@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manga Viewer - Publisher</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #000;
+            color: #fff;
+        }
+        .viewer-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .viewer-header {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 1rem;
+            border-bottom: 1px solid #333;
+        }
+        .viewer-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+        .manga-page {
+            max-width: 100%;
+            max-height: calc(100vh - 140px);
+            object-fit: contain;
+            cursor: pointer;
+        }
+        .viewer-controls {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 1rem;
+            border-top: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .page-nav {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        .reading-mode-switch {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .mode-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #555;
+            background: #222;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .mode-btn:hover {
+            background: #333;
+        }
+        .mode-btn.active {
+            background: #0d6efd;
+            border-color: #0d6efd;
+        }
+        .page-counter {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .thumbnail-strip {
+            position: absolute;
+            bottom: 80px;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 1rem;
+            display: none;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .thumbnail-strip.show {
+            display: block;
+        }
+        .thumbnail {
+            display: inline-block;
+            width: 80px;
+            height: 120px;
+            margin: 0 5px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        .thumbnail:hover {
+            border-color: #0d6efd;
+            transform: scale(1.05);
+        }
+        .thumbnail.active {
+            border-color: #0d6efd;
+        }
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <div class="viewer-container">
+        <!-- Header -->
+        <div class="viewer-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0">The Last Samurai - Chapter 1</h5>
+                    <small class="text-muted">by Kenji Tanaka</small>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-light btn-sm" onclick="toggleFullscreen()">
+                        <i class="fas fa-expand"></i> Fullscreen
+                    </button>
+                    <button class="btn btn-outline-light btn-sm" onclick="showThumbnails()">
+                        <i class="fas fa-th"></i> Pages
+                    </button>
+                    <a href="dashboard.html" class="btn btn-outline-light btn-sm">
+                        <i class="fas fa-times"></i> Close
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Viewer Content -->
+        <div class="viewer-content" id="viewerContent">
+            <!-- Placeholder manga page -->
+            <img src="https://via.placeholder.com/800x1200/333/fff?text=Manga+Page+1" 
+                 class="manga-page" 
+                 id="mangaPage"
+                 onclick="nextPage()">
+            
+            <!-- Navigation arrows -->
+            <button class="btn btn-dark position-absolute start-0 top-50 translate-middle-y ms-3" 
+                    style="z-index: 10; opacity: 0.7;"
+                    onclick="previousPage()">
+                <i class="fas fa-chevron-left fa-2x"></i>
+            </button>
+            <button class="btn btn-dark position-absolute end-0 top-50 translate-middle-y me-3" 
+                    style="z-index: 10; opacity: 0.7;"
+                    onclick="nextPage()">
+                <i class="fas fa-chevron-right fa-2x"></i>
+            </button>
+        </div>
+
+        <!-- Thumbnail Strip -->
+        <div class="thumbnail-strip" id="thumbnailStrip">
+            <!-- Thumbnails will be generated here -->
+        </div>
+
+        <!-- Controls -->
+        <div class="viewer-controls">
+            <div class="reading-mode-switch">
+                <button class="mode-btn active" id="ltrBtn" onclick="setReadingMode('ltr')">
+                    <i class="fas fa-arrow-right"></i> Left to Right
+                </button>
+                <button class="mode-btn" id="rtlBtn" onclick="setReadingMode('rtl')">
+                    <i class="fas fa-arrow-left"></i> Right to Left (Japanese)
+                </button>
+                <button class="mode-btn" id="verticalBtn" onclick="setReadingMode('vertical')">
+                    <i class="fas fa-arrow-down"></i> Vertical (Webtoon)
+                </button>
+            </div>
+
+            <div class="page-nav">
+                <button class="btn btn-light" onclick="previousPage()">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <span class="page-counter">
+                    <span id="currentPage">1</span> / <span id="totalPages">24</span>
+                </span>
+                <button class="btn btn-light" onclick="nextPage()">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-light" onclick="zoomIn()">
+                    <i class="fas fa-search-plus"></i>
+                </button>
+                <button class="btn btn-outline-light" onclick="zoomOut()">
+                    <i class="fas fa-search-minus"></i>
+                </button>
+                <button class="btn btn-outline-light" onclick="resetZoom()">
+                    <i class="fas fa-redo"></i> Reset
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const totalPages = 24;
+        let readingMode = 'ltr';
+        let zoomLevel = 1;
+
+        // Initialize thumbnails
+        function initThumbnails() {
+            const strip = document.getElementById('thumbnailStrip');
+            for (let i = 1; i <= totalPages; i++) {
+                const thumb = document.createElement('div');
+                thumb.className = 'thumbnail' + (i === 1 ? ' active' : '');
+                thumb.innerHTML = `<img src="https://via.placeholder.com/80x120/333/fff?text=P${i}" alt="Page ${i}">`;
+                thumb.onclick = () => goToPage(i);
+                strip.appendChild(thumb);
+            }
+        }
+
+        function showThumbnails() {
+            document.getElementById('thumbnailStrip').classList.toggle('show');
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            updatePage();
+            document.getElementById('thumbnailStrip').classList.remove('show');
+        }
+
+        function nextPage() {
+            if (currentPage < totalPages) {
+                currentPage++;
+                updatePage();
+            }
+        }
+
+        function previousPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                updatePage();
+            }
+        }
+
+        function updatePage() {
+            document.getElementById('currentPage').textContent = currentPage;
+            document.getElementById('mangaPage').src = 
+                `https://via.placeholder.com/800x1200/333/fff?text=Manga+Page+${currentPage}`;
+            
+            // Update thumbnail active state
+            document.querySelectorAll('.thumbnail').forEach((thumb, index) => {
+                thumb.classList.toggle('active', index + 1 === currentPage);
+            });
+        }
+
+        function setReadingMode(mode) {
+            readingMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(mode + 'Btn').classList.add('active');
+            
+            // In production, this would change the layout/navigation behavior
+            if (mode === 'vertical') {
+                alert('Vertical scrolling mode (Webtoon style) - Coming soon!');
+            }
+        }
+
+        function zoomIn() {
+            zoomLevel = Math.min(zoomLevel + 0.1, 3);
+            applyZoom();
+        }
+
+        function zoomOut() {
+            zoomLevel = Math.max(zoomLevel - 0.1, 0.5);
+            applyZoom();
+        }
+
+        function resetZoom() {
+            zoomLevel = 1;
+            applyZoom();
+        }
+
+        function applyZoom() {
+            document.getElementById('mangaPage').style.transform = `scale(${zoomLevel})`;
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextPage();
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') previousPage();
+            if (e.key === 'f') toggleFullscreen();
+            if (e.key === '+') zoomIn();
+            if (e.key === '-') zoomOut();
+            if (e.key === '0') resetZoom();
+        });
+
+        // Initialize on load
+        initThumbnails();
+    </script>
+</body>
+</html>

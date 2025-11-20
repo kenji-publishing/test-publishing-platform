@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Work - Publisher</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="../css/style.css" rel="stylesheet">
+    <style>
+        .upload-area {
+            border: 3px dashed #dee2e6;
+            border-radius: 15px;
+            padding: 3rem;
+            text-align: center;
+            transition: all 0.3s;
+            background: #f8f9fa;
+        }
+        .upload-area:hover {
+            border-color: #0d6efd;
+            background: #e7f1ff;
+        }
+        .upload-area.dragover {
+            border-color: #0d6efd;
+            background: #e7f1ff;
+            transform: scale(1.02);
+        }
+        .preview-image {
+            max-width: 200px;
+            max-height: 200px;
+            margin: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="../index.html">
+                <i class="fas fa-book-open"></i> Publisher
+            </a>
+            <div class="ms-auto">
+                <a href="dashboard.html" class="btn btn-outline-light btn-sm">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <h2 class="mb-4"><i class="fas fa-cloud-upload-alt"></i> Upload Your Work</h2>
+                    
+                    <form id="uploadForm">
+                        <!-- Work Type -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">Content Type *</h5>
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="contentType" id="typeText" value="text" checked>
+                                    <label class="btn btn-outline-primary" for="typeText">
+                                        <i class="fas fa-file-alt fa-2x d-block mb-2"></i>
+                                        Text/Novel
+                                    </label>
+                                    
+                                    <input type="radio" class="btn-check" name="contentType" id="typeManga" value="manga">
+                                    <label class="btn btn-outline-primary" for="typeManga">
+                                        <i class="fas fa-book-open fa-2x d-block mb-2"></i>
+                                        Manga/Comics
+                                    </label>
+                                    
+                                    <input type="radio" class="btn-check" name="contentType" id="typeArt" value="art">
+                                    <label class="btn btn-outline-primary" for="typeArt">
+                                        <i class="fas fa-palette fa-2x d-block mb-2"></i>
+                                        Artwork
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Basic Information -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">Work Details</h5>
+                                
+                                <div class="mb-3">
+                                    <label for="workTitle" class="form-label">Title *</label>
+                                    <input type="text" class="form-control" id="workTitle" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="workDescription" class="form-label">Description *</label>
+                                    <textarea class="form-control" id="workDescription" rows="4" required></textarea>
+                                    <small class="text-muted">Brief summary of your work (max 500 characters)</small>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="workLanguage" class="form-label">Original Language *</label>
+                                        <select class="form-select" id="workLanguage" required>
+                                            <option value="">Select language</option>
+                                            <option value="en">English</option>
+                                            <option value="es">Spanish</option>
+                                            <option value="de">German</option>
+                                            <option value="fr">French</option>
+                                            <option value="ja">Japanese</option>
+                                            <option value="zh">Chinese</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="workGenre" class="form-label">Genre *</label>
+                                        <select class="form-select" id="workGenre" required>
+                                            <option value="">Select genre</option>
+                                            <option value="fiction">Fiction</option>
+                                            <option value="nonfiction">Non-Fiction</option>
+                                            <option value="manga">Manga</option>
+                                            <option value="poetry">Poetry</option>
+                                            <option value="scifi">Science Fiction</option>
+                                            <option value="fantasy">Fantasy</option>
+                                            <option value="romance">Romance</option>
+                                            <option value="mystery">Mystery</option>
+                                            <option value="horror">Horror</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="tags" class="form-label">Tags (Optional)</label>
+                                    <input type="text" class="form-control" id="tags" placeholder="adventure, action, romance (comma separated)">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- File Upload -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">Upload Files</h5>
+                                
+                                <div class="upload-area" id="uploadArea">
+                                    <i class="fas fa-cloud-upload-alt fa-4x text-primary mb-3"></i>
+                                    <h5>Drag & Drop Files Here</h5>
+                                    <p class="text-muted">or click to browse</p>
+                                    <input type="file" id="fileInput" class="d-none" multiple accept=".txt,.doc,.docx,.pdf,.jpg,.jpeg,.png,.gif">
+                                    <button type="button" class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                                        <i class="fas fa-folder-open"></i> Browse Files
+                                    </button>
+                                    <p class="mt-3 small text-muted">
+                                        Supported formats: TXT, DOC, DOCX, PDF (text) | JPG, PNG, GIF (images/manga)
+                                    </p>
+                                </div>
+
+                                <div id="fileList" class="mt-4"></div>
+                                <div id="previewArea" class="mt-4 d-flex flex-wrap"></div>
+                            </div>
+                        </div>
+
+                        <!-- Cover Image -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">Cover Image (Optional)</h5>
+                                <input type="file" class="form-control" id="coverImage" accept=".jpg,.jpeg,.png">
+                                <small class="text-muted">Recommended size: 600x900px</small>
+                            </div>
+                        </div>
+
+                        <!-- Translation Options -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-language"></i> Translation Options</h5>
+                                
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="useAiTranslation" checked>
+                                    <label class="form-check-label" for="useAiTranslation">
+                                        <strong>Enable Free AI Translation</strong>
+                                        <br>
+                                        <small class="text-muted">Automatically translate to all 6 languages</small>
+                                    </label>
+                                </div>
+
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="requestHumanTranslation">
+                                    <label class="form-check-label" for="requestHumanTranslation">
+                                        <strong>Request Human Translation</strong>
+                                        <br>
+                                        <small class="text-muted">Professional translators will be notified (20% revenue share)</small>
+                                    </label>
+                                </div>
+
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="selfTranslate">
+                                    <label class="form-check-label" for="selfTranslate">
+                                        <strong>I'll Translate It Myself</strong>
+                                        <br>
+                                        <small class="text-muted">Earn additional 20% (total 60%)</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Rights & Pricing -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-copyright"></i> Rights & Pricing</h5>
+                                
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="rightsConfirm" required>
+                                    <label class="form-check-label" for="rightsConfirm">
+                                        I confirm that I own all rights to this work and have the authority to publish it *
+                                    </label>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="pricing" class="form-label">Pricing Model *</label>
+                                    <select class="form-select" id="pricing" required>
+                                        <option value="">Select pricing model</option>
+                                        <option value="free">Free (Ad-supported)</option>
+                                        <option value="0.99">$0.99</option>
+                                        <option value="1.99">$1.99</option>
+                                        <option value="2.99">$2.99</option>
+                                        <option value="4.99">$4.99</option>
+                                        <option value="9.99">$9.99</option>
+                                        <option value="custom">Custom Price</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3" id="customPriceDiv" style="display: none;">
+                                    <label for="customPrice" class="form-label">Custom Price ($)</label>
+                                    <input type="number" class="form-control" id="customPrice" step="0.01" min="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-upload"></i> Publish Work
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <p class="mb-0">&copy; 2024 Publisher. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Drag and drop functionality
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const previewArea = document.getElementById('previewArea');
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            fileList.innerHTML = '<h6>Selected Files:</h6>';
+            previewArea.innerHTML = '';
+            
+            for (let file of files) {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'alert alert-info d-flex justify-content-between align-items-center';
+                fileItem.innerHTML = `
+                    <span><i class="fas fa-file"></i> ${file.name} (${(file.size / 1024).toFixed(2)} KB)</span>
+                    <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+                `;
+                fileList.appendChild(fileItem);
+
+                // Preview images
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'preview-image';
+                        previewArea.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        }
+
+        // Show custom price input
+        document.getElementById('pricing').addEventListener('change', function() {
+            document.getElementById('customPriceDiv').style.display = 
+                this.value === 'custom' ? 'block' : 'none';
+        });
+
+        // Form submission
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Work uploaded successfully! (This will connect to backend in production)');
+        });
+    </script>
+</body>
+</html>
