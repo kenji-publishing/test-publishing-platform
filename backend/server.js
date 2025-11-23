@@ -21,7 +21,7 @@ const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const workRoutes = require('./routes/works');
 const translationRoutes = require('./routes/translations');
-
+const paymentRoutes = require('./routes/payments');
 // Create Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -43,7 +43,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/works', workRoutes);
 app.use('/api/translations', translationRoutes);
-
+app.use('/api/payments', paymentRoutes);
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({
