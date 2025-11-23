@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Work - Publisher</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="../css/style.css" rel="stylesheet">
+    <style>
+        .upload-section {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .ai-translation-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+        .language-checkbox {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .language-checkbox:hover {
+            transform: translateY(-2px);
+        }
+        .language-flag {
+            font-size: 1.5rem;
+            margin-right: 8px;
+        }
+        .benefit-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="../index.html">
+                <i class="fas fa-book-open"></i> Publisher
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="dashboard.html">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="upload-section">
+            <h2 class="mb-4">
+                <i class="fas fa-cloud-upload-alt"></i> Upload Your Work
+            </h2>
+
+            <form id="uploadForm">
+                <!-- Basic Information -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle"></i> Basic Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Title -->
+                        <div class="mb-3">
+                            <label class="form-label">Title *</label>
+                            <input type="text" class="form-control" id="workTitle" required>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" id="workDescription" rows="4"></textarea>
+                        </div>
+
+                        <!-- Original Language -->
+                        <div class="mb-3">
+                            <label class="form-label">Original Language *</label>
+                            <select class="form-select" id="originalLanguage" required>
+                                <option value="">Select language...</option>
+                                <option value="en">🇬🇧 English</option>
+                                <option value="es">🇪🇸 Español (Spanish)</option>
+                                <option value="de">🇩🇪 Deutsch (German)</option>
+                                <option value="fr">🇫🇷 Français (French)</option>
+                                <option value="ja">🇯🇵 日本語 (Japanese)</option>
+                                <option value="zh">🇨🇳 中文 (Chinese)</option>
+                            </select>
+                        </div>
+
+                        <!-- Content Type -->
+                        <div class="mb-3">
+                            <label class="form-label">Content Type *</label>
+                            <select class="form-select" id="contentType" required>
+                                <option value="">Select type...</option>
+                                <option value="text">📖 Text (Novel, Story, Article)</option>
+                                <option value="manga">📚 Manga / Comic</option>
+                                <option value="art">🎨 Art / Illustration</option>
+                            </select>
+                        </div>
+
+                        <!-- Genre -->
+                        <div class="mb-3">
+                            <label class="form-label">Genre</label>
+                            <input type="text" class="form-control" id="genre" placeholder="e.g., Fiction, Fantasy, Romance">
+                        </div>
+
+                        <!-- Price -->
+                        <div class="mb-3">
+                            <label class="form-label">Price (USD) *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="price" min="0" step="0.01" value="9.99" required>
+                            </div>
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" id="isFree">
+                                <label class="form-check-label" for="isFree">
+                                    Make this work free
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Translation Section -->
+                <div class="card ai-translation-card mb-4">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fas fa-robot fa-3x me-3"></i>
+                            <div>
+                                <h5 class="mb-1">🤖 AI Translation (FREE)</h5>
+                                <p class="mb-0 small">Translate your work to multiple languages instantly!</p>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <span class="benefit-badge">
+                                    <i class="fas fa-clock"></i> 5 minutes
+                                </span>
+                            </div>
+                            <div class="col-md-4">
+                                <span class="benefit-badge">
+                                    <i class="fas fa-dollar-sign"></i> 100% Free
+                                </span>
+                            </div>
+                            <div class="col-md-4">
+                                <span class="benefit-badge">
+                                    <i class="fas fa-chart-line"></i> More Revenue
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Enable AI Translation -->
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="enableAiTranslation" 
+                                   onchange="toggleLanguageSelection()">
+                            <label class="form-check-label" for="enableAiTranslation">
+                                <strong>Enable AI Translation</strong>
+                            </label>
+                        </div>
+
+                        <!-- Language Selection -->
+                        <div id="languageSelection" style="display: none;">
+                            <p class="mb-2"><strong>Select target languages:</strong></p>
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <div class="form-check language-checkbox">
+                                        <input class="form-check-input" type="checkbox" id="lang_en" value="en" checked>
+                                        <label class="form-check-label" for="lang_en">
+                                            <span class="language-flag">🇬🇧</span> English
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <div class="form-check language-checkbox">
+                                        <input class="form-check-input" type="checkbox" id="lang_es" value="es" checked>
+                                        <label class="form-check-label" for="lang_es">
+                                            <span class="language-flag">🇪🇸</span> Español
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <div class="form-check language-checkbox">
+                                        <input class="form-check-input" type="checkbox" id="lang_de" value="de" checked>
+                                        <label class="form-check-label" for="lang_de">
+                                            <span class="language-flag">🇩🇪</span> Deutsch
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <div class="form-check language-checkbox">
+                                        <input class="form-check-input" type="checkbox" id="lang_fr" value="fr" checked>
+                                        <label class="form-check-label" for="lang_fr">
+                                            <span class="language-flag">🇫🇷</span> Français
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <div class="form-check language-checkbox">
+                                        <input class="form-check-input" type="checkbox" id="lang_ja" value="ja" checked>
+                                        <label class="form-check-label" for="lang_ja">
+                                            <span class="language-flag">🇯🇵</span> 日本語
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <div class="form-check language-checkbox">
+                                        <input class="form-check-input" type="checkbox" id="lang_zh" value="zh" checked>
+                                        <label class="form-check-label" for="lang_zh">
+                                            <span class="language-flag">🇨🇳</span> 中文
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-light mt-3 mb-0">
+                                <small>
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Note:</strong> Translations will be automatically generated after you publish. 
+                                    You can edit or request professional review later.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- File Upload -->
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-file-upload"></i> Upload Files
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Content File *</label>
+                            <input type="file" class="form-control" id="contentFile" 
+                                   accept=".txt,.pdf,.doc,.docx,.epub">
+                            <small class="text-muted">
+                                Supported formats: TXT, PDF, DOC, DOCX, EPUB
+                            </small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Cover Image</label>
+                            <input type="file" class="form-control" id="coverImage" 
+                                   accept="image/*">
+                            <small class="text-muted">
+                                Recommended size: 800x1200px
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-check"></i> Publish Work
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <p class="mb-0">&copy; 2024 Publisher. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Toggle language selection
+        function toggleLanguageSelection() {
+            const checkbox = document.getElementById('enableAiTranslation');
+            const languageDiv = document.getElementById('languageSelection');
+            languageDiv.style.display = checkbox.checked ? 'block' : 'none';
+        }
+
+        // Handle free checkbox
+        document.getElementById('isFree').addEventListener('change', function() {
+            const priceInput = document.getElementById('price');
+            if (this.checked) {
+                priceInput.value = 0;
+                priceInput.disabled = true;
+            } else {
+                priceInput.value = 9.99;
+                priceInput.disabled = false;
+            }
+        });
+
+        // Form submission
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+
+            try {
+                // Collect form data
+                const formData = {
+                    title: document.getElementById('workTitle').value,
+                    description: document.getElementById('workDescription').value,
+                    originalLanguage: document.getElementById('originalLanguage').value,
+                    contentType: document.getElementById('contentType').value,
+                    genre: document.getElementById('genre').value,
+                    price: parseFloat(document.getElementById('price').value),
+                    isFree: document.getElementById('isFree').checked,
+                    enableAiTranslation: document.getElementById('enableAiTranslation').checked
+                };
+
+                // Collect selected languages for translation
+                if (formData.enableAiTranslation) {
+                    formData.targetLanguages = [];
+                    ['en', 'es', 'de', 'fr', 'ja', 'zh'].forEach(lang => {
+                        if (document.getElementById(`lang_${lang}`).checked) {
+                            formData.targetLanguages.push(lang);
+                        }
+                    });
+                }
+
+                // TODO: Upload files and create work via API
+                console.log('Work data:', formData);
+
+                // Simulate API call
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                alert('Work uploaded successfully!\n' + 
+                      (formData.enableAiTranslation ? 
+                       'AI translation will begin shortly.' : 
+                       'Work published.'));
+
+                window.location.href = 'dashboard.html';
+
+            } catch (error) {
+                console.error('Upload error:', error);
+                alert('Failed to upload work: ' + error.message);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-check"></i> Publish Work';
+            }
+        });
+    </script>
+</body>
+</html>
