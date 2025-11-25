@@ -7,6 +7,12 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const db = require('../config/database');
+const Anthropic = require('@anthropic-ai/sdk');
+
+// Initialize Anthropic client
+const anthropic = new Anthropic({
+  apiKey: process.env.CLAUDE_API_KEY,
+});
 
 // Translation pricing configuration
 const PRICING = {
@@ -263,18 +269,85 @@ router.get('/usage', authenticate, async (req, res) => {
 });
 
 /**
- * Simulate Claude API translation
- * In production, replace with actual Claude API call
+ * Real Claude API translation
  */
 async function simulateClaudeTranslation(title, description, sourceLang, targetLang) {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  try {
+    // Language names for better translation
+    const langNames = {
+      'en': 'English',
+      'es': 'Spanish',
+      'de': 'German',
+      'fr': 'French',
+      'ja': 'Japanese',
+      'zh': 'Chinese'
+    };
 
-  // Return simulated translation
-  return {
-    title: `[${targetLang.toUpperCase()}] ${title}`,
-    description: `[Translated to ${targetLang}] ${description}`
-  };
+    const sourceLangName = langNames[sourceLang] || sourceLang;
+    const targetLangName = langNames[targetLang] || targetLang;
+
+    // Create translation prompt
+    const prompt = `You are a professional translator. Translate the following content from ${sourceLangName} to ${targetLangName}.
+
+Title: ${title}
+
+Description: ${description}
+
+Please provide the translation in the following JSON format:
+{
+  "title": "translated title",
+  "description": "translated description"
 }
 
+Important: 
+- Maintain the tone and style of the original
+- Keep any technical terms or proper nouns appropriate for the target language
+- Ensure natural, fluent translation
+- Only respond with the JSON, no additional text`;
+
+    // Call Claude API
+    const message = await anthropic.messages.create({
+      model: process.env.CLAUDE_MODEL || 'claude-3-haiku-20240307',
+      max_tokens: 1024,
+      messages: [
+        {
+          role: 'user',
+          content: prompt
+        }
+      ]
+    });
+
+    // Parse response
+    const responseText = message.content[0].text;
+    
+    // Try to extract JSON from response
+    let translatedContent;
+    try {
+      // Try to parse as pure JSON
+      translatedContent = JSON.parse(responseText);
+    } catch (e) {
+      // If that fails, try to extract JSON from markdown code blocks
+      const jsonMatch = responseText.match(/```json\s*([\s\S]*?)\s*```/) || 
+                       responseText.match(/```\s*([\s\S]*?)\s*```/);
+      if (jsonMatch) {
+        translatedContent = JSON.parse(jsonMatch[1]);
+      } else {
+        throw new Error('Failed to parse translation response');
+      }
+    }
+
+    console.log(`✅ Translation completed: ${sourceLang} → ${targetLang}`);
+    
+    return translatedContent;
+
+  } catch (error) {
+    console.error('Claude API translation error:', error);
+    
+    // Fallback to simple translation if API fails
+    return {
+      title: `[${targetLang.toUpperCase()}] ${title}`,
+      description: `[Translation pending] ${description}`
+    };
+  }
+}
 module.exports = router;
