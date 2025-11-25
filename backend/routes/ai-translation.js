@@ -280,7 +280,9 @@ async function simulateClaudeTranslation(title, description, sourceLang, targetL
       'de': 'German',
       'fr': 'French',
       'ja': 'Japanese',
-      'zh': 'Chinese'
+      'zh': 'Chinese',
+      'ko': 'Korean',
+      'ar': 'Arabic'
     };
 
     const sourceLangName = langNames[sourceLang] || sourceLang;
