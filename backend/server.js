@@ -23,6 +23,7 @@ const workRoutes = require('./routes/works');
 const translationRoutes = require('./routes/translations');
 const paymentRoutes = require('./routes/payments');
 const aiTranslationRoutes = require('./routes/ai-translation');
+const notificationRoutes = require('./routes/notifications');
 // Create Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -46,6 +47,7 @@ app.use('/api/works', workRoutes);
 app.use('/api/translations', translationRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/ai-translation', aiTranslationRoutes);
+app.use('/api/notifications', notificationRoutes);
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({
