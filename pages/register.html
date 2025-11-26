@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - Publisher</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <link href="../css/style-new.css" rel="stylesheet">
+    
+    <style>
+        .register-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-xl) var(--spacing-md);
+        }
+
+        .register-card {
+            background-color: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+            max-width: 480px;
+            padding: var(--spacing-2xl);
+        }
+
+        .register-header {
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .register-header .logo {
+            font-family: var(--font-heading);
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+            color: var(--color-accent);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .register-header h1 {
+            font-size: var(--font-size-xl);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .register-header p {
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-sm);
+            margin: 0;
+        }
+
+        .form-group {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--color-text-primary);
+            margin-bottom: var(--spacing-xs);
+            font-size: var(--font-size-sm);
+        }
+
+        .form-control {
+            background-color: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-sm) var(--spacing-md);
+            font-size: 16px;
+            color: var(--color-text-primary);
+            transition: all var(--transition-fast);
+        }
+
+        .form-control:focus {
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 3px rgba(139, 115, 85, 0.1);
+            outline: none;
+        }
+
+        .form-control::placeholder {
+            color: var(--color-text-light);
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: var(--spacing-md);
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--color-text-light);
+        }
+
+        .input-group .form-control {
+            padding-left: 2.5rem;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: var(--spacing-md);
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--color-text-light);
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .password-toggle:hover {
+            color: var(--color-accent);
+        }
+
+        .role-selector {
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .role-option {
+            flex: 1;
+            text-align: center;
+            padding: var(--spacing-md);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .role-option:hover {
+            border-color: var(--color-accent-light);
+            background-color: var(--color-bg-hover);
+        }
+
+        .role-option.selected {
+            border-color: var(--color-accent);
+            background-color: rgba(139, 115, 85, 0.1);
+        }
+
+        .role-option i {
+            font-size: 1.5rem;
+            color: var(--color-accent);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .role-option .role-title {
+            font-weight: 600;
+            font-size: var(--font-size-sm);
+            color: var(--color-text-primary);
+        }
+
+        .role-option .role-desc {
+            font-size: var(--font-size-xs);
+            color: var(--color-text-secondary);
+        }
+
+        .form-check-input:checked {
+            background-color: var(--color-accent);
+            border-color: var(--color-accent);
+        }
+
+        .form-check-label {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+        }
+
+        .form-check-label a {
+            color: var(--color-accent);
+        }
+
+        .btn-register {
+            width: 100%;
+            background-color: var(--color-accent);
+            border: none;
+            color: white;
+            padding: var(--spacing-md);
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: var(--font-size-base);
+            transition: all var(--transition-fast);
+        }
+
+        .btn-register:hover {
+            background-color: var(--color-accent-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: var(--spacing-lg) 0;
+            color: var(--color-text-light);
+            font-size: var(--font-size-sm);
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .divider span {
+            padding: 0 var(--spacing-md);
+        }
+
+        .social-buttons {
+            display: flex;
+            gap: var(--spacing-md);
+        }
+
+        .btn-social {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            background: var(--color-bg-card);
+            color: var(--color-text-primary);
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            transition: all var(--transition-fast);
+            text-decoration: none;
+        }
+
+        .btn-social:hover {
+            background-color: var(--color-bg-hover);
+            border-color: var(--color-accent);
+            color: var(--color-text-primary);
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: var(--spacing-lg);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+        }
+
+        .login-link a {
+            color: var(--color-accent);
+            font-weight: 500;
+        }
+
+        .password-strength {
+            margin-top: var(--spacing-xs);
+            height: 4px;
+            background-color: var(--color-border);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: all var(--transition-fast);
+        }
+
+        .strength-weak { width: 33%; background-color: var(--color-error); }
+        .strength-medium { width: 66%; background-color: var(--color-warning); }
+        .strength-strong { width: 100%; background-color: var(--color-success); }
+
+        @media (max-width: 576px) {
+            .register-card {
+                padding: var(--spacing-xl);
+                border-radius: var(--radius-lg);
+            }
+
+            .role-selector {
+                flex-direction: column;
+            }
+
+            .social-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-card fade-in">
+            <!-- Header -->
+            <div class="register-header">
+                <a href="../index.html" class="logo">
+                    <i class="fas fa-book-open"></i>
+                    Publisher
+                </a>
+                <h1>Create Your Account</h1>
+                <p>Join thousands of readers and creators worldwide</p>
+            </div>
+
+            <!-- Role Selector -->
+            <div class="role-selector">
+                <div class="role-option selected" data-role="reader" onclick="selectRole('reader')">
+                    <i class="fas fa-book-reader d-block"></i>
+                    <div class="role-title">Reader</div>
+                    <div class="role-desc">Discover stories</div>
+                </div>
+                <div class="role-option" data-role="author" onclick="selectRole('author')">
+                    <i class="fas fa-pen-fancy d-block"></i>
+                    <div class="role-title">Author</div>
+                    <div class="role-desc">Write & publish</div>
+                </div>
+                <div class="role-option" data-role="translator" onclick="selectRole('translator')">
+                    <i class="fas fa-language d-block"></i>
+                    <div class="role-title">Translator</div>
+                    <div class="role-desc">Translate works</div>
+                </div>
+            </div>
+
+            <!-- Register Form -->
+            <form id="registerForm">
+                <input type="hidden" id="selectedRole" value="reader">
+                
+                <!-- Name Row -->
+                <div class="row">
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label class="form-label" for="firstName">First Name</label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="firstName" 
+                                placeholder="First name"
+                                required
+                            >
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label class="form-label" for="lastName">Last Name</label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="lastName" 
+                                placeholder="Last name"
+                                required
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label class="form-label" for="email">Email Address</label>
+                    <div class="input-group">
+                        <i class="fas fa-envelope input-icon"></i>
+                        <input 
+                            type="email" 
+                            class="form-control" 
+                            id="email" 
+                            placeholder="Enter your email"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <div class="input-group">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input 
+                            type="password" 
+                            class="form-control" 
+                            id="password" 
+                            placeholder="Create a password"
+                            required
+                            oninput="checkPasswordStrength()"
+                        >
+                        <button type="button" class="password-toggle" onclick="togglePassword()">
+                            <i class="fas fa-eye" id="toggleIcon"></i>
+                        </button>
+                    </div>
+                    <div class="password-strength">
+                        <div class="password-strength-bar" id="strengthBar"></div>
+                    </div>
+                </div>
+
+                <!-- Preferred Language -->
+                <div class="form-group">
+                    <label class="form-label" for="preferredLanguage">Preferred Language</label>
+                    <select class="form-control" id="preferredLanguage">
+                        <option value="en">🇬🇧 English</option>
+                        <option value="ja">🇯🇵 日本語 (Japanese)</option>
+                        <option value="es">🇪🇸 Español (Spanish)</option>
+                        <option value="de">🇩🇪 Deutsch (German)</option>
+                        <option value="fr">🇫🇷 Français (French)</option>
+                        <option value="zh">🇨🇳 中文 (Chinese)</option>
+                        <option value="ko">🇰🇷 한국어 (Korean)</option>
+                        <option value="ar">🇸🇦 العربية (Arabic)</option>
+                    </select>
+                </div>
+
+                <!-- Terms -->
+                <div class="form-check mb-4">
+                    <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+                    <label class="form-check-label" for="agreeTerms">
+                        I agree to the <a href="terms.html">Terms of Service</a> and <a href="privacy.html">Privacy Policy</a>
+                    </label>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-register">
+                    <i class="fas fa-user-plus me-2"></i>Create Account
+                </button>
+            </form>
+
+            <!-- Divider -->
+            <div class="divider">
+                <span>or sign up with</span>
+            </div>
+
+            <!-- Social Register -->
+            <div class="social-buttons">
+                <a href="#" class="btn-social">
+                    <i class="fab fa-google"></i>
+                    Google
+                </a>
+                <a href="#" class="btn-social">
+                    <i class="fab fa-apple"></i>
+                    Apple
+                </a>
+            </div>
+
+            <!-- Login Link -->
+            <div class="login-link">
+                Already have an account? <a href="login.html">Sign in</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Role selection
+        function selectRole(role) {
+            document.querySelectorAll('.role-option').forEach(el => {
+                el.classList.remove('selected');
+            });
+            document.querySelector(`[data-role="${role}"]`).classList.add('selected');
+            document.getElementById('selectedRole').value = role;
+        }
+
+        // Toggle password visibility
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('toggleIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        // Password strength checker
+        function checkPasswordStrength() {
+            const password = document.getElementById('password').value;
+            const strengthBar = document.getElementById('strengthBar');
+            
+            strengthBar.className = 'password-strength-bar';
+            
+            if (password.length === 0) {
+                strengthBar.style.width = '0%';
+                return;
+            }
+            
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
+            if (password.match(/[0-9]/)) strength++;
+            if (password.match(/[^a-zA-Z0-9]/)) strength++;
+            
+            if (strength <= 1) {
+                strengthBar.classList.add('strength-weak');
+            } else if (strength <= 2) {
+                strengthBar.classList.add('strength-medium');
+            } else {
+                strengthBar.classList.add('strength-strong');
+            }
+        }
+
+        // Form submission
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+                role: document.getElementById('selectedRole').value,
+                preferredLanguage: document.getElementById('preferredLanguage').value
+            };
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('Registration successful! Please sign in.');
+                    window.location.href = 'login.html';
+                } else {
+                    alert(data.error || 'Registration failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                alert('Connection error. Please make sure the server is running.');
+            }
+        });
+    </script>
+</body>
+</html>
+```
+

@@ -4,314 +4,705 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Publisher</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="../css/style.css" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <link href="../css/style-new.css" rel="stylesheet">
+    
     <style>
+        .dashboard-container {
+            padding: var(--spacing-xl) 0;
+        }
+
+        /* Welcome Banner */
+        .welcome-banner {
+            background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            color: white;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .welcome-banner h1 {
+            color: white;
+            font-size: var(--font-size-2xl);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .welcome-banner p {
+            color: rgba(255, 255, 255, 0.9);
+            margin: 0;
+        }
+
+        .welcome-banner .btn {
+            background: white;
+            color: var(--color-accent);
+            border: none;
+            font-weight: 600;
+        }
+
+        .welcome-banner .btn:hover {
+            background: var(--color-bg-hover);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
+        }
+
         .stat-card {
-            transition: transform 0.3s;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            transition: all var(--transition-fast);
         }
+
         .stat-card:hover {
-            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
         }
-        .earnings-value {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #198754;
+
+        .stat-card .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: var(--spacing-md);
         }
-        .work-thumbnail {
-            width: 80px;
-            height: 120px;
-            object-fit: cover;
-            border-radius: 5px;
+
+        .stat-card .stat-icon.earnings {
+            background: rgba(93, 156, 89, 0.1);
+            color: var(--color-success);
+        }
+
+        .stat-card .stat-icon.works {
+            background: rgba(139, 115, 85, 0.1);
+            color: var(--color-accent);
+        }
+
+        .stat-card .stat-icon.views {
+            background: rgba(93, 139, 199, 0.1);
+            color: var(--color-info);
+        }
+
+        .stat-card .stat-icon.translations {
+            background: rgba(212, 168, 83, 0.1);
+            color: var(--color-warning);
+        }
+
+        .stat-card .stat-value {
+            font-family: var(--font-heading);
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+            color: var(--color-text-primary);
+        }
+
+        .stat-card .stat-label {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+        }
+
+        .stat-card .stat-change {
+            font-size: var(--font-size-xs);
+            margin-top: var(--spacing-xs);
+        }
+
+        .stat-change.positive {
+            color: var(--color-success);
+        }
+
+        .stat-change.negative {
+            color: var(--color-error);
+        }
+
+        /* Dashboard Sections */
+        .dashboard-section {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-lg);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .section-header h2 {
+            font-size: var(--font-size-lg);
+            margin: 0;
+        }
+
+        .section-body {
+            padding: var(--spacing-lg);
+        }
+
+        /* Work Item */
+        .work-item {
+            display: flex;
+            align-items: center;
+            padding: var(--spacing-md);
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+
+        .work-item:hover {
+            background: var(--color-bg-hover);
+        }
+
+        .work-item .work-cover {
+            width: 60px;
+            height: 80px;
+            background: var(--color-bg-hover);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: var(--spacing-md);
+            flex-shrink: 0;
+        }
+
+        .work-item .work-cover i {
+            font-size: 1.5rem;
+            color: var(--color-accent-light);
+        }
+
+        .work-item .work-info {
+            flex-grow: 1;
+            min-width: 0;
+        }
+
+        .work-item .work-title {
+            font-weight: 600;
+            color: var(--color-text-primary);
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .work-item .work-meta {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+        }
+
+        .work-item .work-stats {
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .work-item .work-earnings {
+            font-weight: 600;
+            color: var(--color-success);
+        }
+
+        .work-item .work-views {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+        }
+
+        /* Translation Status */
+        .translation-item {
+            display: flex;
+            align-items: center;
+            padding: var(--spacing-md);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--spacing-sm);
+            background: var(--color-bg-main);
+        }
+
+        .translation-item .lang-flag {
+            font-size: 1.5rem;
+            margin-right: var(--spacing-md);
+        }
+
+        .translation-item .translation-info {
+            flex-grow: 1;
+        }
+
+        .translation-item .translation-title {
+            font-weight: 500;
+            font-size: var(--font-size-sm);
+        }
+
+        .translation-item .translation-progress {
+            font-size: var(--font-size-xs);
+            color: var(--color-text-secondary);
+        }
+
+        .translation-item .status-badge {
+            padding: 4px 8px;
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-xs);
+            font-weight: 500;
+        }
+
+        .status-badge.completed {
+            background: rgba(93, 156, 89, 0.1);
+            color: var(--color-success);
+        }
+
+        .status-badge.in-progress {
+            background: rgba(93, 139, 199, 0.1);
+            color: var(--color-info);
+        }
+
+        .status-badge.pending {
+            background: rgba(212, 168, 83, 0.1);
+            color: var(--color-warning);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--spacing-md);
+        }
+
+        .action-card {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            text-align: center;
+            text-decoration: none;
+            color: var(--color-text-primary);
+            transition: all var(--transition-fast);
+        }
+
+        .action-card:hover {
+            border-color: var(--color-accent);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+            color: var(--color-text-primary);
+        }
+
+        .action-card i {
+            font-size: 2rem;
+            color: var(--color-accent);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .action-card .action-title {
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .action-card .action-desc {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+        }
+
+        /* AI Translation Usage */
+        .usage-card {
+            background: linear-gradient(135deg, var(--color-bg-hover) 0%, var(--color-bg-card) 100%);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+        }
+
+        .usage-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .usage-header h3 {
+            font-size: var(--font-size-base);
+            margin: 0;
+        }
+
+        .usage-count {
+            font-family: var(--font-heading);
+            font-size: var(--font-size-3xl);
+            font-weight: 700;
+            color: var(--color-accent);
+        }
+
+        .usage-label {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .welcome-banner {
+                text-align: center;
+            }
+
+            .welcome-banner .d-flex {
+                flex-direction: column;
+                gap: var(--spacing-md);
+            }
+
+            .work-item {
+                flex-wrap: wrap;
+            }
+
+            .work-item .work-stats {
+                width: 100%;
+                text-align: left;
+                margin-top: var(--spacing-sm);
+                padding-top: var(--spacing-sm);
+                border-top: 1px solid var(--color-border);
+            }
         }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+        <div class="container">
             <a class="navbar-brand" href="../index.html">
-                <i class="fas fa-book-open"></i> Publisher
+                <i class="fas fa-book-open"></i>
+                Publisher
             </a>
+            
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
+            
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="upload.html">
-                            <i class="fas fa-upload"></i> Upload Work
+                        <a class="nav-link active" href="dashboard.html">
+                            <i class="fas fa-th-large me-1"></i> Dashboard
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-user"></i> John Author
+                        <a class="nav-link" href="my-works.html">
+                            <i class="fas fa-book me-1"></i> My Works
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-sign-out-alt"></i> Logout
+                        <a class="nav-link" href="earnings.html">
+                            <i class="fas fa-coins me-1"></i> Earnings
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="browse.html">
+                            <i class="fas fa-compass me-1"></i> Browse
                         </a>
                     </li>
                 </ul>
+                
+                <div class="d-flex align-items-center gap-3">
+                    <a href="notifications.html" class="btn btn-soft-custom position-relative">
+                        <i class="fas fa-bell"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
+                            3
+                        </span>
+                    </a>
+                    
+                    <div class="dropdown">
+                        <button class="btn btn-soft-custom dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i>
+                            <span id="userName">User</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="profile.html"><i class="fas fa-user me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="settings.html"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Sign Out</a></li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
 
-    <div class="container-fluid py-4">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-3 col-lg-2">
-                <div class="list-group">
-                    <a href="#" class="list-group-item list-group-item-action active">
-                        <i class="fas fa-home"></i> Overview
-                    </a>
-                    <a href="#" class="list-group-item list-group-item-action">
-                        <i class="fas fa-book"></i> My Works
-                    </a>
-                    <a href="#" class="list-group-item list-group-item-action">
-                        <i class="fas fa-chart-line"></i> Analytics
-                    </a>
-                    <a href="#" class="list-group-item list-group-item-action">
-                        <i class="fas fa-dollar-sign"></i> Earnings
-                    </a>
-                    <a href="#" class="list-group-item list-group-item-action">
-                        <i class="fas fa-language"></i> Translations
-                    </a>
-                    <a href="#" class="list-group-item list-group-item-action">
-                        <i class="fas fa-cog"></i> Settings
+    <!-- Main Content -->
+    <main class="dashboard-container">
+        <div class="container">
+            <!-- Welcome Banner -->
+            <div class="welcome-banner fade-in">
+                <div class="d-flex justify-content-between align-items-center flex-wrap">
+                    <div>
+                        <h1>Welcome back, <span id="welcomeName">Creator</span>! 👋</h1>
+                        <p>Here's what's happening with your works today.</p>
+                    </div>
+                    <a href="upload-work.html" class="btn btn-lg mt-3 mt-md-0">
+                        <i class="fas fa-plus me-2"></i>Upload New Work
                     </a>
                 </div>
             </div>
 
-            <!-- Main Content -->
-            <div class="col-md-9 col-lg-10">
-                <!-- Welcome Section -->
-                <div class="mb-4">
-                    <h2>Welcome back, John! 👋</h2>
-                    <p class="text-muted">Here's what's happening with your works today.</p>
-                </div>
-
-                <!-- Stats Overview -->
-                <div class="row g-4 mb-4">
-                    <div class="col-md-3">
-                        <div class="card stat-card text-center h-100">
-                            <div class="card-body">
-                                <i class="fas fa-dollar-sign fa-2x text-success mb-2"></i>
-                                <h6 class="text-muted">Total Earnings</h6>
-                                <div class="earnings-value">$2,450</div>
-                                <small class="text-success"><i class="fas fa-arrow-up"></i> +15% this month</small>
-                            </div>
-                        </div>
+            <!-- Stats Grid -->
+            <div class="stats-grid fade-in">
+                <div class="stat-card">
+                    <div class="stat-icon earnings">
+                        <i class="fas fa-dollar-sign fa-lg"></i>
                     </div>
-                    <div class="col-md-3">
-                        <div class="card stat-card text-center h-100">
-                            <div class="card-body">
-                                <i class="fas fa-book fa-2x text-primary mb-2"></i>
-                                <h6 class="text-muted">Published Works</h6>
-                                <h2>8</h2>
-                                <small class="text-muted">3 in translation</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card stat-card text-center h-100">
-                            <div class="card-body">
-                                <i class="fas fa-eye fa-2x text-info mb-2"></i>
-                                <h6 class="text-muted">Total Views</h6>
-                                <h2>45.2K</h2>
-                                <small class="text-success"><i class="fas fa-arrow-up"></i> +8% this week</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card stat-card text-center h-100">
-                            <div class="card-body">
-                                <i class="fas fa-users fa-2x text-warning mb-2"></i>
-                                <h6 class="text-muted">Followers</h6>
-                                <h2>1,234</h2>
-                                <small class="text-success"><i class="fas fa-arrow-up"></i> +45 new</small>
-                            </div>
-                        </div>
+                    <div class="stat-value">$1,234.56</div>
+                    <div class="stat-label">Total Earnings</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i> +12.5% this month
                     </div>
                 </div>
 
-                <!-- Recent Activity -->
-                <div class="row mb-4">
-                    <div class="col-lg-8">
-                        <div class="card">
-                            <div class="card-header bg-white">
-                                <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Recent Performance</h5>
-                            </div>
-                            <div class="card-body">
-                                <canvas id="performanceChart" height="100"></canvas>
-                            </div>
-                        </div>
+                <div class="stat-card">
+                    <div class="stat-icon works">
+                        <i class="fas fa-book fa-lg"></i>
                     </div>
-                    <div class="col-lg-4">
-                        <div class="card">
-                            <div class="card-header bg-white">
-                                <h5 class="mb-0"><i class="fas fa-bell"></i> Notifications</h5>
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">Published Works</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i> +2 this month
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon views">
+                        <i class="fas fa-eye fa-lg"></i>
+                    </div>
+                    <div class="stat-value">8,432</div>
+                    <div class="stat-label">Total Views</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i> +24.3% this month
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon translations">
+                        <i class="fas fa-language fa-lg"></i>
+                    </div>
+                    <div class="stat-value">48</div>
+                    <div class="stat-label">Translations</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i> +8 this month
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Left Column -->
+                <div class="col-lg-8">
+                    <!-- Recent Works -->
+                    <div class="dashboard-section fade-in">
+                        <div class="section-header">
+                            <h2><i class="fas fa-clock me-2 text-accent"></i>Recent Works</h2>
+                            <a href="my-works.html" class="btn btn-soft-custom btn-sm">View All</a>
+                        </div>
+                        <div class="section-body">
+                            <div class="work-item">
+                                <div class="work-cover">
+                                    <i class="fas fa-book"></i>
+                                </div>
+                                <div class="work-info">
+                                    <div class="work-title">The Adventure of Magic Academy</div>
+                                    <div class="work-meta">
+                                        <span class="badge badge-soft me-2">Fiction</span>
+                                        Translated to 5 languages
+                                    </div>
+                                </div>
+                                <div class="work-stats">
+                                    <div class="work-earnings">$234.50</div>
+                                    <div class="work-views">1,234 views</div>
+                                </div>
                             </div>
-                            <div class="card-body">
-                                <div class="list-group list-group-flush">
-                                    <div class="list-group-item px-0">
-                                        <small class="text-muted">2 hours ago</small>
-                                        <p class="mb-0">New translation request for "Midnight Stories"</p>
+
+                            <div class="work-item">
+                                <div class="work-cover">
+                                    <i class="fas fa-book"></i>
+                                </div>
+                                <div class="work-info">
+                                    <div class="work-title">Whispers of Tomorrow</div>
+                                    <div class="work-meta">
+                                        <span class="badge badge-soft me-2">Romance</span>
+                                        Translated to 3 languages
                                     </div>
-                                    <div class="list-group-item px-0">
-                                        <small class="text-muted">5 hours ago</small>
-                                        <p class="mb-0">Your work reached 1,000 views!</p>
+                                </div>
+                                <div class="work-stats">
+                                    <div class="work-earnings">$156.00</div>
+                                    <div class="work-views">892 views</div>
+                                </div>
+                            </div>
+
+                            <div class="work-item">
+                                <div class="work-cover">
+                                    <i class="fas fa-book"></i>
+                                </div>
+                                <div class="work-info">
+                                    <div class="work-title">Digital Dreams: A Cyberpunk Story</div>
+                                    <div class="work-meta">
+                                        <span class="badge badge-soft me-2">Sci-Fi</span>
+                                        Translated to 7 languages
                                     </div>
-                                    <div class="list-group-item px-0">
-                                        <small class="text-muted">1 day ago</small>
-                                        <p class="mb-0">Payment of $450 processed</p>
-                                    </div>
-                                    <div class="list-group-item px-0">
-                                        <small class="text-muted">2 days ago</small>
-                                        <p class="mb-0">New follower: @reader_japan</p>
-                                    </div>
+                                </div>
+                                <div class="work-stats">
+                                    <div class="work-earnings">$89.25</div>
+                                    <div class="work-views">567 views</div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Translation Status -->
+                    <div class="dashboard-section fade-in">
+                        <div class="section-header">
+                            <h2><i class="fas fa-language me-2 text-accent"></i>Recent Translations</h2>
+                            <a href="translation-status.html" class="btn btn-soft-custom btn-sm">View All</a>
+                        </div>
+                        <div class="section-body">
+                            <div class="translation-item">
+                                <div class="lang-flag">🇬🇧</div>
+                                <div class="translation-info">
+                                    <div class="translation-title">The Adventure of Magic Academy → English</div>
+                                    <div class="translation-progress">Completed 2 hours ago</div>
+                                </div>
+                                <span class="status-badge completed">
+                                    <i class="fas fa-check me-1"></i>Completed
+                                </span>
+                            </div>
+
+                            <div class="translation-item">
+                                <div class="lang-flag">🇪🇸</div>
+                                <div class="translation-info">
+                                    <div class="translation-title">Whispers of Tomorrow → Spanish</div>
+                                    <div class="translation-progress">65% complete • 3 min remaining</div>
+                                </div>
+                                <span class="status-badge in-progress">
+                                    <i class="fas fa-spinner fa-spin me-1"></i>In Progress
+                                </span>
+                            </div>
+
+                            <div class="translation-item">
+                                <div class="lang-flag">🇰🇷</div>
+                                <div class="translation-info">
+                                    <div class="translation-title">Digital Dreams → Korean</div>
+                                    <div class="translation-progress">Waiting in queue • Position 2</div>
+                                </div>
+                                <span class="status-badge pending">
+                                    <i class="fas fa-clock me-1"></i>Pending
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- My Works -->
-                <div class="card">
-                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="fas fa-book"></i> My Published Works</h5>
-                        <a href="upload.html" class="btn btn-primary btn-sm">
-                            <i class="fas fa-plus"></i> Upload New
-                        </a>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Cover</th>
-                                        <th>Title</th>
-                                        <th>Genre</th>
-                                        <th>Language</th>
-                                        <th>Views</th>
-                                        <th>Earnings</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>
-                                            <div class="work-thumbnail bg-secondary d-flex align-items-center justify-content-center">
-                                                <i class="fas fa-book text-white"></i>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <strong>Midnight Stories</strong><br>
-                                            <small class="text-muted">Published 3 months ago</small>
-                                        </td>
-                                        <td>Fiction</td>
-                                        <td>
-                                            <span class="badge bg-primary">EN</span>
-                                            <span class="badge bg-success">ES</span>
-                                            <span class="badge bg-info">JA</span>
-                                        </td>
-                                        <td>12.5K</td>
-                                        <td class="text-success">$850</td>
-                                        <td><span class="badge bg-success">Published</span></td>
-                                        <td>
-                                            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></button>
-                                            <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-edit"></i></button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="work-thumbnail bg-secondary d-flex align-items-center justify-content-center">
-                                                <i class="fas fa-book text-white"></i>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <strong>The Last Samurai</strong><br>
-                                            <small class="text-muted">Published 2 months ago</small>
-                                        </td>
-                                        <td>Manga</td>
-                                        <td>
-                                            <span class="badge bg-primary">JA</span>
-                                            <span class="badge bg-warning">EN (pending)</span>
-                                        </td>
-                                        <td>8.3K</td>
-                                        <td class="text-success">$620</td>
-                                        <td><span class="badge bg-warning">In Translation</span></td>
-                                        <td>
-                                            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></button>
-                                            <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-edit"></i></button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="work-thumbnail bg-secondary d-flex align-items-center justify-content-center">
-                                                <i class="fas fa-book text-white"></i>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <strong>Digital Dreams</strong><br>
-                                            <small class="text-muted">Published 1 month ago</small>
-                                        </td>
-                                        <td>Sci-Fi</td>
-                                        <td>
-                                            <span class="badge bg-primary">EN</span>
-                                            <span class="badge bg-success">ES</span>
-                                            <span class="badge bg-info">DE</span>
-                                            <span class="badge bg-warning">FR</span>
-                                        </td>
-                                        <td>15.8K</td>
-                                        <td class="text-success">$980</td>
-                                        <td><span class="badge bg-success">Published</span></td>
-                                        <td>
-                                            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></button>
-                                            <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-edit"></i></button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                <!-- Right Column -->
+                <div class="col-lg-4">
+                    <!-- AI Translation Usage -->
+                    <div class="usage-card fade-in mb-4">
+                        <div class="usage-header">
+                            <h3><i class="fas fa-robot me-2 text-accent"></i>AI Translation</h3>
+                            <span class="badge badge-accent">Free Tier</span>
                         </div>
+                        <div class="text-center my-4">
+                            <div class="usage-count">3 / 5</div>
+                            <div class="usage-label">Works translated this month</div>
+                        </div>
+                        <div class="progress-custom mb-3">
+                            <div class="progress-bar" style="width: 60%"></div>
+                        </div>
+                        <p class="text-center mb-0" style="font-size: var(--font-size-sm); color: var(--color-text-secondary);">
+                            2 free translations remaining
+                        </p>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <h3 class="mb-3" style="font-size: var(--font-size-lg);">Quick Actions</h3>
+                    <div class="quick-actions fade-in">
+                        <a href="upload-work.html" class="action-card">
+                            <i class="fas fa-upload d-block"></i>
+                            <div class="action-title">Upload</div>
+                            <div class="action-desc">New work</div>
+                        </a>
+
+                        <a href="translation-status.html" class="action-card">
+                            <i class="fas fa-language d-block"></i>
+                            <div class="action-title">Translate</div>
+                            <div class="action-desc">AI powered</div>
+                        </a>
+
+                        <a href="earnings.html" class="action-card">
+                            <i class="fas fa-chart-line d-block"></i>
+                            <div class="action-title">Analytics</div>
+                            <div class="action-desc">View stats</div>
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer-custom">
+        <div class="container">
+            <div class="d-flex flex-wrap justify-content-between align-items-center">
+                <p class="small mb-0">&copy; 2024 Publisher. All rights reserved.</p>
+                <div class="d-flex gap-3">
+                    <a href="help.html" class="text-secondary">Help</a>
+                    <a href="terms.html" class="text-secondary">Terms</a>
+                    <a href="privacy.html" class="text-secondary">Privacy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Simple chart for demonstration
-        const ctx = document.getElementById('performanceChart');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                datasets: [{
-                    label: 'Views',
-                    data: [1200, 1900, 3000, 5000, 7500, 8300],
-                    borderColor: 'rgb(75, 192, 192)',
-                    tension: 0.1
-                }, {
-                    label: 'Earnings ($)',
-                    data: [120, 190, 300, 500, 650, 850],
-                    borderColor: 'rgb(255, 99, 132)',
-                    tension: 0.1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    }
-                }
+        // Check if user is logged in
+        document.addEventListener('DOMContentLoaded', function() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+                // Not logged in, redirect to login
+                // window.location.href = 'login.html';
+                // For demo, just show default values
+            }
+
+            // Set user name
+            if (user.firstName) {
+                document.getElementById('userName').textContent = user.firstName;
+                document.getElementById('welcomeName').textContent = user.firstName;
             }
         });
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
     </script>
 </body>
 </html>
+```
