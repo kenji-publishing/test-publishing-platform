@@ -24,6 +24,7 @@ const translationRoutes = require('./routes/translations');
 const paymentRoutes = require('./routes/payments');
 const aiTranslationRoutes = require('./routes/ai-translation');
 const notificationRoutes = require('./routes/notifications');
+const authMagicRoutes = require('./routes/auth-magic');
 // Create Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -48,6 +49,7 @@ app.use('/api/translations', translationRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/ai-translation', aiTranslationRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/auth-magic', authMagicRoutes);
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({
