@@ -26,6 +26,7 @@ const aiTranslationRoutes = require('./routes/ai-translation');
 const notificationRoutes = require('./routes/notifications');
 const authMagicRoutes = require('./routes/auth-magic');
 const moderationRoutes = require('./routes/moderation');
+const revenueRoutes = require('./routes/revenue');
 // Create Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -52,6 +53,7 @@ app.use('/api/ai-translation', aiTranslationRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/auth-magic', authMagicRoutes);
 app.use('/api/moderation', moderationRoutes);
+app.use('/api/revenue', revenueRoutes);
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({
