@@ -1,7 +1,7 @@
 /**
  * Works Routes
  * 
- * Handles work creation, retrieval, and management
+ * Handles work creation, retrieval, management, synopsis, and preview
  */
 
 const express = require('express');
@@ -14,79 +14,292 @@ const db = require('../config/database');
  * Get all published works (public)
  */
 router.get('/', async (req, res) => {
-  try {
-    const { page = 1, limit = 20, genre, language } = req.query;
-    const offset = (page - 1) * limit;
-    
-    let query = `
-      SELECT w.work_id, w.title, w.description, w.cover_image_url,
-             w.genre, w.original_language, w.content_type, w.price,
-             w.view_count, w.rating_average, w.rating_count, w.published_at,
-             u.user_id as author_id, u.pen_name as author_name
-      FROM works w
-      JOIN users u ON w.author_id = u.user_id
-      WHERE w.status = 'published'
-    `;
-    
-    const params = [];
-    let paramCount = 1;
-    
-    if (genre) {
-      query += ` AND w.genre = $${paramCount}`;
-      params.push(genre);
-      paramCount++;
+    try {
+        const { 
+            page = 1, limit = 20, genre, language, authorId,
+            sort = 'newest', excludeAdult = 'true'
+        } = req.query;
+        const offset = (page - 1) * limit;
+
+        let query = `
+            SELECT w.work_id, w.title, w.description, w.synopsis, w.cover_image_url,
+                   w.cover_image, w.genre, w.original_language, w.language,
+                   w.content_type, w.price, w.is_free,
+                   w.view_count, w.like_count, w.comment_count,
+                   w.rating_average, w.rating_count, w.published_at,
+                   w.is_adult, w.is_ai_generated, w.ai_tools_used,
+                   u.user_id as author_id, u.pen_name as author_name,
+                   u.first_name, u.last_name
+            FROM works w
+            JOIN users u ON w.author_id = u.user_id
+            WHERE w.status = 'published'
+        `;
+
+        const params = [];
+        let paramCount = 1;
+
+        if (genre) {
+            query += ` AND w.genre = $${paramCount}`;
+            params.push(genre);
+            paramCount++;
+        }
+
+        if (language) {
+            query += ` AND (w.original_language = $${paramCount} OR w.language = $${paramCount})`;
+            params.push(language);
+            paramCount++;
+        }
+
+        if (authorId) {
+            query += ` AND w.author_id = $${paramCount}`;
+            params.push(authorId);
+            paramCount++;
+        }
+
+        if (excludeAdult === 'true') {
+            query += ` AND (w.is_adult = FALSE OR w.is_adult IS NULL)`;
+        }
+
+        // Sorting
+        switch (sort) {
+            case 'popular':
+                query += ` ORDER BY w.like_count DESC NULLS LAST, w.view_count DESC NULLS LAST`;
+                break;
+            case 'views':
+                query += ` ORDER BY w.view_count DESC NULLS LAST`;
+                break;
+            case 'oldest':
+                query += ` ORDER BY w.published_at ASC NULLS LAST`;
+                break;
+            default:
+                query += ` ORDER BY w.published_at DESC NULLS LAST`;
+        }
+
+        query += ` LIMIT $${paramCount} OFFSET $${paramCount + 1}`;
+        params.push(limit, offset);
+
+        const result = await db.query(query, params);
+
+        // Get total count
+        let countQuery = `SELECT COUNT(*) FROM works WHERE status = 'published'`;
+        if (excludeAdult === 'true') {
+            countQuery += ` AND (is_adult = FALSE OR is_adult IS NULL)`;
+        }
+        const countResult = await db.query(countQuery);
+
+        res.json({
+            success: true,
+            works: result.rows,
+            page: parseInt(page),
+            limit: parseInt(limit),
+            total: parseInt(countResult.rows[0].count)
+        });
+    } catch (error) {
+        console.error('Get works error:', error);
+        res.status(500).json({ error: error.message });
     }
-    
-    if (language) {
-      query += ` AND w.original_language = $${paramCount}`;
-      params.push(language);
-      paramCount++;
+});
+
+/**
+ * GET /api/works/my/all
+ * Get current user's works (authenticated)
+ */
+router.get('/my/all', authenticate, async (req, res) => {
+    try {
+        const result = await db.query(
+            `SELECT * FROM works
+             WHERE author_id = $1
+             ORDER BY created_at DESC`,
+            [req.user.userId]
+        );
+
+        res.json({ 
+            success: true,
+            works: result.rows 
+        });
+    } catch (error) {
+        console.error('Get my works error:', error);
+        res.status(500).json({ error: error.message });
     }
-    
-    query += ` ORDER BY w.published_at DESC LIMIT $${paramCount} OFFSET $${paramCount + 1}`;
-    params.push(limit, offset);
-    
-    const result = await db.query(query, params);
-    
-    res.json({
-      works: result.rows,
-      page: parseInt(page),
-      limit: parseInt(limit),
-      total: result.rows.length
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
 });
 
 /**
  * GET /api/works/:workId
- * Get single work details
+ * Get single work details (public)
  */
 router.get('/:workId', async (req, res) => {
-  try {
-    const result = await db.query(
-      `SELECT w.*, u.pen_name as author_name, u.user_id as author_id
-       FROM works w
-       JOIN users u ON w.author_id = u.user_id
-       WHERE w.work_id = $1 AND w.status = 'published'`,
-      [req.params.workId]
-    );
-    
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Work not found' });
+    try {
+        const { userId } = req.query;
+
+        const result = await db.query(
+            `SELECT w.*, 
+                    u.pen_name as author_name, u.user_id as author_id,
+                    u.first_name, u.last_name,
+                    COALESCE(w.like_count, 0) as like_count,
+                    COALESCE(w.comment_count, 0) as comment_count
+             FROM works w
+             JOIN users u ON w.author_id = u.user_id
+             WHERE w.work_id = $1 AND w.status = 'published'`,
+            [req.params.workId]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Work not found' });
+        }
+
+        const work = result.rows[0];
+
+        // Check if user has liked
+        let userLiked = false;
+        if (userId) {
+            const likeCheck = await db.query(
+                `SELECT * FROM likes WHERE work_id = $1 AND user_id = $2`,
+                [req.params.workId, userId]
+            );
+            userLiked = likeCheck.rows.length > 0;
+        }
+
+        // Increment view count
+        await db.query(
+            'UPDATE works SET view_count = COALESCE(view_count, 0) + 1 WHERE work_id = $1',
+            [req.params.workId]
+        );
+
+        res.json({ 
+            success: true,
+            work: {
+                ...work,
+                userLiked,
+                content: undefined // Don't send full content
+            }
+        });
+    } catch (error) {
+        console.error('Get work error:', error);
+        res.status(500).json({ error: error.message });
     }
-    
-    // Increment view count
-    await db.query(
-      'UPDATE works SET view_count = view_count + 1 WHERE work_id = $1',
-      [req.params.workId]
-    );
-    
-    res.json({ work: result.rows[0] });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+});
+
+/**
+ * GET /api/works/:workId/preview
+ * Get work preview - synopsis + first 10% of content
+ */
+router.get('/:workId/preview', async (req, res) => {
+    try {
+        const result = await db.query(
+            `SELECT w.work_id, w.title, w.description, w.synopsis, 
+                    w.content, w.preview_percent, w.is_free, w.price,
+                    w.word_count, w.page_count,
+                    u.pen_name as author_name, u.first_name, u.last_name
+             FROM works w
+             JOIN users u ON w.author_id = u.user_id
+             WHERE w.work_id = $1 AND w.status = 'published'`,
+            [req.params.workId]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Work not found' });
+        }
+
+        const work = result.rows[0];
+        const content = work.content || '';
+        const previewPercent = work.preview_percent || 10;
+
+        // Calculate preview length
+        const previewLength = Math.floor(content.length * (previewPercent / 100));
+
+        // Find a good break point (end of sentence or paragraph)
+        let previewContent = content.substring(0, previewLength);
+
+        // Try to end at a sentence
+        const lastPeriod = Math.max(
+            previewContent.lastIndexOf('。'),
+            previewContent.lastIndexOf('.'),
+            previewContent.lastIndexOf('！'),
+            previewContent.lastIndexOf('!'),
+            previewContent.lastIndexOf('？'),
+            previewContent.lastIndexOf('?'),
+            previewContent.lastIndexOf('\n\n')
+        );
+
+        if (lastPeriod > previewLength * 0.7) {
+            previewContent = previewContent.substring(0, lastPeriod + 1);
+        }
+
+        res.json({
+            success: true,
+            preview: {
+                workId: work.work_id,
+                title: work.title,
+                authorName: work.author_name || `${work.first_name} ${work.last_name}`,
+                description: work.description,
+                synopsis: work.synopsis,
+                previewContent: previewContent,
+                previewPercent: previewPercent,
+                totalLength: content.length,
+                wordCount: work.word_count,
+                pageCount: work.page_count,
+                isFree: work.is_free,
+                price: work.price,
+                hasMore: content.length > previewContent.length
+            }
+        });
+    } catch (error) {
+        console.error('Get preview error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/works/:workId/full
+ * Get full work content (requires purchase or ownership)
+ */
+router.get('/:workId/full', async (req, res) => {
+    try {
+        const { userId } = req.query;
+
+        if (!userId) {
+            return res.status(401).json({ error: 'Authentication required' });
+        }
+
+        const result = await db.query(
+            `SELECT * FROM works WHERE work_id = $1 AND status = 'published'`,
+            [req.params.workId]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Work not found' });
+        }
+
+        const work = result.rows[0];
+
+        // Check if user is author
+        if (work.author_id === userId) {
+            return res.json({ 
+                success: true, 
+                work, 
+                access: 'author' 
+            });
+        }
+
+        // Check if work is free
+        if (work.is_free || work.price === 0 || work.price === null) {
+            return res.json({ 
+                success: true, 
+                work, 
+                access: 'free' 
+            });
+        }
+
+        // TODO: Check if user has purchased (when purchase system is implemented)
+        // For now, return error
+        return res.status(403).json({
+            error: 'Purchase required to access full content',
+            price: work.price
+        });
+    } catch (error) {
+        console.error('Get full work error:', error);
+        res.status(500).json({ error: error.message });
+    }
 });
 
 /**
@@ -94,44 +307,72 @@ router.get('/:workId', async (req, res) => {
  * Create new work (authenticated)
  */
 router.post('/', authenticate, async (req, res) => {
-  try {
-    const {
-      title,
-      description,
-      originalLanguage,
-      contentType,
-      genre,
-      tags,
-      price,
-      isFree
-    } = req.body;
-    
-    const result = await db.query(
-      `INSERT INTO works (
-        author_id, title, description, original_language,
-        content_type, genre, tags, price, is_free, status
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'draft')
-      RETURNING *`,
-      [
-        req.user.userId,
-        title,
-        description,
-        originalLanguage,
-        contentType,
-        genre,
-        tags || [],
-        price || 0,
-        isFree || false
-      ]
-    );
-    
-    res.status(201).json({
-      message: 'Work created successfully',
-      work: result.rows[0]
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+    try {
+        const {
+            title,
+            description,
+            synopsis,
+            content,
+            originalLanguage,
+            language,
+            contentType,
+            genre,
+            tags,
+            price,
+            isFree,
+            coverImage,
+            isAdult,
+            isAiGenerated,
+            aiToolsUsed,
+            previewPercent
+        } = req.body;
+
+        // Calculate word count
+        const textContent = content || '';
+        const wordCount = textContent.replace(/\s+/g, ' ').trim().split(/\s+/).length;
+        const pageCount = Math.ceil(wordCount / 250);
+
+        const result = await db.query(
+            `INSERT INTO works (
+                author_id, title, description, synopsis, content,
+                original_language, language, content_type, genre, tags,
+                price, is_free, cover_image, is_adult,
+                is_ai_generated, ai_tools_used, preview_percent,
+                word_count, page_count, status
+             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, 'draft')
+             RETURNING *`,
+            [
+                req.user.userId,
+                title,
+                description || '',
+                synopsis || '',
+                content || '',
+                originalLanguage || 'ja',
+                language || originalLanguage || 'ja',
+                contentType || 'novel',
+                genre || 'general',
+                tags || [],
+                price || 0,
+                isFree || false,
+                coverImage || null,
+                isAdult || false,
+                isAiGenerated || false,
+                aiToolsUsed || null,
+                previewPercent || 10,
+                wordCount,
+                pageCount
+            ]
+        );
+
+        res.status(201).json({
+            success: true,
+            message: 'Work created successfully',
+            work: result.rows[0]
+        });
+    } catch (error) {
+        console.error('Create work error:', error);
+        res.status(500).json({ error: error.message });
+    }
 });
 
 /**
@@ -139,63 +380,113 @@ router.post('/', authenticate, async (req, res) => {
  * Update work (authenticated, author only)
  */
 router.put('/:workId', authenticate, async (req, res) => {
-  try {
-    // Check if user is the author
-    const checkResult = await db.query(
-      'SELECT author_id FROM works WHERE work_id = $1',
-      [req.params.workId]
-    );
-    
-    if (checkResult.rows.length === 0) {
-      return res.status(404).json({ error: 'Work not found' });
+    try {
+        // Check if user is the author
+        const checkResult = await db.query(
+            'SELECT author_id FROM works WHERE work_id = $1',
+            [req.params.workId]
+        );
+
+        if (checkResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Work not found' });
+        }
+
+        if (checkResult.rows[0].author_id !== req.user.userId) {
+            return res.status(403).json({ error: 'Not authorized to edit this work' });
+        }
+
+        const {
+            title, description, synopsis, content, genre, tags,
+            price, status, isFree, coverImage, isAdult,
+            isAiGenerated, aiToolsUsed, previewPercent
+        } = req.body;
+
+        // Calculate word count if content changed
+        let wordCount = null;
+        let pageCount = null;
+        if (content) {
+            wordCount = content.replace(/\s+/g, ' ').trim().split(/\s+/).length;
+            pageCount = Math.ceil(wordCount / 250);
+        }
+
+        const result = await db.query(
+            `UPDATE works
+             SET title = COALESCE($1, title),
+                 description = COALESCE($2, description),
+                 synopsis = COALESCE($3, synopsis),
+                 content = COALESCE($4, content),
+                 genre = COALESCE($5, genre),
+                 tags = COALESCE($6, tags),
+                 price = COALESCE($7, price),
+                 status = COALESCE($8, status),
+                 is_free = COALESCE($9, is_free),
+                 cover_image = COALESCE($10, cover_image),
+                 is_adult = COALESCE($11, is_adult),
+                 is_ai_generated = COALESCE($12, is_ai_generated),
+                 ai_tools_used = COALESCE($13, ai_tools_used),
+                 preview_percent = COALESCE($14, preview_percent),
+                 word_count = COALESCE($15, word_count),
+                 page_count = COALESCE($16, page_count),
+                 updated_at = CURRENT_TIMESTAMP,
+                 published_at = CASE 
+                     WHEN $8 = 'published' AND published_at IS NULL THEN CURRENT_TIMESTAMP 
+                     ELSE published_at 
+                 END
+             WHERE work_id = $17
+             RETURNING *`,
+            [
+                title, description, synopsis, content, genre, tags,
+                price, status, isFree, coverImage, isAdult,
+                isAiGenerated, aiToolsUsed, previewPercent,
+                wordCount, pageCount, req.params.workId
+            ]
+        );
+
+        res.json({
+            success: true,
+            message: 'Work updated successfully',
+            work: result.rows[0]
+        });
+    } catch (error) {
+        console.error('Update work error:', error);
+        res.status(500).json({ error: error.message });
     }
-    
-    if (checkResult.rows[0].author_id !== req.user.userId) {
-      return res.status(403).json({ error: 'Not authorized to edit this work' });
-    }
-    
-    const { title, description, genre, tags, price, status } = req.body;
-    
-    const result = await db.query(
-      `UPDATE works
-       SET title = COALESCE($1, title),
-           description = COALESCE($2, description),
-           genre = COALESCE($3, genre),
-           tags = COALESCE($4, tags),
-           price = COALESCE($5, price),
-           status = COALESCE($6, status),
-           updated_at = CURRENT_TIMESTAMP
-       WHERE work_id = $7
-       RETURNING *`,
-      [title, description, genre, tags, price, status, req.params.workId]
-    );
-    
-    res.json({
-      message: 'Work updated successfully',
-      work: result.rows[0]
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
 });
 
 /**
- * GET /api/works/my/all
- * Get current user's works
+ * DELETE /api/works/:workId
+ * Delete work (authenticated, author only)
  */
-router.get('/my/all', authenticate, async (req, res) => {
-  try {
-    const result = await db.query(
-      `SELECT * FROM works
-       WHERE author_id = $1
-       ORDER BY created_at DESC`,
-      [req.user.userId]
-    );
-    
-    res.json({ works: result.rows });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+router.delete('/:workId', authenticate, async (req, res) => {
+    try {
+        // Check if user is the author
+        const checkResult = await db.query(
+            'SELECT author_id FROM works WHERE work_id = $1',
+            [req.params.workId]
+        );
+
+        if (checkResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Work not found' });
+        }
+
+        if (checkResult.rows[0].author_id !== req.user.userId) {
+            return res.status(403).json({ error: 'Not authorized to delete this work' });
+        }
+
+        // Soft delete (change status to deleted)
+        await db.query(
+            `UPDATE works SET status = 'deleted', updated_at = CURRENT_TIMESTAMP WHERE work_id = $1`,
+            [req.params.workId]
+        );
+
+        res.json({
+            success: true,
+            message: 'Work deleted successfully'
+        });
+    } catch (error) {
+        console.error('Delete work error:', error);
+        res.status(500).json({ error: error.message });
+    }
 });
 
 module.exports = router;

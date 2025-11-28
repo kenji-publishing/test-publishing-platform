@@ -27,6 +27,9 @@ const notificationRoutes = require('./routes/notifications');
 const authMagicRoutes = require('./routes/auth-magic');
 const moderationRoutes = require('./routes/moderation');
 const revenueRoutes = require('./routes/revenue');
+const messagesRoutes = require('./routes/messages');
+const interactionsRoutes = require('./routes/interactions');
+const worksRoutes = require('./routes/works');
 // Create Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -54,6 +57,9 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/auth-magic', authMagicRoutes);
 app.use('/api/moderation', moderationRoutes);
 app.use('/api/revenue', revenueRoutes);
+app.use('/api/messages', messagesRoutes);
+app.use('/api/interactions', interactionsRoutes);
+app.use('/api/works', worksRoutes);
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({
