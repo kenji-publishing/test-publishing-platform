@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manga Translator - Publisher</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&family=M+PLUS+Rounded+1c:wght@400;500;700&family=Kosugi+Maru&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --color-bg: #FAF8F5;
+            --color-bg-card: #FFFFFF;
+            --color-accent: #8B7355;
+            --color-text: #2D2A26;
+            --color-text-secondary: #6B6560;
+            --color-border: #E8E4E0;
+            --color-success: #5D9C59;
+            --color-warning: #D4A853;
+            --color-error: #C75D5D;
+            --color-info: #5D8BC7;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar {
+            background: var(--color-bg-card);
+            border-bottom: 1px solid var(--color-border);
+            padding: 1rem;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--color-accent);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 1rem;
+            padding: 1rem;
+            height: calc(100vh - 70px);
+        }
+
+        .editor-panel {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .editor-header h2 {
+            margin: 0;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .canvas-container {
+            flex: 1;
+            overflow: auto;
+            padding: 1rem;
+            background: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        #mainCanvas {
+            background: white;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            cursor: crosshair;
+        }
+
+        .tools-panel {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .tools-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .tools-header h3 {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .tools-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .tool-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .tool-section h4 {
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-tool {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            background: var(--color-bg);
+            color: var(--color-text);
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 0.5rem;
+        }
+
+        .btn-tool:hover {
+            background: var(--color-accent);
+            color: white;
+            border-color: var(--color-accent);
+        }
+
+        .btn-tool.active {
+            background: var(--color-accent);
+            color: white;
+            border-color: var(--color-accent);
+        }
+
+        .btn-primary-custom {
+            background: var(--color-accent);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary-custom:hover {
+            background: #7A6548;
+        }
+
+        .btn-secondary-custom {
+            background: transparent;
+            color: var(--color-accent);
+            border: 1px solid var(--color-accent);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary-custom:hover {
+            background: var(--color-accent);
+            color: white;
+        }
+
+        .form-control-custom {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background: var(--color-bg);
+        }
+
+        .form-control-custom:focus {
+            outline: none;
+            border-color: var(--color-accent);
+        }
+
+        .text-boxes-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .text-box-item {
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .text-box-item.selected {
+            border-color: var(--color-accent);
+            background: rgba(139, 115, 85, 0.1);
+        }
+
+        .text-box-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .text-box-number {
+            font-weight: 600;
+            color: var(--color-accent);
+        }
+
+        .text-box-delete {
+            background: none;
+            border: none;
+            color: var(--color-error);
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--color-border);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .upload-area:hover {
+            border-color: var(--color-accent);
+            background: rgba(139, 115, 85, 0.05);
+        }
+
+        .upload-area i {
+            font-size: 3rem;
+            color: var(--color-accent);
+            margin-bottom: 1rem;
+        }
+
+        .font-select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .color-picker-row {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .color-picker-row label {
+            flex: 1;
+            font-size: 0.85rem;
+        }
+
+        .color-picker-row input[type="color"] {
+            width: 40px;
+            height: 30px;
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .size-slider {
+            width: 100%;
+        }
+
+        .instructions {
+            background: rgba(93, 139, 199, 0.1);
+            border-left: 4px solid var(--color-info);
+            padding: 1rem;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+        }
+
+        .translate-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .translate-row select {
+            flex: 1;
+        }
+
+        .translate-row button {
+            white-space: nowrap;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem;
+            border-top: 1px solid var(--color-border);
+        }
+
+        .action-buttons button {
+            flex: 1;
+        }
+
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr auto;
+            }
+
+            .tools-panel {
+                max-height: 400px;
+            }
+        }
+
+        /* Hide file input */
+        #imageInput {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <a class="navbar-brand" href="../index.html">
+            <i class="fas fa-book-open"></i>
+            Publisher
+        </a>
+        <span style="color: var(--color-text-secondary);">
+            <i class="fas fa-language me-2"></i>Manga Translator / 漫画翻訳エディタ
+        </span>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Editor Panel -->
+        <div class="editor-panel">
+            <div class="editor-header">
+                <h2><i class="fas fa-image"></i> Editor / エディタ</h2>
+                <div>
+                    <button class="btn-secondary-custom" onclick="zoomOut()" title="Zoom Out">
+                        <i class="fas fa-search-minus"></i>
+                    </button>
+                    <span id="zoomLevel" style="margin: 0 0.5rem;">100%</span>
+                    <button class="btn-secondary-custom" onclick="zoomIn()" title="Zoom In">
+                        <i class="fas fa-search-plus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="canvas-container">
+                <div id="uploadArea" class="upload-area" onclick="document.getElementById('imageInput').click()">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p><strong>Click to upload image</strong><br>画像をアップロード</p>
+                    <p style="color: var(--color-text-secondary); font-size: 0.85rem;">PNG, JPEG supported</p>
+                </div>
+                <canvas id="mainCanvas" style="display: none;"></canvas>
+            </div>
+            <input type="file" id="imageInput" accept="image/*" onchange="handleImageUpload(event)">
+        </div>
+
+        <!-- Tools Panel -->
+        <div class="tools-panel">
+            <div class="tools-header">
+                <h3><i class="fas fa-tools me-2"></i>Tools / ツール</h3>
+            </div>
+            <div class="tools-content">
+                <!-- Instructions -->
+                <div class="instructions">
+                    <strong><i class="fas fa-info-circle me-1"></i> How to use / 使い方:</strong>
+                    <ol style="margin: 0.5rem 0 0 1rem; padding: 0;">
+                        <li>Upload manga page / 画像をアップロード</li>
+                        <li>Select "Erase" and drag over text / 「消去」でテキストを消す</li>
+                        <li>Select "Add Text" and click to add / 「テキスト追加」でクリック</li>
+                        <li>Enter translated text / 翻訳文を入力</li>
+                        <li>Save image / 画像を保存</li>
+                    </ol>
+                </div>
+
+                <!-- Drawing Tools -->
+                <div class="tool-section">
+                    <h4><i class="fas fa-pen me-1"></i> Drawing Tools / 描画ツール</h4>
+                    <button class="btn-tool" id="btnErase" onclick="setTool('erase')">
+                        <i class="fas fa-eraser"></i> Erase (White) / 消去（白）
+                    </button>
+                    <button class="btn-tool" id="btnAddText" onclick="setTool('text')">
+                        <i class="fas fa-font"></i> Add Text / テキスト追加
+                    </button>
+                    <button class="btn-tool" id="btnSelect" onclick="setTool('select')">
+                        <i class="fas fa-mouse-pointer"></i> Select / 選択
+                    </button>
+                </div>
+
+                <!-- Eraser Size -->
+                <div class="tool-section" id="eraserOptions" style="display: none;">
+                    <h4><i class="fas fa-expand me-1"></i> Eraser Size / 消しゴムサイズ</h4>
+                    <input type="range" class="size-slider" id="eraserSize" min="5" max="100" value="30" oninput="updateEraserSize()">
+                    <div style="text-align: center; font-size: 0.85rem;" id="eraserSizeLabel">30px</div>
+                </div>
+
+                <!-- Text Options -->
+                <div class="tool-section" id="textOptions" style="display: none;">
+                    <h4><i class="fas fa-text-height me-1"></i> Text Options / テキスト設定</h4>
+                    
+                    <label style="font-size: 0.85rem; margin-bottom: 0.25rem; display: block;">Font / フォント:</label>
+                    <select class="font-select" id="fontSelect">
+                        <option value="Noto Sans JP">Noto Sans JP</option>
+                        <option value="Noto Serif JP">Noto Serif JP</option>
+                        <option value="M PLUS Rounded 1c">M PLUS Rounded 1c</option>
+                        <option value="Kosugi Maru">Kosugi Maru</option>
+                        <option value="Arial">Arial</option>
+                        <option value="Comic Sans MS">Comic Sans MS</option>
+                    </select>
+
+                    <label style="font-size: 0.85rem; margin-bottom: 0.25rem; display: block;">Size / サイズ:</label>
+                    <input type="range" class="size-slider" id="fontSize" min="8" max="72" value="16" oninput="updateFontSize()">
+                    <div style="text-align: center; font-size: 0.85rem;" id="fontSizeLabel">16px</div>
+
+                    <div class="color-picker-row">
+                        <label>Text Color / 文字色:</label>
+                        <input type="color" id="textColor" value="#000000">
+                    </div>
+
+                    <div class="color-picker-row">
+                        <label>Background / 背景:</label>
+                        <input type="color" id="bgColor" value="#FFFFFF">
+                        <label style="flex: none;">
+                            <input type="checkbox" id="bgTransparent"> None
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Text Boxes List -->
+                <div class="tool-section">
+                    <h4><i class="fas fa-list me-1"></i> Text Boxes / テキストボックス</h4>
+                    <div class="text-boxes-list" id="textBoxesList">
+                        <p style="color: var(--color-text-secondary); font-size: 0.85rem; text-align: center;">
+                            No text boxes yet<br>テキストボックスなし
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Translation -->
+                <div class="tool-section">
+                    <h4><i class="fas fa-language me-1"></i> AI Translation / AI翻訳</h4>
+                    <textarea class="form-control-custom" id="originalText" rows="2" placeholder="Original text / 元のテキスト"></textarea>
+                    <div class="translate-row">
+                        <select class="form-control-custom" id="targetLang">
+                            <option value="ja">日本語</option>
+                            <option value="en">English</option>
+                            <option value="zh">中文</option>
+                            <option value="ko">한국어</option>
+                            <option value="es">Español</option>
+                            <option value="fr">Français</option>
+                            <option value="de">Deutsch</option>
+                            <option value="ar">العربية</option>
+                        </select>
+                        <button class="btn-primary-custom" onclick="translateText()">
+                            <i class="fas fa-language"></i> Translate
+                        </button>
+                    </div>
+                    <textarea class="form-control-custom" id="translatedText" rows="2" placeholder="Translated text / 翻訳結果" style="margin-top: 0.5rem;"></textarea>
+                    <button class="btn-secondary-custom" style="width: 100%; margin-top: 0.5rem;" onclick="applyTranslation()">
+                        <i class="fas fa-check"></i> Apply to Selected / 選択に適用
+                    </button>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="btn-secondary-custom" onclick="undoAction()">
+                    <i class="fas fa-undo"></i> Undo
+                </button>
+                <button class="btn-secondary-custom" onclick="clearAll()">
+                    <i class="fas fa-trash"></i> Clear
+                </button>
+                <button class="btn-primary-custom" onclick="saveImage()">
+                    <i class="fas fa-download"></i> Save
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Canvas and Context
+        const canvas = document.getElementById('mainCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // State
+        let currentTool = 'erase';
+        let isDrawing = false;
+        let originalImage = null;
+        let textBoxes = [];
+        let selectedTextBox = null;
+        let history = [];
+        let historyIndex = -1;
+        let zoom = 1;
+        let eraserSize = 30;
+
+        // Tool Selection
+        function setTool(tool) {
+            currentTool = tool;
+            
+            // Update button states
+            document.querySelectorAll('.btn-tool').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('btn' + tool.charAt(0).toUpperCase() + tool.slice(1))?.classList.add('active');
+            
+            // Show/hide options
+            document.getElementById('eraserOptions').style.display = tool === 'erase' ? 'block' : 'none';
+            document.getElementById('textOptions').style.display = tool === 'text' || tool === 'select' ? 'block' : 'none';
+            
+            // Update cursor
+            if (tool === 'erase') {
+                canvas.style.cursor = 'crosshair';
+            } else if (tool === 'text') {
+                canvas.style.cursor = 'text';
+            } else {
+                canvas.style.cursor = 'default';
+            }
+        }
+
+        // Image Upload
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    originalImage = img;
+                    
+                    // Set canvas size
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    
+                    // Draw image
+                    ctx.drawImage(img, 0, 0);
+                    
+                    // Show canvas, hide upload area
+                    canvas.style.display = 'block';
+                    document.getElementById('uploadArea').style.display = 'none';
+                    
+                    // Save to history
+                    saveToHistory();
+                    
+                    // Reset text boxes
+                    textBoxes = [];
+                    updateTextBoxesList();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Canvas Events
+        canvas.addEventListener('mousedown', function(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / zoom;
+            const y = (e.clientY - rect.top) / zoom;
+
+            if (currentTool === 'erase') {
+                isDrawing = true;
+                eraseAt(x, y);
+            } else if (currentTool === 'text') {
+                addTextBox(x, y);
+            } else if (currentTool === 'select') {
+                selectTextBoxAt(x, y);
+            }
+        });
+
+        canvas.addEventListener('mousemove', function(e) {
+            if (!isDrawing) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / zoom;
+            const y = (e.clientY - rect.top) / zoom;
+
+            if (currentTool === 'erase') {
+                eraseAt(x, y);
+            }
+        });
+
+        canvas.addEventListener('mouseup', function() {
+            if (isDrawing) {
+                isDrawing = false;
+                saveToHistory();
+            }
+        });
+
+        canvas.addEventListener('mouseleave', function() {
+            isDrawing = false;
+        });
+
+        // Erase Function
+        function eraseAt(x, y) {
+            ctx.fillStyle = '#FFFFFF';
+            ctx.beginPath();
+            ctx.arc(x, y, eraserSize / 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function updateEraserSize() {
+            eraserSize = document.getElementById('eraserSize').value;
+            document.getElementById('eraserSizeLabel').textContent = eraserSize + 'px';
+        }
+
+        // Text Box Functions
+        function addTextBox(x, y) {
+            const text = prompt('Enter text / テキストを入力:', '');
+            if (text === null || text === '') return;
+
+            const font = document.getElementById('fontSelect').value;
+            const fontSize = document.getElementById('fontSize').value;
+            const textColor = document.getElementById('textColor').value;
+            const bgColor = document.getElementById('bgColor').value;
+            const bgTransparent = document.getElementById('bgTransparent').checked;
+
+            const textBox = {
+                id: Date.now(),
+                x: x,
+                y: y,
+                text: text,
+                font: font,
+                fontSize: parseInt(fontSize),
+                textColor: textColor,
+                bgColor: bgTransparent ? null : bgColor
+            };
+
+            textBoxes.push(textBox);
+            renderCanvas();
+            updateTextBoxesList();
+            saveToHistory();
+        }
+
+        function selectTextBoxAt(x, y) {
+            selectedTextBox = null;
+            
+            for (let i = textBoxes.length - 1; i >= 0; i--) {
+                const tb = textBoxes[i];
+                ctx.font = `${tb.fontSize}px "${tb.font}"`;
+                const metrics = ctx.measureText(tb.text);
+                const width = metrics.width + 10;
+                const height = tb.fontSize + 10;
+
+                if (x >= tb.x - 5 && x <= tb.x + width &&
+                    y >= tb.y - tb.fontSize - 5 && y <= tb.y + 10) {
+                    selectedTextBox = tb;
+                    break;
+                }
+            }
+
+            updateTextBoxesList();
+            renderCanvas();
+        }
+
+        function deleteTextBox(id) {
+            textBoxes = textBoxes.filter(tb => tb.id !== id);
+            if (selectedTextBox && selectedTextBox.id === id) {
+                selectedTextBox = null;
+            }
+            renderCanvas();
+            updateTextBoxesList();
+            saveToHistory();
+        }
+
+        function updateTextBoxesList() {
+            const list = document.getElementById('textBoxesList');
+            
+            if (textBoxes.length === 0) {
+                list.innerHTML = `
+                    <p style="color: var(--color-text-secondary); font-size: 0.85rem; text-align: center;">
+                        No text boxes yet<br>テキストボックスなし
+                    </p>
+                `;
+                return;
+            }
+
+            list.innerHTML = textBoxes.map((tb, index) => `
+                <div class="text-box-item ${selectedTextBox && selectedTextBox.id === tb.id ? 'selected' : ''}" 
+                     onclick="selectTextBoxById(${tb.id})">
+                    <div class="text-box-header">
+                        <span class="text-box-number">#${index + 1}</span>
+                        <button class="text-box-delete" onclick="event.stopPropagation(); deleteTextBox(${tb.id})">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div style="font-size: 0.85rem; word-break: break-all;">${tb.text}</div>
+                </div>
+            `).join('');
+        }
+
+        function selectTextBoxById(id) {
+            selectedTextBox = textBoxes.find(tb => tb.id === id) || null;
+            updateTextBoxesList();
+            renderCanvas();
+        }
+
+        function updateFontSize() {
+            const size = document.getElementById('fontSize').value;
+            document.getElementById('fontSizeLabel').textContent = size + 'px';
+        }
+
+        // Render Canvas
+        function renderCanvas() {
+            if (!originalImage) return;
+
+            // Clear and redraw from history
+            if (historyIndex >= 0 && history[historyIndex]) {
+                const img = new Image();
+                img.onload = function() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0);
+                    drawTextBoxes();
+                };
+                img.src = history[historyIndex];
+            } else {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(originalImage, 0, 0);
+                drawTextBoxes();
+            }
+        }
+
+        function drawTextBoxes() {
+            textBoxes.forEach(tb => {
+                ctx.font = `${tb.fontSize}px "${tb.font}"`;
+                const metrics = ctx.measureText(tb.text);
+                
+                // Draw background
+                if (tb.bgColor) {
+                    ctx.fillStyle = tb.bgColor;
+                    ctx.fillRect(tb.x - 5, tb.y - tb.fontSize - 2, metrics.width + 10, tb.fontSize + 8);
+                }
+                
+                // Draw text
+                ctx.fillStyle = tb.textColor;
+                ctx.fillText(tb.text, tb.x, tb.y);
+                
+                // Draw selection border
+                if (selectedTextBox && selectedTextBox.id === tb.id) {
+                    ctx.strokeStyle = '#8B7355';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([5, 5]);
+                    ctx.strokeRect(tb.x - 5, tb.y - tb.fontSize - 2, metrics.width + 10, tb.fontSize + 8);
+                    ctx.setLineDash([]);
+                }
+            });
+        }
+
+        // History Functions
+        function saveToHistory() {
+            // Remove any future history if we're not at the end
+            history = history.slice(0, historyIndex + 1);
+            
+            // Save current state (without text boxes - they're stored separately)
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            // Draw only the base image (without text boxes)
+            if (originalImage) {
+                tempCtx.drawImage(canvas, 0, 0);
+            }
+            
+            history.push(tempCanvas.toDataURL());
+            historyIndex = history.length - 1;
+            
+            // Limit history size
+            if (history.length > 50) {
+                history.shift();
+                historyIndex--;
+            }
+        }
+
+        function undoAction() {
+            if (historyIndex > 0) {
+                historyIndex--;
+                const img = new Image();
+                img.onload = function() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0);
+                    drawTextBoxes();
+                };
+                img.src = history[historyIndex];
+            }
+        }
+
+        // Translation Function
+        async function translateText() {
+            const originalText = document.getElementById('originalText').value;
+            const targetLang = document.getElementById('targetLang').value;
+            
+            if (!originalText.trim()) {
+                alert('Please enter text to translate / 翻訳するテキストを入力してください');
+                return;
+            }
+
+            try {
+                // Note: This would connect to your backend translation API
+                const response = await fetch('/api/translate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: originalText,
+                        targetLang: targetLang
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('translatedText').value = data.translatedText;
+                } else {
+                    // Fallback for demo
+                    document.getElementById('translatedText').value = `[Translated to ${targetLang}]: ${originalText}`;
+                }
+            } catch (error) {
+                // Demo fallback
+                document.getElementById('translatedText').value = `[Demo] ${originalText}`;
+                console.log('Translation API not available, using demo mode');
+            }
+        }
+
+        function applyTranslation() {
+            const translatedText = document.getElementById('translatedText').value;
+            
+            if (!translatedText.trim()) {
+                alert('No translated text / 翻訳テキストがありません');
+                return;
+            }
+
+            if (selectedTextBox) {
+                selectedTextBox.text = translatedText;
+                renderCanvas();
+                updateTextBoxesList();
+                saveToHistory();
+            } else {
+                alert('Please select a text box first / 先にテキストボックスを選択してください');
+            }
+        }
+
+        // Zoom Functions
+        function zoomIn() {
+            if (zoom < 3) {
+                zoom += 0.25;
+                updateZoom();
+            }
+        }
+
+        function zoomOut() {
+            if (zoom > 0.25) {
+                zoom -= 0.25;
+                updateZoom();
+            }
+        }
+
+        function updateZoom() {
+            canvas.style.transform = `scale(${zoom})`;
+            canvas.style.transformOrigin = 'top left';
+            document.getElementById('zoomLevel').textContent = Math.round(zoom * 100) + '%';
+        }
+
+        // Save Image
+        function saveImage() {
+            if (!originalImage) {
+                alert('Please upload an image first / 先に画像をアップロードしてください');
+                return;
+            }
+
+            // Create a clean canvas with text boxes rendered
+            const saveCanvas = document.createElement('canvas');
+            saveCanvas.width = canvas.width;
+            saveCanvas.height = canvas.height;
+            const saveCtx = saveCanvas.getContext('2d');
+            
+            // Draw current canvas state
+            saveCtx.drawImage(canvas, 0, 0);
+            
+            // Draw text boxes
+            textBoxes.forEach(tb => {
+                saveCtx.font = `${tb.fontSize}px "${tb.font}"`;
+                const metrics = saveCtx.measureText(tb.text);
+                
+                if (tb.bgColor) {
+                    saveCtx.fillStyle = tb.bgColor;
+                    saveCtx.fillRect(tb.x - 5, tb.y - tb.fontSize - 2, metrics.width + 10, tb.fontSize + 8);
+                }
+                
+                saveCtx.fillStyle = tb.textColor;
+                saveCtx.fillText(tb.text, tb.x, tb.y);
+            });
+
+            // Download
+            const link = document.createElement('a');
+            link.download = 'manga-translated-' + Date.now() + '.png';
+            link.href = saveCanvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // Clear All
+        function clearAll() {
+            if (!confirm('Clear all changes? / すべての変更を消去しますか？')) return;
+            
+            if (originalImage) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(originalImage, 0, 0);
+                textBoxes = [];
+                selectedTextBox = null;
+                history = [];
+                historyIndex = -1;
+                saveToHistory();
+                updateTextBoxesList();
+            }
+        }
+
+        // Initialize
+        setTool('erase');
+    </script>
+</body>
+</html>
