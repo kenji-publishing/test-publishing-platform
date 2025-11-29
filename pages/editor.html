@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor - Publisher</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --color-bg: #FAF8F5;
+            --color-bg-card: #FFFFFF;
+            --color-accent: #8B7355;
+            --color-text: #2D2A26;
+            --color-text-secondary: #6B6560;
+            --color-border: #E8E4E0;
+            --color-success: #5D9C59;
+            --color-warning: #D4A853;
+            --color-error: #C75D5D;
+            --color-info: #5D8BC7;
+            --color-comment: #FFF3CD;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: var(--color-bg-card);
+            border-bottom: 1px solid var(--color-border);
+            padding: 0.5rem 1rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .navbar-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--color-accent);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .doc-title-input {
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--color-text);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            max-width: 300px;
+        }
+
+        .doc-title-input:hover {
+            background: var(--color-bg);
+        }
+
+        .doc-title-input:focus {
+            outline: none;
+            background: var(--color-bg);
+            border: 1px solid var(--color-accent);
+        }
+
+        .save-status {
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .save-status.saving {
+            color: var(--color-warning);
+        }
+
+        .save-status.saved {
+            color: var(--color-success);
+        }
+
+        /* Toolbar */
+        .toolbar {
+            background: var(--color-bg-card);
+            border-bottom: 1px solid var(--color-border);
+            padding: 0.5rem 1rem;
+            position: fixed;
+            top: 50px;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            align-items: center;
+        }
+
+        .toolbar-group {
+            display: flex;
+            gap: 0.15rem;
+            padding: 0 0.5rem;
+            border-right: 1px solid var(--color-border);
+        }
+
+        .toolbar-group:last-child {
+            border-right: none;
+        }
+
+        .toolbar-btn {
+            background: transparent;
+            border: none;
+            color: var(--color-text);
+            padding: 0.4rem 0.6rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .toolbar-btn:hover {
+            background: var(--color-bg);
+        }
+
+        .toolbar-btn.active {
+            background: var(--color-accent);
+            color: white;
+        }
+
+        .toolbar-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .toolbar-select {
+            padding: 0.4rem;
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            background: white;
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 280px;
+            gap: 0;
+            padding-top: 100px;
+            min-height: 100vh;
+        }
+
+        .main-container.comments-hidden {
+            grid-template-columns: 1fr;
+        }
+
+        /* Editor Area */
+        .editor-area {
+            background: var(--color-bg);
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .editor-paper {
+            background: white;
+            max-width: 800px;
+            margin: 0 auto;
+            min-height: calc(100vh - 150px);
+            padding: 3rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 4px;
+        }
+
+        .editor-content {
+            outline: none;
+            min-height: 500px;
+            font-size: 16px;
+            line-height: 1.8;
+        }
+
+        .editor-content:focus {
+            outline: none;
+        }
+
+        .editor-content h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: 0.5rem;
+        }
+
+        .editor-content h2 {
+            font-size: 1.5rem;
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .editor-content h3 {
+            font-size: 1.25rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .editor-content p {
+            margin-bottom: 1rem;
+        }
+
+        .editor-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+
+        .editor-content blockquote {
+            border-left: 4px solid var(--color-accent);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--color-text-secondary);
+            font-style: italic;
+        }
+
+        /* Inline Comment Highlight */
+        .comment-highlight {
+            background: var(--color-comment);
+            cursor: pointer;
+            border-bottom: 2px solid var(--color-warning);
+        }
+
+        /* Comments Panel */
+        .comments-panel {
+            background: var(--color-bg-card);
+            border-left: 1px solid var(--color-border);
+            padding: 1rem;
+            overflow-y: auto;
+            height: calc(100vh - 100px);
+            position: fixed;
+            right: 0;
+            top: 100px;
+            width: 280px;
+        }
+
+        .comments-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .comments-header h3 {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .comment-item {
+            background: var(--color-bg);
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            border-left: 3px solid var(--color-warning);
+        }
+
+        .comment-item.resolved {
+            opacity: 0.6;
+            border-left-color: var(--color-success);
+        }
+
+        .comment-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .comment-author {
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .comment-time {
+            font-size: 0.75rem;
+            color: var(--color-text-secondary);
+        }
+
+        .comment-text {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .comment-context {
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            background: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            font-style: italic;
+        }
+
+        .comment-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .comment-actions button {
+            background: none;
+            border: none;
+            font-size: 0.75rem;
+            color: var(--color-accent);
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        .comment-actions button:hover {
+            text-decoration: underline;
+        }
+
+        /* Add Comment Form */
+        .add-comment-form {
+            background: var(--color-bg);
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .add-comment-form textarea {
+            width: 100%;
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            padding: 0.5rem;
+            font-size: 0.9rem;
+            resize: none;
+            margin-bottom: 0.5rem;
+        }
+
+        .add-comment-form textarea:focus {
+            outline: none;
+            border-color: var(--color-accent);
+        }
+
+        /* Search & Replace Panel */
+        .search-panel {
+            position: fixed;
+            top: 100px;
+            right: 300px;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            z-index: 1001;
+            width: 320px;
+            display: none;
+        }
+
+        .search-panel.show {
+            display: block;
+        }
+
+        .search-panel h4 {
+            margin: 0 0 1rem 0;
+            font-size: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .search-panel input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .search-panel input:focus {
+            outline: none;
+            border-color: var(--color-accent);
+        }
+
+        .search-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .search-actions button {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .search-actions button:hover {
+            background: var(--color-accent);
+            color: white;
+            border-color: var(--color-accent);
+        }
+
+        .search-results-info {
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        /* Image Insert Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            width: 400px;
+            max-width: 90vw;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--color-text-secondary);
+        }
+
+        .modal-body {
+            margin-bottom: 1rem;
+        }
+
+        .modal-body input,
+        .modal-body textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        .modal-body input:focus,
+        .modal-body textarea:focus {
+            outline: none;
+            border-color: var(--color-accent);
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .btn-primary {
+            background: var(--color-accent);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .btn-primary:hover {
+            background: #7A6548;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--color-text);
+            border: 1px solid var(--color-border);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            background: var(--color-bg);
+        }
+
+        /* Export Options */
+        .export-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .export-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: none;
+            min-width: 150px;
+            z-index: 100;
+        }
+
+        .export-menu.show {
+            display: block;
+        }
+
+        .export-menu button {
+            display: block;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: none;
+            background: none;
+            text-align: left;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .export-menu button:hover {
+            background: var(--color-bg);
+        }
+
+        .export-menu button i {
+            width: 20px;
+            margin-right: 0.5rem;
+        }
+
+        /* Word Count Footer */
+        .editor-footer {
+            background: var(--color-bg-card);
+            border-top: 1px solid var(--color-border);
+            padding: 0.5rem 1rem;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 280px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+        }
+
+        .main-container.comments-hidden .editor-footer {
+            right: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+
+            .comments-panel {
+                display: none;
+            }
+
+            .editor-footer {
+                right: 0;
+            }
+
+            .editor-paper {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Hidden file input */
+        #imageInput {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <a class="navbar-brand" href="dashboard.html" title="Back to Dashboard">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    <i class="fas fa-th-large"></i>
+                </a>
+                <input type="text" class="doc-title-input" id="docTitle" value="無題のドキュメント" placeholder="Document title...">
+            </div>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <span class="save-status saved" id="saveStatus">
+                    <i class="fas fa-check-circle"></i> Saved
+                </span>
+                <div class="export-dropdown">
+                    <button class="toolbar-btn" onclick="toggleExportMenu()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                    <div class="export-menu" id="exportMenu">
+                        <button onclick="exportDocument('txt')"><i class="fas fa-file-alt"></i> Plain Text (.txt)</button>
+                        <button onclick="exportDocument('html')"><i class="fas fa-file-code"></i> HTML (.html)</button>
+                        <button onclick="exportDocument('word')"><i class="fas fa-file-word"></i> Word (.doc)</button>
+                    </div>
+                </div>
+                <button class="toolbar-btn" onclick="publishToPublisher()" style="background: var(--color-accent); color: white;">
+                    <i class="fas fa-cloud-upload-alt"></i> Publish
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <div class="toolbar-group">
+            <button class="toolbar-btn" onclick="execCmd('undo')" title="Undo (Ctrl+Z)">
+                <i class="fas fa-undo"></i>
+            </button>
+            <button class="toolbar-btn" onclick="execCmd('redo')" title="Redo (Ctrl+Y)">
+                <i class="fas fa-redo"></i>
+            </button>
+        </div>
+
+        <div class="toolbar-group">
+            <select class="toolbar-select" onchange="execCmd('formatBlock', this.value)" title="Heading">
+                <option value="p">Normal</option>
+                <option value="h1">Heading 1</option>
+                <option value="h2">Heading 2</option>
+                <option value="h3">Heading 3</option>
+                <option value="blockquote">Quote</option>
+            </select>
+            <select class="toolbar-select" onchange="changeFontSize(this.value)" title="Font Size">
+                <option value="14px">14px</option>
+                <option value="16px" selected>16px</option>
+                <option value="18px">18px</option>
+                <option value="20px">20px</option>
+                <option value="24px">24px</option>
+            </select>
+        </div>
+
+        <div class="toolbar-group">
+            <button class="toolbar-btn" onclick="execCmd('bold')" title="Bold (Ctrl+B)">
+                <i class="fas fa-bold"></i>
+            </button>
+            <button class="toolbar-btn" onclick="execCmd('italic')" title="Italic (Ctrl+I)">
+                <i class="fas fa-italic"></i>
+            </button>
+            <button class="toolbar-btn" onclick="execCmd('underline')" title="Underline (Ctrl+U)">
+                <i class="fas fa-underline"></i>
+            </button>
+            <button class="toolbar-btn" onclick="execCmd('strikeThrough')" title="Strikethrough">
+                <i class="fas fa-strikethrough"></i>
+            </button>
+        </div>
+
+        <div class="toolbar-group">
+            <button class="toolbar-btn" onclick="execCmd('justifyLeft')" title="Align Left">
+                <i class="fas fa-align-left"></i>
+            </button>
+            <button class="toolbar-btn" onclick="execCmd('justifyCenter')" title="Align Center">
+                <i class="fas fa-align-center"></i>
+            </button>
+            <button class="toolbar-btn" onclick="execCmd('justifyRight')" title="Align Right">
+                <i class="fas fa-align-right"></i>
+            </button>
+            <button class="toolbar-btn" onclick="execCmd('justifyFull')" title="Justify">
+                <i class="fas fa-align-justify"></i>
+            </button>
+        </div>
+
+        <div class="toolbar-group">
+            <button class="toolbar-btn" onclick="execCmd('insertUnorderedList')" title="Bullet List">
+                <i class="fas fa-list-ul"></i>
+            </button>
+            <button class="toolbar-btn" onclick="execCmd('insertOrderedList')" title="Numbered List">
+                <i class="fas fa-list-ol"></i>
+            </button>
+            <button class="toolbar-btn" onclick="execCmd('indent')" title="Indent">
+                <i class="fas fa-indent"></i>
+            </button>
+            <button class="toolbar-btn" onclick="execCmd('outdent')" title="Outdent">
+                <i class="fas fa-outdent"></i>
+            </button>
+        </div>
+
+        <div class="toolbar-group">
+            <button class="toolbar-btn" onclick="showImageModal()" title="Insert Image">
+                <i class="fas fa-image"></i>
+            </button>
+            <button class="toolbar-btn" onclick="insertLink()" title="Insert Link">
+                <i class="fas fa-link"></i>
+            </button>
+            <button class="toolbar-btn" onclick="execCmd('insertHorizontalRule')" title="Horizontal Line">
+                <i class="fas fa-minus"></i>
+            </button>
+        </div>
+
+        <div class="toolbar-group">
+            <button class="toolbar-btn" onclick="toggleSearchPanel()" title="Find & Replace (Ctrl+F)">
+                <i class="fas fa-search"></i>
+            </button>
+            <button class="toolbar-btn" onclick="addComment()" title="Add Comment">
+                <i class="fas fa-comment"></i>
+            </button>
+            <button class="toolbar-btn" onclick="toggleComments()" title="Toggle Comments Panel">
+                <i class="fas fa-comments"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Search & Replace Panel -->
+    <div class="search-panel" id="searchPanel">
+        <h4>
+            Find & Replace
+            <button onclick="toggleSearchPanel()" style="background:none;border:none;cursor:pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        </h4>
+        <input type="text" id="searchInput" placeholder="Find..." oninput="performSearch()">
+        <input type="text" id="replaceInput" placeholder="Replace with...">
+        <div class="search-actions">
+            <button onclick="findNext()">Next</button>
+            <button onclick="findPrev()">Prev</button>
+            <button onclick="replaceOne()">Replace</button>
+            <button onclick="replaceAll()">Replace All</button>
+        </div>
+        <div class="search-results-info" id="searchResultsInfo"></div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-container" id="mainContainer">
+        <!-- Editor Area -->
+        <div class="editor-area">
+            <div class="editor-paper">
+                <div class="editor-content" id="editorContent" contenteditable="true">
+                    <h1>タイトルを入力</h1>
+                    <p>ここから本文を書き始めてください...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comments Panel -->
+        <div class="comments-panel" id="commentsPanel">
+            <div class="comments-header">
+                <h3><i class="fas fa-comments me-2"></i>Comments</h3>
+                <span id="commentCount">0</span>
+            </div>
+            <div id="commentsList">
+                <p style="color: var(--color-text-secondary); font-size: 0.9rem; text-align: center;">
+                    No comments yet.<br>Select text and click <i class="fas fa-comment"></i> to add.
+                </p>
+            </div>
+            <div class="add-comment-form" id="addCommentForm" style="display: none;">
+                <textarea id="newCommentText" rows="3" placeholder="Add your comment..."></textarea>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn-primary" onclick="submitComment()" style="flex:1; padding: 0.5rem;">Add</button>
+                    <button class="btn-secondary" onclick="cancelComment()" style="padding: 0.5rem;">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="editor-footer">
+        <div>
+            <span id="wordCount">0</span> words | 
+            <span id="charCount">0</span> characters | 
+            <span id="pageCount">0</span> pages
+        </div>
+        <div>
+            Last edited: <span id="lastEdited">-</span>
+        </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div class="modal-overlay" id="imageModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-image me-2"></i>Insert Image</h3>
+                <button class="modal-close" onclick="closeImageModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="file" id="imageInput" accept="image/*" onchange="handleImageSelect(event)">
+                <button class="btn-secondary" onclick="document.getElementById('imageInput').click()" style="width: 100%; margin-bottom: 0.75rem;">
+                    <i class="fas fa-upload me-2"></i>Upload from Computer
+                </button>
+                <p style="text-align: center; color: var(--color-text-secondary); margin: 0.5rem 0;">or</p>
+                <input type="text" id="imageUrl" placeholder="Paste image URL...">
+                <img id="imagePreview" class="image-preview" style="display: none;">
+                <input type="text" id="imageAlt" placeholder="Image description (alt text)">
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeImageModal()">Cancel</button>
+                <button class="btn-primary" onclick="insertImage()">Insert</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let comments = [];
+        let selectedRange = null;
+        let autoSaveTimer = null;
+        let searchMatches = [];
+        let currentMatchIndex = -1;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            const editor = document.getElementById('editorContent');
+            
+            // Load saved content
+            loadContent();
+
+            // Event listeners
+            editor.addEventListener('input', function() {
+                updateCounts();
+                autoSave();
+            });
+
+            editor.addEventListener('keydown', function(e) {
+                // Keyboard shortcuts
+                if (e.ctrlKey) {
+                    switch(e.key.toLowerCase()) {
+                        case 's':
+                            e.preventDefault();
+                            saveContent();
+                            break;
+                        case 'f':
+                            e.preventDefault();
+                            toggleSearchPanel();
+                            break;
+                    }
+                }
+            });
+
+            // Initial count
+            updateCounts();
+        });
+
+        // Execute Command
+        function execCmd(command, value = null) {
+            document.execCommand(command, false, value);
+            document.getElementById('editorContent').focus();
+        }
+
+        // Change Font Size
+        function changeFontSize(size) {
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                const span = document.createElement('span');
+                span.style.fontSize = size;
+                range.surroundContents(span);
+            }
+        }
+
+        // Update Word/Character/Page Counts
+        function updateCounts() {
+            const editor = document.getElementById('editorContent');
+            const text = editor.innerText || '';
+            
+            // Character count
+            const charCount = text.length;
+            document.getElementById('charCount').textContent = charCount.toLocaleString();
+            
+            // Word count (handle both English and Japanese)
+            const englishWords = text.match(/[a-zA-Z]+/g) || [];
+            const japaneseChars = text.match(/[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]/g) || [];
+            const wordCount = englishWords.length + Math.ceil(japaneseChars.length / 2);
+            document.getElementById('wordCount').textContent = wordCount.toLocaleString();
+            
+            // Page count (roughly 400 words per page)
+            const pageCount = Math.max(1, Math.ceil(wordCount / 400));
+            document.getElementById('pageCount').textContent = pageCount;
+        }
+
+        // Auto Save
+        function autoSave() {
+            const status = document.getElementById('saveStatus');
+            status.innerHTML = '<i class="fas fa-sync fa-spin"></i> Saving...';
+            status.className = 'save-status saving';
+
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(() => {
+                saveContent();
+            }, 2000);
+        }
+
+        // Save Content
+        function saveContent() {
+            const title = document.getElementById('docTitle').value;
+            const content = document.getElementById('editorContent').innerHTML;
+            
+            localStorage.setItem('editor_title', title);
+            localStorage.setItem('editor_content', content);
+            localStorage.setItem('editor_comments', JSON.stringify(comments));
+            localStorage.setItem('editor_lastSaved', new Date().toISOString());
+
+            const status = document.getElementById('saveStatus');
+            status.innerHTML = '<i class="fas fa-check-circle"></i> Saved';
+            status.className = 'save-status saved';
+
+            document.getElementById('lastEdited').textContent = new Date().toLocaleTimeString();
+        }
+
+        // Load Content
+        function loadContent() {
+            const title = localStorage.getItem('editor_title');
+            const content = localStorage.getItem('editor_content');
+            const savedComments = localStorage.getItem('editor_comments');
+            const lastSaved = localStorage.getItem('editor_lastSaved');
+
+            if (title) document.getElementById('docTitle').value = title;
+            if (content) document.getElementById('editorContent').innerHTML = content;
+            if (savedComments) {
+                comments = JSON.parse(savedComments);
+                renderComments();
+            }
+            if (lastSaved) {
+                document.getElementById('lastEdited').textContent = new Date(lastSaved).toLocaleTimeString();
+            }
+        }
+
+        // Search Functions
+        function toggleSearchPanel() {
+            const panel = document.getElementById('searchPanel');
+            panel.classList.toggle('show');
+            if (panel.classList.contains('show')) {
+                document.getElementById('searchInput').focus();
+            }
+        }
+
+        function performSearch() {
+            const query = document.getElementById('searchInput').value;
+            const info = document.getElementById('searchResultsInfo');
+            
+            // Clear previous highlights
+            clearSearchHighlights();
+            searchMatches = [];
+            currentMatchIndex = -1;
+
+            if (!query) {
+                info.textContent = '';
+                return;
+            }
+
+            const editor = document.getElementById('editorContent');
+            const text = editor.innerText;
+            const regex = new RegExp(query, 'gi');
+            let match;
+            let count = 0;
+
+            while ((match = regex.exec(text)) !== null) {
+                count++;
+            }
+
+            info.textContent = count > 0 ? `${count} matches found` : 'No matches found';
+        }
+
+        function clearSearchHighlights() {
+            const editor = document.getElementById('editorContent');
+            const highlights = editor.querySelectorAll('.search-match');
+            highlights.forEach(h => {
+                const text = document.createTextNode(h.textContent);
+                h.parentNode.replaceChild(text, h);
+            });
+        }
+
+        function findNext() {
+            const query = document.getElementById('searchInput').value;
+            if (!query) return;
+
+            const editor = document.getElementById('editorContent');
+            if (window.find) {
+                window.find(query, false, false, true, false, true, false);
+            }
+        }
+
+        function findPrev() {
+            const query = document.getElementById('searchInput').value;
+            if (!query) return;
+
+            if (window.find) {
+                window.find(query, false, true, true, false, true, false);
+            }
+        }
+
+        function replaceOne() {
+            const query = document.getElementById('searchInput').value;
+            const replacement = document.getElementById('replaceInput').value;
+            
+            const selection = window.getSelection();
+            if (selection.toString().toLowerCase() === query.toLowerCase()) {
+                document.execCommand('insertText', false, replacement);
+                findNext();
+            } else {
+                findNext();
+            }
+        }
+
+        function replaceAll() {
+            const query = document.getElementById('searchInput').value;
+            const replacement = document.getElementById('replaceInput').value;
+            
+            if (!query) return;
+
+            const editor = document.getElementById('editorContent');
+            const regex = new RegExp(query, 'gi');
+            editor.innerHTML = editor.innerHTML.replace(regex, replacement);
+            
+            performSearch();
+            saveContent();
+        }
+
+        // Comment Functions
+        function addComment() {
+            const selection = window.getSelection();
+            const selectedText = selection.toString().trim();
+
+            if (!selectedText) {
+                alert('Please select text to comment on');
+                return;
+            }
+
+            selectedRange = selection.getRangeAt(0).cloneRange();
+            document.getElementById('addCommentForm').style.display = 'block';
+            document.getElementById('newCommentText').focus();
+        }
+
+        function submitComment() {
+            const text = document.getElementById('newCommentText').value.trim();
+            if (!text || !selectedRange) return;
+
+            // Highlight the selected text
+            const span = document.createElement('span');
+            span.className = 'comment-highlight';
+            span.dataset.commentId = Date.now();
+            
+            try {
+                selectedRange.surroundContents(span);
+            } catch (e) {
+                alert('Cannot comment across elements. Please select within a single paragraph.');
+                return;
+            }
+
+            // Add comment to list
+            const comment = {
+                id: span.dataset.commentId,
+                text: text,
+                context: selectedRange.toString().substring(0, 50) + '...',
+                author: 'Editor',
+                createdAt: new Date().toISOString(),
+                resolved: false
+            };
+
+            comments.push(comment);
+            renderComments();
+            cancelComment();
+            saveContent();
+        }
+
+        function cancelComment() {
+            document.getElementById('addCommentForm').style.display = 'none';
+            document.getElementById('newCommentText').value = '';
+            selectedRange = null;
+        }
+
+        function renderComments() {
+            const list = document.getElementById('commentsList');
+            document.getElementById('commentCount').textContent = comments.length;
+
+            if (comments.length === 0) {
+                list.innerHTML = `
+                    <p style="color: var(--color-text-secondary); font-size: 0.9rem; text-align: center;">
+                        No comments yet.<br>Select text and click <i class="fas fa-comment"></i> to add.
+                    </p>
+                `;
+                return;
+            }
+
+            list.innerHTML = comments.map(c => `
+                <div class="comment-item ${c.resolved ? 'resolved' : ''}" data-id="${c.id}">
+                    <div class="comment-meta">
+                        <span class="comment-author">${c.author}</span>
+                        <span class="comment-time">${new Date(c.createdAt).toLocaleString()}</span>
+                    </div>
+                    <div class="comment-context">"${c.context}"</div>
+                    <div class="comment-text">${c.text}</div>
+                    <div class="comment-actions">
+                        <button onclick="resolveComment('${c.id}')">${c.resolved ? 'Unresolve' : 'Resolve'}</button>
+                        <button onclick="deleteComment('${c.id}')">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function resolveComment(id) {
+            const comment = comments.find(c => c.id == id);
+            if (comment) {
+                comment.resolved = !comment.resolved;
+                renderComments();
+                saveContent();
+            }
+        }
+
+        function deleteComment(id) {
+            if (!confirm('Delete this comment?')) return;
+            
+            // Remove highlight
+            const highlight = document.querySelector(`.comment-highlight[data-comment-id="${id}"]`);
+            if (highlight) {
+                const text = document.createTextNode(highlight.textContent);
+                highlight.parentNode.replaceChild(text, highlight);
+            }
+
+            // Remove from list
+            comments = comments.filter(c => c.id != id);
+            renderComments();
+            saveContent();
+        }
+
+        function toggleComments() {
+            const container = document.getElementById('mainContainer');
+            const panel = document.getElementById('commentsPanel');
+            container.classList.toggle('comments-hidden');
+            panel.style.display = container.classList.contains('comments-hidden') ? 'none' : 'block';
+        }
+
+        // Image Functions
+        function showImageModal() {
+            document.getElementById('imageModal').classList.add('show');
+        }
+
+        function closeImageModal() {
+            document.getElementById('imageModal').classList.remove('show');
+            document.getElementById('imageUrl').value = '';
+            document.getElementById('imageAlt').value = '';
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('imageInput').value = '';
+        }
+
+        function handleImageSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('imageUrl').value = e.target.result;
+                document.getElementById('imagePreview').src = e.target.result;
+                document.getElementById('imagePreview').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // URL input preview
+        document.getElementById('imageUrl')?.addEventListener('input', function() {
+            const url = this.value;
+            if (url && (url.startsWith('http') || url.startsWith('data:'))) {
+                document.getElementById('imagePreview').src = url;
+                document.getElementById('imagePreview').style.display = 'block';
+            }
+        });
+
+        function insertImage() {
+            const url = document.getElementById('imageUrl').value;
+            const alt = document.getElementById('imageAlt').value || 'Image';
+
+            if (!url) {
+                alert('Please select an image or enter a URL');
+                return;
+            }
+
+            const img = `<img src="${url}" alt="${alt}" style="max-width:100%;">`;
+            document.getElementById('editorContent').focus();
+            document.execCommand('insertHTML', false, img);
+            
+            closeImageModal();
+            saveContent();
+        }
+
+        function insertLink() {
+            const url = prompt('Enter URL:');
+            if (url) {
+                execCmd('createLink', url);
+            }
+        }
+
+        // Export Functions
+        function toggleExportMenu() {
+            document.getElementById('exportMenu').classList.toggle('show');
+        }
+
+        // Close export menu when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.export-dropdown')) {
+                document.getElementById('exportMenu').classList.remove('show');
+            }
+        });
+
+        function exportDocument(format) {
+            const title = document.getElementById('docTitle').value || 'document';
+            const content = document.getElementById('editorContent');
+            let data, filename, mimeType;
+
+            switch(format) {
+                case 'txt':
+                    data = content.innerText;
+                    filename = `${title}.txt`;
+                    mimeType = 'text/plain';
+                    break;
+                case 'html':
+                    data = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>${title}</title>
+    <style>
+        body { font-family: 'Noto Sans JP', sans-serif; max-width: 800px; margin: 2rem auto; padding: 1rem; line-height: 1.8; }
+        h1 { border-bottom: 2px solid #8B7355; padding-bottom: 0.5rem; }
+        img { max-width: 100%; }
+        blockquote { border-left: 4px solid #8B7355; padding-left: 1rem; color: #666; }
+    </style>
+</head>
+<body>
+${content.innerHTML}
+</body>
+</html>`;
+                    filename = `${title}.html`;
+                    mimeType = 'text/html';
+                    break;
+                case 'word':
+                    data = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'>
+<head><meta charset="UTF-8"><title>${title}</title></head>
+<body style="font-family: Arial, sans-serif;">
+${content.innerHTML}
+</body></html>`;
+                    filename = `${title}.doc`;
+                    mimeType = 'application/msword';
+                    break;
+            }
+
+            const blob = new Blob([data], { type: mimeType });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+
+            toggleExportMenu();
+        }
+
+        // Publish to Publisher
+        function publishToPublisher() {
+            const title = document.getElementById('docTitle').value;
+            const content = document.getElementById('editorContent').innerHTML;
+            
+            if (!title || title === '無題のドキュメント') {
+                alert('Please enter a title for your work');
+                document.getElementById('docTitle').focus();
+                return;
+            }
+
+            if (content.length < 100) {
+                alert('Content is too short. Please write more before publishing.');
+                return;
+            }
+
+            // Save to localStorage for transfer to upload page
+            const workData = {
+                title: title,
+                content: content,
+                synopsis: '',
+                wordCount: document.getElementById('wordCount').textContent,
+                charCount: document.getElementById('charCount').textContent,
+                pageCount: document.getElementById('pageCount').textContent,
+                createdAt: new Date().toISOString()
+            };
+
+            localStorage.setItem('editor_work_transfer', JSON.stringify(workData));
+
+            // Redirect to upload page
+            if (confirm('Ready to publish "' + title + '"?\n\nYou will be redirected to the upload page to add details like synopsis, genre, and pricing.')) {
+                window.location.href = 'upload.html?from=editor';
+            }
+        }
+    </script>
+</body>
+</html>
