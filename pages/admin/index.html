@@ -26,6 +26,7 @@
         .stat-card .icon.works { background: #f3e5f5; color: #7b1fa2; }
         .stat-card .icon.revenue { background: #e8f5e9; color: #388e3c; }
         .stat-card .icon.tasks { background: #fff3e0; color: #f57c00; }
+        .stat-card .icon.dmca { background: #ffebee; color: #c62828; }
         .stat-card .info h3 { font-size: 1.8rem; font-weight: bold; margin: 0; color: #2c3e50; }
         .stat-card .info p { margin: 5px 0 0; color: #7f8c8d; font-size: 0.9rem; }
         .content-panel { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; }
@@ -44,9 +45,11 @@
         .user-name { font-weight: 600; color: #2c3e50; }
         .user-email { font-size: 0.85rem; color: #7f8c8d; }
         .status-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: 500; }
-        .status-badge.active, .status-badge.published, .status-badge.completed { background: #e8f5e9; color: #388e3c; }
-        .status-badge.suspended, .status-badge.draft, .status-badge.pending { background: #fff3e0; color: #f57c00; }
-        .status-badge.banned, .status-badge.archived, .status-badge.cancelled { background: #ffebee; color: #c62828; }
+        .status-badge.active, .status-badge.published, .status-badge.completed, .status-badge.action_taken { background: #e8f5e9; color: #388e3c; }
+        .status-badge.suspended, .status-badge.draft, .status-badge.pending, .status-badge.reviewing { background: #fff3e0; color: #f57c00; }
+        .status-badge.banned, .status-badge.archived, .status-badge.cancelled, .status-badge.rejected { background: #ffebee; color: #c62828; }
+        .status-badge.new { background: #e3f2fd; color: #1976d2; }
+        .status-badge.counter_notice { background: #f3e5f5; color: #7b1fa2; }
         .loading-spinner { display: flex; justify-content: center; align-items: center; padding: 40px; }
         .filter-stats { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
         .filter-stats .stat-btn { padding: 8px 16px; border-radius: 20px; border: 1px solid #e0e0e0; background: #fff; cursor: pointer; transition: all 0.2s; }
@@ -77,6 +80,23 @@
         .revenue-table { width: 100%; border-collapse: collapse; }
         .revenue-table th, .revenue-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #f0f0f0; }
         .revenue-table th { background: #f8f9fa; font-weight: 600; }
+        .dmca-card { border: 1px solid #e0e0e0; border-radius: 12px; padding: 20px; margin-bottom: 15px; transition: all 0.2s; }
+        .dmca-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .dmca-card.new { border-left: 4px solid #1976d2; }
+        .dmca-card.reviewing { border-left: 4px solid #f57c00; }
+        .dmca-card.action_taken { border-left: 4px solid #388e3c; }
+        .dmca-card.rejected { border-left: 4px solid #c62828; }
+        .dmca-card.counter_notice { border-left: 4px solid #7b1fa2; }
+        .priority-badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 8px; }
+        .priority-badge.urgent { background: #ffebee; color: #c62828; }
+        .priority-badge.high { background: #fff3e0; color: #f57c00; }
+        .priority-badge.normal { background: #e3f2fd; color: #1976d2; }
+        .priority-badge.low { background: #f5f5f5; color: #757575; }
+        .action-timeline { border-left: 2px solid #e0e0e0; padding-left: 20px; margin-left: 10px; }
+        .action-item { position: relative; padding-bottom: 15px; }
+        .action-item::before { content: ''; position: absolute; left: -26px; top: 5px; width: 12px; height: 12px; border-radius: 50%; background: #3498db; }
+        .action-item .action-date { font-size: 0.75rem; color: #7f8c8d; }
+        .action-item .action-text { font-size: 0.9rem; color: #2c3e50; }
         @media (max-width: 768px) {
             .admin-sidebar { transform: translateX(-100%); transition: transform 0.3s; }
             .admin-sidebar.open { transform: translateX(0); }
@@ -96,6 +116,7 @@
                 <a class="nav-item" data-section="verification"><i class="bi bi-person-check"></i><span>本人確認</span><span class="badge-pending" id="verification-badge">0</span></a>
                 <div class="nav-section">コンテンツ</div>
                 <a class="nav-item" data-section="moderation"><i class="bi bi-shield-check"></i><span>コンテンツ審査</span><span class="badge-pending" id="moderation-badge">0</span></a>
+                <a class="nav-item" data-section="dmca"><i class="bi bi-exclamation-triangle"></i><span>DMCA管理</span><span class="badge-pending" id="dmca-badge">0</span></a>
                 <div class="nav-section">財務</div>
                 <a class="nav-item" data-section="finance"><i class="bi bi-graph-up"></i><span>収益レポート</span></a>
                 <a class="nav-item" data-section="payouts"><i class="bi bi-credit-card"></i><span>支払い管理</span></a>
@@ -140,9 +161,9 @@
                                 <div class="panel-body">
                                     <div class="quick-actions">
                                         <a class="quick-action-btn" data-section="moderation"><i class="bi bi-shield-check"></i><span>審査待ち</span></a>
+                                        <a class="quick-action-btn" data-section="dmca"><i class="bi bi-exclamation-triangle"></i><span>DMCA</span></a>
                                         <a class="quick-action-btn" data-section="finance"><i class="bi bi-graph-up"></i><span>収益</span></a>
                                         <a class="quick-action-btn" data-section="payouts"><i class="bi bi-credit-card"></i><span>支払い</span></a>
-                                        <a class="quick-action-btn" data-section="users"><i class="bi bi-people"></i><span>ユーザー</span></a>
                                     </div>
                                 </div>
                             </div>
@@ -195,6 +216,59 @@
                             <div id="moderation-loading" class="loading-spinner"><div class="spinner-border text-primary"></div></div>
                             <div id="moderation-list"></div>
                             <div id="moderation-empty" class="text-center text-muted py-5" style="display: none;"><i class="bi bi-journal-x fs-1 d-block mb-3"></i><p>作品がありません</p></div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- DMCA -->
+                <section id="section-dmca" class="tool-section">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="icon dmca"><i class="bi bi-exclamation-triangle"></i></div>
+                            <div class="info"><h3 id="dmca-new-count">0</h3><p>新規報告</p></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="icon" style="background: #fff3e0; color: #f57c00;"><i class="bi bi-hourglass-split"></i></div>
+                            <div class="info"><h3 id="dmca-reviewing-count">0</h3><p>審査中</p></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="icon" style="background: #e8f5e9; color: #388e3c;"><i class="bi bi-check-circle"></i></div>
+                            <div class="info"><h3 id="dmca-resolved-count">0</h3><p>対応済み</p></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="icon" style="background: #f3e5f5; color: #7b1fa2;"><i class="bi bi-arrow-repeat"></i></div>
+                            <div class="info"><h3 id="dmca-counter-count">0</h3><p>異議申立</p></div>
+                        </div>
+                    </div>
+                    
+                    <div class="content-panel">
+                        <div class="panel-header">
+                            <h2><i class="bi bi-exclamation-triangle me-2"></i>著作権侵害報告</h2>
+                            <div class="d-flex gap-2">
+                                <input type="text" class="form-control form-control-sm" id="dmca-search" placeholder="検索..." style="width: 200px;">
+                                <select class="form-select form-select-sm" id="dmca-priority-filter" style="width: 130px;">
+                                    <option value="">全ての優先度</option>
+                                    <option value="urgent">緊急</option>
+                                    <option value="high">高</option>
+                                    <option value="normal">通常</option>
+                                    <option value="low">低</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <div class="filter-stats" id="dmca-stats">
+                                <button class="stat-btn active" data-status=""><i class="bi bi-list"></i> 全て<span class="count" id="d-stat-total">0</span></button>
+                                <button class="stat-btn" data-status="new"><i class="bi bi-envelope"></i> 新規<span class="count" id="d-stat-new">0</span></button>
+                                <button class="stat-btn" data-status="reviewing"><i class="bi bi-search"></i> 審査中<span class="count" id="d-stat-reviewing">0</span></button>
+                                <button class="stat-btn" data-status="action_taken"><i class="bi bi-check-lg"></i> 対応済<span class="count" id="d-stat-action">0</span></button>
+                                <button class="stat-btn" data-status="rejected"><i class="bi bi-x-lg"></i> 却下<span class="count" id="d-stat-rejected">0</span></button>
+                            </div>
+                            <div id="dmca-loading" class="loading-spinner"><div class="spinner-border text-primary"></div></div>
+                            <div id="dmca-list"></div>
+                            <div id="dmca-empty" class="text-center text-muted py-5" style="display: none;">
+                                <i class="bi bi-shield-check fs-1 d-block mb-3"></i>
+                                <p>著作権侵害報告はありません</p>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -314,6 +388,19 @@
     <!-- Work Detail Modal -->
     <div class="modal fade" id="workDetailModal" tabindex="-1"><div class="modal-dialog modal-xl"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">作品詳細</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body" id="work-detail-content"></div></div></div></div>
     
+    <!-- DMCA Detail Modal -->
+    <div class="modal fade" id="dmcaDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-exclamation-triangle me-2"></i>DMCA報告詳細</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="dmca-detail-content"></div>
+            </div>
+        </div>
+    </div>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const API_BASE = 'http://localhost:3000/api';
@@ -327,6 +414,7 @@
             'users': 'ユーザー管理', 
             'verification': '本人確認審査', 
             'moderation': 'コンテンツ審査',
+            'dmca': 'DMCA管理',
             'finance': '収益レポート',
             'payouts': '支払い管理'
         };
@@ -337,6 +425,7 @@
             sectionTitle.textContent = sectionTitles[sectionName] || sectionName;
             if (sectionName === 'users') loadUsers();
             if (sectionName === 'moderation') loadModerationWorks();
+            if (sectionName === 'dmca') loadDmcaReports();
             if (sectionName === 'finance') loadFinanceData();
             if (sectionName === 'payouts') loadPayouts();
         }
@@ -378,6 +467,26 @@
             } catch (error) { console.error('Failed to load moderation stats:', error); }
         }
         
+        async function loadDmcaStats() {
+            try {
+                const response = await fetch(`${API_BASE}/dmca/admin/stats`);
+                if (response.ok) {
+                    const data = await response.json();
+                    const stats = data.stats;
+                    document.getElementById('dmca-new-count').textContent = stats.new || 0;
+                    document.getElementById('dmca-reviewing-count').textContent = stats.reviewing || 0;
+                    document.getElementById('dmca-resolved-count').textContent = (stats.action_taken + stats.rejected) || 0;
+                    document.getElementById('dmca-counter-count').textContent = stats.counter_notice || 0;
+                    document.getElementById('d-stat-total').textContent = stats.total || 0;
+                    document.getElementById('d-stat-new').textContent = stats.new || 0;
+                    document.getElementById('d-stat-reviewing').textContent = stats.reviewing || 0;
+                    document.getElementById('d-stat-action').textContent = stats.action_taken || 0;
+                    document.getElementById('d-stat-rejected').textContent = stats.rejected || 0;
+                    document.getElementById('dmca-badge').textContent = stats.new || 0;
+                }
+            } catch (error) { console.error('Failed to load DMCA stats:', error); }
+        }
+        
         async function loadUsers() {
             const loading = document.getElementById('users-loading');
             const list = document.getElementById('users-list');
@@ -401,6 +510,7 @@
         }
         
         let currentModStatus = '';
+        let currentDmcaStatus = '';
         
         async function loadModerationWorks() {
             await loadModerationStats();
@@ -461,6 +571,261 @@
                 loading.style.display = 'none'; 
                 list.innerHTML = '<div class="text-center text-danger py-4">データを読み込めませんでした</div>'; 
             }
+        }
+        
+        // ===== DMCA Functions =====
+        async function loadDmcaReports() {
+            await loadDmcaStats();
+            const loading = document.getElementById('dmca-loading');
+            const list = document.getElementById('dmca-list');
+            const emptyState = document.getElementById('dmca-empty');
+            loading.style.display = 'flex';
+            list.innerHTML = '';
+            emptyState.style.display = 'none';
+            
+            try {
+                const params = new URLSearchParams({
+                    status: currentDmcaStatus,
+                    priority: document.getElementById('dmca-priority-filter').value,
+                    search: document.getElementById('dmca-search').value
+                });
+                const response = await fetch(`${API_BASE}/dmca/admin/reports?${params}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    loading.style.display = 'none';
+                    if (data.reports && data.reports.length > 0) {
+                        list.innerHTML = data.reports.map(report => `
+                            <div class="dmca-card ${report.status}">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <div class="d-flex align-items-center gap-2 mb-2">
+                                            <span class="work-title">${escapeHtml(report.original_work_title)}</span>
+                                            <span class="priority-badge ${report.priority}">${getPriorityName(report.priority)}</span>
+                                        </div>
+                                        <div class="work-meta">
+                                            <span><i class="bi bi-person me-1"></i>${escapeHtml(report.reporter_name)}</span>
+                                            <span class="ms-2"><i class="bi bi-envelope me-1"></i>${escapeHtml(report.reporter_email)}</span>
+                                            ${report.work_title ? `<span class="ms-2"><i class="bi bi-file-text me-1"></i>対象: ${escapeHtml(report.work_title)}</span>` : ''}
+                                        </div>
+                                        <div class="mt-2">
+                                            <span class="status-badge ${report.status}">${getDmcaStatusName(report.status)}</span>
+                                            <span class="text-muted ms-2 small">${new Date(report.created_at).toLocaleDateString('ja-JP')}</span>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        ${report.status === 'new' ? `
+                                            <button class="btn btn-primary btn-sm" onclick="updateDmcaStatus('${report.report_id}', 'reviewing')"><i class="bi bi-search"></i> 審査開始</button>
+                                        ` : ''}
+                                        ${report.status === 'reviewing' ? `
+                                            <button class="btn btn-danger btn-sm" onclick="executeTakedown('${report.report_id}')"><i class="bi bi-trash"></i> 削除実行</button>
+                                            <button class="btn btn-outline-secondary btn-sm" onclick="rejectDmca('${report.report_id}')"><i class="bi bi-x"></i> 却下</button>
+                                        ` : ''}
+                                        <button class="btn btn-outline-primary btn-sm" onclick="viewDmcaDetail('${report.report_id}')"><i class="bi bi-eye"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('');
+                    } else {
+                        emptyState.style.display = 'block';
+                    }
+                }
+            } catch (error) {
+                loading.style.display = 'none';
+                list.innerHTML = '<div class="text-center text-danger py-4">データを読み込めませんでした</div>';
+            }
+        }
+        
+        async function viewDmcaDetail(reportId) {
+            const modal = new bootstrap.Modal(document.getElementById('dmcaDetailModal'));
+            const content = document.getElementById('dmca-detail-content');
+            content.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div></div>';
+            modal.show();
+            
+            try {
+                const response = await fetch(`${API_BASE}/dmca/admin/reports/${reportId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    const report = data.report;
+                    const actions = data.actions || [];
+                    const counterNotices = data.counterNotices || [];
+                    
+                    content.innerHTML = `
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h4 class="mb-3">報告内容</h4>
+                                <table class="table table-bordered">
+                                    <tr><th style="width: 150px;">報告者</th><td>${escapeHtml(report.reporter_name)} (${escapeHtml(report.reporter_email)})</td></tr>
+                                    ${report.reporter_company ? `<tr><th>会社/組織</th><td>${escapeHtml(report.reporter_company)}</td></tr>` : ''}
+                                    <tr><th>オリジナル作品</th><td>${escapeHtml(report.original_work_title)}</td></tr>
+                                    ${report.original_work_url ? `<tr><th>オリジナルURL</th><td><a href="${escapeHtml(report.original_work_url)}" target="_blank">${escapeHtml(report.original_work_url)}</a></td></tr>` : ''}
+                                    ${report.work_title ? `<tr><th>対象作品</th><td>${escapeHtml(report.work_title)}</td></tr>` : ''}
+                                    <tr><th>説明</th><td>${escapeHtml(report.description)}</td></tr>
+                                    <tr><th>ステータス</th><td><span class="status-badge ${report.status}">${getDmcaStatusName(report.status)}</span></td></tr>
+                                    <tr><th>優先度</th><td><span class="priority-badge ${report.priority}">${getPriorityName(report.priority)}</span></td></tr>
+                                    <tr><th>報告日</th><td>${new Date(report.created_at).toLocaleString('ja-JP')}</td></tr>
+                                </table>
+                                
+                                <h5 class="mt-4">法的宣言</h5>
+                                <ul>
+                                    <li>誠実な信念: ${report.good_faith_belief ? '✅ 確認済' : '❌'}</li>
+                                    <li>正確性の声明: ${report.accuracy_statement ? '✅ 確認済' : '❌'}</li>
+                                    <li>権限の声明: ${report.authorization_statement ? '✅ 確認済' : '❌'}</li>
+                                    <li>署名: ${escapeHtml(report.signature)}</li>
+                                </ul>
+                                
+                                ${counterNotices.length > 0 ? `
+                                    <h5 class="mt-4">異議申立</h5>
+                                    ${counterNotices.map(cn => `
+                                        <div class="card mb-2">
+                                            <div class="card-body">
+                                                <p><strong>${escapeHtml(cn.submitter_name)}</strong> (${escapeHtml(cn.submitter_email)})</p>
+                                                <p>${escapeHtml(cn.statement)}</p>
+                                                <small class="text-muted">${new Date(cn.created_at).toLocaleString('ja-JP')}</small>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                ` : ''}
+                            </div>
+                            <div class="col-md-4">
+                                <h5>対応履歴</h5>
+                                ${actions.length > 0 ? `
+                                    <div class="action-timeline">
+                                        ${actions.map(action => `
+                                            <div class="action-item">
+                                                <div class="action-date">${new Date(action.created_at).toLocaleString('ja-JP')}</div>
+                                                <div class="action-text">${escapeHtml(action.action_description)}</div>
+                                                <small class="text-muted">${escapeHtml(action.performed_by_name || 'System')}</small>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                ` : '<p class="text-muted">まだ対応履歴がありません</p>'}
+                                
+                                <hr>
+                                <h5>アクション</h5>
+                                <div class="d-grid gap-2">
+                                    ${report.status === 'new' ? `<button class="btn btn-primary" onclick="updateDmcaStatus('${report.report_id}', 'reviewing')"><i class="bi bi-search me-1"></i>審査開始</button>` : ''}
+                                    ${report.status === 'reviewing' ? `
+                                        <button class="btn btn-danger" onclick="executeTakedown('${report.report_id}')"><i class="bi bi-trash me-1"></i>コンテンツ削除</button>
+                                        <button class="btn btn-outline-danger" onclick="rejectDmca('${report.report_id}')"><i class="bi bi-x me-1"></i>報告を却下</button>
+                                    ` : ''}
+                                    <button class="btn btn-outline-secondary" onclick="addDmcaNote('${report.report_id}')"><i class="bi bi-chat me-1"></i>メモを追加</button>
+                                    <div class="mt-2">
+                                        <label class="form-label small">優先度変更:</label>
+                                        <select class="form-select form-select-sm" onchange="updateDmcaPriority('${report.report_id}', this.value)">
+                                            <option value="low" ${report.priority === 'low' ? 'selected' : ''}>低</option>
+                                            <option value="normal" ${report.priority === 'normal' ? 'selected' : ''}>通常</option>
+                                            <option value="high" ${report.priority === 'high' ? 'selected' : ''}>高</option>
+                                            <option value="urgent" ${report.priority === 'urgent' ? 'selected' : ''}>緊急</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                content.innerHTML = '<div class="text-center text-danger py-4">データを読み込めませんでした</div>';
+            }
+        }
+        
+        async function updateDmcaStatus(reportId, status) {
+            const notes = prompt('メモを入力してください（任意）:');
+            try {
+                const response = await fetch(`${API_BASE}/dmca/admin/reports/${reportId}/status`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status, notes, performedByName: 'Admin' })
+                });
+                if (response.ok) {
+                    alert('ステータスを更新しました');
+                    bootstrap.Modal.getInstance(document.getElementById('dmcaDetailModal'))?.hide();
+                    loadDmcaReports();
+                }
+            } catch (error) { alert('更新に失敗しました'); }
+        }
+        
+        async function executeTakedown(reportId) {
+            if (!confirm('この報告に基づいてコンテンツを削除（停止）しますか？\nこのアクションは対象作品を停止状態にします。')) return;
+            const notes = prompt('削除理由を入力してください:');
+            try {
+                const response = await fetch(`${API_BASE}/dmca/admin/reports/${reportId}/takedown`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ notes, performedByName: 'Admin' })
+                });
+                if (response.ok) {
+                    alert('コンテンツを削除しました');
+                    bootstrap.Modal.getInstance(document.getElementById('dmcaDetailModal'))?.hide();
+                    loadDmcaReports();
+                }
+            } catch (error) { alert('削除に失敗しました'); }
+        }
+        
+        async function rejectDmca(reportId) {
+            const reason = prompt('却下理由を入力してください:');
+            if (!reason) return;
+            try {
+                const response = await fetch(`${API_BASE}/dmca/admin/reports/${reportId}/reject`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reason, performedByName: 'Admin' })
+                });
+                if (response.ok) {
+                    alert('報告を却下しました');
+                    bootstrap.Modal.getInstance(document.getElementById('dmcaDetailModal'))?.hide();
+                    loadDmcaReports();
+                }
+            } catch (error) { alert('却下に失敗しました'); }
+        }
+        
+        async function addDmcaNote(reportId) {
+            const description = prompt('メモを入力してください:');
+            if (!description) return;
+            try {
+                const response = await fetch(`${API_BASE}/dmca/admin/reports/${reportId}/action`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ actionType: 'note_added', description, performedByName: 'Admin' })
+                });
+                if (response.ok) {
+                    alert('メモを追加しました');
+                    viewDmcaDetail(reportId);
+                }
+            } catch (error) { alert('追加に失敗しました'); }
+        }
+        
+        async function updateDmcaPriority(reportId, priority) {
+            try {
+                const response = await fetch(`${API_BASE}/dmca/admin/reports/${reportId}/priority`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ priority })
+                });
+                if (response.ok) {
+                    loadDmcaReports();
+                }
+            } catch (error) { alert('優先度の更新に失敗しました'); }
+        }
+        
+        document.querySelectorAll('#dmca-stats .stat-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#dmca-stats .stat-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentDmcaStatus = btn.dataset.status;
+                loadDmcaReports();
+            });
+        });
+        
+        document.getElementById('dmca-priority-filter').addEventListener('change', () => loadDmcaReports());
+        document.getElementById('dmca-search').addEventListener('input', debounce(() => loadDmcaReports(), 300));
+        
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => { clearTimeout(timeout); func(...args); };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
         }
         
         async function viewWorkDetail(workId) {
@@ -566,7 +931,6 @@
                     document.getElementById('finance-month').textContent = '$' + data.stats.month_revenue.toLocaleString();
                     document.getElementById('finance-week').textContent = '$' + data.stats.week_revenue.toLocaleString();
                     
-                    // Top works
                     const loading = document.getElementById('top-works-loading');
                     const list = document.getElementById('top-works-list');
                     const empty = document.getElementById('top-works-empty');
@@ -603,7 +967,6 @@
             empty.style.display = 'none';
             
             try {
-                // Load stats
                 const statsResponse = await fetch(`${API_BASE}/finance/admin/stats`);
                 if (statsResponse.ok) {
                     const statsData = await statsResponse.json();
@@ -611,7 +974,6 @@
                     document.getElementById('payout-pending-amount').textContent = '$' + statsData.pendingPayouts.amount.toLocaleString();
                 }
                 
-                // Load payouts
                 const status = document.getElementById('payout-status-filter').value;
                 const params = new URLSearchParams({ status });
                 const response = await fetch(`${API_BASE}/finance/admin/payouts?${params}`);
@@ -703,6 +1065,14 @@
             return { 'pending': '保留中', 'completed': '完了', 'cancelled': 'キャンセル' }[status] || status;
         }
         
+        function getDmcaStatusName(status) {
+            return { 'new': '新規', 'reviewing': '審査中', 'action_taken': '対応済', 'rejected': '却下', 'counter_notice': '異議申立' }[status] || status;
+        }
+        
+        function getPriorityName(priority) {
+            return { 'urgent': '緊急', 'high': '高', 'normal': '通常', 'low': '低' }[priority] || priority;
+        }
+        
         function escapeHtml(text) { 
             if (!text) return ''; 
             const div = document.createElement('div'); 
@@ -718,7 +1088,8 @@
         
         document.addEventListener('DOMContentLoaded', () => { 
             loadDashboardStats(); 
-            loadModerationStats(); 
+            loadModerationStats();
+            loadDmcaStats();
         });
     </script>
 </body>
