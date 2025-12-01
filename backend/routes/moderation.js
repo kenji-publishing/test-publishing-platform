@@ -16,10 +16,9 @@ router.get('/admin/stats', async (req, res) => {
         const statsQuery = `
             SELECT 
                 COUNT(*) FILTER (WHERE status = 'draft') as draft,
-                COUNT(*) FILTER (WHERE status = 'pending_review') as pending_review,
                 COUNT(*) FILTER (WHERE status = 'published') as published,
-                COUNT(*) FILTER (WHERE status = 'rejected') as rejected,
                 COUNT(*) FILTER (WHERE status = 'archived') as archived,
+                COUNT(*) FILTER (WHERE status = 'suspended') as suspended,
                 COUNT(*) as total
             FROM works
         `;
@@ -29,10 +28,9 @@ router.get('/admin/stats', async (req, res) => {
         
         res.json({
             draft: parseInt(stats.draft) || 0,
-            pending_review: parseInt(stats.pending_review) || 0,
             published: parseInt(stats.published) || 0,
-            rejected: parseInt(stats.rejected) || 0,
             archived: parseInt(stats.archived) || 0,
+            suspended: parseInt(stats.suspended) || 0,
             total: parseInt(stats.total) || 0
         });
     } catch (error) {
@@ -57,12 +55,12 @@ router.get('/admin/works', async (req, res) => {
         }
         
         if (type) {
-            whereConditions.push(`w.work_type = $${paramIndex++}`);
+            whereConditions.push(`w.content_type = $${paramIndex++}`);
             params.push(type);
         }
         
         if (language) {
-            whereConditions.push(`w.original_language = $${paramIndex++}`);
+            whereConditions.push(`w.language = $${paramIndex++}`);
             params.push(language);
         }
         
@@ -91,11 +89,14 @@ router.get('/admin/works', async (req, res) => {
                 w.work_id,
                 w.title,
                 w.description,
-                w.work_type,
+                w.content_type,
+                w.language,
                 w.original_language,
                 w.status,
-                w.is_premium,
-                w.content_warnings,
+                w.is_free,
+                w.price,
+                w.genre,
+                w.is_adult,
                 w.created_at,
                 w.updated_at,
                 w.published_at,
@@ -109,8 +110,8 @@ router.get('/admin/works', async (req, res) => {
             ${whereClause}
             ORDER BY 
                 CASE w.status 
-                    WHEN 'pending_review' THEN 1 
-                    WHEN 'draft' THEN 2
+                    WHEN 'draft' THEN 1
+                    WHEN 'published' THEN 2
                     ELSE 3 
                 END,
                 w.created_at DESC
@@ -124,16 +125,20 @@ router.get('/admin/works', async (req, res) => {
         let chapterCounts = {};
         
         if (workIds.length > 0) {
-            const chapterQuery = `
-                SELECT work_id, COUNT(*) as chapter_count
-                FROM chapters
-                WHERE work_id = ANY($1)
-                GROUP BY work_id
-            `;
-            const chapterResult = await pool.query(chapterQuery, [workIds]);
-            chapterResult.rows.forEach(row => {
-                chapterCounts[row.work_id] = parseInt(row.chapter_count);
-            });
+            try {
+                const chapterQuery = `
+                    SELECT work_id, COUNT(*) as chapter_count
+                    FROM chapters
+                    WHERE work_id = ANY($1)
+                    GROUP BY work_id
+                `;
+                const chapterResult = await pool.query(chapterQuery, [workIds]);
+                chapterResult.rows.forEach(row => {
+                    chapterCounts[row.work_id] = parseInt(row.chapter_count);
+                });
+            } catch (e) {
+                console.log('Chapters table may not exist');
+            }
         }
         
         const works = worksResult.rows.map(work => ({
@@ -186,35 +191,24 @@ router.get('/admin/works/:workId', async (req, res) => {
         const work = workResult.rows[0];
         
         // Get chapters
-        const chaptersQuery = `
-            SELECT chapter_id, chapter_number, title, status, word_count, created_at
-            FROM chapters
-            WHERE work_id = $1
-            ORDER BY chapter_number ASC
-        `;
-        const chaptersResult = await pool.query(chaptersQuery, [workId]);
-        
-        // Get moderation history (if table exists)
-        let moderationHistory = [];
+        let chapters = [];
         try {
-            const historyQuery = `
-                SELECT mh.*, u.email as moderator_email, u.pen_name as moderator_name
-                FROM moderation_history mh
-                LEFT JOIN users u ON mh.moderator_id = u.user_id
-                WHERE mh.work_id = $1
-                ORDER BY mh.created_at DESC
+            const chaptersQuery = `
+                SELECT chapter_id, chapter_number, title, status, word_count, created_at
+                FROM chapters
+                WHERE work_id = $1
+                ORDER BY chapter_number ASC
             `;
-            const historyResult = await pool.query(historyQuery, [workId]);
-            moderationHistory = historyResult.rows;
+            const chaptersResult = await pool.query(chaptersQuery, [workId]);
+            chapters = chaptersResult.rows;
         } catch (e) {
-            // Table might not exist yet
-            console.log('Moderation history table not found, skipping');
+            console.log('Chapters table may not exist');
         }
         
         res.json({
             work,
-            chapters: chaptersResult.rows,
-            moderationHistory
+            chapters,
+            moderationHistory: []
         });
     } catch (error) {
         console.error('Error fetching work details:', error);
@@ -254,7 +248,6 @@ router.patch('/admin/works/:workId/approve', async (req, res) => {
     
     try {
         const { workId } = req.params;
-        const { moderatorId, notes } = req.body;
         
         await client.query('BEGIN');
         
@@ -275,17 +268,6 @@ router.patch('/admin/works/:workId/approve', async (req, res) => {
             return res.status(404).json({ error: 'Work not found' });
         }
         
-        // Try to log moderation action
-        try {
-            const historyQuery = `
-                INSERT INTO moderation_history (work_id, moderator_id, action, notes, created_at)
-                VALUES ($1, $2, 'approved', $3, CURRENT_TIMESTAMP)
-            `;
-            await client.query(historyQuery, [workId, moderatorId, notes || '']);
-        } catch (e) {
-            console.log('Could not log to moderation_history (table may not exist)');
-        }
-        
         await client.query('COMMIT');
         
         res.json({
@@ -302,14 +284,14 @@ router.patch('/admin/works/:workId/approve', async (req, res) => {
     }
 });
 
-// PATCH /api/moderation/admin/works/:workId/reject - Reject a work
+// PATCH /api/moderation/admin/works/:workId/reject - Reject a work (suspend)
 router.patch('/admin/works/:workId/reject', async (req, res) => {
     const pool = getPool(req);
     const client = await pool.connect();
     
     try {
         const { workId } = req.params;
-        const { moderatorId, reason, notes } = req.body;
+        const { reason } = req.body;
         
         if (!reason) {
             return res.status(400).json({ error: 'Rejection reason is required' });
@@ -317,10 +299,10 @@ router.patch('/admin/works/:workId/reject', async (req, res) => {
         
         await client.query('BEGIN');
         
-        // Update work status
+        // Update work status to suspended
         const updateQuery = `
             UPDATE works
-            SET status = 'rejected',
+            SET status = 'suspended',
                 updated_at = CURRENT_TIMESTAMP
             WHERE work_id = $1
             RETURNING *
@@ -331,17 +313,6 @@ router.patch('/admin/works/:workId/reject', async (req, res) => {
         if (result.rows.length === 0) {
             await client.query('ROLLBACK');
             return res.status(404).json({ error: 'Work not found' });
-        }
-        
-        // Try to log moderation action
-        try {
-            const historyQuery = `
-                INSERT INTO moderation_history (work_id, moderator_id, action, reason, notes, created_at)
-                VALUES ($1, $2, 'rejected', $3, $4, CURRENT_TIMESTAMP)
-            `;
-            await client.query(historyQuery, [workId, moderatorId, reason, notes || '']);
-        } catch (e) {
-            console.log('Could not log to moderation_history (table may not exist)');
         }
         
         await client.query('COMMIT');
@@ -360,14 +331,14 @@ router.patch('/admin/works/:workId/reject', async (req, res) => {
     }
 });
 
-// PATCH /api/moderation/admin/works/:workId/request-revision - Request revision
+// PATCH /api/moderation/admin/works/:workId/request-revision - Request revision (back to draft)
 router.patch('/admin/works/:workId/request-revision', async (req, res) => {
     const pool = getPool(req);
     const client = await pool.connect();
     
     try {
         const { workId } = req.params;
-        const { moderatorId, feedback, notes } = req.body;
+        const { feedback } = req.body;
         
         if (!feedback) {
             return res.status(400).json({ error: 'Feedback is required' });
@@ -389,17 +360,6 @@ router.patch('/admin/works/:workId/request-revision', async (req, res) => {
         if (result.rows.length === 0) {
             await client.query('ROLLBACK');
             return res.status(404).json({ error: 'Work not found' });
-        }
-        
-        // Try to log moderation action
-        try {
-            const historyQuery = `
-                INSERT INTO moderation_history (work_id, moderator_id, action, reason, notes, created_at)
-                VALUES ($1, $2, 'revision_requested', $3, $4, CURRENT_TIMESTAMP)
-            `;
-            await client.query(historyQuery, [workId, moderatorId, feedback, notes || '']);
-        } catch (e) {
-            console.log('Could not log to moderation_history (table may not exist)');
         }
         
         await client.query('COMMIT');
@@ -435,7 +395,6 @@ router.get('/admin/recent', async (req, res) => {
                 u.email as author_email
             FROM works w
             LEFT JOIN users u ON w.author_id = u.user_id
-            WHERE w.status IN ('pending_review', 'published', 'rejected')
             ORDER BY w.updated_at DESC
             LIMIT $1
         `;
