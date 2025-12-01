@@ -895,6 +895,19 @@
         // ===== Configuration =====
         const API_BASE = 'http://localhost:3000/api';
         
+        // ===== Helper: Parse PostgreSQL array string =====
+        function parsePostgresArray(str) {
+            if (!str) return [];
+            if (Array.isArray(str)) return str;
+            // Handle PostgreSQL array format like "{editor}" or "{author,translator}"
+            if (typeof str === 'string' && str.startsWith('{') && str.endsWith('}')) {
+                const inner = str.slice(1, -1);
+                if (inner === '') return [];
+                return inner.split(',').map(s => s.trim());
+            }
+            return [str];
+        }
+        
         // ===== Navigation Handling =====
         const navItems = document.querySelectorAll('.nav-item[data-section]');
         const sections = document.querySelectorAll('.tool-section');
@@ -1027,8 +1040,8 @@
                             const iconClass = activity.type === 'user_registered' ? 'user' : 'work';
                             const icon = activity.type === 'user_registered' ? 'bi-person-plus' : 'bi-file-earmark-plus';
                             const text = activity.type === 'user_registered' 
-                                ? `<strong>${activity.title}</strong>さんが新規登録しました`
-                                : `新しい作品「<strong>${activity.title}</strong>」が投稿されました`;
+                                ? `<strong>${escapeHtml(activity.title)}</strong>さんが新規登録しました`
+                                : `新しい作品「<strong>${escapeHtml(activity.title)}</strong>」が投稿されました`;
                             const time = formatTimeAgo(new Date(activity.created_at));
                             
                             return `
@@ -1097,6 +1110,10 @@
                         renderPagination(data.pagination);
                     } else {
                         emptyState.style.display = 'block';
+                        emptyState.innerHTML = `
+                            <i class="bi bi-people fs-1 d-block mb-3"></i>
+                            <p>ユーザーが見つかりません</p>
+                        `;
                     }
                 } else {
                     throw new Error('API error');
@@ -1118,9 +1135,13 @@
             tbody.innerHTML = users.map(user => {
                 const name = user.pen_name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Unknown';
                 const initial = name.charAt(0).toUpperCase();
-                const roles = (user.roles || []).filter(r => r).map(role => 
+                
+                // Parse roles from PostgreSQL array format
+                const rolesArray = parsePostgresArray(user.roles);
+                const roles = rolesArray.filter(r => r).map(role => 
                     `<span class="role-badge ${role}">${getRoleName(role)}</span>`
                 ).join('');
+                
                 const statusClass = user.account_status || 'active';
                 const statusName = getStatusName(statusClass);
                 const date = new Date(user.created_at).toLocaleDateString('ja-JP');
@@ -1205,7 +1226,10 @@
                     
                     const name = user.pen_name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Unknown';
                     const initial = name.charAt(0).toUpperCase();
-                    const roles = (user.roles || []).filter(r => r).map(role => 
+                    
+                    // Parse roles from PostgreSQL array format
+                    const rolesArray = parsePostgresArray(user.roles);
+                    const roles = rolesArray.filter(r => r).map(role => 
                         `<span class="role-badge ${role}">${getRoleName(role)}</span>`
                     ).join(' ');
                     
@@ -1239,7 +1263,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <p><strong>登録日:</strong> ${new Date(user.created_at).toLocaleDateString('ja-JP')}</p>
-                                <p><strong>最終ログイン:</strong> ${user.last_login ? new Date(user.last_login).toLocaleDateString('ja-JP') : '未ログイン'}</p>
+                                <p><strong>最終ログイン:</strong> ${user.last_login_at ? new Date(user.last_login_at).toLocaleDateString('ja-JP') : '未ログイン'}</p>
                                 <p><strong>国:</strong> ${user.country_code || '未設定'}</p>
                             </div>
                             <div class="col-md-6">
