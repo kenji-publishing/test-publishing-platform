@@ -123,7 +123,7 @@ router.post('/counter-notice', async (req, res) => {
         
         // Check if report exists
         const reportCheck = await pool.query(
-            'SELECT report_id, status FROM dmca_reports WHERE report_id = $1',
+            'SELECT report_id, status FROM dmca_reports WHERE report_id = $1::uuid',
             [reportId]
         );
         
@@ -135,7 +135,7 @@ router.post('/counter-notice', async (req, res) => {
             INSERT INTO dmca_counter_notices (
                 report_id, submitter_name, submitter_email, submitter_address, submitter_phone,
                 statement, good_faith_belief, consent_to_jurisdiction, signature
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            ) VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, $8, $9)
             RETURNING counter_id, created_at
         `;
         
@@ -146,7 +146,7 @@ router.post('/counter-notice', async (req, res) => {
         
         // Update report status to counter_notice
         await pool.query(
-            `UPDATE dmca_reports SET status = 'counter_notice', updated_at = CURRENT_TIMESTAMP WHERE report_id = $1`,
+            `UPDATE dmca_reports SET status = 'counter_notice', updated_at = CURRENT_TIMESTAMP WHERE report_id = $1::uuid`,
             [reportId]
         );
         
@@ -232,21 +232,21 @@ router.get('/admin/reports', async (req, res) => {
             let paramIndex = 1;
             
             if (status) {
-                whereConditions.push(`status = $${paramIndex++}`);
+                whereConditions.push(`status = $${paramIndex++}::varchar`);
                 params.push(status);
             }
             
             if (priority) {
-                whereConditions.push(`priority = $${paramIndex++}`);
+                whereConditions.push(`priority = $${paramIndex++}::varchar`);
                 params.push(priority);
             }
             
             if (search) {
                 whereConditions.push(`(
-                    reporter_name ILIKE $${paramIndex} OR 
-                    reporter_email ILIKE $${paramIndex} OR 
-                    work_title ILIKE $${paramIndex} OR
-                    original_work_title ILIKE $${paramIndex}
+                    reporter_name ILIKE $${paramIndex}::varchar OR 
+                    reporter_email ILIKE $${paramIndex}::varchar OR 
+                    work_title ILIKE $${paramIndex}::varchar OR
+                    original_work_title ILIKE $${paramIndex}::varchar
                 )`);
                 params.push(`%${search}%`);
                 paramIndex++;
@@ -284,7 +284,7 @@ router.get('/admin/reports', async (req, res) => {
                         ELSE 4 
                     END,
                     r.created_at DESC
-                LIMIT $${paramIndex++} OFFSET $${paramIndex}
+                LIMIT $${paramIndex++}::int OFFSET $${paramIndex}::int
             `;
             
             const result = await pool.query(query, params);
@@ -328,7 +328,7 @@ router.get('/admin/reports/:reportId', async (req, res) => {
             LEFT JOIN works w ON r.work_id = w.work_id
             LEFT JOIN users u ON r.assigned_to = u.user_id
             LEFT JOIN users author ON w.author_id = author.user_id
-            WHERE r.report_id = $1
+            WHERE r.report_id = $1::uuid
         `;
         
         const reportResult = await pool.query(reportQuery, [reportId]);
@@ -344,7 +344,7 @@ router.get('/admin/reports/:reportId', async (req, res) => {
         try {
             const actionsQuery = `
                 SELECT * FROM dmca_actions 
-                WHERE report_id = $1 
+                WHERE report_id = $1::uuid 
                 ORDER BY created_at DESC
             `;
             const actionsResult = await pool.query(actionsQuery, [reportId]);
@@ -358,7 +358,7 @@ router.get('/admin/reports/:reportId', async (req, res) => {
         try {
             const counterQuery = `
                 SELECT * FROM dmca_counter_notices 
-                WHERE report_id = $1 
+                WHERE report_id = $1::uuid 
                 ORDER BY created_at DESC
             `;
             const counterResult = await pool.query(counterQuery, [reportId]);
@@ -391,7 +391,7 @@ router.patch('/admin/reports/:reportId/status', async (req, res) => {
         
         // Get current status
         const currentResult = await client.query(
-            'SELECT status FROM dmca_reports WHERE report_id = $1',
+            'SELECT status FROM dmca_reports WHERE report_id = $1::uuid',
             [reportId]
         );
         
@@ -402,15 +402,26 @@ router.patch('/admin/reports/:reportId/status', async (req, res) => {
         
         const previousStatus = currentResult.rows[0].status;
         
-        // Update status
-        const updateQuery = `
-            UPDATE dmca_reports 
-            SET status = $1, 
-                updated_at = CURRENT_TIMESTAMP,
-                resolved_at = CASE WHEN $1 IN ('action_taken', 'rejected') THEN CURRENT_TIMESTAMP ELSE resolved_at END
-            WHERE report_id = $2
-            RETURNING *
-        `;
+        // Update status - using separate queries to avoid type inference issues
+        let updateQuery;
+        if (status === 'action_taken' || status === 'rejected') {
+            updateQuery = `
+                UPDATE dmca_reports 
+                SET status = $1::varchar, 
+                    updated_at = CURRENT_TIMESTAMP,
+                    resolved_at = CURRENT_TIMESTAMP
+                WHERE report_id = $2::uuid
+                RETURNING *
+            `;
+        } else {
+            updateQuery = `
+                UPDATE dmca_reports 
+                SET status = $1::varchar, 
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE report_id = $2::uuid
+                RETURNING *
+            `;
+        }
         
         const updateResult = await client.query(updateQuery, [status, reportId]);
         
@@ -420,7 +431,7 @@ router.patch('/admin/reports/:reportId/status', async (req, res) => {
                 report_id, action_type, action_description, 
                 previous_status, new_status, 
                 performed_by, performed_by_name
-            ) VALUES ($1, 'status_change', $2, $3, $4, $5, $6)
+            ) VALUES ($1::uuid, 'status_change', $2::varchar, $3::varchar, $4::varchar, $5::uuid, $6::varchar)
         `;
         
         await client.query(actionQuery, [
@@ -460,7 +471,7 @@ router.patch('/admin/reports/:reportId/priority', async (req, res) => {
         }
         
         const result = await pool.query(
-            `UPDATE dmca_reports SET priority = $1, updated_at = CURRENT_TIMESTAMP WHERE report_id = $2 RETURNING *`,
+            `UPDATE dmca_reports SET priority = $1::varchar, updated_at = CURRENT_TIMESTAMP WHERE report_id = $2::uuid RETURNING *`,
             [priority, reportId]
         );
         
@@ -494,7 +505,7 @@ router.post('/admin/reports/:reportId/action', async (req, res) => {
             INSERT INTO dmca_actions (
                 report_id, action_type, action_description,
                 performed_by, performed_by_name
-            ) VALUES ($1, $2, $3, $4, $5)
+            ) VALUES ($1::uuid, $2::varchar, $3::varchar, $4::uuid, $5::varchar)
             RETURNING *
         `;
         
@@ -505,7 +516,7 @@ router.post('/admin/reports/:reportId/action', async (req, res) => {
         
         // Update report updated_at
         await pool.query(
-            'UPDATE dmca_reports SET updated_at = CURRENT_TIMESTAMP WHERE report_id = $1',
+            'UPDATE dmca_reports SET updated_at = CURRENT_TIMESTAMP WHERE report_id = $1::uuid',
             [reportId]
         );
         
@@ -533,7 +544,7 @@ router.post('/admin/reports/:reportId/takedown', async (req, res) => {
         
         // Get report
         const reportResult = await client.query(
-            'SELECT * FROM dmca_reports WHERE report_id = $1',
+            'SELECT * FROM dmca_reports WHERE report_id = $1::uuid',
             [reportId]
         );
         
@@ -547,14 +558,14 @@ router.post('/admin/reports/:reportId/takedown', async (req, res) => {
         // Suspend the work if linked
         if (report.work_id) {
             await client.query(
-                `UPDATE works SET status = 'suspended', updated_at = CURRENT_TIMESTAMP WHERE work_id = $1`,
+                `UPDATE works SET status = 'suspended', updated_at = CURRENT_TIMESTAMP WHERE work_id = $1::uuid`,
                 [report.work_id]
             );
         }
         
         // Update report status
         await client.query(
-            `UPDATE dmca_reports SET status = 'action_taken', resolved_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE report_id = $1`,
+            `UPDATE dmca_reports SET status = 'action_taken', resolved_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE report_id = $1::uuid`,
             [reportId]
         );
         
@@ -564,7 +575,7 @@ router.post('/admin/reports/:reportId/takedown', async (req, res) => {
                 report_id, action_type, action_description,
                 previous_status, new_status,
                 performed_by, performed_by_name
-            ) VALUES ($1, 'content_removed', $2, $3, 'action_taken', $4, $5)
+            ) VALUES ($1::uuid, 'content_removed', $2::varchar, $3::varchar, 'action_taken', $4::uuid, $5::varchar)
         `, [
             reportId,
             notes || 'Content has been removed/suspended due to DMCA takedown request',
@@ -606,7 +617,7 @@ router.patch('/admin/reports/:reportId/reject', async (req, res) => {
         
         // Get current status
         const currentResult = await client.query(
-            'SELECT status FROM dmca_reports WHERE report_id = $1',
+            'SELECT status FROM dmca_reports WHERE report_id = $1::uuid',
             [reportId]
         );
         
@@ -617,7 +628,7 @@ router.patch('/admin/reports/:reportId/reject', async (req, res) => {
         
         // Update status to rejected
         await client.query(
-            `UPDATE dmca_reports SET status = 'rejected', resolved_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE report_id = $1`,
+            `UPDATE dmca_reports SET status = 'rejected', resolved_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE report_id = $1::uuid`,
             [reportId]
         );
         
@@ -627,7 +638,7 @@ router.patch('/admin/reports/:reportId/reject', async (req, res) => {
                 report_id, action_type, action_description,
                 previous_status, new_status,
                 performed_by, performed_by_name
-            ) VALUES ($1, 'rejected', $2, $3, 'rejected', $4, $5)
+            ) VALUES ($1::uuid, 'rejected', $2::varchar, $3::varchar, 'rejected', $4::uuid, $5::varchar)
         `, [
             reportId,
             `Report rejected: ${reason}`,
