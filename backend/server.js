@@ -29,7 +29,8 @@ const moderationRoutes = require('./routes/moderation');
 const revenueRoutes = require('./routes/revenue');
 const messagesRoutes = require('./routes/messages');
 const interactionsRoutes = require('./routes/interactions');
-const worksRoutes = require('./routes/works');
+const adminRoutes = require('./routes/admin');
+
 // Create Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -59,7 +60,8 @@ app.use('/api/moderation', moderationRoutes);
 app.use('/api/revenue', revenueRoutes);
 app.use('/api/messages', messagesRoutes);
 app.use('/api/interactions', interactionsRoutes);
-app.use('/api/works', worksRoutes);
+app.use('/api/admin', adminRoutes);
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({
@@ -80,7 +82,8 @@ app.get('/', (req, res) => {
       auth: '/api/auth',
       users: '/api/users',
       works: '/api/works',
-      translations: '/api/translations'
+      translations: '/api/translations',
+      admin: '/api/admin'
     }
   });
 });
@@ -115,6 +118,8 @@ app.listen(PORT, () => {
   console.log(`   - POST /api/auth/login`);
   console.log(`   - GET  /api/users/profile`);
   console.log(`   - GET  /api/works`);
+  console.log(`   - GET  /api/admin/stats`);
+  console.log(`   - GET  /api/admin/users`);
   console.log(`\n✨ Press Ctrl+C to stop\n`);
 });
 
