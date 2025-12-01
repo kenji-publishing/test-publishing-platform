@@ -730,52 +730,78 @@
         
         async function updateDmcaStatus(reportId, status) {
             const notes = prompt('メモを入力してください（任意）:');
+            if (notes === null) return;
             try {
+                console.log('Updating DMCA status:', reportId, status);
                 const response = await fetch(`${API_BASE}/dmca/admin/reports/${reportId}/status`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ status, notes, performedByName: 'Admin' })
+                    body: JSON.stringify({ status, notes: notes || '', performedByName: 'Admin' })
                 });
+                const data = await response.json();
+                console.log('Response:', response.status, data);
                 if (response.ok) {
                     alert('ステータスを更新しました');
                     bootstrap.Modal.getInstance(document.getElementById('dmcaDetailModal'))?.hide();
                     loadDmcaReports();
+                } else {
+                    alert('エラー: ' + (data.error || response.status));
                 }
-            } catch (error) { alert('更新に失敗しました'); }
+            } catch (error) { 
+                console.error('Update error:', error);
+                alert('更新に失敗しました: ' + error.message); 
+            }
         }
         
         async function executeTakedown(reportId) {
             if (!confirm('この報告に基づいてコンテンツを削除（停止）しますか？\nこのアクションは対象作品を停止状態にします。')) return;
             const notes = prompt('削除理由を入力してください:');
+            if (notes === null) return;
             try {
+                console.log('Executing takedown:', reportId);
                 const response = await fetch(`${API_BASE}/dmca/admin/reports/${reportId}/takedown`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ notes, performedByName: 'Admin' })
+                    body: JSON.stringify({ notes: notes || '', performedByName: 'Admin' })
                 });
+                const data = await response.json();
+                console.log('Response:', response.status, data);
                 if (response.ok) {
                     alert('コンテンツを削除しました');
                     bootstrap.Modal.getInstance(document.getElementById('dmcaDetailModal'))?.hide();
                     loadDmcaReports();
+                } else {
+                    alert('エラー: ' + (data.error || response.status));
                 }
-            } catch (error) { alert('削除に失敗しました'); }
+            } catch (error) { 
+                console.error('Takedown error:', error);
+                alert('削除に失敗しました: ' + error.message); 
+            }
         }
         
         async function rejectDmca(reportId) {
             const reason = prompt('却下理由を入力してください:');
             if (!reason) return;
             try {
+                console.log('Rejecting DMCA:', reportId);
                 const response = await fetch(`${API_BASE}/dmca/admin/reports/${reportId}/reject`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ reason, performedByName: 'Admin' })
                 });
+                const data = await response.json();
+                console.log('Response:', response.status, data);
                 if (response.ok) {
                     alert('報告を却下しました');
                     bootstrap.Modal.getInstance(document.getElementById('dmcaDetailModal'))?.hide();
                     loadDmcaReports();
+                } else {
+                    alert('エラー: ' + (data.error || response.status));
                 }
-            } catch (error) { alert('却下に失敗しました'); }
+            } catch (error) { 
+                console.error('Reject error:', error);
+                alert('却下に失敗しました: ' + error.message); 
+            }
         }
         
         async function addDmcaNote(reportId) {
@@ -790,8 +816,11 @@
                 if (response.ok) {
                     alert('メモを追加しました');
                     viewDmcaDetail(reportId);
+                } else {
+                    const data = await response.json();
+                    alert('エラー: ' + (data.error || response.status));
                 }
-            } catch (error) { alert('追加に失敗しました'); }
+            } catch (error) { alert('追加に失敗しました: ' + error.message); }
         }
         
         async function updateDmcaPriority(reportId, priority) {
@@ -803,8 +832,11 @@
                 });
                 if (response.ok) {
                     loadDmcaReports();
+                } else {
+                    const data = await response.json();
+                    alert('エラー: ' + (data.error || response.status));
                 }
-            } catch (error) { alert('優先度の更新に失敗しました'); }
+            } catch (error) { alert('優先度の更新に失敗しました: ' + error.message); }
         }
         
         document.querySelectorAll('#dmca-stats .stat-btn').forEach(btn => {
