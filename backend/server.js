@@ -36,6 +36,9 @@ const verificationRoutes = require('./routes/verification');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Make db pool available to routes
+app.set('db', db.pool);
+
 // Middleware
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:8000',
@@ -86,7 +89,8 @@ app.get('/', (req, res) => {
       works: '/api/works',
       translations: '/api/translations',
       admin: '/api/admin',
-      verification: '/api/verification'
+      verification: '/api/verification',
+      moderation: '/api/moderation'
     }
   });
 });
@@ -124,6 +128,7 @@ app.listen(PORT, () => {
   console.log(`   - GET  /api/admin/stats`);
   console.log(`   - GET  /api/admin/users`);
   console.log(`   - GET  /api/verification/admin/requests`);
+  console.log(`   - GET  /api/moderation/admin/works`);
   console.log(`\n✨ Press Ctrl+C to stop\n`);
 });
 
