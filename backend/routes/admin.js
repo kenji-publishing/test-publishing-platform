@@ -30,21 +30,34 @@ router.get('/stats', async (req, res) => {
     // Get works count
     const worksResult = await db.query('SELECT COUNT(*) as count FROM works');
     
-    // Get this month's revenue (placeholder - will be updated when payments are live)
-    const revenueResult = await db.query(`
-      SELECT COALESCE(SUM(amount), 0) as total
-      FROM transactions
-      WHERE created_at >= date_trunc('month', CURRENT_DATE)
-        AND status = 'completed'
-    `);
+    // Get this month's revenue (placeholder - transactions table may not exist yet)
+    let revenue = 0;
+    try {
+      const revenueResult = await db.query(`
+        SELECT COALESCE(SUM(amount), 0) as total
+        FROM transactions
+        WHERE created_at >= date_trunc('month', CURRENT_DATE)
+          AND status = 'completed'
+      `);
+      revenue = parseFloat(revenueResult.rows[0].total) || 0;
+    } catch (e) {
+      // transactions table doesn't exist yet, that's OK
+      console.log('Note: transactions table not found, showing $0 revenue');
+    }
     
     // Get pending tasks count
     const pendingVerifications = await db.query(
       "SELECT COUNT(*) as count FROM users WHERE verified = false"
     );
-    const pendingModeration = await db.query(
-      "SELECT COUNT(*) as count FROM works WHERE status = 'pending_review'"
-    );
+    
+    let pendingModeration = { rows: [{ count: 0 }] };
+    try {
+      pendingModeration = await db.query(
+        "SELECT COUNT(*) as count FROM works WHERE status = 'pending_review'"
+      );
+    } catch (e) {
+      // works table might not have status column or different values
+    }
     
     const totalPendingTasks = 
       parseInt(pendingVerifications.rows[0].count) + 
@@ -53,7 +66,7 @@ router.get('/stats', async (req, res) => {
     res.json({
       users: parseInt(usersResult.rows[0].count),
       works: parseInt(worksResult.rows[0].count),
-      revenue: parseFloat(revenueResult.rows[0].total) || 0,
+      revenue: revenue,
       pendingTasks: totalPendingTasks
     });
   } catch (error) {
@@ -70,36 +83,47 @@ router.get('/activity', async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 10;
     
-    // Combine multiple activity types into one query
-    const activities = await db.query(`
-      (
+    // Get recent users
+    let activities = [];
+    
+    try {
+      const usersActivity = await db.query(`
         SELECT 
           'user_registered' as type,
           user_id as id,
           COALESCE(pen_name, first_name || ' ' || last_name, email) as title,
-          NULL as extra,
           created_at
         FROM users
         ORDER BY created_at DESC
         LIMIT 5
-      )
-      UNION ALL
-      (
+      `);
+      activities = activities.concat(usersActivity.rows);
+    } catch (e) {
+      console.log('Could not fetch user activity');
+    }
+    
+    // Get recent works
+    try {
+      const worksActivity = await db.query(`
         SELECT 
           'work_uploaded' as type,
           work_id as id,
           title,
-          NULL as extra,
           created_at
         FROM works
         ORDER BY created_at DESC
         LIMIT 5
-      )
-      ORDER BY created_at DESC
-      LIMIT $1
-    `, [limit]);
+      `);
+      activities = activities.concat(worksActivity.rows);
+    } catch (e) {
+      console.log('Could not fetch works activity');
+    }
     
-    res.json({ activities: activities.rows });
+    // Sort by created_at and limit
+    activities.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    activities = activities.slice(0, limit);
+    
+    res.json({ activities });
   } catch (error) {
     console.error('Activity error:', error);
     res.status(500).json({ error: error.message });
@@ -159,7 +183,7 @@ router.get('/users', async (req, res) => {
       params
     );
     
-    // Get users with roles
+    // Get users with roles (using last_login_at instead of last_login)
     const usersResult = await db.query(
       `SELECT 
          u.user_id,
@@ -171,7 +195,7 @@ router.get('/users', async (req, res) => {
          u.verified,
          u.account_status,
          u.created_at,
-         u.last_login,
+         u.last_login_at,
          array_agg(DISTINCT ur.role_type) FILTER (WHERE ur.role_type IS NOT NULL) as roles
        FROM users u
        LEFT JOIN user_roles ur ON u.user_id = ur.user_id AND ur.is_active = true
@@ -211,10 +235,22 @@ router.get('/users/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
     
-    // Get user details
+    // Get user details (selecting specific columns to avoid issues)
     const userResult = await db.query(
       `SELECT 
-         u.*,
+         u.user_id,
+         u.email,
+         u.first_name,
+         u.last_name,
+         u.pen_name,
+         u.country_code,
+         u.bio,
+         u.profile_image_url,
+         u.verified,
+         u.account_status,
+         u.created_at,
+         u.updated_at,
+         u.last_login_at,
          array_agg(DISTINCT ur.role_type) FILTER (WHERE ur.role_type IS NOT NULL) as roles
        FROM users u
        LEFT JOIN user_roles ur ON u.user_id = ur.user_id AND ur.is_active = true
@@ -233,24 +269,27 @@ router.get('/users/:userId', async (req, res) => {
       [userId]
     );
     
-    // Get user's earnings (placeholder)
-    const earningsResult = await db.query(
-      `SELECT COALESCE(SUM(creator_amount), 0) as total
-       FROM revenue_distributions
-       WHERE user_id = $1 AND status = 'paid'`,
-      [userId]
-    );
+    // Get user's earnings (placeholder - table may not exist)
+    let totalEarnings = 0;
+    try {
+      const earningsResult = await db.query(
+        `SELECT COALESCE(SUM(creator_amount), 0) as total
+         FROM revenue_distributions
+         WHERE user_id = $1 AND status = 'paid'`,
+        [userId]
+      );
+      totalEarnings = parseFloat(earningsResult.rows[0].total) || 0;
+    } catch (e) {
+      // revenue_distributions table doesn't exist yet
+    }
     
     const user = userResult.rows[0];
-    // Remove sensitive fields
-    delete user.password_hash;
-    delete user.backup_codes;
     
     res.json({
       user,
       stats: {
         worksCount: parseInt(worksResult.rows[0].count),
-        totalEarnings: parseFloat(earningsResult.rows[0].total) || 0
+        totalEarnings: totalEarnings
       }
     });
   } catch (error) {
