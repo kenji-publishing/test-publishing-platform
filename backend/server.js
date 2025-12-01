@@ -30,6 +30,7 @@ const revenueRoutes = require('./routes/revenue');
 const messagesRoutes = require('./routes/messages');
 const interactionsRoutes = require('./routes/interactions');
 const adminRoutes = require('./routes/admin');
+const verificationRoutes = require('./routes/verification');
 
 // Create Express app
 const app = express();
@@ -61,6 +62,7 @@ app.use('/api/revenue', revenueRoutes);
 app.use('/api/messages', messagesRoutes);
 app.use('/api/interactions', interactionsRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/verification', verificationRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -83,7 +85,8 @@ app.get('/', (req, res) => {
       users: '/api/users',
       works: '/api/works',
       translations: '/api/translations',
-      admin: '/api/admin'
+      admin: '/api/admin',
+      verification: '/api/verification'
     }
   });
 });
@@ -120,6 +123,7 @@ app.listen(PORT, () => {
   console.log(`   - GET  /api/works`);
   console.log(`   - GET  /api/admin/stats`);
   console.log(`   - GET  /api/admin/users`);
+  console.log(`   - GET  /api/verification/admin/requests`);
   console.log(`\n✨ Press Ctrl+C to stop\n`);
 });
 
