@@ -33,6 +33,7 @@ const adminRoutes = require('./routes/admin');
 const verificationRoutes = require('./routes/verification');
 const financeRoutes = require('./routes/finance');
 const dmcaRoutes = require('./routes/dmca');
+const translationQueueRoutes = require('./routes/translation-queue');
 
 // Create Express app
 const app = express();
@@ -70,6 +71,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/verification', verificationRoutes);
 app.use('/api/finance', financeRoutes);
 app.use('/api/dmca', dmcaRoutes);
+app.use('/api/translation-queue', translationQueueRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -96,7 +98,8 @@ app.get('/', (req, res) => {
       verification: '/api/verification',
       moderation: '/api/moderation',
       finance: '/api/finance',
-      dmca: '/api/dmca'
+      dmca: '/api/dmca',
+      translationQueue: '/api/translation-queue'
     }
   });
 });
@@ -138,6 +141,8 @@ app.listen(PORT, () => {
   console.log(`   - GET  /api/finance/admin/stats`);
   console.log(`   - GET  /api/dmca/admin/stats`);
   console.log(`   - GET  /api/dmca/admin/reports`);
+  console.log(`   - GET  /api/translation-queue/admin/stats`);
+  console.log(`   - GET  /api/translation-queue/admin/requests`);
   console.log(`\n✨ Press Ctrl+C to stop\n`);
 });
 
