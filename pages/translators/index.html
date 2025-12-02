@@ -4,59 +4,214 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>翻訳者を探す - Publisher</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <link href="../../css/style-new.css" rel="stylesheet">
+    
     <style>
-        :root {
-            --primary-color: #667eea;
-            --secondary-color: #764ba2;
+        .page-header {
+            background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
+            color: white;
+            padding: var(--spacing-xl) 0;
+            margin-bottom: var(--spacing-xl);
         }
-        body { background: #f5f6fa; min-height: 100vh; }
-        .navbar-custom { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); }
-        .page-header { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: #fff; padding: 40px 0; margin-bottom: 30px; }
-        .page-header h1 { font-weight: 700; margin-bottom: 10px; }
-        .page-header p { opacity: 0.9; margin-bottom: 0; }
-        .filter-card { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 25px; margin-bottom: 25px; }
-        .filter-card h5 { font-weight: 600; margin-bottom: 20px; color: #2c3e50; }
-        .translator-card { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 25px; margin-bottom: 20px; transition: all 0.3s; }
-        .translator-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.12); }
-        .translator-avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold; }
-        .translator-name { font-size: 1.3rem; font-weight: 600; color: #2c3e50; margin-bottom: 5px; }
-        .translator-bio { color: #7f8c8d; font-size: 0.95rem; margin-bottom: 15px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .rating-stars { color: #f1c40f; font-size: 1.1rem; }
-        .rating-count { color: #7f8c8d; font-size: 0.85rem; margin-left: 8px; }
-        .lang-badge { display: inline-flex; align-items: center; gap: 5px; background: #f0f4ff; color: #667eea; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; margin: 3px; }
-        .lang-badge i { font-size: 0.8rem; }
-        .price-tag { background: #e8f5e9; color: #388e3c; padding: 8px 15px; border-radius: 8px; font-weight: 600; }
-        .specialization-tag { background: #f5f5f5; color: #666; padding: 4px 10px; border-radius: 15px; font-size: 0.8rem; margin: 2px; display: inline-block; }
-        .native-badge { background: #fff3e0; color: #f57c00; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; }
-        .stats-item { text-align: center; padding: 10px; }
-        .stats-item .number { font-size: 1.5rem; font-weight: 700; color: #2c3e50; }
-        .stats-item .label { font-size: 0.8rem; color: #7f8c8d; }
-        .empty-state { text-align: center; padding: 60px 20px; }
-        .empty-state i { font-size: 4rem; color: #ddd; margin-bottom: 20px; }
-        .loading-spinner { display: flex; justify-content: center; padding: 60px; }
-        .sort-dropdown { min-width: 180px; }
-        .language-select { min-width: 150px; }
-        .pagination-wrapper { display: flex; justify-content: center; margin-top: 30px; }
+        .page-header h1 { color: white; font-size: var(--font-size-2xl); margin-bottom: var(--spacing-xs); }
+        .page-header p { color: rgba(255,255,255,0.9); margin: 0; }
+        
+        .filter-card {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+        }
+        .filter-card h5 { font-weight: 600; margin-bottom: var(--spacing-lg); color: var(--color-text-primary); }
+        
+        .translator-card {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+            transition: all var(--transition-fast);
+        }
+        .translator-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+        
+        .translator-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--color-accent), var(--color-accent-light));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        
+        .translator-name {
+            font-family: var(--font-heading);
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            color: var(--color-text-primary);
+            margin-bottom: 4px;
+        }
+        
+        .translator-bio {
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-sm);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .rating-stars { color: var(--color-warning); }
+        .rating-count { color: var(--color-text-secondary); font-size: var(--font-size-sm); margin-left: 8px; }
+        
+        .lang-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(139, 115, 85, 0.1);
+            color: var(--color-accent);
+            padding: 4px 12px;
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-sm);
+            margin: 3px;
+        }
+        
+        .native-badge {
+            background: rgba(212, 168, 83, 0.2);
+            color: var(--color-warning);
+            font-size: var(--font-size-xs);
+            padding: 2px 6px;
+            border-radius: var(--radius-sm);
+            margin-left: 5px;
+        }
+        
+        .specialization-tag {
+            background: var(--color-bg-hover);
+            color: var(--color-text-secondary);
+            padding: 4px 10px;
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-xs);
+            margin: 2px;
+            display: inline-block;
+        }
+        
+        .revenue-badge {
+            background: rgba(93, 156, 89, 0.1);
+            color: var(--color-success);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            text-align: center;
+        }
+        .revenue-badge .percent { font-size: var(--font-size-xl); }
+        .revenue-badge .label { font-size: var(--font-size-xs); }
+        
+        .stats-row {
+            display: flex;
+            justify-content: space-around;
+            padding-top: var(--spacing-md);
+            border-top: 1px solid var(--color-border);
+            margin-top: var(--spacing-md);
+        }
+        .stat-item { text-align: center; }
+        .stat-item .number {
+            font-family: var(--font-heading);
+            font-size: var(--font-size-lg);
+            font-weight: 700;
+            color: var(--color-text-primary);
+        }
+        .stat-item .label {
+            font-size: var(--font-size-xs);
+            color: var(--color-text-secondary);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: var(--spacing-2xl);
+            color: var(--color-text-secondary);
+        }
+        .empty-state i { font-size: 4rem; margin-bottom: var(--spacing-md); opacity: 0.3; }
+        
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            padding: var(--spacing-2xl);
+        }
+        
+        .cta-card {
+            background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
+            color: white;
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            text-align: center;
+        }
+        .cta-card h6 { color: white; margin-bottom: var(--spacing-sm); }
+        .cta-card p { color: rgba(255,255,255,0.9); font-size: var(--font-size-sm); margin-bottom: var(--spacing-md); }
+        .cta-card .btn { background: white; color: var(--color-accent); border: none; }
+        .cta-card .btn:hover { background: var(--color-bg-hover); }
+        
+        .info-card {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+        }
+        .info-card h6 { font-weight: 600; margin-bottom: var(--spacing-md); }
+        .info-card ul { padding-left: var(--spacing-md); margin: 0; }
+        .info-card li { margin-bottom: var(--spacing-xs); font-size: var(--font-size-sm); color: var(--color-text-secondary); }
     </style>
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="../index.html"><i class="bi bi-book me-2"></i>Publisher</a>
+            <a class="navbar-brand" href="../../index.html">
+                <i class="fas fa-book-open"></i>
+                Publisher
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link" href="../works/browse.html">作品を読む</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="index.html">翻訳者を探す</a></li>
+                    <li class="nav-item"><a class="nav-link" href="../dashboard.html"><i class="fas fa-th-large me-1"></i>Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="../browse.html"><i class="fas fa-compass me-1"></i>Browse</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="index.html"><i class="fas fa-language me-1"></i>翻訳者</a></li>
                 </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item"><a class="nav-link" href="../dashboard.html"><i class="bi bi-person-circle me-1"></i>マイページ</a></li>
-                </ul>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="dropdown">
+                        <button class="btn btn-soft-custom dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i>
+                            <span id="userName">User</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="../profile.html"><i class="fas fa-user me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="../settings.html"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Sign Out</a></li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
@@ -64,21 +219,21 @@
     <!-- Page Header -->
     <div class="page-header">
         <div class="container">
-            <h1><i class="bi bi-translate me-2"></i>翻訳者を探す</h1>
+            <h1><i class="fas fa-language me-2"></i>翻訳者を探す</h1>
             <p>あなたの作品を世界中の読者に届けましょう。経験豊富な翻訳者が待っています。</p>
         </div>
     </div>
 
-    <div class="container">
+    <div class="container mb-5">
         <div class="row">
             <!-- Filters Sidebar -->
             <div class="col-lg-3">
                 <div class="filter-card">
-                    <h5><i class="bi bi-funnel me-2"></i>絞り込み</h5>
+                    <h5><i class="fas fa-filter me-2"></i>絞り込み</h5>
                     
                     <div class="mb-4">
-                        <label class="form-label fw-semibold">翻訳元言語</label>
-                        <select class="form-select language-select" id="source-language">
+                        <label class="form-label">翻訳元言語</label>
+                        <select class="form-select" id="source-language">
                             <option value="">すべて</option>
                             <option value="ja">日本語</option>
                             <option value="en">English</option>
@@ -92,8 +247,8 @@
                     </div>
                     
                     <div class="mb-4">
-                        <label class="form-label fw-semibold">翻訳先言語</label>
-                        <select class="form-select language-select" id="target-language">
+                        <label class="form-label">翻訳先言語</label>
+                        <select class="form-select" id="target-language">
                             <option value="">すべて</option>
                             <option value="ja">日本語</option>
                             <option value="en">English</option>
@@ -107,7 +262,7 @@
                     </div>
                     
                     <div class="mb-4">
-                        <label class="form-label fw-semibold">最低評価</label>
+                        <label class="form-label">最低評価</label>
                         <select class="form-select" id="min-rating">
                             <option value="">指定なし</option>
                             <option value="4.5">★4.5以上</option>
@@ -118,18 +273,7 @@
                     </div>
                     
                     <div class="mb-4">
-                        <label class="form-label fw-semibold">料金上限（1000文字あたり）</label>
-                        <select class="form-select" id="max-rate">
-                            <option value="">指定なし</option>
-                            <option value="5">$5以下</option>
-                            <option value="10">$10以下</option>
-                            <option value="20">$20以下</option>
-                            <option value="50">$50以下</option>
-                        </select>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold">専門分野</label>
+                        <label class="form-label">専門分野</label>
                         <select class="form-select" id="specialization">
                             <option value="">すべて</option>
                             <option value="fiction">小説・フィクション</option>
@@ -141,20 +285,32 @@
                         </select>
                     </div>
                     
-                    <button class="btn btn-primary w-100" onclick="searchTranslators()">
-                        <i class="bi bi-search me-2"></i>検索
+                    <button class="btn btn-custom w-100 mb-2" onclick="searchTranslators()">
+                        <i class="fas fa-search me-2"></i>検索
                     </button>
-                    <button class="btn btn-outline-secondary w-100 mt-2" onclick="resetFilters()">
-                        <i class="bi bi-x-circle me-2"></i>リセット
+                    <button class="btn btn-soft-custom w-100" onclick="resetFilters()">
+                        <i class="fas fa-times me-2"></i>リセット
                     </button>
                 </div>
                 
+                <!-- Revenue Info -->
+                <div class="info-card mb-3">
+                    <h6><i class="fas fa-info-circle me-2 text-accent"></i>収益分配について</h6>
+                    <p class="small text-secondary mb-2">翻訳者は翻訳作品の収益から報酬を受け取ります：</p>
+                    <ul>
+                        <li><strong>翻訳者: 20%</strong></li>
+                        <li>著者: 40-70%</li>
+                        <li>編集者: 10%</li>
+                        <li>プラットフォーム: 30%</li>
+                    </ul>
+                </div>
+                
                 <!-- Become a Translator CTA -->
-                <div class="filter-card text-center">
-                    <i class="bi bi-person-plus fs-1 text-primary mb-3 d-block"></i>
+                <div class="cta-card">
+                    <i class="fas fa-user-plus fa-2x mb-3"></i>
                     <h6>翻訳者として登録</h6>
-                    <p class="small text-muted">あなたのスキルを活かして収入を得ましょう</p>
-                    <a href="register.html" class="btn btn-outline-primary btn-sm">登録する</a>
+                    <p>あなたのスキルを活かして収入を得ましょう</p>
+                    <a href="register.html" class="btn btn-sm">登録する</a>
                 </div>
             </div>
             
@@ -162,19 +318,17 @@
             <div class="col-lg-9">
                 <!-- Sort & Results Count -->
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div id="results-count" class="text-muted">--人の翻訳者が見つかりました</div>
-                    <select class="form-select sort-dropdown" id="sort-order" onchange="searchTranslators()">
+                    <div id="results-count" class="text-secondary">--人の翻訳者が見つかりました</div>
+                    <select class="form-select" id="sort-order" style="width: auto;" onchange="searchTranslators()">
                         <option value="rating">評価が高い順</option>
                         <option value="projects">実績が多い順</option>
                         <option value="reviews">レビューが多い順</option>
-                        <option value="rate_low">料金が安い順</option>
-                        <option value="rate_high">料金が高い順</option>
                     </select>
                 </div>
                 
                 <!-- Loading -->
                 <div id="loading" class="loading-spinner">
-                    <div class="spinner-border text-primary" role="status">
+                    <div class="spinner-border text-accent" role="status">
                         <span class="visually-hidden">Loading...</span>
                     </div>
                 </div>
@@ -184,13 +338,13 @@
                 
                 <!-- Empty State -->
                 <div id="empty-state" class="empty-state" style="display: none;">
-                    <i class="bi bi-search"></i>
+                    <i class="fas fa-search"></i>
                     <h4>翻訳者が見つかりませんでした</h4>
-                    <p class="text-muted">条件を変更して再検索してください</p>
+                    <p>条件を変更して再検索してください</p>
                 </div>
                 
                 <!-- Pagination -->
-                <div class="pagination-wrapper" id="pagination"></div>
+                <div id="pagination" class="d-flex justify-content-center mt-4"></div>
             </div>
         </div>
     </div>
@@ -200,13 +354,11 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">翻訳者プロフィール</h5>
+                    <h5 class="modal-title"><i class="fas fa-user me-2"></i>翻訳者プロフィール</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" id="translator-detail-content">
-                    <div class="text-center py-4">
-                        <div class="spinner-border text-primary"></div>
-                    </div>
+                    <div class="text-center py-4"><div class="spinner-border text-accent"></div></div>
                 </div>
             </div>
         </div>
@@ -217,16 +369,22 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="bi bi-send me-2"></i>翻訳を依頼</h5>
+                    <h5 class="modal-title"><i class="fas fa-paper-plane me-2"></i>翻訳を依頼</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="request-profile-id">
-                    <input type="hidden" id="request-translator-rate">
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>収益分配モデル:</strong> 翻訳者は翻訳作品の収益の<strong>20%</strong>を受け取ります。
+                    </div>
                     
                     <div class="mb-3">
-                        <label class="form-label">依頼タイトル <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="request-title" placeholder="例: 小説「〇〇」の英語翻訳">
+                        <label class="form-label">作品を選択 <span class="text-danger">*</span></label>
+                        <select class="form-select" id="request-work">
+                            <option value="">作品を選択してください</option>
+                        </select>
                     </div>
                     
                     <div class="row mb-3">
@@ -249,38 +407,38 @@
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label">説明・要望</label>
-                        <textarea class="form-control" id="request-description" rows="3" placeholder="翻訳する作品の概要や、特に気をつけてほしい点など"></textarea>
+                        <label class="form-label">メッセージ（任意）</label>
+                        <textarea class="form-control" id="request-message" rows="3" placeholder="翻訳者への要望やコメントがあれば記入してください"></textarea>
                     </div>
                     
-                    <div class="row mb-3">
-                        <div class="col-6">
-                            <label class="form-label">文字数（概算）</label>
-                            <input type="number" class="form-control" id="request-word-count" placeholder="例: 50000" oninput="calculateEstimate()">
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label">希望納期</label>
-                            <input type="date" class="form-control" id="request-deadline">
-                        </div>
-                    </div>
-                    
-                    <div class="alert alert-info" id="estimate-display" style="display: none;">
-                        <div class="d-flex justify-content-between">
-                            <span>見積もり金額:</span>
-                            <strong id="estimate-amount">$0</strong>
-                        </div>
-                        <small class="text-muted">（翻訳者の料金: $<span id="translator-rate-display">0</span>/1000文字）</small>
+                    <div class="mb-3">
+                        <label class="form-label">希望納期（任意）</label>
+                        <input type="date" class="form-control" id="request-deadline">
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
-                    <button type="button" class="btn btn-primary" onclick="submitRequest()">
-                        <i class="bi bi-send me-2"></i>依頼を送信
+                    <button type="button" class="btn btn-soft-custom" data-bs-dismiss="modal">キャンセル</button>
+                    <button type="button" class="btn btn-custom" onclick="submitRequest()">
+                        <i class="fas fa-paper-plane me-2"></i>依頼を送信
                     </button>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="footer-custom">
+        <div class="container">
+            <div class="d-flex flex-wrap justify-content-between align-items-center">
+                <p class="small mb-0">&copy; 2024 Publisher. All rights reserved.</p>
+                <div class="d-flex gap-3">
+                    <a href="../help.html" class="text-secondary">Help</a>
+                    <a href="../legal/terms.html" class="text-secondary">Terms</a>
+                    <a href="../legal/privacy.html" class="text-secondary">Privacy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -311,7 +469,6 @@
                 source_language: document.getElementById('source-language').value,
                 target_language: document.getElementById('target-language').value,
                 min_rating: document.getElementById('min-rating').value,
-                max_rate: document.getElementById('max-rate').value,
                 specialization: document.getElementById('specialization').value,
                 sort: document.getElementById('sort-order').value,
                 page: page,
@@ -326,7 +483,6 @@
                 
                 if (data.translators && data.translators.length > 0) {
                     document.getElementById('results-count').textContent = `${data.pagination.total}人の翻訳者が見つかりました`;
-                    
                     list.innerHTML = data.translators.map(t => renderTranslatorCard(t)).join('');
                     renderPagination(data.pagination);
                 } else {
@@ -347,7 +503,6 @@
             const rating = parseFloat(translator.avg_rating) || 0;
             const stars = '★'.repeat(Math.floor(rating)) + (rating % 1 >= 0.5 ? '☆' : '');
             
-            // Language pairs
             let langPairsHtml = '';
             if (translator.language_pairs) {
                 const pairs = Array.isArray(translator.language_pairs) ? translator.language_pairs : [];
@@ -357,12 +512,9 @@
                         ${lp.is_native ? '<span class="native-badge">ネイティブ</span>' : ''}
                     </span>
                 `).join('');
-                if (pairs.length > 4) {
-                    langPairsHtml += `<span class="lang-badge">+${pairs.length - 4}言語</span>`;
-                }
+                if (pairs.length > 4) langPairsHtml += `<span class="lang-badge">+${pairs.length - 4}</span>`;
             }
             
-            // Specializations
             let specsHtml = '';
             if (translator.specializations && translator.specializations.length > 0) {
                 specsHtml = translator.specializations.map(s => 
@@ -380,43 +532,39 @@
                             <div class="translator-name">${escapeHtml(name)}</div>
                             <div class="mb-2">
                                 <span class="rating-stars">${stars || '☆☆☆☆☆'}</span>
-                                <span class="rating-count">(${translator.total_reviews || 0}件のレビュー)</span>
+                                <span class="rating-count">(${translator.total_reviews || 0}件)</span>
                             </div>
                             <div class="translator-bio">${escapeHtml(translator.bio) || '自己紹介はまだありません'}</div>
-                            <div class="mb-2">${langPairsHtml || '<span class="text-muted">言語ペア未設定</span>'}</div>
+                            <div class="mb-2">${langPairsHtml || '<span class="text-secondary small">言語ペア未設定</span>'}</div>
                             <div>${specsHtml}</div>
                         </div>
-                        <div class="col-auto text-end">
-                            <div class="price-tag mb-3">$${parseFloat(translator.base_rate_per_1000 || 10).toFixed(2)}<small>/1000文字</small></div>
+                        <div class="col-auto text-center">
+                            <div class="revenue-badge mb-3">
+                                <div class="percent">20%</div>
+                                <div class="label">収益分配</div>
+                            </div>
                             <div class="d-grid gap-2">
-                                <button class="btn btn-primary btn-sm" onclick="openRequestModal('${translator.profile_id}', ${translator.base_rate_per_1000 || 10})">
-                                    <i class="bi bi-send me-1"></i>依頼する
+                                <button class="btn btn-custom btn-sm" onclick="openRequestModal('${translator.profile_id}')">
+                                    <i class="fas fa-paper-plane me-1"></i>依頼する
                                 </button>
-                                <button class="btn btn-outline-secondary btn-sm" onclick="viewProfile('${translator.profile_id}')">
-                                    <i class="bi bi-person me-1"></i>プロフィール
+                                <button class="btn btn-soft-custom btn-sm" onclick="viewProfile('${translator.profile_id}')">
+                                    <i class="fas fa-user me-1"></i>プロフィール
                                 </button>
                             </div>
                         </div>
                     </div>
-                    <hr class="my-3">
-                    <div class="row text-center">
-                        <div class="col-4">
-                            <div class="stats-item">
-                                <div class="number">${translator.completed_projects || 0}</div>
-                                <div class="label">完了プロジェクト</div>
-                            </div>
+                    <div class="stats-row">
+                        <div class="stat-item">
+                            <div class="number">${translator.completed_projects || 0}</div>
+                            <div class="label">完了案件</div>
                         </div>
-                        <div class="col-4">
-                            <div class="stats-item">
-                                <div class="number">${translator.years_experience || 0}年</div>
-                                <div class="label">経験年数</div>
-                            </div>
+                        <div class="stat-item">
+                            <div class="number">${translator.years_experience || 0}年</div>
+                            <div class="label">経験年数</div>
                         </div>
-                        <div class="col-4">
-                            <div class="stats-item">
-                                <div class="number">${translator.avg_response_hours || 24}h</div>
-                                <div class="label">平均返答時間</div>
-                            </div>
+                        <div class="stat-item">
+                            <div class="number">${translator.avg_response_hours || 24}h</div>
+                            <div class="label">返答時間</div>
                         </div>
                     </div>
                 </div>
@@ -425,34 +573,23 @@
         
         function renderPagination(pagination) {
             const container = document.getElementById('pagination');
-            if (pagination.totalPages <= 1) {
-                container.innerHTML = '';
-                return;
-            }
+            if (pagination.totalPages <= 1) { container.innerHTML = ''; return; }
             
             let html = '<nav><ul class="pagination">';
-            
-            // Previous
             html += `<li class="page-item ${pagination.page === 1 ? 'disabled' : ''}">
-                <a class="page-link" href="#" onclick="searchTranslators(${pagination.page - 1})">&laquo;</a>
-            </li>`;
+                <a class="page-link" href="#" onclick="searchTranslators(${pagination.page - 1})">&laquo;</a></li>`;
             
-            // Pages
             for (let i = 1; i <= pagination.totalPages; i++) {
                 if (i === 1 || i === pagination.totalPages || (i >= pagination.page - 2 && i <= pagination.page + 2)) {
                     html += `<li class="page-item ${i === pagination.page ? 'active' : ''}">
-                        <a class="page-link" href="#" onclick="searchTranslators(${i})">${i}</a>
-                    </li>`;
+                        <a class="page-link" href="#" onclick="searchTranslators(${i})">${i}</a></li>`;
                 } else if (i === pagination.page - 3 || i === pagination.page + 3) {
                     html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
                 }
             }
             
-            // Next
             html += `<li class="page-item ${pagination.page === pagination.totalPages ? 'disabled' : ''}">
-                <a class="page-link" href="#" onclick="searchTranslators(${pagination.page + 1})">&raquo;</a>
-            </li>`;
-            
+                <a class="page-link" href="#" onclick="searchTranslators(${pagination.page + 1})">&raquo;</a></li>`;
             html += '</ul></nav>';
             container.innerHTML = html;
         }
@@ -460,13 +597,12 @@
         async function viewProfile(profileId) {
             const modal = new bootstrap.Modal(document.getElementById('translatorModal'));
             const content = document.getElementById('translator-detail-content');
-            content.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div></div>';
+            content.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-accent"></div></div>';
             modal.show();
             
             try {
                 const response = await fetch(`${API_BASE}/translators/${profileId}`);
                 const data = await response.json();
-                
                 const profile = data.profile;
                 const languages = data.languages || [];
                 const reviews = data.reviews || [];
@@ -478,20 +614,21 @@
                 content.innerHTML = `
                     <div class="row">
                         <div class="col-md-4 text-center mb-4">
-                            <div class="translator-avatar mx-auto mb-3" style="width: 120px; height: 120px; font-size: 3rem;">
+                            <div class="translator-avatar mx-auto mb-3" style="width: 100px; height: 100px; font-size: 2.5rem;">
                                 ${name.charAt(0).toUpperCase()}
                             </div>
-                            <h4>${escapeHtml(name)}</h4>
+                            <h4 style="font-family: var(--font-heading);">${escapeHtml(name)}</h4>
                             <div class="mb-2">
                                 <span class="rating-stars">${stars || '☆☆☆☆☆'}</span>
-                                <span class="text-muted">${rating.toFixed(1)}</span>
+                                <span class="text-secondary">${rating.toFixed(1)}</span>
                             </div>
-                            <div class="price-tag d-inline-block mb-3">
-                                $${parseFloat(profile.base_rate_per_1000 || 10).toFixed(2)}/1000文字
+                            <div class="revenue-badge d-inline-block mb-3">
+                                <div class="percent">20%</div>
+                                <div class="label">収益分配</div>
                             </div>
                             <div class="d-grid">
-                                <button class="btn btn-primary" onclick="openRequestModal('${profile.profile_id}', ${profile.base_rate_per_1000 || 10})">
-                                    <i class="bi bi-send me-2"></i>依頼する
+                                <button class="btn btn-custom" onclick="openRequestModal('${profile.profile_id}')">
+                                    <i class="fas fa-paper-plane me-2"></i>依頼する
                                 </button>
                             </div>
                         </div>
@@ -505,36 +642,28 @@
                                     <span class="lang-badge mb-2">
                                         ${LANG_NAMES[l.source_language] || l.source_language} → ${LANG_NAMES[l.target_language] || l.target_language}
                                         ${l.is_native_target ? '<span class="native-badge">ネイティブ</span>' : ''}
-                                        <small class="text-muted">(${l.projects_completed}件完了)</small>
                                     </span>
                                 `).join('')}
                             </div>
                             
                             <div class="row mb-3">
-                                <div class="col-6">
-                                    <strong>経験年数:</strong> ${profile.years_experience || 0}年
-                                </div>
-                                <div class="col-6">
-                                    <strong>完了案件:</strong> ${profile.completed_projects || 0}件
-                                </div>
+                                <div class="col-6"><strong>経験年数:</strong> ${profile.years_experience || 0}年</div>
+                                <div class="col-6"><strong>完了案件:</strong> ${profile.completed_projects || 0}件</div>
                             </div>
                             
                             ${profile.certifications ? `<p><strong>資格:</strong> ${escapeHtml(profile.certifications)}</p>` : ''}
-                            ${profile.portfolio_url ? `<p><strong>ポートフォリオ:</strong> <a href="${escapeHtml(profile.portfolio_url)}" target="_blank">${escapeHtml(profile.portfolio_url)}</a></p>` : ''}
                             
                             <h5 class="mt-4">レビュー (${reviews.length}件)</h5>
                             ${reviews.length > 0 ? reviews.map(r => `
-                                <div class="card mb-2">
-                                    <div class="card-body py-2">
-                                        <div class="d-flex justify-content-between">
-                                            <strong>${escapeHtml(r.reviewer_name) || '匿名'}</strong>
-                                            <span class="rating-stars">${'★'.repeat(r.overall_rating)}</span>
-                                        </div>
-                                        ${r.review_text ? `<p class="mb-1 small">${escapeHtml(r.review_text)}</p>` : ''}
-                                        <small class="text-muted">${new Date(r.created_at).toLocaleDateString('ja-JP')}</small>
+                                <div class="p-3 mb-2" style="background: var(--color-bg-hover); border-radius: var(--radius-md);">
+                                    <div class="d-flex justify-content-between">
+                                        <strong>${escapeHtml(r.reviewer_name) || '匿名'}</strong>
+                                        <span class="rating-stars">${'★'.repeat(r.overall_rating)}</span>
                                     </div>
+                                    ${r.review_text ? `<p class="mb-1 small">${escapeHtml(r.review_text)}</p>` : ''}
+                                    <small class="text-secondary">${new Date(r.created_at).toLocaleDateString('ja-JP')}</small>
                                 </div>
-                            `).join('') : '<p class="text-muted">まだレビューがありません</p>'}
+                            `).join('') : '<p class="text-secondary">まだレビューがありません</p>'}
                         </div>
                     </div>
                 `;
@@ -543,52 +672,49 @@
             }
         }
         
-        function openRequestModal(profileId, rate) {
+        async function openRequestModal(profileId) {
             document.getElementById('request-profile-id').value = profileId;
-            document.getElementById('request-translator-rate').value = rate;
-            document.getElementById('translator-rate-display').textContent = parseFloat(rate).toFixed(2);
-            document.getElementById('request-title').value = '';
-            document.getElementById('request-description').value = '';
-            document.getElementById('request-word-count').value = '';
-            document.getElementById('estimate-display').style.display = 'none';
+            document.getElementById('request-message').value = '';
+            document.getElementById('request-deadline').value = '';
             
-            // Close profile modal if open
+            // Load user's works
+            const workSelect = document.getElementById('request-work');
+            workSelect.innerHTML = '<option value="">読み込み中...</option>';
+            
             const profileModal = bootstrap.Modal.getInstance(document.getElementById('translatorModal'));
             if (profileModal) profileModal.hide();
             
             const modal = new bootstrap.Modal(document.getElementById('requestModal'));
             modal.show();
-        }
-        
-        function calculateEstimate() {
-            const wordCount = parseInt(document.getElementById('request-word-count').value) || 0;
-            const rate = parseFloat(document.getElementById('request-translator-rate').value) || 0;
             
-            if (wordCount > 0 && rate > 0) {
-                const estimate = (wordCount / 1000) * rate;
-                document.getElementById('estimate-amount').textContent = '$' + estimate.toFixed(2);
-                document.getElementById('estimate-display').style.display = 'block';
-            } else {
-                document.getElementById('estimate-display').style.display = 'none';
+            try {
+                const userId = localStorage.getItem('userId');
+                if (userId) {
+                    const response = await fetch(`${API_BASE}/works?author_id=${userId}`);
+                    const data = await response.json();
+                    workSelect.innerHTML = '<option value="">作品を選択してください</option>' +
+                        (data.works || []).map(w => `<option value="${w.work_id}">${escapeHtml(w.title)}</option>`).join('');
+                } else {
+                    workSelect.innerHTML = '<option value="">ログインが必要です</option>';
+                }
+            } catch (error) {
+                workSelect.innerHTML = '<option value="">作品を読み込めませんでした</option>';
             }
         }
         
         async function submitRequest() {
             const profileId = document.getElementById('request-profile-id').value;
-            const title = document.getElementById('request-title').value;
+            const workId = document.getElementById('request-work').value;
             const sourceLanguage = document.getElementById('request-source-lang').value;
             const targetLanguage = document.getElementById('request-target-lang').value;
-            const description = document.getElementById('request-description').value;
-            const wordCount = document.getElementById('request-word-count').value;
+            const message = document.getElementById('request-message').value;
             const deadline = document.getElementById('request-deadline').value;
-            const proposedRate = document.getElementById('request-translator-rate').value;
             
-            if (!title) {
-                alert('依頼タイトルを入力してください');
+            if (!workId) {
+                alert('作品を選択してください');
                 return;
             }
             
-            // Get user ID (in production, this comes from auth)
             const userId = localStorage.getItem('userId');
             if (!userId) {
                 alert('ログインが必要です');
@@ -599,27 +725,22 @@
             try {
                 const response = await fetch(`${API_BASE}/translators/${profileId}/request`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-User-ID': userId
-                    },
+                    headers: { 'Content-Type': 'application/json', 'X-User-ID': userId },
                     body: JSON.stringify({
-                        title,
+                        workId,
                         sourceLanguage,
                         targetLanguage,
-                        description,
-                        wordCount: parseInt(wordCount) || 0,
-                        deadline: deadline || null,
-                        proposedRate: parseFloat(proposedRate)
+                        title: '翻訳依頼',
+                        description: message,
+                        deadline: deadline || null
                     })
                 });
-                
-                const data = await response.json();
                 
                 if (response.ok) {
                     alert('翻訳依頼を送信しました！翻訳者からの返答をお待ちください。');
                     bootstrap.Modal.getInstance(document.getElementById('requestModal')).hide();
                 } else {
+                    const data = await response.json();
                     alert('エラー: ' + (data.error || '送信に失敗しました'));
                 }
             } catch (error) {
@@ -631,7 +752,6 @@
             document.getElementById('source-language').value = '';
             document.getElementById('target-language').value = '';
             document.getElementById('min-rating').value = '';
-            document.getElementById('max-rate').value = '';
             document.getElementById('specialization').value = '';
             document.getElementById('sort-order').value = 'rating';
             searchTranslators();
@@ -644,8 +764,15 @@
             return div.innerHTML;
         }
         
-        // Initial load
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '../login.html';
+        }
+        
         document.addEventListener('DOMContentLoaded', () => {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (user.firstName) document.getElementById('userName').textContent = user.firstName;
             searchTranslators();
         });
     </script>
