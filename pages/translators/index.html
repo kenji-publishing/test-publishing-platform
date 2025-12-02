@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>翻訳者を探す - Publisher</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+        }
+        body { background: #f5f6fa; min-height: 100vh; }
+        .navbar-custom { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); }
+        .page-header { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: #fff; padding: 40px 0; margin-bottom: 30px; }
+        .page-header h1 { font-weight: 700; margin-bottom: 10px; }
+        .page-header p { opacity: 0.9; margin-bottom: 0; }
+        .filter-card { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 25px; margin-bottom: 25px; }
+        .filter-card h5 { font-weight: 600; margin-bottom: 20px; color: #2c3e50; }
+        .translator-card { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 25px; margin-bottom: 20px; transition: all 0.3s; }
+        .translator-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.12); }
+        .translator-avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold; }
+        .translator-name { font-size: 1.3rem; font-weight: 600; color: #2c3e50; margin-bottom: 5px; }
+        .translator-bio { color: #7f8c8d; font-size: 0.95rem; margin-bottom: 15px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .rating-stars { color: #f1c40f; font-size: 1.1rem; }
+        .rating-count { color: #7f8c8d; font-size: 0.85rem; margin-left: 8px; }
+        .lang-badge { display: inline-flex; align-items: center; gap: 5px; background: #f0f4ff; color: #667eea; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; margin: 3px; }
+        .lang-badge i { font-size: 0.8rem; }
+        .price-tag { background: #e8f5e9; color: #388e3c; padding: 8px 15px; border-radius: 8px; font-weight: 600; }
+        .specialization-tag { background: #f5f5f5; color: #666; padding: 4px 10px; border-radius: 15px; font-size: 0.8rem; margin: 2px; display: inline-block; }
+        .native-badge { background: #fff3e0; color: #f57c00; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; }
+        .stats-item { text-align: center; padding: 10px; }
+        .stats-item .number { font-size: 1.5rem; font-weight: 700; color: #2c3e50; }
+        .stats-item .label { font-size: 0.8rem; color: #7f8c8d; }
+        .empty-state { text-align: center; padding: 60px 20px; }
+        .empty-state i { font-size: 4rem; color: #ddd; margin-bottom: 20px; }
+        .loading-spinner { display: flex; justify-content: center; padding: 60px; }
+        .sort-dropdown { min-width: 180px; }
+        .language-select { min-width: 150px; }
+        .pagination-wrapper { display: flex; justify-content: center; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="../index.html"><i class="bi bi-book me-2"></i>Publisher</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="../works/browse.html">作品を読む</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="index.html">翻訳者を探す</a></li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="../dashboard.html"><i class="bi bi-person-circle me-1"></i>マイページ</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="container">
+            <h1><i class="bi bi-translate me-2"></i>翻訳者を探す</h1>
+            <p>あなたの作品を世界中の読者に届けましょう。経験豊富な翻訳者が待っています。</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <!-- Filters Sidebar -->
+            <div class="col-lg-3">
+                <div class="filter-card">
+                    <h5><i class="bi bi-funnel me-2"></i>絞り込み</h5>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">翻訳元言語</label>
+                        <select class="form-select language-select" id="source-language">
+                            <option value="">すべて</option>
+                            <option value="ja">日本語</option>
+                            <option value="en">English</option>
+                            <option value="zh">中文</option>
+                            <option value="es">Español</option>
+                            <option value="fr">Français</option>
+                            <option value="de">Deutsch</option>
+                            <option value="ko">한국어</option>
+                            <option value="ar">العربية</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">翻訳先言語</label>
+                        <select class="form-select language-select" id="target-language">
+                            <option value="">すべて</option>
+                            <option value="ja">日本語</option>
+                            <option value="en">English</option>
+                            <option value="zh">中文</option>
+                            <option value="es">Español</option>
+                            <option value="fr">Français</option>
+                            <option value="de">Deutsch</option>
+                            <option value="ko">한국어</option>
+                            <option value="ar">العربية</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">最低評価</label>
+                        <select class="form-select" id="min-rating">
+                            <option value="">指定なし</option>
+                            <option value="4.5">★4.5以上</option>
+                            <option value="4">★4.0以上</option>
+                            <option value="3.5">★3.5以上</option>
+                            <option value="3">★3.0以上</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">料金上限（1000文字あたり）</label>
+                        <select class="form-select" id="max-rate">
+                            <option value="">指定なし</option>
+                            <option value="5">$5以下</option>
+                            <option value="10">$10以下</option>
+                            <option value="20">$20以下</option>
+                            <option value="50">$50以下</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">専門分野</label>
+                        <select class="form-select" id="specialization">
+                            <option value="">すべて</option>
+                            <option value="fiction">小説・フィクション</option>
+                            <option value="manga">マンガ</option>
+                            <option value="technical">技術・専門書</option>
+                            <option value="poetry">詩・俳句</option>
+                            <option value="business">ビジネス</option>
+                            <option value="academic">学術</option>
+                        </select>
+                    </div>
+                    
+                    <button class="btn btn-primary w-100" onclick="searchTranslators()">
+                        <i class="bi bi-search me-2"></i>検索
+                    </button>
+                    <button class="btn btn-outline-secondary w-100 mt-2" onclick="resetFilters()">
+                        <i class="bi bi-x-circle me-2"></i>リセット
+                    </button>
+                </div>
+                
+                <!-- Become a Translator CTA -->
+                <div class="filter-card text-center">
+                    <i class="bi bi-person-plus fs-1 text-primary mb-3 d-block"></i>
+                    <h6>翻訳者として登録</h6>
+                    <p class="small text-muted">あなたのスキルを活かして収入を得ましょう</p>
+                    <a href="register.html" class="btn btn-outline-primary btn-sm">登録する</a>
+                </div>
+            </div>
+            
+            <!-- Translators List -->
+            <div class="col-lg-9">
+                <!-- Sort & Results Count -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div id="results-count" class="text-muted">--人の翻訳者が見つかりました</div>
+                    <select class="form-select sort-dropdown" id="sort-order" onchange="searchTranslators()">
+                        <option value="rating">評価が高い順</option>
+                        <option value="projects">実績が多い順</option>
+                        <option value="reviews">レビューが多い順</option>
+                        <option value="rate_low">料金が安い順</option>
+                        <option value="rate_high">料金が高い順</option>
+                    </select>
+                </div>
+                
+                <!-- Loading -->
+                <div id="loading" class="loading-spinner">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                
+                <!-- Translator Cards -->
+                <div id="translator-list"></div>
+                
+                <!-- Empty State -->
+                <div id="empty-state" class="empty-state" style="display: none;">
+                    <i class="bi bi-search"></i>
+                    <h4>翻訳者が見つかりませんでした</h4>
+                    <p class="text-muted">条件を変更して再検索してください</p>
+                </div>
+                
+                <!-- Pagination -->
+                <div class="pagination-wrapper" id="pagination"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Translator Detail Modal -->
+    <div class="modal fade" id="translatorModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">翻訳者プロフィール</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="translator-detail-content">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Request Translation Modal -->
+    <div class="modal fade" id="requestModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-send me-2"></i>翻訳を依頼</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="request-profile-id">
+                    <input type="hidden" id="request-translator-rate">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">依頼タイトル <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="request-title" placeholder="例: 小説「〇〇」の英語翻訳">
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="form-label">翻訳元</label>
+                            <select class="form-select" id="request-source-lang">
+                                <option value="ja">日本語</option>
+                                <option value="en">English</option>
+                                <option value="zh">中文</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">翻訳先</label>
+                            <select class="form-select" id="request-target-lang">
+                                <option value="en">English</option>
+                                <option value="ja">日本語</option>
+                                <option value="zh">中文</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">説明・要望</label>
+                        <textarea class="form-control" id="request-description" rows="3" placeholder="翻訳する作品の概要や、特に気をつけてほしい点など"></textarea>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="form-label">文字数（概算）</label>
+                            <input type="number" class="form-control" id="request-word-count" placeholder="例: 50000" oninput="calculateEstimate()">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">希望納期</label>
+                            <input type="date" class="form-control" id="request-deadline">
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info" id="estimate-display" style="display: none;">
+                        <div class="d-flex justify-content-between">
+                            <span>見積もり金額:</span>
+                            <strong id="estimate-amount">$0</strong>
+                        </div>
+                        <small class="text-muted">（翻訳者の料金: $<span id="translator-rate-display">0</span>/1000文字）</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                    <button type="button" class="btn btn-primary" onclick="submitRequest()">
+                        <i class="bi bi-send me-2"></i>依頼を送信
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+        const LANG_NAMES = {
+            'ja': '日本語', 'en': 'English', 'zh': '中文',
+            'es': 'Español', 'fr': 'Français', 'de': 'Deutsch',
+            'ko': '한국어', 'ar': 'العربية'
+        };
+        const SPEC_NAMES = {
+            'fiction': '小説', 'manga': 'マンガ', 'technical': '技術書',
+            'poetry': '詩', 'business': 'ビジネス', 'academic': '学術'
+        };
+        
+        let currentPage = 1;
+        
+        async function searchTranslators(page = 1) {
+            currentPage = page;
+            const loading = document.getElementById('loading');
+            const list = document.getElementById('translator-list');
+            const emptyState = document.getElementById('empty-state');
+            
+            loading.style.display = 'flex';
+            list.innerHTML = '';
+            emptyState.style.display = 'none';
+            
+            const params = new URLSearchParams({
+                source_language: document.getElementById('source-language').value,
+                target_language: document.getElementById('target-language').value,
+                min_rating: document.getElementById('min-rating').value,
+                max_rate: document.getElementById('max-rate').value,
+                specialization: document.getElementById('specialization').value,
+                sort: document.getElementById('sort-order').value,
+                page: page,
+                limit: 10
+            });
+            
+            try {
+                const response = await fetch(`${API_BASE}/translators?${params}`);
+                const data = await response.json();
+                
+                loading.style.display = 'none';
+                
+                if (data.translators && data.translators.length > 0) {
+                    document.getElementById('results-count').textContent = `${data.pagination.total}人の翻訳者が見つかりました`;
+                    
+                    list.innerHTML = data.translators.map(t => renderTranslatorCard(t)).join('');
+                    renderPagination(data.pagination);
+                } else {
+                    document.getElementById('results-count').textContent = '0人の翻訳者が見つかりました';
+                    emptyState.style.display = 'block';
+                    document.getElementById('pagination').innerHTML = '';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                loading.style.display = 'none';
+                list.innerHTML = '<div class="alert alert-danger">翻訳者の検索に失敗しました</div>';
+            }
+        }
+        
+        function renderTranslatorCard(translator) {
+            const name = translator.display_name || translator.pen_name || '翻訳者';
+            const initial = name.charAt(0).toUpperCase();
+            const rating = parseFloat(translator.avg_rating) || 0;
+            const stars = '★'.repeat(Math.floor(rating)) + (rating % 1 >= 0.5 ? '☆' : '');
+            
+            // Language pairs
+            let langPairsHtml = '';
+            if (translator.language_pairs) {
+                const pairs = Array.isArray(translator.language_pairs) ? translator.language_pairs : [];
+                langPairsHtml = pairs.slice(0, 4).map(lp => `
+                    <span class="lang-badge">
+                        ${LANG_NAMES[lp.source] || lp.source} → ${LANG_NAMES[lp.target] || lp.target}
+                        ${lp.is_native ? '<span class="native-badge">ネイティブ</span>' : ''}
+                    </span>
+                `).join('');
+                if (pairs.length > 4) {
+                    langPairsHtml += `<span class="lang-badge">+${pairs.length - 4}言語</span>`;
+                }
+            }
+            
+            // Specializations
+            let specsHtml = '';
+            if (translator.specializations && translator.specializations.length > 0) {
+                specsHtml = translator.specializations.map(s => 
+                    `<span class="specialization-tag">${SPEC_NAMES[s] || s}</span>`
+                ).join('');
+            }
+            
+            return `
+                <div class="translator-card">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <div class="translator-avatar">${initial}</div>
+                        </div>
+                        <div class="col">
+                            <div class="translator-name">${escapeHtml(name)}</div>
+                            <div class="mb-2">
+                                <span class="rating-stars">${stars || '☆☆☆☆☆'}</span>
+                                <span class="rating-count">(${translator.total_reviews || 0}件のレビュー)</span>
+                            </div>
+                            <div class="translator-bio">${escapeHtml(translator.bio) || '自己紹介はまだありません'}</div>
+                            <div class="mb-2">${langPairsHtml || '<span class="text-muted">言語ペア未設定</span>'}</div>
+                            <div>${specsHtml}</div>
+                        </div>
+                        <div class="col-auto text-end">
+                            <div class="price-tag mb-3">$${parseFloat(translator.base_rate_per_1000 || 10).toFixed(2)}<small>/1000文字</small></div>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-primary btn-sm" onclick="openRequestModal('${translator.profile_id}', ${translator.base_rate_per_1000 || 10})">
+                                    <i class="bi bi-send me-1"></i>依頼する
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="viewProfile('${translator.profile_id}')">
+                                    <i class="bi bi-person me-1"></i>プロフィール
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <hr class="my-3">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="stats-item">
+                                <div class="number">${translator.completed_projects || 0}</div>
+                                <div class="label">完了プロジェクト</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stats-item">
+                                <div class="number">${translator.years_experience || 0}年</div>
+                                <div class="label">経験年数</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stats-item">
+                                <div class="number">${translator.avg_response_hours || 24}h</div>
+                                <div class="label">平均返答時間</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function renderPagination(pagination) {
+            const container = document.getElementById('pagination');
+            if (pagination.totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            let html = '<nav><ul class="pagination">';
+            
+            // Previous
+            html += `<li class="page-item ${pagination.page === 1 ? 'disabled' : ''}">
+                <a class="page-link" href="#" onclick="searchTranslators(${pagination.page - 1})">&laquo;</a>
+            </li>`;
+            
+            // Pages
+            for (let i = 1; i <= pagination.totalPages; i++) {
+                if (i === 1 || i === pagination.totalPages || (i >= pagination.page - 2 && i <= pagination.page + 2)) {
+                    html += `<li class="page-item ${i === pagination.page ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="searchTranslators(${i})">${i}</a>
+                    </li>`;
+                } else if (i === pagination.page - 3 || i === pagination.page + 3) {
+                    html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                }
+            }
+            
+            // Next
+            html += `<li class="page-item ${pagination.page === pagination.totalPages ? 'disabled' : ''}">
+                <a class="page-link" href="#" onclick="searchTranslators(${pagination.page + 1})">&raquo;</a>
+            </li>`;
+            
+            html += '</ul></nav>';
+            container.innerHTML = html;
+        }
+        
+        async function viewProfile(profileId) {
+            const modal = new bootstrap.Modal(document.getElementById('translatorModal'));
+            const content = document.getElementById('translator-detail-content');
+            content.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div></div>';
+            modal.show();
+            
+            try {
+                const response = await fetch(`${API_BASE}/translators/${profileId}`);
+                const data = await response.json();
+                
+                const profile = data.profile;
+                const languages = data.languages || [];
+                const reviews = data.reviews || [];
+                
+                const name = profile.display_name || profile.pen_name || '翻訳者';
+                const rating = parseFloat(profile.avg_rating) || 0;
+                const stars = '★'.repeat(Math.floor(rating)) + (rating % 1 >= 0.5 ? '☆' : '');
+                
+                content.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-4">
+                            <div class="translator-avatar mx-auto mb-3" style="width: 120px; height: 120px; font-size: 3rem;">
+                                ${name.charAt(0).toUpperCase()}
+                            </div>
+                            <h4>${escapeHtml(name)}</h4>
+                            <div class="mb-2">
+                                <span class="rating-stars">${stars || '☆☆☆☆☆'}</span>
+                                <span class="text-muted">${rating.toFixed(1)}</span>
+                            </div>
+                            <div class="price-tag d-inline-block mb-3">
+                                $${parseFloat(profile.base_rate_per_1000 || 10).toFixed(2)}/1000文字
+                            </div>
+                            <div class="d-grid">
+                                <button class="btn btn-primary" onclick="openRequestModal('${profile.profile_id}', ${profile.base_rate_per_1000 || 10})">
+                                    <i class="bi bi-send me-2"></i>依頼する
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <h5>自己紹介</h5>
+                            <p>${escapeHtml(profile.bio) || 'まだ自己紹介がありません'}</p>
+                            
+                            <h5>対応言語</h5>
+                            <div class="mb-3">
+                                ${languages.map(l => `
+                                    <span class="lang-badge mb-2">
+                                        ${LANG_NAMES[l.source_language] || l.source_language} → ${LANG_NAMES[l.target_language] || l.target_language}
+                                        ${l.is_native_target ? '<span class="native-badge">ネイティブ</span>' : ''}
+                                        <small class="text-muted">(${l.projects_completed}件完了)</small>
+                                    </span>
+                                `).join('')}
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <strong>経験年数:</strong> ${profile.years_experience || 0}年
+                                </div>
+                                <div class="col-6">
+                                    <strong>完了案件:</strong> ${profile.completed_projects || 0}件
+                                </div>
+                            </div>
+                            
+                            ${profile.certifications ? `<p><strong>資格:</strong> ${escapeHtml(profile.certifications)}</p>` : ''}
+                            ${profile.portfolio_url ? `<p><strong>ポートフォリオ:</strong> <a href="${escapeHtml(profile.portfolio_url)}" target="_blank">${escapeHtml(profile.portfolio_url)}</a></p>` : ''}
+                            
+                            <h5 class="mt-4">レビュー (${reviews.length}件)</h5>
+                            ${reviews.length > 0 ? reviews.map(r => `
+                                <div class="card mb-2">
+                                    <div class="card-body py-2">
+                                        <div class="d-flex justify-content-between">
+                                            <strong>${escapeHtml(r.reviewer_name) || '匿名'}</strong>
+                                            <span class="rating-stars">${'★'.repeat(r.overall_rating)}</span>
+                                        </div>
+                                        ${r.review_text ? `<p class="mb-1 small">${escapeHtml(r.review_text)}</p>` : ''}
+                                        <small class="text-muted">${new Date(r.created_at).toLocaleDateString('ja-JP')}</small>
+                                    </div>
+                                </div>
+                            `).join('') : '<p class="text-muted">まだレビューがありません</p>'}
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                content.innerHTML = '<div class="alert alert-danger">プロフィールの読み込みに失敗しました</div>';
+            }
+        }
+        
+        function openRequestModal(profileId, rate) {
+            document.getElementById('request-profile-id').value = profileId;
+            document.getElementById('request-translator-rate').value = rate;
+            document.getElementById('translator-rate-display').textContent = parseFloat(rate).toFixed(2);
+            document.getElementById('request-title').value = '';
+            document.getElementById('request-description').value = '';
+            document.getElementById('request-word-count').value = '';
+            document.getElementById('estimate-display').style.display = 'none';
+            
+            // Close profile modal if open
+            const profileModal = bootstrap.Modal.getInstance(document.getElementById('translatorModal'));
+            if (profileModal) profileModal.hide();
+            
+            const modal = new bootstrap.Modal(document.getElementById('requestModal'));
+            modal.show();
+        }
+        
+        function calculateEstimate() {
+            const wordCount = parseInt(document.getElementById('request-word-count').value) || 0;
+            const rate = parseFloat(document.getElementById('request-translator-rate').value) || 0;
+            
+            if (wordCount > 0 && rate > 0) {
+                const estimate = (wordCount / 1000) * rate;
+                document.getElementById('estimate-amount').textContent = '$' + estimate.toFixed(2);
+                document.getElementById('estimate-display').style.display = 'block';
+            } else {
+                document.getElementById('estimate-display').style.display = 'none';
+            }
+        }
+        
+        async function submitRequest() {
+            const profileId = document.getElementById('request-profile-id').value;
+            const title = document.getElementById('request-title').value;
+            const sourceLanguage = document.getElementById('request-source-lang').value;
+            const targetLanguage = document.getElementById('request-target-lang').value;
+            const description = document.getElementById('request-description').value;
+            const wordCount = document.getElementById('request-word-count').value;
+            const deadline = document.getElementById('request-deadline').value;
+            const proposedRate = document.getElementById('request-translator-rate').value;
+            
+            if (!title) {
+                alert('依頼タイトルを入力してください');
+                return;
+            }
+            
+            // Get user ID (in production, this comes from auth)
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                alert('ログインが必要です');
+                window.location.href = '../login.html';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/translators/${profileId}/request`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-User-ID': userId
+                    },
+                    body: JSON.stringify({
+                        title,
+                        sourceLanguage,
+                        targetLanguage,
+                        description,
+                        wordCount: parseInt(wordCount) || 0,
+                        deadline: deadline || null,
+                        proposedRate: parseFloat(proposedRate)
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('翻訳依頼を送信しました！翻訳者からの返答をお待ちください。');
+                    bootstrap.Modal.getInstance(document.getElementById('requestModal')).hide();
+                } else {
+                    alert('エラー: ' + (data.error || '送信に失敗しました'));
+                }
+            } catch (error) {
+                alert('送信に失敗しました: ' + error.message);
+            }
+        }
+        
+        function resetFilters() {
+            document.getElementById('source-language').value = '';
+            document.getElementById('target-language').value = '';
+            document.getElementById('min-rating').value = '';
+            document.getElementById('max-rate').value = '';
+            document.getElementById('specialization').value = '';
+            document.getElementById('sort-order').value = 'rating';
+            searchTranslators();
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Initial load
+        document.addEventListener('DOMContentLoaded', () => {
+            searchTranslators();
+        });
+    </script>
+</body>
+</html>
