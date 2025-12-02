@@ -34,6 +34,7 @@ const verificationRoutes = require('./routes/verification');
 const financeRoutes = require('./routes/finance');
 const dmcaRoutes = require('./routes/dmca');
 const translationQueueRoutes = require('./routes/translation-queue');
+const translatorMarketplaceRoutes = require('./routes/translator-marketplace');
 
 // Create Express app
 const app = express();
@@ -72,6 +73,7 @@ app.use('/api/verification', verificationRoutes);
 app.use('/api/finance', financeRoutes);
 app.use('/api/dmca', dmcaRoutes);
 app.use('/api/translation-queue', translationQueueRoutes);
+app.use('/api/translators', translatorMarketplaceRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -99,7 +101,8 @@ app.get('/', (req, res) => {
       moderation: '/api/moderation',
       finance: '/api/finance',
       dmca: '/api/dmca',
-      translationQueue: '/api/translation-queue'
+      translationQueue: '/api/translation-queue',
+      translators: '/api/translators'
     }
   });
 });
@@ -143,6 +146,8 @@ app.listen(PORT, () => {
   console.log(`   - GET  /api/dmca/admin/reports`);
   console.log(`   - GET  /api/translation-queue/admin/stats`);
   console.log(`   - GET  /api/translation-queue/admin/requests`);
+  console.log(`   - GET  /api/translators`);
+  console.log(`   - GET  /api/translators/:profileId`);
   console.log(`\n✨ Press Ctrl+C to stop\n`);
 });
 
