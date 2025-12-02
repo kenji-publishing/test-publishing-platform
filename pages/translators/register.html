@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>翻訳者として登録 - Publisher</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root { --primary-color: #667eea; --secondary-color: #764ba2; }
+        body { background: #f5f6fa; min-height: 100vh; }
+        .navbar-custom { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); }
+        .page-header { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: #fff; padding: 40px 0; margin-bottom: 30px; }
+        .form-card { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 30px; margin-bottom: 25px; }
+        .form-card h4 { color: #2c3e50; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #f0f0f0; }
+        .lang-pair-item { background: #f8f9fa; border-radius: 8px; padding: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; }
+        .lang-pair-item .form-select { flex: 1; }
+        .benefits-list { list-style: none; padding: 0; }
+        .benefits-list li { padding: 10px 0; display: flex; align-items: center; gap: 10px; }
+        .benefits-list li i { color: #388e3c; font-size: 1.2rem; }
+        .step-indicator { display: flex; justify-content: center; margin-bottom: 30px; }
+        .step { display: flex; align-items: center; gap: 10px; padding: 0 20px; }
+        .step-num { width: 35px; height: 35px; border-radius: 50%; background: #e0e0e0; color: #666; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .step.active .step-num { background: var(--primary-color); color: #fff; }
+        .step.completed .step-num { background: #388e3c; color: #fff; }
+        .step-line { width: 50px; height: 2px; background: #e0e0e0; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="../index.html"><i class="bi bi-book me-2"></i>Publisher</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="index.html">翻訳者を探す</a>
+                <a class="nav-link" href="../dashboard.html">マイページ</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-header">
+        <div class="container">
+            <h1><i class="bi bi-person-plus me-2"></i>翻訳者として登録</h1>
+            <p>あなたの語学スキルを活かして収入を得ましょう</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Step Indicator -->
+                <div class="step-indicator">
+                    <div class="step active" id="step1-indicator">
+                        <div class="step-num">1</div>
+                        <span>基本情報</span>
+                    </div>
+                    <div class="step-line"></div>
+                    <div class="step" id="step2-indicator">
+                        <div class="step-num">2</div>
+                        <span>言語設定</span>
+                    </div>
+                    <div class="step-line"></div>
+                    <div class="step" id="step3-indicator">
+                        <div class="step-num">3</div>
+                        <span>完了</span>
+                    </div>
+                </div>
+
+                <!-- Step 1: Basic Info -->
+                <div id="step1" class="form-card">
+                    <h4><i class="bi bi-person me-2"></i>基本情報</h4>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">表示名 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="display-name" placeholder="翻訳者としての名前">
+                        <small class="text-muted">著者に表示される名前です</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">自己紹介 <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="bio" rows="4" placeholder="あなたの経歴、翻訳スタイル、得意分野などを紹介してください"></textarea>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">翻訳経験年数</label>
+                            <input type="number" class="form-control" id="years-experience" min="0" max="50" value="0">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">平均返答時間（時間）</label>
+                            <input type="number" class="form-control" id="response-hours" min="1" max="168" value="24">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">専門分野（複数選択可）</label>
+                        <div class="row">
+                            <div class="col-6 col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="fiction" id="spec-fiction">
+                                    <label class="form-check-label" for="spec-fiction">小説・フィクション</label>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="manga" id="spec-manga">
+                                    <label class="form-check-label" for="spec-manga">マンガ</label>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="technical" id="spec-technical">
+                                    <label class="form-check-label" for="spec-technical">技術・専門書</label>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="poetry" id="spec-poetry">
+                                    <label class="form-check-label" for="spec-poetry">詩・俳句</label>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="business" id="spec-business">
+                                    <label class="form-check-label" for="spec-business">ビジネス</label>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="academic" id="spec-academic">
+                                    <label class="form-check-label" for="spec-academic">学術</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">資格・認定（任意）</label>
+                        <input type="text" class="form-control" id="certifications" placeholder="例: JLPT N1, 翻訳検定1級">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">ポートフォリオURL（任意）</label>
+                        <input type="url" class="form-control" id="portfolio-url" placeholder="https://...">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label">基本料金（1000文字あたり） <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="base-rate" min="1" step="0.01" value="10.00">
+                        </div>
+                        <small class="text-muted">言語ペアごとに個別の料金も設定できます</small>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end">
+                        <button class="btn btn-primary" onclick="goToStep(2)">
+                            次へ：言語設定 <i class="bi bi-arrow-right ms-2"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Languages -->
+                <div id="step2" class="form-card" style="display: none;">
+                    <h4><i class="bi bi-translate me-2"></i>対応言語</h4>
+                    <p class="text-muted mb-4">翻訳できる言語ペアを追加してください。最低1つ必要です。</p>
+                    
+                    <div id="language-pairs">
+                        <div class="lang-pair-item">
+                            <select class="form-select source-lang">
+                                <option value="">翻訳元</option>
+                                <option value="ja">日本語</option>
+                                <option value="en">English</option>
+                                <option value="zh">中文</option>
+                                <option value="es">Español</option>
+                                <option value="fr">Français</option>
+                                <option value="de">Deutsch</option>
+                                <option value="ko">한국어</option>
+                                <option value="ar">العربية</option>
+                            </select>
+                            <i class="bi bi-arrow-right"></i>
+                            <select class="form-select target-lang">
+                                <option value="">翻訳先</option>
+                                <option value="ja">日本語</option>
+                                <option value="en">English</option>
+                                <option value="zh">中文</option>
+                                <option value="es">Español</option>
+                                <option value="fr">Français</option>
+                                <option value="de">Deutsch</option>
+                                <option value="ko">한국어</option>
+                                <option value="ar">العربية</option>
+                            </select>
+                            <div class="form-check">
+                                <input class="form-check-input is-native" type="checkbox">
+                                <label class="form-check-label">ネイティブ</label>
+                            </div>
+                            <button class="btn btn-outline-danger btn-sm" onclick="removeLanguagePair(this)" disabled>
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-outline-primary mt-3" onclick="addLanguagePair()">
+                        <i class="bi bi-plus-circle me-2"></i>言語ペアを追加
+                    </button>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="d-flex justify-content-between">
+                        <button class="btn btn-outline-secondary" onclick="goToStep(1)">
+                            <i class="bi bi-arrow-left me-2"></i>戻る
+                        </button>
+                        <button class="btn btn-primary" onclick="submitRegistration()">
+                            <i class="bi bi-check-circle me-2"></i>登録を完了
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Complete -->
+                <div id="step3" class="form-card text-center" style="display: none;">
+                    <i class="bi bi-check-circle text-success" style="font-size: 5rem;"></i>
+                    <h3 class="mt-4">登録が完了しました！</h3>
+                    <p class="text-muted mb-4">翻訳者として活動を開始できます。著者からの依頼をお待ちください。</p>
+                    
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="index.html" class="btn btn-outline-primary">
+                            <i class="bi bi-search me-2"></i>マーケットプレイスを見る
+                        </a>
+                        <a href="../dashboard.html" class="btn btn-primary">
+                            <i class="bi bi-house me-2"></i>ダッシュボードへ
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="form-card">
+                    <h5><i class="bi bi-star me-2 text-warning"></i>翻訳者のメリット</h5>
+                    <ul class="benefits-list">
+                        <li><i class="bi bi-check-circle-fill"></i>自分のペースで働ける</li>
+                        <li><i class="bi bi-check-circle-fill"></i>料金は自分で設定</li>
+                        <li><i class="bi bi-check-circle-fill"></i>世界中の著者と繋がる</li>
+                        <li><i class="bi bi-check-circle-fill"></i>翻訳料の80%が収入に</li>
+                        <li><i class="bi bi-check-circle-fill"></i>レビューで実績を積める</li>
+                    </ul>
+                </div>
+                
+                <div class="form-card">
+                    <h5><i class="bi bi-info-circle me-2 text-primary"></i>料金の目安</h5>
+                    <table class="table table-sm">
+                        <tr><td>小説・一般</td><td class="text-end">$5-15/1000文字</td></tr>
+                        <tr><td>マンガ</td><td class="text-end">$8-20/1000文字</td></tr>
+                        <tr><td>技術書</td><td class="text-end">$15-30/1000文字</td></tr>
+                        <tr><td>学術論文</td><td class="text-end">$20-50/1000文字</td></tr>
+                    </table>
+                    <small class="text-muted">※ あくまで参考値です</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+        let currentStep = 1;
+        
+        function goToStep(step) {
+            // Validate current step
+            if (step === 2 && currentStep === 1) {
+                const displayName = document.getElementById('display-name').value.trim();
+                const bio = document.getElementById('bio').value.trim();
+                const baseRate = document.getElementById('base-rate').value;
+                
+                if (!displayName) { alert('表示名を入力してください'); return; }
+                if (!bio) { alert('自己紹介を入力してください'); return; }
+                if (!baseRate || parseFloat(baseRate) <= 0) { alert('料金を設定してください'); return; }
+            }
+            
+            // Hide all steps
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('step3').style.display = 'none';
+            
+            // Show target step
+            document.getElementById('step' + step).style.display = 'block';
+            
+            // Update indicators
+            for (let i = 1; i <= 3; i++) {
+                const indicator = document.getElementById('step' + i + '-indicator');
+                indicator.classList.remove('active', 'completed');
+                if (i < step) indicator.classList.add('completed');
+                if (i === step) indicator.classList.add('active');
+            }
+            
+            currentStep = step;
+        }
+        
+        function addLanguagePair() {
+            const container = document.getElementById('language-pairs');
+            const newPair = document.createElement('div');
+            newPair.className = 'lang-pair-item';
+            newPair.innerHTML = `
+                <select class="form-select source-lang">
+                    <option value="">翻訳元</option>
+                    <option value="ja">日本語</option>
+                    <option value="en">English</option>
+                    <option value="zh">中文</option>
+                    <option value="es">Español</option>
+                    <option value="fr">Français</option>
+                    <option value="de">Deutsch</option>
+                    <option value="ko">한국어</option>
+                    <option value="ar">العربية</option>
+                </select>
+                <i class="bi bi-arrow-right"></i>
+                <select class="form-select target-lang">
+                    <option value="">翻訳先</option>
+                    <option value="ja">日本語</option>
+                    <option value="en">English</option>
+                    <option value="zh">中文</option>
+                    <option value="es">Español</option>
+                    <option value="fr">Français</option>
+                    <option value="de">Deutsch</option>
+                    <option value="ko">한국어</option>
+                    <option value="ar">العربية</option>
+                </select>
+                <div class="form-check">
+                    <input class="form-check-input is-native" type="checkbox">
+                    <label class="form-check-label">ネイティブ</label>
+                </div>
+                <button class="btn btn-outline-danger btn-sm" onclick="removeLanguagePair(this)">
+                    <i class="bi bi-trash"></i>
+                </button>
+            `;
+            container.appendChild(newPair);
+            updateRemoveButtons();
+        }
+        
+        function removeLanguagePair(btn) {
+            btn.closest('.lang-pair-item').remove();
+            updateRemoveButtons();
+        }
+        
+        function updateRemoveButtons() {
+            const pairs = document.querySelectorAll('.lang-pair-item');
+            pairs.forEach((pair, index) => {
+                const btn = pair.querySelector('.btn-outline-danger');
+                btn.disabled = pairs.length <= 1;
+            });
+        }
+        
+        async function submitRegistration() {
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                alert('ログインが必要です');
+                window.location.href = '../login.html';
+                return;
+            }
+            
+            // Collect language pairs
+            const pairs = [];
+            document.querySelectorAll('.lang-pair-item').forEach(item => {
+                const source = item.querySelector('.source-lang').value;
+                const target = item.querySelector('.target-lang').value;
+                const isNative = item.querySelector('.is-native').checked;
+                if (source && target && source !== target) {
+                    pairs.push({ sourceLanguage: source, targetLanguage: target, isNativeTarget: isNative });
+                }
+            });
+            
+            if (pairs.length === 0) {
+                alert('最低1つの言語ペアを設定してください');
+                return;
+            }
+            
+            // Collect specializations
+            const specializations = [];
+            document.querySelectorAll('input[id^="spec-"]:checked').forEach(cb => {
+                specializations.push(cb.value);
+            });
+            
+            try {
+                // Create profile
+                const profileResponse = await fetch(`${API_BASE}/translators/profile`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-User-ID': userId
+                    },
+                    body: JSON.stringify({
+                        displayName: document.getElementById('display-name').value,
+                        bio: document.getElementById('bio').value,
+                        yearsExperience: parseInt(document.getElementById('years-experience').value) || 0,
+                        specializations: specializations,
+                        certifications: document.getElementById('certifications').value,
+                        portfolioUrl: document.getElementById('portfolio-url').value,
+                        baseRate: parseFloat(document.getElementById('base-rate').value),
+                        avgResponseHours: parseInt(document.getElementById('response-hours').value) || 24
+                    })
+                });
+                
+                if (!profileResponse.ok) {
+                    const data = await profileResponse.json();
+                    throw new Error(data.error || 'プロフィールの作成に失敗しました');
+                }
+                
+                // Add language pairs
+                for (const pair of pairs) {
+                    await fetch(`${API_BASE}/translators/profile/languages`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-User-ID': userId
+                        },
+                        body: JSON.stringify(pair)
+                    });
+                }
+                
+                // Show success
+                goToStep(3);
+                
+            } catch (error) {
+                alert('登録に失敗しました: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
