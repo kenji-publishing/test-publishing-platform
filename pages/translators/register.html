@@ -4,75 +4,203 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>翻訳者として登録 - Publisher</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <link href="../../css/style-new.css" rel="stylesheet">
+    
     <style>
-        :root { --primary-color: #667eea; --secondary-color: #764ba2; }
-        body { background: #f5f6fa; min-height: 100vh; }
-        .navbar-custom { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); }
-        .page-header { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: #fff; padding: 40px 0; margin-bottom: 30px; }
-        .form-card { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 30px; margin-bottom: 25px; }
-        .form-card h4 { color: #2c3e50; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #f0f0f0; }
-        .lang-pair-item { background: #f8f9fa; border-radius: 8px; padding: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; }
+        .page-header {
+            background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
+            color: white;
+            padding: var(--spacing-xl) 0;
+            margin-bottom: var(--spacing-xl);
+        }
+        .page-header h1 { color: white; font-size: var(--font-size-2xl); margin-bottom: var(--spacing-xs); }
+        .page-header p { color: rgba(255,255,255,0.9); margin: 0; }
+        
+        .form-card {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-lg);
+        }
+        .form-card h4 {
+            font-family: var(--font-heading);
+            color: var(--color-text-primary);
+            margin-bottom: var(--spacing-lg);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: var(--spacing-xl);
+            gap: var(--spacing-sm);
+        }
+        .step {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+        .step-num {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--color-bg-hover);
+            color: var(--color-text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            transition: all var(--transition-fast);
+        }
+        .step.active .step-num {
+            background: var(--color-accent);
+            color: white;
+        }
+        .step.completed .step-num {
+            background: var(--color-success);
+            color: white;
+        }
+        .step-label {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+        }
+        .step.active .step-label { color: var(--color-text-primary); font-weight: 500; }
+        .step-line {
+            width: 40px;
+            height: 2px;
+            background: var(--color-border);
+            margin: 0 var(--spacing-xs);
+        }
+        
+        .lang-pair-item {
+            background: var(--color-bg-hover);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
         .lang-pair-item .form-select { flex: 1; }
-        .benefits-list { list-style: none; padding: 0; }
-        .benefits-list li { padding: 10px 0; display: flex; align-items: center; gap: 10px; }
-        .benefits-list li i { color: #388e3c; font-size: 1.2rem; }
-        .step-indicator { display: flex; justify-content: center; margin-bottom: 30px; }
-        .step { display: flex; align-items: center; gap: 10px; padding: 0 20px; }
-        .step-num { width: 35px; height: 35px; border-radius: 50%; background: #e0e0e0; color: #666; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-        .step.active .step-num { background: var(--primary-color); color: #fff; }
-        .step.completed .step-num { background: #388e3c; color: #fff; }
-        .step-line { width: 50px; height: 2px; background: #e0e0e0; }
+        
+        .info-card {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+        }
+        .info-card h5 {
+            font-weight: 600;
+            margin-bottom: var(--spacing-md);
+            color: var(--color-text-primary);
+        }
+        
+        .benefits-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .benefits-list li {
+            padding: var(--spacing-sm) 0;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            color: var(--color-text-secondary);
+        }
+        .benefits-list li i { color: var(--color-success); }
+        
+        .revenue-highlight {
+            background: linear-gradient(135deg, rgba(93, 156, 89, 0.1), rgba(93, 156, 89, 0.05));
+            border: 1px solid rgba(93, 156, 89, 0.3);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            text-align: center;
+            margin-bottom: var(--spacing-lg);
+        }
+        .revenue-highlight .percent {
+            font-family: var(--font-heading);
+            font-size: var(--font-size-3xl);
+            font-weight: 700;
+            color: var(--color-success);
+        }
+        .revenue-highlight .label {
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-sm);
+        }
+        
+        .success-icon {
+            font-size: 5rem;
+            color: var(--color-success);
+            margin-bottom: var(--spacing-lg);
+        }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="../index.html"><i class="bi bi-book me-2"></i>Publisher</a>
+            <a class="navbar-brand" href="../../index.html">
+                <i class="fas fa-book-open"></i>
+                Publisher
+            </a>
             <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="index.html">翻訳者を探す</a>
-                <a class="nav-link" href="../dashboard.html">マイページ</a>
+                <a class="nav-link" href="index.html"><i class="fas fa-language me-1"></i>翻訳者を探す</a>
+                <a class="nav-link" href="../dashboard.html"><i class="fas fa-th-large me-1"></i>Dashboard</a>
             </div>
         </div>
     </nav>
 
+    <!-- Page Header -->
     <div class="page-header">
         <div class="container">
-            <h1><i class="bi bi-person-plus me-2"></i>翻訳者として登録</h1>
+            <h1><i class="fas fa-user-plus me-2"></i>翻訳者として登録</h1>
             <p>あなたの語学スキルを活かして収入を得ましょう</p>
         </div>
     </div>
 
-    <div class="container">
+    <div class="container mb-5">
         <div class="row">
             <div class="col-lg-8">
                 <!-- Step Indicator -->
                 <div class="step-indicator">
                     <div class="step active" id="step1-indicator">
                         <div class="step-num">1</div>
-                        <span>基本情報</span>
+                        <span class="step-label">基本情報</span>
                     </div>
                     <div class="step-line"></div>
                     <div class="step" id="step2-indicator">
                         <div class="step-num">2</div>
-                        <span>言語設定</span>
+                        <span class="step-label">言語設定</span>
                     </div>
                     <div class="step-line"></div>
                     <div class="step" id="step3-indicator">
                         <div class="step-num">3</div>
-                        <span>完了</span>
+                        <span class="step-label">完了</span>
                     </div>
                 </div>
 
                 <!-- Step 1: Basic Info -->
                 <div id="step1" class="form-card">
-                    <h4><i class="bi bi-person me-2"></i>基本情報</h4>
+                    <h4><i class="fas fa-user me-2 text-accent"></i>基本情報</h4>
                     
                     <div class="mb-3">
                         <label class="form-label">表示名 <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="display-name" placeholder="翻訳者としての名前">
-                        <small class="text-muted">著者に表示される名前です</small>
+                        <small class="text-secondary">著者に表示される名前です</small>
                     </div>
                     
                     <div class="mb-3">
@@ -138,31 +266,22 @@
                         <input type="text" class="form-control" id="certifications" placeholder="例: JLPT N1, 翻訳検定1級">
                     </div>
                     
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <label class="form-label">ポートフォリオURL（任意）</label>
                         <input type="url" class="form-control" id="portfolio-url" placeholder="https://...">
                     </div>
                     
-                    <div class="mb-4">
-                        <label class="form-label">基本料金（1000文字あたり） <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <span class="input-group-text">$</span>
-                            <input type="number" class="form-control" id="base-rate" min="1" step="0.01" value="10.00">
-                        </div>
-                        <small class="text-muted">言語ペアごとに個別の料金も設定できます</small>
-                    </div>
-                    
                     <div class="d-flex justify-content-end">
-                        <button class="btn btn-primary" onclick="goToStep(2)">
-                            次へ：言語設定 <i class="bi bi-arrow-right ms-2"></i>
+                        <button class="btn btn-custom" onclick="goToStep(2)">
+                            次へ：言語設定 <i class="fas fa-arrow-right ms-2"></i>
                         </button>
                     </div>
                 </div>
 
                 <!-- Step 2: Languages -->
                 <div id="step2" class="form-card" style="display: none;">
-                    <h4><i class="bi bi-translate me-2"></i>対応言語</h4>
-                    <p class="text-muted mb-4">翻訳できる言語ペアを追加してください。最低1つ必要です。</p>
+                    <h4><i class="fas fa-language me-2 text-accent"></i>対応言語</h4>
+                    <p class="text-secondary mb-4">翻訳できる言語ペアを追加してください。最低1つ必要です。</p>
                     
                     <div id="language-pairs">
                         <div class="lang-pair-item">
@@ -177,7 +296,7 @@
                                 <option value="ko">한국어</option>
                                 <option value="ar">العربية</option>
                             </select>
-                            <i class="bi bi-arrow-right"></i>
+                            <i class="fas fa-arrow-right text-secondary"></i>
                             <select class="form-select target-lang">
                                 <option value="">翻訳先</option>
                                 <option value="ja">日本語</option>
@@ -193,70 +312,92 @@
                                 <input class="form-check-input is-native" type="checkbox">
                                 <label class="form-check-label">ネイティブ</label>
                             </div>
-                            <button class="btn btn-outline-danger btn-sm" onclick="removeLanguagePair(this)" disabled>
-                                <i class="bi bi-trash"></i>
+                            <button class="btn btn-soft-custom btn-sm" onclick="removeLanguagePair(this)" disabled>
+                                <i class="fas fa-trash"></i>
                             </button>
                         </div>
                     </div>
                     
-                    <button class="btn btn-outline-primary mt-3" onclick="addLanguagePair()">
-                        <i class="bi bi-plus-circle me-2"></i>言語ペアを追加
+                    <button class="btn btn-soft-custom mt-3" onclick="addLanguagePair()">
+                        <i class="fas fa-plus me-2"></i>言語ペアを追加
                     </button>
                     
                     <hr class="my-4">
                     
                     <div class="d-flex justify-content-between">
-                        <button class="btn btn-outline-secondary" onclick="goToStep(1)">
-                            <i class="bi bi-arrow-left me-2"></i>戻る
+                        <button class="btn btn-soft-custom" onclick="goToStep(1)">
+                            <i class="fas fa-arrow-left me-2"></i>戻る
                         </button>
-                        <button class="btn btn-primary" onclick="submitRegistration()">
-                            <i class="bi bi-check-circle me-2"></i>登録を完了
+                        <button class="btn btn-custom" onclick="submitRegistration()">
+                            <i class="fas fa-check me-2"></i>登録を完了
                         </button>
                     </div>
                 </div>
 
                 <!-- Step 3: Complete -->
                 <div id="step3" class="form-card text-center" style="display: none;">
-                    <i class="bi bi-check-circle text-success" style="font-size: 5rem;"></i>
-                    <h3 class="mt-4">登録が完了しました！</h3>
-                    <p class="text-muted mb-4">翻訳者として活動を開始できます。著者からの依頼をお待ちください。</p>
+                    <i class="fas fa-check-circle success-icon"></i>
+                    <h3 style="font-family: var(--font-heading);">登録が完了しました！</h3>
+                    <p class="text-secondary mb-4">翻訳者として活動を開始できます。著者からの依頼をお待ちください。</p>
                     
                     <div class="d-flex justify-content-center gap-3">
-                        <a href="index.html" class="btn btn-outline-primary">
-                            <i class="bi bi-search me-2"></i>マーケットプレイスを見る
+                        <a href="index.html" class="btn btn-soft-custom">
+                            <i class="fas fa-search me-2"></i>マーケットプレイスを見る
                         </a>
-                        <a href="../dashboard.html" class="btn btn-primary">
-                            <i class="bi bi-house me-2"></i>ダッシュボードへ
+                        <a href="../dashboard.html" class="btn btn-custom">
+                            <i class="fas fa-home me-2"></i>ダッシュボードへ
                         </a>
                     </div>
                 </div>
             </div>
             
             <div class="col-lg-4">
-                <div class="form-card">
-                    <h5><i class="bi bi-star me-2 text-warning"></i>翻訳者のメリット</h5>
+                <!-- Revenue Model -->
+                <div class="revenue-highlight">
+                    <div class="percent">20%</div>
+                    <div class="label">翻訳作品の収益があなたの報酬に</div>
+                </div>
+                
+                <!-- Benefits -->
+                <div class="info-card">
+                    <h5><i class="fas fa-star me-2 text-warning"></i>翻訳者のメリット</h5>
                     <ul class="benefits-list">
-                        <li><i class="bi bi-check-circle-fill"></i>自分のペースで働ける</li>
-                        <li><i class="bi bi-check-circle-fill"></i>料金は自分で設定</li>
-                        <li><i class="bi bi-check-circle-fill"></i>世界中の著者と繋がる</li>
-                        <li><i class="bi bi-check-circle-fill"></i>翻訳料の80%が収入に</li>
-                        <li><i class="bi bi-check-circle-fill"></i>レビューで実績を積める</li>
+                        <li><i class="fas fa-check-circle"></i>自分のペースで働ける</li>
+                        <li><i class="fas fa-check-circle"></i>翻訳作品の収益20%が報酬</li>
+                        <li><i class="fas fa-check-circle"></i>世界中の著者と繋がる</li>
+                        <li><i class="fas fa-check-circle"></i>人気作品でより多くの収入</li>
+                        <li><i class="fas fa-check-circle"></i>レビューで実績を積める</li>
                     </ul>
                 </div>
                 
-                <div class="form-card">
-                    <h5><i class="bi bi-info-circle me-2 text-primary"></i>料金の目安</h5>
-                    <table class="table table-sm">
-                        <tr><td>小説・一般</td><td class="text-end">$5-15/1000文字</td></tr>
-                        <tr><td>マンガ</td><td class="text-end">$8-20/1000文字</td></tr>
-                        <tr><td>技術書</td><td class="text-end">$15-30/1000文字</td></tr>
-                        <tr><td>学術論文</td><td class="text-end">$20-50/1000文字</td></tr>
+                <!-- Revenue Model Info -->
+                <div class="info-card">
+                    <h5><i class="fas fa-info-circle me-2 text-accent"></i>収益分配モデル</h5>
+                    <p class="small text-secondary mb-3">作品が売れた際の収益は以下のように分配されます：</p>
+                    <table class="table table-sm mb-0">
+                        <tr><td>著者</td><td class="text-end"><strong>40-70%</strong></td></tr>
+                        <tr><td>翻訳者</td><td class="text-end text-success"><strong>20%</strong></td></tr>
+                        <tr><td>編集者</td><td class="text-end">10%</td></tr>
+                        <tr><td>プラットフォーム</td><td class="text-end">30%</td></tr>
                     </table>
-                    <small class="text-muted">※ あくまで参考値です</small>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="footer-custom">
+        <div class="container">
+            <div class="d-flex flex-wrap justify-content-between align-items-center">
+                <p class="small mb-0">&copy; 2024 Publisher. All rights reserved.</p>
+                <div class="d-flex gap-3">
+                    <a href="../help.html" class="text-secondary">Help</a>
+                    <a href="../legal/terms.html" class="text-secondary">Terms</a>
+                    <a href="../legal/privacy.html" class="text-secondary">Privacy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -264,26 +405,19 @@
         let currentStep = 1;
         
         function goToStep(step) {
-            // Validate current step
             if (step === 2 && currentStep === 1) {
                 const displayName = document.getElementById('display-name').value.trim();
                 const bio = document.getElementById('bio').value.trim();
-                const baseRate = document.getElementById('base-rate').value;
                 
                 if (!displayName) { alert('表示名を入力してください'); return; }
                 if (!bio) { alert('自己紹介を入力してください'); return; }
-                if (!baseRate || parseFloat(baseRate) <= 0) { alert('料金を設定してください'); return; }
             }
             
-            // Hide all steps
             document.getElementById('step1').style.display = 'none';
             document.getElementById('step2').style.display = 'none';
             document.getElementById('step3').style.display = 'none';
-            
-            // Show target step
             document.getElementById('step' + step).style.display = 'block';
             
-            // Update indicators
             for (let i = 1; i <= 3; i++) {
                 const indicator = document.getElementById('step' + i + '-indicator');
                 indicator.classList.remove('active', 'completed');
@@ -310,7 +444,7 @@
                     <option value="ko">한국어</option>
                     <option value="ar">العربية</option>
                 </select>
-                <i class="bi bi-arrow-right"></i>
+                <i class="fas fa-arrow-right text-secondary"></i>
                 <select class="form-select target-lang">
                     <option value="">翻訳先</option>
                     <option value="ja">日本語</option>
@@ -326,8 +460,8 @@
                     <input class="form-check-input is-native" type="checkbox">
                     <label class="form-check-label">ネイティブ</label>
                 </div>
-                <button class="btn btn-outline-danger btn-sm" onclick="removeLanguagePair(this)">
-                    <i class="bi bi-trash"></i>
+                <button class="btn btn-soft-custom btn-sm" onclick="removeLanguagePair(this)">
+                    <i class="fas fa-trash"></i>
                 </button>
             `;
             container.appendChild(newPair);
@@ -342,7 +476,7 @@
         function updateRemoveButtons() {
             const pairs = document.querySelectorAll('.lang-pair-item');
             pairs.forEach((pair, index) => {
-                const btn = pair.querySelector('.btn-outline-danger');
+                const btn = pair.querySelector('.btn-soft-custom');
                 btn.disabled = pairs.length <= 1;
             });
         }
@@ -355,7 +489,6 @@
                 return;
             }
             
-            // Collect language pairs
             const pairs = [];
             document.querySelectorAll('.lang-pair-item').forEach(item => {
                 const source = item.querySelector('.source-lang').value;
@@ -371,20 +504,15 @@
                 return;
             }
             
-            // Collect specializations
             const specializations = [];
             document.querySelectorAll('input[id^="spec-"]:checked').forEach(cb => {
                 specializations.push(cb.value);
             });
             
             try {
-                // Create profile
                 const profileResponse = await fetch(`${API_BASE}/translators/profile`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-User-ID': userId
-                    },
+                    headers: { 'Content-Type': 'application/json', 'X-User-ID': userId },
                     body: JSON.stringify({
                         displayName: document.getElementById('display-name').value,
                         bio: document.getElementById('bio').value,
@@ -392,7 +520,6 @@
                         specializations: specializations,
                         certifications: document.getElementById('certifications').value,
                         portfolioUrl: document.getElementById('portfolio-url').value,
-                        baseRate: parseFloat(document.getElementById('base-rate').value),
                         avgResponseHours: parseInt(document.getElementById('response-hours').value) || 24
                     })
                 });
@@ -402,19 +529,14 @@
                     throw new Error(data.error || 'プロフィールの作成に失敗しました');
                 }
                 
-                // Add language pairs
                 for (const pair of pairs) {
                     await fetch(`${API_BASE}/translators/profile/languages`, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-User-ID': userId
-                        },
+                        headers: { 'Content-Type': 'application/json', 'X-User-ID': userId },
                         body: JSON.stringify(pair)
                     });
                 }
                 
-                // Show success
                 goToStep(3);
                 
             } catch (error) {
