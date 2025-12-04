@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>お問い合わせ - Publisher</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="../css/style-new.css" rel="stylesheet">
+    <style>
+        .contact-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 60px 0;
+            color: white;
+        }
+        
+        .contact-form-card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-top: -40px;
+        }
+        
+        .category-select-card {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .category-select-card:hover {
+            border-color: #667eea;
+            background-color: #f8f9ff;
+        }
+        
+        .category-select-card.selected {
+            border-color: #667eea;
+            background-color: #667eea;
+            color: white;
+        }
+        
+        .category-select-card .icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .category-select-card.selected .icon {
+            color: white;
+        }
+        
+        .success-section {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            color: white;
+            font-size: 3rem;
+        }
+        
+        .faq-suggestion {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .faq-suggestion-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .faq-suggestion-item:hover {
+            background: #e9ecef;
+        }
+        
+        .contact-info-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 30px;
+            height: 100%;
+        }
+        
+        .contact-info-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        
+        .contact-info-item .icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- ナビゲーション -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="../index.html">
+                <i class="bi bi-book"></i> Publisher
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../index.html">ホーム</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="faq.html">FAQ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="contact.html">お問い合わせ</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav" id="authNav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="login.html">ログイン</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ヘッダー -->
+    <section class="contact-header">
+        <div class="container text-center">
+            <h1 class="mb-3"><i class="bi bi-envelope"></i> お問い合わせ</h1>
+            <p class="opacity-75 mb-0">ご質問やご要望がございましたら、お気軽にお問い合わせください</p>
+        </div>
+    </section>
+
+    <!-- メインコンテンツ -->
+    <main class="container pb-5">
+        <div class="row">
+            <!-- お問い合わせフォーム -->
+            <div class="col-lg-8">
+                <div class="card contact-form-card">
+                    <div class="card-body p-4 p-md-5">
+                        <!-- Step 1: カテゴリ選択 -->
+                        <div id="step1">
+                            <h4 class="mb-4">お問い合わせの種類を選択してください</h4>
+                            <div class="row g-3" id="categorySelection">
+                                <div class="col-6 col-md-4">
+                                    <div class="category-select-card" data-category="account">
+                                        <div class="icon"><i class="bi bi-person-circle"></i></div>
+                                        <div class="fw-bold">アカウント</div>
+                                        <small class="text-muted">登録・ログイン</small>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <div class="category-select-card" data-category="payment">
+                                        <div class="icon"><i class="bi bi-credit-card"></i></div>
+                                        <div class="fw-bold">お支払い</div>
+                                        <small class="text-muted">購入・返金</small>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <div class="category-select-card" data-category="translation">
+                                        <div class="icon"><i class="bi bi-translate"></i></div>
+                                        <div class="fw-bold">翻訳</div>
+                                        <small class="text-muted">AI翻訳・翻訳者</small>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <div class="category-select-card" data-category="technical">
+                                        <div class="icon"><i class="bi bi-gear"></i></div>
+                                        <div class="fw-bold">技術的問題</div>
+                                        <small class="text-muted">エラー・不具合</small>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <div class="category-select-card" data-category="copyright">
+                                        <div class="icon"><i class="bi bi-shield-check"></i></div>
+                                        <div class="fw-bold">著作権</div>
+                                        <small class="text-muted">権利侵害報告</small>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <div class="category-select-card" data-category="other">
+                                        <div class="icon"><i class="bi bi-question-circle"></i></div>
+                                        <div class="fw-bold">その他</div>
+                                        <small class="text-muted">上記以外</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- FAQ提案 -->
+                            <div class="faq-suggestion" id="faqSuggestion" style="display: none;">
+                                <h6><i class="bi bi-lightbulb"></i> こちらの回答が参考になるかもしれません</h6>
+                                <div id="faqSuggestionList"></div>
+                                <div class="text-end mt-3">
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="proceedToStep2()">
+                                        解決しない場合は次へ <i class="bi bi-arrow-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="text-end mt-4" id="step1NextBtn" style="display: none;">
+                                <button class="btn btn-primary" onclick="proceedToStep2()">
+                                    次へ <i class="bi bi-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: 詳細入力 -->
+                        <div id="step2" style="display: none;">
+                            <div class="d-flex align-items-center mb-4">
+                                <button class="btn btn-outline-secondary btn-sm me-3" onclick="backToStep1()">
+                                    <i class="bi bi-arrow-left"></i> 戻る
+                                </button>
+                                <h4 class="mb-0">お問い合わせ内容を入力</h4>
+                            </div>
+
+                            <form id="contactForm">
+                                <!-- ゲスト用の連絡先情報 -->
+                                <div id="guestFields">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">お名前 <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="guestName" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">メールアドレス <span class="text-danger">*</span></label>
+                                            <input type="email" class="form-control" id="guestEmail" required>
+                                            <small class="text-muted">返信をお送りするために必要です</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 件名 -->
+                                <div class="mb-3">
+                                    <label class="form-label">件名 <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="subject" required
+                                           placeholder="例：ログインができません">
+                                </div>
+
+                                <!-- 内容 -->
+                                <div class="mb-3">
+                                    <label class="form-label">お問い合わせ内容 <span class="text-danger">*</span></label>
+                                    <textarea class="form-control" id="message" rows="6" required
+                                              placeholder="できるだけ詳しくお書きください。エラーメッセージがある場合はそのままコピーしてください。"></textarea>
+                                    <small class="text-muted">
+                                        <span id="charCount">0</span> / 2000文字
+                                    </small>
+                                </div>
+
+                                <!-- 関連情報（オプション） -->
+                                <div class="mb-4">
+                                    <label class="form-label">関連する注文番号（任意）</label>
+                                    <input type="text" class="form-control" id="relatedOrderId"
+                                           placeholder="例：ORD-20240115-0001">
+                                </div>
+
+                                <!-- プライバシーポリシー同意 -->
+                                <div class="form-check mb-4">
+                                    <input class="form-check-input" type="checkbox" id="agreePrivacy" required>
+                                    <label class="form-check-label" for="agreePrivacy">
+                                        <a href="privacy.html" target="_blank">プライバシーポリシー</a>に同意します
+                                    </label>
+                                </div>
+
+                                <!-- 送信ボタン -->
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                                        <i class="bi bi-send"></i> 送信する
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- 送信完了 -->
+                        <div id="successSection" style="display: none;">
+                            <div class="success-section">
+                                <div class="success-icon">
+                                    <i class="bi bi-check-lg"></i>
+                                </div>
+                                <h3 class="mb-3">お問い合わせを受け付けました</h3>
+                                <p class="text-muted mb-4">
+                                    チケット番号: <strong id="ticketNumber"></strong>
+                                </p>
+                                <p class="mb-4">
+                                    24時間以内にご登録のメールアドレスへ返信いたします。<br>
+                                    しばらくお待ちください。
+                                </p>
+                                <div class="d-flex justify-content-center gap-3">
+                                    <a href="faq.html" class="btn btn-outline-primary">
+                                        <i class="bi bi-question-circle"></i> FAQを見る
+                                    </a>
+                                    <a href="../index.html" class="btn btn-primary">
+                                        <i class="bi bi-house"></i> トップページへ
+                                    </a>
+                                </div>
+                                <div id="ticketLink" class="mt-4" style="display: none;">
+                                    <a href="tickets.html" class="btn btn-link">
+                                        <i class="bi bi-list-ul"></i> お問い合わせ履歴を確認
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- サイドバー -->
+            <div class="col-lg-4 mt-4 mt-lg-0">
+                <div class="contact-info-card" style="margin-top: -40px;">
+                    <h5 class="mb-4">お問い合わせの前に</h5>
+                    
+                    <div class="contact-info-item">
+                        <div class="icon">
+                            <i class="bi bi-book"></i>
+                        </div>
+                        <div>
+                            <strong>FAQをご確認ください</strong>
+                            <p class="text-muted small mb-0">
+                                よくある質問への回答をまとめています。
+                                <a href="faq.html">FAQを見る →</a>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="contact-info-item">
+                        <div class="icon">
+                            <i class="bi bi-clock"></i>
+                        </div>
+                        <div>
+                            <strong>対応時間</strong>
+                            <p class="text-muted small mb-0">
+                                24時間以内に返信いたします<br>
+                                （土日祝は翌営業日）
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="contact-info-item">
+                        <div class="icon">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <div>
+                            <strong>著作権侵害の報告</strong>
+                            <p class="text-muted small mb-0">
+                                著作権侵害を発見した場合は
+                                <a href="dmca.html">DMCA報告フォーム</a>
+                                をご利用ください。
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <h6 class="mb-3">緊急のお問い合わせ</h6>
+                    <p class="text-muted small">
+                        不正アクセスや決済トラブルなど、緊急の場合は
+                        お問い合わせフォームで「緊急」を選択してください。
+                        優先的に対応いたします。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- フッター -->
+    <footer class="bg-dark text-light py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0">&copy; 2024 Publisher. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="terms.html" class="text-light me-3">利用規約</a>
+                    <a href="privacy.html" class="text-light me-3">プライバシーポリシー</a>
+                    <a href="faq.html" class="text-light">FAQ</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // =============================================
+        // お問い合わせページのJavaScript
+        // =============================================
+        
+        const API_BASE = 'http://localhost:3000/api';
+        let selectedCategory = null;
+        let isLoggedIn = false;
+        let currentUser = null;
+
+        // ページ読み込み時
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            setupCategorySelection();
+            setupForm();
+        });
+
+        // 認証チェック
+        async function checkAuth() {
+            try {
+                const response = await fetch(`${API_BASE}/auth/me`, {
+                    credentials: 'include'
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    isLoggedIn = true;
+                    currentUser = data.user;
+                    updateAuthNav(data.user);
+                    // ゲスト用フィールドを非表示
+                    document.getElementById('guestFields').style.display = 'none';
+                }
+            } catch (error) {
+                console.log('未ログイン状態');
+            }
+        }
+
+        function updateAuthNav(user) {
+            const authNav = document.getElementById('authNav');
+            authNav.innerHTML = `
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle"></i> ${user.display_name || user.email}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="dashboard.html">ダッシュボード</a></li>
+                        <li><a class="dropdown-item" href="tickets.html">お問い合わせ履歴</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" onclick="logout()">ログアウト</a></li>
+                    </ul>
+                </li>
+            `;
+        }
+
+        // カテゴリ選択セットアップ
+        function setupCategorySelection() {
+            const cards = document.querySelectorAll('.category-select-card');
+            
+            cards.forEach(card => {
+                card.addEventListener('click', function() {
+                    // 選択状態をクリア
+                    cards.forEach(c => c.classList.remove('selected'));
+                    // 選択
+                    this.classList.add('selected');
+                    selectedCategory = this.dataset.category;
+                    
+                    // FAQ提案を表示
+                    showFaqSuggestions(selectedCategory);
+                    
+                    // 次へボタンを表示
+                    document.getElementById('step1NextBtn').style.display = 'block';
+                });
+            });
+        }
+
+        // FAQ提案を表示
+        async function showFaqSuggestions(category) {
+            try {
+                // カテゴリに対応するFAQカテゴリIDを取得
+                const categoryMap = {
+                    'account': 1,
+                    'payment': 2,
+                    'translation': 4,
+                    'technical': 7,
+                    'copyright': null,
+                    'other': 8
+                };
+                
+                const categoryId = categoryMap[category];
+                if (!categoryId) {
+                    document.getElementById('faqSuggestion').style.display = 'none';
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE}/support/faq?category_id=${categoryId}`);
+                const data = await response.json();
+                
+                if (data.success && data.faqs.length > 0) {
+                    const container = document.getElementById('faqSuggestionList');
+                    container.innerHTML = data.faqs.slice(0, 3).map(faq => `
+                        <div class="faq-suggestion-item" onclick="window.open('faq.html#faq${faq.id}', '_blank')">
+                            <i class="bi bi-question-circle text-primary me-2"></i>
+                            <span>${faq.question_ja}</span>
+                        </div>
+                    `).join('');
+                    
+                    document.getElementById('faqSuggestion').style.display = 'block';
+                } else {
+                    document.getElementById('faqSuggestion').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('FAQ取得エラー:', error);
+            }
+        }
+
+        // Step2へ進む
+        function proceedToStep2() {
+            if (!selectedCategory) {
+                alert('カテゴリを選択してください');
+                return;
+            }
+            
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+        }
+
+        // Step1へ戻る
+        function backToStep1() {
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('step1').style.display = 'block';
+        }
+
+        // フォームセットアップ
+        function setupForm() {
+            const form = document.getElementById('contactForm');
+            const messageInput = document.getElementById('message');
+            const charCount = document.getElementById('charCount');
+
+            // 文字カウント
+            messageInput.addEventListener('input', function() {
+                charCount.textContent = this.value.length;
+                if (this.value.length > 2000) {
+                    charCount.classList.add('text-danger');
+                } else {
+                    charCount.classList.remove('text-danger');
+                }
+            });
+
+            // フォーム送信
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const submitBtn = document.getElementById('submitBtn');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>送信中...';
+
+                try {
+                    const data = {
+                        category: selectedCategory,
+                        subject: document.getElementById('subject').value.trim(),
+                        message: document.getElementById('message').value.trim(),
+                        related_order_id: document.getElementById('relatedOrderId').value.trim() || null
+                    };
+
+                    // ゲストの場合は連絡先情報を追加
+                    if (!isLoggedIn) {
+                        data.guest_name = document.getElementById('guestName').value.trim();
+                        data.guest_email = document.getElementById('guestEmail').value.trim();
+                    }
+
+                    const response = await fetch(`${API_BASE}/support/tickets`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        showSuccess(result.ticket.ticket_number);
+                    } else {
+                        alert(result.error || '送信に失敗しました');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="bi bi-send"></i> 送信する';
+                    }
+                } catch (error) {
+                    console.error('送信エラー:', error);
+                    alert('送信に失敗しました。しばらく経ってから再度お試しください。');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="bi bi-send"></i> 送信する';
+                }
+            });
+        }
+
+        // 送信成功表示
+        function showSuccess(ticketNumber) {
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('successSection').style.display = 'block';
+            document.getElementById('ticketNumber').textContent = ticketNumber;
+            
+            // ログインユーザーにはチケット履歴リンクを表示
+            if (isLoggedIn) {
+                document.getElementById('ticketLink').style.display = 'block';
+            }
+        }
+
+        // ログアウト
+        async function logout() {
+            try {
+                await fetch(`${API_BASE}/auth/logout`, {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                window.location.reload();
+            } catch (error) {
+                console.error('ログアウトエラー:', error);
+            }
+        }
+    </script>
+</body>
+</html>
