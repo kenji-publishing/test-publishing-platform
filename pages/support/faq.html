@@ -15,7 +15,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <!-- Custom Styles -->
-    <link href="../css/style-new.css" rel="stylesheet">
+    <link href="../../css/style-new.css" rel="stylesheet">
     
     <style>
         /* FAQ Hero Section */
@@ -52,6 +52,11 @@
             border-radius: var(--radius-full);
             font-size: var(--font-size-base);
             box-shadow: var(--shadow-lg);
+        }
+
+        .faq-search input:focus {
+            outline: none;
+            box-shadow: var(--shadow-xl);
         }
 
         .faq-search i {
@@ -120,6 +125,7 @@
             border: 1px solid var(--color-border);
             border-radius: var(--radius-lg);
             margin-bottom: var(--spacing-xl);
+            overflow: hidden;
         }
 
         .faq-section-header {
@@ -128,6 +134,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: var(--color-bg-hover);
         }
 
         .faq-section-header h2 {
@@ -160,6 +167,10 @@
 
         .faq-accordion .accordion-button:focus {
             box-shadow: none;
+        }
+
+        .faq-accordion .accordion-button::after {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%238B7355'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
         }
 
         .faq-accordion .accordion-body {
@@ -209,6 +220,7 @@
             border: 1px solid var(--color-border);
             border-radius: var(--radius-lg);
             margin-bottom: var(--spacing-xl);
+            overflow: hidden;
         }
 
         .search-result-item {
@@ -229,6 +241,7 @@
         .search-result-item h4 {
             font-size: var(--font-size-base);
             margin-bottom: var(--spacing-xs);
+            color: var(--color-text-primary);
         }
 
         .search-result-item p {
@@ -239,7 +252,8 @@
 
         /* Contact CTA */
         .contact-cta {
-            background: var(--color-bg-hover);
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
             border-radius: var(--radius-lg);
             padding: var(--spacing-xl);
             text-align: center;
@@ -265,6 +279,11 @@
             .category-grid {
                 grid-template-columns: 1fr;
             }
+
+            .faq-section-header {
+                flex-direction: column;
+                gap: var(--spacing-md);
+            }
         }
     </style>
 </head>
@@ -272,7 +291,7 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="../index.html">
+            <a class="navbar-brand" href="../../index.html">
                 <i class="fas fa-book-open"></i>
                 Publisher
             </a>
@@ -284,7 +303,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="../index.html">
+                        <a class="nav-link" href="../../index.html">
                             <i class="fas fa-home me-1"></i> Home
                         </a>
                     </li>
@@ -301,10 +320,10 @@
                 </ul>
                 
                 <div class="d-flex align-items-center gap-3" id="authNav">
-                    <a href="login.html" class="btn btn-soft-custom">
+                    <a href="../login.html" class="btn btn-soft-custom">
                         <i class="fas fa-sign-in-alt me-1"></i> Sign In
                     </a>
-                    <a href="register.html" class="btn btn-custom">
+                    <a href="../register.html" class="btn btn-primary-custom">
                         Get Started
                     </a>
                 </div>
@@ -329,7 +348,7 @@
         <!-- Search Results (Hidden by default) -->
         <div id="searchResultsSection" style="display: none;">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h3><i class="fas fa-search me-2"></i>Search Results: <span id="searchQuery"></span></h3>
+                <h3><i class="fas fa-search me-2 text-accent"></i>Search Results: <span id="searchQuery"></span></h3>
                 <button class="btn btn-soft-custom btn-sm" id="clearSearch">
                     <i class="fas fa-times me-1"></i> Clear
                 </button>
@@ -340,7 +359,7 @@
         </div>
 
         <!-- Categories Section -->
-        <section id="categoriesSection">
+        <section id="categoriesSection" class="fade-in">
             <h2 class="mb-4"><i class="fas fa-th-large me-2 text-accent"></i>Browse by Category</h2>
             <div class="category-grid" id="categoriesList">
                 <!-- Categories will be loaded here -->
@@ -348,7 +367,7 @@
         </section>
 
         <!-- FAQ Section -->
-        <section id="faqSection">
+        <section id="faqSection" class="fade-in">
             <div class="faq-section">
                 <div class="faq-section-header">
                     <h2><i class="fas fa-list me-2 text-accent"></i>All Questions</h2>
@@ -364,9 +383,9 @@
 
         <!-- Contact CTA -->
         <section class="contact-cta fade-in">
-            <h3>Can't find what you're looking for?</h3>
+            <h3><i class="fas fa-headset me-2 text-accent"></i>Can't find what you're looking for?</h3>
             <p>Our support team is here to help you</p>
-            <a href="contact.html" class="btn btn-custom btn-lg">
+            <a href="contact.html" class="btn btn-primary-custom btn-lg">
                 <i class="fas fa-envelope me-2"></i>Contact Support
             </a>
         </section>
@@ -378,10 +397,10 @@
             <div class="d-flex flex-wrap justify-content-between align-items-center">
                 <p class="small mb-0">&copy; 2024 Publisher. All rights reserved.</p>
                 <div class="d-flex gap-3">
-                    <a href="faq.html" class="text-secondary">FAQ</a>
-                    <a href="contact.html" class="text-secondary">Contact</a>
-                    <a href="terms.html" class="text-secondary">Terms</a>
-                    <a href="privacy.html" class="text-secondary">Privacy</a>
+                    <a href="faq.html" class="text-accent">FAQ</a>
+                    <a href="contact.html">Contact</a>
+                    <a href="../terms.html">Terms</a>
+                    <a href="../privacy.html">Privacy</a>
                 </div>
             </div>
         </div>
@@ -436,7 +455,7 @@
                         ${user.display_name || user.email}
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="dashboard.html"><i class="fas fa-th-large me-2"></i>Dashboard</a></li>
+                        <li><a class="dropdown-item" href="../dashboard.html"><i class="fas fa-th-large me-2"></i>Dashboard</a></li>
                         <li><a class="dropdown-item" href="tickets.html"><i class="fas fa-ticket-alt me-2"></i>My Tickets</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Sign Out</a></li>
@@ -457,7 +476,25 @@
                 }
             } catch (error) {
                 console.error('Error loading categories:', error);
+                // Show fallback categories
+                renderFallbackCategories();
             }
+        }
+
+        function renderFallbackCategories() {
+            const defaultCategories = [
+                { id: 1, name_en: 'Account', item_count: 0 },
+                { id: 2, name_en: 'Payment', item_count: 0 },
+                { id: 3, name_en: 'Works', item_count: 0 },
+                { id: 4, name_en: 'Translation', item_count: 0 },
+                { id: 5, name_en: 'For Authors', item_count: 0 },
+                { id: 6, name_en: 'For Translators', item_count: 0 },
+                { id: 7, name_en: 'Technical', item_count: 0 },
+                { id: 8, name_en: 'Other', item_count: 0 }
+            ];
+            categories = defaultCategories;
+            renderCategories();
+            renderCategoryFilter();
         }
 
         function renderCategories() {
@@ -498,7 +535,18 @@
                 }
             } catch (error) {
                 console.error('Error loading FAQs:', error);
+                renderEmptyFaqs();
             }
+        }
+
+        function renderEmptyFaqs() {
+            const container = document.getElementById('faqAccordion');
+            container.innerHTML = `
+                <div class="text-center py-5 text-muted">
+                    <i class="fas fa-database fa-3x mb-3"></i>
+                    <p>Unable to load FAQs. Please try again later.</p>
+                </div>
+            `;
         }
 
         function renderFaqs() {
@@ -524,7 +572,7 @@
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" 
                                 data-bs-toggle="collapse" data-bs-target="#faq${faq.id}">
-                            <span class="badge badge-soft me-2">${faq.category_name_en}</span>
+                            <span class="badge badge-soft me-2">${faq.category_name_en || 'General'}</span>
                             ${faq.question_en}
                         </button>
                     </h2>
@@ -598,13 +646,13 @@
                     <div class="text-center py-5 text-muted">
                         <i class="fas fa-search fa-3x mb-3"></i>
                         <p>No results found for "${query}"</p>
-                        <a href="contact.html" class="btn btn-custom mt-2">Contact Support</a>
+                        <a href="contact.html" class="btn btn-primary-custom mt-2">Contact Support</a>
                     </div>
                 `;
             } else {
                 container.innerHTML = results.map(faq => `
                     <div class="search-result-item" onclick="showFaqDetail(${faq.id})">
-                        <span class="badge badge-soft mb-2">${faq.category_name_en}</span>
+                        <span class="badge badge-soft mb-2">${faq.category_name_en || 'General'}</span>
                         <h4>${faq.question_en}</h4>
                         <p>${faq.answer_en.substring(0, 150)}...</p>
                     </div>
@@ -627,7 +675,9 @@
             const accordion = document.getElementById(`faq${faqId}`);
             if (accordion) {
                 new bootstrap.Collapse(accordion, { toggle: true });
-                accordion.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => {
+                    accordion.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300);
             }
         }
 
