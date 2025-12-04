@@ -1,323 +1,457 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>お問い合わせ - Publisher</title>
+    <title>Contact Us - Publisher</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Custom Styles -->
     <link href="../css/style-new.css" rel="stylesheet">
+    
     <style>
-        .contact-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 60px 0;
+        /* Contact Hero Section */
+        .contact-hero {
+            background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
+            padding: var(--spacing-2xl) 0;
             color: white;
+            text-align: center;
         }
-        
-        .contact-form-card {
-            border: none;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            margin-top: -40px;
+
+        .contact-hero h1 {
+            color: white;
+            font-size: var(--font-size-3xl);
+            margin-bottom: var(--spacing-sm);
         }
-        
+
+        .contact-hero p {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Contact Form Card */
+        .contact-card {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            margin-top: -60px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .contact-card-header {
+            padding: var(--spacing-lg);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .contact-card-body {
+            padding: var(--spacing-xl);
+        }
+
+        /* Category Selection */
+        .category-select-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+
         .category-select-card {
-            border: 2px solid #e9ecef;
-            border-radius: 12px;
-            padding: 20px;
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-lg);
+            text-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
+            transition: all var(--transition-fast);
         }
-        
+
         .category-select-card:hover {
-            border-color: #667eea;
-            background-color: #f8f9ff;
+            border-color: var(--color-accent);
+            background: var(--color-bg-hover);
         }
-        
+
         .category-select-card.selected {
-            border-color: #667eea;
-            background-color: #667eea;
-            color: white;
+            border-color: var(--color-accent);
+            background: rgba(139, 115, 85, 0.1);
         }
-        
+
         .category-select-card .icon {
-            font-size: 2rem;
-            margin-bottom: 10px;
+            font-size: 1.5rem;
+            color: var(--color-accent);
+            margin-bottom: var(--spacing-sm);
         }
-        
-        .category-select-card.selected .icon {
-            color: white;
+
+        .category-select-card h4 {
+            font-size: var(--font-size-base);
+            margin-bottom: var(--spacing-xs);
         }
-        
-        .success-section {
-            text-align: center;
-            padding: 60px 20px;
+
+        .category-select-card p {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            margin: 0;
         }
-        
-        .success-icon {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+
+        /* Info Sidebar */
+        .info-card {
+            background: var(--color-bg-hover);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            height: 100%;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .info-item .icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            background: var(--color-accent);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 30px;
             color: white;
-            font-size: 3rem;
+            margin-right: var(--spacing-md);
+            flex-shrink: 0;
         }
-        
+
+        .info-item h5 {
+            font-size: var(--font-size-base);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .info-item p {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            margin: 0;
+        }
+
+        /* Success Section */
+        .success-section {
+            text-align: center;
+            padding: var(--spacing-2xl);
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--color-success);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto var(--spacing-lg);
+            color: white;
+            font-size: 2rem;
+        }
+
+        /* FAQ Suggestion */
         .faq-suggestion {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 20px;
+            background: var(--color-bg-hover);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-lg);
+            margin-top: var(--spacing-lg);
         }
-        
+
+        .faq-suggestion h5 {
+            font-size: var(--font-size-base);
+            margin-bottom: var(--spacing-md);
+        }
+
         .faq-suggestion-item {
             display: flex;
             align-items: center;
-            padding: 10px;
-            border-radius: 8px;
+            padding: var(--spacing-sm) 0;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: color var(--transition-fast);
         }
-        
+
         .faq-suggestion-item:hover {
-            background: #e9ecef;
+            color: var(--color-accent);
         }
-        
-        .contact-info-card {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 30px;
-            height: 100%;
+
+        .faq-suggestion-item i {
+            color: var(--color-accent);
+            margin-right: var(--spacing-sm);
         }
-        
-        .contact-info-item {
+
+        /* Step Indicator */
+        .step-indicator {
             display: flex;
-            align-items: flex-start;
-            margin-bottom: 20px;
+            justify-content: center;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
         }
-        
-        .contact-info-item .icon {
-            width: 40px;
-            height: 40px;
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            color: var(--color-text-secondary);
+        }
+
+        .step.active {
+            color: var(--color-accent);
+        }
+
+        .step .number {
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--color-border);
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+        }
+
+        .step.active .number {
+            background: var(--color-accent);
             color: white;
-            margin-right: 15px;
-            flex-shrink: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .category-select-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .category-select-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- ナビゲーション -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
         <div class="container">
             <a class="navbar-brand" href="../index.html">
-                <i class="bi bi-book"></i> Publisher
+                <i class="fas fa-book-open"></i>
+                Publisher
             </a>
+            
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
+            
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="../index.html">ホーム</a>
+                        <a class="nav-link" href="../index.html">
+                            <i class="fas fa-home me-1"></i> Home
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="faq.html">FAQ</a>
+                        <a class="nav-link" href="faq.html">
+                            <i class="fas fa-question-circle me-1"></i> FAQ
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="contact.html">お問い合わせ</a>
+                        <a class="nav-link active" href="contact.html">
+                            <i class="fas fa-envelope me-1"></i> Contact
+                        </a>
                     </li>
                 </ul>
-                <ul class="navbar-nav" id="authNav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="login.html">ログイン</a>
-                    </li>
-                </ul>
+                
+                <div class="d-flex align-items-center gap-3" id="authNav">
+                    <a href="login.html" class="btn btn-soft-custom">
+                        <i class="fas fa-sign-in-alt me-1"></i> Sign In
+                    </a>
+                    <a href="register.html" class="btn btn-custom">
+                        Get Started
+                    </a>
+                </div>
             </div>
         </div>
     </nav>
 
-    <!-- ヘッダー -->
-    <section class="contact-header">
-        <div class="container text-center">
-            <h1 class="mb-3"><i class="bi bi-envelope"></i> お問い合わせ</h1>
-            <p class="opacity-75 mb-0">ご質問やご要望がございましたら、お気軽にお問い合わせください</p>
+    <!-- Hero Section -->
+    <section class="contact-hero">
+        <div class="container">
+            <h1><i class="fas fa-envelope me-2"></i>Contact Us</h1>
+            <p>Have a question or need help? We're here for you.</p>
         </div>
     </section>
 
-    <!-- メインコンテンツ -->
+    <!-- Main Content -->
     <main class="container pb-5">
         <div class="row">
-            <!-- お問い合わせフォーム -->
+            <!-- Contact Form -->
             <div class="col-lg-8">
-                <div class="card contact-form-card">
-                    <div class="card-body p-4 p-md-5">
-                        <!-- Step 1: カテゴリ選択 -->
+                <div class="contact-card">
+                    <div class="contact-card-body">
+                        <!-- Step Indicator -->
+                        <div class="step-indicator">
+                            <div class="step active" id="stepIndicator1">
+                                <div class="number">1</div>
+                                <span>Category</span>
+                            </div>
+                            <div class="step" id="stepIndicator2">
+                                <div class="number">2</div>
+                                <span>Details</span>
+                            </div>
+                        </div>
+
+                        <!-- Step 1: Category Selection -->
                         <div id="step1">
-                            <h4 class="mb-4">お問い合わせの種類を選択してください</h4>
-                            <div class="row g-3" id="categorySelection">
-                                <div class="col-6 col-md-4">
-                                    <div class="category-select-card" data-category="account">
-                                        <div class="icon"><i class="bi bi-person-circle"></i></div>
-                                        <div class="fw-bold">アカウント</div>
-                                        <small class="text-muted">登録・ログイン</small>
-                                    </div>
+                            <h3 class="mb-4">What can we help you with?</h3>
+                            <div class="category-select-grid" id="categorySelection">
+                                <div class="category-select-card" data-category="account">
+                                    <div class="icon"><i class="fas fa-user-circle"></i></div>
+                                    <h4>Account</h4>
+                                    <p>Login & registration</p>
                                 </div>
-                                <div class="col-6 col-md-4">
-                                    <div class="category-select-card" data-category="payment">
-                                        <div class="icon"><i class="bi bi-credit-card"></i></div>
-                                        <div class="fw-bold">お支払い</div>
-                                        <small class="text-muted">購入・返金</small>
-                                    </div>
+                                <div class="category-select-card" data-category="payment">
+                                    <div class="icon"><i class="fas fa-credit-card"></i></div>
+                                    <h4>Payment</h4>
+                                    <p>Purchases & refunds</p>
                                 </div>
-                                <div class="col-6 col-md-4">
-                                    <div class="category-select-card" data-category="translation">
-                                        <div class="icon"><i class="bi bi-translate"></i></div>
-                                        <div class="fw-bold">翻訳</div>
-                                        <small class="text-muted">AI翻訳・翻訳者</small>
-                                    </div>
+                                <div class="category-select-card" data-category="translation">
+                                    <div class="icon"><i class="fas fa-language"></i></div>
+                                    <h4>Translation</h4>
+                                    <p>AI & human translation</p>
                                 </div>
-                                <div class="col-6 col-md-4">
-                                    <div class="category-select-card" data-category="technical">
-                                        <div class="icon"><i class="bi bi-gear"></i></div>
-                                        <div class="fw-bold">技術的問題</div>
-                                        <small class="text-muted">エラー・不具合</small>
-                                    </div>
+                                <div class="category-select-card" data-category="technical">
+                                    <div class="icon"><i class="fas fa-cog"></i></div>
+                                    <h4>Technical</h4>
+                                    <p>Bugs & errors</p>
                                 </div>
-                                <div class="col-6 col-md-4">
-                                    <div class="category-select-card" data-category="copyright">
-                                        <div class="icon"><i class="bi bi-shield-check"></i></div>
-                                        <div class="fw-bold">著作権</div>
-                                        <small class="text-muted">権利侵害報告</small>
-                                    </div>
+                                <div class="category-select-card" data-category="copyright">
+                                    <div class="icon"><i class="fas fa-shield-alt"></i></div>
+                                    <h4>Copyright</h4>
+                                    <p>DMCA & violations</p>
                                 </div>
-                                <div class="col-6 col-md-4">
-                                    <div class="category-select-card" data-category="other">
-                                        <div class="icon"><i class="bi bi-question-circle"></i></div>
-                                        <div class="fw-bold">その他</div>
-                                        <small class="text-muted">上記以外</small>
-                                    </div>
+                                <div class="category-select-card" data-category="other">
+                                    <div class="icon"><i class="fas fa-question-circle"></i></div>
+                                    <h4>Other</h4>
+                                    <p>General inquiries</p>
                                 </div>
                             </div>
 
-                            <!-- FAQ提案 -->
+                            <!-- FAQ Suggestion -->
                             <div class="faq-suggestion" id="faqSuggestion" style="display: none;">
-                                <h6><i class="bi bi-lightbulb"></i> こちらの回答が参考になるかもしれません</h6>
+                                <h5><i class="fas fa-lightbulb me-2 text-warning"></i>These might help:</h5>
                                 <div id="faqSuggestionList"></div>
                                 <div class="text-end mt-3">
-                                    <button class="btn btn-outline-secondary btn-sm" onclick="proceedToStep2()">
-                                        解決しない場合は次へ <i class="bi bi-arrow-right"></i>
+                                    <button class="btn btn-soft-custom btn-sm" onclick="proceedToStep2()">
+                                        Not helpful? Continue <i class="fas fa-arrow-right ms-1"></i>
                                     </button>
                                 </div>
                             </div>
 
                             <div class="text-end mt-4" id="step1NextBtn" style="display: none;">
-                                <button class="btn btn-primary" onclick="proceedToStep2()">
-                                    次へ <i class="bi bi-arrow-right"></i>
+                                <button class="btn btn-custom" onclick="proceedToStep2()">
+                                    Continue <i class="fas fa-arrow-right ms-1"></i>
                                 </button>
                             </div>
                         </div>
 
-                        <!-- Step 2: 詳細入力 -->
+                        <!-- Step 2: Contact Form -->
                         <div id="step2" style="display: none;">
                             <div class="d-flex align-items-center mb-4">
-                                <button class="btn btn-outline-secondary btn-sm me-3" onclick="backToStep1()">
-                                    <i class="bi bi-arrow-left"></i> 戻る
+                                <button class="btn btn-soft-custom btn-sm me-3" onclick="backToStep1()">
+                                    <i class="fas fa-arrow-left"></i>
                                 </button>
-                                <h4 class="mb-0">お問い合わせ内容を入力</h4>
+                                <h3 class="mb-0">Tell us more</h3>
                             </div>
 
                             <form id="contactForm">
-                                <!-- ゲスト用の連絡先情報 -->
+                                <!-- Guest Fields -->
                                 <div id="guestFields">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">お名前 <span class="text-danger">*</span></label>
+                                            <label class="form-label">Your Name <span class="text-danger">*</span></label>
                                             <input type="text" class="form-control" id="guestName" required>
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">メールアドレス <span class="text-danger">*</span></label>
+                                            <label class="form-label">Email Address <span class="text-danger">*</span></label>
                                             <input type="email" class="form-control" id="guestEmail" required>
-                                            <small class="text-muted">返信をお送りするために必要です</small>
+                                            <small class="text-muted">We'll send our response here</small>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- 件名 -->
+                                <!-- Subject -->
                                 <div class="mb-3">
-                                    <label class="form-label">件名 <span class="text-danger">*</span></label>
+                                    <label class="form-label">Subject <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control" id="subject" required
-                                           placeholder="例：ログインができません">
+                                           placeholder="Brief description of your issue">
                                 </div>
 
-                                <!-- 内容 -->
+                                <!-- Message -->
                                 <div class="mb-3">
-                                    <label class="form-label">お問い合わせ内容 <span class="text-danger">*</span></label>
+                                    <label class="form-label">Message <span class="text-danger">*</span></label>
                                     <textarea class="form-control" id="message" rows="6" required
-                                              placeholder="できるだけ詳しくお書きください。エラーメッセージがある場合はそのままコピーしてください。"></textarea>
+                                              placeholder="Please describe your issue in detail. Include any error messages if applicable."></textarea>
                                     <small class="text-muted">
-                                        <span id="charCount">0</span> / 2000文字
+                                        <span id="charCount">0</span> / 2000 characters
                                     </small>
                                 </div>
 
-                                <!-- 関連情報（オプション） -->
+                                <!-- Related Order -->
                                 <div class="mb-4">
-                                    <label class="form-label">関連する注文番号（任意）</label>
+                                    <label class="form-label">Order ID (optional)</label>
                                     <input type="text" class="form-control" id="relatedOrderId"
-                                           placeholder="例：ORD-20240115-0001">
+                                           placeholder="e.g., ORD-20240115-0001">
                                 </div>
 
-                                <!-- プライバシーポリシー同意 -->
+                                <!-- Privacy Agreement -->
                                 <div class="form-check mb-4">
                                     <input class="form-check-input" type="checkbox" id="agreePrivacy" required>
                                     <label class="form-check-label" for="agreePrivacy">
-                                        <a href="privacy.html" target="_blank">プライバシーポリシー</a>に同意します
+                                        I agree to the <a href="privacy.html" target="_blank">Privacy Policy</a>
                                     </label>
                                 </div>
 
-                                <!-- 送信ボタン -->
+                                <!-- Submit -->
                                 <div class="d-grid">
-                                    <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
-                                        <i class="bi bi-send"></i> 送信する
+                                    <button type="submit" class="btn btn-custom btn-lg" id="submitBtn">
+                                        <i class="fas fa-paper-plane me-2"></i>Submit Request
                                     </button>
                                 </div>
                             </form>
                         </div>
 
-                        <!-- 送信完了 -->
+                        <!-- Success Section -->
                         <div id="successSection" style="display: none;">
                             <div class="success-section">
                                 <div class="success-icon">
-                                    <i class="bi bi-check-lg"></i>
+                                    <i class="fas fa-check"></i>
                                 </div>
-                                <h3 class="mb-3">お問い合わせを受け付けました</h3>
-                                <p class="text-muted mb-4">
-                                    チケット番号: <strong id="ticketNumber"></strong>
+                                <h3 class="mb-3">Request Submitted!</h3>
+                                <p class="text-muted mb-2">
+                                    Ticket Number: <strong id="ticketNumber"></strong>
                                 </p>
                                 <p class="mb-4">
-                                    24時間以内にご登録のメールアドレスへ返信いたします。<br>
-                                    しばらくお待ちください。
+                                    We'll respond within 24 hours. Check your email for updates.
                                 </p>
                                 <div class="d-flex justify-content-center gap-3">
-                                    <a href="faq.html" class="btn btn-outline-primary">
-                                        <i class="bi bi-question-circle"></i> FAQを見る
+                                    <a href="faq.html" class="btn btn-soft-custom">
+                                        <i class="fas fa-question-circle me-1"></i> Browse FAQ
                                     </a>
-                                    <a href="../index.html" class="btn btn-primary">
-                                        <i class="bi bi-house"></i> トップページへ
+                                    <a href="../index.html" class="btn btn-custom">
+                                        <i class="fas fa-home me-1"></i> Back to Home
                                     </a>
                                 </div>
                                 <div id="ticketLink" class="mt-4" style="display: none;">
                                     <a href="tickets.html" class="btn btn-link">
-                                        <i class="bi bi-list-ul"></i> お問い合わせ履歴を確認
+                                        <i class="fas fa-list me-1"></i>View My Tickets
                                     </a>
                                 </div>
                             </div>
@@ -326,75 +460,63 @@
                 </div>
             </div>
 
-            <!-- サイドバー -->
+            <!-- Sidebar -->
             <div class="col-lg-4 mt-4 mt-lg-0">
-                <div class="contact-info-card" style="margin-top: -40px;">
-                    <h5 class="mb-4">お問い合わせの前に</h5>
+                <div class="info-card" style="margin-top: -60px;">
+                    <h4 class="mb-4">Before you contact us</h4>
                     
-                    <div class="contact-info-item">
+                    <div class="info-item">
                         <div class="icon">
-                            <i class="bi bi-book"></i>
+                            <i class="fas fa-book"></i>
                         </div>
                         <div>
-                            <strong>FAQをご確認ください</strong>
-                            <p class="text-muted small mb-0">
-                                よくある質問への回答をまとめています。
-                                <a href="faq.html">FAQを見る →</a>
-                            </p>
+                            <h5>Check our FAQ</h5>
+                            <p>Find quick answers to common questions. <a href="faq.html">Browse FAQ →</a></p>
                         </div>
                     </div>
 
-                    <div class="contact-info-item">
+                    <div class="info-item">
                         <div class="icon">
-                            <i class="bi bi-clock"></i>
+                            <i class="fas fa-clock"></i>
                         </div>
                         <div>
-                            <strong>対応時間</strong>
-                            <p class="text-muted small mb-0">
-                                24時間以内に返信いたします<br>
-                                （土日祝は翌営業日）
-                            </p>
+                            <h5>Response Time</h5>
+                            <p>We typically respond within 24 hours (business days).</p>
                         </div>
                     </div>
 
-                    <div class="contact-info-item">
+                    <div class="info-item">
                         <div class="icon">
-                            <i class="bi bi-shield-check"></i>
+                            <i class="fas fa-shield-alt"></i>
                         </div>
                         <div>
-                            <strong>著作権侵害の報告</strong>
-                            <p class="text-muted small mb-0">
-                                著作権侵害を発見した場合は
-                                <a href="dmca.html">DMCA報告フォーム</a>
-                                をご利用ください。
-                            </p>
+                            <h5>Copyright Issues</h5>
+                            <p>For DMCA takedowns, use our <a href="dmca.html">DMCA form</a>.</p>
                         </div>
                     </div>
 
                     <hr>
 
-                    <h6 class="mb-3">緊急のお問い合わせ</h6>
+                    <h5 class="mb-3">Urgent Issues</h5>
                     <p class="text-muted small">
-                        不正アクセスや決済トラブルなど、緊急の場合は
-                        お問い合わせフォームで「緊急」を選択してください。
-                        優先的に対応いたします。
+                        For account security or payment emergencies, select the appropriate 
+                        category and we'll prioritize your request.
                     </p>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- フッター -->
-    <footer class="bg-dark text-light py-4">
+    <!-- Footer -->
+    <footer class="footer-custom">
         <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <p class="mb-0">&copy; 2024 Publisher. All rights reserved.</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <a href="terms.html" class="text-light me-3">利用規約</a>
-                    <a href="privacy.html" class="text-light me-3">プライバシーポリシー</a>
-                    <a href="faq.html" class="text-light">FAQ</a>
+            <div class="d-flex flex-wrap justify-content-between align-items-center">
+                <p class="small mb-0">&copy; 2024 Publisher. All rights reserved.</p>
+                <div class="d-flex gap-3">
+                    <a href="faq.html" class="text-secondary">FAQ</a>
+                    <a href="contact.html" class="text-secondary">Contact</a>
+                    <a href="terms.html" class="text-secondary">Terms</a>
+                    <a href="privacy.html" class="text-secondary">Privacy</a>
                 </div>
             </div>
         </div>
@@ -402,23 +524,17 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // =============================================
-        // お問い合わせページのJavaScript
-        // =============================================
-        
         const API_BASE = 'http://localhost:3000/api';
         let selectedCategory = null;
         let isLoggedIn = false;
         let currentUser = null;
 
-        // ページ読み込み時
         document.addEventListener('DOMContentLoaded', function() {
             checkAuth();
             setupCategorySelection();
             setupForm();
         });
 
-        // 認証チェック
         async function checkAuth() {
             try {
                 const response = await fetch(`${API_BASE}/auth/me`, {
@@ -429,63 +545,51 @@
                     isLoggedIn = true;
                     currentUser = data.user;
                     updateAuthNav(data.user);
-                    // ゲスト用フィールドを非表示
                     document.getElementById('guestFields').style.display = 'none';
                 }
             } catch (error) {
-                console.log('未ログイン状態');
+                console.log('Not logged in');
             }
         }
 
         function updateAuthNav(user) {
             const authNav = document.getElementById('authNav');
             authNav.innerHTML = `
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-person-circle"></i> ${user.display_name || user.email}
-                    </a>
+                <div class="dropdown">
+                    <button class="btn btn-soft-custom dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle me-1"></i>
+                        ${user.display_name || user.email}
+                    </button>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="dashboard.html">ダッシュボード</a></li>
-                        <li><a class="dropdown-item" href="tickets.html">お問い合わせ履歴</a></li>
+                        <li><a class="dropdown-item" href="dashboard.html"><i class="fas fa-th-large me-2"></i>Dashboard</a></li>
+                        <li><a class="dropdown-item" href="tickets.html"><i class="fas fa-ticket-alt me-2"></i>My Tickets</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" onclick="logout()">ログアウト</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Sign Out</a></li>
                     </ul>
-                </li>
+                </div>
             `;
         }
 
-        // カテゴリ選択セットアップ
         function setupCategorySelection() {
             const cards = document.querySelectorAll('.category-select-card');
             
             cards.forEach(card => {
                 card.addEventListener('click', function() {
-                    // 選択状態をクリア
                     cards.forEach(c => c.classList.remove('selected'));
-                    // 選択
                     this.classList.add('selected');
                     selectedCategory = this.dataset.category;
                     
-                    // FAQ提案を表示
                     showFaqSuggestions(selectedCategory);
-                    
-                    // 次へボタンを表示
                     document.getElementById('step1NextBtn').style.display = 'block';
                 });
             });
         }
 
-        // FAQ提案を表示
         async function showFaqSuggestions(category) {
             try {
-                // カテゴリに対応するFAQカテゴリIDを取得
                 const categoryMap = {
-                    'account': 1,
-                    'payment': 2,
-                    'translation': 4,
-                    'technical': 7,
-                    'copyright': null,
-                    'other': 8
+                    'account': 1, 'payment': 2, 'translation': 4,
+                    'technical': 7, 'copyright': null, 'other': 8
                 };
                 
                 const categoryId = categoryMap[category];
@@ -501,8 +605,8 @@
                     const container = document.getElementById('faqSuggestionList');
                     container.innerHTML = data.faqs.slice(0, 3).map(faq => `
                         <div class="faq-suggestion-item" onclick="window.open('faq.html#faq${faq.id}', '_blank')">
-                            <i class="bi bi-question-circle text-primary me-2"></i>
-                            <span>${faq.question_ja}</span>
+                            <i class="fas fa-question-circle"></i>
+                            <span>${faq.question_en}</span>
                         </div>
                     `).join('');
                     
@@ -511,50 +615,45 @@
                     document.getElementById('faqSuggestion').style.display = 'none';
                 }
             } catch (error) {
-                console.error('FAQ取得エラー:', error);
+                console.error('FAQ fetch error:', error);
             }
         }
 
-        // Step2へ進む
         function proceedToStep2() {
             if (!selectedCategory) {
-                alert('カテゴリを選択してください');
+                alert('Please select a category');
                 return;
             }
             
             document.getElementById('step1').style.display = 'none';
             document.getElementById('step2').style.display = 'block';
+            document.getElementById('stepIndicator1').classList.remove('active');
+            document.getElementById('stepIndicator2').classList.add('active');
         }
 
-        // Step1へ戻る
         function backToStep1() {
             document.getElementById('step2').style.display = 'none';
             document.getElementById('step1').style.display = 'block';
+            document.getElementById('stepIndicator2').classList.remove('active');
+            document.getElementById('stepIndicator1').classList.add('active');
         }
 
-        // フォームセットアップ
         function setupForm() {
             const form = document.getElementById('contactForm');
             const messageInput = document.getElementById('message');
             const charCount = document.getElementById('charCount');
 
-            // 文字カウント
             messageInput.addEventListener('input', function() {
                 charCount.textContent = this.value.length;
-                if (this.value.length > 2000) {
-                    charCount.classList.add('text-danger');
-                } else {
-                    charCount.classList.remove('text-danger');
-                }
+                charCount.classList.toggle('text-danger', this.value.length > 2000);
             });
 
-            // フォーム送信
             form.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
                 const submitBtn = document.getElementById('submitBtn');
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>送信中...';
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Submitting...';
 
                 try {
                     const data = {
@@ -564,7 +663,6 @@
                         related_order_id: document.getElementById('relatedOrderId').value.trim() || null
                     };
 
-                    // ゲストの場合は連絡先情報を追加
                     if (!isLoggedIn) {
                         data.guest_name = document.getElementById('guestName').value.trim();
                         data.guest_email = document.getElementById('guestEmail').value.trim();
@@ -582,42 +680,35 @@
                     if (result.success) {
                         showSuccess(result.ticket.ticket_number);
                     } else {
-                        alert(result.error || '送信に失敗しました');
+                        alert(result.error || 'Failed to submit. Please try again.');
                         submitBtn.disabled = false;
-                        submitBtn.innerHTML = '<i class="bi bi-send"></i> 送信する';
+                        submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Submit Request';
                     }
                 } catch (error) {
-                    console.error('送信エラー:', error);
-                    alert('送信に失敗しました。しばらく経ってから再度お試しください。');
+                    console.error('Submit error:', error);
+                    alert('Failed to submit. Please try again later.');
                     submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="bi bi-send"></i> 送信する';
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Submit Request';
                 }
             });
         }
 
-        // 送信成功表示
         function showSuccess(ticketNumber) {
             document.getElementById('step2').style.display = 'none';
             document.getElementById('successSection').style.display = 'block';
             document.getElementById('ticketNumber').textContent = ticketNumber;
+            document.querySelector('.step-indicator').style.display = 'none';
             
-            // ログインユーザーにはチケット履歴リンクを表示
             if (isLoggedIn) {
                 document.getElementById('ticketLink').style.display = 'block';
             }
         }
 
-        // ログアウト
-        async function logout() {
-            try {
-                await fetch(`${API_BASE}/auth/logout`, {
-                    method: 'POST',
-                    credentials: 'include'
-                });
-                window.location.reload();
-            } catch (error) {
-                console.error('ログアウトエラー:', error);
-            }
+        function logout() {
+            fetch(`${API_BASE}/auth/logout`, {
+                method: 'POST',
+                credentials: 'include'
+            }).then(() => window.location.reload());
         }
     </script>
 </body>
