@@ -23,10 +23,350 @@ const CATEGORY_NAMES = {
     'other': 'その他'
 };
 
+// Status names
+const STATUS_NAMES = {
+    'pending': '未対応',
+    'reviewing': '確認中',
+    'accepted': '承認済み',
+    'rejected': '却下',
+    'fixed': '修正済み'
+};
+
 // Middleware to get user ID from header (simplified auth)
 const getUserId = (req) => {
     return req.headers['x-user-id'] || req.user?.userId;
 };
+
+// ============================================
+// ADMIN ENDPOINTS
+// ============================================
+
+/**
+ * GET /api/feedback/admin/stats
+ * Get overall feedback statistics (admin)
+ */
+router.get('/admin/stats', async (req, res) => {
+    try {
+        const db = req.app.get('db');
+        
+        // Get overall counts
+        const overallResult = await db.query(`
+            SELECT 
+                COUNT(*) as total,
+                COUNT(*) FILTER (WHERE status = 'pending') as pending,
+                COUNT(*) FILTER (WHERE status = 'reviewing') as reviewing,
+                COUNT(*) FILTER (WHERE status = 'fixed') as fixed,
+                COUNT(*) FILTER (WHERE status = 'rejected') as rejected,
+                COUNT(*) FILTER (WHERE agree_count >= 3 AND status = 'pending') as high_priority
+            FROM translation_feedback
+        `);
+        
+        // Get counts by category
+        const categoryResult = await db.query(`
+            SELECT category, COUNT(*) as count
+            FROM translation_feedback
+            GROUP BY category
+            ORDER BY count DESC
+        `);
+        
+        // Get recent activity (last 7 days)
+        const recentResult = await db.query(`
+            SELECT 
+                DATE(created_at) as date,
+                COUNT(*) as count
+            FROM translation_feedback
+            WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'
+            GROUP BY DATE(created_at)
+            ORDER BY date DESC
+        `);
+        
+        // Get top works with feedback
+        const topWorksResult = await db.query(`
+            SELECT 
+                w.work_id,
+                w.title,
+                COUNT(tf.feedback_id) as feedback_count,
+                COUNT(*) FILTER (WHERE tf.status = 'pending') as pending_count
+            FROM translation_feedback tf
+            JOIN works w ON tf.work_id = w.work_id
+            GROUP BY w.work_id, w.title
+            ORDER BY feedback_count DESC
+            LIMIT 10
+        `);
+        
+        const stats = overallResult.rows[0];
+        
+        res.json({
+            total: parseInt(stats.total),
+            pending: parseInt(stats.pending),
+            reviewing: parseInt(stats.reviewing),
+            fixed: parseInt(stats.fixed),
+            rejected: parseInt(stats.rejected),
+            highPriority: parseInt(stats.high_priority),
+            byCategory: categoryResult.rows.map(r => ({
+                category: r.category,
+                categoryName: CATEGORY_NAMES[r.category] || r.category,
+                count: parseInt(r.count)
+            })),
+            recentActivity: recentResult.rows.map(r => ({
+                date: r.date,
+                count: parseInt(r.count)
+            })),
+            topWorks: topWorksResult.rows.map(r => ({
+                workId: r.work_id,
+                title: r.title,
+                feedbackCount: parseInt(r.feedback_count),
+                pendingCount: parseInt(r.pending_count)
+            }))
+        });
+        
+    } catch (error) {
+        console.error('Admin get stats error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/feedback/admin/all
+ * Get all feedback across all works (admin)
+ */
+router.get('/admin/all', async (req, res) => {
+    try {
+        const db = req.app.get('db');
+        const { status, category, sort, search, page = 1, limit = 20 } = req.query;
+        
+        let query = `
+            SELECT 
+                tf.feedback_id,
+                tf.work_id,
+                tf.chapter_id,
+                tf.source_language,
+                tf.target_language,
+                tf.original_text,
+                tf.translated_text,
+                tf.category,
+                tf.description,
+                tf.suggested_correction,
+                tf.status,
+                tf.agree_count,
+                tf.resolution_note,
+                tf.resolved_at,
+                tf.created_at,
+                tf.updated_at,
+                w.title as work_title,
+                u.pen_name as reporter_name,
+                u.email as reporter_email,
+                ru.pen_name as resolver_name
+            FROM translation_feedback tf
+            JOIN works w ON tf.work_id = w.work_id
+            JOIN users u ON tf.reporter_id = u.user_id
+            LEFT JOIN users ru ON tf.resolved_by = ru.user_id
+            WHERE 1=1
+        `;
+        
+        const params = [];
+        let paramIndex = 1;
+        
+        // Filters
+        if (status) {
+            query += ` AND tf.status = $${paramIndex}::varchar`;
+            params.push(status);
+            paramIndex++;
+        }
+        
+        if (category) {
+            query += ` AND tf.category = $${paramIndex}::varchar`;
+            params.push(category);
+            paramIndex++;
+        }
+        
+        if (search) {
+            query += ` AND (
+                w.title ILIKE $${paramIndex} OR
+                tf.translated_text ILIKE $${paramIndex} OR
+                u.pen_name ILIKE $${paramIndex}
+            )`;
+            params.push(`%${search}%`);
+            paramIndex++;
+        }
+        
+        // Sorting
+        switch (sort) {
+            case 'oldest':
+                query += ' ORDER BY tf.created_at ASC';
+                break;
+            case 'agrees':
+                query += ' ORDER BY tf.agree_count DESC, tf.created_at DESC';
+                break;
+            case 'priority':
+                query += ' ORDER BY (CASE WHEN tf.agree_count >= 3 AND tf.status = \'pending\' THEN 0 ELSE 1 END), tf.agree_count DESC, tf.created_at DESC';
+                break;
+            default:
+                query += ' ORDER BY tf.created_at DESC';
+        }
+        
+        // Pagination
+        const offset = (parseInt(page) - 1) * parseInt(limit);
+        query += ` LIMIT $${paramIndex}::int OFFSET $${paramIndex + 1}::int`;
+        params.push(parseInt(limit), offset);
+        
+        const result = await db.query(query, params);
+        
+        // Get total count
+        let countQuery = `
+            SELECT COUNT(*) FROM translation_feedback tf
+            JOIN works w ON tf.work_id = w.work_id
+            JOIN users u ON tf.reporter_id = u.user_id
+            WHERE 1=1
+        `;
+        const countParams = [];
+        let countParamIndex = 1;
+        
+        if (status) {
+            countQuery += ` AND tf.status = $${countParamIndex}::varchar`;
+            countParams.push(status);
+            countParamIndex++;
+        }
+        if (category) {
+            countQuery += ` AND tf.category = $${countParamIndex}::varchar`;
+            countParams.push(category);
+            countParamIndex++;
+        }
+        if (search) {
+            countQuery += ` AND (w.title ILIKE $${countParamIndex} OR tf.translated_text ILIKE $${countParamIndex} OR u.pen_name ILIKE $${countParamIndex})`;
+            countParams.push(`%${search}%`);
+        }
+        
+        const countResult = await db.query(countQuery, countParams);
+        const total = parseInt(countResult.rows[0].count);
+        
+        // Format response
+        const feedbackList = result.rows.map(row => ({
+            ...row,
+            categoryName: CATEGORY_NAMES[row.category] || row.category,
+            statusName: STATUS_NAMES[row.status] || row.status,
+            sourceLangName: LANG_NAMES[row.source_language] || row.source_language,
+            targetLangName: LANG_NAMES[row.target_language] || row.target_language,
+            isHighPriority: row.agree_count >= 3 && row.status === 'pending'
+        }));
+        
+        res.json({
+            feedback: feedbackList,
+            pagination: {
+                page: parseInt(page),
+                limit: parseInt(limit),
+                total,
+                totalPages: Math.ceil(total / parseInt(limit))
+            }
+        });
+        
+    } catch (error) {
+        console.error('Admin get all feedback error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * PATCH /api/feedback/admin/:feedbackId/resolve
+ * Resolve feedback as admin
+ */
+router.patch('/admin/:feedbackId/resolve', async (req, res) => {
+    try {
+        const db = req.app.get('db');
+        const { feedbackId } = req.params;
+        const userId = getUserId(req);
+        const { status, resolutionNote } = req.body;
+        
+        // Validate status
+        const validStatuses = ['pending', 'reviewing', 'accepted', 'rejected', 'fixed'];
+        if (!validStatuses.includes(status)) {
+            return res.status(400).json({ 
+                error: 'Invalid status. Must be one of: ' + validStatuses.join(', ') 
+            });
+        }
+        
+        // Check if feedback exists
+        const feedbackCheck = await db.query(
+            'SELECT feedback_id FROM translation_feedback WHERE feedback_id = $1::uuid',
+            [feedbackId]
+        );
+        
+        if (feedbackCheck.rows.length === 0) {
+            return res.status(404).json({ error: 'Feedback not found' });
+        }
+        
+        // Update feedback
+        const result = await db.query(
+            `UPDATE translation_feedback
+             SET status = $1::varchar,
+                 resolved_by = $2::uuid,
+                 resolution_note = $3,
+                 resolved_at = CURRENT_TIMESTAMP,
+                 updated_at = CURRENT_TIMESTAMP
+             WHERE feedback_id = $4::uuid
+             RETURNING *`,
+            [status, userId || null, resolutionNote || null, feedbackId]
+        );
+        
+        res.json({
+            success: true,
+            message: 'Feedback updated',
+            feedback: {
+                ...result.rows[0],
+                statusName: STATUS_NAMES[status]
+            }
+        });
+        
+    } catch (error) {
+        console.error('Admin resolve feedback error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * DELETE /api/feedback/admin/:feedbackId
+ * Delete feedback as admin (for spam/inappropriate reports)
+ */
+router.delete('/admin/:feedbackId', async (req, res) => {
+    try {
+        const db = req.app.get('db');
+        const { feedbackId } = req.params;
+        
+        // Delete related records first (agreements, notifications)
+        await db.query(
+            'DELETE FROM translation_feedback_agreements WHERE feedback_id = $1::uuid',
+            [feedbackId]
+        );
+        
+        await db.query(
+            'DELETE FROM translation_feedback_notifications WHERE feedback_id = $1::uuid',
+            [feedbackId]
+        );
+        
+        // Delete feedback
+        const result = await db.query(
+            'DELETE FROM translation_feedback WHERE feedback_id = $1::uuid RETURNING *',
+            [feedbackId]
+        );
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Feedback not found' });
+        }
+        
+        res.json({
+            success: true,
+            message: 'Feedback deleted'
+        });
+        
+    } catch (error) {
+        console.error('Admin delete feedback error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ============================================
+// PUBLIC ENDPOINTS
+// ============================================
 
 /**
  * POST /api/feedback
@@ -176,11 +516,9 @@ router.get('/work/:workId', async (req, res) => {
                 tf.agree_count,
                 tf.created_at,
                 tf.updated_at,
-                u.pen_name as reporter_name,
-                c.title as chapter_title
+                u.pen_name as reporter_name
             FROM translation_feedback tf
             JOIN users u ON tf.reporter_id = u.user_id
-            LEFT JOIN chapters c ON tf.chapter_id = c.chapter_id
             WHERE tf.work_id = $1::uuid
         `;
         
@@ -242,7 +580,7 @@ router.get('/work/:workId', async (req, res) => {
         
         // Check if current user has agreed to each feedback
         let userAgreements = [];
-        if (userId) {
+        if (userId && result.rows.length > 0) {
             const agreementResult = await db.query(
                 `SELECT feedback_id FROM translation_feedback_agreements
                  WHERE user_id = $1::uuid
@@ -291,12 +629,10 @@ router.get('/:feedbackId', async (req, res) => {
             `SELECT 
                 tf.*,
                 w.title as work_title,
-                c.title as chapter_title,
                 u.pen_name as reporter_name,
                 ru.pen_name as resolver_name
              FROM translation_feedback tf
              JOIN works w ON tf.work_id = w.work_id
-             LEFT JOIN chapters c ON tf.chapter_id = c.chapter_id
              JOIN users u ON tf.reporter_id = u.user_id
              LEFT JOIN users ru ON tf.resolved_by = ru.user_id
              WHERE tf.feedback_id = $1::uuid`,
@@ -335,6 +671,7 @@ router.get('/:feedbackId', async (req, res) => {
             feedback: {
                 ...feedback,
                 categoryName: CATEGORY_NAMES[feedback.category] || feedback.category,
+                statusName: STATUS_NAMES[feedback.status] || feedback.status,
                 sourceLangName: LANG_NAMES[feedback.source_language] || feedback.source_language,
                 targetLangName: LANG_NAMES[feedback.target_language] || feedback.target_language,
                 hasUserAgreed,
