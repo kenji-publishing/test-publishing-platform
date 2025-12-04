@@ -36,6 +36,7 @@ const dmcaRoutes = require('./routes/dmca');
 const translationQueueRoutes = require('./routes/translation-queue');
 const translatorMarketplaceRoutes = require('./routes/translator-marketplace');
 const readerFeedbackRoutes = require('./routes/reader-feedback');
+const supportRoutes = require('./routes/support');
 
 // Create Express app
 const app = express();
@@ -76,6 +77,7 @@ app.use('/api/dmca', dmcaRoutes);
 app.use('/api/translation-queue', translationQueueRoutes);
 app.use('/api/translators', translatorMarketplaceRoutes);
 app.use('/api/feedback', readerFeedbackRoutes);
+app.use('/api/support', supportRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -105,7 +107,8 @@ app.get('/', (req, res) => {
       dmca: '/api/dmca',
       translationQueue: '/api/translation-queue',
       translators: '/api/translators',
-      feedback: '/api/feedback'
+      feedback: '/api/feedback',
+      support: '/api/support'
     }
   });
 });
@@ -153,6 +156,9 @@ app.listen(PORT, () => {
   console.log(`   - GET  /api/translators/:profileId`);
   console.log(`   - POST /api/feedback`);
   console.log(`   - GET  /api/feedback/work/:workId`);
+  console.log(`   - GET  /api/support/faq/categories`);
+  console.log(`   - GET  /api/support/faq`);
+  console.log(`   - POST /api/support/tickets`);
   console.log(`\n✨ Press Ctrl+C to stop\n`);
 });
 
