@@ -15,7 +15,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <!-- Custom Styles -->
-    <link href="../css/style-new.css" rel="stylesheet">
+    <link href="../../css/style-new.css" rel="stylesheet">
     
     <style>
         /* Contact Hero Section */
@@ -47,11 +47,6 @@
             z-index: 10;
         }
 
-        .contact-card-header {
-            padding: var(--spacing-lg);
-            border-bottom: 1px solid var(--color-border);
-        }
-
         .contact-card-body {
             padding: var(--spacing-xl);
         }
@@ -71,6 +66,7 @@
             text-align: center;
             cursor: pointer;
             transition: all var(--transition-fast);
+            background: var(--color-bg-card);
         }
 
         .category-select-card:hover {
@@ -102,16 +98,26 @@
 
         /* Info Sidebar */
         .info-card {
-            background: var(--color-bg-hover);
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
             border-radius: var(--radius-lg);
             padding: var(--spacing-xl);
             height: 100%;
+            margin-top: -60px;
         }
 
         .info-item {
             display: flex;
             align-items: flex-start;
             margin-bottom: var(--spacing-lg);
+            padding-bottom: var(--spacing-lg);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
         }
 
         .info-item .icon {
@@ -176,6 +182,7 @@
             padding: var(--spacing-sm) 0;
             cursor: pointer;
             transition: color var(--transition-fast);
+            color: var(--color-text-primary);
         }
 
         .faq-suggestion-item:hover {
@@ -191,8 +198,10 @@
         .step-indicator {
             display: flex;
             justify-content: center;
-            gap: var(--spacing-md);
+            gap: var(--spacing-xl);
             margin-bottom: var(--spacing-xl);
+            padding-bottom: var(--spacing-lg);
+            border-bottom: 1px solid var(--color-border);
         }
 
         .step {
@@ -223,16 +232,38 @@
             color: white;
         }
 
+        /* Form Styles */
+        .form-control:focus {
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 3px rgba(139, 115, 85, 0.1);
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--color-text-primary);
+            margin-bottom: var(--spacing-xs);
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .category-select-grid {
                 grid-template-columns: repeat(2, 1fr);
+            }
+
+            .info-card {
+                margin-top: var(--spacing-xl);
             }
         }
 
         @media (max-width: 576px) {
             .category-select-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .step-indicator {
+                flex-direction: column;
+                align-items: center;
+                gap: var(--spacing-sm);
             }
         }
     </style>
@@ -241,7 +272,7 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="../index.html">
+            <a class="navbar-brand" href="../../index.html">
                 <i class="fas fa-book-open"></i>
                 Publisher
             </a>
@@ -253,7 +284,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="../index.html">
+                        <a class="nav-link" href="../../index.html">
                             <i class="fas fa-home me-1"></i> Home
                         </a>
                     </li>
@@ -270,10 +301,10 @@
                 </ul>
                 
                 <div class="d-flex align-items-center gap-3" id="authNav">
-                    <a href="login.html" class="btn btn-soft-custom">
+                    <a href="../login.html" class="btn btn-soft-custom">
                         <i class="fas fa-sign-in-alt me-1"></i> Sign In
                     </a>
-                    <a href="register.html" class="btn btn-custom">
+                    <a href="../register.html" class="btn btn-primary-custom">
                         Get Started
                     </a>
                 </div>
@@ -294,23 +325,23 @@
         <div class="row">
             <!-- Contact Form -->
             <div class="col-lg-8">
-                <div class="contact-card">
+                <div class="contact-card fade-in">
                     <div class="contact-card-body">
                         <!-- Step Indicator -->
                         <div class="step-indicator">
                             <div class="step active" id="stepIndicator1">
                                 <div class="number">1</div>
-                                <span>Category</span>
+                                <span>Select Category</span>
                             </div>
                             <div class="step" id="stepIndicator2">
                                 <div class="number">2</div>
-                                <span>Details</span>
+                                <span>Enter Details</span>
                             </div>
                         </div>
 
                         <!-- Step 1: Category Selection -->
                         <div id="step1">
-                            <h3 class="mb-4">What can we help you with?</h3>
+                            <h3 class="mb-4"><i class="fas fa-th-large me-2 text-accent"></i>What can we help you with?</h3>
                             <div class="category-select-grid" id="categorySelection">
                                 <div class="category-select-card" data-category="account">
                                     <div class="icon"><i class="fas fa-user-circle"></i></div>
@@ -356,7 +387,7 @@
                             </div>
 
                             <div class="text-end mt-4" id="step1NextBtn" style="display: none;">
-                                <button class="btn btn-custom" onclick="proceedToStep2()">
+                                <button class="btn btn-primary-custom" onclick="proceedToStep2()">
                                     Continue <i class="fas fa-arrow-right ms-1"></i>
                                 </button>
                             </div>
@@ -368,7 +399,7 @@
                                 <button class="btn btn-soft-custom btn-sm me-3" onclick="backToStep1()">
                                     <i class="fas fa-arrow-left"></i>
                                 </button>
-                                <h3 class="mb-0">Tell us more</h3>
+                                <h3 class="mb-0"><i class="fas fa-edit me-2 text-accent"></i>Tell us more</h3>
                             </div>
 
                             <form id="contactForm">
@@ -415,13 +446,13 @@
                                 <div class="form-check mb-4">
                                     <input class="form-check-input" type="checkbox" id="agreePrivacy" required>
                                     <label class="form-check-label" for="agreePrivacy">
-                                        I agree to the <a href="privacy.html" target="_blank">Privacy Policy</a>
+                                        I agree to the <a href="../privacy.html" target="_blank">Privacy Policy</a>
                                     </label>
                                 </div>
 
                                 <!-- Submit -->
                                 <div class="d-grid">
-                                    <button type="submit" class="btn btn-custom btn-lg" id="submitBtn">
+                                    <button type="submit" class="btn btn-primary-custom btn-lg" id="submitBtn">
                                         <i class="fas fa-paper-plane me-2"></i>Submit Request
                                     </button>
                                 </div>
@@ -436,21 +467,21 @@
                                 </div>
                                 <h3 class="mb-3">Request Submitted!</h3>
                                 <p class="text-muted mb-2">
-                                    Ticket Number: <strong id="ticketNumber"></strong>
+                                    Ticket Number: <strong id="ticketNumber" class="text-accent"></strong>
                                 </p>
                                 <p class="mb-4">
                                     We'll respond within 24 hours. Check your email for updates.
                                 </p>
-                                <div class="d-flex justify-content-center gap-3">
+                                <div class="d-flex justify-content-center gap-3 flex-wrap">
                                     <a href="faq.html" class="btn btn-soft-custom">
                                         <i class="fas fa-question-circle me-1"></i> Browse FAQ
                                     </a>
-                                    <a href="../index.html" class="btn btn-custom">
+                                    <a href="../../index.html" class="btn btn-primary-custom">
                                         <i class="fas fa-home me-1"></i> Back to Home
                                     </a>
                                 </div>
                                 <div id="ticketLink" class="mt-4" style="display: none;">
-                                    <a href="tickets.html" class="btn btn-link">
+                                    <a href="tickets.html" class="btn btn-outline-custom">
                                         <i class="fas fa-list me-1"></i>View My Tickets
                                     </a>
                                 </div>
@@ -462,8 +493,8 @@
 
             <!-- Sidebar -->
             <div class="col-lg-4 mt-4 mt-lg-0">
-                <div class="info-card" style="margin-top: -60px;">
-                    <h4 class="mb-4">Before you contact us</h4>
+                <div class="info-card fade-in">
+                    <h4 class="mb-4"><i class="fas fa-info-circle me-2 text-accent"></i>Before you contact us</h4>
                     
                     <div class="info-item">
                         <div class="icon">
@@ -491,17 +522,19 @@
                         </div>
                         <div>
                             <h5>Copyright Issues</h5>
-                            <p>For DMCA takedowns, use our <a href="dmca.html">DMCA form</a>.</p>
+                            <p>For DMCA takedowns, use our <a href="../dmca.html">DMCA form</a>.</p>
                         </div>
                     </div>
 
-                    <hr>
-
-                    <h5 class="mb-3">Urgent Issues</h5>
-                    <p class="text-muted small">
-                        For account security or payment emergencies, select the appropriate 
-                        category and we'll prioritize your request.
-                    </p>
+                    <div class="info-item">
+                        <div class="icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div>
+                            <h5>Urgent Issues</h5>
+                            <p>For account security or payment emergencies, select the appropriate category.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -513,10 +546,10 @@
             <div class="d-flex flex-wrap justify-content-between align-items-center">
                 <p class="small mb-0">&copy; 2024 Publisher. All rights reserved.</p>
                 <div class="d-flex gap-3">
-                    <a href="faq.html" class="text-secondary">FAQ</a>
-                    <a href="contact.html" class="text-secondary">Contact</a>
-                    <a href="terms.html" class="text-secondary">Terms</a>
-                    <a href="privacy.html" class="text-secondary">Privacy</a>
+                    <a href="faq.html">FAQ</a>
+                    <a href="contact.html" class="text-accent">Contact</a>
+                    <a href="../terms.html">Terms</a>
+                    <a href="../privacy.html">Privacy</a>
                 </div>
             </div>
         </div>
@@ -561,7 +594,7 @@
                         ${user.display_name || user.email}
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="dashboard.html"><i class="fas fa-th-large me-2"></i>Dashboard</a></li>
+                        <li><a class="dropdown-item" href="../dashboard.html"><i class="fas fa-th-large me-2"></i>Dashboard</a></li>
                         <li><a class="dropdown-item" href="tickets.html"><i class="fas fa-ticket-alt me-2"></i>My Tickets</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Sign Out</a></li>
@@ -616,6 +649,7 @@
                 }
             } catch (error) {
                 console.error('FAQ fetch error:', error);
+                document.getElementById('faqSuggestion').style.display = 'none';
             }
         }
 
