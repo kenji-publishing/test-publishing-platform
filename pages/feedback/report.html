@@ -112,6 +112,73 @@
             color: var(--color-success);
             margin-bottom: var(--spacing-lg);
         }
+        
+        /* Context Banner - Shows when coming from reader */
+        .context-banner {
+            background: linear-gradient(135deg, #e8f4fd 0%, #d1ecf1 100%);
+            border: 1px solid #bee5eb;
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md) var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            display: none;
+        }
+        .context-banner.show {
+            display: block;
+        }
+        .context-banner .context-title {
+            font-weight: 600;
+            color: #0c5460;
+            margin-bottom: var(--spacing-xs);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+        .context-banner .context-title i {
+            color: #17a2b8;
+        }
+        .context-banner .context-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-md);
+            font-size: var(--font-size-sm);
+            color: #0c5460;
+        }
+        .context-banner .context-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+        .context-banner .context-item i {
+            color: #17a2b8;
+        }
+        
+        .selected-text-preview {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+            display: none;
+        }
+        .selected-text-preview.show {
+            display: block;
+        }
+        .selected-text-preview .preview-label {
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            color: #856404;
+            margin-bottom: var(--spacing-xs);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+        .selected-text-preview .preview-text {
+            color: #856404;
+            font-style: italic;
+            background: rgba(255,255,255,0.5);
+            padding: var(--spacing-sm);
+            border-radius: var(--radius-sm);
+        }
     </style>
 </head>
 <body>
@@ -147,6 +214,34 @@
             <div class="col-lg-8">
                 <!-- Report Form -->
                 <div class="report-card" id="report-form">
+                    
+                    <!-- Context Banner (shows when coming from reader) -->
+                    <div class="context-banner" id="context-banner">
+                        <div class="context-title">
+                            <i class="fas fa-book-reader"></i>
+                            読書ページからの報告
+                        </div>
+                        <div class="context-details">
+                            <span class="context-item">
+                                <i class="fas fa-book"></i>
+                                <span id="context-work-title">-</span>
+                            </span>
+                            <span class="context-item">
+                                <i class="fas fa-file-alt"></i>
+                                ページ <span id="context-page">-</span>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Selected Text Preview (shows when text was selected in reader) -->
+                    <div class="selected-text-preview" id="selected-text-preview">
+                        <div class="preview-label">
+                            <i class="fas fa-quote-left"></i>
+                            選択されたテキスト
+                        </div>
+                        <div class="preview-text" id="preview-text"></div>
+                    </div>
+                    
                     <h4 class="mb-4"><i class="fas fa-edit me-2 text-accent"></i>問題の詳細</h4>
                     
                     <!-- Work Selection -->
@@ -274,6 +369,9 @@
                         </div>
                     </div>
                     
+                    <!-- Hidden field for page number -->
+                    <input type="hidden" id="page-number" value="">
+                    
                     <hr class="my-4">
                     
                     <div class="d-flex justify-content-between">
@@ -345,19 +443,68 @@
     <script>
         const API_BASE = 'http://localhost:3000/api';
         let selectedCategory = null;
+        let fromReader = false;
+        let pageNumber = null;
         
         document.addEventListener('DOMContentLoaded', async () => {
             await loadWorks();
-            
-            // Check for URL parameters (from reader page)
-            const params = new URLSearchParams(window.location.search);
-            if (params.get('workId')) {
-                document.getElementById('work-id').value = params.get('workId');
-            }
-            if (params.get('text')) {
-                document.getElementById('translated-text').value = params.get('text');
-            }
+            processUrlParameters();
         });
+        
+        function processUrlParameters() {
+            const params = new URLSearchParams(window.location.search);
+            
+            // Check if coming from reader page
+            const workId = params.get('workId');
+            const text = params.get('text');
+            const page = params.get('page');
+            const title = params.get('title');
+            
+            if (workId || text || page || title) {
+                fromReader = true;
+            }
+            
+            // Set work ID
+            if (workId) {
+                const workSelect = document.getElementById('work-id');
+                // Try to set the value, or add it as an option if not found
+                workSelect.value = workId;
+                if (workSelect.value !== workId) {
+                    // Work not in list, add it manually
+                    const option = document.createElement('option');
+                    option.value = workId;
+                    option.textContent = title || workId;
+                    option.selected = true;
+                    workSelect.appendChild(option);
+                }
+            }
+            
+            // Set translated text
+            if (text) {
+                document.getElementById('translated-text').value = text;
+                
+                // Show preview
+                document.getElementById('preview-text').textContent = text;
+                document.getElementById('selected-text-preview').classList.add('show');
+            }
+            
+            // Set page number
+            if (page) {
+                pageNumber = page;
+                document.getElementById('page-number').value = page;
+                document.getElementById('context-page').textContent = page;
+            }
+            
+            // Set work title in context banner
+            if (title) {
+                document.getElementById('context-work-title').textContent = title;
+            }
+            
+            // Show context banner if coming from reader
+            if (fromReader) {
+                document.getElementById('context-banner').classList.add('show');
+            }
+        }
         
         async function loadWorks() {
             try {
@@ -412,6 +559,13 @@
                 return;
             }
             
+            // Build description with page info if available
+            let description = document.getElementById('description').value.trim() || '';
+            if (pageNumber && !description.includes('ページ')) {
+                const pageInfo = `[ページ ${pageNumber} で発見]`;
+                description = description ? `${pageInfo} ${description}` : pageInfo;
+            }
+            
             try {
                 const response = await fetch(`${API_BASE}/feedback`, {
                     method: 'POST',
@@ -424,7 +578,7 @@
                         translatedText,
                         originalText: document.getElementById('original-text').value.trim() || null,
                         category: selectedCategory,
-                        description: document.getElementById('description').value.trim() || null,
+                        description: description || null,
                         suggestedCorrection: document.getElementById('suggested-correction').value.trim() || null,
                         sourceLanguage: document.getElementById('source-language').value,
                         targetLanguage: document.getElementById('target-language').value
@@ -450,8 +604,14 @@
             document.getElementById('original-text').value = '';
             document.getElementById('description').value = '';
             document.getElementById('suggested-correction').value = '';
+            document.getElementById('page-number').value = '';
             selectedCategory = null;
+            pageNumber = null;
+            fromReader = false;
+            
             document.querySelectorAll('.category-option').forEach(el => el.classList.remove('selected'));
+            document.getElementById('context-banner').classList.remove('show');
+            document.getElementById('selected-text-preview').classList.remove('show');
             
             document.getElementById('success-state').style.display = 'none';
             document.getElementById('report-form').style.display = 'block';
