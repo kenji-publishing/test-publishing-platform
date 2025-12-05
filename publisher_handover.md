@@ -114,7 +114,7 @@ BASE_URL=http://localhost:8000
 ### ファイルパス
 
 ```
-C:\Users\kenji\test-publishing-platform\
+C:\Projects\test-publishing-platform\
 ```
 
 ### サーバーURL
@@ -251,7 +251,7 @@ test-publishing-platform/
 | 8C | 条件付きお問い合わせ表示 | ✅ |
 | 8D | セルフサービス機能（アカウント設定） | ✅ |
 | 8E | 自動メール応答（6種類のテンプレート） | ✅ |
-| **9A** | **通知センター - データベース・API・UI** | ✅ NEW |
+| **9A** | **通知センター - データベース・API・UI** | ✅ |
 
 ---
 
@@ -301,75 +301,7 @@ test-publishing-platform/
 
 ---
 
-## 9. Phase 9A セットアップ手順
-
-### 🔴 重要：以下の手順を実行してください
-
-#### Step 1: 最新コードを取得
-
-1. **PowerShellを開く**
-   - Windowsキー → 「PowerShell」と入力 → Enter
-
-2. **プロジェクトフォルダに移動**
-   ```
-   cd C:\Users\kenji\test-publishing-platform
-   ```
-
-3. **最新コードを取得**
-   ```
-   git pull
-   ```
-   
-   **成功すると**：ファイル一覧が表示されます
-
-#### Step 2: データベースにテーブルを作成
-
-1. **pgAdmin 4 を開く**
-   - スタートメニューから「pgAdmin 4」を検索して起動
-
-2. **publisher_db を開く**
-   - 左パネル: Servers → PostgreSQL → Databases → publisher_db
-
-3. **Query Tool を開く**
-   - publisher_db を右クリック → 「Query Tool」
-
-4. **SQLを実行**
-   - 以下のファイルの内容をコピー＆ペースト：
-     ```
-     C:\Users\kenji\test-publishing-platform\backend\migrations\011_notification_center.sql
-     ```
-   - ▶️ ボタンをクリックして実行
-
-5. **成功確認**
-   - 「Query returned successfully」と表示されればOK
-
-#### Step 3: サーバーを再起動
-
-1. **既存のサーバーを停止**
-   - サーバーが動いているPowerShellで `Ctrl + C`
-
-2. **サーバーを起動**
-   ```
-   cd C:\Users\kenji\test-publishing-platform\backend
-   node server.js
-   ```
-
-3. **確認**
-   - 「Server is running on port 8000」と表示されればOK
-
-#### Step 4: 動作確認
-
-1. ブラウザで以下を開く：
-   - http://localhost:8000/pages/notifications.html?demo=true
-
-2. **確認ポイント**：
-   - 通知一覧が表示される
-   - フィルターが動作する
-   - 「すべて既読」ボタンが動作する
-
----
-
-## 10. 今後の開発予定
+## 9. 今後の開発予定
 
 | Phase | 内容 | 概要 |
 |-------|------|------|
@@ -388,7 +320,7 @@ test-publishing-platform/
 
 ---
 
-## 11. サーバー起動方法
+## 10. サーバー起動方法
 
 ### 手順
 
@@ -397,7 +329,7 @@ test-publishing-platform/
 
 2. **プロジェクトフォルダに移動**
    ```
-   cd C:\Users\kenji\test-publishing-platform\backend
+   cd C:\Projects\test-publishing-platform\backend
    ```
 
 3. **サーバーを起動**
@@ -421,7 +353,7 @@ PowerShellで `Ctrl + C` を押す
 
 ---
 
-## 12. GitHubからの更新取得方法
+## 11. GitHubからの更新取得方法
 
 ### 手順
 
@@ -429,7 +361,7 @@ PowerShellで `Ctrl + C` を押す
 
 2. **プロジェクトフォルダに移動**
    ```
-   cd C:\Users\kenji\test-publishing-platform
+   cd C:\Projects\test-publishing-platform
    ```
 
 3. **最新コードを取得**
@@ -445,7 +377,7 @@ PowerShellで `Ctrl + C` を押す
 
 ---
 
-## 13. 注意事項
+## 12. 注意事項
 
 ### データベーススキーマの違い
 
@@ -470,7 +402,7 @@ FAQデータの一部に `[要更新]` マーカーが含まれています。
 
 ---
 
-## 14. 新しいChatでの開始方法
+## 13. 新しいChatでの開始方法
 
 1. このドキュメントの内容をClaudeに共有（またはアップロード）
 2. 「Phase 9Bから続けてください」と伝える
@@ -479,7 +411,7 @@ FAQデータの一部に `[要更新]` マーカーが含まれています。
 
 ---
 
-## 15. 参考リンク
+## 14. 参考リンク
 
 | 項目 | URL |
 |------|-----|
