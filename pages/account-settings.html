@@ -298,9 +298,28 @@
         .loading-overlay.show {
             display: flex;
         }
+        
+        /* Demo Mode Banner */
+        .demo-banner {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.75rem;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        
+        .demo-banner i {
+            margin-right: 0.5rem;
+        }
     </style>
 </head>
 <body>
+    <!-- Demo Mode Banner -->
+    <div class="demo-banner" id="demoBanner" style="display: none;">
+        <i class="fas fa-flask"></i>
+        <strong>デモモード:</strong> ダミーデータで表示しています。実際の機能はログイン後に利用できます。
+    </div>
+
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner-border text-primary" role="status">
@@ -665,15 +684,65 @@
         const API_BASE = 'http://localhost:3000/api';
         let currentUser = null;
         let backupCodes = [];
+        let isDemo = false;
+        
+        // =============================================
+        // Demo Data
+        // =============================================
+        const DEMO_USER = {
+            user_id: 'demo-user-001',
+            email: 'demo@example.com',
+            first_name: '太郎',
+            last_name: '山田',
+            display_name: '山田太郎',
+            bio: '小説家を目指しています。ファンタジーとSFが好きです。よろしくお願いします！',
+            preferred_language: 'ja',
+            email_verified: true,
+            avatar_url: null
+        };
+        
+        const DEMO_SECURITY_QUESTIONS = [
+            { id: 1, question: '子供の頃のペットの名前は？', order: 1 },
+            { id: 2, question: '初めて買った本のタイトルは？', order: 2 },
+            { id: 3, question: '一番好きな映画は？', order: 3 }
+        ];
+        
+        const DEMO_PURCHASES = [
+            { id: 'p001', work_title: '異世界転生物語 第1巻', amount: 500, purchased_at: '2025-11-15T10:30:00Z', payment_method: 'クレジットカード' },
+            { id: 'p002', work_title: 'プログラミング入門', amount: 1200, purchased_at: '2025-10-22T14:15:00Z', payment_method: 'PayPal' },
+            { id: 'p003', work_title: '短編小説集「夜明け」', amount: 300, purchased_at: '2025-09-05T09:00:00Z', payment_method: 'クレジットカード' }
+        ];
+        
+        const DEMO_LOGIN_HISTORY = [
+            { date: '2025-12-05 10:30', device: 'Chrome / Windows', location: '東京, 日本' },
+            { date: '2025-12-04 18:45', device: 'Safari / iPhone', location: '東京, 日本' },
+            { date: '2025-12-03 09:15', device: 'Chrome / Windows', location: '大阪, 日本' }
+        ];
         
         // =============================================
         // Initialization
         // =============================================
         document.addEventListener('DOMContentLoaded', async function() {
-            await checkAuth();
+            // Check for demo mode
+            const params = new URLSearchParams(window.location.search);
+            isDemo = params.get('demo') === 'true';
+            
+            if (isDemo) {
+                document.getElementById('demoBanner').style.display = 'block';
+                currentUser = DEMO_USER;
+                updateAuthNav();
+                loadUserData();
+                loadDemoSecurityData();
+                loadDemoPurchases();
+            } else {
+                await checkAuth();
+                setupTabs();
+                setupDeleteConfirmation();
+                loadUserData();
+            }
+            
             setupTabs();
             setupDeleteConfirmation();
-            loadUserData();
         });
         
         async function checkAuth() {
@@ -729,8 +798,12 @@
                     document.getElementById(`panel-${tabName}`).classList.add('active');
                     
                     // Load data for specific tabs
-                    if (tabName === 'purchases') loadPurchases();
-                    if (tabName === 'security') loadSecurityData();
+                    if (tabName === 'purchases') {
+                        isDemo ? loadDemoPurchases() : loadPurchases();
+                    }
+                    if (tabName === 'security') {
+                        isDemo ? loadDemoSecurityData() : loadSecurityData();
+                    }
                 });
             });
         }
@@ -761,10 +834,71 @@
         }
         
         // =============================================
+        // Demo Data Loaders
+        // =============================================
+        function loadDemoSecurityData() {
+            // Backup code count
+            document.getElementById('backupCodeCount').textContent = '8';
+            
+            // Security questions
+            const container = document.getElementById('securityQuestionsList');
+            container.innerHTML = DEMO_SECURITY_QUESTIONS.map((q, i) => `
+                <div class="security-item">
+                    <div class="security-info">
+                        <h4>質問 ${i + 1}</h4>
+                        <p>${q.question}</p>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Email change modal questions
+            const emailQuestionsContainer = document.getElementById('emailSecurityQuestions');
+            emailQuestionsContainer.innerHTML = DEMO_SECURITY_QUESTIONS.map(q => `
+                <div class="form-group mb-3">
+                    <label>${q.question}</label>
+                    <input type="text" class="form-control security-answer" data-question-id="${q.id}" required>
+                </div>
+            `).join('');
+            
+            // Login history
+            const loginContainer = document.getElementById('loginHistory');
+            loginContainer.innerHTML = DEMO_LOGIN_HISTORY.map(log => `
+                <div class="security-item">
+                    <div class="security-info">
+                        <h4>${log.date}</h4>
+                        <p>${log.device} • ${log.location}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function loadDemoPurchases() {
+            const container = document.getElementById('purchasesList');
+            container.innerHTML = DEMO_PURCHASES.map(purchase => `
+                <div class="purchase-item">
+                    <div class="purchase-info">
+                        <h4>${purchase.work_title}</h4>
+                        <p>${new Date(purchase.purchased_at).toLocaleDateString('ja-JP')} • ${purchase.payment_method}</p>
+                    </div>
+                    <span class="purchase-amount">¥${purchase.amount.toLocaleString()}</span>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="downloadReceipt('${purchase.id}')">
+                        <i class="fas fa-download me-1"></i> 領収書
+                    </button>
+                </div>
+            `).join('');
+        }
+        
+        // =============================================
         // Profile Form
         // =============================================
         document.getElementById('profileForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            
+            if (isDemo) {
+                showAlert('info', 'デモモードのため保存されません');
+                return;
+            }
+            
             showLoading();
             
             try {
@@ -838,6 +972,15 @@
         }
         
         async function regenerateBackupCodes() {
+            if (isDemo) {
+                backupCodes = ['ABCD-EFGH-IJKL', 'MNOP-QRST-UVWX', 'YZ12-3456-7890', 
+                               '1234-ABCD-5678', 'DEMO-CODE-0001', 'DEMO-CODE-0002',
+                               'DEMO-CODE-0003', 'DEMO-CODE-0004', 'DEMO-CODE-0005', 'DEMO-CODE-0006'];
+                document.getElementById('backupCodesList').innerHTML = backupCodes.map(code => `<div>${code}</div>`).join('');
+                new bootstrap.Modal(document.getElementById('backupCodesModal')).show();
+                return;
+            }
+            
             if (!confirm('新しいバックアップコードを生成しますか？\n現在のコードはすべて無効になります。')) {
                 return;
             }
@@ -883,6 +1026,12 @@
         // Email Change
         // =============================================
         async function changeEmail() {
+            if (isDemo) {
+                showAlert('info', 'デモモードのため変更されません');
+                bootstrap.Modal.getInstance(document.getElementById('changeEmailModal')).hide();
+                return;
+            }
+            
             const newEmail = document.getElementById('newEmail').value;
             const answers = [];
             
@@ -926,6 +1075,11 @@
         // Notification Settings
         // =============================================
         async function saveNotificationSettings() {
+            if (isDemo) {
+                showAlert('info', 'デモモードのため保存されません');
+                return;
+            }
+            
             showLoading();
             
             const settings = {
@@ -999,6 +1153,11 @@
         }
         
         async function downloadReceipt(purchaseId) {
+            if (isDemo) {
+                showAlert('info', 'デモモードのためダウンロードできません');
+                return;
+            }
+            
             showLoading();
             
             try {
@@ -1034,6 +1193,12 @@
         }
         
         async function requestAccountDeletion() {
+            if (isDemo) {
+                showAlert('info', 'デモモードのため削除できません');
+                bootstrap.Modal.getInstance(document.getElementById('deleteAccountModal')).hide();
+                return;
+            }
+            
             if (!confirm('本当にアカウントを削除しますか？\nこの操作は取り消せません。')) {
                 return;
             }
@@ -1086,6 +1251,11 @@
         }
         
         async function logout() {
+            if (isDemo) {
+                window.location.href = '../index.html';
+                return;
+            }
+            
             await fetch(`${API_BASE}/auth/logout`, {
                 method: 'POST',
                 credentials: 'include'
