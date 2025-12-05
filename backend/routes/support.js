@@ -5,6 +5,7 @@
 
 const express = require('express');
 const router = express.Router();
+const db = require('../config/database');
 
 // ---------------------------------------------
 // ヘルパー関数
@@ -63,7 +64,7 @@ function requireAdmin(req, res, next) {
  */
 router.get('/faq/categories', async (req, res) => {
     try {
-        const result = await req.db.query(`
+        const result = await db.query(`
             SELECT 
                 c.*,
                 COUNT(f.id) as item_count
@@ -113,7 +114,7 @@ router.get('/faq', async (req, res) => {
 
         query += ' ORDER BY f.category_id, f.display_order ASC';
 
-        const result = await req.db.query(query, params);
+        const result = await db.query(query, params);
 
         res.json({
             success: true,
@@ -145,7 +146,7 @@ router.get('/faq/search', async (req, res) => {
 
         const searchTerm = `%${q.trim()}%`;
 
-        const result = await req.db.query(`
+        const result = await db.query(`
             SELECT 
                 f.*,
                 c.name_ja as category_name_ja,
@@ -187,7 +188,7 @@ router.get('/faq/:id', async (req, res) => {
         const { id } = req.params;
 
         // 閲覧数をインクリメント
-        const result = await req.db.query(`
+        const result = await db.query(`
             UPDATE faq_items 
             SET view_count = view_count + 1
             WHERE id = $1 AND is_active = true
@@ -225,7 +226,7 @@ router.post('/faq/:id/vote', async (req, res) => {
 
         const column = helpful ? 'helpful_count' : 'not_helpful_count';
         
-        const result = await req.db.query(`
+        const result = await db.query(`
             UPDATE faq_items 
             SET ${column} = ${column} + 1
             WHERE id = $1 AND is_active = true
@@ -284,7 +285,7 @@ router.post('/tickets', async (req, res) => {
         }
 
         // ゲストの場合はメールアドレス必須
-        const userId = req.session?.user?.id || null;
+        const userId = req.session?.user?.user_id || null;
         if (!userId && !guest_email) {
             return res.status(400).json({ 
                 success: false, 
@@ -295,7 +296,7 @@ router.post('/tickets', async (req, res) => {
         const ticketNumber = generateTicketNumber();
 
         // チケット作成
-        const result = await req.db.query(`
+        const result = await db.query(`
             INSERT INTO support_tickets (
                 ticket_number, user_id, guest_email, guest_name,
                 category, subject, initial_message,
@@ -311,7 +312,7 @@ router.post('/tickets', async (req, res) => {
         const ticket = result.rows[0];
 
         // 最初のメッセージをticket_messagesにも追加
-        await req.db.query(`
+        await db.query(`
             INSERT INTO ticket_messages (ticket_id, sender_id, sender_type, message)
             VALUES ($1, $2, $3, $4)
         `, [ticket.id, userId, userId ? 'user' : 'guest', message]);
@@ -340,7 +341,7 @@ router.post('/tickets', async (req, res) => {
  */
 router.get('/tickets', requireAuth, async (req, res) => {
     try {
-        const userId = req.session.user.id;
+        const userId = req.session.user.user_id;
         const { status } = req.query;
 
         let query = `
@@ -361,7 +362,7 @@ router.get('/tickets', requireAuth, async (req, res) => {
 
         query += ' ORDER BY t.last_message_at DESC';
 
-        const result = await req.db.query(query, params);
+        const result = await db.query(query, params);
 
         res.json({
             success: true,
@@ -383,14 +384,14 @@ router.get('/tickets', requireAuth, async (req, res) => {
 router.get('/tickets/:id', requireAuth, async (req, res) => {
     try {
         const { id } = req.params;
-        const userId = req.session.user.id;
+        const userId = req.session.user.user_id;
         const isAdmin = req.session.user.role === 'admin';
 
         // チケット取得
         let ticketQuery = `
-            SELECT t.*, u.display_name as user_name
+            SELECT t.*, u.first_name || ' ' || u.last_name as user_name
             FROM support_tickets t
-            LEFT JOIN users u ON t.user_id = u.id
+            LEFT JOIN users u ON t.user_id = u.user_id
             WHERE t.id = $1
         `;
         
@@ -399,7 +400,7 @@ router.get('/tickets/:id', requireAuth, async (req, res) => {
             ticketQuery += ' AND t.user_id = $2';
         }
 
-        const ticketResult = await req.db.query(
+        const ticketResult = await db.query(
             ticketQuery, 
             isAdmin ? [id] : [id, userId]
         );
@@ -417,9 +418,9 @@ router.get('/tickets/:id', requireAuth, async (req, res) => {
         let messagesQuery = `
             SELECT 
                 m.*,
-                u.display_name as sender_name
+                u.first_name || ' ' || u.last_name as sender_name
             FROM ticket_messages m
-            LEFT JOIN users u ON m.sender_id = u.id
+            LEFT JOIN users u ON m.sender_id = u.user_id
             WHERE m.ticket_id = $1
         `;
         
@@ -430,11 +431,11 @@ router.get('/tickets/:id', requireAuth, async (req, res) => {
         
         messagesQuery += ' ORDER BY m.created_at ASC';
 
-        const messagesResult = await req.db.query(messagesQuery, [id]);
+        const messagesResult = await db.query(messagesQuery, [id]);
 
         // ユーザー側のメッセージを既読にする
         if (!isAdmin) {
-            await req.db.query(`
+            await db.query(`
                 UPDATE ticket_messages 
                 SET is_read = true
                 WHERE ticket_id = $1 AND sender_type = 'admin'
@@ -463,7 +464,7 @@ router.post('/tickets/:id/messages', requireAuth, async (req, res) => {
     try {
         const { id } = req.params;
         const { message } = req.body;
-        const userId = req.session.user.id;
+        const userId = req.session.user.user_id;
         const isAdmin = req.session.user.role === 'admin';
 
         if (!message || message.trim().length === 0) {
@@ -474,7 +475,7 @@ router.post('/tickets/:id/messages', requireAuth, async (req, res) => {
         }
 
         // チケット存在確認＆権限チェック
-        const ticketCheck = await req.db.query(`
+        const ticketCheck = await db.query(`
             SELECT * FROM support_tickets WHERE id = $1
         `, [id]);
 
@@ -505,7 +506,7 @@ router.post('/tickets/:id/messages', requireAuth, async (req, res) => {
 
         // メッセージ追加
         const senderType = isAdmin ? 'admin' : 'user';
-        const newMessage = await req.db.query(`
+        const newMessage = await db.query(`
             INSERT INTO ticket_messages (ticket_id, sender_id, sender_type, message)
             VALUES ($1, $2, $3, $4)
             RETURNING *
@@ -513,7 +514,7 @@ router.post('/tickets/:id/messages', requireAuth, async (req, res) => {
 
         // チケットのステータスと最終メッセージ日時を更新
         const newStatus = isAdmin ? 'waiting_user' : 'waiting_admin';
-        await req.db.query(`
+        await db.query(`
             UPDATE support_tickets 
             SET last_message_at = CURRENT_TIMESTAMP,
                 status = CASE 
@@ -546,9 +547,9 @@ router.post('/tickets/:id/messages', requireAuth, async (req, res) => {
 router.post('/tickets/:id/close', requireAuth, async (req, res) => {
     try {
         const { id } = req.params;
-        const userId = req.session.user.id;
+        const userId = req.session.user.user_id;
 
-        const result = await req.db.query(`
+        const result = await db.query(`
             UPDATE support_tickets 
             SET status = 'closed', resolved_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
             WHERE id = $1 AND user_id = $2 AND status != 'closed'
@@ -583,7 +584,7 @@ router.post('/tickets/:id/rate', requireAuth, async (req, res) => {
     try {
         const { id } = req.params;
         const { rating, comment } = req.body;
-        const userId = req.session.user.id;
+        const userId = req.session.user.user_id;
 
         if (!rating || rating < 1 || rating > 5) {
             return res.status(400).json({ 
@@ -593,7 +594,7 @@ router.post('/tickets/:id/rate', requireAuth, async (req, res) => {
         }
 
         // チケットが自分のもので、解決済みか確認
-        const ticketCheck = await req.db.query(`
+        const ticketCheck = await db.query(`
             SELECT * FROM support_tickets 
             WHERE id = $1 AND user_id = $2 AND status IN ('resolved', 'closed')
         `, [id, userId]);
@@ -606,7 +607,7 @@ router.post('/tickets/:id/rate', requireAuth, async (req, res) => {
         }
 
         // 評価を保存（既存があれば更新）
-        await req.db.query(`
+        await db.query(`
             INSERT INTO ticket_ratings (ticket_id, rating, comment)
             VALUES ($1, $2, $3)
             ON CONFLICT (ticket_id) DO UPDATE
@@ -642,15 +643,15 @@ router.get('/admin/tickets', requireAdmin, async (req, res) => {
         let query = `
             SELECT 
                 t.*,
-                u.display_name as user_name,
+                u.first_name || ' ' || u.last_name as user_name,
                 u.email as user_email,
-                a.display_name as assigned_name,
+                a.first_name || ' ' || a.last_name as assigned_name,
                 (SELECT COUNT(*) FROM ticket_messages tm 
                  WHERE tm.ticket_id = t.id AND tm.is_read = false 
                  AND tm.sender_type = 'user') as unread_count
             FROM support_tickets t
-            LEFT JOIN users u ON t.user_id = u.id
-            LEFT JOIN users a ON t.assigned_to = a.id
+            LEFT JOIN users u ON t.user_id = u.user_id
+            LEFT JOIN users a ON t.assigned_to = a.user_id
             WHERE 1=1
         `;
         const params = [];
@@ -680,7 +681,7 @@ router.get('/admin/tickets', requireAdmin, async (req, res) => {
         }
 
         // カウント取得
-        const countResult = await req.db.query(
+        const countResult = await db.query(
             query.replace(/SELECT[\s\S]*?FROM/, 'SELECT COUNT(*) FROM'),
             params
         );
@@ -699,7 +700,7 @@ router.get('/admin/tickets', requireAdmin, async (req, res) => {
         params.push(limit, offset);
         query += ` LIMIT $${params.length - 1} OFFSET $${params.length}`;
 
-        const result = await req.db.query(query, params);
+        const result = await db.query(query, params);
 
         res.json({
             success: true,
@@ -728,7 +729,7 @@ router.patch('/admin/tickets/:id', requireAdmin, async (req, res) => {
     try {
         const { id } = req.params;
         const { status, priority, assigned_to } = req.body;
-        const adminId = req.session.user.id;
+        const adminId = req.session.user.user_id;
 
         const updates = [];
         const params = [id];
@@ -761,7 +762,7 @@ router.patch('/admin/tickets/:id', requireAdmin, async (req, res) => {
 
         updates.push('updated_at = CURRENT_TIMESTAMP');
 
-        const result = await req.db.query(`
+        const result = await db.query(`
             UPDATE support_tickets 
             SET ${updates.join(', ')}
             WHERE id = $1
@@ -785,7 +786,7 @@ router.patch('/admin/tickets/:id', requireAdmin, async (req, res) => {
                 'resolved': '解決済み',
                 'closed': 'クローズ'
             };
-            await req.db.query(`
+            await db.query(`
                 INSERT INTO ticket_messages (ticket_id, sender_id, sender_type, message)
                 VALUES ($1, $2, 'system', $3)
             `, [id, adminId, `ステータスが「${statusLabels[status] || status}」に変更されました`]);
@@ -813,7 +814,7 @@ router.post('/admin/tickets/:id/notes', requireAdmin, async (req, res) => {
     try {
         const { id } = req.params;
         const { message } = req.body;
-        const adminId = req.session.user.id;
+        const adminId = req.session.user.user_id;
 
         if (!message || message.trim().length === 0) {
             return res.status(400).json({ 
@@ -822,7 +823,7 @@ router.post('/admin/tickets/:id/notes', requireAdmin, async (req, res) => {
             });
         }
 
-        const result = await req.db.query(`
+        const result = await db.query(`
             INSERT INTO ticket_messages (ticket_id, sender_id, sender_type, message, is_internal_note)
             VALUES ($1, $2, 'admin', $3, true)
             RETURNING *
@@ -849,14 +850,14 @@ router.post('/admin/tickets/:id/notes', requireAdmin, async (req, res) => {
 router.get('/admin/stats', requireAdmin, async (req, res) => {
     try {
         // ステータス別チケット数
-        const statusStats = await req.db.query(`
+        const statusStats = await db.query(`
             SELECT status, COUNT(*) as count
             FROM support_tickets
             GROUP BY status
         `);
 
         // 優先度別チケット数（未解決のみ）
-        const priorityStats = await req.db.query(`
+        const priorityStats = await db.query(`
             SELECT priority, COUNT(*) as count
             FROM support_tickets
             WHERE status NOT IN ('resolved', 'closed')
@@ -864,7 +865,7 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
         `);
 
         // カテゴリ別チケット数（今月）
-        const categoryStats = await req.db.query(`
+        const categoryStats = await db.query(`
             SELECT category, COUNT(*) as count
             FROM support_tickets
             WHERE created_at >= DATE_TRUNC('month', CURRENT_DATE)
@@ -872,7 +873,7 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
         `);
 
         // 平均解決時間（過去30日）
-        const avgResolutionTime = await req.db.query(`
+        const avgResolutionTime = await db.query(`
             SELECT AVG(EXTRACT(EPOCH FROM (resolved_at - created_at)) / 3600) as avg_hours
             FROM support_tickets
             WHERE resolved_at IS NOT NULL
@@ -880,14 +881,14 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
         `);
 
         // 平均満足度
-        const avgRating = await req.db.query(`
+        const avgRating = await db.query(`
             SELECT AVG(rating) as avg_rating, COUNT(*) as total_ratings
             FROM ticket_ratings
             WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'
         `);
 
         // 今日の新規チケット数
-        const todayTickets = await req.db.query(`
+        const todayTickets = await db.query(`
             SELECT COUNT(*) as count
             FROM support_tickets
             WHERE DATE(created_at) = CURRENT_DATE
@@ -933,7 +934,7 @@ router.post('/admin/faq/categories', requireAdmin, async (req, res) => {
             });
         }
 
-        const result = await req.db.query(`
+        const result = await db.query(`
             INSERT INTO faq_categories (name_ja, name_en, description_ja, description_en, icon, display_order)
             VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING *
@@ -962,7 +963,7 @@ router.patch('/admin/faq/categories/:id', requireAdmin, async (req, res) => {
         const { id } = req.params;
         const { name_ja, name_en, description_ja, description_en, icon, display_order, is_active } = req.body;
 
-        const result = await req.db.query(`
+        const result = await db.query(`
             UPDATE faq_categories 
             SET name_ja = COALESCE($2, name_ja),
                 name_en = COALESCE($3, name_en),
@@ -1018,7 +1019,7 @@ router.post('/admin/faq', requireAdmin, async (req, res) => {
             });
         }
 
-        const result = await req.db.query(`
+        const result = await db.query(`
             INSERT INTO faq_items (category_id, question_ja, question_en, answer_ja, answer_en, keywords, display_order)
             VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING *
@@ -1054,7 +1055,7 @@ router.patch('/admin/faq/:id', requireAdmin, async (req, res) => {
             is_active
         } = req.body;
 
-        const result = await req.db.query(`
+        const result = await db.query(`
             UPDATE faq_items 
             SET category_id = COALESCE($2, category_id),
                 question_ja = COALESCE($3, question_ja),
@@ -1098,7 +1099,7 @@ router.delete('/admin/faq/:id', requireAdmin, async (req, res) => {
     try {
         const { id } = req.params;
 
-        const result = await req.db.query(`
+        const result = await db.query(`
             DELETE FROM faq_items WHERE id = $1 RETURNING id
         `, [id]);
 
