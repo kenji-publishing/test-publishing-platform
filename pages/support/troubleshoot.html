@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>トラブルシューティング - Publisher</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../css/style-new.css">
+    
+    <style>
+        /* トラブルシューティング専用スタイル */
+        .troubleshoot-hero {
+            background: linear-gradient(135deg, var(--color-accent), var(--color-accent-light));
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+        }
+        
+        .troubleshoot-hero h1 {
+            font-family: var(--font-heading);
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .troubleshoot-hero p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        /* プログレスバー */
+        .wizard-progress {
+            background: var(--color-cream);
+            padding: 1.5rem 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .progress-steps {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .progress-step {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--color-text-muted);
+            font-size: 0.9rem;
+        }
+        
+        .progress-step.active {
+            color: var(--color-accent);
+            font-weight: 500;
+        }
+        
+        .progress-step.completed {
+            color: var(--color-success);
+        }
+        
+        .step-number {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--color-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        
+        .progress-step.active .step-number {
+            background: var(--color-accent);
+            color: white;
+        }
+        
+        .progress-step.completed .step-number {
+            background: var(--color-success);
+            color: white;
+        }
+        
+        .progress-line {
+            width: 60px;
+            height: 2px;
+            background: var(--color-border);
+            margin: 0 0.5rem;
+        }
+        
+        .progress-line.completed {
+            background: var(--color-success);
+        }
+        
+        /* ウィザードコンテンツ */
+        .wizard-content {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .wizard-step {
+            display: none;
+        }
+        
+        .wizard-step.active {
+            display: block;
+        }
+        
+        .wizard-question {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .wizard-question h2 {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            color: var(--color-text);
+            margin-bottom: 0.5rem;
+        }
+        
+        .wizard-question p {
+            color: var(--color-text-muted);
+        }
+        
+        /* 選択肢カード */
+        .option-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        @media (max-width: 576px) {
+            .option-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .option-card {
+            background: white;
+            border: 2px solid var(--color-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        
+        .option-card:hover {
+            border-color: var(--color-accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .option-card.selected {
+            border-color: var(--color-accent);
+            background: var(--color-cream);
+        }
+        
+        .option-card i {
+            font-size: 2rem;
+            color: var(--color-accent);
+            margin-bottom: 0.75rem;
+        }
+        
+        .option-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: var(--color-text);
+        }
+        
+        .option-card p {
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+            margin: 0;
+        }
+        
+        /* 解決策表示 */
+        .solution-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .solution-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .solution-header i {
+            font-size: 2.5rem;
+            color: var(--color-accent);
+        }
+        
+        .solution-header h3 {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            margin: 0;
+        }
+        
+        .solution-steps {
+            margin-bottom: 1.5rem;
+        }
+        
+        .solution-step {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: var(--color-cream);
+            border-radius: 8px;
+        }
+        
+        .solution-step-number {
+            width: 28px;
+            height: 28px;
+            background: var(--color-accent);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+        
+        .solution-step-content h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .solution-step-content p {
+            font-size: 0.9rem;
+            color: var(--color-text-muted);
+            margin: 0;
+        }
+        
+        .solution-action {
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+        
+        /* 解決確認 */
+        .resolution-check {
+            background: var(--color-cream);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+        
+        .resolution-check h4 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .resolution-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+        
+        .btn-resolved {
+            background: var(--color-success);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-resolved:hover {
+            background: #2e7d32;
+        }
+        
+        .btn-not-resolved {
+            background: white;
+            color: var(--color-text);
+            border: 2px solid var(--color-border);
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-not-resolved:hover {
+            border-color: var(--color-accent);
+        }
+        
+        /* 関連FAQ */
+        .related-faqs {
+            margin-top: 2rem;
+            display: none;
+        }
+        
+        .related-faqs.show {
+            display: block;
+        }
+        
+        .related-faqs h4 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .related-faqs h4 i {
+            color: var(--color-accent);
+        }
+        
+        .faq-mini-card {
+            background: white;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .faq-mini-card:hover {
+            border-color: var(--color-accent);
+        }
+        
+        .faq-mini-card h5 {
+            font-size: 0.95rem;
+            margin: 0;
+            color: var(--color-text);
+        }
+        
+        .faq-mini-card .faq-answer {
+            display: none;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--color-border);
+            font-size: 0.9rem;
+            color: var(--color-text-muted);
+        }
+        
+        .faq-mini-card.expanded .faq-answer {
+            display: block;
+        }
+        
+        /* お問い合わせセクション */
+        .contact-section {
+            margin-top: 2rem;
+            display: none;
+        }
+        
+        .contact-section.show {
+            display: block;
+        }
+        
+        .contact-card {
+            background: linear-gradient(135deg, var(--color-accent), var(--color-accent-light));
+            color: white;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .contact-card h4 {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .contact-card p {
+            opacity: 0.9;
+            margin-bottom: 1.5rem;
+        }
+        
+        .contact-card .btn {
+            background: white;
+            color: var(--color-accent);
+            font-weight: 600;
+        }
+        
+        .contact-card .btn:hover {
+            background: var(--color-cream);
+        }
+        
+        /* 成功画面 */
+        .success-screen {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+        
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--color-success);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin: 0 auto 1.5rem;
+        }
+        
+        .success-screen h2 {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .success-screen p {
+            color: var(--color-text-muted);
+            margin-bottom: 2rem;
+        }
+        
+        /* ナビゲーションボタン */
+        .wizard-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--color-border);
+        }
+        
+        .btn-back {
+            background: transparent;
+            color: var(--color-text-muted);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-back:hover {
+            color: var(--color-text);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="../../index.html">
+                <i class="fas fa-book-open"></i> Publisher
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="../../index.html">ホーム</a></li>
+                    <li class="nav-item"><a class="nav-link" href="../explore.html">作品を探す</a></li>
+                    <li class="nav-item"><a class="nav-link" href="../translator-marketplace.html">翻訳者</a></li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link active" href="faq.html">ヘルプ</a></li>
+                    <li class="nav-item" id="loginNav"><a class="nav-link" href="../login.html">ログイン</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="troubleshoot-hero">
+        <div class="container">
+            <h1><i class="fas fa-tools me-2"></i>トラブルシューティング</h1>
+            <p>問題を解決するお手伝いをします</p>
+        </div>
+    </section>
+
+    <!-- Progress Bar -->
+    <section class="wizard-progress">
+        <div class="container">
+            <div class="progress-steps">
+                <div class="progress-step active" data-step="1">
+                    <span class="step-number">1</span>
+                    <span class="step-label d-none d-sm-inline">問題を選択</span>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="2">
+                    <span class="step-number">2</span>
+                    <span class="step-label d-none d-sm-inline">詳細を選択</span>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="3">
+                    <span class="step-number">3</span>
+                    <span class="step-label d-none d-sm-inline">解決策</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Wizard Content -->
+    <main class="wizard-content">
+        
+        <!-- Step 1: カテゴリ選択 -->
+        <div class="wizard-step active" id="step1">
+            <div class="wizard-question">
+                <h2>どのような問題でお困りですか？</h2>
+                <p>最も近いカテゴリを選択してください</p>
+            </div>
+            <div class="option-grid">
+                <div class="option-card" data-category="login">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <h3>ログインできない</h3>
+                    <p>パスワード忘れ、アカウントロック</p>
+                </div>
+                <div class="option-card" data-category="payment">
+                    <i class="fas fa-credit-card"></i>
+                    <h3>支払いに関する問題</h3>
+                    <p>決済エラー、返金、領収書</p>
+                </div>
+                <div class="option-card" data-category="reading">
+                    <i class="fas fa-book-reader"></i>
+                    <h3>作品が読めない</h3>
+                    <p>閲覧エラー、ダウンロード問題</p>
+                </div>
+                <div class="option-card" data-category="translation">
+                    <i class="fas fa-language"></i>
+                    <h3>翻訳に関する問題</h3>
+                    <p>AI翻訳、翻訳者とのやり取り</p>
+                </div>
+                <div class="option-card" data-category="publishing">
+                    <i class="fas fa-upload"></i>
+                    <h3>作品の投稿ができない</h3>
+                    <p>アップロードエラー、公開問題</p>
+                </div>
+                <div class="option-card" data-category="account">
+                    <i class="fas fa-user-cog"></i>
+                    <h3>アカウント設定</h3>
+                    <p>プロフィール変更、退会</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: 詳細選択 -->
+        <div class="wizard-step" id="step2">
+            <div class="wizard-question">
+                <h2 id="step2Title">詳しい状況を教えてください</h2>
+                <p>最も当てはまるものを選択してください</p>
+            </div>
+            <div class="option-grid" id="step2Options">
+                <!-- JavaScriptで動的に生成 -->
+            </div>
+            <div class="wizard-nav">
+                <button class="btn-back" onclick="goToStep(1)">
+                    <i class="fas fa-arrow-left"></i> 戻る
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 3: 解決策 -->
+        <div class="wizard-step" id="step3">
+            <div class="solution-card">
+                <div class="solution-header">
+                    <i class="fas fa-lightbulb" id="solutionIcon"></i>
+                    <div>
+                        <h3 id="solutionTitle">解決策</h3>
+                    </div>
+                </div>
+                <div class="solution-steps" id="solutionSteps">
+                    <!-- JavaScriptで動的に生成 -->
+                </div>
+                
+                <div class="resolution-check">
+                    <h4>この方法で問題は解決しましたか？</h4>
+                    <div class="resolution-buttons">
+                        <button class="btn-resolved" onclick="markResolved()">
+                            <i class="fas fa-check me-2"></i>解決しました
+                        </button>
+                        <button class="btn-not-resolved" onclick="showMoreHelp()">
+                            <i class="fas fa-times me-2"></i>解決しません
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 関連FAQ（解決しない場合に表示） -->
+            <div class="related-faqs" id="relatedFaqs">
+                <h4><i class="fas fa-question-circle"></i> 関連するよくある質問</h4>
+                <div id="relatedFaqsList">
+                    <!-- JavaScriptで動的に生成 -->
+                </div>
+                
+                <!-- お問い合わせセクション（FAQでも解決しない場合に表示） -->
+                <div class="contact-section" id="contactSection">
+                    <div class="contact-card">
+                        <h4><i class="fas fa-envelope me-2"></i>それでも解決しない場合</h4>
+                        <p>サポートチームがお手伝いします。通常1〜2営業日以内に回答いたします。</p>
+                        <a href="contact.html?from=wizard" class="btn btn-lg">
+                            <i class="fas fa-paper-plane me-2"></i>お問い合わせ
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="wizard-nav">
+                <button class="btn-back" onclick="goToStep(2)">
+                    <i class="fas fa-arrow-left"></i> 戻る
+                </button>
+            </div>
+        </div>
+
+        <!-- 成功画面 -->
+        <div class="wizard-step" id="stepSuccess">
+            <div class="success-screen">
+                <div class="success-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+                <h2>問題が解決しました！</h2>
+                <p>お役に立てて嬉しいです。</p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="faq.html" class="btn btn-outline-secondary">
+                        <i class="fas fa-question-circle me-2"></i>FAQを見る
+                    </a>
+                    <a href="../../index.html" class="btn btn-primary-custom">
+                        <i class="fas fa-home me-2"></i>ホームへ戻る
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer-custom mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <h5><i class="fas fa-book-open me-2"></i>Publisher</h5>
+                    <p class="text-muted">世界中の読者と作家をつなぐ多言語出版プラットフォーム</p>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <h6>サービス</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="../explore.html">作品を探す</a></li>
+                        <li><a href="../publish.html">作品を投稿</a></li>
+                        <li><a href="../translator-marketplace.html">翻訳者になる</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <h6>サポート</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="faq.html">よくある質問</a></li>
+                        <li><a href="troubleshoot.html" class="active">トラブルシューティング</a></li>
+                        <li><a href="contact.html">お問い合わせ</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <h6>会社情報</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="../about.html">会社概要</a></li>
+                        <li><a href="../terms.html">利用規約</a></li>
+                        <li><a href="../privacy.html">プライバシーポリシー</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <h6>言語</h6>
+                    <select class="form-select form-select-sm" id="languageSelect">
+                        <option value="ja" selected>日本語</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+            </div>
+            <hr>
+            <div class="text-center text-muted">
+                <small>&copy; 2025 Publisher. All rights reserved.</small>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // =============================================
+        // トラブルシューティングデータ（決定木）
+        // =============================================
+        const troubleshootData = {
+            login: {
+                title: 'ログインの問題',
+                icon: 'fa-sign-in-alt',
+                options: [
+                    {
+                        id: 'password_wrong',
+                        title: 'パスワードが正しくないと表示される',
+                        description: 'パスワードを入力してもエラーになる',
+                        solution: {
+                            title: 'パスワードをリセットしましょう',
+                            steps: [
+                                { title: 'ログインページを開く', description: 'ログインページの「パスワードを忘れた方」をクリックします', action: { text: 'ログインページへ', url: '../login.html' } },
+                                { title: 'メールアドレスを入力', description: '登録時に使用したメールアドレスを入力します' },
+                                { title: 'リセットメールを確認', description: '届いたメールのリンクをクリックして新しいパスワードを設定します' }
+                            ],
+                            relatedFaqKeywords: 'パスワード,ログイン'
+                        }
+                    },
+                    {
+                        id: 'account_locked',
+                        title: 'アカウントがロックされた',
+                        description: '何度か失敗してロックされた',
+                        solution: {
+                            title: 'アカウントロックの解除',
+                            steps: [
+                                { title: '30分待つ', description: 'セキュリティのため、30分後に自動的にロックが解除されます' },
+                                { title: 'または、パスワードをリセット', description: 'パスワードリセットを行うと、即座にロックが解除されます', action: { text: 'パスワードリセット', url: '../login.html' } }
+                            ],
+                            relatedFaqKeywords: 'ロック,アカウント'
+                        }
+                    },
+                    {
+                        id: 'email_not_found',
+                        title: 'メールアドレスが見つからない',
+                        description: '登録していないと表示される',
+                        solution: {
+                            title: 'アカウントの確認',
+                            steps: [
+                                { title: '別のメールアドレスを試す', description: '登録時に別のメールアドレスを使用した可能性があります' },
+                                { title: 'スペルを確認', description: 'メールアドレスに誤字がないか確認してください' },
+                                { title: '新規登録', description: 'アカウントをお持ちでない場合は新規登録してください', action: { text: '新規登録', url: '../register.html' } }
+                            ],
+                            relatedFaqKeywords: 'メール,登録'
+                        }
+                    },
+                    {
+                        id: 'page_not_loading',
+                        title: 'ページが読み込まれない',
+                        description: '画面が真っ白になる、エラーが出る',
+                        solution: {
+                            title: 'ブラウザの問題を解決',
+                            steps: [
+                                { title: 'ページを再読み込み', description: 'Ctrl + F5（Mac: Cmd + Shift + R）で強制リロードします' },
+                                { title: 'キャッシュをクリア', description: 'ブラウザの設定からキャッシュと Cookieを削除します' },
+                                { title: '別のブラウザを試す', description: 'Chrome、Firefox、Safari など別のブラウザでお試しください' }
+                            ],
+                            relatedFaqKeywords: '表示,ブラウザ'
+                        }
+                    }
+                ]
+            },
+            payment: {
+                title: '支払いの問題',
+                icon: 'fa-credit-card',
+                options: [
+                    {
+                        id: 'payment_failed',
+                        title: '支払いが失敗する',
+                        description: 'エラーが表示されて購入できない',
+                        solution: {
+                            title: '支払いエラーの解決',
+                            steps: [
+                                { title: 'カード情報を確認', description: 'カード番号、有効期限、セキュリティコードが正しいか確認します' },
+                                { title: '利用限度額を確認', description: 'カードの利用限度額に達していないか確認します' },
+                                { title: '別の支払い方法を試す', description: '別のカードまたはPayPalをお試しください' },
+                                { title: 'カード会社に確認', description: '問題が続く場合は、カード発行会社にお問い合わせください' }
+                            ],
+                            relatedFaqKeywords: '支払い,エラー,カード'
+                        }
+                    },
+                    {
+                        id: 'refund_request',
+                        title: '返金したい',
+                        description: '購入をキャンセルしたい',
+                        solution: {
+                            title: '返金リクエスト',
+                            steps: [
+                                { title: '返金条件を確認', description: '購入後7日以内で、作品を閲覧していない場合は返金可能です' },
+                                { title: '購入履歴を開く', description: 'ダッシュボード→購入履歴から該当の購入を見つけます' },
+                                { title: '返金をリクエスト', description: '「返金をリクエスト」ボタンをクリックします' }
+                            ],
+                            relatedFaqKeywords: '返金,キャンセル'
+                        }
+                    },
+                    {
+                        id: 'receipt_needed',
+                        title: '領収書が欲しい',
+                        description: '経費精算用の領収書が必要',
+                        solution: {
+                            title: '領収書のダウンロード',
+                            steps: [
+                                { title: 'ダッシュボードを開く', description: 'ログイン後、ダッシュボードにアクセスします' },
+                                { title: '購入履歴を選択', description: '左メニューから「購入履歴」をクリックします' },
+                                { title: '領収書をダウンロード', description: '各購入の横にある「領収書」ボタンでPDFをダウンロードできます' }
+                            ],
+                            relatedFaqKeywords: '領収書,請求書'
+                        }
+                    },
+                    {
+                        id: 'double_charge',
+                        title: '二重に請求された',
+                        description: '同じ購入が2回請求されている',
+                        solution: {
+                            title: '二重請求の確認',
+                            steps: [
+                                { title: '購入履歴を確認', description: 'まず、購入履歴で本当に2回購入されているか確認します' },
+                                { title: '銀行明細を確認', description: 'オーソリ（仮押さえ）と実際の請求を混同している場合があります' },
+                                { title: '48時間待つ', description: 'オーソリは通常48時間以内に自動的に解除されます' }
+                            ],
+                            relatedFaqKeywords: '請求,二重'
+                        }
+                    }
+                ]
+            },
+            reading: {
+                title: '作品閲覧の問題',
+                icon: 'fa-book-reader',
+                options: [
+                    {
+                        id: 'cannot_open',
+                        title: '作品が開けない',
+                        description: 'エラーが表示されて読めない',
+                        solution: {
+                            title: '閲覧エラーの解決',
+                            steps: [
+                                { title: 'ページを再読み込み', description: 'ブラウザの更新ボタンをクリックします' },
+                                { title: 'ログイン状態を確認', description: 'ログアウトしてから再度ログインしてみてください' },
+                                { title: 'ブラウザを変更', description: '別のブラウザでお試しください' }
+                            ],
+                            relatedFaqKeywords: '閲覧,エラー'
+                        }
+                    },
+                    {
+                        id: 'download_failed',
+                        title: 'ダウンロードできない',
+                        description: 'ダウンロードが途中で止まる',
+                        solution: {
+                            title: 'ダウンロード問題の解決',
+                            steps: [
+                                { title: 'インターネット接続を確認', description: '安定したWi-Fi環境でお試しください' },
+                                { title: 'ストレージ容量を確認', description: 'デバイスに十分な空き容量があるか確認します' },
+                                { title: '別の形式を試す', description: 'EPUBでダメならPDFなど、別の形式でダウンロードしてみてください' }
+                            ],
+                            relatedFaqKeywords: 'ダウンロード,失敗'
+                        }
+                    },
+                    {
+                        id: 'purchased_not_shown',
+                        title: '購入した作品が見つからない',
+                        description: 'ライブラリに表示されない',
+                        solution: {
+                            title: '購入作品の確認',
+                            steps: [
+                                { title: 'ログインアカウントを確認', description: '購入時と同じアカウントでログインしているか確認します' },
+                                { title: 'ページを更新', description: 'ライブラリページを再読み込みします' },
+                                { title: '購入履歴を確認', description: 'ダッシュボード→購入履歴で購入が完了しているか確認します' }
+                            ],
+                            relatedFaqKeywords: '購入,ライブラリ'
+                        }
+                    }
+                ]
+            },
+            translation: {
+                title: '翻訳の問題',
+                icon: 'fa-language',
+                options: [
+                    {
+                        id: 'ai_translation_error',
+                        title: 'AI翻訳が動作しない',
+                        description: 'エラーが表示される、翻訳されない',
+                        solution: {
+                            title: 'AI翻訳エラーの解決',
+                            steps: [
+                                { title: '無料枠を確認', description: '月の無料翻訳回数（5回）を使い切っていないか確認します' },
+                                { title: 'テキスト量を確認', description: '一度に翻訳できるテキスト量に制限があります。分割してお試しください' },
+                                { title: '時間をおいて再試行', description: 'サーバーが混雑している可能性があります。少し時間をおいてお試しください' }
+                            ],
+                            relatedFaqKeywords: 'AI翻訳,エラー'
+                        }
+                    },
+                    {
+                        id: 'translation_quality',
+                        title: '翻訳の品質が悪い',
+                        description: '意味が通じない、誤訳がある',
+                        solution: {
+                            title: '翻訳品質の改善',
+                            steps: [
+                                { title: '再翻訳を試す', description: 'AI翻訳は毎回少し異なる結果になることがあります' },
+                                { title: 'プロの翻訳者に依頼', description: '高品質な翻訳が必要な場合は、翻訳者マーケットプレイスをご利用ください', action: { text: '翻訳者を探す', url: '../translator-marketplace.html' } }
+                            ],
+                            relatedFaqKeywords: '翻訳,品質'
+                        }
+                    },
+                    {
+                        id: 'translator_issue',
+                        title: '翻訳者とのトラブル',
+                        description: '連絡が取れない、納期遅延',
+                        solution: {
+                            title: '翻訳者とのトラブル解決',
+                            steps: [
+                                { title: 'メッセージを確認', description: 'ダッシュボードのメッセージで翻訳者からの連絡がないか確認します' },
+                                { title: '契約内容を確認', description: '最初に合意した納期と条件を確認します' },
+                                { title: 'サポートに連絡', description: '解決しない場合は、具体的な状況をサポートにご連絡ください' }
+                            ],
+                            relatedFaqKeywords: '翻訳者,トラブル'
+                        }
+                    }
+                ]
+            },
+            publishing: {
+                title: '作品投稿の問題',
+                icon: 'fa-upload',
+                options: [
+                    {
+                        id: 'upload_failed',
+                        title: 'アップロードが失敗する',
+                        description: 'ファイルがアップロードできない',
+                        solution: {
+                            title: 'アップロードエラーの解決',
+                            steps: [
+                                { title: 'ファイルサイズを確認', description: '最大100MBまでアップロード可能です' },
+                                { title: 'ファイル形式を確認', description: '対応形式：PDF、EPUB、DOCX、TXT' },
+                                { title: 'インターネット接続を確認', description: '安定したWi-Fi環境でお試しください' },
+                                { title: 'ブラウザを変更', description: '別のブラウザでお試しください' }
+                            ],
+                            relatedFaqKeywords: 'アップロード,投稿'
+                        }
+                    },
+                    {
+                        id: 'work_not_published',
+                        title: '作品が公開されない',
+                        description: '投稿したのに表示されない',
+                        solution: {
+                            title: '公開状況の確認',
+                            steps: [
+                                { title: '審査状況を確認', description: 'ダッシュボード→投稿作品で審査状況を確認します。審査には1〜3営業日かかります' },
+                                { title: 'メールを確認', description: '審査結果はメールでお知らせします。迷惑メールフォルダもご確認ください' },
+                                { title: 'ガイドラインを確認', description: '却下された場合は、投稿ガイドラインを確認して修正後に再投稿してください' }
+                            ],
+                            relatedFaqKeywords: '公開,審査'
+                        }
+                    },
+                    {
+                        id: 'cover_image_issue',
+                        title: '表紙画像の問題',
+                        description: '画像がアップロードできない、表示されない',
+                        solution: {
+                            title: '表紙画像の問題解決',
+                            steps: [
+                                { title: '画像形式を確認', description: 'JPG、PNG形式に対応しています' },
+                                { title: 'サイズを確認', description: '推奨サイズ：1600×2400px、最大5MB' },
+                                { title: '画像を最適化', description: '画像が大きすぎる場合は圧縮してからアップロードしてください' }
+                            ],
+                            relatedFaqKeywords: '表紙,画像'
+                        }
+                    }
+                ]
+            },
+            account: {
+                title: 'アカウント設定',
+                icon: 'fa-user-cog',
+                options: [
+                    {
+                        id: 'change_email',
+                        title: 'メールアドレスを変更したい',
+                        description: '別のメールアドレスに変更する',
+                        solution: {
+                            title: 'メールアドレスの変更',
+                            steps: [
+                                { title: 'アカウント設定を開く', description: 'ダッシュボード→アカウント設定にアクセスします' },
+                                { title: '新しいメールアドレスを入力', description: 'メールアドレス欄に新しいアドレスを入力します' },
+                                { title: '確認メールをクリック', description: '新しいアドレスに届く確認メールのリンクをクリックして完了です' }
+                            ],
+                            relatedFaqKeywords: 'メール,変更'
+                        }
+                    },
+                    {
+                        id: 'delete_account',
+                        title: 'アカウントを削除したい',
+                        description: '退会して全データを削除する',
+                        solution: {
+                            title: 'アカウント削除の手順',
+                            steps: [
+                                { title: 'ご注意', description: 'アカウントを削除すると、投稿作品、購入履歴、収益など全てのデータが完全に削除され、復元できません' },
+                                { title: 'アカウント設定を開く', description: 'ダッシュボード→アカウント設定→「アカウントを削除」をクリック' },
+                                { title: 'パスワードを入力', description: '確認のためパスワードを入力し、削除を実行します' }
+                            ],
+                            relatedFaqKeywords: '削除,退会'
+                        }
+                    },
+                    {
+                        id: 'profile_update',
+                        title: 'プロフィールを編集したい',
+                        description: '名前や紹介文を変更する',
+                        solution: {
+                            title: 'プロフィールの編集',
+                            steps: [
+                                { title: 'プロフィール設定を開く', description: 'ダッシュボード→プロフィール設定にアクセスします' },
+                                { title: '情報を編集', description: '表示名、紹介文、プロフィール画像などを編集できます' },
+                                { title: '保存する', description: '変更を保存ボタンをクリックして完了です' }
+                            ],
+                            relatedFaqKeywords: 'プロフィール,編集'
+                        }
+                    },
+                    {
+                        id: 'notification_settings',
+                        title: '通知設定を変更したい',
+                        description: 'メール通知を減らしたい',
+                        solution: {
+                            title: '通知設定の変更',
+                            steps: [
+                                { title: '通知設定を開く', description: 'ダッシュボード→アカウント設定→通知設定にアクセスします' },
+                                { title: '通知タイプを選択', description: '受け取りたい通知の種類を選択します' },
+                                { title: '保存する', description: '設定を保存して完了です' }
+                            ],
+                            relatedFaqKeywords: '通知,メール,設定'
+                        }
+                    }
+                ]
+            }
+        };
+
+        // =============================================
+        // 状態管理
+        // =============================================
+        let currentStep = 1;
+        let selectedCategory = null;
+        let selectedOption = null;
+        let helpClickCount = 0;
+
+        // =============================================
+        // ウィザード制御
+        // =============================================
+        function goToStep(step) {
+            // 現在のステップを非表示
+            document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active'));
+            
+            // 新しいステップを表示
+            const stepElement = document.getElementById('step' + step);
+            if (stepElement) {
+                stepElement.classList.add('active');
+            }
+            
+            // プログレスバーを更新
+            updateProgress(step);
+            currentStep = step;
+            
+            // ページトップにスクロール
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updateProgress(step) {
+            document.querySelectorAll('.progress-step').forEach((el, index) => {
+                const stepNum = index + 1;
+                el.classList.remove('active', 'completed');
+                if (stepNum < step) {
+                    el.classList.add('completed');
+                } else if (stepNum === step) {
+                    el.classList.add('active');
+                }
+            });
+            
+            document.querySelectorAll('.progress-line').forEach((el, index) => {
+                if (index < step - 1) {
+                    el.classList.add('completed');
+                } else {
+                    el.classList.remove('completed');
+                }
+            });
+        }
+
+        // =============================================
+        // カテゴリ選択
+        // =============================================
+        document.querySelectorAll('#step1 .option-card').forEach(card => {
+            card.addEventListener('click', function() {
+                selectedCategory = this.dataset.category;
+                
+                // 選択状態を更新
+                document.querySelectorAll('#step1 .option-card').forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                
+                // Step 2のオプションを生成
+                generateStep2Options(selectedCategory);
+                
+                // 少し遅延してStep 2へ
+                setTimeout(() => goToStep(2), 300);
+            });
+        });
+
+        function generateStep2Options(category) {
+            const categoryData = troubleshootData[category];
+            if (!categoryData) return;
+            
+            document.getElementById('step2Title').textContent = categoryData.title + ' - 詳しい状況を教えてください';
+            
+            const optionsContainer = document.getElementById('step2Options');
+            optionsContainer.innerHTML = '';
+            
+            categoryData.options.forEach(option => {
+                const card = document.createElement('div');
+                card.className = 'option-card';
+                card.dataset.optionId = option.id;
+                card.innerHTML = `
+                    <i class="fas ${categoryData.icon}"></i>
+                    <h3>${option.title}</h3>
+                    <p>${option.description}</p>
+                `;
+                card.addEventListener('click', () => selectOption(option));
+                optionsContainer.appendChild(card);
+            });
+        }
+
+        function selectOption(option) {
+            selectedOption = option;
+            
+            // 選択状態を更新
+            document.querySelectorAll('#step2 .option-card').forEach(c => c.classList.remove('selected'));
+            event.target.closest('.option-card').classList.add('selected');
+            
+            // 解決策を表示
+            showSolution(option.solution);
+            
+            // 関連FAQとお問い合わせを非表示にリセット
+            document.getElementById('relatedFaqs').classList.remove('show');
+            document.getElementById('contactSection').classList.remove('show');
+            helpClickCount = 0;
+            
+            // 少し遅延してStep 3へ
+            setTimeout(() => goToStep(3), 300);
+        }
+
+        function showSolution(solution) {
+            document.getElementById('solutionTitle').textContent = solution.title;
+            
+            const stepsContainer = document.getElementById('solutionSteps');
+            stepsContainer.innerHTML = '';
+            
+            solution.steps.forEach((step, index) => {
+                const stepDiv = document.createElement('div');
+                stepDiv.className = 'solution-step';
+                
+                let actionHtml = '';
+                if (step.action) {
+                    actionHtml = `<a href="${step.action.url}" class="btn btn-sm btn-primary-custom solution-action">${step.action.text}</a>`;
+                }
+                
+                stepDiv.innerHTML = `
+                    <div class="solution-step-number">${index + 1}</div>
+                    <div class="solution-step-content">
+                        <h4>${step.title}</h4>
+                        <p>${step.description}</p>
+                        ${actionHtml}
+                    </div>
+                `;
+                stepsContainer.appendChild(stepDiv);
+            });
+        }
+
+        // =============================================
+        // 解決確認
+        // =============================================
+        function markResolved() {
+            goToStep('Success');
+            document.getElementById('stepSuccess').classList.add('active');
+        }
+
+        function showMoreHelp() {
+            helpClickCount++;
+            
+            if (helpClickCount === 1) {
+                // 関連FAQを表示
+                loadRelatedFaqs();
+                document.getElementById('relatedFaqs').classList.add('show');
+                
+                // スクロール
+                document.getElementById('relatedFaqs').scrollIntoView({ behavior: 'smooth' });
+            } else {
+                // お問い合わせセクションを表示
+                document.getElementById('contactSection').classList.add('show');
+                document.getElementById('contactSection').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        async function loadRelatedFaqs() {
+            if (!selectedOption || !selectedOption.solution.relatedFaqKeywords) return;
+            
+            const keywords = selectedOption.solution.relatedFaqKeywords.split(',')[0];
+            
+            try {
+                const response = await fetch(`http://localhost:3000/api/support/faq/search?q=${encodeURIComponent(keywords)}`);
+                const data = await response.json();
+                
+                const faqList = document.getElementById('relatedFaqsList');
+                faqList.innerHTML = '';
+                
+                if (data.success && data.faqs.length > 0) {
+                    data.faqs.slice(0, 3).forEach(faq => {
+                        const faqCard = document.createElement('div');
+                        faqCard.className = 'faq-mini-card';
+                        faqCard.innerHTML = `
+                            <h5><i class="fas fa-chevron-right me-2"></i>${faq.question_ja}</h5>
+                            <div class="faq-answer">${faq.answer_ja}</div>
+                        `;
+                        faqCard.addEventListener('click', function() {
+                            this.classList.toggle('expanded');
+                            const icon = this.querySelector('i');
+                            if (this.classList.contains('expanded')) {
+                                icon.classList.replace('fa-chevron-right', 'fa-chevron-down');
+                            } else {
+                                icon.classList.replace('fa-chevron-down', 'fa-chevron-right');
+                            }
+                        });
+                        faqList.appendChild(faqCard);
+                    });
+                    
+                    // FAQの後に「それでも解決しない」メッセージを追加
+                    const moreHelpMsg = document.createElement('p');
+                    moreHelpMsg.className = 'text-center text-muted mt-3';
+                    moreHelpMsg.innerHTML = '<small>上記で解決しない場合は、もう一度「解決しません」をクリックしてください</small>';
+                    faqList.appendChild(moreHelpMsg);
+                } else {
+                    faqList.innerHTML = '<p class="text-muted">関連するFAQが見つかりませんでした。</p>';
+                    // FAQがない場合は直接お問い合わせを表示
+                    document.getElementById('contactSection').classList.add('show');
+                }
+            } catch (error) {
+                console.error('FAQ取得エラー:', error);
+                document.getElementById('contactSection').classList.add('show');
+            }
+        }
+
+        // =============================================
+        // 初期化
+        // =============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // URLパラメータをチェック
+            const params = new URLSearchParams(window.location.search);
+            const category = params.get('category');
+            
+            if (category && troubleshootData[category]) {
+                selectedCategory = category;
+                generateStep2Options(category);
+                goToStep(2);
+            }
+        });
+    </script>
+</body>
+</html>
