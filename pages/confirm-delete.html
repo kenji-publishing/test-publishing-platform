@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>アカウント削除の確認 - Publisher</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/style-new.css">
+    
+    <style>
+        .confirm-container {
+            max-width: 500px;
+            margin: 4rem auto;
+            padding: 0 1rem;
+        }
+        
+        .confirm-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 2.5rem;
+            text-align: center;
+        }
+        
+        .confirm-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2.5rem;
+        }
+        
+        .confirm-icon.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .confirm-icon.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .confirm-icon.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .confirm-card h1 {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .confirm-card p {
+            color: var(--color-text-muted);
+            margin-bottom: 1.5rem;
+        }
+        
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-delete:hover {
+            background: #c82333;
+        }
+        
+        .btn-delete:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .countdown {
+            font-size: 0.9rem;
+            color: var(--color-text-muted);
+            margin-top: 1rem;
+        }
+        
+        .loading {
+            display: none;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="../index.html">
+                <i class="fas fa-book-open"></i> Publisher
+            </a>
+        </div>
+    </nav>
+
+    <main class="confirm-container">
+        <!-- Confirmation Screen -->
+        <div class="confirm-card" id="confirmScreen">
+            <div class="confirm-icon warning">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h1>アカウント削除の最終確認</h1>
+            <p>この操作は取り消すことができません。<br>本当にアカウントを削除しますか？</p>
+            
+            <div class="d-flex justify-content-center gap-3">
+                <a href="../index.html" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> キャンセル
+                </a>
+                <button class="btn-delete" id="deleteBtn" onclick="confirmDeletion()">
+                    <i class="fas fa-trash me-1"></i> 削除する
+                </button>
+            </div>
+            
+            <p class="countdown" id="countdown"></p>
+            
+            <div class="loading mt-3" id="loading">
+                <div class="spinner-border text-danger" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2 text-muted">削除中...</p>
+            </div>
+        </div>
+        
+        <!-- Success Screen -->
+        <div class="confirm-card" id="successScreen" style="display: none;">
+            <div class="confirm-icon success">
+                <i class="fas fa-check"></i>
+            </div>
+            <h1>アカウントが削除されました</h1>
+            <p>ご利用いただきありがとうございました。</p>
+            <a href="../index.html" class="btn btn-primary-custom">
+                <i class="fas fa-home me-1"></i> ホームへ戻る
+            </a>
+        </div>
+        
+        <!-- Error Screen -->
+        <div class="confirm-card" id="errorScreen" style="display: none;">
+            <div class="confirm-icon error">
+                <i class="fas fa-times"></i>
+            </div>
+            <h1>エラーが発生しました</h1>
+            <p id="errorMessage">リンクが無効か期限切れです。</p>
+            <a href="account-settings.html" class="btn btn-outline-secondary">
+                <i class="fas fa-cog me-1"></i> 設定に戻る
+            </a>
+        </div>
+        
+        <!-- Invalid Token Screen -->
+        <div class="confirm-card" id="invalidScreen" style="display: none;">
+            <div class="confirm-icon error">
+                <i class="fas fa-link-slash"></i>
+            </div>
+            <h1>無効なリンク</h1>
+            <p>このリンクは無効または期限切れです。<br>アカウント削除を再度リクエストしてください。</p>
+            <a href="account-settings.html" class="btn btn-outline-secondary">
+                <i class="fas fa-cog me-1"></i> 設定に戻る
+            </a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer-custom mt-5">
+        <div class="container">
+            <div class="text-center text-muted">
+                <small>&copy; 2025 Publisher. All rights reserved.</small>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+        let token = null;
+        let countdown = 5;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const params = new URLSearchParams(window.location.search);
+            token = params.get('token');
+            
+            if (!token) {
+                showScreen('invalidScreen');
+                return;
+            }
+            
+            // Enable button after countdown
+            const deleteBtn = document.getElementById('deleteBtn');
+            deleteBtn.disabled = true;
+            
+            const countdownEl = document.getElementById('countdown');
+            const interval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    countdownEl.textContent = `${countdown}秒後に削除ボタンが有効になります...`;
+                } else {
+                    clearInterval(interval);
+                    deleteBtn.disabled = false;
+                    countdownEl.textContent = '';
+                }
+            }, 1000);
+            countdownEl.textContent = `${countdown}秒後に削除ボタンが有効になります...`;
+        });
+        
+        async function confirmDeletion() {
+            const deleteBtn = document.getElementById('deleteBtn');
+            deleteBtn.disabled = true;
+            document.getElementById('loading').classList.add('show');
+            
+            try {
+                const response = await fetch(`${API_BASE}/users/confirm-delete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Clear any stored auth
+                    localStorage.removeItem('authToken');
+                    showScreen('successScreen');
+                } else {
+                    document.getElementById('errorMessage').textContent = result.error || '削除に失敗しました';
+                    showScreen('errorScreen');
+                }
+            } catch (error) {
+                console.error('Deletion error:', error);
+                document.getElementById('errorMessage').textContent = 'エラーが発生しました。後でもう一度お試しください。';
+                showScreen('errorScreen');
+            }
+        }
+        
+        function showScreen(screenId) {
+            document.getElementById('confirmScreen').style.display = 'none';
+            document.getElementById('successScreen').style.display = 'none';
+            document.getElementById('errorScreen').style.display = 'none';
+            document.getElementById('invalidScreen').style.display = 'none';
+            document.getElementById(screenId).style.display = 'block';
+        }
+    </script>
+</body>
+</html>
