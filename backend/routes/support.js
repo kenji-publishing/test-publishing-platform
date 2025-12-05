@@ -1,11 +1,13 @@
 // =============================================
 // Phase 8: Support System API
 // FAQ・問い合わせチケット管理
+// Phase 8E: 自動メール応答追加
 // =============================================
 
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
+const { sendEmail, templates, getCategoryLabel } = require('../config/email');
 
 // ---------------------------------------------
 // ヘルパー関数
@@ -52,6 +54,58 @@ function requireAdmin(req, res, next) {
         });
     }
     next();
+}
+
+/**
+ * メール送信ログを記録
+ */
+async function logEmail(recipientEmail, recipientUserId, emailType, subject, ticketId, status, errorMessage = null) {
+    try {
+        await db.query(`
+            INSERT INTO email_logs (recipient_email, recipient_user_id, email_type, subject, ticket_id, status, error_message)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+        `, [recipientEmail, recipientUserId, emailType, subject, ticketId, status, errorMessage]);
+    } catch (error) {
+        console.error('Email log error:', error);
+    }
+}
+
+/**
+ * カテゴリに関連するFAQを取得
+ */
+async function getRelatedFaqs(category, limit = 3) {
+    try {
+        const result = await db.query(`
+            SELECT f.id, f.question_ja, f.question_en, f.answer_ja
+            FROM category_faq_mapping cfm
+            JOIN faq_items f ON cfm.faq_id = f.id
+            WHERE cfm.ticket_category = $1 AND f.is_active = true
+            ORDER BY cfm.priority DESC, f.view_count DESC
+            LIMIT $2
+        `, [category, limit]);
+        return result.rows;
+    } catch (error) {
+        console.error('Get related FAQs error:', error);
+        return [];
+    }
+}
+
+/**
+ * ユーザー情報を取得
+ */
+async function getUserInfo(userId) {
+    if (!userId) return null;
+    try {
+        const result = await db.query(`
+            SELECT user_id, email, first_name, last_name, 
+                   COALESCE(first_name || ' ' || last_name, email) as display_name
+            FROM users WHERE user_id = $1
+        `, [userId]);
+        return result.rows[0] || null;
+    } catch (error) {
+        console.error('Get user info error:', error);
+        return null;
+    }
 }
 
 // =============================================
@@ -317,6 +371,46 @@ router.post('/tickets', async (req, res) => {
             VALUES ($1, $2, $3, $4)
         `, [ticket.id, userId, userId ? 'user' : 'guest', message]);
 
+        // =============================================
+        // Phase E: 自動メール送信
+        // =============================================
+        const recipientEmail = userId ? (await getUserInfo(userId))?.email : guest_email;
+        const userName = userId ? (await getUserInfo(userId))?.display_name : guest_name;
+        const categoryLabel = getCategoryLabel(category);
+
+        if (recipientEmail) {
+            // カテゴリに関連するFAQを取得
+            const relatedFaqs = await getRelatedFaqs(category, 3);
+
+            let emailTemplate;
+            if (relatedFaqs.length > 0) {
+                // 関連FAQがある場合
+                emailTemplate = templates.ticketReceivedWithFaq(
+                    userName, ticketNumber, subject, categoryLabel, relatedFaqs
+                );
+            } else {
+                // 関連FAQがない場合
+                emailTemplate = templates.ticketReceived(
+                    userName, ticketNumber, subject, categoryLabel
+                );
+            }
+
+            const emailResult = await sendEmail(
+                recipientEmail,
+                emailTemplate.subject,
+                emailTemplate.text,
+                emailTemplate.html
+            );
+
+            // ログ記録
+            await logEmail(
+                recipientEmail, userId, 'ticket_received',
+                emailTemplate.subject, ticket.id,
+                emailResult.success ? 'sent' : 'failed',
+                emailResult.error
+            );
+        }
+
         res.status(201).json({
             success: true,
             message: 'お問い合わせを受け付けました',
@@ -476,7 +570,10 @@ router.post('/tickets/:id/messages', requireAuth, async (req, res) => {
 
         // チケット存在確認＆権限チェック
         const ticketCheck = await db.query(`
-            SELECT * FROM support_tickets WHERE id = $1
+            SELECT t.*, u.email as user_email, u.first_name || ' ' || u.last_name as user_name
+            FROM support_tickets t
+            LEFT JOIN users u ON t.user_id = u.user_id
+            WHERE t.id = $1
         `, [id]);
 
         if (ticketCheck.rows.length === 0) {
@@ -526,6 +623,52 @@ router.post('/tickets/:id/messages', requireAuth, async (req, res) => {
             WHERE id = $1
         `, [id, newStatus]);
 
+        // =============================================
+        // Phase E: 返信通知メール送信
+        // =============================================
+        if (isAdmin) {
+            // 管理者が返信 → ユーザーに通知
+            const recipientEmail = ticket.user_email || ticket.guest_email;
+            const userName = ticket.user_name || ticket.guest_name;
+
+            if (recipientEmail) {
+                const replyPreview = message.trim().substring(0, 100);
+                const emailTemplate = templates.ticketReply(
+                    userName, ticket.ticket_number, ticket.subject, replyPreview
+                );
+
+                const emailResult = await sendEmail(
+                    recipientEmail,
+                    emailTemplate.subject,
+                    emailTemplate.text,
+                    emailTemplate.html
+                );
+
+                await logEmail(
+                    recipientEmail, ticket.user_id, 'ticket_reply',
+                    emailTemplate.subject, ticket.id,
+                    emailResult.success ? 'sent' : 'failed',
+                    emailResult.error
+                );
+            }
+        } else {
+            // ユーザーが返信 → 管理者に通知（サポートメール宛）
+            const supportEmail = process.env.SUPPORT_EMAIL || 'support@publisher.local';
+            const emailTemplate = templates.ticketUserReply(
+                ticket.user_name || ticket.guest_name,
+                ticket.ticket_number,
+                ticket.subject,
+                ticket.user_email || ticket.guest_email
+            );
+
+            await sendEmail(
+                supportEmail,
+                emailTemplate.subject,
+                emailTemplate.text,
+                emailTemplate.html
+            );
+        }
+
         res.status(201).json({
             success: true,
             message: '返信しました',
@@ -549,18 +692,50 @@ router.post('/tickets/:id/close', requireAuth, async (req, res) => {
         const { id } = req.params;
         const userId = req.session.user.user_id;
 
-        const result = await db.query(`
-            UPDATE support_tickets 
-            SET status = 'closed', resolved_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
-            WHERE id = $1 AND user_id = $2 AND status != 'closed'
-            RETURNING *
+        // チケット情報取得
+        const ticketQuery = await db.query(`
+            SELECT t.*, u.email as user_email, u.first_name || ' ' || u.last_name as user_name
+            FROM support_tickets t
+            LEFT JOIN users u ON t.user_id = u.user_id
+            WHERE t.id = $1 AND t.user_id = $2 AND t.status != 'closed'
         `, [id, userId]);
 
-        if (result.rows.length === 0) {
+        if (ticketQuery.rows.length === 0) {
             return res.status(404).json({ 
                 success: false, 
                 error: 'チケットが見つからないか、既にクローズされています' 
             });
+        }
+
+        const ticket = ticketQuery.rows[0];
+
+        // ステータス更新
+        await db.query(`
+            UPDATE support_tickets 
+            SET status = 'closed', resolved_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+            WHERE id = $1
+        `, [id]);
+
+        // Phase E: クローズ通知メール
+        const recipientEmail = ticket.user_email || ticket.guest_email;
+        if (recipientEmail) {
+            const emailTemplate = templates.ticketClosed(
+                ticket.user_name || ticket.guest_name,
+                ticket.ticket_number,
+                ticket.subject
+            );
+
+            await sendEmail(
+                recipientEmail,
+                emailTemplate.subject,
+                emailTemplate.text,
+                emailTemplate.html
+            );
+
+            await logEmail(
+                recipientEmail, ticket.user_id, 'ticket_closed',
+                emailTemplate.subject, ticket.id, 'sent'
+            );
         }
 
         res.json({
@@ -731,6 +906,24 @@ router.patch('/admin/tickets/:id', requireAdmin, async (req, res) => {
         const { status, priority, assigned_to } = req.body;
         const adminId = req.session.user.user_id;
 
+        // 現在のチケット情報を取得
+        const currentTicket = await db.query(`
+            SELECT t.*, u.email as user_email, u.first_name || ' ' || u.last_name as user_name
+            FROM support_tickets t
+            LEFT JOIN users u ON t.user_id = u.user_id
+            WHERE t.id = $1
+        `, [id]);
+
+        if (currentTicket.rows.length === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                error: 'チケットが見つかりません' 
+            });
+        }
+
+        const ticket = currentTicket.rows[0];
+        const oldStatus = ticket.status;
+
         const updates = [];
         const params = [id];
         let paramIndex = 2;
@@ -769,13 +962,6 @@ router.patch('/admin/tickets/:id', requireAdmin, async (req, res) => {
             RETURNING *
         `, params);
 
-        if (result.rows.length === 0) {
-            return res.status(404).json({ 
-                success: false, 
-                error: 'チケットが見つかりません' 
-            });
-        }
-
         // システムメッセージを追加（ステータス変更時）
         if (status) {
             const statusLabels = {
@@ -790,6 +976,45 @@ router.patch('/admin/tickets/:id', requireAdmin, async (req, res) => {
                 INSERT INTO ticket_messages (ticket_id, sender_id, sender_type, message)
                 VALUES ($1, $2, 'system', $3)
             `, [id, adminId, `ステータスが「${statusLabels[status] || status}」に変更されました`]);
+
+            // Phase E: ステータス変更時のメール通知
+            const recipientEmail = ticket.user_email || ticket.guest_email;
+            if (recipientEmail && status !== oldStatus) {
+                let emailTemplate = null;
+
+                if (status === 'resolved') {
+                    // 解決済み → 満足度調査メール
+                    emailTemplate = templates.ticketResolved(
+                        ticket.user_name || ticket.guest_name,
+                        ticket.ticket_number,
+                        ticket.subject
+                    );
+                } else if (status === 'closed') {
+                    // クローズ → クローズ通知
+                    emailTemplate = templates.ticketClosed(
+                        ticket.user_name || ticket.guest_name,
+                        ticket.ticket_number,
+                        ticket.subject
+                    );
+                }
+
+                if (emailTemplate) {
+                    const emailResult = await sendEmail(
+                        recipientEmail,
+                        emailTemplate.subject,
+                        emailTemplate.text,
+                        emailTemplate.html
+                    );
+
+                    await logEmail(
+                        recipientEmail, ticket.user_id,
+                        status === 'resolved' ? 'ticket_resolved' : 'ticket_closed',
+                        emailTemplate.subject, ticket.id,
+                        emailResult.success ? 'sent' : 'failed',
+                        emailResult.error
+                    );
+                }
+            }
         }
 
         res.json({
@@ -911,6 +1136,204 @@ router.get('/admin/stats', requireAdmin, async (req, res) => {
         res.status(500).json({ 
             success: false, 
             error: '統計の取得に失敗しました' 
+        });
+    }
+});
+
+// =============================================
+// 定型文テンプレートAPI（Phase E）
+// =============================================
+
+/**
+ * 管理者：定型文テンプレート一覧取得
+ * GET /api/support/admin/templates
+ */
+router.get('/admin/templates', requireAdmin, async (req, res) => {
+    try {
+        const { category } = req.query;
+
+        let query = `
+            SELECT * FROM reply_templates
+            WHERE is_active = true
+        `;
+        const params = [];
+
+        if (category) {
+            params.push(category);
+            query += ` AND category = $${params.length}`;
+        }
+
+        query += ' ORDER BY usage_count DESC, name ASC';
+
+        const result = await db.query(query, params);
+
+        res.json({
+            success: true,
+            templates: result.rows
+        });
+    } catch (error) {
+        console.error('テンプレート一覧エラー:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'テンプレートの取得に失敗しました' 
+        });
+    }
+});
+
+/**
+ * 管理者：定型文テンプレート作成
+ * POST /api/support/admin/templates
+ */
+router.post('/admin/templates', requireAdmin, async (req, res) => {
+    try {
+        const { name, category, subject_template, body_template, variables } = req.body;
+        const adminId = req.session.user.user_id;
+
+        if (!name || !body_template) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'テンプレート名と本文は必須です' 
+            });
+        }
+
+        const result = await db.query(`
+            INSERT INTO reply_templates (name, category, subject_template, body_template, variables, created_by)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING *
+        `, [name, category, subject_template, body_template, variables || [], adminId]);
+
+        res.status(201).json({
+            success: true,
+            message: 'テンプレートを作成しました',
+            template: result.rows[0]
+        });
+    } catch (error) {
+        console.error('テンプレート作成エラー:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'テンプレートの作成に失敗しました' 
+        });
+    }
+});
+
+/**
+ * 管理者：定型文テンプレート更新
+ * PUT /api/support/admin/templates/:id
+ */
+router.put('/admin/templates/:id', requireAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, category, subject_template, body_template, variables, is_active } = req.body;
+
+        const result = await db.query(`
+            UPDATE reply_templates
+            SET name = COALESCE($2, name),
+                category = COALESCE($3, category),
+                subject_template = COALESCE($4, subject_template),
+                body_template = COALESCE($5, body_template),
+                variables = COALESCE($6, variables),
+                is_active = COALESCE($7, is_active),
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = $1
+            RETURNING *
+        `, [id, name, category, subject_template, body_template, variables, is_active]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                error: 'テンプレートが見つかりません' 
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'テンプレートを更新しました',
+            template: result.rows[0]
+        });
+    } catch (error) {
+        console.error('テンプレート更新エラー:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'テンプレートの更新に失敗しました' 
+        });
+    }
+});
+
+/**
+ * 管理者：定型文テンプレート使用（使用回数インクリメント）
+ * POST /api/support/admin/templates/:id/use
+ */
+router.post('/admin/templates/:id/use', requireAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const result = await db.query(`
+            UPDATE reply_templates
+            SET usage_count = usage_count + 1
+            WHERE id = $1
+            RETURNING *
+        `, [id]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                error: 'テンプレートが見つかりません' 
+            });
+        }
+
+        res.json({
+            success: true,
+            template: result.rows[0]
+        });
+    } catch (error) {
+        console.error('テンプレート使用エラー:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'エラーが発生しました' 
+        });
+    }
+});
+
+/**
+ * 管理者：メール送信ログ取得
+ * GET /api/support/admin/email-logs
+ */
+router.get('/admin/email-logs', requireAdmin, async (req, res) => {
+    try {
+        const { ticket_id, email_type, limit = 50 } = req.query;
+
+        let query = `
+            SELECT el.*, t.ticket_number
+            FROM email_logs el
+            LEFT JOIN support_tickets t ON el.ticket_id = t.id
+            WHERE 1=1
+        `;
+        const params = [];
+
+        if (ticket_id) {
+            params.push(ticket_id);
+            query += ` AND el.ticket_id = $${params.length}`;
+        }
+
+        if (email_type) {
+            params.push(email_type);
+            query += ` AND el.email_type = $${params.length}`;
+        }
+
+        params.push(limit);
+        query += ` ORDER BY el.created_at DESC LIMIT $${params.length}`;
+
+        const result = await db.query(query, params);
+
+        res.json({
+            success: true,
+            logs: result.rows
+        });
+    } catch (error) {
+        console.error('メールログ取得エラー:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'ログの取得に失敗しました' 
         });
     }
 });
