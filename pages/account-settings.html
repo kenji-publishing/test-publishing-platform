@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>アカウント設定 - Publisher</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/style-new.css">
+    
+    <style>
+        .settings-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .settings-header {
+            margin-bottom: 2rem;
+        }
+        
+        .settings-header h1 {
+            font-family: var(--font-heading);
+            font-size: 1.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .settings-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: 0;
+            flex-wrap: wrap;
+        }
+        
+        .settings-tab {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            color: var(--color-text-muted);
+            cursor: pointer;
+            font-weight: 500;
+            position: relative;
+            transition: color 0.2s;
+        }
+        
+        .settings-tab:hover {
+            color: var(--color-text);
+        }
+        
+        .settings-tab.active {
+            color: var(--color-accent);
+        }
+        
+        .settings-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--color-accent);
+        }
+        
+        .settings-panel {
+            display: none;
+        }
+        
+        .settings-panel.active {
+            display: block;
+        }
+        
+        .settings-card {
+            background: white;
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .settings-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .settings-card h3 i {
+            color: var(--color-accent);
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        
+        .form-group .form-text {
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+            margin-top: 0.25rem;
+        }
+        
+        .avatar-upload {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .avatar-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--color-cream);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: var(--color-accent);
+            overflow: hidden;
+        }
+        
+        .avatar-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        /* Notification Settings */
+        .notification-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+        
+        .notification-info h4 {
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+        
+        .notification-info p {
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+            margin: 0;
+        }
+        
+        .form-switch .form-check-input {
+            width: 50px;
+            height: 26px;
+        }
+        
+        /* Security Items */
+        .security-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: var(--color-cream);
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+        }
+        
+        .security-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .security-info h4 {
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+        
+        .security-info p {
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+            margin: 0;
+        }
+        
+        /* Purchase History */
+        .purchase-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: var(--color-cream);
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+        }
+        
+        .purchase-info {
+            flex: 1;
+        }
+        
+        .purchase-info h4 {
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+        
+        .purchase-info p {
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+            margin: 0;
+        }
+        
+        .purchase-amount {
+            font-weight: 600;
+            color: var(--color-accent);
+            margin-right: 1rem;
+        }
+        
+        /* Danger Zone */
+        .danger-zone {
+            border: 2px solid #dc3545;
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        
+        .danger-zone h3 {
+            color: #dc3545;
+        }
+        
+        .danger-zone h3 i {
+            color: #dc3545;
+        }
+        
+        /* Modal */
+        .modal-header {
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .modal-footer {
+            border-top: 1px solid var(--color-border);
+        }
+        
+        /* Success/Error Messages */
+        .alert-floating {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Loading State */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .loading-overlay.show {
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="../index.html">
+                <i class="fas fa-book-open"></i> Publisher
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="../index.html">ホーム</a></li>
+                    <li class="nav-item"><a class="nav-link" href="dashboard.html">ダッシュボード</a></li>
+                </ul>
+                <ul class="navbar-nav" id="authNav">
+                    <li class="nav-item"><a class="nav-link" href="login.html">ログイン</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="settings-container">
+        <div class="settings-header">
+            <h1><i class="fas fa-cog"></i> アカウント設定</h1>
+            <p class="text-muted">プロフィール、セキュリティ、通知などの設定を管理します</p>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="settings-tabs">
+            <button class="settings-tab active" data-tab="profile">
+                <i class="fas fa-user me-2"></i>プロフィール
+            </button>
+            <button class="settings-tab" data-tab="security">
+                <i class="fas fa-shield-alt me-2"></i>セキュリティ
+            </button>
+            <button class="settings-tab" data-tab="notifications">
+                <i class="fas fa-bell me-2"></i>通知
+            </button>
+            <button class="settings-tab" data-tab="purchases">
+                <i class="fas fa-receipt me-2"></i>購入履歴
+            </button>
+            <button class="settings-tab" data-tab="danger">
+                <i class="fas fa-exclamation-triangle me-2"></i>アカウント削除
+            </button>
+        </div>
+        
+        <!-- Profile Panel -->
+        <div class="settings-panel active" id="panel-profile">
+            <div class="settings-card">
+                <h3><i class="fas fa-image"></i> プロフィール画像</h3>
+                <div class="avatar-upload">
+                    <div class="avatar-preview" id="avatarPreview">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div>
+                        <input type="file" id="avatarInput" class="d-none" accept="image/*">
+                        <button class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('avatarInput').click()">
+                            <i class="fas fa-upload me-1"></i> 画像を変更
+                        </button>
+                        <p class="form-text">JPG, PNG形式、最大2MB</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="settings-card">
+                <h3><i class="fas fa-id-card"></i> 基本情報</h3>
+                <form id="profileForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="firstName">名</label>
+                                <input type="text" class="form-control" id="firstName">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="lastName">姓</label>
+                                <input type="text" class="form-control" id="lastName">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="displayName">表示名（ペンネーム）</label>
+                        <input type="text" class="form-control" id="displayName">
+                        <p class="form-text">他のユーザーに表示される名前です</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="bio">自己紹介</label>
+                        <textarea class="form-control" id="bio" rows="3" placeholder="簡単な自己紹介..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="preferredLanguage">優先言語</label>
+                        <select class="form-select" id="preferredLanguage">
+                            <option value="ja">日本語</option>
+                            <option value="en">English</option>
+                            <option value="zh">中文</option>
+                            <option value="es">Español</option>
+                            <option value="fr">Français</option>
+                            <option value="de">Deutsch</option>
+                            <option value="ko">한국어</option>
+                            <option value="ar">العربية</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary-custom">
+                        <i class="fas fa-save me-1"></i> 変更を保存
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Security Panel -->
+        <div class="settings-panel" id="panel-security">
+            <div class="settings-card">
+                <h3><i class="fas fa-envelope"></i> メールアドレス</h3>
+                <div class="security-item">
+                    <div class="security-info">
+                        <h4 id="currentEmail">loading...</h4>
+                        <p id="emailVerified"><i class="fas fa-check-circle text-success me-1"></i> 確認済み</p>
+                    </div>
+                    <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#changeEmailModal">
+                        変更する
+                    </button>
+                </div>
+            </div>
+            
+            <div class="settings-card">
+                <h3><i class="fas fa-key"></i> バックアップコード</h3>
+                <p class="text-muted">アカウントにアクセスできなくなった場合に使用できるコードです。</p>
+                <div class="security-item">
+                    <div class="security-info">
+                        <h4>残り <span id="backupCodeCount">-</span> 個のコード</h4>
+                        <p>安全な場所に保管してください</p>
+                    </div>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="regenerateBackupCodes()">
+                        <i class="fas fa-sync me-1"></i> 再生成
+                    </button>
+                </div>
+            </div>
+            
+            <div class="settings-card">
+                <h3><i class="fas fa-question-circle"></i> セキュリティ質問</h3>
+                <p class="text-muted">アカウント復旧に使用する質問と回答です。</p>
+                <div id="securityQuestionsList">
+                    <!-- Loaded dynamically -->
+                </div>
+                <button class="btn btn-outline-secondary btn-sm mt-2" data-bs-toggle="modal" data-bs-target="#changeQuestionsModal">
+                    <i class="fas fa-edit me-1"></i> 質問を変更
+                </button>
+            </div>
+            
+            <div class="settings-card">
+                <h3><i class="fas fa-history"></i> ログイン履歴</h3>
+                <div id="loginHistory">
+                    <!-- Loaded dynamically -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Notifications Panel -->
+        <div class="settings-panel" id="panel-notifications">
+            <div class="settings-card">
+                <h3><i class="fas fa-envelope-open-text"></i> メール通知</h3>
+                <div class="notification-item">
+                    <div class="notification-info">
+                        <h4>作品の更新通知</h4>
+                        <p>フォローしている作品が更新されたとき</p>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="notifyUpdates" checked>
+                    </div>
+                </div>
+                <div class="notification-item">
+                    <div class="notification-info">
+                        <h4>コメント通知</h4>
+                        <p>あなたの作品にコメントがあったとき</p>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="notifyComments" checked>
+                    </div>
+                </div>
+                <div class="notification-item">
+                    <div class="notification-info">
+                        <h4>売上通知</h4>
+                        <p>作品が購入されたとき</p>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="notifySales" checked>
+                    </div>
+                </div>
+                <div class="notification-item">
+                    <div class="notification-info">
+                        <h4>翻訳完了通知</h4>
+                        <p>依頼した翻訳が完了したとき</p>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="notifyTranslation" checked>
+                    </div>
+                </div>
+                <div class="notification-item">
+                    <div class="notification-info">
+                        <h4>マーケティングメール</h4>
+                        <p>新機能やキャンペーンのお知らせ</p>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="notifyMarketing">
+                    </div>
+                </div>
+            </div>
+            
+            <button class="btn btn-primary-custom" onclick="saveNotificationSettings()">
+                <i class="fas fa-save me-1"></i> 設定を保存
+            </button>
+        </div>
+        
+        <!-- Purchases Panel -->
+        <div class="settings-panel" id="panel-purchases">
+            <div class="settings-card">
+                <h3><i class="fas fa-shopping-bag"></i> 購入履歴</h3>
+                <p class="text-muted">過去の購入と領収書をダウンロードできます。</p>
+                <div id="purchasesList">
+                    <div class="text-center py-4 text-muted">
+                        <i class="fas fa-spinner fa-spin me-2"></i>読み込み中...
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Danger Zone Panel -->
+        <div class="settings-panel" id="panel-danger">
+            <div class="danger-zone">
+                <h3><i class="fas fa-exclamation-triangle"></i> 危険なアクション</h3>
+                <p class="text-muted">以下の操作は取り消すことができません。十分にご注意ください。</p>
+                
+                <div class="security-item" style="background: #fff5f5;">
+                    <div class="security-info">
+                        <h4>アカウントを削除する</h4>
+                        <p>すべてのデータ（作品、購入履歴、収益）が完全に削除されます</p>
+                    </div>
+                    <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                        <i class="fas fa-trash me-1"></i> 削除する
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Change Email Modal -->
+    <div class="modal fade" id="changeEmailModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-envelope me-2"></i>メールアドレスの変更</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">セキュリティ質問に正しく回答する必要があります。</p>
+                    <form id="changeEmailForm">
+                        <div class="form-group mb-3">
+                            <label for="newEmail">新しいメールアドレス</label>
+                            <input type="email" class="form-control" id="newEmail" required>
+                        </div>
+                        <div id="emailSecurityQuestions">
+                            <!-- Loaded dynamically -->
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                    <button type="button" class="btn btn-primary-custom" onclick="changeEmail()">
+                        <i class="fas fa-save me-1"></i> 変更する
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Account Modal -->
+    <div class="modal fade" id="deleteAccountModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>アカウント削除の確認</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger">
+                        <strong>警告:</strong> この操作は取り消せません！
+                    </div>
+                    <p>アカウントを削除すると、以下のすべてが完全に削除されます：</p>
+                    <ul>
+                        <li>投稿した作品</li>
+                        <li>購入履歴と購入した作品へのアクセス</li>
+                        <li>収益データと支払い履歴</li>
+                        <li>翻訳依頼と翻訳履歴</li>
+                        <li>すべてのアカウント情報</li>
+                    </ul>
+                    <p class="mb-3">本当に削除する場合は、確認のため以下に「<strong>アカウントを削除する</strong>」と入力してください。</p>
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="deleteConfirmText" placeholder="アカウントを削除する">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                    <button type="button" class="btn btn-danger" onclick="requestAccountDeletion()" id="deleteAccountBtn" disabled>
+                        <i class="fas fa-trash me-1"></i> 完全に削除する
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Backup Codes Modal -->
+    <div class="modal fade" id="backupCodesModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-key me-2"></i>新しいバックアップコード</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        これらのコードは一度だけ表示されます。安全な場所に保存してください。
+                    </div>
+                    <div id="backupCodesList" class="bg-light p-3 rounded font-monospace text-center">
+                        <!-- Codes will be displayed here -->
+                    </div>
+                    <button class="btn btn-outline-secondary btn-sm mt-3" onclick="copyBackupCodes()">
+                        <i class="fas fa-copy me-1"></i> コードをコピー
+                    </button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary-custom" data-bs-dismiss="modal">
+                        保存しました
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer-custom mt-5">
+        <div class="container">
+            <div class="text-center text-muted">
+                <small>&copy; 2025 Publisher. All rights reserved.</small>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+        let currentUser = null;
+        let backupCodes = [];
+        
+        // =============================================
+        // Initialization
+        // =============================================
+        document.addEventListener('DOMContentLoaded', async function() {
+            await checkAuth();
+            setupTabs();
+            setupDeleteConfirmation();
+            loadUserData();
+        });
+        
+        async function checkAuth() {
+            try {
+                const response = await fetch(`${API_BASE}/auth/me`, {
+                    credentials: 'include'
+                });
+                if (!response.ok) {
+                    window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.href);
+                    return;
+                }
+                const data = await response.json();
+                currentUser = data.user;
+                updateAuthNav();
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                window.location.href = 'login.html';
+            }
+        }
+        
+        function updateAuthNav() {
+            const authNav = document.getElementById('authNav');
+            authNav.innerHTML = `
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle me-1"></i>
+                        ${currentUser.display_name || currentUser.email}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="dashboard.html"><i class="fas fa-th-large me-2"></i>ダッシュボード</a></li>
+                        <li><a class="dropdown-item active" href="account-settings.html"><i class="fas fa-cog me-2"></i>設定</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>ログアウト</a></li>
+                    </ul>
+                </li>
+            `;
+        }
+        
+        // =============================================
+        // Tab Navigation
+        // =============================================
+        function setupTabs() {
+            document.querySelectorAll('.settings-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabName = this.dataset.tab;
+                    
+                    // Update tab buttons
+                    document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Update panels
+                    document.querySelectorAll('.settings-panel').forEach(p => p.classList.remove('active'));
+                    document.getElementById(`panel-${tabName}`).classList.add('active');
+                    
+                    // Load data for specific tabs
+                    if (tabName === 'purchases') loadPurchases();
+                    if (tabName === 'security') loadSecurityData();
+                });
+            });
+        }
+        
+        // =============================================
+        // Load User Data
+        // =============================================
+        async function loadUserData() {
+            if (!currentUser) return;
+            
+            // Profile
+            document.getElementById('firstName').value = currentUser.first_name || '';
+            document.getElementById('lastName').value = currentUser.last_name || '';
+            document.getElementById('displayName').value = currentUser.display_name || '';
+            document.getElementById('bio').value = currentUser.bio || '';
+            document.getElementById('preferredLanguage').value = currentUser.preferred_language || 'ja';
+            
+            // Email
+            document.getElementById('currentEmail').textContent = currentUser.email;
+            if (!currentUser.email_verified) {
+                document.getElementById('emailVerified').innerHTML = '<i class="fas fa-exclamation-circle text-warning me-1"></i> 未確認';
+            }
+            
+            // Avatar
+            if (currentUser.avatar_url) {
+                document.getElementById('avatarPreview').innerHTML = `<img src="${currentUser.avatar_url}" alt="Avatar">`;
+            }
+        }
+        
+        // =============================================
+        // Profile Form
+        // =============================================
+        document.getElementById('profileForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            showLoading();
+            
+            try {
+                const response = await fetch(`${API_BASE}/users/profile`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        first_name: document.getElementById('firstName').value,
+                        last_name: document.getElementById('lastName').value,
+                        display_name: document.getElementById('displayName').value,
+                        bio: document.getElementById('bio').value,
+                        preferred_language: document.getElementById('preferredLanguage').value
+                    })
+                });
+                
+                const result = await response.json();
+                hideLoading();
+                
+                if (result.success) {
+                    showAlert('success', 'プロフィールを更新しました');
+                } else {
+                    showAlert('danger', result.error || '更新に失敗しました');
+                }
+            } catch (error) {
+                hideLoading();
+                showAlert('danger', 'エラーが発生しました');
+            }
+        });
+        
+        // =============================================
+        // Security
+        // =============================================
+        async function loadSecurityData() {
+            try {
+                // Load backup code count
+                const codesResponse = await fetch(`${API_BASE}/auth-magic/backup-codes/count`, {
+                    credentials: 'include'
+                });
+                if (codesResponse.ok) {
+                    const data = await codesResponse.json();
+                    document.getElementById('backupCodeCount').textContent = data.count || 0;
+                }
+                
+                // Load security questions
+                const questionsResponse = await fetch(`${API_BASE}/auth-magic/recover/questions/${currentUser.email}`);
+                if (questionsResponse.ok) {
+                    const data = await questionsResponse.json();
+                    const container = document.getElementById('securityQuestionsList');
+                    container.innerHTML = data.questions.map((q, i) => `
+                        <div class="security-item">
+                            <div class="security-info">
+                                <h4>質問 ${i + 1}</h4>
+                                <p>${q.question}</p>
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    // Also populate for email change modal
+                    const emailQuestionsContainer = document.getElementById('emailSecurityQuestions');
+                    emailQuestionsContainer.innerHTML = data.questions.map(q => `
+                        <div class="form-group mb-3">
+                            <label>${q.question}</label>
+                            <input type="text" class="form-control security-answer" data-question-id="${q.id}" required>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Failed to load security data:', error);
+            }
+        }
+        
+        async function regenerateBackupCodes() {
+            if (!confirm('新しいバックアップコードを生成しますか？\n現在のコードはすべて無効になります。')) {
+                return;
+            }
+            
+            showLoading();
+            
+            try {
+                const token = localStorage.getItem('authToken');
+                const response = await fetch(`${API_BASE}/auth-magic/backup-codes/regenerate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    credentials: 'include'
+                });
+                
+                const result = await response.json();
+                hideLoading();
+                
+                if (result.success) {
+                    backupCodes = result.backupCodes;
+                    document.getElementById('backupCodesList').innerHTML = backupCodes.map(code => `<div>${code}</div>`).join('');
+                    document.getElementById('backupCodeCount').textContent = backupCodes.length;
+                    new bootstrap.Modal(document.getElementById('backupCodesModal')).show();
+                } else {
+                    showAlert('danger', result.error || 'バックアップコードの生成に失敗しました');
+                }
+            } catch (error) {
+                hideLoading();
+                showAlert('danger', 'エラーが発生しました');
+            }
+        }
+        
+        function copyBackupCodes() {
+            const text = backupCodes.join('\n');
+            navigator.clipboard.writeText(text).then(() => {
+                showAlert('success', 'コードをクリップボードにコピーしました');
+            });
+        }
+        
+        // =============================================
+        // Email Change
+        // =============================================
+        async function changeEmail() {
+            const newEmail = document.getElementById('newEmail').value;
+            const answers = [];
+            
+            document.querySelectorAll('.security-answer').forEach(input => {
+                answers.push({
+                    questionId: parseInt(input.dataset.questionId),
+                    answer: input.value
+                });
+            });
+            
+            showLoading();
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth-magic/recover/questions`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        email: currentUser.email,
+                        answers: answers,
+                        newEmail: newEmail
+                    })
+                });
+                
+                const result = await response.json();
+                hideLoading();
+                
+                if (result.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('changeEmailModal')).hide();
+                    showAlert('success', '確認メールを送信しました。新しいメールアドレスを確認してください。');
+                } else {
+                    showAlert('danger', result.error || 'メールアドレスの変更に失敗しました');
+                }
+            } catch (error) {
+                hideLoading();
+                showAlert('danger', 'エラーが発生しました');
+            }
+        }
+        
+        // =============================================
+        // Notification Settings
+        // =============================================
+        async function saveNotificationSettings() {
+            showLoading();
+            
+            const settings = {
+                notify_updates: document.getElementById('notifyUpdates').checked,
+                notify_comments: document.getElementById('notifyComments').checked,
+                notify_sales: document.getElementById('notifySales').checked,
+                notify_translation: document.getElementById('notifyTranslation').checked,
+                notify_marketing: document.getElementById('notifyMarketing').checked
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/users/notifications`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(settings)
+                });
+                
+                hideLoading();
+                
+                if (response.ok) {
+                    showAlert('success', '通知設定を保存しました');
+                } else {
+                    showAlert('danger', '設定の保存に失敗しました');
+                }
+            } catch (error) {
+                hideLoading();
+                showAlert('danger', 'エラーが発生しました');
+            }
+        }
+        
+        // =============================================
+        // Purchase History
+        // =============================================
+        async function loadPurchases() {
+            try {
+                const response = await fetch(`${API_BASE}/users/purchases`, {
+                    credentials: 'include'
+                });
+                
+                const container = document.getElementById('purchasesList');
+                
+                if (!response.ok) {
+                    container.innerHTML = '<p class="text-muted">購入履歴の取得に失敗しました</p>';
+                    return;
+                }
+                
+                const data = await response.json();
+                
+                if (!data.purchases || data.purchases.length === 0) {
+                    container.innerHTML = '<p class="text-muted text-center py-4">購入履歴がありません</p>';
+                    return;
+                }
+                
+                container.innerHTML = data.purchases.map(purchase => `
+                    <div class="purchase-item">
+                        <div class="purchase-info">
+                            <h4>${purchase.work_title || '作品タイトル'}</h4>
+                            <p>${new Date(purchase.purchased_at).toLocaleDateString('ja-JP')} • ${purchase.payment_method || 'カード'}</p>
+                        </div>
+                        <span class="purchase-amount">¥${purchase.amount?.toLocaleString() || '0'}</span>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="downloadReceipt('${purchase.id}')">
+                            <i class="fas fa-download me-1"></i> 領収書
+                        </button>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Failed to load purchases:', error);
+                document.getElementById('purchasesList').innerHTML = '<p class="text-muted">購入履歴の取得に失敗しました</p>';
+            }
+        }
+        
+        async function downloadReceipt(purchaseId) {
+            showLoading();
+            
+            try {
+                const response = await fetch(`${API_BASE}/users/purchases/${purchaseId}/receipt`, {
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `receipt-${purchaseId}.pdf`;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    showAlert('danger', '領収書のダウンロードに失敗しました');
+                }
+            } catch (error) {
+                showAlert('danger', 'エラーが発生しました');
+            }
+            
+            hideLoading();
+        }
+        
+        // =============================================
+        // Account Deletion
+        // =============================================
+        function setupDeleteConfirmation() {
+            document.getElementById('deleteConfirmText').addEventListener('input', function() {
+                document.getElementById('deleteAccountBtn').disabled = this.value !== 'アカウントを削除する';
+            });
+        }
+        
+        async function requestAccountDeletion() {
+            if (!confirm('本当にアカウントを削除しますか？\nこの操作は取り消せません。')) {
+                return;
+            }
+            
+            showLoading();
+            
+            try {
+                const response = await fetch(`${API_BASE}/users/delete-request`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include'
+                });
+                
+                const result = await response.json();
+                hideLoading();
+                
+                if (result.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('deleteAccountModal')).hide();
+                    showAlert('success', '削除確認メールを送信しました。メールのリンクをクリックして削除を完了してください。');
+                } else {
+                    showAlert('danger', result.error || 'リクエストの送信に失敗しました');
+                }
+            } catch (error) {
+                hideLoading();
+                showAlert('danger', 'エラーが発生しました');
+            }
+        }
+        
+        // =============================================
+        // Utilities
+        // =============================================
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('show');
+        }
+        
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('show');
+        }
+        
+        function showAlert(type, message) {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-floating alert-dismissible fade show`;
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alert);
+            
+            setTimeout(() => alert.remove(), 5000);
+        }
+        
+        async function logout() {
+            await fetch(`${API_BASE}/auth/logout`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+            localStorage.removeItem('authToken');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>
