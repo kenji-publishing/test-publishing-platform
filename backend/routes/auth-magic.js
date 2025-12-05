@@ -658,4 +658,46 @@ router.post('/backup-codes/regenerate', async (req, res) => {
   }
 });
 
+/**
+ * GET /api/auth-magic/backup-codes/count
+ * Get remaining backup code count (requires authentication)
+ */
+router.get('/backup-codes/count', async (req, res) => {
+  try {
+    // Try session auth first
+    let userId = null;
+    
+    if (req.session && req.session.userId) {
+      userId = req.session.userId;
+    } else {
+      // Try JWT auth
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+        userId = decoded.userId;
+      }
+    }
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const result = await db.query(
+      'SELECT COUNT(*) as count FROM backup_codes WHERE user_id = $1 AND is_used = FALSE',
+      [userId]
+    );
+
+    res.json({
+      success: true,
+      count: parseInt(result.rows[0].count)
+    });
+
+  } catch (error) {
+    console.error('Get backup code count error:', error);
+    // Return 0 if table doesn't exist
+    res.json({ success: true, count: 0 });
+  }
+});
+
 module.exports = router;
