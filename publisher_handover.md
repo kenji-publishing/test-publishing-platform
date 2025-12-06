@@ -1,6 +1,6 @@
 # Publisher Platform 引き継ぎドキュメント
 
-最終更新: 2025年12月5日
+最終更新: 2025年12月6日
 
 ---
 
@@ -122,7 +122,7 @@ C:\Projects\test-publishing-platform\
 | 用途 | URL |
 |------|-----|
 | フロントエンド | http://localhost:8000 |
-| API | http://localhost:8000/api/... |
+| バックエンドAPI | http://localhost:3000/api/... |
 | 管理画面 | http://localhost:8000/pages/admin/index.html |
 | ユーザーダッシュボード | http://localhost:8000/pages/dashboard.html |
 | 通知センター | http://localhost:8000/pages/notifications.html |
@@ -133,7 +133,37 @@ https://github.com/kenji-publishing/test-publishing-platform
 
 ---
 
-## 5. データベース重要情報
+## 5. テストユーザー
+
+### ログイン情報
+
+| 項目 | 値 |
+|------|-----|
+| メール | test@publisher.local |
+| パスワード | Test1234 |
+
+### テストユーザー作成方法（必要な場合）
+
+1. PowerShellでハッシュを生成：
+   ```powershell
+   cd C:\Projects\test-publishing-platform
+   node -e "const bcrypt = require('bcryptjs'); console.log(bcrypt.hashSync('Test1234', 10));"
+   ```
+
+2. pgAdmin 4のQuery Toolで以下を実行（ハッシュを置き換え）：
+   ```sql
+   INSERT INTO users (
+       user_id, email, password_hash, first_name, last_name,
+       pen_name, verified, email_verified, account_status, created_at, updated_at
+   ) VALUES (
+       gen_random_uuid(), 'test@publisher.local', '生成したハッシュ',
+       'Test', 'User', 'TestAuthor', true, true, 'active', NOW(), NOW()
+   );
+   ```
+
+---
+
+## 6. データベース重要情報
 
 ### ⚠️ 主キーの型（UUID）
 
@@ -146,15 +176,6 @@ SQLを作成・実行する際は以下に注意：
 | notifications | notification_id | UUID |
 
 **外部キーを設定する際は必ず UUID 型を使用してください。**
-
-例：
-```sql
--- ✅ 正しい
-user_id UUID REFERENCES users(user_id)
-
--- ❌ 間違い（INTEGER型ではエラー）
-user_id INTEGER REFERENCES users(user_id)
-```
 
 ### データベース接続情報
 
@@ -174,7 +195,7 @@ user_id INTEGER REFERENCES users(user_id)
 
 ---
 
-## 6. フォルダ構造
+## 7. フォルダ構造
 
 ```
 test-publishing-platform/
@@ -191,7 +212,7 @@ test-publishing-platform/
 │   │   ├── dmca.js
 │   │   ├── finance.js
 │   │   ├── moderation.js
-│   │   ├── notifications.js  # ★Phase 9A拡張
+│   │   ├── notifications.js  # ★Phase 9A/9C
 │   │   ├── reader-feedback.js
 │   │   ├── support.js
 │   │   ├── translator-marketplace.js
@@ -199,28 +220,27 @@ test-publishing-platform/
 │   │   ├── verification.js
 │   │   ├── works.js
 │   │   └── ...
+│   ├── services/          # ★Phase 9C新規
+│   │   ├── notificationService.js      # 通知ヘルパー関数
+│   │   └── notificationIntegration.js  # 統合ガイド
 │   └── migrations/        # DBマイグレーション
-│       ├── 005_verification_requests.sql
-│       ├── 006_dmca_reports.sql
-│       ├── 007_translation_queue.sql
-│       ├── 008_translator_marketplace.sql
-│       ├── 009_reader_feedback.sql
-│       ├── 010_support_system.sql
-│       ├── 011_notification_center.sql  # ★Phase 9A新規
-│       ├── phase8d_self_service.sql
-│       └── phase8e_auto_response.sql
+│       ├── 011_notification_center.sql  # ★Phase 9A
+│       └── ...
 ├── pages/
 │   ├── admin/             # 管理者画面
 │   ├── support/           # サポート画面
 │   ├── feedback/          # 読者フィードバック
 │   ├── translators/       # 翻訳者マーケット
 │   ├── dev/               # 開発用ツール
-│   ├── account-settings.html
-│   ├── dashboard.html
-│   ├── notifications.html  # ★Phase 9A新規
+│   ├── account-settings.html  # ★Phase 9Bバッジ追加
+│   ├── dashboard.html         # ★Phase 9Bバッジ追加
+│   ├── notifications.html     # ★Phase 9A
+│   ├── translation-status.html # ★Phase 9Bバッジ追加
+│   ├── upload-work.html       # ★Phase 9Bバッジ追加
 │   └── ...
 ├── js/
-│   └── notification-badge.js  # ★Phase 9A新規
+│   ├── notification-badge.js      # ★Phase 9A（手動挿入用）
+│   └── header-notification.js     # ★Phase 9B（自動挿入用）
 ├── css/
 │   └── style-new.css      # 共通スタイル
 └── index.html             # トップページ
@@ -228,7 +248,7 @@ test-publishing-platform/
 
 ---
 
-## 7. 完了済みフェーズ
+## 8. 完了済みフェーズ
 
 | Phase | 内容 | 状態 |
 |-------|------|:----:|
@@ -252,21 +272,62 @@ test-publishing-platform/
 | 8D | セルフサービス機能（アカウント設定） | ✅ |
 | 8E | 自動メール応答（6種類のテンプレート） | ✅ |
 | **9A** | **通知センター - データベース・API・UI** | ✅ |
+| **9B** | **通知バッジ - 4ページへの統合** | ✅ |
+| **9C** | **自動通知生成 - ヘルパー関数・デモ機能** | ✅ |
 
 ---
 
-## 8. Phase 9 通知センター詳細
+## 9. Phase 9 通知センター詳細
 
-### Phase 9A で作成したもの ✅
+### Phase 9A: 通知センター基盤 ✅
 
 | ファイル | 説明 |
 |----------|------|
 | `backend/migrations/011_notification_center.sql` | 通知テーブル（notifications, notification_preferences） |
 | `backend/routes/notifications.js` | 通知API（取得・既読化・設定） |
-| `pages/notifications.html` | 通知一覧ページ |
-| `js/notification-badge.js` | ヘッダーバッジ更新用共通コンポーネント |
+| `pages/notifications.html` | 通知一覧ページ（デモモード対応） |
+| `js/notification-badge.js` | ヘッダーバッジ更新用コンポーネント（手動挿入） |
 
-### API エンドポイント
+### Phase 9B: 通知バッジ統合 ✅
+
+| ファイル | 説明 |
+|----------|------|
+| `js/header-notification.js` | 自動挿入型通知ベルコンポーネント |
+
+**バッジ追加済みページ（4ページ）:**
+
+| ページ | 実装方法 |
+|--------|----------|
+| dashboard.html | 手動バッジ + notification-badge.js |
+| upload-work.html | 手動バッジ + notification-badge.js |
+| translation-status.html | header-notification.js（自動挿入） |
+| account-settings.html | header-notification.js（自動挿入） |
+
+### Phase 9C: 自動通知生成 ✅
+
+| ファイル | 説明 |
+|----------|------|
+| `backend/services/notificationService.js` | 通知ヘルパー関数（8種類） |
+| `backend/services/notificationIntegration.js` | 既存ルートへの統合ガイド |
+
+**通知ヘルパー関数:**
+
+| 関数 | 用途 |
+|------|------|
+| `notifySale()` | 売上通知 |
+| `notifyTranslationComplete()` | 翻訳完了通知 |
+| `notifyTranslationRequest()` | 翻訳依頼通知 |
+| `notifyComment()` | コメント通知 |
+| `notifyFeedback()` | フィードバック通知 |
+| `notifyTicketReply()` | チケット返信通知 |
+| `notifySystem()` | システム通知 |
+| `notifyAccount()` | アカウント通知 |
+
+---
+
+## 10. 通知API エンドポイント
+
+### 基本API
 
 | メソッド | URL | 説明 |
 |----------|-----|------|
@@ -276,10 +337,22 @@ test-publishing-platform/
 | PUT | /api/notifications/read-all | すべて既読 |
 | DELETE | /api/notifications/:id | 通知削除 |
 | DELETE | /api/notifications/clear-all | 一括削除 |
+
+### 設定API
+
+| メソッド | URL | 説明 |
+|----------|-----|------|
 | GET | /api/notifications/preferences | 通知設定取得 |
 | PUT | /api/notifications/preferences | 通知設定更新 |
-| POST | /api/notifications/create | 通知作成 |
-| POST | /api/notifications/test | テスト通知作成 |
+| GET | /api/notifications/types | 通知タイプ一覧 |
+
+### デモ・テストAPI ★Phase 9C
+
+| メソッド | URL | 説明 |
+|----------|-----|------|
+| POST | /api/notifications/demo/generate-all | 全タイプのデモ通知を一括生成（9件） |
+| POST | /api/notifications/demo/generate | 指定タイプのデモ通知を生成 |
+| POST | /api/notifications/test | 単一テスト通知作成 |
 
 ### 通知タイプ
 
@@ -294,33 +367,50 @@ test-publishing-platform/
 | ticket_reply | 🎧 | サポート返信 |
 | account | 👤 | アカウント関連 |
 
-### デモモード
+---
 
-`?demo=true` をURLに追加するとログインなしでダミーデータ表示：
-- http://localhost:8000/pages/notifications.html?demo=true
+## 11. デモ通知の生成方法
+
+### 方法1: ブラウザコンソールから
+
+1. ログイン後、任意のページで開発者ツールを開く（F12）
+2. Consoleタブで `allow pasting` と入力してEnter
+3. 以下を貼り付けてEnter:
+
+```javascript
+fetch('http://localhost:3000/api/notifications/demo/generate-all', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer ' + localStorage.getItem('token'),
+    'Content-Type': 'application/json'
+  }
+}).then(r => r.json()).then(data => console.log(data))
+```
+
+4. `{success: true, count: 9, ...}` と表示されれば成功
+5. 通知ページ（notifications.html）で確認
+
+### 方法2: デモモード（ログイン不要）
+
+URL: `http://localhost:8000/pages/notifications.html?demo=true`
+
+ダミーデータで通知UIを確認できます。
 
 ---
 
-## 9. 今後の開発予定
+## 12. 今後の開発予定
 
 | Phase | 内容 | 概要 |
 |-------|------|------|
-| **9B** | **ヘッダーバッジ統合** | **全ページで通知バッジを動的に更新** |
-| 9C | 自動通知生成 | イベント発生時に自動で通知を作成 |
-| 9D | 通知設定ページ | アカウント設定内に通知設定タブ追加 |
+| **9D** | **通知設定ページ** | account-settings.html内に通知設定タブ追加 |
+| 9E | 残りページへのバッジ追加 | my-works, earnings, editor等 |
 | 10 | Analytics | アクセス解析・レポート |
 | 11 | Mobile Optimization | モバイル最適化 |
 | 12 | Production Deploy | 本番環境デプロイ |
 
-### Phase 9B 予定機能
-
-- 全ページのヘッダーに `js/notification-badge.js` を読み込み
-- 通知バッジのIDを統一（`notificationBadge`）
-- 1分ごとに自動で未読数を更新
-
 ---
 
-## 10. サーバー起動方法
+## 13. サーバー起動方法
 
 ### 手順
 
@@ -329,23 +419,24 @@ test-publishing-platform/
 
 2. **プロジェクトフォルダに移動**
    ```
-   cd C:\Projects\test-publishing-platform\backend
+   cd C:\Projects\test-publishing-platform
    ```
 
 3. **サーバーを起動**
    ```
-   node server.js
+   npm start
    ```
 
 4. **成功確認**
    以下のメッセージが表示されればOK：
    ```
-   Server is running on port 8000
-   PostgreSQL connected successfully
+   Server running on port 3000
+   Frontend server running on port 8000
    ```
 
 5. **ブラウザでアクセス**
-   http://localhost:8000
+   - フロントエンド: http://localhost:8000
+   - ログイン: http://localhost:8000/pages/login.html
 
 ### サーバー停止方法
 
@@ -353,7 +444,7 @@ PowerShellで `Ctrl + C` を押す
 
 ---
 
-## 11. GitHubからの更新取得方法
+## 14. GitHubからの更新取得方法
 
 ### 手順
 
@@ -369,22 +460,30 @@ PowerShellで `Ctrl + C` を押す
    git pull
    ```
 
-4. **サーバーを再起動**（backendフォルダで）
+4. **サーバーを再起動**
    ```
-   cd backend
-   node server.js
+   npm start
    ```
 
 ---
 
-## 12. 注意事項
+## 15. 注意事項
+
+### フロントエンドとバックエンドのポート
+
+| 用途 | ポート | 備考 |
+|------|--------|------|
+| フロントエンド | 8000 | HTMLページの配信 |
+| バックエンドAPI | 3000 | APIリクエストの処理 |
+
+**APIを直接呼ぶ場合は `localhost:3000` を使用してください。**
 
 ### データベーススキーマの違い
 
 当初の設計と実際のテーブル構造に差異があります：
 - `work_type` → `content_type`
 - `is_premium` → `is_free`
-- `pending_review` ステータスは存在しない（draft, published, archived, suspended のみ）
+- `role` カラムは users テーブルに存在しない
 
 ### 決済はテストモード
 
@@ -402,16 +501,16 @@ FAQデータの一部に `[要更新]` マーカーが含まれています。
 
 ---
 
-## 13. 新しいChatでの開始方法
+## 16. 新しいChatでの開始方法
 
 1. このドキュメントの内容をClaudeに共有（またはアップロード）
-2. 「Phase 9Bから続けてください」と伝える
+2. 「Phase 9Dから続けてください」と伝える
 3. 必要に応じて `git pull` で最新コードを取得
 4. サーバーを起動して動作確認
 
 ---
 
-## 14. 参考リンク
+## 17. 参考リンク
 
 | 項目 | URL |
 |------|-----|
@@ -427,4 +526,4 @@ FAQデータの一部に `[要更新]` マーカーが含まれています。
 
 ---
 
-最終更新: 2025年12月5日
+最終更新: 2025年12月6日
