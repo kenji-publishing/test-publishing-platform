@@ -1,12 +1,14 @@
 /**
  * Notification Routes
  * Phase 9A: 通知センター機能
+ * Phase 9C: 自動通知生成機能追加
  * 
  * - 通知一覧取得
  * - 未読件数取得
  * - 既読化（単一/一括）
  * - 通知設定
  * - 通知作成（内部/管理者用）
+ * - デモ通知生成
  * - メール通知送信（既存機能）
  */
 
@@ -532,6 +534,241 @@ router.get('/types', (req, res) => {
     success: true,
     types
   });
+});
+
+// =============================================================
+// Phase 9C: デモ通知生成エンドポイント
+// =============================================================
+
+/**
+ * POST /api/notifications/demo/generate-all
+ * すべてのタイプのデモ通知を一括生成
+ */
+router.post('/demo/generate-all', authenticate, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    // ユーザー名を取得
+    const userResult = await db.query(
+      'SELECT first_name, pen_name FROM users WHERE user_id = $1',
+      [userId]
+    );
+    const userName = userResult.rows[0]?.pen_name || 
+                    userResult.rows[0]?.first_name || 
+                    'クリエイター';
+
+    // すべてのタイプのデモ通知データ
+    const demoNotifications = [
+      {
+        type: 'sale',
+        title: '💰 作品が購入されました！',
+        message: `「異世界転生物語」がJohn Smithさんに購入されました。¥1,200の収益が発生しました。`,
+        actionUrl: '/pages/earnings.html',
+        metadata: { amount: 1200, buyer: 'John Smith', work_title: '異世界転生物語' }
+      },
+      {
+        type: 'sale',
+        title: '💰 新しい購入がありました',
+        message: `「Tokyo Days」がMariaさんに購入されました。¥800の収益が発生しました。`,
+        actionUrl: '/pages/earnings.html',
+        metadata: { amount: 800, buyer: 'Maria', work_title: 'Tokyo Days' }
+      },
+      {
+        type: 'translation_complete',
+        title: '🌐 翻訳が完了しました',
+        message: `「異世界転生物語」の英語翻訳が完了しました。確認してください。`,
+        actionUrl: '/pages/translation-status.html',
+        metadata: { language: 'en', work_title: '異世界転生物語' }
+      },
+      {
+        type: 'translation_request',
+        title: '📤 新しい翻訳依頼',
+        message: `「Summer Memories」の日本語→スペイン語翻訳依頼が届きました。`,
+        actionUrl: '/pages/translators/requests.html',
+        metadata: { source: 'ja', target: 'es', work_title: 'Summer Memories' }
+      },
+      {
+        type: 'comment',
+        title: '💬 新しいコメント',
+        message: `田中さんが「異世界転生物語」にコメントしました: "素晴らしい作品です！続きが楽しみ..."`,
+        actionUrl: '/pages/dashboard.html',
+        metadata: { commenter: '田中', work_title: '異世界転生物語' }
+      },
+      {
+        type: 'feedback',
+        title: '⭐ 読者フィードバック',
+        message: `「Tokyo Days」に⭐⭐⭐⭐⭐の評価がつきました: "感動しました！"`,
+        actionUrl: '/pages/feedback/author.html',
+        metadata: { rating: 5, work_title: 'Tokyo Days' }
+      },
+      {
+        type: 'ticket_reply',
+        title: '🎧 サポートから返信',
+        message: `お問い合わせ「支払い方法について」にサポートチームから返信がありました。`,
+        actionUrl: '/pages/support/tickets.html',
+        metadata: { ticket_subject: '支払い方法について' }
+      },
+      {
+        type: 'system',
+        title: '🔔 メンテナンスのお知らせ',
+        message: `12月15日(日) 午前2時〜4時にシステムメンテナンスを実施します。`,
+        actionUrl: null,
+        metadata: {}
+      },
+      {
+        type: 'account',
+        title: '👤 プロフィール更新',
+        message: `本人確認が承認されました。すべての機能が利用可能になりました。`,
+        actionUrl: '/pages/account-settings.html',
+        metadata: { verification: 'approved' }
+      }
+    ];
+
+    // 通知を一括作成
+    const createdNotifications = [];
+    for (const notif of demoNotifications) {
+      const typeConfig = NOTIFICATION_TYPES[notif.type] || NOTIFICATION_TYPES.system;
+      
+      const result = await db.query(
+        `INSERT INTO notifications 
+          (user_id, notification_type, title, message, icon, icon_color, action_url, metadata)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+         RETURNING notification_id, notification_type, title`,
+        [
+          userId,
+          notif.type,
+          notif.title,
+          notif.message,
+          typeConfig.icon,
+          typeConfig.color,
+          notif.actionUrl,
+          JSON.stringify(notif.metadata)
+        ]
+      );
+      createdNotifications.push(result.rows[0]);
+    }
+
+    res.json({
+      success: true,
+      message: `${createdNotifications.length}件のデモ通知を生成しました`,
+      count: createdNotifications.length,
+      notifications: createdNotifications
+    });
+
+  } catch (error) {
+    console.error('Generate demo notifications error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/notifications/demo/generate
+ * 指定タイプのデモ通知を生成
+ */
+router.post('/demo/generate', authenticate, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { type = 'system', count = 1 } = req.body;
+
+    // 最大10件まで
+    const generateCount = Math.min(parseInt(count), 10);
+
+    const typeConfig = NOTIFICATION_TYPES[type] || NOTIFICATION_TYPES.system;
+
+    // デモデータのバリエーション
+    const variations = {
+      sale: [
+        { title: '💰 作品が購入されました！', work: '異世界転生物語', buyer: 'John', amount: 1200 },
+        { title: '💰 新しい売上', work: 'Tokyo Days', buyer: 'Maria', amount: 800 },
+        { title: '💰 購入通知', work: '夏の思い出', buyer: 'Alex', amount: 500 },
+      ],
+      translation_complete: [
+        { title: '🌐 英語翻訳完了', work: '異世界転生物語', lang: 'English' },
+        { title: '🌐 中国語翻訳完了', work: 'Tokyo Days', lang: 'Chinese' },
+        { title: '🌐 スペイン語翻訳完了', work: '夏の思い出', lang: 'Spanish' },
+      ],
+      comment: [
+        { title: '💬 新しいコメント', commenter: '田中', preview: '素晴らしい作品です！' },
+        { title: '💬 コメントが届きました', commenter: 'Sarah', preview: 'Love this story!' },
+        { title: '💬 読者からのコメント', commenter: '山田', preview: '続きが楽しみです' },
+      ],
+      feedback: [
+        { title: '⭐ 5つ星の評価！', rating: 5, comment: '感動しました' },
+        { title: '⭐ 高評価をいただきました', rating: 4, comment: '面白かった' },
+        { title: '⭐ 読者フィードバック', rating: 5, comment: '最高です！' },
+      ],
+      system: [
+        { title: '🔔 システム通知', message: 'メンテナンスのお知らせ' },
+        { title: '🔔 お知らせ', message: '新機能が追加されました' },
+        { title: '🔔 重要なお知らせ', message: '利用規約が更新されました' },
+      ]
+    };
+
+    const typeVariations = variations[type] || variations.system;
+    const createdNotifications = [];
+
+    for (let i = 0; i < generateCount; i++) {
+      const variation = typeVariations[i % typeVariations.length];
+      
+      let title, message, metadata;
+      
+      switch (type) {
+        case 'sale':
+          title = variation.title;
+          message = `「${variation.work}」が${variation.buyer}さんに購入されました。¥${variation.amount}の収益が発生しました。`;
+          metadata = { work_title: variation.work, buyer: variation.buyer, amount: variation.amount };
+          break;
+        case 'translation_complete':
+          title = variation.title;
+          message = `「${variation.work}」の${variation.lang}翻訳が完了しました。`;
+          metadata = { work_title: variation.work, language: variation.lang };
+          break;
+        case 'comment':
+          title = variation.title;
+          message = `${variation.commenter}さんがコメントしました: "${variation.preview}"`;
+          metadata = { commenter: variation.commenter };
+          break;
+        case 'feedback':
+          title = variation.title;
+          message = `${'⭐'.repeat(variation.rating)}の評価: "${variation.comment}"`;
+          metadata = { rating: variation.rating };
+          break;
+        default:
+          title = variation.title;
+          message = variation.message;
+          metadata = {};
+      }
+
+      const result = await db.query(
+        `INSERT INTO notifications 
+          (user_id, notification_type, title, message, icon, icon_color, action_url, metadata)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+         RETURNING notification_id, notification_type, title`,
+        [
+          userId,
+          type,
+          title,
+          message,
+          typeConfig.icon,
+          typeConfig.color,
+          null,
+          JSON.stringify(metadata)
+        ]
+      );
+      createdNotifications.push(result.rows[0]);
+    }
+
+    res.json({
+      success: true,
+      message: `${createdNotifications.length}件の${typeConfig.label}通知を生成しました`,
+      count: createdNotifications.length,
+      notifications: createdNotifications
+    });
+
+  } catch (error) {
+    console.error('Generate demo notification error:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // =============================================================
