@@ -1,6 +1,6 @@
 # Publisher Platform 引き継ぎドキュメント
 
-最終更新: 2025年12月6日
+最終更新: 2025年12月7日
 
 ---
 
@@ -126,6 +126,7 @@ C:\Projects\test-publishing-platform\
 | 管理画面 | http://localhost:8000/pages/admin/index.html |
 | ユーザーダッシュボード | http://localhost:8000/pages/dashboard.html |
 | 通知センター | http://localhost:8000/pages/notifications.html |
+| アカウント設定 | http://localhost:8000/pages/account-settings.html |
 
 ### GitHubリポジトリ
 
@@ -232,15 +233,16 @@ test-publishing-platform/
 │   ├── feedback/          # 読者フィードバック
 │   ├── translators/       # 翻訳者マーケット
 │   ├── dev/               # 開発用ツール
-│   ├── account-settings.html  # ★Phase 9Bバッジ追加
+│   ├── account-settings.html  # ★Phase 9D通知設定統合
 │   ├── dashboard.html         # ★Phase 9Bバッジ追加
-│   ├── notifications.html     # ★Phase 9A
+│   ├── notifications.html     # ★Phase 9A/9D API URL修正
 │   ├── translation-status.html # ★Phase 9Bバッジ追加
 │   ├── upload-work.html       # ★Phase 9Bバッジ追加
 │   └── ...
 ├── js/
 │   ├── notification-badge.js      # ★Phase 9A（手動挿入用）
-│   └── header-notification.js     # ★Phase 9B（自動挿入用）
+│   ├── header-notification.js     # ★Phase 9B/9D API URL修正
+│   └── notification-settings.js   # ★Phase 9D（通知設定管理）
 ├── css/
 │   └── style-new.css      # 共通スタイル
 └── index.html             # トップページ
@@ -274,10 +276,49 @@ test-publishing-platform/
 | **9A** | **通知センター - データベース・API・UI** | ✅ |
 | **9B** | **通知バッジ - 4ページへの統合** | ✅ |
 | **9C** | **自動通知生成 - ヘルパー関数・デモ機能** | ✅ |
+| **9D** | **通知設定ページ・API URL修正** | 🔄 進行中 |
 
 ---
 
-## 9. Phase 9 通知センター詳細
+## 9. Phase 9D 現在の状態（2025年12月7日）
+
+### 完了した作業
+
+| 項目 | 内容 |
+|------|------|
+| API URL修正 | `header-notification.js`と`notifications.html`の`API_BASE`を相対パス(`/api`)から絶対パス(`http://localhost:3000/api`)に修正 |
+| 認証方式統一 | `account-settings.html`の認証チェックをlocalStorage方式に統一（APIベースから変更） |
+| 通知設定UI | `notification-settings.js`で通知設定パネルを動的生成（account-settings.html#notifications） |
+
+### ⚠️ 未解決の問題
+
+**症状**: notifications.htmlから「通知設定」ボタンをクリックすると、account-settings.htmlが一瞬表示された後、自動的にlogin.htmlにリダイレクトされる
+
+**調査結果**:
+- localStorageにはtoken、userデータが正しく存在することを確認済み
+- account-settings.htmlのJavaScriptコードは正しく実装されている
+- login.htmlには自動リダイレクト機能はない
+
+**推定原因**: ブラウザキャッシュに古いバージョンのaccount-settings.htmlが残っている可能性
+
+**次回試すべき対処法**:
+1. ブラウザのキャッシュを完全にクリア（Ctrl+Shift+Delete → 「全期間」→「キャッシュされた画像とファイル」）
+2. ブラウザを完全に閉じて再起動
+3. `Ctrl + Shift + R` でハードリロード
+4. それでも解決しない場合は、F12 → Networkタブで何がリダイレクトを引き起こしているか調査
+
+### 関連コミット
+
+| コミット | 内容 |
+|----------|------|
+| `a2f31b5` | header-notification.js API_BASE修正 |
+| `a301d3b` | notifications.html API_BASE修正 |
+| `cce142f` | account-settings.html localStorage認証統一 |
+| `e5b6ba9` | Phase 9D 認証方式の二重サポート（初期実装） |
+
+---
+
+## 10. Phase 9 通知センター詳細
 
 ### Phase 9A: 通知センター基盤 ✅
 
@@ -323,9 +364,15 @@ test-publishing-platform/
 | `notifySystem()` | システム通知 |
 | `notifyAccount()` | アカウント通知 |
 
+### Phase 9D: 通知設定ページ 🔄 進行中
+
+| ファイル | 説明 |
+|----------|------|
+| `js/notification-settings.js` | 通知設定管理（アプリ内/メール別） |
+
 ---
 
-## 10. 通知API エンドポイント
+## 11. 通知API エンドポイント
 
 ### 基本API
 
@@ -369,7 +416,7 @@ test-publishing-platform/
 
 ---
 
-## 11. デモ通知の生成方法
+## 12. デモ通知の生成方法
 
 ### 方法1: ブラウザコンソールから
 
@@ -398,11 +445,11 @@ URL: `http://localhost:8000/pages/notifications.html?demo=true`
 
 ---
 
-## 12. 今後の開発予定
+## 13. 今後の開発予定
 
 | Phase | 内容 | 概要 |
 |-------|------|------|
-| **9D** | **通知設定ページ** | account-settings.html内に通知設定タブ追加 |
+| **9D** | **通知設定ページ** | ⚠️ account-settings.htmlリダイレクト問題の解決 |
 | 9E | 残りページへのバッジ追加 | my-works, earnings, editor等 |
 | 10 | Analytics | アクセス解析・レポート |
 | 11 | Mobile Optimization | モバイル最適化 |
@@ -410,7 +457,7 @@ URL: `http://localhost:8000/pages/notifications.html?demo=true`
 
 ---
 
-## 13. サーバー起動方法
+## 14. サーバー起動方法
 
 ### 手順
 
@@ -444,7 +491,7 @@ PowerShellで `Ctrl + C` を押す
 
 ---
 
-## 14. GitHubからの更新取得方法
+## 15. GitHubからの更新取得方法
 
 ### 手順
 
@@ -467,7 +514,7 @@ PowerShellで `Ctrl + C` を押す
 
 ---
 
-## 15. 注意事項
+## 16. 注意事項
 
 ### フロントエンドとバックエンドのポート
 
@@ -477,6 +524,12 @@ PowerShellで `Ctrl + C` を押す
 | バックエンドAPI | 3000 | APIリクエストの処理 |
 
 **APIを直接呼ぶ場合は `localhost:3000` を使用してください。**
+
+### ⚠️ API URLの注意（Phase 9Dで修正）
+
+フロントエンドのJavaScriptでAPIを呼ぶ際：
+- ❌ `/api/...` → localhost:8000に送信されてしまう（404エラー）
+- ✅ `http://localhost:3000/api/...` → 正しいバックエンドに送信される
 
 ### データベーススキーマの違い
 
@@ -501,16 +554,16 @@ FAQデータの一部に `[要更新]` マーカーが含まれています。
 
 ---
 
-## 16. 新しいChatでの開始方法
+## 17. 新しいChatでの開始方法
 
 1. このドキュメントの内容をClaudeに共有（またはアップロード）
-2. 「Phase 9Dから続けてください」と伝える
+2. 「Phase 9Dを続けてください。account-settings.htmlへのリダイレクト問題を解決する必要があります」と伝える
 3. 必要に応じて `git pull` で最新コードを取得
-4. サーバーを起動して動作確認
+4. **ブラウザのキャッシュをクリア**してからサーバーを起動して動作確認
 
 ---
 
-## 17. 参考リンク
+## 18. 参考リンク
 
 | 項目 | URL |
 |------|-----|
@@ -526,4 +579,4 @@ FAQデータの一部に `[要更新]` マーカーが含まれています。
 
 ---
 
-最終更新: 2025年12月6日
+最終更新: 2025年12月7日
