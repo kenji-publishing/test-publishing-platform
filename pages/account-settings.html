@@ -311,6 +311,28 @@
         .demo-banner i {
             margin-right: 0.5rem;
         }
+        
+        /* Login Required State */
+        .login-required {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+        
+        .login-required i {
+            font-size: 4rem;
+            color: var(--color-border);
+            margin-bottom: 1.5rem;
+        }
+        
+        .login-required h3 {
+            color: var(--color-text-secondary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .login-required p {
+            color: var(--color-text-muted);
+            margin-bottom: 1.5rem;
+        }
     </style>
 </head>
 <body>
@@ -349,7 +371,7 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="settings-container">
+    <main class="settings-container" id="mainContent">
         <div class="settings-header">
             <h1><i class="fas fa-cog"></i> アカウント設定</h1>
             <p class="text-muted">プロフィール、セキュリティ、通知などの設定を管理します</p>
@@ -723,7 +745,7 @@
         // =============================================
         // Initialization
         // =============================================
-        document.addEventListener('DOMContentLoaded', async function() {
+        document.addEventListener('DOMContentLoaded', function() {
             // Check for demo mode
             const params = new URLSearchParams(window.location.search);
             isDemo = params.get('demo') === 'true';
@@ -731,21 +753,49 @@
             if (isDemo) {
                 document.getElementById('demoBanner').style.display = 'block';
                 currentUser = DEMO_USER;
-                updateAuthNav();
-                loadUserData();
-                loadDemoSecurityData();
-                loadDemoPurchases();
+                initPage();
             } else {
-                await checkAuth();
-                loadUserData();
+                // Check authentication using localStorage (same as notifications.html)
+                const token = localStorage.getItem('token');
+                const storedUser = localStorage.getItem('user');
+                
+                if (token && storedUser) {
+                    try {
+                        currentUser = JSON.parse(storedUser);
+                        initPage();
+                    } catch (e) {
+                        console.error('Failed to parse user data:', e);
+                        showLoginRequired();
+                    }
+                } else {
+                    showLoginRequired();
+                }
             }
-            
+        });
+        
+        function initPage() {
+            updateAuthNav();
+            loadUserData();
             setupTabs();
             setupDeleteConfirmation();
             
             // Handle hash navigation (e.g., #notifications)
             handleHashNavigation();
-        });
+        }
+        
+        function showLoginRequired() {
+            const mainContent = document.getElementById('mainContent');
+            mainContent.innerHTML = `
+                <div class="login-required">
+                    <i class="fas fa-lock"></i>
+                    <h3>ログインが必要です</h3>
+                    <p>アカウント設定を確認・変更するにはログインしてください</p>
+                    <a href="login.html?redirect=${encodeURIComponent(window.location.href)}" class="btn btn-primary-custom">
+                        <i class="fas fa-sign-in-alt me-1"></i> ログイン
+                    </a>
+                </div>
+            `;
+        }
         
         // Handle URL hash for direct tab navigation
         function handleHashNavigation() {
@@ -758,55 +808,14 @@
             }
         }
         
-        async function checkAuth() {
-            // Try token-based auth first (used by most pages)
-            const token = localStorage.getItem('token');
-            
-            if (token) {
-                try {
-                    const response = await fetch(`${API_BASE}/auth/me`, {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
-                    });
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        currentUser = data.user;
-                        updateAuthNav();
-                        return;
-                    }
-                } catch (error) {
-                    console.error('Token auth failed:', error);
-                }
-            }
-            
-            // Fallback to cookie-based auth
-            try {
-                const response = await fetch(`${API_BASE}/auth/me`, {
-                    credentials: 'include'
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    currentUser = data.user;
-                    updateAuthNav();
-                    return;
-                }
-            } catch (error) {
-                console.error('Cookie auth failed:', error);
-            }
-            
-            // No valid auth, redirect to login
-            window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.href);
-        }
-        
         function updateAuthNav() {
             const authNav = document.getElementById('authNav');
+            const displayName = currentUser.display_name || currentUser.displayName || currentUser.firstName || currentUser.email;
             authNav.innerHTML = `
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                         <i class="fas fa-user-circle me-1"></i>
-                        ${currentUser.display_name || currentUser.email}
+                        ${displayName}
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="dashboard.html"><i class="fas fa-th-large me-2"></i>ダッシュボード</a></li>
@@ -851,25 +860,27 @@
         // =============================================
         // Load User Data
         // =============================================
-        async function loadUserData() {
+        function loadUserData() {
             if (!currentUser) return;
             
-            // Profile
-            document.getElementById('firstName').value = currentUser.first_name || '';
-            document.getElementById('lastName').value = currentUser.last_name || '';
-            document.getElementById('displayName').value = currentUser.display_name || '';
+            // Profile - handle different property name formats
+            document.getElementById('firstName').value = currentUser.first_name || currentUser.firstName || '';
+            document.getElementById('lastName').value = currentUser.last_name || currentUser.lastName || '';
+            document.getElementById('displayName').value = currentUser.display_name || currentUser.displayName || '';
             document.getElementById('bio').value = currentUser.bio || '';
-            document.getElementById('preferredLanguage').value = currentUser.preferred_language || 'ja';
+            document.getElementById('preferredLanguage').value = currentUser.preferred_language || currentUser.preferredLanguage || 'ja';
             
             // Email
-            document.getElementById('currentEmail').textContent = currentUser.email;
-            if (!currentUser.email_verified) {
+            document.getElementById('currentEmail').textContent = currentUser.email || 'N/A';
+            const emailVerified = currentUser.email_verified || currentUser.emailVerified;
+            if (!emailVerified) {
                 document.getElementById('emailVerified').innerHTML = '<i class="fas fa-exclamation-circle text-warning me-1"></i> 未確認';
             }
             
             // Avatar
-            if (currentUser.avatar_url) {
-                document.getElementById('avatarPreview').innerHTML = `<img src="${currentUser.avatar_url}" alt="Avatar">`;
+            const avatarUrl = currentUser.avatar_url || currentUser.avatarUrl;
+            if (avatarUrl) {
+                document.getElementById('avatarPreview').innerHTML = `<img src="${avatarUrl}" alt="Avatar">`;
             }
         }
         
@@ -931,7 +942,7 @@
         // =============================================
         // Profile Form
         // =============================================
-        document.getElementById('profileForm').addEventListener('submit', async function(e) {
+        document.getElementById('profileForm')?.addEventListener('submit', async function(e) {
             e.preventDefault();
             
             if (isDemo) {
@@ -947,9 +958,8 @@
                     method: 'PUT',
                     headers: { 
                         'Content-Type': 'application/json',
-                        'Authorization': token ? `Bearer ${token}` : ''
+                        'Authorization': `Bearer ${token}`
                     },
-                    credentials: 'include',
                     body: JSON.stringify({
                         first_name: document.getElementById('firstName').value,
                         last_name: document.getElementById('lastName').value,
@@ -978,13 +988,11 @@
         // =============================================
         async function loadSecurityData() {
             const token = localStorage.getItem('token');
-            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
             
             try {
                 // Load backup code count
                 const codesResponse = await fetch(`${API_BASE}/auth-magic/backup-codes/count`, {
-                    headers: headers,
-                    credentials: 'include'
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (codesResponse.ok) {
                     const data = await codesResponse.json();
@@ -992,27 +1000,29 @@
                 }
                 
                 // Load security questions
-                const questionsResponse = await fetch(`${API_BASE}/auth-magic/recover/questions/${currentUser.email}`);
-                if (questionsResponse.ok) {
-                    const data = await questionsResponse.json();
-                    const container = document.getElementById('securityQuestionsList');
-                    container.innerHTML = data.questions.map((q, i) => `
-                        <div class="security-item">
-                            <div class="security-info">
-                                <h4>質問 ${i + 1}</h4>
-                                <p>${q.question}</p>
+                if (currentUser && currentUser.email) {
+                    const questionsResponse = await fetch(`${API_BASE}/auth-magic/recover/questions/${currentUser.email}`);
+                    if (questionsResponse.ok) {
+                        const data = await questionsResponse.json();
+                        const container = document.getElementById('securityQuestionsList');
+                        container.innerHTML = data.questions.map((q, i) => `
+                            <div class="security-item">
+                                <div class="security-info">
+                                    <h4>質問 ${i + 1}</h4>
+                                    <p>${q.question}</p>
+                                </div>
                             </div>
-                        </div>
-                    `).join('');
-                    
-                    // Also populate for email change modal
-                    const emailQuestionsContainer = document.getElementById('emailSecurityQuestions');
-                    emailQuestionsContainer.innerHTML = data.questions.map(q => `
-                        <div class="form-group mb-3">
-                            <label>${q.question}</label>
-                            <input type="text" class="form-control security-answer" data-question-id="${q.id}" required>
-                        </div>
-                    `).join('');
+                        `).join('');
+                        
+                        // Also populate for email change modal
+                        const emailQuestionsContainer = document.getElementById('emailSecurityQuestions');
+                        emailQuestionsContainer.innerHTML = data.questions.map(q => `
+                            <div class="form-group mb-3">
+                                <label>${q.question}</label>
+                                <input type="text" class="form-control security-answer" data-question-id="${q.id}" required>
+                            </div>
+                        `).join('');
+                    }
                 }
             } catch (error) {
                 console.error('Failed to load security data:', error);
@@ -1041,9 +1051,8 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': token ? `Bearer ${token}` : ''
-                    },
-                    credentials: 'include'
+                        'Authorization': `Bearer ${token}`
+                    }
                 });
                 
                 const result = await response.json();
@@ -1098,9 +1107,8 @@
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
-                        'Authorization': token ? `Bearer ${token}` : ''
+                        'Authorization': `Bearer ${token}`
                     },
-                    credentials: 'include',
                     body: JSON.stringify({
                         email: currentUser.email,
                         answers: answers,
@@ -1148,9 +1156,8 @@
                     method: 'PUT',
                     headers: { 
                         'Content-Type': 'application/json',
-                        'Authorization': token ? `Bearer ${token}` : ''
+                        'Authorization': `Bearer ${token}`
                     },
-                    credentials: 'include',
                     body: JSON.stringify(settings)
                 });
                 
@@ -1174,8 +1181,7 @@
             try {
                 const token = localStorage.getItem('token');
                 const response = await fetch(`${API_BASE}/users/purchases`, {
-                    headers: token ? { 'Authorization': `Bearer ${token}` } : {},
-                    credentials: 'include'
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
                 
                 const container = document.getElementById('purchasesList');
@@ -1221,8 +1227,7 @@
             try {
                 const token = localStorage.getItem('token');
                 const response = await fetch(`${API_BASE}/users/purchases/${purchaseId}/receipt`, {
-                    headers: token ? { 'Authorization': `Bearer ${token}` } : {},
-                    credentials: 'include'
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
                 
                 if (response.ok) {
@@ -1247,9 +1252,12 @@
         // Account Deletion
         // =============================================
         function setupDeleteConfirmation() {
-            document.getElementById('deleteConfirmText').addEventListener('input', function() {
-                document.getElementById('deleteAccountBtn').disabled = this.value !== 'アカウントを削除する';
-            });
+            const deleteInput = document.getElementById('deleteConfirmText');
+            if (deleteInput) {
+                deleteInput.addEventListener('input', function() {
+                    document.getElementById('deleteAccountBtn').disabled = this.value !== 'アカウントを削除する';
+                });
+            }
         }
         
         async function requestAccountDeletion() {
@@ -1271,9 +1279,8 @@
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
-                        'Authorization': token ? `Bearer ${token}` : ''
-                    },
-                    credentials: 'include'
+                        'Authorization': `Bearer ${token}`
+                    }
                 });
                 
                 const result = await response.json();
@@ -1314,18 +1321,7 @@
             setTimeout(() => alert.remove(), 5000);
         }
         
-        async function logout() {
-            if (isDemo) {
-                window.location.href = '../index.html';
-                return;
-            }
-            
-            const token = localStorage.getItem('token');
-            await fetch(`${API_BASE}/auth/logout`, {
-                method: 'POST',
-                headers: token ? { 'Authorization': `Bearer ${token}` } : {},
-                credentials: 'include'
-            });
+        function logout() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             window.location.href = 'login.html';
