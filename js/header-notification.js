@@ -10,6 +10,9 @@
 (function() {
     'use strict';
 
+    // API Base URL
+    const API_BASE = 'http://localhost:3000/api';
+
     // ページ読み込み完了時に実行
     document.addEventListener('DOMContentLoaded', function() {
         insertNotificationBell();
@@ -72,7 +75,7 @@
                     return;
                 }
 
-                const response = await fetch('/api/notifications/unread-count', {
+                const response = await fetch(`${API_BASE}/notifications/unread-count`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
