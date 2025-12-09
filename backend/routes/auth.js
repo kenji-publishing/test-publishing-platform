@@ -22,7 +22,7 @@ router.post('/register',
   body('password').isLength({ min: 6 }),
   body('firstName').trim().notEmpty(),
   body('lastName').trim().notEmpty(),
-  body('role').isIn(['author', 'translator', 'editor']),
+  body('role').isIn(['author', 'translator', 'editor', 'reader']),
   
   async (req, res) => {
     try {
@@ -50,28 +50,33 @@ router.post('/register',
       // Hash password
       const passwordHash = await bcrypt.hash(password, 10);
       
-      // Create user
+      // Create user with role
       const result = await db.query(
-        `INSERT INTO users (email, password_hash, first_name, last_name, pen_name, country_code)
-         VALUES ($1, $2, $3, $4, $5, $6)
-         RETURNING user_id, email, first_name, last_name, pen_name, created_at`,
-        [email, passwordHash, firstName, lastName, penName || null, country || null]
+        `INSERT INTO users (email, password_hash, first_name, last_name, pen_name, country_code, role)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
+         RETURNING user_id, email, first_name, last_name, pen_name, role, created_at`,
+        [email, passwordHash, firstName, lastName, penName || null, country || null, role || 'reader']
       );
       
       const user = result.rows[0];
       
-      // Create user role
-      await db.query(
-        'INSERT INTO user_roles (user_id, role_type) VALUES ($1, $2)',
-        [user.user_id, role]
-      );
+      // Also create user_roles entry for backward compatibility
+      try {
+        await db.query(
+          'INSERT INTO user_roles (user_id, role_type) VALUES ($1, $2)',
+          [user.user_id, role || 'reader']
+        );
+      } catch (e) {
+        // user_roles table might not exist, ignore
+        console.log('user_roles insert skipped:', e.message);
+      }
       
       // Generate JWT token
       const token = jwt.sign(
         { 
           userId: user.user_id,
           email: user.email,
-          role: role
+          role: user.role
         },
         process.env.JWT_SECRET,
         { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
@@ -85,7 +90,7 @@ router.post('/register',
           firstName: user.first_name,
           lastName: user.last_name,
           penName: user.pen_name,
-          role: role
+          role: user.role
         },
         token
       });
@@ -117,10 +122,10 @@ router.post('/login',
       
       const { email, password } = req.body;
       
-      // Find user
+      // Find user - get role from both users.role and user_roles table
       const result = await db.query(
         `SELECT u.user_id, u.email, u.password_hash, u.first_name, u.last_name, 
-                u.pen_name, u.account_status, ur.role_type
+                u.pen_name, u.account_status, u.role, ur.role_type
          FROM users u
          LEFT JOIN user_roles ur ON u.user_id = ur.user_id AND ur.is_active = true
          WHERE u.email = $1`,
@@ -160,12 +165,15 @@ router.post('/login',
         [user.user_id]
       );
       
+      // Determine role: prefer users.role, fallback to user_roles.role_type, default to 'reader'
+      const userRole = user.role || user.role_type || 'reader';
+      
       // Generate JWT token
       const token = jwt.sign(
         { 
           userId: user.user_id,
           email: user.email,
-          role: user.role_type
+          role: userRole
         },
         process.env.JWT_SECRET,
         { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
@@ -179,7 +187,7 @@ router.post('/login',
           firstName: user.first_name,
           lastName: user.last_name,
           penName: user.pen_name,
-          role: user.role_type
+          role: userRole
         },
         token
       });
@@ -202,7 +210,7 @@ router.get('/me', authenticate, async (req, res) => {
   try {
     const result = await db.query(
       `SELECT u.user_id, u.email, u.first_name, u.last_name, u.pen_name,
-              u.country_code, u.bio, u.profile_image_url, u.verified,
+              u.country_code, u.bio, u.profile_image_url, u.verified, u.role,
               array_agg(DISTINCT ur.role_type) as roles
        FROM users u
        LEFT JOIN user_roles ur ON u.user_id = ur.user_id AND ur.is_active = true
@@ -219,6 +227,9 @@ router.get('/me', authenticate, async (req, res) => {
     
     const user = result.rows[0];
     
+    // Determine role
+    const userRole = user.role || (user.roles && user.roles[0]) || 'reader';
+    
     res.json({
       user: {
         id: user.user_id,
@@ -230,6 +241,7 @@ router.get('/me', authenticate, async (req, res) => {
         bio: user.bio,
         profileImage: user.profile_image_url,
         verified: user.verified,
+        role: userRole,
         roles: user.roles.filter(r => r !== null)
       }
     });
