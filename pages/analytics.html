@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>アナリティクス - Publisher</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/style-new.css">
+    
+    <style>
+        /* Analytics Page Styles */
+        .analytics-hero {
+            background: linear-gradient(135deg, var(--color-accent), var(--color-accent-light));
+            color: white;
+            padding: 2rem 0;
+        }
+        
+        .analytics-hero h1 {
+            font-family: var(--font-heading);
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Period Selector */
+        .period-selector {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        .period-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--color-border);
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+        
+        .period-btn:hover {
+            border-color: var(--color-accent);
+        }
+        
+        .period-btn.active {
+            background: var(--color-accent);
+            color: white;
+            border-color: var(--color-accent);
+        }
+        
+        /* Stats Cards */
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            height: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+        
+        .stat-card .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-card .stat-icon.views { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+        .stat-card .stat-icon.readers { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .stat-card .stat-icon.time { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+        .stat-card .stat-icon.revenue { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+        
+        .stat-card .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--color-text);
+            margin-bottom: 0.25rem;
+        }
+        
+        .stat-card .stat-label {
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-card .stat-change {
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .stat-change.positive { color: #10b981; }
+        .stat-change.negative { color: #ef4444; }
+        .stat-change.neutral { color: var(--color-text-muted); }
+        
+        /* Chart Container */
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        .chart-card h3 {
+            font-family: var(--font-heading);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .chart-card h3 i {
+            color: var(--color-accent);
+        }
+        
+        /* Engagement Stats */
+        .engagement-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .engagement-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        .engagement-item {
+            text-align: center;
+            padding: 1rem;
+            background: var(--color-cream);
+            border-radius: 8px;
+        }
+        
+        .engagement-item i {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .engagement-item .value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--color-text);
+        }
+        
+        .engagement-item .label {
+            font-size: 0.8rem;
+            color: var(--color-text-muted);
+        }
+        
+        /* Top Works Table */
+        .top-works-table {
+            width: 100%;
+        }
+        
+        .top-works-table th {
+            font-weight: 500;
+            color: var(--color-text-muted);
+            font-size: 0.85rem;
+            padding: 0.75rem;
+            border-bottom: 2px solid var(--color-border);
+        }
+        
+        .top-works-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--color-border);
+            vertical-align: middle;
+        }
+        
+        .top-works-table tr:hover {
+            background: var(--color-cream);
+        }
+        
+        .work-rank {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--color-accent);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        
+        .work-rank.rank-1 { background: #f59e0b; }
+        .work-rank.rank-2 { background: #6b7280; }
+        .work-rank.rank-3 { background: #b45309; }
+        
+        /* Loading State */
+        .loading-overlay {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--color-border);
+            border-top-color: var(--color-accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--color-text-muted);
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="../index.html">
+                <i class="fas fa-book-open"></i> Publisher
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="../index.html">ホーム</a></li>
+                    <li class="nav-item"><a class="nav-link" href="explore.html">作品を探す</a></li>
+                    <li class="nav-item"><a class="nav-link" href="dashboard.html">ダッシュボード</a></li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item" id="notificationBellContainer">
+                        <a class="nav-link position-relative" href="notifications.html" title="通知">
+                            <i class="fas fa-bell"></i>
+                            <span id="notificationBadge" class="position-absolute badge rounded-pill bg-danger" style="font-size: 0.55rem; display: none; top: 0; right: 0; transform: translate(25%, -25%);">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown" id="authNav">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i>
+                            <span id="userDisplayName">ユーザー</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="profile.html"><i class="fas fa-user me-2"></i>プロフィール</a></li>
+                            <li><a class="dropdown-item" href="settings.html"><i class="fas fa-cog me-2"></i>設定</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>ログアウト</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="analytics-hero">
+        <div class="container">
+            <h1><i class="fas fa-chart-line me-2"></i>アナリティクス</h1>
+            <p class="mb-0 opacity-75">あなたの作品のパフォーマンスを確認</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container py-4">
+        
+        <!-- Period Selector -->
+        <div class="period-selector d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <span class="text-muted me-2">期間:</span>
+                <button class="period-btn" data-period="7">7日</button>
+                <button class="period-btn active" data-period="30">30日</button>
+                <button class="period-btn" data-period="90">90日</button>
+            </div>
+            <div class="text-muted small">
+                <i class="fas fa-sync-alt me-1"></i>
+                <span id="lastUpdated">最終更新: --</span>
+            </div>
+        </div>
+        
+        <!-- Stats Cards -->
+        <div class="row g-3 mb-4" id="statsCards">
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-icon views"><i class="fas fa-eye"></i></div>
+                    <div class="stat-value" id="statViews">--</div>
+                    <div class="stat-label">総閲覧数</div>
+                    <div class="stat-change neutral" id="statViewsChange">
+                        <i class="fas fa-minus"></i> --
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-icon readers"><i class="fas fa-users"></i></div>
+                    <div class="stat-value" id="statReaders">--</div>
+                    <div class="stat-label">ユニーク読者</div>
+                    <div class="stat-change neutral" id="statReadersChange">
+                        <i class="fas fa-minus"></i> --
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-icon time"><i class="fas fa-clock"></i></div>
+                    <div class="stat-value" id="statTime">--</div>
+                    <div class="stat-label">総読書時間</div>
+                    <div class="stat-change neutral">
+                        <span class="text-muted">前期間比</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-icon revenue"><i class="fas fa-yen-sign"></i></div>
+                    <div class="stat-value" id="statRevenue">--</div>
+                    <div class="stat-label">収益</div>
+                    <div class="stat-change neutral" id="statRevenueChange">
+                        <i class="fas fa-minus"></i> --
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Charts Row -->
+        <div class="row g-4 mb-4">
+            <!-- Views Trend Chart -->
+            <div class="col-lg-8">
+                <div class="chart-card">
+                    <h3><i class="fas fa-chart-area"></i> 閲覧数の推移</h3>
+                    <div style="height: 300px;">
+                        <canvas id="viewsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Engagement Stats -->
+            <div class="col-lg-4">
+                <div class="chart-card">
+                    <h3><i class="fas fa-heart"></i> エンゲージメント</h3>
+                    <div class="engagement-grid" id="engagementStats">
+                        <div class="engagement-item">
+                            <i class="fas fa-heart text-danger"></i>
+                            <div class="value" id="engLikes">--</div>
+                            <div class="label">いいね</div>
+                        </div>
+                        <div class="engagement-item">
+                            <i class="fas fa-comment text-primary"></i>
+                            <div class="value" id="engComments">--</div>
+                            <div class="label">コメント</div>
+                        </div>
+                        <div class="engagement-item">
+                            <i class="fas fa-bookmark text-warning"></i>
+                            <div class="value" id="engBookmarks">--</div>
+                            <div class="label">ブックマーク</div>
+                        </div>
+                        <div class="engagement-item">
+                            <i class="fas fa-download text-success"></i>
+                            <div class="value" id="engDownloads">--</div>
+                            <div class="label">ダウンロード</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Top Works -->
+        <div class="chart-card">
+            <h3><i class="fas fa-trophy"></i> 人気作品ランキング</h3>
+            <div class="table-responsive">
+                <table class="top-works-table" id="topWorksTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th>作品名</th>
+                            <th class="text-end">閲覧数</th>
+                            <th class="text-end">読者数</th>
+                            <th class="text-end">収益</th>
+                        </tr>
+                    </thead>
+                    <tbody id="topWorksBody">
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                <div class="loading-spinner mx-auto"></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer-custom mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <h5><i class="fas fa-book-open me-2"></i>Publisher</h5>
+                    <p class="text-muted">世界中の読者と作家をつなぐ多言語出版プラットフォーム</p>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <h6>サービス</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="explore.html">作品を探す</a></li>
+                        <li><a href="publish.html">作品を投稿</a></li>
+                        <li><a href="translator-marketplace.html">翻訳者になる</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <h6>サポート</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="support/faq.html">よくある質問</a></li>
+                        <li><a href="support/contact.html">お問い合わせ</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <h6>会社情報</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="about.html">会社概要</a></li>
+                        <li><a href="terms.html">利用規約</a></li>
+                        <li><a href="privacy.html">プライバシーポリシー</a></li>
+                    </ul>
+                </div>
+            </div>
+            <hr>
+            <div class="text-center text-muted">
+                <small>&copy; 2025 Publisher. All rights reserved.</small>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Notification Badge -->
+    <script src="../js/header-notification.js"></script>
+
+    <script>
+        // =============================================
+        // State
+        // =============================================
+        let currentPeriod = 30;
+        let viewsChart = null;
+        
+        // =============================================
+        // Auth Check
+        // =============================================
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            
+            if (!token || !user) {
+                window.location.href = 'login.html';
+                return null;
+            }
+            
+            const userData = JSON.parse(user);
+            document.getElementById('userDisplayName').textContent = userData.display_name || userData.email;
+            
+            return { token, user: userData };
+        }
+        
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+        
+        // =============================================
+        // API
+        // =============================================
+        async function fetchAnalytics() {
+            const { token } = checkAuth();
+            if (!token) return;
+            
+            try {
+                const response = await fetch(`http://localhost:3000/api/analytics/author/overview?period=${currentPeriod}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!response.ok) throw new Error('Failed to fetch analytics');
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateStats(data.overview);
+                    updateChart(data.trend);
+                    updateTopWorks(data.topWorks);
+                    updateLastUpdated();
+                }
+            } catch (error) {
+                console.error('Analytics fetch error:', error);
+                showEmptyState();
+            }
+        }
+        
+        // =============================================
+        // UI Updates
+        // =============================================
+        function updateStats(overview) {
+            // Views
+            document.getElementById('statViews').textContent = formatNumber(overview.views.value);
+            updateChangeIndicator('statViewsChange', overview.views.change);
+            
+            // Readers
+            document.getElementById('statReaders').textContent = formatNumber(overview.readers.value);
+            updateChangeIndicator('statReadersChange', overview.readers.change);
+            
+            // Reading Time
+            document.getElementById('statTime').textContent = overview.readingTime.formatted;
+            
+            // Revenue
+            document.getElementById('statRevenue').textContent = '¥' + formatNumber(overview.revenue.value);
+            updateChangeIndicator('statRevenueChange', overview.revenue.change);
+            
+            // Engagement
+            document.getElementById('engLikes').textContent = formatNumber(overview.engagement.likes);
+            document.getElementById('engComments').textContent = formatNumber(overview.engagement.comments);
+            document.getElementById('engBookmarks').textContent = formatNumber(overview.engagement.bookmarks);
+            document.getElementById('engDownloads').textContent = formatNumber(overview.engagement.downloads);
+        }
+        
+        function updateChangeIndicator(elementId, change) {
+            const element = document.getElementById(elementId);
+            const value = parseFloat(change);
+            
+            if (value > 0) {
+                element.className = 'stat-change positive';
+                element.innerHTML = `<i class="fas fa-arrow-up"></i> ${value}%`;
+            } else if (value < 0) {
+                element.className = 'stat-change negative';
+                element.innerHTML = `<i class="fas fa-arrow-down"></i> ${Math.abs(value)}%`;
+            } else {
+                element.className = 'stat-change neutral';
+                element.innerHTML = `<i class="fas fa-minus"></i> 0%`;
+            }
+        }
+        
+        function updateChart(trend) {
+            const ctx = document.getElementById('viewsChart').getContext('2d');
+            
+            const labels = trend.map(d => formatDate(d.date));
+            const viewsData = trend.map(d => d.views);
+            const readersData = trend.map(d => d.readers);
+            
+            if (viewsChart) {
+                viewsChart.destroy();
+            }
+            
+            viewsChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '閲覧数',
+                            data: viewsData,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            fill: true,
+                            tension: 0.3
+                        },
+                        {
+                            label: '読者数',
+                            data: readersData,
+                            borderColor: '#10b981',
+                            backgroundColor: 'transparent',
+                            borderDash: [5, 5],
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            align: 'end'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
+        }
+        
+        function updateTopWorks(topWorks) {
+            const tbody = document.getElementById('topWorksBody');
+            
+            if (!topWorks || topWorks.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">
+                            <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                            まだデータがありません
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = topWorks.map((work, index) => `
+                <tr>
+                    <td>
+                        <span class="work-rank ${index < 3 ? 'rank-' + (index + 1) : ''}">${index + 1}</span>
+                    </td>
+                    <td>
+                        <a href="work-detail.html?id=${work.id}" class="text-decoration-none">
+                            ${escapeHtml(work.title)}
+                        </a>
+                    </td>
+                    <td class="text-end">${formatNumber(work.views)}</td>
+                    <td class="text-end">${formatNumber(work.readers)}</td>
+                    <td class="text-end">¥${formatNumber(work.revenue)}</td>
+                </tr>
+            `).join('');
+        }
+        
+        function updateLastUpdated() {
+            const now = new Date();
+            document.getElementById('lastUpdated').textContent = `最終更新: ${now.toLocaleTimeString('ja-JP')}`;
+        }
+        
+        function showEmptyState() {
+            document.getElementById('topWorksBody').innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">
+                        <i class="fas fa-exclamation-circle fa-2x mb-2 d-block"></i>
+                        データの取得に失敗しました
+                    </td>
+                </tr>
+            `;
+        }
+        
+        // =============================================
+        // Helpers
+        // =============================================
+        function formatNumber(num) {
+            if (num === null || num === undefined) return '0';
+            return Number(num).toLocaleString('ja-JP');
+        }
+        
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return `${date.getMonth() + 1}/${date.getDate()}`;
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // =============================================
+        // Event Listeners
+        // =============================================
+        document.querySelectorAll('.period-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentPeriod = parseInt(this.dataset.period);
+                fetchAnalytics();
+            });
+        });
+        
+        // =============================================
+        // Initialize
+        // =============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const auth = checkAuth();
+            if (auth) {
+                fetchAnalytics();
+            }
+        });
+    </script>
+</body>
+</html>
