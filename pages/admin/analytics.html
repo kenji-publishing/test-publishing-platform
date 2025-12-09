@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>プラットフォーム分析 - 管理者 - Publisher</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../css/style-new.css">
+    
+    <style>
+        /* Admin Analytics Styles */
+        .admin-header {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            padding: 1.5rem 0;
+        }
+        
+        .admin-header h1 {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        /* Sidebar */
+        .admin-sidebar {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 1rem 0;
+            position: sticky;
+            top: 1rem;
+        }
+        
+        .admin-sidebar .nav-link {
+            color: var(--color-text);
+            padding: 0.75rem 1.5rem;
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .admin-sidebar .nav-link:hover {
+            background: var(--color-cream);
+            color: var(--color-accent);
+        }
+        
+        .admin-sidebar .nav-link.active {
+            background: var(--color-cream);
+            color: var(--color-accent);
+            border-left-color: var(--color-accent);
+            font-weight: 500;
+        }
+        
+        .admin-sidebar .nav-link i {
+            width: 20px;
+            margin-right: 0.5rem;
+        }
+        
+        /* Realtime Stats */
+        .realtime-card {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .realtime-card h3 {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-bottom: 1rem;
+        }
+        
+        .realtime-stats {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .realtime-stat {
+            text-align: center;
+        }
+        
+        .realtime-stat .value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        
+        .realtime-stat .label {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+        
+        .pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Stats Cards */
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.25rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            height: 100%;
+        }
+        
+        .stat-card .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .stat-card .stat-icon.blue { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+        .stat-card .stat-icon.green { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .stat-card .stat-icon.purple { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+        .stat-card .stat-icon.amber { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+        .stat-card .stat-icon.red { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+        .stat-card .stat-icon.indigo { background: rgba(99, 102, 241, 0.1); color: #6366f1; }
+        
+        .stat-card .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text);
+        }
+        
+        .stat-card .stat-label {
+            font-size: 0.8rem;
+            color: var(--color-text-muted);
+        }
+        
+        .stat-card .stat-change {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .stat-change.positive { color: #10b981; }
+        .stat-change.negative { color: #ef4444; }
+        
+        /* Chart Cards */
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        .chart-card h3 {
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .chart-card h3 i {
+            color: var(--color-accent);
+            margin-right: 0.5rem;
+        }
+        
+        /* Period Selector */
+        .period-selector {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .period-btn {
+            padding: 0.35rem 0.75rem;
+            border: 1px solid var(--color-border);
+            background: white;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .period-btn:hover {
+            border-color: var(--color-accent);
+        }
+        
+        .period-btn.active {
+            background: var(--color-accent);
+            color: white;
+            border-color: var(--color-accent);
+        }
+        
+        /* Device/Country Breakdown */
+        .breakdown-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+        
+        .breakdown-item .label {
+            width: 80px;
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+        }
+        
+        .breakdown-item .bar-container {
+            flex: 1;
+            height: 8px;
+            background: var(--color-border);
+            border-radius: 4px;
+            margin: 0 0.75rem;
+            overflow: hidden;
+        }
+        
+        .breakdown-item .bar {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .breakdown-item .bar.desktop { background: #3b82f6; }
+        .breakdown-item .bar.mobile { background: #10b981; }
+        .breakdown-item .bar.tablet { background: #f59e0b; }
+        .breakdown-item .bar.jp { background: #ef4444; }
+        .breakdown-item .bar.us { background: #3b82f6; }
+        .breakdown-item .bar.gb { background: #6366f1; }
+        .breakdown-item .bar.de { background: #f59e0b; }
+        .breakdown-item .bar.other { background: #9ca3af; }
+        
+        .breakdown-item .value {
+            width: 60px;
+            text-align: right;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        /* Top Works Table */
+        .ranking-table {
+            width: 100%;
+            font-size: 0.9rem;
+        }
+        
+        .ranking-table th {
+            font-weight: 500;
+            color: var(--color-text-muted);
+            padding: 0.5rem;
+            border-bottom: 2px solid var(--color-border);
+            font-size: 0.8rem;
+        }
+        
+        .ranking-table td {
+            padding: 0.75rem 0.5rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .ranking-table tr:hover {
+            background: var(--color-cream);
+        }
+        
+        .rank-badge {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: var(--color-border);
+            color: var(--color-text);
+        }
+        
+        .rank-badge.rank-1 { background: #fbbf24; color: #78350f; }
+        .rank-badge.rank-2 { background: #d1d5db; color: #374151; }
+        .rank-badge.rank-3 { background: #f59e0b; color: #78350f; }
+        
+        /* Export Button */
+        .btn-export {
+            background: white;
+            border: 1px solid var(--color-border);
+            color: var(--color-text);
+            padding: 0.35rem 0.75rem;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        
+        .btn-export:hover {
+            background: var(--color-cream);
+            border-color: var(--color-accent);
+        }
+        
+        /* Loading */
+        .loading-spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid var(--color-border);
+            border-top-color: var(--color-accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <div class="container">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <h1><i class="fas fa-chart-pie me-2"></i>プラットフォーム分析</h1>
+                    <p class="mb-0 opacity-75 small">Publisher 管理ダッシュボード</p>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <a href="../notifications.html" class="btn btn-outline-light btn-sm position-relative">
+                        <i class="fas fa-bell"></i>
+                    </a>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-light btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-shield me-1"></i>
+                            <span id="adminName">管理者</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="../settings.html"><i class="fas fa-cog me-2"></i>設定</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>ログアウト</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container py-4">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-2 mb-4">
+                <nav class="admin-sidebar">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="index.html"><i class="fas fa-tachometer-alt"></i>概要</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="users.html"><i class="fas fa-users"></i>ユーザー</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="moderation.html"><i class="fas fa-shield-alt"></i>コンテンツ</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="finance.html"><i class="fas fa-yen-sign"></i>財務</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="analytics.html"><i class="fas fa-chart-line"></i>分析</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="support-admin.html"><i class="fas fa-headset"></i>サポート</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-lg-10">
+                
+                <!-- Realtime Stats -->
+                <div class="realtime-card">
+                    <h3><i class="fas fa-circle pulse me-2" style="font-size: 0.6rem;"></i>リアルタイム</h3>
+                    <div class="realtime-stats">
+                        <div class="realtime-stat">
+                            <div class="value" id="activeUsers">--</div>
+                            <div class="label">アクティブユーザー</div>
+                        </div>
+                        <div class="realtime-stat">
+                            <div class="value" id="pageViewsHour">--</div>
+                            <div class="label">PV/時間</div>
+                        </div>
+                        <div class="realtime-stat">
+                            <div class="value" id="todayVisitors">--</div>
+                            <div class="label">今日の訪問者</div>
+                        </div>
+                        <div class="realtime-stat">
+                            <div class="value" id="todayRevenue">--</div>
+                            <div class="label">今日の収益</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Period Selector -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="period-selector">
+                        <button class="period-btn" data-period="7">7日</button>
+                        <button class="period-btn active" data-period="30">30日</button>
+                        <button class="period-btn" data-period="90">90日</button>
+                    </div>
+                    <button class="btn-export" onclick="exportData()">
+                        <i class="fas fa-download"></i> エクスポート
+                    </button>
+                </div>
+                
+                <!-- Stats Grid -->
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <div class="stat-card">
+                            <div class="stat-icon blue"><i class="fas fa-eye"></i></div>
+                            <div class="stat-value" id="totalPageViews">--</div>
+                            <div class="stat-label">総PV</div>
+                            <div class="stat-change positive" id="pvChange">--</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <div class="stat-card">
+                            <div class="stat-icon green"><i class="fas fa-users"></i></div>
+                            <div class="stat-value" id="uniqueVisitors">--</div>
+                            <div class="stat-label">ユニーク訪問</div>
+                            <div class="stat-change positive" id="uvChange">--</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <div class="stat-card">
+                            <div class="stat-icon purple"><i class="fas fa-user-plus"></i></div>
+                            <div class="stat-value" id="newUsers">--</div>
+                            <div class="stat-label">新規ユーザー</div>
+                            <div class="stat-change positive" id="nuChange">--</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <div class="stat-card">
+                            <div class="stat-icon indigo"><i class="fas fa-book-open"></i></div>
+                            <div class="stat-value" id="workViews">--</div>
+                            <div class="stat-label">作品閲覧</div>
+                            <div class="stat-change neutral">--</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <div class="stat-card">
+                            <div class="stat-icon amber"><i class="fas fa-shopping-cart"></i></div>
+                            <div class="stat-value" id="purchases">--</div>
+                            <div class="stat-label">購入数</div>
+                            <div class="stat-change neutral">--</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <div class="stat-card">
+                            <div class="stat-icon red"><i class="fas fa-yen-sign"></i></div>
+                            <div class="stat-value" id="totalRevenue">--</div>
+                            <div class="stat-label">総収益</div>
+                            <div class="stat-change positive" id="revChange">--</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Charts Row -->
+                <div class="row g-4 mb-4">
+                    <!-- Traffic Chart -->
+                    <div class="col-lg-8">
+                        <div class="chart-card">
+                            <h3>
+                                <span><i class="fas fa-chart-area"></i> トラフィック推移</span>
+                            </h3>
+                            <div style="height: 280px;">
+                                <canvas id="trafficChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- User Growth -->
+                    <div class="col-lg-4">
+                        <div class="chart-card">
+                            <h3><i class="fas fa-user-plus"></i> ユーザー成長</h3>
+                            <div style="height: 280px;">
+                                <canvas id="userGrowthChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Breakdown Row -->
+                <div class="row g-4 mb-4">
+                    <!-- Device Breakdown -->
+                    <div class="col-md-6">
+                        <div class="chart-card">
+                            <h3><i class="fas fa-mobile-alt"></i> デバイス別</h3>
+                            <div id="deviceBreakdown">
+                                <div class="breakdown-item">
+                                    <span class="label">デスクトップ</span>
+                                    <div class="bar-container"><div class="bar desktop" style="width: 0%"></div></div>
+                                    <span class="value" id="deviceDesktop">--</span>
+                                </div>
+                                <div class="breakdown-item">
+                                    <span class="label">モバイル</span>
+                                    <div class="bar-container"><div class="bar mobile" style="width: 0%"></div></div>
+                                    <span class="value" id="deviceMobile">--</span>
+                                </div>
+                                <div class="breakdown-item">
+                                    <span class="label">タブレット</span>
+                                    <div class="bar-container"><div class="bar tablet" style="width: 0%"></div></div>
+                                    <span class="value" id="deviceTablet">--</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Country Breakdown -->
+                    <div class="col-md-6">
+                        <div class="chart-card">
+                            <h3><i class="fas fa-globe-asia"></i> 国・地域別</h3>
+                            <div id="countryBreakdown">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Top Works -->
+                <div class="chart-card">
+                    <h3><i class="fas fa-trophy"></i> 人気作品TOP10</h3>
+                    <div class="table-responsive">
+                        <table class="ranking-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px;">#</th>
+                                    <th>作品名</th>
+                                    <th>作者</th>
+                                    <th class="text-end">閲覧数</th>
+                                    <th class="text-end">収益</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topWorksBody">
+                                <tr>
+                                    <td colspan="5" class="text-center py-4">
+                                        <div class="loading-spinner mx-auto"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // =============================================
+        // State
+        // =============================================
+        let currentPeriod = 30;
+        let trafficChart = null;
+        let userGrowthChart = null;
+        
+        // =============================================
+        // Auth Check
+        // =============================================
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            
+            if (!token || !user) {
+                window.location.href = '../login.html';
+                return null;
+            }
+            
+            const userData = JSON.parse(user);
+            if (userData.role !== 'admin') {
+                window.location.href = '../dashboard.html';
+                return null;
+            }
+            
+            document.getElementById('adminName').textContent = userData.display_name || '管理者';
+            return { token, user: userData };
+        }
+        
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '../login.html';
+        }
+        
+        // =============================================
+        // API
+        // =============================================
+        async function fetchAnalytics() {
+            const { token } = checkAuth();
+            if (!token) return;
+            
+            try {
+                const response = await fetch(`http://localhost:3000/api/analytics/admin/overview?period=${currentPeriod}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!response.ok) throw new Error('Failed to fetch');
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateStats(data.overview);
+                    updateTrafficChart(data.trend);
+                    updateUserGrowthChart(data.userGrowth);
+                    updateDeviceBreakdown(data.deviceBreakdown);
+                    updateCountryBreakdown(data.countryBreakdown);
+                    updateTopWorks(data.topWorks);
+                }
+            } catch (error) {
+                console.error('Analytics error:', error);
+            }
+        }
+        
+        async function fetchRealtime() {
+            const { token } = checkAuth();
+            if (!token) return;
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/analytics/admin/realtime', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!response.ok) return;
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('activeUsers').textContent = data.realtime.activeUsers;
+                    document.getElementById('pageViewsHour').textContent = formatNumber(data.realtime.pageViewsLastHour);
+                    document.getElementById('todayVisitors').textContent = formatNumber(data.realtime.today.visitors);
+                    document.getElementById('todayRevenue').textContent = '¥' + formatNumber(data.realtime.today.revenue);
+                }
+            } catch (error) {
+                console.error('Realtime error:', error);
+            }
+        }
+        
+        async function exportData() {
+            const { token } = checkAuth();
+            if (!token) return;
+            
+            try {
+                const response = await fetch(`http://localhost:3000/api/analytics/admin/export?type=platform&period=${currentPeriod}&format=csv`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!response.ok) throw new Error('Export failed');
+                
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `analytics_${currentPeriod}days.csv`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('エクスポートに失敗しました');
+            }
+        }
+        
+        // =============================================
+        // UI Updates
+        // =============================================
+        function updateStats(overview) {
+            document.getElementById('totalPageViews').textContent = formatNumber(overview.pageViews.value);
+            document.getElementById('pvChange').textContent = formatChange(overview.pageViews.change);
+            document.getElementById('pvChange').className = 'stat-change ' + getChangeClass(overview.pageViews.change);
+            
+            document.getElementById('uniqueVisitors').textContent = formatNumber(overview.uniqueVisitors.value);
+            document.getElementById('uvChange').textContent = formatChange(overview.uniqueVisitors.change);
+            document.getElementById('uvChange').className = 'stat-change ' + getChangeClass(overview.uniqueVisitors.change);
+            
+            document.getElementById('newUsers').textContent = formatNumber(overview.newUsers.value);
+            document.getElementById('nuChange').textContent = formatChange(overview.newUsers.change);
+            document.getElementById('nuChange').className = 'stat-change ' + getChangeClass(overview.newUsers.change);
+            
+            document.getElementById('workViews').textContent = formatNumber(overview.workViews);
+            document.getElementById('purchases').textContent = formatNumber(overview.purchases);
+            
+            document.getElementById('totalRevenue').textContent = '¥' + formatNumber(overview.revenue.total);
+            document.getElementById('revChange').textContent = formatChange(overview.revenue.change);
+            document.getElementById('revChange').className = 'stat-change ' + getChangeClass(overview.revenue.change);
+        }
+        
+        function updateTrafficChart(trend) {
+            const ctx = document.getElementById('trafficChart').getContext('2d');
+            
+            if (trafficChart) trafficChart.destroy();
+            
+            trafficChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: trend.map(d => formatDate(d.date)),
+                    datasets: [
+                        {
+                            label: 'PV',
+                            data: trend.map(d => d.page_views),
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            fill: true,
+                            tension: 0.3
+                        },
+                        {
+                            label: 'UV',
+                            data: trend.map(d => d.unique_visitors),
+                            borderColor: '#10b981',
+                            backgroundColor: 'transparent',
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', align: 'end' }
+                    },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }
+                    }
+                }
+            });
+        }
+        
+        function updateUserGrowthChart(userGrowth) {
+            const ctx = document.getElementById('userGrowthChart').getContext('2d');
+            
+            if (userGrowthChart) userGrowthChart.destroy();
+            
+            userGrowthChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: userGrowth.map(d => formatDate(d.date)),
+                    datasets: [{
+                        label: '新規ユーザー',
+                        data: userGrowth.map(d => d.new_users),
+                        backgroundColor: '#8b5cf6',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }
+                    }
+                }
+            });
+        }
+        
+        function updateDeviceBreakdown(breakdown) {
+            const total = (breakdown.desktop || 0) + (breakdown.mobile || 0) + (breakdown.tablet || 0);
+            
+            const pctDesktop = total > 0 ? (breakdown.desktop / total * 100).toFixed(1) : 0;
+            const pctMobile = total > 0 ? (breakdown.mobile / total * 100).toFixed(1) : 0;
+            const pctTablet = total > 0 ? (breakdown.tablet / total * 100).toFixed(1) : 0;
+            
+            document.querySelector('.bar.desktop').style.width = pctDesktop + '%';
+            document.querySelector('.bar.mobile').style.width = pctMobile + '%';
+            document.querySelector('.bar.tablet').style.width = pctTablet + '%';
+            
+            document.getElementById('deviceDesktop').textContent = pctDesktop + '%';
+            document.getElementById('deviceMobile').textContent = pctMobile + '%';
+            document.getElementById('deviceTablet').textContent = pctTablet + '%';
+        }
+        
+        function updateCountryBreakdown(breakdown) {
+            const container = document.getElementById('countryBreakdown');
+            const total = Object.values(breakdown).reduce((a, b) => a + b, 0);
+            
+            const countryNames = {
+                'JP': '日本',
+                'US': 'アメリカ',
+                'GB': 'イギリス',
+                'DE': 'ドイツ',
+                'CN': '中国',
+                'KR': '韓国',
+                'FR': 'フランス'
+            };
+            
+            const colors = ['jp', 'us', 'gb', 'de', 'other'];
+            
+            const sorted = Object.entries(breakdown)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+            
+            container.innerHTML = sorted.map(([code, value], i) => {
+                const pct = total > 0 ? (value / total * 100).toFixed(1) : 0;
+                const name = countryNames[code] || code;
+                const colorClass = colors[i] || 'other';
+                
+                return `
+                    <div class="breakdown-item">
+                        <span class="label">${name}</span>
+                        <div class="bar-container"><div class="bar ${colorClass}" style="width: ${pct}%"></div></div>
+                        <span class="value">${pct}%</span>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function updateTopWorks(topWorks) {
+            const tbody = document.getElementById('topWorksBody');
+            
+            if (!topWorks || topWorks.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">データがありません</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = topWorks.map((work, i) => `
+                <tr>
+                    <td><span class="rank-badge ${i < 3 ? 'rank-' + (i + 1) : ''}">${i + 1}</span></td>
+                    <td>${escapeHtml(work.title)}</td>
+                    <td class="text-muted">${escapeHtml(work.author_name)}</td>
+                    <td class="text-end">${formatNumber(work.views)}</td>
+                    <td class="text-end">¥${formatNumber(work.revenue)}</td>
+                </tr>
+            `).join('');
+        }
+        
+        // =============================================
+        // Helpers
+        // =============================================
+        function formatNumber(num) {
+            if (num === null || num === undefined) return '0';
+            return Number(num).toLocaleString('ja-JP');
+        }
+        
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return `${date.getMonth() + 1}/${date.getDate()}`;
+        }
+        
+        function formatChange(change) {
+            const val = parseFloat(change);
+            if (val > 0) return `+${val}%`;
+            if (val < 0) return `${val}%`;
+            return '0%';
+        }
+        
+        function getChangeClass(change) {
+            const val = parseFloat(change);
+            if (val > 0) return 'positive';
+            if (val < 0) return 'negative';
+            return 'neutral';
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // =============================================
+        // Event Listeners
+        // =============================================
+        document.querySelectorAll('.period-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentPeriod = parseInt(this.dataset.period);
+                fetchAnalytics();
+            });
+        });
+        
+        // =============================================
+        // Initialize
+        // =============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const auth = checkAuth();
+            if (auth) {
+                fetchAnalytics();
+                fetchRealtime();
+                
+                // Update realtime every 30 seconds
+                setInterval(fetchRealtime, 30000);
+            }
+        });
+    </script>
+</body>
+</html>
