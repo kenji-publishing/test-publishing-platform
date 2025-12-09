@@ -37,6 +37,7 @@ const translationQueueRoutes = require('./routes/translation-queue');
 const translatorMarketplaceRoutes = require('./routes/translator-marketplace');
 const readerFeedbackRoutes = require('./routes/reader-feedback');
 const supportRoutes = require('./routes/support');
+const analyticsRoutes = require('./routes/analytics');
 
 // Create Express app
 const app = express();
@@ -78,6 +79,7 @@ app.use('/api/translation-queue', translationQueueRoutes);
 app.use('/api/translators', translatorMarketplaceRoutes);
 app.use('/api/feedback', readerFeedbackRoutes);
 app.use('/api/support', supportRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -108,7 +110,8 @@ app.get('/', (req, res) => {
       translationQueue: '/api/translation-queue',
       translators: '/api/translators',
       feedback: '/api/feedback',
-      support: '/api/support'
+      support: '/api/support',
+      analytics: '/api/analytics'
     }
   });
 });
@@ -159,6 +162,8 @@ app.listen(PORT, () => {
   console.log(`   - GET  /api/support/faq/categories`);
   console.log(`   - GET  /api/support/faq`);
   console.log(`   - POST /api/support/tickets`);
+  console.log(`   - GET  /api/analytics/author/overview`);
+  console.log(`   - GET  /api/analytics/admin/overview`);
   console.log(`\n✨ Press Ctrl+C to stop\n`);
 });
 
