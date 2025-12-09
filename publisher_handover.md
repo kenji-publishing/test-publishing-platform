@@ -66,6 +66,7 @@
 | フロントエンド | HTML / Bootstrap 5 / JavaScript |
 | 決済 | Stripe / PayPal（テストモード） |
 | AI翻訳 | Claude API（Anthropic） |
+| グラフ | Chart.js |
 
 ---
 
@@ -127,6 +128,8 @@ C:\Projects\test-publishing-platform\
 | ユーザーダッシュボード | http://localhost:8000/pages/dashboard.html |
 | 通知センター | http://localhost:8000/pages/notifications.html |
 | アカウント設定 | http://localhost:8000/pages/account-settings.html |
+| **アナリティクス（作者）** | http://localhost:8000/pages/analytics.html |
+| **アナリティクス（管理）** | http://localhost:8000/pages/admin/analytics.html |
 
 ### GitHubリポジトリ
 
@@ -208,12 +211,13 @@ test-publishing-platform/
 │   ├── routes/            # APIエンドポイント
 │   │   ├── admin.js
 │   │   ├── ai-translation.js
+│   │   ├── analytics.js       # ★Phase 10
 │   │   ├── auth.js
 │   │   ├── auth-magic.js
 │   │   ├── dmca.js
 │   │   ├── finance.js
 │   │   ├── moderation.js
-│   │   ├── notifications.js  # ★Phase 9A/9C
+│   │   ├── notifications.js
 │   │   ├── reader-feedback.js
 │   │   ├── support.js
 │   │   ├── translator-marketplace.js
@@ -221,28 +225,31 @@ test-publishing-platform/
 │   │   ├── verification.js
 │   │   ├── works.js
 │   │   └── ...
-│   ├── services/          # ★Phase 9C新規
-│   │   ├── notificationService.js      # 通知ヘルパー関数
-│   │   └── notificationIntegration.js  # 統合ガイド
+│   ├── services/
+│   │   ├── notificationService.js
+│   │   └── notificationIntegration.js
 │   └── migrations/        # DBマイグレーション
-│       ├── 011_notification_center.sql  # ★Phase 9A
+│       ├── 011_notification_center.sql
+│       ├── 012_analytics.sql      # ★Phase 10
 │       └── ...
 ├── pages/
 │   ├── admin/             # 管理者画面
+│   │   ├── analytics.html     # ★Phase 10 管理者分析
+│   │   └── ...
 │   ├── support/           # サポート画面
 │   ├── feedback/          # 読者フィードバック
 │   ├── translators/       # 翻訳者マーケット
 │   ├── dev/               # 開発用ツール
-│   ├── account-settings.html  # ★Phase 9D通知設定統合
-│   ├── dashboard.html         # ★Phase 9Bバッジ追加
-│   ├── notifications.html     # ★Phase 9A/9D API URL修正
-│   ├── translation-status.html # ★Phase 9Bバッジ追加
-│   ├── upload-work.html       # ★Phase 9Bバッジ追加
+│   ├── analytics.html         # ★Phase 10 作者分析
+│   ├── account-settings.html
+│   ├── dashboard.html
+│   ├── notifications.html
 │   └── ...
 ├── js/
-│   ├── notification-badge.js      # ★Phase 9A（手動挿入用）
-│   ├── header-notification.js     # ★Phase 9B/9D API URL修正
-│   └── notification-settings.js   # ★Phase 9D（通知設定管理）
+│   ├── analytics-tracker.js   # ★Phase 10 追跡スクリプト
+│   ├── notification-badge.js
+│   ├── header-notification.js
+│   └── notification-settings.js
 ├── css/
 │   └── style-new.css      # 共通スタイル
 └── index.html             # トップページ
@@ -273,160 +280,110 @@ test-publishing-platform/
 | 8C | 条件付きお問い合わせ表示 | ✅ |
 | 8D | セルフサービス機能（アカウント設定） | ✅ |
 | 8E | 自動メール応答（6種類のテンプレート） | ✅ |
-| **9A** | **通知センター - データベース・API・UI** | ✅ |
-| **9B** | **通知バッジ - 4ページへの統合** | ✅ |
-| **9C** | **自動通知生成 - ヘルパー関数・デモ機能** | ✅ |
-| **9D** | **通知設定ページ - API URL修正・認証統一** | ✅ |
+| **9** | **通知センター（全5段階）** | ✅ |
+| 9A | 通知センター - データベース・API・UI | ✅ |
+| 9B | 通知バッジ - 4ページへの統合 | ✅ |
+| 9C | 自動通知生成 - ヘルパー関数・デモ機能 | ✅ |
+| 9D | 通知設定ページ - API URL修正・認証統一 | ✅ |
+| 9E | 残りページへのバッジ追加 | ✅ |
+| **10** | **アナリティクスシステム** | ✅ |
+| 10A | データベース・API | ✅ |
+| 10B | 作者向けダッシュボード | ✅ |
+| 10C | 管理者向けレポート | ✅ |
 
 ---
 
-## 9. Phase 9 通知センター詳細
+## 9. Phase 10 アナリティクスシステム詳細
 
-### Phase 9A: 通知センター基盤 ✅
-
-| ファイル | 説明 |
-|----------|------|
-| `backend/migrations/011_notification_center.sql` | 通知テーブル（notifications, notification_preferences） |
-| `backend/routes/notifications.js` | 通知API（取得・既読化・設定） |
-| `pages/notifications.html` | 通知一覧ページ（デモモード対応） |
-| `js/notification-badge.js` | ヘッダーバッジ更新用コンポーネント（手動挿入） |
-
-### Phase 9B: 通知バッジ統合 ✅
+### Phase 10A: データベース・API ✅
 
 | ファイル | 説明 |
 |----------|------|
-| `js/header-notification.js` | 自動挿入型通知ベルコンポーネント |
+| `backend/migrations/012_analytics.sql` | 分析用テーブル（page_views, work_views, analytics_daily等） |
+| `backend/routes/analytics.js` | アナリティクスAPI（追跡・集計・エクスポート） |
 
-**バッジ追加済みページ（4ページ）:**
+**データベーステーブル:**
 
-| ページ | 実装方法 |
-|--------|----------|
-| dashboard.html | 手動バッジ + notification-badge.js |
-| upload-work.html | 手動バッジ + notification-badge.js |
-| translation-status.html | header-notification.js（自動挿入） |
-| account-settings.html | header-notification.js（自動挿入） |
+| テーブル | 用途 |
+|----------|------|
+| page_views | ページビュー追跡 |
+| work_views | 作品閲覧追跡 |
+| analytics_daily | プラットフォーム日次集計 |
+| author_analytics_daily | 作者別日次集計 |
+| work_analytics_daily | 作品別日次集計 |
+| user_events | ユーザーイベント追跡 |
+| realtime_stats | リアルタイム統計キャッシュ |
 
-### Phase 9C: 自動通知生成 ✅
+### Phase 10B: 作者向けダッシュボード ✅
 
 | ファイル | 説明 |
 |----------|------|
-| `backend/services/notificationService.js` | 通知ヘルパー関数（8種類） |
-| `backend/services/notificationIntegration.js` | 既存ルートへの統合ガイド |
+| `pages/analytics.html` | 作者向けアナリティクスページ |
+| `js/analytics-tracker.js` | ユーザー行動追跡スクリプト |
 
-**通知ヘルパー関数:**
+**機能:**
+- 閲覧数・読者数・読書時間の表示
+- 期間選択（7日/30日/90日）
+- 閲覧数推移グラフ（Chart.js）
+- エンゲージメント統計（いいね・コメント・ブックマーク・DL）
+- 人気作品ランキング
+- 前期間比較（増減率表示）
 
-| 関数 | 用途 |
-|------|------|
-| `notifySale()` | 売上通知 |
-| `notifyTranslationComplete()` | 翻訳完了通知 |
-| `notifyTranslationRequest()` | 翻訳依頼通知 |
-| `notifyComment()` | コメント通知 |
-| `notifyFeedback()` | フィードバック通知 |
-| `notifyTicketReply()` | チケット返信通知 |
-| `notifySystem()` | システム通知 |
-| `notifyAccount()` | アカウント通知 |
-
-### Phase 9D: 通知設定ページ ✅
+### Phase 10C: 管理者向けレポート ✅
 
 | ファイル | 説明 |
 |----------|------|
-| `js/notification-settings.js` | 通知設定管理（アプリ内/メール別） |
-| `js/header-notification.js` | API URL修正（localhost:3000） |
-| `pages/notifications.html` | API URL修正（localhost:3000） |
-| `pages/account-settings.html` | localStorage認証統一 |
+| `pages/admin/analytics.html` | 管理者向けプラットフォーム分析ページ |
 
-**Phase 9Dで解決した問題:**
-- API URLが間違っていた（localhost:8000 → localhost:3000に修正）
-- 認証方式の不一致（APIベース → localStorage方式に統一）
-- ブラウザキャッシュによる古いコードの使用
+**機能:**
+- リアルタイム統計（アクティブユーザー、PV/時間、今日の訪問者・収益）
+- 全体統計（総PV、UV、新規ユーザー、作品閲覧、購入数、総収益）
+- トラフィック推移グラフ
+- ユーザー成長グラフ
+- デバイス別内訳（デスクトップ/モバイル/タブレット）
+- 国・地域別内訳
+- 人気作品TOP10
+- CSVエクスポート機能
 
 ---
 
-## 10. 通知API エンドポイント
+## 10. アナリティクスAPI エンドポイント
 
-### 基本API
+### トラッキングAPI
 
 | メソッド | URL | 説明 |
 |----------|-----|------|
-| GET | /api/notifications | 通知一覧取得 |
-| GET | /api/notifications/unread-count | 未読件数取得 |
-| PUT | /api/notifications/:id/read | 既読にする |
-| PUT | /api/notifications/read-all | すべて既読 |
-| DELETE | /api/notifications/:id | 通知削除 |
-| DELETE | /api/notifications/clear-all | 一括削除 |
+| POST | /api/analytics/track/pageview | ページビュー追跡 |
+| POST | /api/analytics/track/work | 作品閲覧追跡 |
+| POST | /api/analytics/track/event | カスタムイベント追跡 |
 
-### 設定API
+### 作者向けAPI（要認証）
 
 | メソッド | URL | 説明 |
 |----------|-----|------|
-| GET | /api/notifications/preferences | 通知設定取得 |
-| PUT | /api/notifications/preferences | 通知設定更新 |
-| GET | /api/notifications/types | 通知タイプ一覧 |
+| GET | /api/analytics/author/overview | 作者統計概要 |
+| GET | /api/analytics/author/work/:workId | 作品別詳細統計 |
 
-### デモ・テストAPI ★Phase 9C
+### 管理者向けAPI（要管理者権限）
 
 | メソッド | URL | 説明 |
 |----------|-----|------|
-| POST | /api/notifications/demo/generate-all | 全タイプのデモ通知を一括生成（9件） |
-| POST | /api/notifications/demo/generate | 指定タイプのデモ通知を生成 |
-| POST | /api/notifications/test | 単一テスト通知作成 |
-
-### 通知タイプ
-
-| タイプ | アイコン | 説明 |
-|--------|---------|------|
-| sale | 💰 | 作品購入通知 |
-| translation_complete | 🌐 | 翻訳完了 |
-| translation_request | 📤 | 翻訳依頼 |
-| comment | 💬 | コメント |
-| feedback | ⭐ | 読者フィードバック |
-| system | 🔔 | システム通知 |
-| ticket_reply | 🎧 | サポート返信 |
-| account | 👤 | アカウント関連 |
+| GET | /api/analytics/admin/overview | プラットフォーム統計概要 |
+| GET | /api/analytics/admin/realtime | リアルタイム統計 |
+| GET | /api/analytics/admin/export | データエクスポート（CSV/JSON） |
 
 ---
 
-## 11. デモ通知の生成方法
-
-### 方法1: ブラウザコンソールから
-
-1. ログイン後、任意のページで開発者ツールを開く（F12）
-2. Consoleタブで `allow pasting` と入力してEnter
-3. 以下を貼り付けてEnter:
-
-```javascript
-fetch('http://localhost:3000/api/notifications/demo/generate-all', {
-  method: 'POST',
-  headers: {
-    'Authorization': 'Bearer ' + localStorage.getItem('token'),
-    'Content-Type': 'application/json'
-  }
-}).then(r => r.json()).then(data => console.log(data))
-```
-
-4. `{success: true, count: 9, ...}` と表示されれば成功
-5. 通知ページ（notifications.html）で確認
-
-### 方法2: デモモード（ログイン不要）
-
-URL: `http://localhost:8000/pages/notifications.html?demo=true`
-
-ダミーデータで通知UIを確認できます。
-
----
-
-## 12. 今後の開発予定
+## 11. 今後の開発予定
 
 | Phase | 内容 | 概要 |
 |-------|------|------|
-| 9E | 残りページへのバッジ追加 | my-works, earnings, editor等 |
-| 10 | Analytics | アクセス解析・レポート |
 | 11 | Mobile Optimization | モバイル最適化 |
 | 12 | Production Deploy | 本番環境デプロイ |
 
 ---
 
-## 13. サーバー起動方法
+## 12. サーバー起動方法
 
 ### 手順
 
@@ -460,7 +417,7 @@ PowerShellで `Ctrl + C` を押す
 
 ---
 
-## 14. GitHubからの更新取得方法
+## 13. GitHubからの更新取得方法
 
 ### 手順
 
@@ -476,14 +433,17 @@ PowerShellで `Ctrl + C` を押す
    git pull
    ```
 
-4. **サーバーを再起動**
+4. **マイグレーションを実行（Phase 10）**
+   pgAdmin 4で `backend/migrations/012_analytics.sql` を実行
+
+5. **サーバーを再起動**
    ```
    npm start
    ```
 
 ---
 
-## 15. 注意事項
+## 14. 注意事項
 
 ### フロントエンドとバックエンドのポート
 
@@ -494,7 +454,7 @@ PowerShellで `Ctrl + C` を押す
 
 **APIを直接呼ぶ場合は `localhost:3000` を使用してください。**
 
-### ⚠️ API URLの注意（Phase 9Dで修正済み）
+### ⚠️ API URLの注意
 
 フロントエンドのJavaScriptでAPIを呼ぶ際：
 - ❌ `/api/...` → localhost:8000に送信されてしまう（404エラー）
@@ -529,24 +489,26 @@ FAQデータの一部に `[要更新]` マーカーが含まれています。
 
 ---
 
-## 16. 新しいChatでの開始方法
+## 15. 新しいChatでの開始方法
 
 1. このドキュメントの内容をClaudeに共有（またはアップロード）
-2. 「Phase 9Eから続けてください」と伝える
+2. 「Phase 11から続けてください」と伝える
 3. 必要に応じて `git pull` で最新コードを取得
 4. サーバーを起動して動作確認
 
 ---
 
-## 17. 参考リンク
+## 16. 参考リンク
 
 | 項目 | URL |
 |------|-----|
 | GitHubリポジトリ | https://github.com/kenji-publishing/test-publishing-platform |
 | 管理画面 | http://localhost:8000/pages/admin/index.html |
 | ユーザー画面 | http://localhost:8000/pages/dashboard.html |
-| **通知センター** | **http://localhost:8000/pages/notifications.html** |
+| 通知センター | http://localhost:8000/pages/notifications.html |
 | 通知センター（デモ） | http://localhost:8000/pages/notifications.html?demo=true |
+| **アナリティクス（作者）** | **http://localhost:8000/pages/analytics.html** |
+| **アナリティクス（管理）** | **http://localhost:8000/pages/admin/analytics.html** |
 | FAQページ | http://localhost:8000/pages/support/faq.html |
 | トラブルシューティング | http://localhost:8000/pages/support/troubleshoot.html |
 | アカウント設定 | http://localhost:8000/pages/account-settings.html |
