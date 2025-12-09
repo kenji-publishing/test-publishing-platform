@@ -1,6 +1,6 @@
 # Publisher Platform 引き継ぎドキュメント
 
-最終更新: 2025年12月9日
+最終更新: 2025年12月10日
 
 ---
 
@@ -79,6 +79,12 @@
 | GitHub MCP | GitHubリポジトリの操作（ファイル作成・更新） |
 | Filesystem MCP | ローカルファイルの読み書き |
 
+### MCP設定ファイルの場所
+
+```
+%APPDATA%\Claude\claude_desktop_config.json
+```
+
 ### 外部API
 
 | API | 用途 | 備考 |
@@ -129,8 +135,8 @@ C:\Projects\test-publishing-platform\
 | ユーザーダッシュボード | http://localhost:8000/pages/dashboard.html |
 | 通知センター | http://localhost:8000/pages/notifications.html |
 | アカウント設定 | http://localhost:8000/pages/account-settings.html |
-| **アナリティクス（作者）** | http://localhost:8000/pages/analytics.html |
-| **アナリティクス（管理）** | http://localhost:8000/pages/admin/analytics.html |
+| アナリティクス（作者） | http://localhost:8000/pages/analytics.html |
+| アナリティクス（管理） | http://localhost:8000/pages/admin/analytics.html |
 
 ### GitHubリポジトリ
 
@@ -212,7 +218,7 @@ test-publishing-platform/
 │   ├── routes/            # APIエンドポイント
 │   │   ├── admin.js
 │   │   ├── ai-translation.js
-│   │   ├── analytics.js       # ★Phase 10
+│   │   ├── analytics.js
 │   │   ├── auth.js
 │   │   ├── auth-magic.js
 │   │   ├── dmca.js
@@ -231,28 +237,29 @@ test-publishing-platform/
 │   │   └── notificationIntegration.js
 │   └── migrations/        # DBマイグレーション
 │       ├── 011_notification_center.sql
-│       ├── 012_analytics.sql      # ★Phase 10
+│       ├── 012_analytics.sql
 │       └── ...
 ├── pages/
 │   ├── admin/             # 管理者画面
-│   │   ├── analytics.html     # ★Phase 10 管理者分析
+│   │   ├── analytics.html
 │   │   └── ...
 │   ├── support/           # サポート画面
 │   ├── feedback/          # 読者フィードバック
 │   ├── translators/       # 翻訳者マーケット
 │   ├── dev/               # 開発用ツール
-│   ├── analytics.html         # ★Phase 10 作者分析
+│   ├── analytics.html
 │   ├── account-settings.html
 │   ├── dashboard.html
 │   ├── notifications.html
 │   └── ...
 ├── js/
-│   ├── analytics-tracker.js   # ★Phase 10 追跡スクリプト
+│   ├── analytics-tracker.js
 │   ├── notification-badge.js
 │   ├── header-notification.js
 │   └── notification-settings.js
 ├── css/
-│   └── style-new.css      # 共通スタイル（★Phase 11 モバイル最適化）
+│   ├── style-new.css      # 共通スタイル
+│   └── mobile-fixes.css   # ★Phase 11 モバイル最適化
 └── index.html             # トップページ
 ```
 
@@ -292,51 +299,46 @@ test-publishing-platform/
 | 10B | 作者向けダッシュボード | ✅ |
 | 10C | 管理者向けレポート | ✅ |
 | **11** | **モバイル最適化** | 🔄 進行中 |
-| 11A | レスポンシブ監査・CSS追加 | ✅ |
-| 11B | タッチ最適化 | 📝 次 |
-| 11C | モバイルナビゲーション | 📝 予定 |
-| 11D | パフォーマンス最適化 | 📝 予定 |
+| 11A-1 | CSS監査 | ✅ |
+| 11A-2 | index.html（トップページ）修正 | ✅ |
+| 11A-3 | ログイン・登録ページ修正 | 次はここ |
+| 11A-4 | dashboard.html修正 | |
+| 11A-5 | その他主要ページ修正 | |
 
 ---
 
-## 9. Phase 11 モバイル最適化詳細
+## 9. Phase 11 モバイル最適化 詳細
 
-### Phase 11A: レスポンシブ監査・CSS追加 ✅
+### Phase 11A: レスポンシブ監査・修正 🔄
 
-| ファイル | 説明 |
-|----------|------|
-| `css/style-new.css` | モバイル最適化CSS追加（約400行追加） |
+**対応済み:**
 
-**追加されたモバイル対応機能:**
+| ファイル | 修正内容 |
+|----------|----------|
+| `css/mobile-fixes.css` | Hero/CTAセクションのボタン縦並び対応追加 |
 
-| 機能 | 説明 |
-|------|------|
-| ナビゲーション改善 | タブレット以下でハンバーガーメニュー内のレイアウト最適化 |
-| CTAボタン | モバイルで縦並びに自動変更 |
-| テーブル対応 | `.table-responsive-mobile` クラスでカード型表示 |
-| フォーム最適化 | iOS ズーム防止、最小タッチサイズ確保 |
-| モーダル改善 | モバイルで全幅表示、ボタン縦並び |
-| ドロップダウン | モバイルでボトムシート型表示 |
-| ダッシュボード | 統計カード、クイックアクション最適化 |
-| アナリティクス | チャート、期間セレクター、テーブル最適化 |
-| 通知 | 通知アイテムのコンパクト表示 |
-| FAQ | アコーディオン最適化 |
-| ユーティリティ | `.hide-mobile`, `.show-mobile-only` クラス追加 |
-| スクロールスナップ | 水平カルーセル用 `.scroll-snap-container` |
-| ボトムバー | `.mobile-bottom-bar` で固定フッターナビ対応 |
+**mobile-fixes.css で対応済みの機能:**
 
-**ブレイクポイント:**
-- 991px以下: タブレット
-- 768px以下: 小タブレット/大スマホ
-- 576px以下: スマートフォン
+- グローバルタッチターゲットサイズ（44px最小）
+- ナビゲーションのモバイルメニュー
+- テーブルのスクロール対応
+- 管理者ダッシュボードのモバイルレイアウト
+- ユーザーダッシュボードのモバイル対応
+- 通知ページのモバイル対応
+- アナリティクスのモバイル対応
+- アカウント設定のモバイル対応
+- サポートページのモバイル対応
+- フォームのモバイル対応
+- フッターのモバイル対応
+- 印刷スタイル
 
-### Phase 11B〜D: 今後の予定
+### 今後の作業（Phase 11A-3以降）
 
-| Phase | 内容 | 詳細 |
-|-------|------|------|
-| 11B | タッチ最適化 | ボタンサイズ確認、スワイプジェスチャー |
-| 11C | モバイルナビゲーション | ボトムナビ実装検討 |
-| 11D | パフォーマンス最適化 | 画像遅延読み込み、バンドル最適化 |
+| ステップ | 対象ページ | 確認ポイント |
+|----------|-----------|--------------|
+| 11A-3 | login.html, register.html | フォームの入力しやすさ |
+| 11A-4 | dashboard.html | カードレイアウト、統計表示 |
+| 11A-5 | その他ページ | 全体的な確認 |
 
 ---
 
@@ -371,7 +373,7 @@ test-publishing-platform/
 
 | Phase | 内容 | 概要 |
 |-------|------|------|
-| 11B-D | Mobile Optimization続き | タッチ最適化、ナビ改善、パフォーマンス |
+| 11 | Mobile Optimization | モバイル最適化（進行中） |
 | 12 | Production Deploy | 本番環境デプロイ |
 
 ---
@@ -433,7 +435,28 @@ PowerShellで `Ctrl + C` を押す
 
 ---
 
-## 14. 注意事項
+## 14. モバイル表示の確認方法
+
+### PCブラウザでの確認（推奨）
+
+1. http://localhost:8000 を開く
+2. `F12` キーを押して開発者ツールを開く
+3. 📱アイコン（デバイスツールバー）をクリック
+4. 上部のドロップダウンからデバイスを選択：
+   - iPhone 12 Pro
+   - Galaxy S20
+   - iPad など
+
+### 実機での確認
+
+同じWiFiネットワーク内であれば、PCのIPアドレスを使ってスマホからアクセス可能：
+```
+http://[PCのIPアドレス]:8000
+```
+
+---
+
+## 15. 注意事項
 
 ### フロントエンドとバックエンドのポート
 
@@ -479,16 +502,16 @@ FAQデータの一部に `[要更新]` マーカーが含まれています。
 
 ---
 
-## 15. 新しいChatでの開始方法
+## 16. 新しいChatでの開始方法
 
 1. このドキュメントの内容をClaudeに共有（またはアップロード）
-2. 「Phase 11Bから続けてください」と伝える
+2. 「Phase 11A-3から続けてください」と伝える
 3. 必要に応じて `git pull` で最新コードを取得
 4. サーバーを起動して動作確認
 
 ---
 
-## 16. 参考リンク
+## 17. 参考リンク
 
 | 項目 | URL |
 |------|-----|
@@ -497,8 +520,8 @@ FAQデータの一部に `[要更新]` マーカーが含まれています。
 | ユーザー画面 | http://localhost:8000/pages/dashboard.html |
 | 通知センター | http://localhost:8000/pages/notifications.html |
 | 通知センター（デモ） | http://localhost:8000/pages/notifications.html?demo=true |
-| **アナリティクス（作者）** | **http://localhost:8000/pages/analytics.html** |
-| **アナリティクス（管理）** | **http://localhost:8000/pages/admin/analytics.html** |
+| アナリティクス（作者） | http://localhost:8000/pages/analytics.html |
+| アナリティクス（管理） | http://localhost:8000/pages/admin/analytics.html |
 | FAQページ | http://localhost:8000/pages/support/faq.html |
 | トラブルシューティング | http://localhost:8000/pages/support/troubleshoot.html |
 | アカウント設定 | http://localhost:8000/pages/account-settings.html |
@@ -506,4 +529,4 @@ FAQデータの一部に `[要更新]` マーカーが含まれています。
 
 ---
 
-最終更新: 2025年12月9日
+最終更新: 2025年12月10日
