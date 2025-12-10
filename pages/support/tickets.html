@@ -7,7 +7,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="../css/style-new.css" rel="stylesheet">
+    <link href="../../css/style-new.css" rel="stylesheet">
+    <link href="../../css/mobile-fixes.css" rel="stylesheet">
     <style>
         .ticket-card {
             border: none;
@@ -114,7 +115,7 @@
     <!-- ナビゲーション -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="../index.html">
+            <a class="navbar-brand" href="../../index.html">
                 <i class="bi bi-book"></i> Publisher
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -123,7 +124,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="../index.html">ホーム</a>
+                        <a class="nav-link" href="../../index.html">ホーム</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="faq.html">FAQ</a>
@@ -257,8 +258,8 @@
                     <p class="mb-0">&copy; 2024 Publisher. All rights reserved.</p>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <a href="terms.html" class="text-light me-3">利用規約</a>
-                    <a href="privacy.html" class="text-light me-3">プライバシーポリシー</a>
+                    <a href="../terms.html" class="text-light me-3">利用規約</a>
+                    <a href="../privacy.html" class="text-light me-3">プライバシーポリシー</a>
                     <a href="faq.html" class="text-light">FAQ</a>
                 </div>
             </div>
@@ -271,6 +272,9 @@
         let tickets = [];
         let currentTicket = null;
         let selectedRating = 0;
+        
+        // デモモード判定
+        const isDemo = new URLSearchParams(window.location.search).get('demo') === 'true';
 
         const statusLabels = {
             'open': '新規', 'in_progress': '対応中', 'waiting_user': '返答待ち',
@@ -280,6 +284,40 @@
             'account': 'アカウント', 'payment': 'お支払い', 'translation': '翻訳',
             'technical': '技術的問題', 'copyright': '著作権', 'other': 'その他'
         };
+        
+        // デモ用チケットデータ
+        const DEMO_TICKETS = [
+            {
+                id: 1,
+                ticket_number: 'TKT-20241201-0001',
+                subject: '翻訳の品質について',
+                category: 'translation',
+                status: 'in_progress',
+                unread_count: 1,
+                created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+                last_message_at: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString()
+            },
+            {
+                id: 2,
+                ticket_number: 'TKT-20241128-0002',
+                subject: '支払い方法の変更について',
+                category: 'payment',
+                status: 'resolved',
+                unread_count: 0,
+                created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+                last_message_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+            },
+            {
+                id: 3,
+                ticket_number: 'TKT-20241125-0003',
+                subject: 'アカウント設定が保存されない',
+                category: 'technical',
+                status: 'closed',
+                unread_count: 0,
+                created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+                last_message_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+            }
+        ];
 
         document.addEventListener('DOMContentLoaded', function() {
             checkAuth();
@@ -288,10 +326,17 @@
         });
 
         async function checkAuth() {
+            // デモモードの場合はログインチェックをスキップ
+            if (isDemo) {
+                updateAuthNav({ display_name: 'デモユーザー', email: 'demo@example.com' });
+                loadTickets();
+                return;
+            }
+            
             try {
                 const response = await fetch(`${API_BASE}/auth/me`, { credentials: 'include' });
                 if (!response.ok) {
-                    window.location.href = 'login.html?redirect=tickets.html';
+                    window.location.href = '../login.html?redirect=/pages/support/tickets.html';
                     return;
                 }
                 const data = await response.json();
@@ -299,7 +344,7 @@
                 loadTickets();
             } catch (error) {
                 console.error('認証エラー:', error);
-                window.location.href = 'login.html?redirect=tickets.html';
+                window.location.href = '../login.html?redirect=/pages/support/tickets.html';
             }
         }
 
@@ -311,7 +356,7 @@
                         <i class="bi bi-person-circle"></i> ${user.display_name || user.email}
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="dashboard.html">ダッシュボード</a></li>
+                        <li><a class="dropdown-item" href="../dashboard.html">ダッシュボード</a></li>
                         <li><a class="dropdown-item active" href="tickets.html">お問い合わせ履歴</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="#" onclick="logout()">ログアウト</a></li>
@@ -321,6 +366,22 @@
         }
 
         async function loadTickets() {
+            // デモモードの場合
+            if (isDemo) {
+                document.getElementById('loading').style.display = 'none';
+                tickets = [...DEMO_TICKETS];
+                
+                const status = document.getElementById('statusFilter').value;
+                if (status !== 'all') {
+                    tickets = tickets.filter(t => t.status === status);
+                }
+                if (document.getElementById('unreadOnly').checked) {
+                    tickets = tickets.filter(t => t.unread_count > 0);
+                }
+                renderTickets();
+                return;
+            }
+            
             try {
                 const status = document.getElementById('statusFilter').value;
                 let url = `${API_BASE}/support/tickets`;
@@ -398,6 +459,20 @@
         }
 
         async function openTicket(ticketId) {
+            // デモモードの場合
+            if (isDemo) {
+                const ticket = DEMO_TICKETS.find(t => t.id === ticketId);
+                if (ticket) {
+                    const demoMessages = [
+                        { sender_type: 'user', message: 'お問い合わせ内容です。\n詳細をお知らせください。', created_at: ticket.created_at },
+                        { sender_type: 'admin', message: 'お問い合わせありがとうございます。\n確認いたします。', created_at: new Date(Date.parse(ticket.created_at) + 60 * 60 * 1000).toISOString() }
+                    ];
+                    currentTicket = ticket;
+                    showTicketModal(ticket, demoMessages);
+                }
+                return;
+            }
+            
             try {
                 const response = await fetch(`${API_BASE}/support/tickets/${ticketId}`, { credentials: 'include' });
                 const data = await response.json();
@@ -446,6 +521,12 @@
             const message = document.getElementById('replyMessage').value.trim();
             if (!message) { alert('メッセージを入力してください'); return; }
 
+            // デモモードの場合
+            if (isDemo) {
+                alert('デモモードでは送信できません');
+                return;
+            }
+
             const btn = document.getElementById('sendReplyBtn');
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
@@ -475,6 +556,13 @@
 
         async function closeTicket() {
             if (!confirm('このチケットをクローズしますか？')) return;
+            
+            // デモモードの場合
+            if (isDemo) {
+                alert('デモモードでは操作できません');
+                return;
+            }
+            
             try {
                 const response = await fetch(`${API_BASE}/support/tickets/${currentTicket.id}/close`, {
                     method: 'POST', credentials: 'include'
@@ -507,6 +595,13 @@
 
         async function submitRating() {
             if (selectedRating === 0) { alert('評価を選択してください'); return; }
+            
+            // デモモードの場合
+            if (isDemo) {
+                alert('デモモードでは操作できません');
+                return;
+            }
+            
             const comment = document.getElementById('ratingComment').value.trim();
             const btn = document.getElementById('submitRatingBtn');
             btn.disabled = true;
@@ -554,7 +649,7 @@
         async function logout() {
             try {
                 await fetch(`${API_BASE}/auth/logout`, { method: 'POST', credentials: 'include' });
-                window.location.href = 'login.html';
+                window.location.href = '../login.html';
             } catch (error) {
                 console.error('ログアウトエラー:', error);
             }
