@@ -263,43 +263,8 @@
             color: var(--color-text-secondary);
         }
 
-        /* モバイルスワイプヒント */
-        .swipe-hint-banner {
-            background: linear-gradient(135deg, rgba(139, 115, 85, 0.1) 0%, rgba(139, 115, 85, 0.05) 100%);
-            border: 1px solid rgba(139, 115, 85, 0.2);
-            border-radius: var(--radius-md);
-            padding: var(--spacing-sm) var(--spacing-md);
-            margin-bottom: var(--spacing-md);
-            display: none;
-            align-items: center;
-            gap: var(--spacing-sm);
-            font-size: var(--font-size-sm);
-            color: var(--color-text-secondary);
-        }
-
-        .swipe-hint-banner i {
-            color: var(--color-accent);
-        }
-
-        .swipe-hint-banner .close-hint {
-            margin-left: auto;
-            cursor: pointer;
-            opacity: 0.6;
-        }
-
-        .swipe-hint-banner .close-hint:hover {
-            opacity: 1;
-        }
-
+        /* モバイルでアクションボタン常に表示 */
         @media (max-width: 768px) {
-            .swipe-hint-banner {
-                display: flex;
-            }
-
-            .swipe-hint-banner.hidden {
-                display: none;
-            }
-
             .notification-actions .btn {
                 opacity: 1;
             }
@@ -398,15 +363,6 @@
                 </div>
             </div>
 
-            <!-- Mobile Swipe Hint -->
-            <div class="swipe-hint-banner" id="swipeHintBanner">
-                <i class="bi bi-hand-index-thumb"></i>
-                <span>左スワイプで削除、右スワイプで既読にできます</span>
-                <span class="close-hint" onclick="hideSwipeHint()">
-                    <i class="bi bi-x-lg"></i>
-                </span>
-            </div>
-
             <!-- Filter Bar -->
             <div class="filter-bar">
                 <div class="filter-left">
@@ -484,7 +440,6 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/touch-interactions.js"></script>
     <script>
         // ==================================================
         // 設定
@@ -575,7 +530,6 @@
             loadNotifications();
             setupEventListeners();
             loadUnreadCount();
-            checkSwipeHint();
         });
 
         function initUser() {
@@ -590,23 +544,6 @@
         }
 
         // ==================================================
-        // スワイプヒント
-        // ==================================================
-        function checkSwipeHint() {
-            const isMobile = window.matchMedia('(max-width: 768px)').matches;
-            const hintShown = localStorage.getItem('notificationSwipeHintShown');
-            
-            if (isMobile && !hintShown) {
-                document.getElementById('swipeHintBanner').style.display = 'flex';
-            }
-        }
-
-        function hideSwipeHint() {
-            document.getElementById('swipeHintBanner').classList.add('hidden');
-            localStorage.setItem('notificationSwipeHintShown', 'true');
-        }
-
-        // ==================================================
         // 通知取得
         // ==================================================
         async function loadNotifications() {
@@ -615,7 +552,6 @@
             if (isDemo) {
                 renderNotifications(filterDemoData());
                 updateStats();
-                initTouchInteractions();
                 return;
             }
 
@@ -657,7 +593,6 @@
                     renderNotifications(data.notifications);
                     updatePagination(data.pagination);
                     loadStats();
-                    initTouchInteractions();
                 }
 
             } catch (error) {
@@ -687,71 +622,6 @@
         }
 
         // ==================================================
-        // タッチ操作初期化
-        // ==================================================
-        function initTouchInteractions() {
-            if (typeof TouchInteractions === 'undefined') return;
-
-            // デモモードの場合、カスタムハンドラーを設定
-            if (isDemo) {
-                TouchInteractions.setCustomHandlers({
-                    onDelete: (element, notificationId) => {
-                        // デモ用削除処理
-                        const idx = DEMO_NOTIFICATIONS.findIndex(n => n.notification_id === notificationId);
-                        if (idx > -1) {
-                            DEMO_NOTIFICATIONS.splice(idx, 1);
-                        }
-                        
-                        // アニメーション付き削除
-                        element.style.height = element.offsetHeight + 'px';
-                        element.style.transition = 'height 0.2s ease, opacity 0.2s ease, margin 0.2s ease, padding 0.2s ease';
-                        
-                        requestAnimationFrame(() => {
-                            element.style.height = '0';
-                            element.style.opacity = '0';
-                            element.style.margin = '0';
-                            element.style.padding = '0';
-                            element.style.overflow = 'hidden';
-                        });
-
-                        setTimeout(() => {
-                            element.remove();
-                            updateStats();
-                            loadUnreadCount();
-                            showToast('通知を削除しました');
-                        }, 200);
-                    },
-                    onMarkRead: (element, notificationId) => {
-                        // デモ用既読処理
-                        const n = DEMO_NOTIFICATIONS.find(n => n.notification_id === notificationId);
-                        if (n) {
-                            n.is_read = true;
-                        }
-                        
-                        // UIを更新
-                        element.classList.remove('unread');
-                        element.classList.add('read');
-                        
-                        // NEWバッジを削除
-                        const badge = element.querySelector('.badge.bg-accent');
-                        if (badge) badge.remove();
-                        
-                        // 既読ボタンを削除
-                        const readBtn = element.querySelector('.notification-actions .btn-outline-custom');
-                        if (readBtn) readBtn.remove();
-                        
-                        updateStats();
-                        loadUnreadCount();
-                        showToast('既読にしました');
-                    }
-                });
-            }
-
-            // スワイプ機能を初期化
-            TouchInteractions.reinit();
-        }
-
-        // ==================================================
         // 通知レンダリング
         // ==================================================
         function renderNotifications(notifications) {
@@ -771,7 +641,6 @@
             listContainer.innerHTML = notifications.map(n => `
                 <div class="notification-item ${n.is_read ? '' : 'unread'}" 
                      data-id="${n.notification_id}"
-                     data-notification-id="${n.notification_id}"
                      onclick="handleNotificationClick('${n.notification_id}', '${n.action_url || ''}')">
                     <div class="notification-icon ${n.icon_color || 'primary'}">
                         <i class="fas ${n.icon || 'fa-bell'} fa-lg"></i>
