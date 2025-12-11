@@ -690,9 +690,65 @@
         // タッチ操作初期化
         // ==================================================
         function initTouchInteractions() {
-            if (typeof TouchInteractions !== 'undefined') {
-                TouchInteractions.reinit();
+            if (typeof TouchInteractions === 'undefined') return;
+
+            // デモモードの場合、カスタムハンドラーを設定
+            if (isDemo) {
+                TouchInteractions.setCustomHandlers({
+                    onDelete: (element, notificationId) => {
+                        // デモ用削除処理
+                        const idx = DEMO_NOTIFICATIONS.findIndex(n => n.notification_id === notificationId);
+                        if (idx > -1) {
+                            DEMO_NOTIFICATIONS.splice(idx, 1);
+                        }
+                        
+                        // アニメーション付き削除
+                        element.style.height = element.offsetHeight + 'px';
+                        element.style.transition = 'height 0.2s ease, opacity 0.2s ease, margin 0.2s ease, padding 0.2s ease';
+                        
+                        requestAnimationFrame(() => {
+                            element.style.height = '0';
+                            element.style.opacity = '0';
+                            element.style.margin = '0';
+                            element.style.padding = '0';
+                            element.style.overflow = 'hidden';
+                        });
+
+                        setTimeout(() => {
+                            element.remove();
+                            updateStats();
+                            loadUnreadCount();
+                            showToast('通知を削除しました');
+                        }, 200);
+                    },
+                    onMarkRead: (element, notificationId) => {
+                        // デモ用既読処理
+                        const n = DEMO_NOTIFICATIONS.find(n => n.notification_id === notificationId);
+                        if (n) {
+                            n.is_read = true;
+                        }
+                        
+                        // UIを更新
+                        element.classList.remove('unread');
+                        element.classList.add('read');
+                        
+                        // NEWバッジを削除
+                        const badge = element.querySelector('.badge.bg-accent');
+                        if (badge) badge.remove();
+                        
+                        // 既読ボタンを削除
+                        const readBtn = element.querySelector('.notification-actions .btn-outline-custom');
+                        if (readBtn) readBtn.remove();
+                        
+                        updateStats();
+                        loadUnreadCount();
+                        showToast('既読にしました');
+                    }
+                });
             }
+
+            // スワイプ機能を初期化
+            TouchInteractions.reinit();
         }
 
         // ==================================================
@@ -859,7 +915,7 @@
         function handleNotificationClick(id, actionUrl) {
             markAsRead(id);
             
-            if (actionUrl) {
+            if (actionUrl && !isDemo) {
                 window.location.href = actionUrl;
             }
         }
@@ -927,6 +983,7 @@
                 if (idx > -1) DEMO_NOTIFICATIONS.splice(idx, 1);
                 loadNotifications();
                 loadUnreadCount();
+                showToast('通知を削除しました');
                 return;
             }
 
