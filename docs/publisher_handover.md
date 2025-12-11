@@ -76,22 +76,16 @@ https://github.com/kenji-publishing/test-publishing-platform
 | 8 | サポートシステム（FAQ・チケット・自動メール） | ✅ |
 | 9 | 通知センター | ✅ |
 | 10 | アナリティクス | ✅ |
+| 11A | モバイルレイアウト最適化 | ✅ |
+| 11B | タッチ操作最適化 | ✅ |
 
-### 現在のフェーズ: Phase 11 モバイル最適化
+### 現在のフェーズ: Phase 11C パフォーマンス最適化
 
 | ステップ | 内容 | 状態 |
 |----------|------|:----:|
-| 11A-1 | CSS監査 | ✅ |
-| 11A-2 | index.html モバイル最適化 | ✅ |
-| 11A-3 | login.html / register.html | ✅ |
-| 11A-3+ | notifications.html 縦並び修正 | ✅ |
-| 11A-3+ | tickets.html リダイレクト修正 | ✅ |
-| 11A-4 | dashboard.html | ✅ |
-| 11A-5 | account-settings / upload-work / analytics | ✅ |
-| 11B-1 | タップターゲット強化（44px以上保証） | ✅ |
-| 11B-2 | タッチフィードバック（:active状態） | ✅ |
-| 11B-3 | スワイプ操作（通知削除・既読） | ✅ |
-| **11C** | **パフォーマンス最適化** | **→ 次** |
+| **11C-1** | **画像の遅延読み込み** | **→ 次** |
+| 11C-2 | CSSの最適化 | ⬜ |
+| 11C-3 | JavaScriptの最適化 | ⬜ |
 
 ### Phase 11B 完了内容
 
@@ -99,15 +93,8 @@ https://github.com/kenji-publishing/test-publishing-platform
 - ✅ タップ間隔8px以上確保
 - ✅ チェックボックス・ラジオボタンのタップ領域拡大
 - ✅ タッチフィードバック（スケール効果、ボックスシャドウ）
-- ✅ 通知の左スワイプ削除・右スワイプ既読
-- ✅ プルトゥリフレッシュ準備（CSS）
-- ✅ フローティングアクションボタン（FAB）スタイル
-
-### Phase 11C 予定内容
-
-- 画像の遅延読み込み
-- CSSの最適化・圧縮
-- JavaScriptの最適化
+- ✅ モバイルでアクションボタン常に表示
+- ❌ スワイプ操作（実装後、シンプルさを優先して削除）
 
 ---
 
@@ -119,14 +106,14 @@ https://github.com/kenji-publishing/test-publishing-platform
 |----------|------|
 | `css/mobile-fixes.css` | モバイル用CSS（Phase 11A/11Bで更新） |
 | `css/style-new.css` | 共通スタイル |
-| `js/touch-interactions.js` | スワイプ操作JS（Phase 11Bで追加） |
+| `js/touch-interactions.js` | タッチ操作JS（将来用に保持） |
 
 ### mobile-fixes.css が適用済みのページ
 
 - index.html ✅
 - pages/login.html ✅
 - pages/register.html ✅
-- pages/notifications.html ✅ （スワイプ操作対応）
+- pages/notifications.html ✅
 - pages/dashboard.html ✅
 - pages/account-settings.html ✅
 - pages/upload-work.html ✅
@@ -175,13 +162,6 @@ npm start
 2. `F12` キーで開発者ツールを開く
 3. 📱アイコン（デバイスツールバー）をクリック
 4. デバイスを選択（iPhone 12 Pro など）
-
-### スワイプ操作のテスト（通知ページ）
-
-1. http://localhost:8000/pages/notifications.html?demo=true を開く
-2. モバイル表示に切り替え
-3. 通知アイテムを左にスワイプ → 削除
-4. 通知アイテムを右にスワイプ → 既読
 
 ---
 
