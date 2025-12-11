@@ -1,6 +1,7 @@
 /**
  * Publisher Platform - Mobile Optimization Fixes
  * Phase 11A: Responsive improvements
+ * Phase 11B: Touch optimization
  */
 
 /* ===== Global Mobile Improvements ===== */
@@ -24,6 +25,311 @@
     .container {
         padding-left: 1rem;
         padding-right: 1rem;
+    }
+}
+
+/* ===== Phase 11B-1: Enhanced Touch Targets ===== */
+
+@media (max-width: 768px) {
+    /* All clickable elements - minimum 44px touch target */
+    a:not(.navbar-brand),
+    button,
+    [role="button"],
+    input[type="button"],
+    input[type="submit"],
+    input[type="reset"],
+    .clickable,
+    .card-link,
+    .list-group-item-action {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    /* Links in text - add padding for easier tapping */
+    p a,
+    li a,
+    td a {
+        padding: 0.25rem 0;
+        margin: -0.25rem 0;
+        display: inline;
+        min-height: auto;
+    }
+
+    /* Button spacing - ensure 8px gap between tap targets */
+    .btn + .btn,
+    .btn + a,
+    a + .btn {
+        margin-left: 0.5rem;
+    }
+
+    /* Vertical button groups */
+    .btn-group-vertical .btn {
+        margin-bottom: 0.5rem;
+    }
+
+    .btn-group-vertical .btn:last-child {
+        margin-bottom: 0;
+    }
+
+    /* Action buttons in cards */
+    .card-footer .btn,
+    .card-body .btn {
+        margin-bottom: 0.5rem;
+    }
+
+    .card-footer .btn:last-child,
+    .card-body .btn:last-child {
+        margin-bottom: 0;
+    }
+
+    /* Checkbox and Radio - larger tap area */
+    .form-check {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        padding-left: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-check-input {
+        width: 1.25rem;
+        height: 1.25rem;
+        margin-top: 0;
+        margin-left: -2rem;
+        cursor: pointer;
+    }
+
+    .form-check-label {
+        padding: 0.5rem 0;
+        padding-left: 0.5rem;
+        cursor: pointer;
+        flex: 1;
+    }
+
+    /* Switch toggle - larger */
+    .form-switch .form-check-input {
+        width: 2.5rem;
+        height: 1.5rem;
+    }
+
+    /* Dropdown items */
+    .dropdown-menu {
+        padding: 0.5rem 0;
+    }
+
+    .dropdown-item {
+        padding: 0.75rem 1rem;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+
+    /* Pagination */
+    .pagination {
+        gap: 0.25rem;
+    }
+
+    .page-link {
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem;
+    }
+
+    /* Badge links */
+    a.badge {
+        padding: 0.5rem 0.75rem;
+        min-height: 32px;
+    }
+
+    /* List group items */
+    .list-group-item {
+        padding: 0.875rem 1rem;
+        min-height: 44px;
+    }
+
+    .list-group-item-action {
+        cursor: pointer;
+    }
+
+    /* Breadcrumb links */
+    .breadcrumb-item a {
+        padding: 0.25rem 0.5rem;
+        margin: -0.25rem -0.5rem;
+        border-radius: 0.25rem;
+    }
+
+    /* Close buttons */
+    .btn-close {
+        width: 44px;
+        height: 44px;
+        padding: 0.75rem;
+    }
+
+    /* Icon buttons */
+    .btn-icon,
+    .icon-btn,
+    [class*="btn-outline-"] i:only-child {
+        min-width: 44px;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Tab navigation */
+    .nav-tabs .nav-link,
+    .nav-pills .nav-link {
+        padding: 0.75rem 1rem;
+        min-height: 44px;
+    }
+
+    /* Accordion buttons */
+    .accordion-button {
+        min-height: 48px;
+        padding: 1rem 1.25rem;
+    }
+
+    /* Toast close button */
+    .toast .btn-close {
+        width: 32px;
+        height: 32px;
+        padding: 0.5rem;
+    }
+}
+
+/* ===== Phase 11B-2: Touch Feedback ===== */
+
+@media (max-width: 768px) {
+    /* Active state feedback for buttons */
+    .btn:active {
+        transform: scale(0.97);
+        transition: transform 0.1s ease;
+    }
+
+    .btn-lg:active {
+        transform: scale(0.98);
+    }
+
+    .btn-sm:active {
+        transform: scale(0.95);
+    }
+
+    /* Primary button active feedback */
+    .btn-primary:active,
+    .btn-accent:active {
+        box-shadow: 0 0 0 3px rgba(139, 115, 85, 0.3);
+    }
+
+    /* Outline button active feedback */
+    [class*="btn-outline-"]:active {
+        box-shadow: 0 0 0 3px rgba(139, 115, 85, 0.2);
+    }
+
+    /* Card tap feedback */
+    .card-clickable:active,
+    .work-card:active,
+    .notification-item:active {
+        transform: scale(0.99);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.15s ease;
+    }
+
+    /* List item tap feedback */
+    .list-group-item-action:active {
+        background-color: rgba(139, 115, 85, 0.1);
+        transition: background-color 0.1s ease;
+    }
+
+    /* Nav link tap feedback */
+    .nav-link:active {
+        background-color: rgba(139, 115, 85, 0.1);
+        border-radius: 0.5rem;
+        transition: background-color 0.1s ease;
+    }
+
+    /* Dropdown item tap feedback */
+    .dropdown-item:active {
+        background-color: rgba(139, 115, 85, 0.15);
+        color: inherit;
+    }
+
+    /* Checkbox/Radio tap feedback */
+    .form-check:active {
+        background-color: rgba(139, 115, 85, 0.05);
+        border-radius: 0.5rem;
+        transition: background-color 0.1s ease;
+    }
+
+    /* Pagination tap feedback */
+    .page-link:active {
+        transform: scale(0.95);
+        transition: transform 0.1s ease;
+    }
+
+    /* Accordion button tap feedback */
+    .accordion-button:active {
+        background-color: rgba(139, 115, 85, 0.1);
+    }
+
+    /* FAQ item tap feedback */
+    .faq-question:active {
+        background-color: rgba(139, 115, 85, 0.1);
+    }
+
+    /* Notification action button feedback */
+    .notification-actions .btn:active {
+        transform: scale(0.95);
+        background-color: rgba(139, 115, 85, 0.1);
+    }
+
+    /* Ripple effect base (applied via JS) */
+    .touch-ripple {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .touch-ripple::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0;
+    }
+
+    .touch-ripple:active::after {
+        width: 200%;
+        height: 200%;
+        opacity: 1;
+        transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
+    }
+
+    /* Disable hover effects on touch devices */
+    @media (hover: none) {
+        .btn:hover,
+        .nav-link:hover,
+        .dropdown-item:hover,
+        .list-group-item-action:hover {
+            background-color: inherit;
+            color: inherit;
+        }
+
+        /* Keep focus styles for accessibility */
+        .btn:focus,
+        .nav-link:focus,
+        .dropdown-item:focus,
+        .list-group-item-action:focus {
+            outline: 2px solid var(--color-accent, #8B7355);
+            outline-offset: 2px;
+        }
     }
 }
 
@@ -706,6 +1012,208 @@
 
     .footer-custom .d-flex {
         justify-content: center !important;
+    }
+}
+
+/* ===== Phase 11B-3: Swipe Actions (CSS Part) ===== */
+
+@media (max-width: 768px) {
+    /* Swipeable notification item */
+    .notification-item.swipeable {
+        position: relative;
+        overflow: hidden;
+        touch-action: pan-y;
+        transition: transform 0.2s ease;
+    }
+
+    /* Swipe action backgrounds */
+    .swipe-action-left,
+    .swipe-action-right {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.25rem;
+    }
+
+    .swipe-action-left {
+        left: 0;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+
+    .swipe-action-right {
+        right: 0;
+        background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%);
+    }
+
+    /* Swipe hint animation */
+    .swipe-hint {
+        animation: swipeHint 2s ease-in-out infinite;
+    }
+
+    @keyframes swipeHint {
+        0%, 100% {
+            transform: translateX(0);
+        }
+        50% {
+            transform: translateX(-10px);
+        }
+    }
+
+    /* Swipeable list items */
+    .list-group-item.swipeable {
+        position: relative;
+        overflow: hidden;
+        touch-action: pan-y;
+    }
+
+    /* Ticket item swipe */
+    .ticket-item.swipeable {
+        position: relative;
+        overflow: hidden;
+        touch-action: pan-y;
+        transition: transform 0.2s ease;
+    }
+
+    /* Swipe delete indicator */
+    .swipe-delete-indicator {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #dc3545;
+        font-size: 1.5rem;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+
+    .swipeable.swiping-left .swipe-delete-indicator {
+        opacity: 1;
+    }
+
+    /* Prevent text selection during swipe */
+    .swipeable.swiping {
+        user-select: none;
+        -webkit-user-select: none;
+    }
+}
+
+/* ===== Pull to Refresh Indicator ===== */
+
+@media (max-width: 768px) {
+    .pull-refresh-indicator {
+        position: fixed;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%) translateY(-100%);
+        width: 40px;
+        height: 40px;
+        background: var(--color-bg-card, #fff);
+        border-radius: 50%;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        transition: transform 0.2s ease;
+    }
+
+    .pull-refresh-indicator.visible {
+        transform: translateX(-50%) translateY(60px);
+    }
+
+    .pull-refresh-indicator.refreshing {
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        from {
+            transform: translateX(-50%) translateY(60px) rotate(0deg);
+        }
+        to {
+            transform: translateX(-50%) translateY(60px) rotate(360deg);
+        }
+    }
+
+    .pull-refresh-indicator i {
+        color: var(--color-accent, #8B7355);
+        font-size: 1.25rem;
+    }
+}
+
+/* ===== Bottom Action Bar (Mobile) ===== */
+
+@media (max-width: 768px) {
+    /* Fixed bottom action bar for forms */
+    .bottom-action-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 1rem;
+        background: var(--color-bg-card, #fff);
+        box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+        z-index: 100;
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .bottom-action-bar .btn {
+        flex: 1;
+    }
+
+    /* Add padding to body when bottom action bar is present */
+    body.has-bottom-action-bar {
+        padding-bottom: 80px;
+    }
+}
+
+/* ===== Floating Action Button ===== */
+
+@media (max-width: 768px) {
+    .fab {
+        position: fixed;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--color-accent, #8B7355) 0%, #6d5a43 100%);
+        color: white;
+        border: none;
+        box-shadow: 0 4px 12px rgba(139, 115, 85, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        z-index: 100;
+        transition: all 0.2s ease;
+    }
+
+    .fab:active {
+        transform: scale(0.95);
+        box-shadow: 0 2px 8px rgba(139, 115, 85, 0.4);
+    }
+
+    .fab:hover {
+        background: linear-gradient(135deg, #6d5a43 0%, var(--color-accent, #8B7355) 100%);
+    }
+
+    /* FAB with label */
+    .fab-extended {
+        width: auto;
+        padding: 0 1.25rem;
+        border-radius: 28px;
+        gap: 0.5rem;
+    }
+
+    .fab-extended span {
+        font-size: 0.9rem;
+        font-weight: 500;
     }
 }
 
