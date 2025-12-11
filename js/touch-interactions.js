@@ -319,6 +319,23 @@
     const TouchInteractions = {
         swipeHandlers: new Map(),
         pullToRefresh: null,
+        
+        // Custom handlers that can be set by pages
+        customDeleteHandler: null,
+        customReadHandler: null,
+
+        /**
+         * Set custom handlers for swipe actions
+         * This allows pages to provide their own delete/read logic (e.g., for demo mode)
+         */
+        setCustomHandlers(handlers = {}) {
+            if (handlers.onDelete) {
+                this.customDeleteHandler = handlers.onDelete;
+            }
+            if (handlers.onMarkRead) {
+                this.customReadHandler = handlers.onMarkRead;
+            }
+        },
 
         /**
          * Initialize swipe actions on notification items
@@ -331,18 +348,46 @@
             notifications.forEach(item => {
                 if (this.swipeHandlers.has(item)) return;
 
-                const notificationId = item.dataset.notificationId;
+                const notificationId = item.dataset.notificationId || item.dataset.id;
                 if (!notificationId) return;
 
                 const handler = new SwipeHandler(item, {
                     leftAction: 'delete',
                     rightAction: 'read',
-                    onSwipeLeft: (el) => this.deleteNotification(el, notificationId),
-                    onSwipeRight: (el) => this.markAsRead(el, notificationId)
+                    onSwipeLeft: (el) => this.handleDelete(el, notificationId),
+                    onSwipeRight: (el) => this.handleMarkAsRead(el, notificationId)
                 });
 
                 this.swipeHandlers.set(item, handler);
             });
+        },
+
+        /**
+         * Handle delete action
+         */
+        handleDelete(element, notificationId) {
+            // Use custom handler if set (for demo mode)
+            if (this.customDeleteHandler) {
+                this.customDeleteHandler(element, notificationId);
+                return;
+            }
+
+            // Default: call API
+            this.deleteNotificationAPI(element, notificationId);
+        },
+
+        /**
+         * Handle mark as read action
+         */
+        handleMarkAsRead(element, notificationId) {
+            // Use custom handler if set (for demo mode)
+            if (this.customReadHandler) {
+                this.customReadHandler(element, notificationId);
+                return;
+            }
+
+            // Default: call API
+            this.markAsReadAPI(element, notificationId);
         },
 
         /**
@@ -380,13 +425,17 @@
         },
 
         /**
-         * Delete notification via swipe
+         * Delete notification via API
          */
-        async deleteNotification(element, notificationId) {
+        async deleteNotificationAPI(element, notificationId) {
             try {
                 // Get token
-                const token = localStorage.getItem('authToken');
-                if (!token) return;
+                const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+                if (!token) {
+                    this.showToast('ログインが必要です', 'error');
+                    this.resetElement(element);
+                    return;
+                }
 
                 // API call
                 const response = await fetch(`http://localhost:3000/api/notifications/${notificationId}`, {
@@ -397,43 +446,30 @@
                 });
 
                 if (response.ok) {
-                    // Animate removal
-                    element.style.height = element.offsetHeight + 'px';
-                    element.style.transition = 'height 0.2s ease, opacity 0.2s ease, margin 0.2s ease, padding 0.2s ease';
-                    
-                    requestAnimationFrame(() => {
-                        element.style.height = '0';
-                        element.style.opacity = '0';
-                        element.style.margin = '0';
-                        element.style.padding = '0';
-                        element.style.overflow = 'hidden';
-                    });
-
-                    setTimeout(() => {
-                        element.remove();
-                        this.swipeHandlers.delete(element);
-                        
-                        // Update badge
-                        if (typeof updateNotificationBadge === 'function') {
-                            updateNotificationBadge();
-                        }
-                    }, 200);
-
+                    this.animateRemoval(element);
                     this.showToast('通知を削除しました', 'success');
+                } else {
+                    this.showToast('削除に失敗しました', 'error');
+                    this.resetElement(element);
                 }
             } catch (error) {
                 console.error('Delete notification error:', error);
                 this.showToast('削除に失敗しました', 'error');
+                this.resetElement(element);
             }
         },
 
         /**
-         * Mark notification as read via swipe
+         * Mark notification as read via API
          */
-        async markAsRead(element, notificationId) {
+        async markAsReadAPI(element, notificationId) {
             try {
-                const token = localStorage.getItem('authToken');
-                if (!token) return;
+                const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+                if (!token) {
+                    this.showToast('ログインが必要です', 'error');
+                    this.resetElement(element);
+                    return;
+                }
 
                 const response = await fetch(`http://localhost:3000/api/notifications/${notificationId}/read`, {
                     method: 'PUT',
@@ -445,6 +481,10 @@
                 if (response.ok) {
                     element.classList.remove('unread');
                     element.classList.add('read');
+                    
+                    // Remove NEW badge
+                    const badge = element.querySelector('.badge.bg-accent');
+                    if (badge) badge.remove();
 
                     // Update badge
                     if (typeof updateNotificationBadge === 'function') {
@@ -452,10 +492,47 @@
                     }
 
                     this.showToast('既読にしました', 'success');
+                } else {
+                    this.resetElement(element);
                 }
             } catch (error) {
                 console.error('Mark as read error:', error);
+                this.resetElement(element);
             }
+        },
+
+        /**
+         * Animate element removal
+         */
+        animateRemoval(element) {
+            element.style.height = element.offsetHeight + 'px';
+            element.style.transition = 'height 0.2s ease, opacity 0.2s ease, margin 0.2s ease, padding 0.2s ease';
+            
+            requestAnimationFrame(() => {
+                element.style.height = '0';
+                element.style.opacity = '0';
+                element.style.margin = '0';
+                element.style.padding = '0';
+                element.style.overflow = 'hidden';
+            });
+
+            setTimeout(() => {
+                element.remove();
+                this.swipeHandlers.delete(element);
+                
+                // Update badge
+                if (typeof loadUnreadCount === 'function') {
+                    loadUnreadCount();
+                }
+            }, 200);
+        },
+
+        /**
+         * Reset element position
+         */
+        resetElement(element) {
+            element.style.transition = `transform ${CONFIG.animationDuration}ms ease-out`;
+            element.style.transform = '';
         },
 
         /**
@@ -568,6 +645,9 @@
                 this.pullToRefresh.destroy();
                 this.pullToRefresh = null;
             }
+            
+            this.customDeleteHandler = null;
+            this.customReadHandler = null;
         }
     };
 
