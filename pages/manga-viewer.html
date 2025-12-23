@@ -6,6 +6,7 @@
     <title>Manga Viewer - Publisher</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="../css/mobile-fixes.css" rel="stylesheet">
     <style>
         body {
             background: #000;
@@ -93,6 +94,8 @@
             cursor: pointer;
             border: 2px solid transparent;
             transition: all 0.3s;
+            position: relative;
+            background: #333;
         }
         .thumbnail:hover {
             border-color: #0d6efd;
@@ -117,9 +120,78 @@
             font-size: 0.6rem;
             padding: 2px 5px;
         }
+        
+        /* Page loading indicator */
+        .page-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        .page-loading .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #333;
+            border-top-color: #0d6efd;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .page-loading p {
+            margin-top: 1rem;
+            color: #888;
+        }
+        
+        /* Preload progress bar */
+        .preload-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #0d6efd, #20c997);
+            transition: width 0.3s ease;
+            z-index: 1000;
+        }
+
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            .viewer-controls {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 0.75rem;
+            }
+            .reading-mode-switch {
+                order: 2;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .mode-btn {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.75rem;
+            }
+            .page-nav {
+                order: 1;
+            }
+            .viewer-controls > .d-flex:last-child {
+                order: 3;
+            }
+            .viewer-header h5 {
+                font-size: 0.9rem;
+            }
+            .viewer-header .d-flex {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Preload Progress Bar -->
+    <div class="preload-progress" id="preloadProgress" style="width: 0%;"></div>
+
     <div class="viewer-container">
         <!-- Header -->
         <div class="viewer-header">
@@ -130,10 +202,10 @@
                 </div>
                 <div class="d-flex gap-2">
                     <button class="btn btn-outline-light btn-sm" onclick="toggleFullscreen()">
-                        <i class="fas fa-expand"></i> Fullscreen
+                        <i class="fas fa-expand"></i> <span class="d-none d-md-inline">Fullscreen</span>
                     </button>
                     <button class="btn btn-outline-light btn-sm" onclick="showThumbnails()">
-                        <i class="fas fa-th"></i> Pages
+                        <i class="fas fa-th"></i> <span class="d-none d-md-inline">Pages</span>
                     </button>
                     <!-- Notification Bell -->
                     <a href="notifications.html" class="btn btn-outline-light btn-sm notification-btn" title="通知" id="notificationBellContainer">
@@ -141,7 +213,7 @@
                         <span id="notificationBadge" class="badge rounded-pill bg-danger notification-badge" style="display: none;">0</span>
                     </a>
                     <a href="dashboard.html" class="btn btn-outline-light btn-sm">
-                        <i class="fas fa-times"></i> Close
+                        <i class="fas fa-times"></i> <span class="d-none d-md-inline">Close</span>
                     </a>
                 </div>
             </div>
@@ -149,11 +221,19 @@
 
         <!-- Viewer Content -->
         <div class="viewer-content" id="viewerContent">
-            <!-- Placeholder manga page -->
-            <img src="https://via.placeholder.com/800x1200/333/fff?text=Manga+Page+1" 
-                 class="manga-page" 
+            <!-- Loading indicator (shown initially) -->
+            <div class="page-loading" id="pageLoading">
+                <div class="spinner"></div>
+                <p>Loading page...</p>
+            </div>
+            
+            <!-- Manga page with lazy loading -->
+            <img src="" 
+                 class="manga-page lazy-image" 
                  id="mangaPage"
-                 onclick="nextPage()">
+                 alt="Manga Page"
+                 onclick="nextPage()"
+                 style="display: none;">
             
             <!-- Navigation arrows -->
             <button class="btn btn-dark position-absolute start-0 top-50 translate-middle-y ms-3" 
@@ -170,20 +250,20 @@
 
         <!-- Thumbnail Strip -->
         <div class="thumbnail-strip" id="thumbnailStrip">
-            <!-- Thumbnails will be generated here -->
+            <!-- Thumbnails will be generated here with lazy loading -->
         </div>
 
         <!-- Controls -->
         <div class="viewer-controls">
             <div class="reading-mode-switch">
                 <button class="mode-btn active" id="ltrBtn" onclick="setReadingMode('ltr')">
-                    <i class="fas fa-arrow-right"></i> Left to Right
+                    <i class="fas fa-arrow-right"></i> <span class="d-none d-sm-inline">Left to Right</span>
                 </button>
                 <button class="mode-btn" id="rtlBtn" onclick="setReadingMode('rtl')">
-                    <i class="fas fa-arrow-left"></i> Right to Left (Japanese)
+                    <i class="fas fa-arrow-left"></i> <span class="d-none d-sm-inline">Right to Left</span>
                 </button>
                 <button class="mode-btn" id="verticalBtn" onclick="setReadingMode('vertical')">
-                    <i class="fas fa-arrow-down"></i> Vertical (Webtoon)
+                    <i class="fas fa-arrow-down"></i> <span class="d-none d-sm-inline">Vertical</span>
                 </button>
             </div>
 
@@ -207,76 +287,248 @@
                     <i class="fas fa-search-minus"></i>
                 </button>
                 <button class="btn btn-outline-light" onclick="resetZoom()">
-                    <i class="fas fa-redo"></i> Reset
+                    <i class="fas fa-redo"></i>
                 </button>
             </div>
         </div>
     </div>
 
+    <script src="../js/lazy-loader.js"></script>
     <script>
-        let currentPage = 1;
+        // =====================================================
+        // Configuration
+        // =====================================================
         const totalPages = 24;
+        let currentPage = 1;
         let readingMode = 'ltr';
         let zoomLevel = 1;
+        
+        // Page URLs (in production, these would come from API)
+        // Using placeholder images for demo
+        const pageUrls = [];
+        const thumbnailUrls = [];
+        
+        for (let i = 1; i <= totalPages; i++) {
+            pageUrls.push(`https://via.placeholder.com/800x1200/333/fff?text=Manga+Page+${i}`);
+            thumbnailUrls.push(`https://via.placeholder.com/80x120/333/fff?text=P${i}`);
+        }
 
-        // Initialize thumbnails
+        // Preloaded pages cache
+        const preloadedPages = new Map();
+        const PRELOAD_AHEAD = 3; // Number of pages to preload ahead
+
+        // =====================================================
+        // Initialization
+        // =====================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            initThumbnails();
+            loadPage(1);
+            preloadPages(1);
+        });
+
+        // =====================================================
+        // Page Loading with Lazy Loading
+        // =====================================================
+        function loadPage(pageNum) {
+            const mangaPage = document.getElementById('mangaPage');
+            const loading = document.getElementById('pageLoading');
+            
+            // Show loading indicator
+            loading.style.display = 'block';
+            mangaPage.style.display = 'none';
+            
+            const url = pageUrls[pageNum - 1];
+            
+            // Check if already preloaded
+            if (preloadedPages.has(pageNum)) {
+                // Use cached image
+                mangaPage.src = url;
+                mangaPage.style.display = 'block';
+                loading.style.display = 'none';
+                mangaPage.classList.add('lazy-loaded');
+            } else {
+                // Load image
+                const img = new Image();
+                img.onload = function() {
+                    mangaPage.src = url;
+                    mangaPage.style.display = 'block';
+                    loading.style.display = 'none';
+                    mangaPage.classList.add('lazy-loaded');
+                    preloadedPages.set(pageNum, true);
+                };
+                img.onerror = function() {
+                    loading.innerHTML = `
+                        <i class="fas fa-exclamation-triangle fa-3x text-warning"></i>
+                        <p>Failed to load page. <a href="#" onclick="loadPage(${pageNum})" class="text-info">Retry</a></p>
+                    `;
+                };
+                img.src = url;
+            }
+            
+            // Update UI
+            document.getElementById('currentPage').textContent = pageNum;
+            updateThumbnailActive(pageNum);
+            
+            // Preload surrounding pages
+            preloadPages(pageNum);
+        }
+
+        // =====================================================
+        // Preloading Logic
+        // =====================================================
+        function preloadPages(currentPageNum) {
+            const pagesToPreload = [];
+            
+            // Preload ahead
+            for (let i = 1; i <= PRELOAD_AHEAD; i++) {
+                if (currentPageNum + i <= totalPages) {
+                    pagesToPreload.push(currentPageNum + i);
+                }
+            }
+            
+            // Preload one behind
+            if (currentPageNum > 1) {
+                pagesToPreload.push(currentPageNum - 1);
+            }
+            
+            // Filter out already preloaded
+            const toLoad = pagesToPreload.filter(p => !preloadedPages.has(p));
+            
+            // Update progress bar
+            updatePreloadProgress();
+            
+            // Preload images
+            toLoad.forEach(pageNum => {
+                const img = new Image();
+                img.onload = function() {
+                    preloadedPages.set(pageNum, true);
+                    updatePreloadProgress();
+                };
+                img.src = pageUrls[pageNum - 1];
+            });
+        }
+
+        function updatePreloadProgress() {
+            const progress = (preloadedPages.size / totalPages) * 100;
+            document.getElementById('preloadProgress').style.width = progress + '%';
+            
+            // Hide when complete
+            if (progress >= 100) {
+                setTimeout(() => {
+                    document.getElementById('preloadProgress').style.opacity = '0';
+                }, 500);
+            }
+        }
+
+        // =====================================================
+        // Thumbnail Initialization with Lazy Loading
+        // =====================================================
         function initThumbnails() {
             const strip = document.getElementById('thumbnailStrip');
+            strip.innerHTML = '';
+            
             for (let i = 1; i <= totalPages; i++) {
                 const thumb = document.createElement('div');
                 thumb.className = 'thumbnail' + (i === 1 ? ' active' : '');
-                thumb.innerHTML = `<img src="https://via.placeholder.com/80x120/333/fff?text=P${i}" alt="Page ${i}">`;
+                thumb.dataset.page = i;
+                
+                // Use lazy loading for thumbnails
+                thumb.innerHTML = `
+                    <img class="lazy-image" 
+                         src="" 
+                         data-src="${thumbnailUrls[i - 1]}" 
+                         alt="Page ${i}"
+                         loading="lazy">
+                `;
+                
                 thumb.onclick = () => goToPage(i);
                 strip.appendChild(thumb);
+            }
+            
+            // Initialize thumbnail lazy loader
+            if (typeof ThumbnailLazyLoader !== 'undefined') {
+                ThumbnailLazyLoader.init(strip);
+            }
+        }
+
+        function updateThumbnailActive(pageNum) {
+            document.querySelectorAll('.thumbnail').forEach((thumb, index) => {
+                thumb.classList.toggle('active', index + 1 === pageNum);
+            });
+            
+            // Scroll thumbnail into view
+            const activeThumb = document.querySelector('.thumbnail.active');
+            if (activeThumb) {
+                activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
             }
         }
 
         function showThumbnails() {
-            document.getElementById('thumbnailStrip').classList.toggle('show');
+            const strip = document.getElementById('thumbnailStrip');
+            strip.classList.toggle('show');
+            
+            // Trigger lazy loading of visible thumbnails
+            if (strip.classList.contains('show') && typeof LazyLoader !== 'undefined') {
+                LazyLoader.observeNew(strip);
+            }
         }
 
+        // =====================================================
+        // Navigation
+        // =====================================================
         function goToPage(page) {
-            currentPage = page;
-            updatePage();
-            document.getElementById('thumbnailStrip').classList.remove('show');
+            if (page >= 1 && page <= totalPages) {
+                currentPage = page;
+                loadPage(page);
+                document.getElementById('thumbnailStrip').classList.remove('show');
+            }
         }
 
         function nextPage() {
-            if (currentPage < totalPages) {
-                currentPage++;
-                updatePage();
+            if (readingMode === 'rtl') {
+                if (currentPage > 1) {
+                    currentPage--;
+                    loadPage(currentPage);
+                }
+            } else {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    loadPage(currentPage);
+                }
             }
         }
 
         function previousPage() {
-            if (currentPage > 1) {
-                currentPage--;
-                updatePage();
+            if (readingMode === 'rtl') {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    loadPage(currentPage);
+                }
+            } else {
+                if (currentPage > 1) {
+                    currentPage--;
+                    loadPage(currentPage);
+                }
             }
         }
 
-        function updatePage() {
-            document.getElementById('currentPage').textContent = currentPage;
-            document.getElementById('mangaPage').src = 
-                `https://via.placeholder.com/800x1200/333/fff?text=Manga+Page+${currentPage}`;
-            
-            // Update thumbnail active state
-            document.querySelectorAll('.thumbnail').forEach((thumb, index) => {
-                thumb.classList.toggle('active', index + 1 === currentPage);
-            });
-        }
-
+        // =====================================================
+        // Reading Mode
+        // =====================================================
         function setReadingMode(mode) {
             readingMode = mode;
             document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(mode + 'Btn').classList.add('active');
             
-            // In production, this would change the layout/navigation behavior
             if (mode === 'vertical') {
+                // Switch to vertical scrolling mode (future implementation)
                 alert('Vertical scrolling mode (Webtoon style) - Coming soon!');
             }
         }
 
+        // =====================================================
+        // Zoom Controls
+        // =====================================================
         function zoomIn() {
             zoomLevel = Math.min(zoomLevel + 0.1, 3);
             applyZoom();
@@ -296,6 +548,9 @@
             document.getElementById('mangaPage').style.transform = `scale(${zoomLevel})`;
         }
 
+        // =====================================================
+        // Fullscreen
+        // =====================================================
         function toggleFullscreen() {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen();
@@ -304,18 +559,67 @@
             }
         }
 
-        // Keyboard navigation
+        // =====================================================
+        // Keyboard Navigation
+        // =====================================================
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextPage();
-            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') previousPage();
-            if (e.key === 'f') toggleFullscreen();
-            if (e.key === '+') zoomIn();
-            if (e.key === '-') zoomOut();
-            if (e.key === '0') resetZoom();
+            switch(e.key) {
+                case 'ArrowRight':
+                case 'ArrowDown':
+                    nextPage();
+                    break;
+                case 'ArrowLeft':
+                case 'ArrowUp':
+                    previousPage();
+                    break;
+                case 'f':
+                    toggleFullscreen();
+                    break;
+                case '+':
+                case '=':
+                    zoomIn();
+                    break;
+                case '-':
+                    zoomOut();
+                    break;
+                case '0':
+                    resetZoom();
+                    break;
+                case 'Escape':
+                    document.getElementById('thumbnailStrip').classList.remove('show');
+                    break;
+            }
         });
 
-        // Initialize on load
-        initThumbnails();
+        // =====================================================
+        // Touch Gestures (for mobile)
+        // =====================================================
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.getElementById('viewerContent').addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        document.getElementById('viewerContent').addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, { passive: true });
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const diff = touchEndX - touchStartX;
+            
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    // Swipe right
+                    previousPage();
+                } else {
+                    // Swipe left
+                    nextPage();
+                }
+            }
+        }
     </script>
     <!-- Notification Badge -->
     <script src="../js/header-notification.js"></script>
