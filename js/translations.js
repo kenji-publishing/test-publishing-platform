@@ -1,17 +1,8 @@
 /**
  * Publisher Platform - Translations
- * Phase 12-1: 9言語対応
+ * Phase 12-2: 完全な翻訳データ
  * 
- * 対応言語:
- * - en: English (英語)
- * - ja: Japanese (日本語)
- * - zh: Chinese (中国語)
- * - es: Spanish (スペイン語)
- * - fr: French (フランス語)
- * - de: German (ドイツ語)
- * - ko: Korean (韓国語)
- * - ar: Arabic (アラビア語)
- * - pt: Portuguese (ポルトガル語) ← 新規追加
+ * 対応言語: en, ja, zh, es, fr, de, ko, ar, pt (9言語)
  */
 
 const translations = {
@@ -20,12 +11,16 @@ const translations = {
     // =====================================================
     en: {
         nav: {
+            home: 'Home',
+            browse: 'Browse',
+            genres: 'Genres',
             revenue: 'Revenue Sharing',
             upload: 'Upload Work',
             dashboard: 'Dashboard',
             register: 'Register',
-            login: 'Login',
+            login: 'Sign In',
             logout: 'Logout',
+            getStarted: 'Get Started',
             author: 'Author',
             translator: 'Translator',
             editor: 'Editor',
@@ -33,43 +28,70 @@ const translations = {
             settings: 'Settings',
             support: 'Support'
         },
-        hero: {
-            title: 'Publish Your Story to the World',
-            subtitle: 'A revolutionary platform connecting authors, translators, and readers across 9 languages. Fair revenue sharing. AI-powered translation. Global reach.',
-            start: 'Start Publishing',
-            learn: 'Learn More'
-        },
-        features: {
-            title: 'Why Choose Publisher?',
+        home: {
+            hero: {
+                title: 'Discover Stories from Around the World',
+                subtitle: 'Read and publish stories in 9 languages. Connect with readers and writers globally.',
+                startReading: 'Start Reading',
+                startWriting: 'Start Writing',
+                availableIn: 'Available in 9 languages'
+            },
+            featured: {
+                title: 'Featured Works',
+                viewAll: 'View All Works'
+            },
+            howItWorks: {
+                title: 'How It Works',
+                step1: {
+                    title: 'Write & Upload',
+                    desc: 'Create your story in any of our 9 supported languages. Upload your work in just a few clicks.'
+                },
+                step2: {
+                    title: 'AI Translation',
+                    desc: 'Our AI instantly translates your work into 9 languages. Reach readers around the world.'
+                },
+                step3: {
+                    title: 'Earn Revenue',
+                    desc: 'Earn up to 60% of sales revenue. Fair distribution for all creators.'
+                }
+            },
+            stats: {
+                languages: 'Languages',
+                works: 'Works',
+                authors: 'Authors',
+                readers: 'Readers'
+            },
+            forCreators: {
+                title: 'For Creators',
+                desc: 'Join our community of writers, translators, and artists. Share your stories with the world and earn from your creativity.',
+                feature1: 'Free AI translation to 9 languages',
+                feature2: 'Earn up to 60% revenue share',
+                feature3: 'Reach global audience instantly',
+                feature4: 'Keep full rights to your work',
+                button: 'Start Creating'
+            },
             revenue: {
-                title: 'Fair Revenue Sharing',
-                desc: 'Authors earn up to 70% when handling translation and editing. Transparent payment system.'
+                title: 'Revenue Distribution',
+                platform: 'Platform'
             },
-            translation: {
-                title: 'AI Translation',
-                desc: 'Free AI translation to reach global audiences. Professional human translation available.'
-            },
-            global: {
-                title: 'Global Reach',
-                desc: 'Publish in 9 languages: English, Japanese, Chinese, Spanish, French, German, Korean, Arabic, Portuguese.'
+            cta: {
+                title: 'Ready to Start Your Journey?',
+                subtitle: 'Join thousands of readers and creators on Publisher.',
+                createAccount: 'Create Free Account',
+                browseWorks: 'Browse Works'
             }
         },
-        manga: {
-            title: 'Manga to the World',
-            desc: 'We specialize in bringing Japanese manga and comics to international audiences. Our platform supports vertical and horizontal reading formats, with built-in manga viewer.',
-            feature1: 'Professional manga viewer',
-            feature2: 'Support for Japanese to multiple languages',
-            feature3: 'Rights management system'
-        },
-        cta: {
-            title: 'Ready to Share Your Story?',
-            subtitle: 'Join thousands of creators reaching global audiences',
-            button: 'Get Started Today'
-        },
         footer: {
-            tagline: 'Connecting creators and readers worldwide',
-            links: 'Quick Links',
-            about: 'About',
+            tagline: 'A multilingual publishing platform connecting authors, translators, and readers worldwide.',
+            explore: 'Explore',
+            authors: 'Authors',
+            creators: 'Creators',
+            write: 'Write',
+            translate: 'Translate',
+            pricing: 'Pricing',
+            help: 'Help',
+            faq: 'FAQ',
+            legal: 'Legal',
             terms: 'Terms',
             privacy: 'Privacy',
             contact: 'Contact'
@@ -89,7 +111,8 @@ const translations = {
             no: 'No',
             back: 'Back',
             next: 'Next',
-            previous: 'Previous'
+            previous: 'Previous',
+            free: 'Free'
         }
     },
 
@@ -98,12 +121,16 @@ const translations = {
     // =====================================================
     ja: {
         nav: {
+            home: 'ホーム',
+            browse: '作品を探す',
+            genres: 'ジャンル',
             revenue: '収益配分',
             upload: '作品アップロード',
             dashboard: 'ダッシュボード',
             register: '登録',
             login: 'ログイン',
             logout: 'ログアウト',
+            getStarted: '今すぐ始める',
             author: '著者',
             translator: '翻訳者',
             editor: '編集者',
@@ -111,43 +138,70 @@ const translations = {
             settings: '設定',
             support: 'サポート'
         },
-        hero: {
-            title: 'あなたの物語を世界へ',
-            subtitle: '9言語で著者、翻訳者、読者をつなぐ革新的なプラットフォーム。公正な収益配分。AI翻訳機能。グローバルな展開。',
-            start: '出版を始める',
-            learn: '詳しく見る'
-        },
-        features: {
-            title: 'Publisherを選ぶ理由',
+        home: {
+            hero: {
+                title: '世界中の物語を発見しよう',
+                subtitle: '9言語で物語を読んで出版。世界中の読者と作家とつながる。',
+                startReading: '読み始める',
+                startWriting: '書き始める',
+                availableIn: '9言語に対応'
+            },
+            featured: {
+                title: '注目の作品',
+                viewAll: 'すべての作品を見る'
+            },
+            howItWorks: {
+                title: '使い方',
+                step1: {
+                    title: '書いてアップロード',
+                    desc: '9つの対応言語のいずれかで物語を作成。数クリックで作品をアップロード。'
+                },
+                step2: {
+                    title: 'AI翻訳',
+                    desc: 'AIが即座に9言語に翻訳。世界中の読者にリーチ。'
+                },
+                step3: {
+                    title: '収益を得る',
+                    desc: '売上の最大60%を獲得。すべてのクリエイターに公正な分配。'
+                }
+            },
+            stats: {
+                languages: '言語',
+                works: '作品',
+                authors: '著者',
+                readers: '読者'
+            },
+            forCreators: {
+                title: 'クリエイターのために',
+                desc: '作家、翻訳者、アーティストのコミュニティに参加。物語を世界に共有して創造性から収益を得よう。',
+                feature1: '9言語への無料AI翻訳',
+                feature2: '最大60%の収益シェア',
+                feature3: '即座にグローバルな読者にリーチ',
+                feature4: '作品の完全な権利を保持',
+                button: '創作を始める'
+            },
             revenue: {
-                title: '公正な収益配分',
-                desc: '著者は翻訳・編集を担当すると最大70%を獲得。透明な支払いシステム。'
+                title: '収益配分',
+                platform: 'プラットフォーム'
             },
-            translation: {
-                title: 'AI翻訳',
-                desc: '無料のAI翻訳で世界中の読者へリーチ。プロの人間翻訳も利用可能。'
-            },
-            global: {
-                title: 'グローバルな展開',
-                desc: '9言語で出版：英語、日本語、中国語、スペイン語、フランス語、ドイツ語、韓国語、アラビア語、ポルトガル語。'
+            cta: {
+                title: '始める準備はできましたか？',
+                subtitle: 'Publisherで何千人もの読者とクリエイターに参加。',
+                createAccount: '無料アカウント作成',
+                browseWorks: '作品を探す'
             }
         },
-        manga: {
-            title: 'マンガを世界へ',
-            desc: '日本のマンガやコミックを世界の読者に届けることに特化しています。縦読み・横読みの両方に対応したマンガビューアを搭載。',
-            feature1: 'プロフェッショナルなマンガビューア',
-            feature2: '日本語から多言語へのサポート',
-            feature3: '権利管理システム'
-        },
-        cta: {
-            title: 'あなたの物語を共有する準備はできましたか？',
-            subtitle: '世界中の読者にリーチする数千人のクリエイターに参加',
-            button: '今すぐ始める'
-        },
         footer: {
-            tagline: '世界中のクリエイターと読者をつなぐ',
-            links: 'クイックリンク',
-            about: '概要',
+            tagline: '著者、翻訳者、読者を世界中でつなぐ多言語出版プラットフォーム。',
+            explore: '探索',
+            authors: '著者',
+            creators: 'クリエイター',
+            write: '執筆',
+            translate: '翻訳',
+            pricing: '料金',
+            help: 'ヘルプ',
+            faq: 'FAQ',
+            legal: '法的情報',
             terms: '利用規約',
             privacy: 'プライバシー',
             contact: 'お問い合わせ'
@@ -167,7 +221,8 @@ const translations = {
             no: 'いいえ',
             back: '戻る',
             next: '次へ',
-            previous: '前へ'
+            previous: '前へ',
+            free: '無料'
         }
     },
 
@@ -176,12 +231,16 @@ const translations = {
     // =====================================================
     zh: {
         nav: {
+            home: '首页',
+            browse: '浏览',
+            genres: '类型',
             revenue: '收益分配',
             upload: '上传作品',
             dashboard: '仪表板',
             register: '注册',
             login: '登录',
             logout: '退出',
+            getStarted: '开始使用',
             author: '作者',
             translator: '翻译',
             editor: '编辑',
@@ -189,43 +248,70 @@ const translations = {
             settings: '设置',
             support: '支持'
         },
-        hero: {
-            title: '向世界发布您的故事',
-            subtitle: '一个连接作者、翻译者和读者的革命性平台，支持9种语言。公平的收益分配。AI驱动的翻译。全球影响力。',
-            start: '开始发布',
-            learn: '了解更多'
-        },
-        features: {
-            title: '为什么选择Publisher？',
+        home: {
+            hero: {
+                title: '发现来自世界各地的故事',
+                subtitle: '用9种语言阅读和发布故事。与全球读者和作家联系。',
+                startReading: '开始阅读',
+                startWriting: '开始写作',
+                availableIn: '支持9种语言'
+            },
+            featured: {
+                title: '精选作品',
+                viewAll: '查看全部作品'
+            },
+            howItWorks: {
+                title: '如何使用',
+                step1: {
+                    title: '写作和上传',
+                    desc: '用我们支持的9种语言之一创作你的故事。只需几次点击即可上传作品。'
+                },
+                step2: {
+                    title: 'AI翻译',
+                    desc: '我们的AI即时将您的作品翻译成9种语言。触及世界各地的读者。'
+                },
+                step3: {
+                    title: '获得收益',
+                    desc: '获得高达60%的销售收入。为所有创作者公平分配。'
+                }
+            },
+            stats: {
+                languages: '语言',
+                works: '作品',
+                authors: '作者',
+                readers: '读者'
+            },
+            forCreators: {
+                title: '为创作者',
+                desc: '加入我们的作家、翻译者和艺术家社区。与世界分享你的故事并从创造力中获益。',
+                feature1: '免费AI翻译到9种语言',
+                feature2: '获得高达60%的收益分成',
+                feature3: '即时触达全球受众',
+                feature4: '保留作品的完整权利',
+                button: '开始创作'
+            },
             revenue: {
-                title: '公平的收益分配',
-                desc: '作者处理翻译和编辑时可获得高达70%的收益。透明的支付系统。'
+                title: '收益分配',
+                platform: '平台'
             },
-            translation: {
-                title: 'AI翻译',
-                desc: '免费AI翻译以触及全球受众。提供专业人工翻译服务。'
-            },
-            global: {
-                title: '全球影响力',
-                desc: '以9种语言发布：英语、日语、中文、西班牙语、法语、德语、韩语、阿拉伯语、葡萄牙语。'
+            cta: {
+                title: '准备开始你的旅程了吗？',
+                subtitle: '加入Publisher上成千上万的读者和创作者。',
+                createAccount: '创建免费账户',
+                browseWorks: '浏览作品'
             }
         },
-        manga: {
-            title: '漫画走向世界',
-            desc: '我们专注于将日本漫画和漫画带给国际读者。我们的平台支持垂直和水平阅读格式。',
-            feature1: '专业漫画阅读器',
-            feature2: '支持日语到多种语言',
-            feature3: '版权管理系统'
-        },
-        cta: {
-            title: '准备好分享您的故事了吗？',
-            subtitle: '加入成千上万触及全球受众的创作者',
-            button: '今天就开始'
-        },
         footer: {
-            tagline: '连接全球创作者和读者',
-            links: '快速链接',
-            about: '关于',
+            tagline: '连接全球作者、翻译者和读者的多语言出版平台。',
+            explore: '探索',
+            authors: '作者',
+            creators: '创作者',
+            write: '写作',
+            translate: '翻译',
+            pricing: '定价',
+            help: '帮助',
+            faq: '常见问题',
+            legal: '法律',
             terms: '条款',
             privacy: '隐私',
             contact: '联系'
@@ -245,7 +331,8 @@ const translations = {
             no: '否',
             back: '返回',
             next: '下一个',
-            previous: '上一个'
+            previous: '上一个',
+            free: '免费'
         }
     },
 
@@ -254,12 +341,16 @@ const translations = {
     // =====================================================
     es: {
         nav: {
+            home: 'Inicio',
+            browse: 'Explorar',
+            genres: 'Géneros',
             revenue: 'Distribución de Ingresos',
             upload: 'Subir Obra',
             dashboard: 'Panel',
             register: 'Registrarse',
             login: 'Iniciar Sesión',
             logout: 'Cerrar Sesión',
+            getStarted: 'Comenzar',
             author: 'Autor',
             translator: 'Traductor',
             editor: 'Editor',
@@ -267,43 +358,70 @@ const translations = {
             settings: 'Configuración',
             support: 'Soporte'
         },
-        hero: {
-            title: 'Publica Tu Historia al Mundo',
-            subtitle: 'Una plataforma revolucionaria que conecta autores, traductores y lectores en 9 idiomas. Distribución justa de ingresos. Traducción con IA. Alcance global.',
-            start: 'Comenzar a Publicar',
-            learn: 'Más Información'
-        },
-        features: {
-            title: '¿Por Qué Elegir Publisher?',
+        home: {
+            hero: {
+                title: 'Descubre Historias de Todo el Mundo',
+                subtitle: 'Lee y publica historias en 9 idiomas. Conéctate con lectores y escritores globalmente.',
+                startReading: 'Empezar a Leer',
+                startWriting: 'Empezar a Escribir',
+                availableIn: 'Disponible en 9 idiomas'
+            },
+            featured: {
+                title: 'Obras Destacadas',
+                viewAll: 'Ver Todas las Obras'
+            },
+            howItWorks: {
+                title: 'Cómo Funciona',
+                step1: {
+                    title: 'Escribe y Sube',
+                    desc: 'Crea tu historia en cualquiera de nuestros 9 idiomas soportados. Sube tu trabajo con unos pocos clics.'
+                },
+                step2: {
+                    title: 'Traducción IA',
+                    desc: 'Nuestra IA traduce instantáneamente tu trabajo a 9 idiomas. Llega a lectores de todo el mundo.'
+                },
+                step3: {
+                    title: 'Gana Ingresos',
+                    desc: 'Gana hasta el 60% de los ingresos de ventas. Distribución justa para todos los creadores.'
+                }
+            },
+            stats: {
+                languages: 'Idiomas',
+                works: 'Obras',
+                authors: 'Autores',
+                readers: 'Lectores'
+            },
+            forCreators: {
+                title: 'Para Creadores',
+                desc: 'Únete a nuestra comunidad de escritores, traductores y artistas. Comparte tus historias con el mundo y gana con tu creatividad.',
+                feature1: 'Traducción IA gratuita a 9 idiomas',
+                feature2: 'Gana hasta 60% de participación',
+                feature3: 'Alcanza audiencia global instantáneamente',
+                feature4: 'Mantén todos los derechos de tu obra',
+                button: 'Empezar a Crear'
+            },
             revenue: {
-                title: 'Distribución Justa de Ingresos',
-                desc: 'Los autores ganan hasta el 70% al manejar traducción y edición. Sistema de pago transparente.'
+                title: 'Distribución de Ingresos',
+                platform: 'Plataforma'
             },
-            translation: {
-                title: 'Traducción IA',
-                desc: 'Traducción IA gratuita para llegar a audiencias globales. Traducción humana profesional disponible.'
-            },
-            global: {
-                title: 'Alcance Global',
-                desc: 'Publica en 9 idiomas: inglés, japonés, chino, español, francés, alemán, coreano, árabe, portugués.'
+            cta: {
+                title: '¿Listo para Empezar tu Viaje?',
+                subtitle: 'Únete a miles de lectores y creadores en Publisher.',
+                createAccount: 'Crear Cuenta Gratis',
+                browseWorks: 'Explorar Obras'
             }
         },
-        manga: {
-            title: 'Manga al Mundo',
-            desc: 'Nos especializamos en llevar manga japonés y cómics a audiencias internacionales. Nuestra plataforma soporta formatos de lectura vertical y horizontal.',
-            feature1: 'Visor de manga profesional',
-            feature2: 'Soporte de japonés a múltiples idiomas',
-            feature3: 'Sistema de gestión de derechos'
-        },
-        cta: {
-            title: '¿Listo para Compartir Tu Historia?',
-            subtitle: 'Únete a miles de creadores llegando a audiencias globales',
-            button: 'Comienza Hoy'
-        },
         footer: {
-            tagline: 'Conectando creadores y lectores en todo el mundo',
-            links: 'Enlaces Rápidos',
-            about: 'Acerca de',
+            tagline: 'Una plataforma de publicación multilingüe que conecta autores, traductores y lectores en todo el mundo.',
+            explore: 'Explorar',
+            authors: 'Autores',
+            creators: 'Creadores',
+            write: 'Escribir',
+            translate: 'Traducir',
+            pricing: 'Precios',
+            help: 'Ayuda',
+            faq: 'FAQ',
+            legal: 'Legal',
             terms: 'Términos',
             privacy: 'Privacidad',
             contact: 'Contacto'
@@ -323,7 +441,8 @@ const translations = {
             no: 'No',
             back: 'Volver',
             next: 'Siguiente',
-            previous: 'Anterior'
+            previous: 'Anterior',
+            free: 'Gratis'
         }
     },
 
@@ -332,12 +451,16 @@ const translations = {
     // =====================================================
     fr: {
         nav: {
+            home: 'Accueil',
+            browse: 'Parcourir',
+            genres: 'Genres',
             revenue: 'Partage des Revenus',
-            upload: 'Télécharger une Œuvre',
+            upload: 'Télécharger',
             dashboard: 'Tableau de Bord',
             register: 'S\'inscrire',
             login: 'Connexion',
             logout: 'Déconnexion',
+            getStarted: 'Commencer',
             author: 'Auteur',
             translator: 'Traducteur',
             editor: 'Éditeur',
@@ -345,43 +468,70 @@ const translations = {
             settings: 'Paramètres',
             support: 'Support'
         },
-        hero: {
-            title: 'Publiez Votre Histoire au Monde',
-            subtitle: 'Une plateforme révolutionnaire connectant auteurs, traducteurs et lecteurs dans 9 langues. Partage équitable des revenus. Traduction IA. Portée mondiale.',
-            start: 'Commencer à Publier',
-            learn: 'En Savoir Plus'
-        },
-        features: {
-            title: 'Pourquoi Choisir Publisher?',
+        home: {
+            hero: {
+                title: 'Découvrez des Histoires du Monde Entier',
+                subtitle: 'Lisez et publiez des histoires en 9 langues. Connectez-vous avec des lecteurs et écrivains du monde entier.',
+                startReading: 'Commencer à Lire',
+                startWriting: 'Commencer à Écrire',
+                availableIn: 'Disponible en 9 langues'
+            },
+            featured: {
+                title: 'Œuvres en Vedette',
+                viewAll: 'Voir Toutes les Œuvres'
+            },
+            howItWorks: {
+                title: 'Comment Ça Marche',
+                step1: {
+                    title: 'Écrivez et Téléchargez',
+                    desc: 'Créez votre histoire dans l\'une de nos 9 langues supportées. Téléchargez votre travail en quelques clics.'
+                },
+                step2: {
+                    title: 'Traduction IA',
+                    desc: 'Notre IA traduit instantanément votre travail en 9 langues. Atteignez des lecteurs du monde entier.'
+                },
+                step3: {
+                    title: 'Gagnez des Revenus',
+                    desc: 'Gagnez jusqu\'à 60% des revenus de vente. Distribution équitable pour tous les créateurs.'
+                }
+            },
+            stats: {
+                languages: 'Langues',
+                works: 'Œuvres',
+                authors: 'Auteurs',
+                readers: 'Lecteurs'
+            },
+            forCreators: {
+                title: 'Pour les Créateurs',
+                desc: 'Rejoignez notre communauté d\'écrivains, traducteurs et artistes. Partagez vos histoires avec le monde et gagnez de votre créativité.',
+                feature1: 'Traduction IA gratuite en 9 langues',
+                feature2: 'Gagnez jusqu\'à 60% de partage',
+                feature3: 'Atteignez un public mondial instantanément',
+                feature4: 'Gardez tous les droits sur votre travail',
+                button: 'Commencer à Créer'
+            },
             revenue: {
-                title: 'Partage Équitable des Revenus',
-                desc: 'Les auteurs gagnent jusqu\'à 70% en gérant traduction et édition. Système de paiement transparent.'
+                title: 'Distribution des Revenus',
+                platform: 'Plateforme'
             },
-            translation: {
-                title: 'Traduction IA',
-                desc: 'Traduction IA gratuite pour atteindre un public mondial. Traduction humaine professionnelle disponible.'
-            },
-            global: {
-                title: 'Portée Mondiale',
-                desc: 'Publiez en 9 langues: anglais, japonais, chinois, espagnol, français, allemand, coréen, arabe, portugais.'
+            cta: {
+                title: 'Prêt à Commencer Votre Voyage?',
+                subtitle: 'Rejoignez des milliers de lecteurs et créateurs sur Publisher.',
+                createAccount: 'Créer un Compte Gratuit',
+                browseWorks: 'Parcourir les Œuvres'
             }
         },
-        manga: {
-            title: 'Manga vers le Monde',
-            desc: 'Nous sommes spécialisés dans l\'apport de manga japonais et de bandes dessinées à un public international.',
-            feature1: 'Visionneuse de manga professionnelle',
-            feature2: 'Support du japonais vers plusieurs langues',
-            feature3: 'Système de gestion des droits'
-        },
-        cta: {
-            title: 'Prêt à Partager Votre Histoire?',
-            subtitle: 'Rejoignez des milliers de créateurs atteignant des audiences mondiales',
-            button: 'Commencez Aujourd\'hui'
-        },
         footer: {
-            tagline: 'Connecter les créateurs et les lecteurs du monde entier',
-            links: 'Liens Rapides',
-            about: 'À Propos',
+            tagline: 'Une plateforme de publication multilingue connectant auteurs, traducteurs et lecteurs du monde entier.',
+            explore: 'Explorer',
+            authors: 'Auteurs',
+            creators: 'Créateurs',
+            write: 'Écrire',
+            translate: 'Traduire',
+            pricing: 'Tarifs',
+            help: 'Aide',
+            faq: 'FAQ',
+            legal: 'Mentions Légales',
             terms: 'Conditions',
             privacy: 'Confidentialité',
             contact: 'Contact'
@@ -401,7 +551,8 @@ const translations = {
             no: 'Non',
             back: 'Retour',
             next: 'Suivant',
-            previous: 'Précédent'
+            previous: 'Précédent',
+            free: 'Gratuit'
         }
     },
 
@@ -410,12 +561,16 @@ const translations = {
     // =====================================================
     de: {
         nav: {
+            home: 'Startseite',
+            browse: 'Durchsuchen',
+            genres: 'Genres',
             revenue: 'Umsatzbeteiligung',
-            upload: 'Werk hochladen',
+            upload: 'Hochladen',
             dashboard: 'Dashboard',
             register: 'Registrieren',
             login: 'Anmelden',
             logout: 'Abmelden',
+            getStarted: 'Loslegen',
             author: 'Autor',
             translator: 'Übersetzer',
             editor: 'Redakteur',
@@ -423,43 +578,70 @@ const translations = {
             settings: 'Einstellungen',
             support: 'Support'
         },
-        hero: {
-            title: 'Veröffentlichen Sie Ihre Geschichte',
-            subtitle: 'Eine revolutionäre Plattform, die Autoren, Übersetzer und Leser in 9 Sprachen verbindet. Faire Umsatzbeteiligung. KI-gestützte Übersetzung. Globale Reichweite.',
-            start: 'Veröffentlichung starten',
-            learn: 'Mehr erfahren'
-        },
-        features: {
-            title: 'Warum Publisher wählen?',
+        home: {
+            hero: {
+                title: 'Entdecke Geschichten aus aller Welt',
+                subtitle: 'Lesen und veröffentlichen Sie Geschichten in 9 Sprachen. Verbinden Sie sich mit Lesern und Autoren weltweit.',
+                startReading: 'Lesen starten',
+                startWriting: 'Schreiben starten',
+                availableIn: 'Verfügbar in 9 Sprachen'
+            },
+            featured: {
+                title: 'Ausgewählte Werke',
+                viewAll: 'Alle Werke anzeigen'
+            },
+            howItWorks: {
+                title: 'So funktioniert es',
+                step1: {
+                    title: 'Schreiben & Hochladen',
+                    desc: 'Erstellen Sie Ihre Geschichte in einer unserer 9 unterstützten Sprachen. Laden Sie Ihr Werk mit wenigen Klicks hoch.'
+                },
+                step2: {
+                    title: 'KI-Übersetzung',
+                    desc: 'Unsere KI übersetzt Ihr Werk sofort in 9 Sprachen. Erreichen Sie Leser auf der ganzen Welt.'
+                },
+                step3: {
+                    title: 'Einnahmen erzielen',
+                    desc: 'Verdienen Sie bis zu 60% der Verkaufserlöse. Faire Verteilung für alle Kreativen.'
+                }
+            },
+            stats: {
+                languages: 'Sprachen',
+                works: 'Werke',
+                authors: 'Autoren',
+                readers: 'Leser'
+            },
+            forCreators: {
+                title: 'Für Kreative',
+                desc: 'Treten Sie unserer Gemeinschaft von Autoren, Übersetzern und Künstlern bei. Teilen Sie Ihre Geschichten mit der Welt und verdienen Sie mit Ihrer Kreativität.',
+                feature1: 'Kostenlose KI-Übersetzung in 9 Sprachen',
+                feature2: 'Bis zu 60% Umsatzbeteiligung',
+                feature3: 'Sofort globales Publikum erreichen',
+                feature4: 'Volle Rechte an Ihrem Werk behalten',
+                button: 'Kreieren starten'
+            },
             revenue: {
-                title: 'Faire Umsatzbeteiligung',
-                desc: 'Autoren verdienen bis zu 70%, wenn sie Übersetzung und Redaktion übernehmen. Transparentes Zahlungssystem.'
+                title: 'Umsatzverteilung',
+                platform: 'Plattform'
             },
-            translation: {
-                title: 'KI-Übersetzung',
-                desc: 'Kostenlose KI-Übersetzung für globale Zielgruppen. Professionelle menschliche Übersetzung verfügbar.'
-            },
-            global: {
-                title: 'Globale Reichweite',
-                desc: 'Veröffentlichen in 9 Sprachen: Englisch, Japanisch, Chinesisch, Spanisch, Französisch, Deutsch, Koreanisch, Arabisch, Portugiesisch.'
+            cta: {
+                title: 'Bereit für Ihre Reise?',
+                subtitle: 'Schließen Sie sich Tausenden von Lesern und Kreativen auf Publisher an.',
+                createAccount: 'Kostenloses Konto erstellen',
+                browseWorks: 'Werke durchsuchen'
             }
         },
-        manga: {
-            title: 'Manga in die Welt',
-            desc: 'Wir sind spezialisiert darauf, japanische Manga und Comics einem internationalen Publikum zugänglich zu machen.',
-            feature1: 'Professioneller Manga-Viewer',
-            feature2: 'Unterstützung von Japanisch in mehrere Sprachen',
-            feature3: 'Rechteverwaltungssystem'
-        },
-        cta: {
-            title: 'Bereit, Ihre Geschichte zu teilen?',
-            subtitle: 'Treten Sie Tausenden von Kreativen bei, die globale Zielgruppen erreichen',
-            button: 'Heute starten'
-        },
         footer: {
-            tagline: 'Verbinden von Kreativen und Lesern weltweit',
-            links: 'Schnelllinks',
-            about: 'Über uns',
+            tagline: 'Eine mehrsprachige Verlagsplattform, die Autoren, Übersetzer und Leser weltweit verbindet.',
+            explore: 'Entdecken',
+            authors: 'Autoren',
+            creators: 'Kreative',
+            write: 'Schreiben',
+            translate: 'Übersetzen',
+            pricing: 'Preise',
+            help: 'Hilfe',
+            faq: 'FAQ',
+            legal: 'Rechtliches',
             terms: 'Bedingungen',
             privacy: 'Datenschutz',
             contact: 'Kontakt'
@@ -479,21 +661,26 @@ const translations = {
             no: 'Nein',
             back: 'Zurück',
             next: 'Weiter',
-            previous: 'Zurück'
+            previous: 'Zurück',
+            free: 'Kostenlos'
         }
     },
 
     // =====================================================
-    // Korean (韓国語) - 新規追加
+    // Korean (韓国語)
     // =====================================================
     ko: {
         nav: {
+            home: '홈',
+            browse: '둘러보기',
+            genres: '장르',
             revenue: '수익 배분',
             upload: '작품 업로드',
             dashboard: '대시보드',
             register: '등록',
             login: '로그인',
             logout: '로그아웃',
+            getStarted: '시작하기',
             author: '저자',
             translator: '번역가',
             editor: '편집자',
@@ -501,43 +688,70 @@ const translations = {
             settings: '설정',
             support: '지원'
         },
-        hero: {
-            title: '당신의 이야기를 세계로',
-            subtitle: '9개 언어로 저자, 번역가, 독자를 연결하는 혁신적인 플랫폼. 공정한 수익 배분. AI 번역. 글로벌 도달.',
-            start: '출판 시작하기',
-            learn: '자세히 보기'
-        },
-        features: {
-            title: 'Publisher를 선택하는 이유',
+        home: {
+            hero: {
+                title: '전 세계의 이야기를 발견하세요',
+                subtitle: '9개 언어로 이야기를 읽고 출판하세요. 전 세계 독자와 작가들과 연결하세요.',
+                startReading: '읽기 시작',
+                startWriting: '쓰기 시작',
+                availableIn: '9개 언어 지원'
+            },
+            featured: {
+                title: '추천 작품',
+                viewAll: '모든 작품 보기'
+            },
+            howItWorks: {
+                title: '사용 방법',
+                step1: {
+                    title: '작성 및 업로드',
+                    desc: '지원되는 9개 언어 중 하나로 이야기를 만드세요. 몇 번의 클릭으로 작품을 업로드하세요.'
+                },
+                step2: {
+                    title: 'AI 번역',
+                    desc: 'AI가 작품을 9개 언어로 즉시 번역합니다. 전 세계 독자에게 도달하세요.'
+                },
+                step3: {
+                    title: '수익 창출',
+                    desc: '판매 수익의 최대 60%를 획득하세요. 모든 창작자에게 공정한 분배.'
+                }
+            },
+            stats: {
+                languages: '언어',
+                works: '작품',
+                authors: '저자',
+                readers: '독자'
+            },
+            forCreators: {
+                title: '창작자를 위해',
+                desc: '작가, 번역가, 아티스트 커뮤니티에 참여하세요. 세계와 이야기를 공유하고 창의력으로 수익을 얻으세요.',
+                feature1: '9개 언어 무료 AI 번역',
+                feature2: '최대 60% 수익 공유',
+                feature3: '즉시 글로벌 독자 도달',
+                feature4: '작품의 모든 권리 유지',
+                button: '창작 시작'
+            },
             revenue: {
-                title: '공정한 수익 배분',
-                desc: '저자는 번역과 편집을 담당할 때 최대 70%를 획득. 투명한 결제 시스템.'
+                title: '수익 분배',
+                platform: '플랫폼'
             },
-            translation: {
-                title: 'AI 번역',
-                desc: '무료 AI 번역으로 전 세계 독자에게 도달. 전문 인간 번역도 이용 가능.'
-            },
-            global: {
-                title: '글로벌 도달',
-                desc: '9개 언어로 출판: 영어, 일본어, 중국어, 스페인어, 프랑스어, 독일어, 한국어, 아랍어, 포르투갈어.'
+            cta: {
+                title: '시작할 준비가 되셨나요?',
+                subtitle: 'Publisher의 수천 명의 독자와 창작자와 함께하세요.',
+                createAccount: '무료 계정 만들기',
+                browseWorks: '작품 둘러보기'
             }
         },
-        manga: {
-            title: '만화를 세계로',
-            desc: '일본 만화와 코믹스를 국제 독자에게 전달하는 것을 전문으로 합니다. 세로 및 가로 읽기 형식을 지원.',
-            feature1: '전문 만화 뷰어',
-            feature2: '일본어에서 다국어 지원',
-            feature3: '권리 관리 시스템'
-        },
-        cta: {
-            title: '이야기를 공유할 준비가 되셨나요?',
-            subtitle: '전 세계 독자에게 도달하는 수천 명의 창작자와 함께하세요',
-            button: '오늘 시작하기'
-        },
         footer: {
-            tagline: '전 세계 창작자와 독자를 연결',
-            links: '빠른 링크',
-            about: '소개',
+            tagline: '전 세계 저자, 번역가, 독자를 연결하는 다국어 출판 플랫폼.',
+            explore: '탐색',
+            authors: '저자',
+            creators: '창작자',
+            write: '쓰기',
+            translate: '번역',
+            pricing: '가격',
+            help: '도움말',
+            faq: 'FAQ',
+            legal: '법적 정보',
             terms: '이용약관',
             privacy: '개인정보',
             contact: '연락처'
@@ -557,21 +771,26 @@ const translations = {
             no: '아니오',
             back: '뒤로',
             next: '다음',
-            previous: '이전'
+            previous: '이전',
+            free: '무료'
         }
     },
 
     // =====================================================
-    // Arabic (アラビア語) - 新規追加
+    // Arabic (アラビア語)
     // =====================================================
     ar: {
         nav: {
+            home: 'الرئيسية',
+            browse: 'تصفح',
+            genres: 'الأنواع',
             revenue: 'توزيع الإيرادات',
             upload: 'رفع عمل',
             dashboard: 'لوحة التحكم',
             register: 'تسجيل',
             login: 'تسجيل الدخول',
             logout: 'تسجيل الخروج',
+            getStarted: 'ابدأ الآن',
             author: 'مؤلف',
             translator: 'مترجم',
             editor: 'محرر',
@@ -579,43 +798,70 @@ const translations = {
             settings: 'إعدادات',
             support: 'دعم'
         },
-        hero: {
-            title: 'انشر قصتك للعالم',
-            subtitle: 'منصة ثورية تربط المؤلفين والمترجمين والقراء عبر 9 لغات. توزيع عادل للإيرادات. ترجمة بالذكاء الاصطناعي. وصول عالمي.',
-            start: 'ابدأ النشر',
-            learn: 'اعرف المزيد'
-        },
-        features: {
-            title: 'لماذا تختار Publisher؟',
+        home: {
+            hero: {
+                title: 'اكتشف قصصًا من جميع أنحاء العالم',
+                subtitle: 'اقرأ وانشر القصص بـ 9 لغات. تواصل مع القراء والكتاب عالميًا.',
+                startReading: 'ابدأ القراءة',
+                startWriting: 'ابدأ الكتابة',
+                availableIn: 'متاح بـ 9 لغات'
+            },
+            featured: {
+                title: 'أعمال مميزة',
+                viewAll: 'عرض جميع الأعمال'
+            },
+            howItWorks: {
+                title: 'كيف يعمل',
+                step1: {
+                    title: 'اكتب وارفع',
+                    desc: 'أنشئ قصتك بأي من لغاتنا التسع المدعومة. ارفع عملك بنقرات قليلة.'
+                },
+                step2: {
+                    title: 'ترجمة AI',
+                    desc: 'يترجم AI عملك فوريًا إلى 9 لغات. وصول إلى قراء حول العالم.'
+                },
+                step3: {
+                    title: 'اكسب الإيرادات',
+                    desc: 'اكسب حتى 60٪ من إيرادات المبيعات. توزيع عادل لجميع المبدعين.'
+                }
+            },
+            stats: {
+                languages: 'لغات',
+                works: 'أعمال',
+                authors: 'مؤلفون',
+                readers: 'قراء'
+            },
+            forCreators: {
+                title: 'للمبدعين',
+                desc: 'انضم إلى مجتمعنا من الكتاب والمترجمين والفنانين. شارك قصصك مع العالم واكسب من إبداعك.',
+                feature1: 'ترجمة AI مجانية لـ 9 لغات',
+                feature2: 'اكسب حتى 60٪ من الإيرادات',
+                feature3: 'وصول فوري للجمهور العالمي',
+                feature4: 'احتفظ بجميع حقوق عملك',
+                button: 'ابدأ الإبداع'
+            },
             revenue: {
-                title: 'توزيع عادل للإيرادات',
-                desc: 'يكسب المؤلفون حتى 70٪ عند التعامل مع الترجمة والتحرير. نظام دفع شفاف.'
+                title: 'توزيع الإيرادات',
+                platform: 'المنصة'
             },
-            translation: {
-                title: 'ترجمة AI',
-                desc: 'ترجمة AI مجانية للوصول إلى جمهور عالمي. ترجمة بشرية احترافية متاحة.'
-            },
-            global: {
-                title: 'وصول عالمي',
-                desc: 'النشر بـ 9 لغات: الإنجليزية، اليابانية، الصينية، الإسبانية، الفرنسية، الألمانية، الكورية، العربية، البرتغالية.'
+            cta: {
+                title: 'مستعد لبدء رحلتك؟',
+                subtitle: 'انضم إلى آلاف القراء والمبدعين على Publisher.',
+                createAccount: 'إنشاء حساب مجاني',
+                browseWorks: 'تصفح الأعمال'
             }
         },
-        manga: {
-            title: 'المانغا إلى العالم',
-            desc: 'نحن متخصصون في جلب المانغا اليابانية والقصص المصورة إلى الجماهير الدولية.',
-            feature1: 'عارض مانغا احترافي',
-            feature2: 'دعم من اليابانية إلى لغات متعددة',
-            feature3: 'نظام إدارة الحقوق'
-        },
-        cta: {
-            title: 'مستعد لمشاركة قصتك؟',
-            subtitle: 'انضم إلى آلاف المبدعين الذين يصلون إلى جماهير عالمية',
-            button: 'ابدأ اليوم'
-        },
         footer: {
-            tagline: 'ربط المبدعين والقراء حول العالم',
-            links: 'روابط سريعة',
-            about: 'حول',
+            tagline: 'منصة نشر متعددة اللغات تربط المؤلفين والمترجمين والقراء حول العالم.',
+            explore: 'استكشف',
+            authors: 'المؤلفون',
+            creators: 'المبدعون',
+            write: 'اكتب',
+            translate: 'ترجم',
+            pricing: 'الأسعار',
+            help: 'مساعدة',
+            faq: 'الأسئلة الشائعة',
+            legal: 'قانوني',
             terms: 'الشروط',
             privacy: 'الخصوصية',
             contact: 'اتصل'
@@ -635,21 +881,26 @@ const translations = {
             no: 'لا',
             back: 'رجوع',
             next: 'التالي',
-            previous: 'السابق'
+            previous: 'السابق',
+            free: 'مجاني'
         }
     },
 
     // =====================================================
-    // Portuguese (ポルトガル語) - 新規追加
+    // Portuguese (ポルトガル語)
     // =====================================================
     pt: {
         nav: {
+            home: 'Início',
+            browse: 'Explorar',
+            genres: 'Gêneros',
             revenue: 'Divisão de Receita',
             upload: 'Enviar Obra',
             dashboard: 'Painel',
             register: 'Registrar',
             login: 'Entrar',
             logout: 'Sair',
+            getStarted: 'Começar',
             author: 'Autor',
             translator: 'Tradutor',
             editor: 'Editor',
@@ -657,43 +908,70 @@ const translations = {
             settings: 'Configurações',
             support: 'Suporte'
         },
-        hero: {
-            title: 'Publique Sua História para o Mundo',
-            subtitle: 'Uma plataforma revolucionária conectando autores, tradutores e leitores em 9 idiomas. Divisão justa de receita. Tradução com IA. Alcance global.',
-            start: 'Começar a Publicar',
-            learn: 'Saiba Mais'
-        },
-        features: {
-            title: 'Por Que Escolher Publisher?',
+        home: {
+            hero: {
+                title: 'Descubra Histórias de Todo o Mundo',
+                subtitle: 'Leia e publique histórias em 9 idiomas. Conecte-se com leitores e escritores globalmente.',
+                startReading: 'Começar a Ler',
+                startWriting: 'Começar a Escrever',
+                availableIn: 'Disponível em 9 idiomas'
+            },
+            featured: {
+                title: 'Obras em Destaque',
+                viewAll: 'Ver Todas as Obras'
+            },
+            howItWorks: {
+                title: 'Como Funciona',
+                step1: {
+                    title: 'Escreva e Envie',
+                    desc: 'Crie sua história em qualquer um dos nossos 9 idiomas suportados. Envie seu trabalho com poucos cliques.'
+                },
+                step2: {
+                    title: 'Tradução IA',
+                    desc: 'Nossa IA traduz instantaneamente seu trabalho para 9 idiomas. Alcance leitores ao redor do mundo.'
+                },
+                step3: {
+                    title: 'Ganhe Receita',
+                    desc: 'Ganhe até 60% da receita de vendas. Distribuição justa para todos os criadores.'
+                }
+            },
+            stats: {
+                languages: 'Idiomas',
+                works: 'Obras',
+                authors: 'Autores',
+                readers: 'Leitores'
+            },
+            forCreators: {
+                title: 'Para Criadores',
+                desc: 'Junte-se à nossa comunidade de escritores, tradutores e artistas. Compartilhe suas histórias com o mundo e ganhe com sua criatividade.',
+                feature1: 'Tradução IA gratuita para 9 idiomas',
+                feature2: 'Ganhe até 60% de participação',
+                feature3: 'Alcance público global instantaneamente',
+                feature4: 'Mantenha todos os direitos da sua obra',
+                button: 'Começar a Criar'
+            },
             revenue: {
-                title: 'Divisão Justa de Receita',
-                desc: 'Autores ganham até 70% ao lidar com tradução e edição. Sistema de pagamento transparente.'
+                title: 'Distribuição de Receita',
+                platform: 'Plataforma'
             },
-            translation: {
-                title: 'Tradução IA',
-                desc: 'Tradução IA gratuita para alcançar audiências globais. Tradução humana profissional disponível.'
-            },
-            global: {
-                title: 'Alcance Global',
-                desc: 'Publique em 9 idiomas: inglês, japonês, chinês, espanhol, francês, alemão, coreano, árabe, português.'
+            cta: {
+                title: 'Pronto para Começar sua Jornada?',
+                subtitle: 'Junte-se a milhares de leitores e criadores no Publisher.',
+                createAccount: 'Criar Conta Grátis',
+                browseWorks: 'Explorar Obras'
             }
         },
-        manga: {
-            title: 'Mangá para o Mundo',
-            desc: 'Somos especializados em trazer mangás japoneses e quadrinhos para audiências internacionais. Nossa plataforma suporta formatos de leitura vertical e horizontal.',
-            feature1: 'Visualizador de mangá profissional',
-            feature2: 'Suporte de japonês para múltiplos idiomas',
-            feature3: 'Sistema de gestão de direitos'
-        },
-        cta: {
-            title: 'Pronto para Compartilhar Sua História?',
-            subtitle: 'Junte-se a milhares de criadores alcançando audiências globais',
-            button: 'Comece Hoje'
-        },
         footer: {
-            tagline: 'Conectando criadores e leitores em todo o mundo',
-            links: 'Links Rápidos',
-            about: 'Sobre',
+            tagline: 'Uma plataforma de publicação multilíngue conectando autores, tradutores e leitores em todo o mundo.',
+            explore: 'Explorar',
+            authors: 'Autores',
+            creators: 'Criadores',
+            write: 'Escrever',
+            translate: 'Traduzir',
+            pricing: 'Preços',
+            help: 'Ajuda',
+            faq: 'FAQ',
+            legal: 'Legal',
             terms: 'Termos',
             privacy: 'Privacidade',
             contact: 'Contato'
@@ -713,13 +991,14 @@ const translations = {
             no: 'Não',
             back: 'Voltar',
             next: 'Próximo',
-            previous: 'Anterior'
+            previous: 'Anterior',
+            free: 'Grátis'
         }
     }
 };
 
 // =====================================================
-// 言語コード一覧（利用可能な言語）
+// 言語コード一覧
 // =====================================================
 const availableLanguages = {
     en: { name: 'English', nativeName: 'English', flag: '🇬🇧', rtl: false },
@@ -734,15 +1013,8 @@ const availableLanguages = {
 };
 
 // =====================================================
-// 翻訳ヘルパー関数
+// ヘルパー関数
 // =====================================================
-
-/**
- * 翻訳を取得
- * @param {string} key - ドット区切りのキー (例: 'nav.dashboard')
- * @param {string} lang - 言語コード (例: 'ja')
- * @returns {string} 翻訳テキスト
- */
 function t(key, lang = null) {
     const currentLang = lang || getCurrentLanguage();
     const keys = key.split('.');
@@ -752,13 +1024,12 @@ function t(key, lang = null) {
         if (result && result[k]) {
             result = result[k];
         } else {
-            // フォールバック: 英語を使用
             result = translations.en;
             for (const fallbackKey of keys) {
                 if (result && result[fallbackKey]) {
                     result = result[fallbackKey];
                 } else {
-                    return key; // 見つからない場合はキーを返す
+                    return key;
                 }
             }
             break;
@@ -768,38 +1039,21 @@ function t(key, lang = null) {
     return typeof result === 'string' ? result : key;
 }
 
-/**
- * 現在の言語を取得
- * @returns {string} 言語コード
- */
 function getCurrentLanguage() {
     return localStorage.getItem('preferredLanguage') || 
            navigator.language.split('-')[0] || 
            'en';
 }
 
-/**
- * 言語を設定
- * @param {string} lang - 言語コード
- */
 function setLanguage(lang) {
     if (availableLanguages[lang]) {
         localStorage.setItem('preferredLanguage', lang);
-        
-        // RTL言語の場合、ドキュメントのdir属性を更新
         document.documentElement.dir = availableLanguages[lang].rtl ? 'rtl' : 'ltr';
         document.documentElement.lang = lang;
-        
-        // カスタムイベントを発火
         document.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang } }));
     }
 }
 
-/**
- * 言語が利用可能かチェック
- * @param {string} lang - 言語コード
- * @returns {boolean}
- */
 function isLanguageAvailable(lang) {
     return !!availableLanguages[lang];
 }
