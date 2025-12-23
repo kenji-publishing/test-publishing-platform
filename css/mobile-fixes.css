@@ -2,6 +2,7 @@
  * Publisher Platform - Mobile Optimization Fixes
  * Phase 11A: Responsive improvements
  * Phase 11B: Touch optimization
+ * Phase 11C: Performance optimization (Lazy Loading styles)
  */
 
 /* ===== Global Mobile Improvements ===== */
@@ -1215,6 +1216,191 @@
         font-size: 0.9rem;
         font-weight: 500;
     }
+}
+
+/* ===== Phase 11C-1: Lazy Loading Styles ===== */
+
+/* Base lazy image styles */
+.lazy-image {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.lazy-image.lazy-loaded {
+    opacity: 1;
+}
+
+.lazy-image.lazy-loading {
+    opacity: 0.5;
+}
+
+.lazy-image.lazy-error {
+    opacity: 1;
+    background: #f0f0f0;
+}
+
+/* Placeholder skeleton animation */
+.lazy-placeholder {
+    background: linear-gradient(
+        90deg,
+        #f0f0f0 25%,
+        #e0e0e0 50%,
+        #f0f0f0 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Manga page placeholder */
+.manga-page-placeholder {
+    background: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    font-size: 2rem;
+}
+
+.manga-page-placeholder::before {
+    content: '';
+    width: 40px;
+    height: 40px;
+    border: 3px solid #555;
+    border-top-color: #888;
+    border-radius: 50%;
+    animation: spin-loader 1s linear infinite;
+}
+
+@keyframes spin-loader {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Thumbnail placeholder */
+.thumbnail-placeholder {
+    background: #444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.thumbnail-placeholder::after {
+    content: '';
+    width: 20px;
+    height: 20px;
+    border: 2px solid #555;
+    border-top-color: #777;
+    border-radius: 50%;
+    animation: spin-loader 1s linear infinite;
+}
+
+/* Book cover placeholder */
+.book-cover-placeholder {
+    background: linear-gradient(135deg, #e0d6cc 0%, #d4c9bd 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-accent, #8B7355);
+}
+
+.book-cover-placeholder i {
+    font-size: 2rem;
+    opacity: 0.5;
+}
+
+/* Image container with aspect ratio */
+.lazy-image-container {
+    position: relative;
+    overflow: hidden;
+    background: #f5f5f5;
+}
+
+.lazy-image-container.ratio-4-3 {
+    aspect-ratio: 4 / 3;
+}
+
+.lazy-image-container.ratio-3-4 {
+    aspect-ratio: 3 / 4;
+}
+
+.lazy-image-container.ratio-16-9 {
+    aspect-ratio: 16 / 9;
+}
+
+.lazy-image-container.ratio-1-1 {
+    aspect-ratio: 1 / 1;
+}
+
+.lazy-image-container img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Loading spinner overlay */
+.lazy-loading-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 30px;
+    height: 30px;
+    border: 3px solid rgba(139, 115, 85, 0.2);
+    border-top-color: var(--color-accent, #8B7355);
+    border-radius: 50%;
+    animation: spin-loader 1s linear infinite;
+}
+
+/* Error state */
+.lazy-error-state {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: #999;
+}
+
+.lazy-error-state i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.lazy-error-state span {
+    font-size: 0.75rem;
+    display: block;
+}
+
+/* Manga viewer specific */
+.manga-page.lazy-image {
+    max-width: 100%;
+    max-height: calc(100vh - 140px);
+    object-fit: contain;
+}
+
+/* Thumbnail lazy loading */
+.thumbnail img.lazy-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Native lazy loading support indicator */
+img[loading="lazy"] {
+    /* Modern browsers support native lazy loading */
 }
 
 /* ===== Print Styles ===== */
