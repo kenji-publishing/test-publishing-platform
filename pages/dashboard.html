@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Publisher</title>
+    <title data-i18n="dashboard.title">Dashboard - Publisher</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,11 +19,23 @@
     <link href="../css/mobile-fixes.css" rel="stylesheet">
     
     <style>
-        .dashboard-container {
-            padding: var(--spacing-xl) 0;
+        /* Language Selector */
+        .language-selector {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .language-selector select {
+            padding: 8px 12px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            background: var(--color-bg-card);
+            font-size: var(--font-size-sm);
+            cursor: pointer;
         }
 
-        /* Welcome Banner */
+        .dashboard-container { padding: var(--spacing-xl) 0; }
         .welcome-banner {
             background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
             border-radius: var(--radius-xl);
@@ -31,453 +43,78 @@
             color: white;
             margin-bottom: var(--spacing-xl);
         }
-
-        .welcome-banner h1 {
-            color: white;
-            font-size: var(--font-size-2xl);
-            margin-bottom: var(--spacing-xs);
-        }
-
-        .welcome-banner p {
-            color: rgba(255, 255, 255, 0.9);
-            margin: 0;
-        }
-
-        .welcome-banner .btn {
-            background: white;
-            color: var(--color-accent);
-            border: none;
-            font-weight: 600;
-        }
-
-        .welcome-banner .btn:hover {
-            background: var(--color-bg-hover);
-        }
-
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: var(--spacing-md);
-            margin-bottom: var(--spacing-xl);
-        }
-
-        .stat-card {
-            background: var(--color-bg-card);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-lg);
-            transition: all var(--transition-fast);
-        }
-
-        .stat-card:hover {
-            box-shadow: var(--shadow-md);
-            transform: translateY(-2px);
-        }
-
-        .stat-card .stat-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: var(--radius-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: var(--spacing-md);
-        }
-
-        .stat-card .stat-icon.earnings {
-            background: rgba(93, 156, 89, 0.1);
-            color: var(--color-success);
-        }
-
-        .stat-card .stat-icon.works {
-            background: rgba(139, 115, 85, 0.1);
-            color: var(--color-accent);
-        }
-
-        .stat-card .stat-icon.views {
-            background: rgba(93, 139, 199, 0.1);
-            color: var(--color-info);
-        }
-
-        .stat-card .stat-icon.translations {
-            background: rgba(212, 168, 83, 0.1);
-            color: var(--color-warning);
-        }
-
-        .stat-card .stat-value {
-            font-family: var(--font-heading);
-            font-size: var(--font-size-2xl);
-            font-weight: 700;
-            color: var(--color-text-primary);
-        }
-
-        .stat-card .stat-label {
-            font-size: var(--font-size-sm);
-            color: var(--color-text-secondary);
-        }
-
-        .stat-card .stat-change {
-            font-size: var(--font-size-xs);
-            margin-top: var(--spacing-xs);
-        }
-
-        .stat-change.positive {
-            color: var(--color-success);
-        }
-
-        .stat-change.negative {
-            color: var(--color-error);
-        }
-
-        /* Dashboard Sections */
-        .dashboard-section {
-            background: var(--color-bg-card);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-lg);
-            margin-bottom: var(--spacing-xl);
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: var(--spacing-lg);
-            border-bottom: 1px solid var(--color-border);
-        }
-
-        .section-header h2 {
-            font-size: var(--font-size-lg);
-            margin: 0;
-        }
-
-        .section-body {
-            padding: var(--spacing-lg);
-        }
-
-        /* Work Item */
-        .work-item {
-            display: flex;
-            align-items: center;
-            padding: var(--spacing-md);
-            border-radius: var(--radius-md);
-            transition: all var(--transition-fast);
-        }
-
-        .work-item:hover {
-            background: var(--color-bg-hover);
-        }
-
-        .work-item .work-cover {
-            width: 60px;
-            height: 80px;
-            background: var(--color-bg-hover);
-            border-radius: var(--radius-sm);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: var(--spacing-md);
-            flex-shrink: 0;
-        }
-
-        .work-item .work-cover i {
-            font-size: 1.5rem;
-            color: var(--color-accent-light);
-        }
-
-        .work-item .work-info {
-            flex-grow: 1;
-            min-width: 0;
-        }
-
-        .work-item .work-title {
-            font-weight: 600;
-            color: var(--color-text-primary);
-            margin-bottom: 2px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .work-item .work-meta {
-            font-size: var(--font-size-sm);
-            color: var(--color-text-secondary);
-        }
-
-        .work-item .work-stats {
-            text-align: right;
-            flex-shrink: 0;
-        }
-
-        .work-item .work-earnings {
-            font-weight: 600;
-            color: var(--color-success);
-        }
-
-        .work-item .work-views {
-            font-size: var(--font-size-sm);
-            color: var(--color-text-secondary);
-        }
-
-        /* Translation Status */
-        .translation-item {
-            display: flex;
-            align-items: center;
-            padding: var(--spacing-md);
-            border-radius: var(--radius-md);
-            margin-bottom: var(--spacing-sm);
-            background: var(--color-bg-main);
-        }
-
-        .translation-item .lang-flag {
-            font-size: 1.5rem;
-            margin-right: var(--spacing-md);
-        }
-
-        .translation-item .translation-info {
-            flex-grow: 1;
-            min-width: 0;
-        }
-
-        .translation-item .translation-title {
-            font-weight: 500;
-            font-size: var(--font-size-sm);
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-        }
-
-        .translation-item .translation-progress {
-            font-size: var(--font-size-xs);
-            color: var(--color-text-secondary);
-        }
-
-        .translation-item .status-badge {
-            padding: 4px 8px;
-            border-radius: var(--radius-full);
-            font-size: var(--font-size-xs);
-            font-weight: 500;
-            flex-shrink: 0;
-        }
-
-        .status-badge.completed {
-            background: rgba(93, 156, 89, 0.1);
-            color: var(--color-success);
-        }
-
-        .status-badge.in-progress {
-            background: rgba(93, 139, 199, 0.1);
-            color: var(--color-info);
-        }
-
-        .status-badge.pending {
-            background: rgba(212, 168, 83, 0.1);
-            color: var(--color-warning);
-        }
-
-        /* Quick Actions */
-        .quick-actions {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: var(--spacing-md);
-        }
-        .action-card {
-            background: var(--color-bg-card);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-lg);
-            text-align: center;
-            text-decoration: none;
-            color: var(--color-text-primary);
-            transition: all var(--transition-fast);
-        }
-
-        .action-card:hover {
-            border-color: var(--color-accent);
-            box-shadow: var(--shadow-md);
-            transform: translateY(-2px);
-            color: var(--color-text-primary);
-        }
-
-        .action-card i {
-            font-size: 2rem;
-            color: var(--color-accent);
-            margin-bottom: var(--spacing-sm);
-        }
-
-        .action-card .action-title {
-            font-weight: 600;
-            margin-bottom: var(--spacing-xs);
-        }
-
-        .action-card .action-desc {
-            font-size: var(--font-size-sm);
-            color: var(--color-text-secondary);
-        }
-
-        /* AI Translation Usage */
-        .usage-card {
-            background: linear-gradient(135deg, var(--color-bg-hover) 0%, var(--color-bg-card) 100%);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-lg);
-        }
-
-        .usage-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--spacing-md);
-        }
-
-        .usage-header h3 {
-            font-size: var(--font-size-base);
-            margin: 0;
-        }
-
-        .usage-count {
-            font-family: var(--font-heading);
-            font-size: var(--font-size-3xl);
-            font-weight: 700;
-            color: var(--color-accent);
-        }
-
-        .usage-label {
-            font-size: var(--font-size-sm);
-            color: var(--color-text-secondary);
-        }
-
-        /* Responsive - Basic styles (mobile-fixes.css handles detailed mobile styles) */
-        @media (max-width: 992px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .quick-actions {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .translation-item {
-                flex-wrap: wrap;
-                gap: 0.5rem;
-            }
-
-            .translation-item .translation-info {
-                flex: 1;
-                min-width: calc(100% - 60px);
-            }
-
-            .translation-item .status-badge {
-                margin-left: auto;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 0.5rem;
-            }
-
-            .stat-card {
-                padding: var(--spacing-md);
-            }
-
-            .stat-card .stat-icon {
-                width: 36px;
-                height: 36px;
-                margin-bottom: var(--spacing-sm);
-            }
-
-            .stat-card .stat-value {
-                font-size: var(--font-size-lg);
-            }
-
-            .stat-card .stat-label {
-                font-size: var(--font-size-xs);
-            }
-
-            .stat-card .stat-change {
-                display: none;
-            }
-
-            .quick-actions {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 0.5rem;
-            }
-
-            .action-card {
-                padding: var(--spacing-md);
-            }
-
-            .action-card i {
-                font-size: 1.5rem;
-            }
-
-            .welcome-banner {
-                text-align: center;
-                padding: var(--spacing-lg);
-            }
-
-            .welcome-banner h1 {
-                font-size: var(--font-size-lg);
-            }
-
-            .welcome-banner .d-flex {
-                flex-direction: column;
-                gap: var(--spacing-md);
-            }
-
-            .work-item {
-                flex-wrap: wrap;
-            }
-
-            .work-item .work-cover {
-                width: 50px;
-                height: 65px;
-            }
-
-            .work-item .work-info {
-                flex: 1;
-                min-width: calc(100% - 70px);
-            }
-
-            .work-item .work-title {
-                white-space: normal;
-                font-size: var(--font-size-sm);
-            }
-
-            .work-item .work-stats {
-                width: 100%;
-                text-align: left;
-                margin-top: var(--spacing-sm);
-                padding-top: var(--spacing-sm);
-                border-top: 1px solid var(--color-border);
-                display: flex;
-                justify-content: space-between;
-            }
-
-            .section-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.5rem;
-            }
-
-            .section-header h2 {
-                font-size: var(--font-size-base);
-            }
-
-            .usage-card {
-                padding: var(--spacing-md);
-            }
-
-            .usage-count {
-                font-size: var(--font-size-2xl);
-            }
-        }
+        .welcome-banner h1 { color: white; font-size: var(--font-size-2xl); margin-bottom: var(--spacing-xs); }
+        .welcome-banner p { color: rgba(255, 255, 255, 0.9); margin: 0; }
+        .welcome-banner .btn { background: white; color: var(--color-accent); border: none; font-weight: 600; }
+        .welcome-banner .btn:hover { background: var(--color-bg-hover); }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--spacing-md); margin-bottom: var(--spacing-xl); }
+        .stat-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-lg); transition: all var(--transition-fast); }
+        .stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+        .stat-card .stat-icon { width: 48px; height: 48px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin-bottom: var(--spacing-md); }
+        .stat-card .stat-icon.earnings { background: rgba(93, 156, 89, 0.1); color: var(--color-success); }
+        .stat-card .stat-icon.works { background: rgba(139, 115, 85, 0.1); color: var(--color-accent); }
+        .stat-card .stat-icon.views { background: rgba(93, 139, 199, 0.1); color: var(--color-info); }
+        .stat-card .stat-icon.translations { background: rgba(212, 168, 83, 0.1); color: var(--color-warning); }
+        .stat-card .stat-value { font-family: var(--font-heading); font-size: var(--font-size-2xl); font-weight: 700; color: var(--color-text-primary); }
+        .stat-card .stat-label { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+        .stat-card .stat-change { font-size: var(--font-size-xs); margin-top: var(--spacing-xs); }
+        .stat-change.positive { color: var(--color-success); }
+        .stat-change.negative { color: var(--color-error); }
+        .dashboard-section { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); margin-bottom: var(--spacing-xl); }
+        .section-header { display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-lg); border-bottom: 1px solid var(--color-border); }
+        .section-header h2 { font-size: var(--font-size-lg); margin: 0; }
+        .section-body { padding: var(--spacing-lg); }
+        .work-item { display: flex; align-items: center; padding: var(--spacing-md); border-radius: var(--radius-md); transition: all var(--transition-fast); }
+        .work-item:hover { background: var(--color-bg-hover); }
+        .work-item .work-cover { width: 60px; height: 80px; background: var(--color-bg-hover); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; margin-right: var(--spacing-md); flex-shrink: 0; }
+        .work-item .work-cover i { font-size: 1.5rem; color: var(--color-accent-light); }
+        .work-item .work-info { flex-grow: 1; min-width: 0; }
+        .work-item .work-title { font-weight: 600; color: var(--color-text-primary); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .work-item .work-meta { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+        .work-item .work-stats { text-align: right; flex-shrink: 0; }
+        .work-item .work-earnings { font-weight: 600; color: var(--color-success); }
+        .work-item .work-views { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+        .translation-item { display: flex; align-items: center; padding: var(--spacing-md); border-radius: var(--radius-md); margin-bottom: var(--spacing-sm); background: var(--color-bg-main); }
+        .translation-item .lang-flag { font-size: 1.5rem; margin-right: var(--spacing-md); }
+        .translation-item .translation-info { flex-grow: 1; min-width: 0; }
+        .translation-item .translation-title { font-weight: 500; font-size: var(--font-size-sm); word-wrap: break-word; overflow-wrap: break-word; }
+        .translation-item .translation-progress { font-size: var(--font-size-xs); color: var(--color-text-secondary); }
+        .translation-item .status-badge { padding: 4px 8px; border-radius: var(--radius-full); font-size: var(--font-size-xs); font-weight: 500; flex-shrink: 0; }
+        .status-badge.completed { background: rgba(93, 156, 89, 0.1); color: var(--color-success); }
+        .status-badge.in-progress { background: rgba(93, 139, 199, 0.1); color: var(--color-info); }
+        .status-badge.pending { background: rgba(212, 168, 83, 0.1); color: var(--color-warning); }
+        .quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--spacing-md); }
+        .action-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-lg); text-align: center; text-decoration: none; color: var(--color-text-primary); transition: all var(--transition-fast); }
+        .action-card:hover { border-color: var(--color-accent); box-shadow: var(--shadow-md); transform: translateY(-2px); color: var(--color-text-primary); }
+        .action-card i { font-size: 2rem; color: var(--color-accent); margin-bottom: var(--spacing-sm); }
+        .action-card .action-title { font-weight: 600; margin-bottom: var(--spacing-xs); }
+        .action-card .action-desc { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+        .usage-card { background: linear-gradient(135deg, var(--color-bg-hover) 0%, var(--color-bg-card) 100%); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-lg); }
+        .usage-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-md); }
+        .usage-header h3 { font-size: var(--font-size-base); margin: 0; }
+        .usage-count { font-family: var(--font-heading); font-size: var(--font-size-3xl); font-weight: 700; color: var(--color-accent); }
+        .usage-label { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+        @media (max-width: 992px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .quick-actions { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) { .translation-item { flex-wrap: wrap; gap: 0.5rem; } .translation-item .translation-info { flex: 1; min-width: calc(100% - 60px); } .translation-item .status-badge { margin-left: auto; } }
+        @media (max-width: 576px) { .stats-grid { grid-template-columns: 1fr 1fr; gap: 0.5rem; } .stat-card { padding: var(--spacing-md); } .stat-card .stat-icon { width: 36px; height: 36px; margin-bottom: var(--spacing-sm); } .stat-card .stat-value { font-size: var(--font-size-lg); } .stat-card .stat-label { font-size: var(--font-size-xs); } .stat-card .stat-change { display: none; } .quick-actions { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; } .action-card { padding: var(--spacing-md); } .action-card i { font-size: 1.5rem; } .welcome-banner { text-align: center; padding: var(--spacing-lg); } .welcome-banner h1 { font-size: var(--font-size-lg); } .welcome-banner .d-flex { flex-direction: column; gap: var(--spacing-md); } .work-item { flex-wrap: wrap; } .work-item .work-cover { width: 50px; height: 65px; } .work-item .work-info { flex: 1; min-width: calc(100% - 70px); } .work-item .work-title { white-space: normal; font-size: var(--font-size-sm); } .work-item .work-stats { width: 100%; text-align: left; margin-top: var(--spacing-sm); padding-top: var(--spacing-sm); border-top: 1px solid var(--color-border); display: flex; justify-content: space-between; } .section-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; } .section-header h2 { font-size: var(--font-size-base); } .usage-card { padding: var(--spacing-md); } .usage-count { font-size: var(--font-size-2xl); } .language-selector { top: 70px; right: 10px; } }
     </style>
 </head>
 <body>
+    <!-- Language Selector -->
+    <div class="language-selector">
+        <select id="languageSelect" onchange="changeLanguage(this.value)">
+            <option value="en">🇬🇧 English</option>
+            <option value="ja">🇯🇵 日本語</option>
+            <option value="zh">🇨🇳 中文</option>
+            <option value="es">🇪🇸 Español</option>
+            <option value="fr">🇫🇷 Français</option>
+            <option value="de">🇩🇪 Deutsch</option>
+            <option value="ko">🇰🇷 한국어</option>
+            <option value="ar">🇸🇦 العربية</option>
+            <option value="pt">🇧🇷 Português</option>
+        </select>
+    </div>
+
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
         <div class="container">
@@ -494,33 +131,30 @@
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link active" href="dashboard.html">
-                            <i class="fas fa-th-large me-1"></i> Dashboard
+                            <i class="fas fa-th-large me-1"></i> <span data-i18n="nav.dashboard">Dashboard</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="my-works.html">
-                            <i class="fas fa-book me-1"></i> My Works
+                            <i class="fas fa-book me-1"></i> <span data-i18n="dashboard.myWorks">My Works</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="earnings.html">
-                            <i class="fas fa-coins me-1"></i> Earnings
+                            <i class="fas fa-coins me-1"></i> <span data-i18n="dashboard.earnings">Earnings</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="browse.html">
-                            <i class="fas fa-compass me-1"></i> Browse
+                            <i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span>
                         </a>
                     </li>
                 </ul>
                 
                 <div class="d-flex align-items-center gap-3">
-                    <!-- 通知ベル（動的バッジ） -->
                     <a href="notifications.html" class="btn btn-soft-custom position-relative">
                         <i class="fas fa-bell"></i>
-                        <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; display: none;">
-                            0
-                        </span>
+                        <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; display: none;">0</span>
                     </a>
                     
                     <div class="dropdown">
@@ -529,10 +163,10 @@
                             <span id="userName">User</span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="profile.html"><i class="fas fa-user me-2"></i>Profile</a></li>
-                            <li><a class="dropdown-item" href="account-settings.html"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                            <li><a class="dropdown-item" href="profile.html"><i class="fas fa-user me-2"></i><span data-i18n="nav.settings">Profile</span></a></li>
+                            <li><a class="dropdown-item" href="account-settings.html"><i class="fas fa-cog me-2"></i><span data-i18n="nav.settings">Settings</span></a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Sign Out</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i><span data-i18n="nav.logout">Sign Out</span></a></li>
                         </ul>
                     </div>
                 </div>
@@ -547,11 +181,11 @@
             <div class="welcome-banner fade-in">
                 <div class="d-flex justify-content-between align-items-center flex-wrap">
                     <div>
-                        <h1>Welcome back, <span id="welcomeName">Creator</span>! 👋</h1>
-                        <p>Here's what's happening with your works today.</p>
+                        <h1><span data-i18n="dashboard.welcome">Welcome back</span>, <span id="welcomeName">Creator</span>! 👋</h1>
+                        <p data-i18n="dashboard.subtitle">Here's what's happening with your works today.</p>
                     </div>
                     <a href="upload-work.html" class="btn btn-lg mt-3 mt-md-0">
-                        <i class="fas fa-plus me-2"></i>Upload New Work
+                        <i class="fas fa-plus me-2"></i><span data-i18n="dashboard.uploadNew">Upload New Work</span>
                     </a>
                 </div>
             </div>
@@ -559,47 +193,28 @@
             <!-- Stats Grid -->
             <div class="stats-grid fade-in">
                 <div class="stat-card">
-                    <div class="stat-icon earnings">
-                        <i class="fas fa-dollar-sign fa-lg"></i>
-                    </div>
+                    <div class="stat-icon earnings"><i class="fas fa-dollar-sign fa-lg"></i></div>
                     <div class="stat-value">$1,234.56</div>
-                    <div class="stat-label">Total Earnings</div>
-                    <div class="stat-change positive">
-                        <i class="fas fa-arrow-up"></i> +12.5% this month
-                    </div>
+                    <div class="stat-label" data-i18n="dashboard.totalRevenue">Total Earnings</div>
+                    <div class="stat-change positive"><i class="fas fa-arrow-up"></i> +12.5% <span data-i18n="dashboard.thisMonth">this month</span></div>
                 </div>
-
                 <div class="stat-card">
-                    <div class="stat-icon works">
-                        <i class="fas fa-book fa-lg"></i>
-                    </div>
+                    <div class="stat-icon works"><i class="fas fa-book fa-lg"></i></div>
                     <div class="stat-value">12</div>
-                    <div class="stat-label">Published Works</div>
-                    <div class="stat-change positive">
-                        <i class="fas fa-arrow-up"></i> +2 this month
-                    </div>
+                    <div class="stat-label" data-i18n="dashboard.totalWorks">Published Works</div>
+                    <div class="stat-change positive"><i class="fas fa-arrow-up"></i> +2 <span data-i18n="dashboard.thisMonth">this month</span></div>
                 </div>
-
                 <div class="stat-card">
-                    <div class="stat-icon views">
-                        <i class="fas fa-eye fa-lg"></i>
-                    </div>
+                    <div class="stat-icon views"><i class="fas fa-eye fa-lg"></i></div>
                     <div class="stat-value">8,432</div>
-                    <div class="stat-label">Total Views</div>
-                    <div class="stat-change positive">
-                        <i class="fas fa-arrow-up"></i> +24.3% this month
-                    </div>
+                    <div class="stat-label" data-i18n="dashboard.totalViews">Total Views</div>
+                    <div class="stat-change positive"><i class="fas fa-arrow-up"></i> +24.3% <span data-i18n="dashboard.thisMonth">this month</span></div>
                 </div>
-
                 <div class="stat-card">
-                    <div class="stat-icon translations">
-                        <i class="fas fa-language fa-lg"></i>
-                    </div>
+                    <div class="stat-icon translations"><i class="fas fa-language fa-lg"></i></div>
                     <div class="stat-value">48</div>
                     <div class="stat-label">Translations</div>
-                    <div class="stat-change positive">
-                        <i class="fas fa-arrow-up"></i> +8 this month
-                    </div>
+                    <div class="stat-change positive"><i class="fas fa-arrow-up"></i> +8 <span data-i18n="dashboard.thisMonth">this month</span></div>
                 </div>
             </div>
 
@@ -609,54 +224,37 @@
                     <!-- Recent Works -->
                     <div class="dashboard-section fade-in">
                         <div class="section-header">
-                            <h2><i class="fas fa-clock me-2 text-accent"></i>Recent Works</h2>
-                            <a href="my-works.html" class="btn btn-soft-custom btn-sm">View All</a>
+                            <h2><i class="fas fa-clock me-2 text-accent"></i><span data-i18n="dashboard.recentActivity">Recent Works</span></h2>
+                            <a href="my-works.html" class="btn btn-soft-custom btn-sm" data-i18n="dashboard.viewAll">View All</a>
                         </div>
                         <div class="section-body">
                             <div class="work-item">
-                                <div class="work-cover">
-                                    <i class="fas fa-book"></i>
-                                </div>
+                                <div class="work-cover"><i class="fas fa-book"></i></div>
                                 <div class="work-info">
                                     <div class="work-title">The Adventure of Magic Academy</div>
-                                    <div class="work-meta">
-                                        <span class="badge badge-soft me-2">Fiction</span>
-                                        Translated to 5 languages
-                                    </div>
+                                    <div class="work-meta"><span class="badge badge-soft me-2">Fiction</span>Translated to 5 languages</div>
                                 </div>
                                 <div class="work-stats">
                                     <div class="work-earnings">$234.50</div>
                                     <div class="work-views">1,234 views</div>
                                 </div>
                             </div>
-
                             <div class="work-item">
-                                <div class="work-cover">
-                                    <i class="fas fa-book"></i>
-                                </div>
+                                <div class="work-cover"><i class="fas fa-book"></i></div>
                                 <div class="work-info">
                                     <div class="work-title">Whispers of Tomorrow</div>
-                                    <div class="work-meta">
-                                        <span class="badge badge-soft me-2">Romance</span>
-                                        Translated to 3 languages
-                                    </div>
+                                    <div class="work-meta"><span class="badge badge-soft me-2">Romance</span>Translated to 3 languages</div>
                                 </div>
                                 <div class="work-stats">
                                     <div class="work-earnings">$156.00</div>
                                     <div class="work-views">892 views</div>
                                 </div>
                             </div>
-
                             <div class="work-item">
-                                <div class="work-cover">
-                                    <i class="fas fa-book"></i>
-                                </div>
+                                <div class="work-cover"><i class="fas fa-book"></i></div>
                                 <div class="work-info">
                                     <div class="work-title">Digital Dreams: A Cyberpunk Story</div>
-                                    <div class="work-meta">
-                                        <span class="badge badge-soft me-2">Sci-Fi</span>
-                                        Translated to 7 languages
-                                    </div>
+                                    <div class="work-meta"><span class="badge badge-soft me-2">Sci-Fi</span>Translated to 7 languages</div>
                                 </div>
                                 <div class="work-stats">
                                     <div class="work-earnings">$89.25</div>
@@ -670,7 +268,7 @@
                     <div class="dashboard-section fade-in">
                         <div class="section-header">
                             <h2><i class="fas fa-language me-2 text-accent"></i>Recent Translations</h2>
-                            <a href="translation-status.html" class="btn btn-soft-custom btn-sm">View All</a>
+                            <a href="translation-status.html" class="btn btn-soft-custom btn-sm" data-i18n="dashboard.viewAll">View All</a>
                         </div>
                         <div class="section-body">
                             <div class="translation-item">
@@ -679,31 +277,23 @@
                                     <div class="translation-title">The Adventure of Magic Academy → English</div>
                                     <div class="translation-progress">Completed 2 hours ago</div>
                                 </div>
-                                <span class="status-badge completed">
-                                    <i class="fas fa-check me-1"></i>Completed
-                                </span>
+                                <span class="status-badge completed"><i class="fas fa-check me-1"></i>Completed</span>
                             </div>
-
                             <div class="translation-item">
                                 <div class="lang-flag">🇪🇸</div>
                                 <div class="translation-info">
                                     <div class="translation-title">Whispers of Tomorrow → Spanish</div>
                                     <div class="translation-progress">65% complete • 3 min remaining</div>
                                 </div>
-                                <span class="status-badge in-progress">
-                                    <i class="fas fa-spinner fa-spin me-1"></i>In Progress
-                                </span>
+                                <span class="status-badge in-progress"><i class="fas fa-spinner fa-spin me-1"></i>In Progress</span>
                             </div>
-
                             <div class="translation-item">
                                 <div class="lang-flag">🇰🇷</div>
                                 <div class="translation-info">
                                     <div class="translation-title">Digital Dreams → Korean</div>
                                     <div class="translation-progress">Waiting in queue • Position 2</div>
                                 </div>
-                                <span class="status-badge pending">
-                                    <i class="fas fa-clock me-1"></i>Pending
-                                </span>
+                                <span class="status-badge pending"><i class="fas fa-clock me-1"></i>Pending</span>
                             </div>
                         </div>
                     </div>
@@ -724,32 +314,27 @@
                         <div class="progress-custom mb-3">
                             <div class="progress-bar" style="width: 60%"></div>
                         </div>
-                        <p class="text-center mb-0" style="font-size: var(--font-size-sm); color: var(--color-text-secondary);">
-                            2 free translations remaining
-                        </p>
+                        <p class="text-center mb-0" style="font-size: var(--font-size-sm); color: var(--color-text-secondary);">2 free translations remaining</p>
                     </div>
 
                     <!-- Quick Actions -->
-                    <h3 class="mb-3" style="font-size: var(--font-size-lg);">Quick Actions</h3>
+                    <h3 class="mb-3" style="font-size: var(--font-size-lg);" data-i18n="dashboard.quickActions">Quick Actions</h3>
                     <div class="quick-actions fade-in">
                         <a href="editor.html" class="action-card">
                             <i class="fas fa-edit d-block"></i>
                             <div class="action-title">Create</div>
                             <div class="action-desc">New work</div>
                         </a>
-
                         <a href="upload.html" class="action-card">
                             <i class="fas fa-upload d-block"></i>
                             <div class="action-title">Upload</div>
                             <div class="action-desc">File upload</div>
                         </a>
-
                         <a href="manga-translator.html" class="action-card">
                             <i class="fas fa-language d-block"></i>
                             <div class="action-title">Manga</div>
                             <div class="action-desc">Translator</div>
                         </a>
-
                         <a href="reader.html" class="action-card">
                             <i class="fas fa-book-reader d-block"></i>
                             <div class="action-title">Reader</div>
@@ -767,37 +352,27 @@
             <div class="d-flex flex-wrap justify-content-between align-items-center">
                 <p class="small mb-0">&copy; 2024 Publisher. All rights reserved.</p>
                 <div class="d-flex gap-3">
-                    <a href="support/faq.html" class="text-secondary">Help</a>
-                    <a href="terms.html" class="text-secondary">Terms</a>
-                    <a href="privacy.html" class="text-secondary">Privacy</a>
+                    <a href="support/faq.html" class="text-secondary" data-i18n="footer.help">Help</a>
+                    <a href="terms.html" class="text-secondary" data-i18n="footer.terms">Terms</a>
+                    <a href="privacy.html" class="text-secondary" data-i18n="footer.privacy">Privacy</a>
                 </div>
             </div>
         </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- 通知バッジ更新コンポーネント -->
+    <script src="../js/translations.js"></script>
+    <script src="../js/language-switcher.js"></script>
     <script src="../js/notification-badge.js"></script>
     <script>
-        // Check if user is logged in
         document.addEventListener('DOMContentLoaded', function() {
             const user = JSON.parse(localStorage.getItem('user') || '{}');
             const token = localStorage.getItem('token');
-
-            if (!token) {
-                // Not logged in, redirect to login
-                // window.location.href = 'login.html';
-                // For demo, just show default values
-            }
-
-            // Set user name
             if (user.firstName) {
                 document.getElementById('userName').textContent = user.firstName;
                 document.getElementById('welcomeName').textContent = user.firstName;
             }
         });
-
-        // Logout function
         function logout() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
