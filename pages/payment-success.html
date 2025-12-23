@@ -3,177 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Successful - Publisher</title>
+    <title data-i18n="payment.successTitle">Payment Successful - Publisher</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="../css/style.css" rel="stylesheet">
+    <link href="../css/style-new.css" rel="stylesheet">
+    <link href="../css/mobile-fixes.css" rel="stylesheet">
     <style>
-        .success-icon {
-            font-size: 6rem;
-            color: #198754;
-            animation: bounceIn 0.6s ease-out;
-        }
-        @keyframes bounceIn {
-            0% { transform: scale(0); opacity: 0; }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        .success-card {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .confetti {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            overflow: hidden;
-            z-index: 1000;
-        }
-        .confetti-piece {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            animation: confetti-fall 3s ease-out forwards;
-        }
-        @keyframes confetti-fall {
-            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-        }
+        .language-selector{position:fixed;top:80px;right:20px;z-index:1000}.language-selector select{padding:8px 12px;border:1px solid var(--color-border);border-radius:var(--radius-md);background:var(--color-bg-card);font-size:var(--font-size-sm);cursor:pointer}
+        .success-icon{font-size:6rem;color:#198754;animation:bounceIn 0.6s ease-out}@keyframes bounceIn{0%{transform:scale(0);opacity:0}50%{transform:scale(1.2)}100%{transform:scale(1);opacity:1}}
+        .success-card{max-width:600px;margin:0 auto}
+        .confetti{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;z-index:1000}
+        .confetti-piece{position:absolute;width:10px;height:10px;animation:confetti-fall 3s ease-out forwards}@keyframes confetti-fall{0%{transform:translateY(-100px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+        @media(max-width:576px){.language-selector{top:70px;right:10px}}
     </style>
 </head>
 <body>
-    <!-- Confetti Animation -->
     <div class="confetti" id="confetti"></div>
-
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="language-selector">
+        <select id="languageSelect" onchange="changeLanguage(this.value)">
+            <option value="en">🇬🇧 English</option><option value="ja">🇯🇵 日本語</option><option value="zh">🇨🇳 中文</option><option value="es">🇪🇸 Español</option><option value="fr">🇫🇷 Français</option><option value="de">🇩🇪 Deutsch</option><option value="ko">🇰🇷 한국어</option><option value="ar">🇸🇦 العربية</option><option value="pt">🇧🇷 Português</option>
+        </select>
+    </div>
+    <nav class="navbar navbar-expand-lg navbar-custom">
         <div class="container">
-            <a class="navbar-brand" href="../index.html">
-                <i class="fas fa-book-open"></i> Publisher
-            </a>
+            <a class="navbar-brand" href="../index.html"><i class="fas fa-book-open"></i> Publisher</a>
         </div>
     </nav>
-
     <div class="container py-5">
         <div class="success-card">
             <div class="card shadow-lg">
                 <div class="card-body text-center p-5">
-                    <!-- Success Icon -->
-                    <div class="success-icon mb-4">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-
-                    <h1 class="text-success mb-3">Payment Successful!</h1>
-                    <p class="lead text-muted mb-4">
-                        Thank you for your purchase. Your content is now available.
-                    </p>
-
-                    <!-- Order Details -->
+                    <div class="success-icon mb-4"><i class="fas fa-check-circle"></i></div>
+                    <h1 class="text-success mb-3" data-i18n="payment.success">Payment Successful!</h1>
+                    <p class="lead text-muted mb-4" data-i18n="payment.thankYou">Thank you for your purchase. Your content is now available.</p>
                     <div class="bg-light rounded p-4 mb-4 text-start">
-                        <h6 class="text-muted mb-3">Order Details</h6>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Order ID:</span>
-                            <strong id="orderId">Loading...</strong>
-                        </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Item:</span>
-                            <strong id="itemTitle">Digital Content</strong>
-                        </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Amount Paid:</span>
-                            <strong id="amountPaid" class="text-success">$0.00</strong>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <span>Date:</span>
-                            <strong id="purchaseDate">-</strong>
-                        </div>
+                        <h6 class="text-muted mb-3" data-i18n="payment.orderDetails">Order Details</h6>
+                        <div class="d-flex justify-content-between mb-2"><span data-i18n="payment.orderId">Order ID:</span><strong id="orderId">Loading...</strong></div>
+                        <div class="d-flex justify-content-between mb-2"><span data-i18n="payment.item">Item:</span><strong id="itemTitle">Digital Content</strong></div>
+                        <div class="d-flex justify-content-between mb-2"><span data-i18n="payment.amountPaid">Amount Paid:</span><strong id="amountPaid" class="text-success">$0.00</strong></div>
+                        <div class="d-flex justify-content-between"><span data-i18n="payment.date">Date:</span><strong id="purchaseDate">-</strong></div>
                     </div>
-
-                    <!-- Revenue Info -->
                     <div class="alert alert-info text-start">
                         <i class="fas fa-info-circle me-2"></i>
-                        <strong>Supporting Creators:</strong><br>
-                        <small>
-                            Your purchase directly supports the author (40%), 
-                            translator (20%), and editor (10%). Thank you for 
-                            supporting creative work!
-                        </small>
+                        <strong data-i18n="payment.supportingCreators">Supporting Creators:</strong><br>
+                        <small data-i18n="payment.revenueInfo">Your purchase directly supports the author (40%), translator (20%), and editor (10%).</small>
                     </div>
-
-                    <!-- Actions -->
                     <div class="d-grid gap-2">
-                        <a href="dashboard.html" class="btn btn-primary btn-lg">
-                            <i class="fas fa-book-reader me-2"></i>Start Reading
-                        </a>
-                        <a href="../index.html" class="btn btn-outline-secondary">
-                            <i class="fas fa-home me-2"></i>Back to Home
-                        </a>
+                        <a href="dashboard.html" class="btn btn-primary btn-lg"><i class="fas fa-book-reader me-2"></i><span data-i18n="payment.startReading">Start Reading</span></a>
+                        <a href="../index.html" class="btn btn-outline-secondary"><i class="fas fa-home me-2"></i><span data-i18n="payment.backToHome">Back to Home</span></a>
                     </div>
-
-                    <!-- Receipt -->
-                    <p class="mt-4 mb-0">
-                        <small class="text-muted">
-                            <i class="fas fa-envelope me-1"></i>
-                            A receipt has been sent to your email
-                        </small>
-                    </p>
+                    <p class="mt-4 mb-0"><small class="text-muted"><i class="fas fa-envelope me-1"></i><span data-i18n="payment.receiptSent">A receipt has been sent to your email</span></small></p>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Footer -->
-    <footer class="bg-dark text-white py-4 mt-5">
-        <div class="container text-center">
-            <p class="mb-0">&copy; 2024 Publisher. All rights reserved.</p>
+    <footer class="footer-custom mt-5">
+        <div class="container">
+            <div class="d-flex flex-wrap justify-content-between align-items-center">
+                <p class="small mb-0">&copy; 2025 Publisher. All rights reserved.</p>
+                <div class="d-flex gap-3">
+                    <a href="support/faq.html" class="text-secondary" data-i18n="footer.help">Help</a>
+                    <a href="terms.html" class="text-secondary" data-i18n="footer.terms">Terms</a>
+                    <a href="privacy.html" class="text-secondary" data-i18n="footer.privacy">Privacy</a>
+                </div>
+            </div>
         </div>
     </footer>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/translations.js"></script>
+    <script src="../js/language-switcher.js"></script>
     <script>
-        // Create confetti effect
-        function createConfetti() {
-            const confettiContainer = document.getElementById('confetti');
-            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dfe6e9'];
-            
-            for (let i = 0; i < 50; i++) {
-                const piece = document.createElement('div');
-                piece.className = 'confetti-piece';
-                piece.style.left = Math.random() * 100 + '%';
-                piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                piece.style.animationDelay = Math.random() * 2 + 's';
-                piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
-                confettiContainer.appendChild(piece);
-            }
-
-            // Remove confetti after animation
-            setTimeout(() => {
-                confettiContainer.innerHTML = '';
-            }, 5000);
-        }
-
-        // Load order details from URL
-        function loadOrderDetails() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const sessionId = urlParams.get('session_id');
-
-            // Generate order ID from session
-            const orderId = sessionId 
-                ? 'PUB-' + sessionId.substring(0, 8).toUpperCase()
-                : 'PUB-' + Math.random().toString(36).substring(2, 10).toUpperCase();
-
-            document.getElementById('orderId').textContent = orderId;
-            document.getElementById('itemTitle').textContent = 'Digital Content';
-            document.getElementById('amountPaid').textContent = '$9.99';
-            document.getElementById('purchaseDate').textContent = new Date().toLocaleDateString();
-        }
-
-        // Initialize
-        createConfetti();
-        loadOrderDetails();
+        function createConfetti(){const c=document.getElementById('confetti'),colors=['#ff6b6b','#4ecdc4','#45b7d1','#96ceb4','#ffeaa7','#dfe6e9'];for(let i=0;i<50;i++){const p=document.createElement('div');p.className='confetti-piece';p.style.left=Math.random()*100+'%';p.style.backgroundColor=colors[Math.floor(Math.random()*colors.length)];p.style.animationDelay=Math.random()*2+'s';p.style.borderRadius=Math.random()>0.5?'50%':'0';c.appendChild(p)}setTimeout(()=>c.innerHTML='',5000)}
+        function loadOrderDetails(){const p=new URLSearchParams(window.location.search),s=p.get('session_id'),o=s?'PUB-'+s.substring(0,8).toUpperCase():'PUB-'+Math.random().toString(36).substring(2,10).toUpperCase();document.getElementById('orderId').textContent=o;document.getElementById('itemTitle').textContent='Digital Content';document.getElementById('amountPaid').textContent='$9.99';document.getElementById('purchaseDate').textContent=new Date().toLocaleDateString()}
+        createConfetti();loadOrderDetails();
     </script>
 </body>
 </html>
