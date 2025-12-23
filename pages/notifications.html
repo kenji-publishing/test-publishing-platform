@@ -4,21 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title data-i18n="notifications.title">Notification Center - Publisher</title>
-    
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
-    <!-- Custom Styles -->
     <link href="../css/style-new.css" rel="stylesheet">
     <link href="../css/mobile-fixes.css" rel="stylesheet">
-    
     <style>
         .language-selector { position: fixed; top: 80px; right: 20px; z-index: 1000; }
         .language-selector select { padding: 8px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-bg-card); font-size: var(--font-size-sm); cursor: pointer; }
@@ -40,19 +33,15 @@
         .notification-icon.info { background: rgba(93, 139, 199, 0.1); color: var(--color-info); }
         .notification-icon.warning { background: rgba(212, 168, 83, 0.1); color: var(--color-warning); }
         .notification-icon.primary { background: rgba(139, 115, 85, 0.1); color: var(--color-accent); }
-        .notification-icon.secondary { background: rgba(108, 117, 125, 0.1); color: var(--color-text-secondary); }
-        .notification-content { flex: 1; min-width: 0; word-wrap: break-word; overflow-wrap: break-word; }
+        .notification-content { flex: 1; min-width: 0; word-wrap: break-word; }
         .notification-title { font-weight: 600; color: var(--color-text-primary); margin-bottom: 4px; display: flex; align-items: center; gap: var(--spacing-sm); flex-wrap: wrap; }
-        .notification-title .badge { font-size: 0.7rem; font-weight: 500; }
-        .notification-message { color: var(--color-text-secondary); font-size: var(--font-size-sm); line-height: 1.5; margin-bottom: var(--spacing-xs); word-wrap: break-word; overflow-wrap: break-word; white-space: normal; }
+        .notification-message { color: var(--color-text-secondary); font-size: var(--font-size-sm); line-height: 1.5; margin-bottom: var(--spacing-xs); }
         .notification-meta { display: flex; align-items: center; gap: var(--spacing-md); font-size: var(--font-size-xs); color: var(--color-text-muted); flex-wrap: wrap; }
         .notification-actions { display: flex; align-items: center; gap: var(--spacing-sm); margin-left: var(--spacing-md); flex-shrink: 0; }
         .notification-actions .btn { opacity: 0; transition: opacity var(--transition-fast); }
         .notification-item:hover .notification-actions .btn { opacity: 1; }
         .empty-state { text-align: center; padding: var(--spacing-3xl) var(--spacing-xl); }
         .empty-state i { font-size: 4rem; color: var(--color-border); margin-bottom: var(--spacing-lg); }
-        .empty-state h3 { color: var(--color-text-secondary); margin-bottom: var(--spacing-sm); }
-        .empty-state p { color: var(--color-text-muted); }
         .pagination-container { display: flex; justify-content: center; align-items: center; padding: var(--spacing-lg); gap: var(--spacing-sm); }
         .type-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: var(--radius-full); font-size: var(--font-size-xs); font-weight: 500; }
         .type-badge.sale { background: rgba(93, 156, 89, 0.1); color: var(--color-success); }
@@ -60,8 +49,6 @@
         .type-badge.comment { background: rgba(139, 115, 85, 0.1); color: var(--color-accent); }
         .type-badge.feedback { background: rgba(212, 168, 83, 0.1); color: var(--color-warning); }
         .type-badge.system { background: rgba(108, 117, 125, 0.1); color: var(--color-text-secondary); }
-        .type-badge.ticket_reply { background: rgba(93, 139, 199, 0.1); color: var(--color-info); }
-        .type-badge.account { background: rgba(139, 115, 85, 0.1); color: var(--color-accent); }
         .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--spacing-md); margin-bottom: var(--spacing-xl); }
         .stat-mini { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--spacing-md); text-align: center; }
         .stat-mini .stat-value { font-size: var(--font-size-xl); font-weight: 700; color: var(--color-accent); }
@@ -71,7 +58,6 @@
     </style>
 </head>
 <body>
-    <!-- Language Selector -->
     <div class="language-selector">
         <select id="languageSelect" onchange="changeLanguage(this.value)">
             <option value="en">🇬🇧 English</option>
@@ -85,8 +71,6 @@
             <option value="pt">🇧🇷 Português</option>
         </select>
     </div>
-
-    <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
         <div class="container">
             <a class="navbar-brand" href="../index.html"><i class="fas fa-book-open"></i> Publisher</a>
@@ -98,14 +82,9 @@
                     <li class="nav-item"><a class="nav-link" href="earnings.html"><i class="fas fa-coins me-1"></i> <span data-i18n="dashboard.earnings">Earnings</span></a></li>
                 </ul>
                 <div class="d-flex align-items-center gap-3">
-                    <a href="notifications.html" class="btn btn-soft-custom position-relative active">
-                        <i class="fas fa-bell"></i>
-                        <span id="navUnreadBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; display: none;">0</span>
-                    </a>
+                    <a href="notifications.html" class="btn btn-soft-custom position-relative active"><i class="fas fa-bell"></i><span id="navUnreadBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; display: none;">0</span></a>
                     <div class="dropdown">
-                        <button class="btn btn-soft-custom dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user-circle me-1"></i><span id="userName">User</span>
-                        </button>
+                        <button class="btn btn-soft-custom dropdown-toggle" type="button" data-bs-toggle="dropdown"><i class="fas fa-user-circle me-1"></i><span id="userName">User</span></button>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="account-settings.html"><i class="fas fa-cog me-2"></i><span data-i18n="nav.settings">Settings</span></a></li>
                             <li><hr class="dropdown-divider"></li>
@@ -116,32 +95,23 @@
             </div>
         </div>
     </nav>
-
-    <!-- Main Content -->
     <main class="notification-container">
         <div class="container">
-            <!-- Page Header -->
             <div class="page-header">
                 <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
                     <div>
                         <h1><i class="fas fa-bell me-2 text-accent"></i><span data-i18n="nav.notifications">Notification Center</span></h1>
                         <p data-i18n="notifications.subtitle">View notifications for sales, translations, comments, and more</p>
                     </div>
-                    <a href="account-settings.html#notifications" class="btn btn-outline-custom">
-                        <i class="fas fa-cog me-1"></i> <span data-i18n="notifications.settings">Notification Settings</span>
-                    </a>
+                    <a href="account-settings.html#notifications" class="btn btn-outline-custom"><i class="fas fa-cog me-1"></i> <span data-i18n="notifications.settings">Notification Settings</span></a>
                 </div>
             </div>
-
-            <!-- Stats Row -->
             <div class="stats-row" id="statsRow">
                 <div class="stat-mini"><div class="stat-value" id="totalCount">-</div><div class="stat-label" data-i18n="notifications.all">All</div></div>
                 <div class="stat-mini"><div class="stat-value" id="unreadCount">-</div><div class="stat-label" data-i18n="notifications.unread">Unread</div></div>
                 <div class="stat-mini"><div class="stat-value" id="todayCount">-</div><div class="stat-label" data-i18n="notifications.today">Today</div></div>
                 <div class="stat-mini"><div class="stat-value" id="weekCount">-</div><div class="stat-label" data-i18n="notifications.thisWeek">This Week</div></div>
             </div>
-
-            <!-- Filter Bar -->
             <div class="filter-bar">
                 <div class="filter-left">
                     <select class="form-select form-select-sm" id="typeFilter" style="width: auto;">
@@ -154,15 +124,10 @@
                         <option value="system">🔔 System</option>
                         <option value="account">👤 Account</option>
                     </select>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="unreadOnly">
-                        <label class="form-check-label" for="unreadOnly" data-i18n="notifications.unreadOnly">Unread only</label>
-                    </div>
+                    <div class="form-check"><input class="form-check-input" type="checkbox" id="unreadOnly"><label class="form-check-label" for="unreadOnly" data-i18n="notifications.unreadOnly">Unread only</label></div>
                 </div>
                 <div class="filter-right">
-                    <button class="btn btn-sm btn-outline-custom" id="markAllReadBtn">
-                        <i class="fas fa-check-double me-1"></i> <span data-i18n="notifications.markAllRead">Mark all read</span>
-                    </button>
+                    <button class="btn btn-sm btn-outline-custom" id="markAllReadBtn"><i class="fas fa-check-double me-1"></i> <span data-i18n="notifications.markAllRead">Mark all read</span></button>
                     <div class="dropdown">
                         <button class="btn btn-sm btn-outline-custom dropdown-toggle" data-bs-toggle="dropdown"><i class="fas fa-ellipsis-v"></i></button>
                         <ul class="dropdown-menu dropdown-menu-end">
@@ -172,16 +137,9 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Notification List -->
             <div class="notification-list" id="notificationList">
-                <div class="text-center py-5" id="loadingState">
-                    <div class="spinner-border text-accent" role="status"><span class="visually-hidden">Loading...</span></div>
-                    <p class="mt-3 text-muted" data-i18n="common.loading">Loading notifications...</p>
-                </div>
+                <div class="text-center py-5" id="loadingState"><div class="spinner-border text-accent" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-3 text-muted" data-i18n="common.loading">Loading...</p></div>
             </div>
-
-            <!-- Pagination -->
             <div class="pagination-container" id="paginationContainer" style="display: none;">
                 <button class="btn btn-sm btn-outline-custom" id="prevPageBtn" disabled><i class="fas fa-chevron-left"></i> <span data-i18n="common.previous">Previous</span></button>
                 <span class="text-muted" id="pageInfo">1 / 1</span>
@@ -189,8 +147,6 @@
             </div>
         </div>
     </main>
-
-    <!-- Footer -->
     <footer class="footer-custom">
         <div class="container">
             <div class="d-flex flex-wrap justify-content-between align-items-center">
@@ -203,195 +159,57 @@
             </div>
         </div>
     </footer>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/translations.js"></script>
     <script src="../js/language-switcher.js"></script>
     <script>
         const API_BASE = 'http://localhost:3000/api/notifications';
-        let currentPage = 1;
-        let totalPages = 1;
-        let currentFilter = { type: '', unreadOnly: false };
+        let currentPage = 1, totalPages = 1, currentFilter = { type: '', unreadOnly: false };
         let isDemo = new URLSearchParams(window.location.search).get('demo') === 'true';
-
         const DEMO_NOTIFICATIONS = [
-            { notification_id: '1', notification_type: 'sale', title: 'Work purchased! 💰', message: '"Magic Academy Adventure" was purchased by John. You earned $9.80.', icon: 'fa-dollar-sign', icon_color: 'success', action_url: '/pages/earnings.html', is_read: false, created_at: new Date(Date.now() - 30 * 60 * 1000).toISOString() },
-            { notification_id: '2', notification_type: 'translation_complete', title: 'Translation completed', message: 'English translation of "Magic Academy Adventure" is complete.', icon: 'fa-language', icon_color: 'info', action_url: '/pages/translation-status.html', is_read: false, created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() },
-            { notification_id: '3', notification_type: 'feedback', title: 'Reader feedback ⭐', message: '"Whispers of Tomorrow" received a 5-star rating! "Amazing story!"', icon: 'fa-star', icon_color: 'warning', action_url: '/pages/feedback/author.html', is_read: false, created_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString() },
-            { notification_id: '4', notification_type: 'comment', title: 'New comment', message: 'New comment on "Digital Dreams".', icon: 'fa-comment', icon_color: 'primary', action_url: '/pages/dashboard.html', is_read: true, created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() },
-            { notification_id: '5', notification_type: 'ticket_reply', title: 'Support reply', message: 'Support team replied to ticket #12345.', icon: 'fa-headset', icon_color: 'info', action_url: '/pages/support/tickets.html', is_read: true, created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
-            { notification_id: '6', notification_type: 'system', title: 'Welcome to Publisher! 🎉', message: 'Your account is ready. Upload your work and reach readers worldwide!', icon: 'fa-rocket', icon_color: 'primary', action_url: '/pages/upload-work.html', is_read: true, created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString() }
+            { notification_id: '1', notification_type: 'sale', title: 'Work purchased! 💰', message: 'Magic Academy Adventure was purchased. You earned $9.80.', icon: 'fa-dollar-sign', icon_color: 'success', is_read: false, created_at: new Date(Date.now() - 30*60*1000).toISOString() },
+            { notification_id: '2', notification_type: 'translation_complete', title: 'Translation completed', message: 'English translation is complete.', icon: 'fa-language', icon_color: 'info', is_read: false, created_at: new Date(Date.now() - 2*60*60*1000).toISOString() },
+            { notification_id: '3', notification_type: 'feedback', title: 'Reader feedback ⭐', message: 'Received a 5-star rating!', icon: 'fa-star', icon_color: 'warning', is_read: false, created_at: new Date(Date.now() - 5*60*60*1000).toISOString() },
+            { notification_id: '4', notification_type: 'comment', title: 'New comment', message: 'New comment on Digital Dreams.', icon: 'fa-comment', icon_color: 'primary', is_read: true, created_at: new Date(Date.now() - 24*60*60*1000).toISOString() },
+            { notification_id: '5', notification_type: 'system', title: 'Welcome to Publisher! 🎉', message: 'Your account is ready.', icon: 'fa-rocket', icon_color: 'primary', is_read: true, created_at: new Date(Date.now() - 7*24*60*60*1000).toISOString() }
         ];
-
-        document.addEventListener('DOMContentLoaded', function() {
-            initUser();
-            loadNotifications();
-            setupEventListeners();
-            loadUnreadCount();
-        });
-
-        function initUser() {
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
-            if (user.firstName) document.getElementById('userName').textContent = user.firstName;
-            if (isDemo) console.log('📋 Demo mode active');
-        }
-
+        document.addEventListener('DOMContentLoaded', function() { initUser(); loadNotifications(); setupEventListeners(); loadUnreadCount(); });
+        function initUser() { const user = JSON.parse(localStorage.getItem('user') || '{}'); if (user.firstName) document.getElementById('userName').textContent = user.firstName; }
         async function loadNotifications() {
             const listContainer = document.getElementById('notificationList');
             if (isDemo) { renderNotifications(filterDemoData()); updateStats(); return; }
             const token = localStorage.getItem('token');
-            if (!token) { listContainer.innerHTML = '<div class="empty-state"><i class="fas fa-lock"></i><h3>Login required</h3><p>Please login to view notifications</p><a href="login.html" class="btn btn-custom mt-3">Login</a></div>'; return; }
+            if (!token) { listContainer.innerHTML = '<div class="empty-state"><i class="fas fa-lock"></i><h3>Login required</h3><a href="login.html" class="btn btn-custom mt-3">Login</a></div>'; return; }
             try {
                 const params = new URLSearchParams({ page: currentPage, limit: 20 });
                 if (currentFilter.type) params.append('type', currentFilter.type);
                 if (currentFilter.unreadOnly) params.append('unread_only', 'true');
                 const response = await fetch(`${API_BASE}?${params}`, { headers: { 'Authorization': `Bearer ${token}` } });
-                if (!response.ok) throw new Error('Failed to load');
+                if (!response.ok) throw new Error('Failed');
                 const data = await response.json();
-                if (data.success) { renderNotifications(data.notifications); updatePagination(data.pagination); loadStats(); }
-            } catch (error) { console.error('Load error:', error); listContainer.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><h3>Load Error</h3><p>Failed to load notifications</p><button class="btn btn-custom mt-3" onclick="loadNotifications()">Retry</button></div>'; }
+                if (data.success) { renderNotifications(data.notifications); updatePagination(data.pagination); }
+            } catch (error) { listContainer.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><h3>Load Error</h3><button class="btn btn-custom mt-3" onclick="loadNotifications()">Retry</button></div>'; }
         }
-
-        function filterDemoData() {
-            let filtered = [...DEMO_NOTIFICATIONS];
-            if (currentFilter.type) filtered = filtered.filter(n => n.notification_type === currentFilter.type);
-            if (currentFilter.unreadOnly) filtered = filtered.filter(n => !n.is_read);
-            return filtered;
-        }
-
+        function filterDemoData() { let f = [...DEMO_NOTIFICATIONS]; if (currentFilter.type) f = f.filter(n => n.notification_type === currentFilter.type); if (currentFilter.unreadOnly) f = f.filter(n => !n.is_read); return f; }
         function renderNotifications(notifications) {
             const listContainer = document.getElementById('notificationList');
-            if (!notifications || notifications.length === 0) { listContainer.innerHTML = '<div class="empty-state"><i class="fas fa-bell-slash"></i><h3>No notifications</h3><p>New notifications will appear here</p></div>'; return; }
-            listContainer.innerHTML = notifications.map(n => `
-                <div class="notification-item ${n.is_read ? '' : 'unread'}" data-id="${n.notification_id}" onclick="handleNotificationClick('${n.notification_id}', '${n.action_url || ''}')">
-                    <div class="notification-icon ${n.icon_color || 'primary'}"><i class="fas ${n.icon || 'fa-bell'} fa-lg"></i></div>
-                    <div class="notification-content">
-                        <div class="notification-title">${n.title} ${!n.is_read ? '<span class="badge bg-accent">NEW</span>' : ''}</div>
-                        <div class="notification-message">${n.message}</div>
-                        <div class="notification-meta"><span class="type-badge ${n.notification_type}">${getTypeLabel(n.notification_type)}</span><span><i class="fas fa-clock me-1"></i>${formatTimeAgo(n.created_at)}</span></div>
-                    </div>
-                    <div class="notification-actions">
-                        ${!n.is_read ? `<button class="btn btn-sm btn-outline-custom" onclick="event.stopPropagation(); markAsRead('${n.notification_id}')" title="Mark read"><i class="fas fa-check"></i></button>` : ''}
-                        <button class="btn btn-sm btn-outline-danger" onclick="event.stopPropagation(); deleteNotification('${n.notification_id}')" title="Delete"><i class="fas fa-trash"></i></button>
-                    </div>
-                </div>
-            `).join('');
+            if (!notifications || notifications.length === 0) { listContainer.innerHTML = '<div class="empty-state"><i class="fas fa-bell-slash"></i><h3>No notifications</h3></div>'; return; }
+            listContainer.innerHTML = notifications.map(n => `<div class="notification-item ${n.is_read ? '' : 'unread'}" data-id="${n.notification_id}" onclick="handleNotificationClick('${n.notification_id}')"><div class="notification-icon ${n.icon_color || 'primary'}"><i class="fas ${n.icon || 'fa-bell'} fa-lg"></i></div><div class="notification-content"><div class="notification-title">${n.title} ${!n.is_read ? '<span class="badge bg-accent">NEW</span>' : ''}</div><div class="notification-message">${n.message}</div><div class="notification-meta"><span class="type-badge ${n.notification_type}">${getTypeLabel(n.notification_type)}</span><span><i class="fas fa-clock me-1"></i>${formatTimeAgo(n.created_at)}</span></div></div><div class="notification-actions">${!n.is_read ? `<button class="btn btn-sm btn-outline-custom" onclick="event.stopPropagation(); markAsRead('${n.notification_id}')"><i class="fas fa-check"></i></button>` : ''}<button class="btn btn-sm btn-outline-danger" onclick="event.stopPropagation(); deleteNotification('${n.notification_id}')"><i class="fas fa-trash"></i></button></div></div>`).join('');
         }
-
-        function getTypeLabel(type) {
-            const labels = { 'sale': '💰 Sale', 'translation_complete': '🌐 Translation', 'translation_request': '📤 Request', 'comment': '💬 Comment', 'feedback': '⭐ Feedback', 'system': '🔔 System', 'ticket_reply': '🎧 Support', 'account': '👤 Account' };
-            return labels[type] || type;
-        }
-
-        function formatTimeAgo(dateString) {
-            const date = new Date(dateString);
-            const now = new Date();
-            const diff = now - date;
-            const minutes = Math.floor(diff / 60000);
-            const hours = Math.floor(diff / 3600000);
-            const days = Math.floor(diff / 86400000);
-            if (minutes < 1) return 'Just now';
-            if (minutes < 60) return `${minutes}m ago`;
-            if (hours < 24) return `${hours}h ago`;
-            if (days < 7) return `${days}d ago`;
-            return date.toLocaleDateString();
-        }
-
-        function updateStats() {
-            const total = DEMO_NOTIFICATIONS.length;
-            const unread = DEMO_NOTIFICATIONS.filter(n => !n.is_read).length;
-            const today = DEMO_NOTIFICATIONS.filter(n => new Date(n.created_at).toDateString() === new Date().toDateString()).length;
-            const week = DEMO_NOTIFICATIONS.filter(n => new Date(n.created_at) >= new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length;
-            document.getElementById('totalCount').textContent = total;
-            document.getElementById('unreadCount').textContent = unread;
-            document.getElementById('todayCount').textContent = today;
-            document.getElementById('weekCount').textContent = week;
-        }
-
-        async function loadStats() {}
-
-        async function loadUnreadCount() {
-            if (isDemo) { updateUnreadBadge(DEMO_NOTIFICATIONS.filter(n => !n.is_read).length); return; }
-            const token = localStorage.getItem('token');
-            if (!token) return;
-            try {
-                const response = await fetch(`${API_BASE}/unread-count`, { headers: { 'Authorization': `Bearer ${token}` } });
-                if (response.ok) { const data = await response.json(); updateUnreadBadge(data.count); }
-            } catch (error) { console.error('Error:', error); }
-        }
-
-        function updateUnreadBadge(count) {
-            const badge = document.getElementById('navUnreadBadge');
-            if (count > 0) { badge.textContent = count > 99 ? '99+' : count; badge.style.display = 'inline-block'; }
-            else { badge.style.display = 'none'; }
-            const unreadEl = document.getElementById('unreadCount');
-            if (unreadEl) unreadEl.textContent = count;
-        }
-
-        function handleNotificationClick(id, actionUrl) { markAsRead(id); if (actionUrl && !isDemo) window.location.href = actionUrl; }
-
-        async function markAsRead(id) {
-            if (isDemo) { const n = DEMO_NOTIFICATIONS.find(n => n.notification_id === id); if (n) n.is_read = true; loadNotifications(); loadUnreadCount(); return; }
-            const token = localStorage.getItem('token');
-            if (!token) return;
-            try { const response = await fetch(`${API_BASE}/${id}/read`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` } }); if (response.ok) { loadNotifications(); loadUnreadCount(); } } catch (error) { console.error('Error:', error); }
-        }
-
-        async function markAllAsRead() {
-            if (isDemo) { DEMO_NOTIFICATIONS.forEach(n => n.is_read = true); loadNotifications(); loadUnreadCount(); showToast('All notifications marked as read'); return; }
-            const token = localStorage.getItem('token');
-            if (!token) return;
-            try { const response = await fetch(`${API_BASE}/read-all`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` } }); if (response.ok) { loadNotifications(); loadUnreadCount(); showToast('All notifications marked as read'); } } catch (error) { console.error('Error:', error); }
-        }
-
-        async function deleteNotification(id) {
-            if (!confirm('Delete this notification?')) return;
-            if (isDemo) { const idx = DEMO_NOTIFICATIONS.findIndex(n => n.notification_id === id); if (idx > -1) DEMO_NOTIFICATIONS.splice(idx, 1); loadNotifications(); loadUnreadCount(); showToast('Notification deleted'); return; }
-            const token = localStorage.getItem('token');
-            if (!token) return;
-            try { const response = await fetch(`${API_BASE}/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } }); if (response.ok) { loadNotifications(); loadUnreadCount(); showToast('Notification deleted'); } } catch (error) { console.error('Error:', error); }
-        }
-
-        async function clearNotifications(readOnly = false) {
-            const message = readOnly ? 'Delete all read notifications?' : 'Delete all notifications? This cannot be undone.';
-            if (!confirm(message)) return;
-            if (isDemo) { if (readOnly) { const unread = DEMO_NOTIFICATIONS.filter(n => !n.is_read); DEMO_NOTIFICATIONS.length = 0; DEMO_NOTIFICATIONS.push(...unread); } else { DEMO_NOTIFICATIONS.length = 0; } loadNotifications(); loadUnreadCount(); showToast('Notifications deleted'); return; }
-            const token = localStorage.getItem('token');
-            if (!token) return;
-            try { const url = readOnly ? `${API_BASE}/clear-all?read_only=true` : `${API_BASE}/clear-all`; const response = await fetch(url, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } }); if (response.ok) { loadNotifications(); loadUnreadCount(); showToast('Notifications deleted'); } } catch (error) { console.error('Error:', error); }
-        }
-
-        function updatePagination(pagination) {
-            const container = document.getElementById('paginationContainer');
-            if (pagination.totalPages <= 1) { container.style.display = 'none'; return; }
-            container.style.display = 'flex';
-            totalPages = pagination.totalPages;
-            document.getElementById('pageInfo').textContent = `${pagination.page} / ${pagination.totalPages}`;
-            document.getElementById('prevPageBtn').disabled = !pagination.hasPrev;
-            document.getElementById('nextPageBtn').disabled = !pagination.hasNext;
-        }
-
-        function goToPage(direction) { if (direction === 'prev' && currentPage > 1) currentPage--; else if (direction === 'next' && currentPage < totalPages) currentPage++; loadNotifications(); }
-
-        function setupEventListeners() {
-            document.getElementById('typeFilter').addEventListener('change', (e) => { currentFilter.type = e.target.value; currentPage = 1; loadNotifications(); });
-            document.getElementById('unreadOnly').addEventListener('change', (e) => { currentFilter.unreadOnly = e.target.checked; currentPage = 1; loadNotifications(); });
-            document.getElementById('markAllReadBtn').addEventListener('click', markAllAsRead);
-            document.getElementById('clearReadBtn').addEventListener('click', () => clearNotifications(true));
-            document.getElementById('clearAllBtn').addEventListener('click', () => clearNotifications(false));
-            document.getElementById('prevPageBtn').addEventListener('click', () => goToPage('prev'));
-            document.getElementById('nextPageBtn').addEventListener('click', () => goToPage('next'));
-        }
-
-        function showToast(message) {
-            const toast = document.createElement('div');
-            toast.className = 'position-fixed bottom-0 end-0 p-3';
-            toast.style.zIndex = '9999';
-            toast.innerHTML = `<div class="toast show" role="alert"><div class="toast-body"><i class="fas fa-check-circle text-success me-2"></i>${message}</div></div>`;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
-
+        function getTypeLabel(type) { const labels = { 'sale': '💰 Sale', 'translation_complete': '🌐 Translation', 'comment': '💬 Comment', 'feedback': '⭐ Feedback', 'system': '🔔 System' }; return labels[type] || type; }
+        function formatTimeAgo(dateString) { const diff = new Date() - new Date(dateString); const m = Math.floor(diff/60000), h = Math.floor(diff/3600000), d = Math.floor(diff/86400000); if (m < 1) return 'Just now'; if (m < 60) return `${m}m ago`; if (h < 24) return `${h}h ago`; if (d < 7) return `${d}d ago`; return new Date(dateString).toLocaleDateString(); }
+        function updateStats() { document.getElementById('totalCount').textContent = DEMO_NOTIFICATIONS.length; document.getElementById('unreadCount').textContent = DEMO_NOTIFICATIONS.filter(n => !n.is_read).length; document.getElementById('todayCount').textContent = DEMO_NOTIFICATIONS.filter(n => new Date(n.created_at).toDateString() === new Date().toDateString()).length; document.getElementById('weekCount').textContent = DEMO_NOTIFICATIONS.filter(n => new Date(n.created_at) >= new Date(Date.now() - 7*24*60*60*1000)).length; }
+        async function loadUnreadCount() { if (isDemo) { updateUnreadBadge(DEMO_NOTIFICATIONS.filter(n => !n.is_read).length); return; } const token = localStorage.getItem('token'); if (!token) return; try { const r = await fetch(`${API_BASE}/unread-count`, { headers: { 'Authorization': `Bearer ${token}` } }); if (r.ok) { const d = await r.json(); updateUnreadBadge(d.count); } } catch (e) {} }
+        function updateUnreadBadge(count) { const b = document.getElementById('navUnreadBadge'); if (count > 0) { b.textContent = count > 99 ? '99+' : count; b.style.display = 'inline-block'; } else { b.style.display = 'none'; } const u = document.getElementById('unreadCount'); if (u) u.textContent = count; }
+        function handleNotificationClick(id) { markAsRead(id); }
+        async function markAsRead(id) { if (isDemo) { const n = DEMO_NOTIFICATIONS.find(n => n.notification_id === id); if (n) n.is_read = true; loadNotifications(); loadUnreadCount(); return; } const token = localStorage.getItem('token'); if (!token) return; try { await fetch(`${API_BASE}/${id}/read`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` } }); loadNotifications(); loadUnreadCount(); } catch (e) {} }
+        async function markAllAsRead() { if (isDemo) { DEMO_NOTIFICATIONS.forEach(n => n.is_read = true); loadNotifications(); loadUnreadCount(); showToast('All marked as read'); return; } const token = localStorage.getItem('token'); if (!token) return; try { await fetch(`${API_BASE}/read-all`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` } }); loadNotifications(); loadUnreadCount(); showToast('All marked as read'); } catch (e) {} }
+        async function deleteNotification(id) { if (!confirm('Delete?')) return; if (isDemo) { const i = DEMO_NOTIFICATIONS.findIndex(n => n.notification_id === id); if (i > -1) DEMO_NOTIFICATIONS.splice(i, 1); loadNotifications(); loadUnreadCount(); showToast('Deleted'); return; } const token = localStorage.getItem('token'); if (!token) return; try { await fetch(`${API_BASE}/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } }); loadNotifications(); loadUnreadCount(); showToast('Deleted'); } catch (e) {} }
+        async function clearNotifications(readOnly = false) { if (!confirm(readOnly ? 'Delete read?' : 'Delete all?')) return; if (isDemo) { if (readOnly) { const u = DEMO_NOTIFICATIONS.filter(n => !n.is_read); DEMO_NOTIFICATIONS.length = 0; DEMO_NOTIFICATIONS.push(...u); } else { DEMO_NOTIFICATIONS.length = 0; } loadNotifications(); loadUnreadCount(); showToast('Deleted'); return; } const token = localStorage.getItem('token'); if (!token) return; try { await fetch(`${API_BASE}/clear-all${readOnly ? '?read_only=true' : ''}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } }); loadNotifications(); loadUnreadCount(); showToast('Deleted'); } catch (e) {} }
+        function updatePagination(p) { const c = document.getElementById('paginationContainer'); if (p.totalPages <= 1) { c.style.display = 'none'; return; } c.style.display = 'flex'; totalPages = p.totalPages; document.getElementById('pageInfo').textContent = `${p.page} / ${p.totalPages}`; document.getElementById('prevPageBtn').disabled = !p.hasPrev; document.getElementById('nextPageBtn').disabled = !p.hasNext; }
+        function goToPage(d) { if (d === 'prev' && currentPage > 1) currentPage--; else if (d === 'next' && currentPage < totalPages) currentPage++; loadNotifications(); }
+        function setupEventListeners() { document.getElementById('typeFilter').addEventListener('change', (e) => { currentFilter.type = e.target.value; currentPage = 1; loadNotifications(); }); document.getElementById('unreadOnly').addEventListener('change', (e) => { currentFilter.unreadOnly = e.target.checked; currentPage = 1; loadNotifications(); }); document.getElementById('markAllReadBtn').addEventListener('click', markAllAsRead); document.getElementById('clearReadBtn').addEventListener('click', () => clearNotifications(true)); document.getElementById('clearAllBtn').addEventListener('click', () => clearNotifications(false)); document.getElementById('prevPageBtn').addEventListener('click', () => goToPage('prev')); document.getElementById('nextPageBtn').addEventListener('click', () => goToPage('next')); }
+        function showToast(message) { const t = document.createElement('div'); t.className = 'position-fixed bottom-0 end-0 p-3'; t.style.zIndex = '9999'; t.innerHTML = `<div class="toast show"><div class="toast-body"><i class="fas fa-check-circle text-success me-2"></i>${message}</div></div>`; document.body.appendChild(t); setTimeout(() => t.remove(), 3000); }
         function logout() { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = 'login.html'; }
     </script>
 </body>
