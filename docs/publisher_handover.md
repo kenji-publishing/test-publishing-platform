@@ -78,25 +78,21 @@ https://github.com/kenji-publishing/test-publishing-platform
 | 10 | アナリティクス | ✅ |
 | 11A | モバイルレイアウト最適化 | ✅ |
 | 11B | タッチ操作最適化 | ✅ |
-| 11C-1 | 画像の遅延読み込み（Lazy Loading） | ✅ |
-| 11C-2 | CSS最適化 | ✅ |
+| 11C | パフォーマンス最適化 | ✅ |
 
-### 現在のフェーズ: Phase 11C パフォーマンス最適化
+### Phase 11C 完了内容
 
-| ステップ | 内容 | 状態 |
-|----------|------|:----:|
-| 11C-1 | 画像の遅延読み込み | ✅ |
-| 11C-2 | CSSの最適化 | ✅ |
-| **11C-3** | **JavaScriptの最適化** | **→ 次** |
+| ステップ | 内容 | 成果 |
+|----------|------|------|
+| 11C-1 | 画像の遅延読み込み | `lazy-loader.js` 作成、manga-viewer適用 |
+| 11C-2 | CSS最適化 | `style-new.css` 52%削減（27KB→13KB） |
+| 11C-3 | JavaScript最適化 | `utils.js` 共通ユーティリティ作成 |
 
-### Phase 11C-2 完了内容
+### 次のフェーズ候補
 
-- ✅ `style-new.css` を整理・最適化（27KB → 13KB、52%削減）
-  - 重複スタイルを削除
-  - モバイル固有のスタイルを mobile-fixes.css に集約
-  - CSS変数を整理
-  - 不要なコメントを削減
-- ⚠️ `style.css` は古い未使用ファイル（削除推奨）
+- Phase 12: テスト・品質保証
+- Phase 12: SEO最適化
+- Phase 12: セキュリティ強化
 
 ---
 
@@ -110,25 +106,21 @@ https://github.com/kenji-publishing/test-publishing-platform
 | `css/mobile-fixes.css` | 30KB | モバイル最適化 + Lazy Loading |
 | `css/style.css` | 2.6KB | ❌ 古い未使用（削除可） |
 
-### JavaScriptファイル
+### JavaScriptファイル構成
 
-| ファイル | 説明 |
-|----------|------|
-| `js/lazy-loader.js` | 画像遅延読み込みモジュール |
-| `js/touch-interactions.js` | タッチ操作（将来用に保持） |
+| ファイル | サイズ | 用途 |
+|----------|--------|------|
+| `js/utils.js` | 11KB | 共通ユーティリティ（新規） |
+| `js/lazy-loader.js` | 10KB | 画像遅延読み込み |
+| `js/header-notification.js` | 10KB | ヘッダー通知 |
+| `js/translations.js` | 13KB | 多言語翻訳データ |
+| `js/main.js` | 3.5KB | 共通機能 |
+| `js/touch-interactions.js` | 23KB | 未使用（将来用） |
+| `js/notification-badge.js` | 3.4KB | 通知バッジ（header-notification.jsと重複） |
 
-### mobile-fixes.css が適用済みのページ
-
-- index.html ✅
-- pages/login.html ✅
-- pages/register.html ✅
-- pages/notifications.html ✅
-- pages/dashboard.html ✅
-- pages/account-settings.html ✅
-- pages/upload-work.html ✅
-- pages/analytics.html ✅
-- pages/support/tickets.html ✅
-- pages/manga-viewer.html ✅
+### 削除推奨ファイル
+- `css/style.css` - 古い未使用
+- `js/notification-badge.js` - header-notification.jsと重複
 
 ---
 
@@ -187,15 +179,19 @@ npm start
 ### データベース主キー
 users, works, notifications の主キーは **UUID型** です。
 
-### 削除推奨ファイル
-- `css/style.css` - 古い未使用ファイル
+### JavaScript読み込みのベストプラクティス
+```html
+<!-- defer属性を使用してページ読み込みをブロックしない -->
+<script src="../js/utils.js" defer></script>
+<script src="../js/main.js" defer></script>
+```
 
 ---
 
 ## 10. 新しいChatでの開始方法
 
 1. このドキュメントをClaudeにアップロード
-2. 「Phase 11C-3から続けてください」と伝える
+2. 「Phase 12から続けてください」と伝える
 3. `git pull` で最新コードを取得
 4. サーバーを起動して動作確認
 
