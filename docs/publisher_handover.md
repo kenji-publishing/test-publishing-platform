@@ -21,7 +21,7 @@
 
 | 項目 | 内容 |
 |------|------|
-| 対応言語 | 日本語、英語、中国語、スペイン語、フランス語、ドイツ語、韓国語、アラビア語 |
+| 対応言語 | 日本語、英語、中国語、スペイン語、フランス語、ドイツ語、韓国語、アラビア語、**ポルトガル語** |
 | 収益分配 | 著者40-70%、翻訳者20%、編集者10%、プラットフォーム30% |
 | 目標 | 低予算・少人数での運営（FAQ・通知・セルフサービスの自動化） |
 
@@ -68,7 +68,7 @@ https://github.com/kenji-publishing/test-publishing-platform
 
 ## 4. 開発進捗
 
-### 完了済みフェーズ（詳細は publisher_phase_history.md 参照）
+### 完了済みフェーズ
 
 | Phase | 内容 | 状態 |
 |-------|------|:----:|
@@ -79,52 +79,72 @@ https://github.com/kenji-publishing/test-publishing-platform
 | 11A | モバイルレイアウト最適化 | ✅ |
 | 11B | タッチ操作最適化 | ✅ |
 | 11C | パフォーマンス最適化 | ✅ |
+| 12-1 | 9言語対応（ポルトガル語追加） | ✅ |
 
-### Phase 11C 完了内容
+### 現在のフェーズ: Phase 12 多言語対応
 
-| ステップ | 内容 | 成果 |
-|----------|------|------|
-| 11C-1 | 画像の遅延読み込み | `lazy-loader.js` 作成、manga-viewer適用 |
-| 11C-2 | CSS最適化 | `style-new.css` 52%削減（27KB→13KB） |
-| 11C-3 | JavaScript最適化 | `utils.js` 共通ユーティリティ作成 |
+| ステップ | 内容 | 状態 |
+|----------|------|:----:|
+| 12-1 | 9言語対応（ポルトガル語追加） | ✅ |
+| **12-2** | **翻訳データの整備** | **→ 次** |
+| 12-3 | 言語切り替え機能の完成 | ⬜ |
 
-### 次のフェーズ候補
+### Phase 12-1 完了内容
 
-- Phase 12: テスト・品質保証
-- Phase 12: SEO最適化
-- Phase 12: セキュリティ強化
+- ✅ `translations.js` を9言語対応に拡張
+  - 新規追加: 韓国語(ko)、アラビア語(ar)、ポルトガル語(pt)
+  - 既存: 英語(en)、日本語(ja)、中国語(zh)、スペイン語(es)、フランス語(fr)、ドイツ語(de)
+- ✅ `language-switcher.js` を更新
+  - 9言語対応
+  - RTL（右から左）対応（アラビア語）
+  - 言語セレクターHTML生成機能
+  - ブラウザ言語自動検出
 
 ---
 
-## 5. 重要なファイル
+## 5. 対応言語一覧
 
-### CSSファイル構成
+| コード | 言語 | ネイティブ名 | フラグ | RTL |
+|--------|------|-------------|--------|:---:|
+| en | English | English | 🇬🇧 | - |
+| ja | Japanese | 日本語 | 🇯🇵 | - |
+| zh | Chinese | 中文 | 🇨🇳 | - |
+| es | Spanish | Español | 🇪🇸 | - |
+| fr | French | Français | 🇫🇷 | - |
+| de | German | Deutsch | 🇩🇪 | - |
+| ko | Korean | 한국어 | 🇰🇷 | - |
+| ar | Arabic | العربية | 🇸🇦 | ✅ |
+| pt | Portuguese | Português | 🇧🇷 | - |
+
+---
+
+## 6. 重要なファイル
+
+### 多言語関連
+
+| ファイル | サイズ | 用途 |
+|----------|--------|------|
+| `js/translations.js` | 31KB | 翻訳データ（9言語） |
+| `js/language-switcher.js` | 11KB | 言語切り替え機能 |
+
+### CSSファイル
 
 | ファイル | サイズ | 用途 |
 |----------|--------|------|
 | `css/style-new.css` | 13KB | メインスタイル |
-| `css/mobile-fixes.css` | 30KB | モバイル最適化 + Lazy Loading |
-| `css/style.css` | 2.6KB | ❌ 古い未使用（削除可） |
+| `css/mobile-fixes.css` | 30KB | モバイル最適化 |
 
-### JavaScriptファイル構成
+### JavaScriptファイル
 
 | ファイル | サイズ | 用途 |
 |----------|--------|------|
-| `js/utils.js` | 11KB | 共通ユーティリティ（新規） |
+| `js/utils.js` | 11KB | 共通ユーティリティ |
 | `js/lazy-loader.js` | 10KB | 画像遅延読み込み |
 | `js/header-notification.js` | 10KB | ヘッダー通知 |
-| `js/translations.js` | 13KB | 多言語翻訳データ |
-| `js/main.js` | 3.5KB | 共通機能 |
-| `js/touch-interactions.js` | 23KB | 未使用（将来用） |
-| `js/notification-badge.js` | 3.4KB | 通知バッジ（header-notification.jsと重複） |
-
-### 削除推奨ファイル
-- `css/style.css` - 古い未使用
-- `js/notification-badge.js` - header-notification.jsと重複
 
 ---
 
-## 6. サーバー起動方法
+## 7. サーバー起動方法
 
 ### 起動手順
 
@@ -133,11 +153,15 @@ https://github.com/kenji-publishing/test-publishing-platform
    ```
    cd C:\Projects\test-publishing-platform
    ```
-3. **サーバーを起動**
+3. **最新コードを取得**
+   ```
+   git pull
+   ```
+4. **サーバーを起動**
    ```
    npm start
    ```
-4. **成功確認** - 以下が表示されればOK：
+5. **成功確認** - 以下が表示されればOK：
    ```
    Server running on port 3000
    Frontend server running on port 8000
@@ -148,56 +172,41 @@ PowerShellで `Ctrl + C`
 
 ---
 
-## 7. GitHubからの更新取得
+## 8. 言語切り替えの使い方
 
-```powershell
-cd C:\Projects\test-publishing-platform
-git pull
-npm start
-```
+### HTMLでの使用例
 
----
-
-## 8. モバイル表示の確認方法
-
-1. http://localhost:8000 を開く
-2. `F12` キーで開発者ツールを開く
-3. 📱アイコン（デバイスツールバー）をクリック
-4. デバイスを選択（iPhone 12 Pro など）
-
----
-
-## 9. 注意事項
-
-### API URLの注意
-- ❌ `/api/...` → 404エラー
-- ✅ `http://localhost:3000/api/...` → 正しい
-
-### ブラウザキャッシュ
-コード更新後に動作がおかしい場合：`Ctrl + Shift + R`
-
-### データベース主キー
-users, works, notifications の主キーは **UUID型** です。
-
-### JavaScript読み込みのベストプラクティス
 ```html
-<!-- defer属性を使用してページ読み込みをブロックしない -->
-<script src="../js/utils.js" defer></script>
-<script src="../js/main.js" defer></script>
+<!-- 翻訳対象の要素に data-i18n 属性を追加 -->
+<span data-i18n="nav.dashboard">Dashboard</span>
+
+<!-- プレースホルダーの翻訳 -->
+<input data-i18n-placeholder="common.search" placeholder="Search">
+
+<!-- 言語セレクター -->
+<select class="language-selector">
+    <option value="en">🇬🇧 English</option>
+    <option value="ja">🇯🇵 日本語</option>
+    <!-- ... -->
+</select>
+
+<!-- スクリプト読み込み順序（重要） -->
+<script src="js/translations.js"></script>
+<script src="js/language-switcher.js"></script>
 ```
 
 ---
 
-## 10. 新しいChatでの開始方法
+## 9. 新しいChatでの開始方法
 
 1. このドキュメントをClaudeにアップロード
-2. 「Phase 12から続けてください」と伝える
+2. 「Phase 12-2から続けてください」と伝える
 3. `git pull` で最新コードを取得
 4. サーバーを起動して動作確認
 
 ---
 
-## 11. 参考リンク
+## 10. 参考リンク
 
 | 項目 | URL |
 |------|-----|
@@ -205,8 +214,6 @@ users, works, notifications の主キーは **UUID型** です。
 | 管理画面 | http://localhost:8000/pages/admin/index.html |
 | 漫画ビューワー | http://localhost:8000/pages/manga-viewer.html |
 | 通知センター（デモ） | http://localhost:8000/pages/notifications.html?demo=true |
-| アカウント設定（デモ） | http://localhost:8000/pages/account-settings.html?demo=true |
-| チケット（デモ） | http://localhost:8000/pages/support/tickets.html?demo=true |
 
 ---
 
