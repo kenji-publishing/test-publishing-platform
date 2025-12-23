@@ -3,129 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Translation Status - Publisher</title>
+    <title data-i18n="translation.pageTitle">Translation Status - Publisher</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="../css/style.css" rel="stylesheet">
+    <link href="../css/style-new.css" rel="stylesheet">
+    <link href="../css/mobile-fixes.css" rel="stylesheet">
     <style>
-        .status-card {
-            border-left: 4px solid #6c757d;
-            transition: all 0.3s;
-        }
-        .status-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        .status-pending { border-left-color: #ffc107; }
-        .status-in-progress { border-left-color: #0dcaf0; }
-        .status-completed { border-left-color: #198754; }
-        .status-failed { border-left-color: #dc3545; }
-        
-        .progress-ring {
-            width: 60px;
-            height: 60px;
-        }
-        .language-flag {
-            font-size: 2rem;
-        }
-        .stat-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 10px;
-            padding: 20px;
-        }
+        .language-selector{position:fixed;top:80px;right:20px;z-index:1000}.language-selector select{padding:8px 12px;border:1px solid var(--color-border);border-radius:var(--radius-md);background:var(--color-bg-card);font-size:var(--font-size-sm);cursor:pointer}
+        .status-card{border-left:4px solid #6c757d;transition:all 0.3s;background:var(--color-bg-card);border-radius:var(--radius-lg)}.status-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+        .status-pending{border-left-color:#ffc107}.status-in-progress{border-left-color:#0dcaf0}.status-completed{border-left-color:#198754}.status-failed{border-left-color:#dc3545}
+        .language-flag{font-size:2rem}
+        .stat-box{background:linear-gradient(135deg,var(--color-accent) 0%,var(--color-accent-light) 100%);color:white;border-radius:var(--radius-lg);padding:var(--spacing-lg)}
+        .stat-box-pink{background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%)}
+        .stat-box-blue{background:linear-gradient(135deg,#4facfe 0%,#00f2fe 100%)}
+        .stat-box-green{background:linear-gradient(135deg,#43e97b 0%,#38f9d7 100%)}
+        @media(max-width:576px){.language-selector{top:70px;right:10px}}
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="language-selector">
+        <select id="languageSelect" onchange="changeLanguage(this.value)">
+            <option value="en">🇬🇧 English</option><option value="ja">🇯🇵 日本語</option><option value="zh">🇨🇳 中文</option><option value="es">🇪🇸 Español</option><option value="fr">🇫🇷 Français</option><option value="de">🇩🇪 Deutsch</option><option value="ko">🇰🇷 한국어</option><option value="ar">🇸🇦 العربية</option><option value="pt">🇧🇷 Português</option>
+        </select>
+    </div>
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="../index.html">
-                <i class="fas fa-book-open"></i> Publisher
-            </a>
-            <div class="collapse navbar-collapse">
+            <a class="navbar-brand" href="../index.html"><i class="fas fa-book-open"></i> Publisher</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="dashboard.html">
-                            <i class="fas fa-tachometer-alt"></i> Dashboard
-                        </a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="dashboard.html"><i class="fas fa-th-large me-1"></i><span data-i18n="nav.dashboard">Dashboard</span></a></li>
+                    <li class="nav-item"><a class="nav-link" href="browse.html"><i class="fas fa-compass me-1"></i><span data-i18n="nav.browse">Browse</span></a></li>
                 </ul>
-                <ul class="navbar-nav" id="authNav">
-                    <li class="nav-item"><a class="nav-link" href="login.html">ログイン</a></li>
-                </ul>
+                <div class="d-flex align-items-center gap-3">
+                    <a href="notifications.html" class="btn btn-soft-custom position-relative"><i class="fas fa-bell"></i></a>
+                    <a href="dashboard.html" class="btn btn-soft-custom"><i class="fas fa-arrow-left me-1"></i><span data-i18n="common.back">Back</span></a>
+                </div>
             </div>
         </div>
     </nav>
-
     <div class="container py-5">
-        <!-- Header -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>
-                <i class="fas fa-language"></i> Translation Status
-            </h2>
-            <a href="dashboard.html" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left"></i> Back to Dashboard
-            </a>
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+            <h2><i class="fas fa-language text-accent"></i> <span data-i18n="translation.title">Translation Status</span></h2>
+            <a href="dashboard.html" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i><span data-i18n="translation.backToDashboard">Back to Dashboard</span></a>
         </div>
-
-        <!-- Work Info -->
-        <div class="card mb-4">
+        <div class="card mb-4" style="background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg)">
             <div class="card-body">
                 <div class="row align-items-center">
-                    <div class="col-md-2 text-center">
-                        <div class="bg-secondary rounded" style="width: 100px; height: 140px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                            <i class="fas fa-book text-white fa-3x"></i>
-                        </div>
+                    <div class="col-md-2 text-center mb-3 mb-md-0">
+                        <div class="bg-secondary rounded" style="width:100px;height:140px;display:flex;align-items:center;justify-content:center;margin:0 auto"><i class="fas fa-book text-white fa-3x"></i></div>
                     </div>
                     <div class="col-md-10">
                         <h4 id="workTitle">Loading...</h4>
                         <p class="text-muted mb-2" id="workAuthor">by Author</p>
-                        <div class="mb-2">
-                            <span class="badge bg-primary me-2" id="contentType">Text</span>
-                            <span class="badge bg-secondary" id="genre">Fiction</span>
-                        </div>
-                        <p class="mb-0">
-                            <small class="text-muted">
-                                <i class="fas fa-globe"></i> Original: <strong id="originalLang">Japanese</strong>
-                            </small>
-                        </p>
+                        <div class="mb-2"><span class="badge bg-primary me-2" id="contentType">Text</span><span class="badge bg-secondary" id="genre">Fiction</span></div>
+                        <p class="mb-0"><small class="text-muted"><i class="fas fa-globe"></i> <span data-i18n="translation.original">Original</span>: <strong id="originalLang">Japanese</strong></small></p>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Overall Statistics -->
         <div class="row mb-4">
-            <div class="col-md-3 mb-3">
-                <div class="stat-box text-center">
-                    <h3 class="mb-0" id="totalTranslations">5</h3>
-                    <small>Total Translations</small>
-                </div>
-            </div>
-            <div class="col-md-3 mb-3">
-                <div class="stat-box text-center" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                    <h3 class="mb-0" id="completedCount">3</h3>
-                    <small>Completed</small>
-                </div>
-            </div>
-            <div class="col-md-3 mb-3">
-                <div class="stat-box text-center" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                    <h3 class="mb-0" id="inProgressCount">1</h3>
-                    <small>In Progress</small>
-                </div>
-            </div>
-            <div class="col-md-3 mb-3">
-                <div class="stat-box text-center" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
-                    <h3 class="mb-0" id="overallProgress">60%</h3>
-                    <small>Overall Progress</small>
-                </div>
-            </div>
+            <div class="col-6 col-md-3 mb-3"><div class="stat-box text-center"><h3 class="mb-0" id="totalTranslations">8</h3><small data-i18n="translation.totalTranslations">Total Translations</small></div></div>
+            <div class="col-6 col-md-3 mb-3"><div class="stat-box stat-box-pink text-center"><h3 class="mb-0" id="completedCount">3</h3><small data-i18n="translation.completed">Completed</small></div></div>
+            <div class="col-6 col-md-3 mb-3"><div class="stat-box stat-box-blue text-center"><h3 class="mb-0" id="inProgressCount">1</h3><small data-i18n="translation.inProgress">In Progress</small></div></div>
+            <div class="col-6 col-md-3 mb-3"><div class="stat-box stat-box-green text-center"><h3 class="mb-0" id="overallProgress">60%</h3><small data-i18n="translation.overallProgress">Overall Progress</small></div></div>
         </div>
-
-        <!-- Translation List -->
         <div class="row" id="translationList">
-            <!-- Completed Translation -->
             <div class="col-md-6 mb-4">
                 <div class="card status-card status-completed h-100">
                     <div class="card-body">
@@ -133,43 +79,18 @@
                             <div class="language-flag me-3">🇬🇧</div>
                             <div class="flex-grow-1">
                                 <h5 class="mb-1">English</h5>
-                                <p class="text-muted mb-2">Target Language</p>
-                                
-                                <div class="mb-3">
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <small>Progress</small>
-                                        <small class="text-success"><strong>100%</strong></small>
-                                    </div>
-                                    <div class="progress">
-                                        <div class="progress-bar bg-success" style="width: 100%"></div>
-                                    </div>
+                                <p class="text-muted mb-2" data-i18n="translation.targetLanguage">Target Language</p>
+                                <div class="mb-3"><div class="d-flex justify-content-between mb-1"><small data-i18n="translation.progress">Progress</small><small class="text-success"><strong>100%</strong></small></div><div class="progress"><div class="progress-bar bg-success" style="width:100%"></div></div></div>
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <span class="badge bg-success"><i class="fas fa-check-circle"></i> <span data-i18n="translation.statusCompleted">Completed</span></span>
+                                    <div><button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-eye"></i> <span data-i18n="translation.view">View</span></button><button class="btn btn-sm btn-outline-secondary"><i class="fas fa-download"></i></button></div>
                                 </div>
-
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="badge bg-success">
-                                        <i class="fas fa-check-circle"></i> Completed
-                                    </span>
-                                    <div>
-                                        <button class="btn btn-sm btn-outline-primary me-1">
-                                            <i class="fas fa-eye"></i> View
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-secondary">
-                                            <i class="fas fa-download"></i> Download
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <small class="text-muted d-block mt-2">
-                                    <i class="fas fa-robot"></i> AI Translation • 
-                                    <i class="fas fa-clock"></i> Completed 2 hours ago
-                                </small>
+                                <small class="text-muted d-block mt-2"><i class="fas fa-robot"></i> <span data-i18n="translation.aiTranslation">AI Translation</span> • <i class="fas fa-clock"></i> <span data-i18n="translation.completed2HoursAgo">Completed 2 hours ago</span></small>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- In Progress Translation -->
             <div class="col-md-6 mb-4">
                 <div class="card status-card status-in-progress h-100">
                     <div class="card-body">
@@ -177,78 +98,18 @@
                             <div class="language-flag me-3">🇪🇸</div>
                             <div class="flex-grow-1">
                                 <h5 class="mb-1">Español</h5>
-                                <p class="text-muted mb-2">Target Language</p>
-                                
-                                <div class="mb-3">
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <small>Progress</small>
-                                        <small class="text-info"><strong>65%</strong></small>
-                                    </div>
-                                    <div class="progress">
-                                        <div class="progress-bar bg-info progress-bar-striped progress-bar-animated" 
-                                             style="width: 65%"></div>
-                                    </div>
+                                <p class="text-muted mb-2" data-i18n="translation.targetLanguage">Target Language</p>
+                                <div class="mb-3"><div class="d-flex justify-content-between mb-1"><small data-i18n="translation.progress">Progress</small><small class="text-info"><strong>65%</strong></small></div><div class="progress"><div class="progress-bar bg-info progress-bar-striped progress-bar-animated" style="width:65%"></div></div></div>
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <span class="badge bg-info"><i class="fas fa-spinner fa-spin"></i> <span data-i18n="translation.translating">Translating...</span></span>
+                                    <button class="btn btn-sm btn-outline-secondary" disabled><i class="fas fa-clock"></i> <span data-i18n="translation.processing">Processing</span></button>
                                 </div>
-
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="badge bg-info">
-                                        <i class="fas fa-spinner fa-spin"></i> Translating...
-                                    </span>
-                                    <button class="btn btn-sm btn-outline-secondary" disabled>
-                                        <i class="fas fa-clock"></i> Processing
-                                    </button>
-                                </div>
-
-                                <small class="text-muted d-block mt-2">
-                                    <i class="fas fa-robot"></i> AI Translation • 
-                                    <i class="fas fa-clock"></i> Est. 3 minutes remaining
-                                </small>
+                                <small class="text-muted d-block mt-2"><i class="fas fa-robot"></i> <span data-i18n="translation.aiTranslation">AI Translation</span> • <i class="fas fa-clock"></i> <span data-i18n="translation.estRemaining">Est. 3 min remaining</span></small>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Pending Translation -->
-            <div class="col-md-6 mb-4">
-                <div class="card status-card status-pending h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-start">
-                            <div class="language-flag me-3">🇩🇪</div>
-                            <div class="flex-grow-1">
-                                <h5 class="mb-1">Deutsch</h5>
-                                <p class="text-muted mb-2">Target Language</p>
-                                
-                                <div class="mb-3">
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <small>Progress</small>
-                                        <small class="text-warning"><strong>0%</strong></small>
-                                    </div>
-                                    <div class="progress">
-                                        <div class="progress-bar bg-warning" style="width: 0%"></div>
-                                    </div>
-                                </div>
-
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="badge bg-warning text-dark">
-                                        <i class="fas fa-hourglass-half"></i> Queued
-                                    </span>
-                                    <button class="btn btn-sm btn-outline-secondary" disabled>
-                                        <i class="fas fa-clock"></i> Waiting
-                                    </button>
-                                </div>
-
-                                <small class="text-muted d-block mt-2">
-                                    <i class="fas fa-robot"></i> AI Translation • 
-                                    <i class="fas fa-clock"></i> Scheduled to start soon
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Completed with Review -->
             <div class="col-md-6 mb-4">
                 <div class="card status-card status-completed h-100">
                     <div class="card-body">
@@ -256,260 +117,143 @@
                             <div class="language-flag me-3">🇫🇷</div>
                             <div class="flex-grow-1">
                                 <h5 class="mb-1">Français</h5>
-                                <p class="text-muted mb-2">Target Language</p>
-                                
-                                <div class="mb-3">
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <small>Progress</small>
-                                        <small class="text-success"><strong>100%</strong></small>
-                                    </div>
-                                    <div class="progress">
-                                        <div class="progress-bar bg-success" style="width: 100%"></div>
-                                    </div>
+                                <p class="text-muted mb-2" data-i18n="translation.targetLanguage">Target Language</p>
+                                <div class="mb-3"><div class="d-flex justify-content-between mb-1"><small data-i18n="translation.progress">Progress</small><small class="text-success"><strong>100%</strong></small></div><div class="progress"><div class="progress-bar bg-success" style="width:100%"></div></div></div>
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <div><span class="badge bg-success me-1"><i class="fas fa-check-circle"></i> <span data-i18n="translation.statusCompleted">Completed</span></span><span class="badge bg-primary"><i class="fas fa-user-check"></i> <span data-i18n="translation.reviewed">Reviewed</span></span></div>
+                                    <div><button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-eye"></i></button><button class="btn btn-sm btn-outline-secondary"><i class="fas fa-download"></i></button></div>
                                 </div>
-
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <span class="badge bg-success me-1">
-                                            <i class="fas fa-check-circle"></i> Completed
-                                        </span>
-                                        <span class="badge bg-primary">
-                                            <i class="fas fa-user-check"></i> Reviewed
-                                        </span>
-                                    </div>
-                                    <div>
-                                        <button class="btn btn-sm btn-outline-primary me-1">
-                                            <i class="fas fa-eye"></i> View
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-secondary">
-                                            <i class="fas fa-download"></i> Download
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <small class="text-muted d-block mt-2">
-                                    <i class="fas fa-user"></i> Professional Review by Marie L. • 
-                                    <i class="fas fa-clock"></i> 1 day ago
-                                </small>
+                                <small class="text-muted d-block mt-2"><i class="fas fa-user"></i> <span data-i18n="translation.professionalReview">Professional Review</span> • <i class="fas fa-clock"></i> 1 day ago</small>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Completed Translation -->
             <div class="col-md-6 mb-4">
                 <div class="card status-card status-completed h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-start">
                             <div class="language-flag me-3">🇨🇳</div>
                             <div class="flex-grow-1">
-                                <h5 class="mb-1">中文 (Chinese)</h5>
-                                <p class="text-muted mb-2">Target Language</p>
-                                
-                                <div class="mb-3">
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <small>Progress</small>
-                                        <small class="text-success"><strong>100%</strong></small>
-                                    </div>
-                                    <div class="progress">
-                                        <div class="progress-bar bg-success" style="width: 100%"></div>
-                                    </div>
+                                <h5 class="mb-1">中文</h5>
+                                <p class="text-muted mb-2" data-i18n="translation.targetLanguage">Target Language</p>
+                                <div class="mb-3"><div class="d-flex justify-content-between mb-1"><small data-i18n="translation.progress">Progress</small><small class="text-success"><strong>100%</strong></small></div><div class="progress"><div class="progress-bar bg-success" style="width:100%"></div></div></div>
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <span class="badge bg-success"><i class="fas fa-check-circle"></i> <span data-i18n="translation.statusCompleted">Completed</span></span>
+                                    <div><button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-eye"></i></button><button class="btn btn-sm btn-outline-secondary"><i class="fas fa-download"></i></button></div>
                                 </div>
-
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="badge bg-success">
-                                        <i class="fas fa-check-circle"></i> Completed
-                                    </span>
-                                    <div>
-                                        <button class="btn btn-sm btn-outline-primary me-1">
-                                            <i class="fas fa-eye"></i> View
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-secondary">
-                                            <i class="fas fa-download"></i> Download
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <small class="text-muted d-block mt-2">
-                                    <i class="fas fa-robot"></i> AI Translation • 
-                                    <i class="fas fa-clock"></i> Completed 5 hours ago
-                                </small>
+                                <small class="text-muted d-block mt-2"><i class="fas fa-robot"></i> <span data-i18n="translation.aiTranslation">AI Translation</span> • <i class="fas fa-clock"></i> 5 hours ago</small>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Pending Translation -->
+            <div class="col-md-6 mb-4">
+                <div class="card status-card status-pending h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start">
+                            <div class="language-flag me-3">🇩🇪</div>
+                            <div class="flex-grow-1">
+                                <h5 class="mb-1">Deutsch</h5>
+                                <p class="text-muted mb-2" data-i18n="translation.targetLanguage">Target Language</p>
+                                <div class="mb-3"><div class="d-flex justify-content-between mb-1"><small data-i18n="translation.progress">Progress</small><small class="text-warning"><strong>0%</strong></small></div><div class="progress"><div class="progress-bar bg-warning" style="width:0%"></div></div></div>
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <span class="badge bg-warning text-dark"><i class="fas fa-hourglass-half"></i> <span data-i18n="translation.queued">Queued</span></span>
+                                    <button class="btn btn-sm btn-outline-secondary" disabled><i class="fas fa-clock"></i> <span data-i18n="translation.waiting">Waiting</span></button>
+                                </div>
+                                <small class="text-muted d-block mt-2"><i class="fas fa-robot"></i> <span data-i18n="translation.aiTranslation">AI Translation</span> • <i class="fas fa-clock"></i> <span data-i18n="translation.scheduledSoon">Scheduled soon</span></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="col-md-6 mb-4">
                 <div class="card status-card status-pending h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-start">
                             <div class="language-flag me-3">🇯🇵</div>
                             <div class="flex-grow-1">
-                                <h5 class="mb-1">日本語 (Japanese)</h5>
-                                <p class="text-muted mb-2">Target Language</p>
-                                
-                                <div class="mb-3">
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <small>Progress</small>
-                                        <small class="text-warning"><strong>0%</strong></small>
-                                    </div>
-                                    <div class="progress">
-                                        <div class="progress-bar bg-warning" style="width: 0%"></div>
-                                    </div>
+                                <h5 class="mb-1">日本語</h5>
+                                <p class="text-muted mb-2" data-i18n="translation.targetLanguage">Target Language</p>
+                                <div class="mb-3"><div class="d-flex justify-content-between mb-1"><small data-i18n="translation.progress">Progress</small><small class="text-warning"><strong>0%</strong></small></div><div class="progress"><div class="progress-bar bg-warning" style="width:0%"></div></div></div>
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <span class="badge bg-warning text-dark"><i class="fas fa-hourglass-half"></i> <span data-i18n="translation.queued">Queued</span></span>
+                                    <button class="btn btn-sm btn-outline-secondary" disabled><i class="fas fa-clock"></i> <span data-i18n="translation.waiting">Waiting</span></button>
                                 </div>
-
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="badge bg-warning text-dark">
-                                        <i class="fas fa-hourglass-half"></i> Queued
-                                    </span>
-                                    <button class="btn btn-sm btn-outline-secondary" disabled>
-                                        <i class="fas fa-clock"></i> Waiting
-                                    </button>
+                                <small class="text-muted d-block mt-2"><i class="fas fa-robot"></i> <span data-i18n="translation.aiTranslation">AI Translation</span> • Position 2</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card status-card status-pending h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start">
+                            <div class="language-flag me-3">🇰🇷</div>
+                            <div class="flex-grow-1">
+                                <h5 class="mb-1">한국어</h5>
+                                <p class="text-muted mb-2" data-i18n="translation.targetLanguage">Target Language</p>
+                                <div class="mb-3"><div class="d-flex justify-content-between mb-1"><small data-i18n="translation.progress">Progress</small><small class="text-warning"><strong>0%</strong></small></div><div class="progress"><div class="progress-bar bg-warning" style="width:0%"></div></div></div>
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <span class="badge bg-warning text-dark"><i class="fas fa-hourglass-half"></i> <span data-i18n="translation.queued">Queued</span></span>
+                                    <button class="btn btn-sm btn-outline-secondary" disabled><i class="fas fa-clock"></i> <span data-i18n="translation.waiting">Waiting</span></button>
                                 </div>
-
-                                <small class="text-muted d-block mt-2">
-                                    <i class="fas fa-robot"></i> AI Translation • 
-                                    <i class="fas fa-clock"></i> Position 2 in queue
-                                </small>
+                                <small class="text-muted d-block mt-2"><i class="fas fa-robot"></i> <span data-i18n="translation.aiTranslation">AI Translation</span> • Position 3</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card status-card status-pending h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start">
+                            <div class="language-flag me-3">🇸🇦</div>
+                            <div class="flex-grow-1">
+                                <h5 class="mb-1">العربية</h5>
+                                <p class="text-muted mb-2" data-i18n="translation.targetLanguage">Target Language</p>
+                                <div class="mb-3"><div class="d-flex justify-content-between mb-1"><small data-i18n="translation.progress">Progress</small><small class="text-warning"><strong>0%</strong></small></div><div class="progress"><div class="progress-bar bg-warning" style="width:0%"></div></div></div>
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <span class="badge bg-warning text-dark"><i class="fas fa-hourglass-half"></i> <span data-i18n="translation.queued">Queued</span></span>
+                                    <button class="btn btn-sm btn-outline-secondary" disabled><i class="fas fa-clock"></i> <span data-i18n="translation.waiting">Waiting</span></button>
+                                </div>
+                                <small class="text-muted d-block mt-2"><i class="fas fa-robot"></i> <span data-i18n="translation.aiTranslation">AI Translation</span> • Position 4</small>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Korean Translation -->
-        <div class="col-md-6 mb-4">
-            <div class="card status-card status-pending h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-start">
-                        <div class="language-flag me-3">🇰🇷</div>
-                        <div class="flex-grow-1">
-                            <h5 class="mb-1">한국어 (Korean)</h5>
-                            <p class="text-muted mb-2">Target Language</p>
-                    
-                            <div class="mb-3">
-                                <div class="d-flex justify-content-between mb-1">
-                                    <small>Progress</small>
-                                    <small class="text-warning"><strong>0%</strong></small>
-                                </div>
-                                <div class="progress">
-                                    <div class="progress-bar bg-warning" style="width: 0%"></div>
-                                </div>
-                            </div>
-
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="badge bg-warning text-dark">
-                                    <i class="fas fa-hourglass-half"></i> Queued
-                                </span>
-                                <button class="btn btn-sm btn-outline-secondary" disabled>
-                                    <i class="fas fa-clock"></i> Waiting
-                                </button>
-                            </div>
-
-                            <small class="text-muted d-block mt-2">
-                                <i class="fas fa-robot"></i> AI Translation • 
-                                <i class="fas fa-clock"></i> Position 3 in queue
-                            </small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Arabic Translation -->
-        <div class="col-md-6 mb-4">
-            <div class="card status-card status-pending h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-start">
-                        <div class="language-flag me-3">🇸🇦</div>
-                        <div class="flex-grow-1">
-                            <h5 class="mb-1">العربية (Arabic)</h5>
-                            <p class="text-muted mb-2">Target Language</p>
-                    
-                            <div class="mb-3">
-                                <div class="d-flex justify-content-between mb-1">
-                                    <small>Progress</small>
-                                    <small class="text-warning"><strong>0%</strong></small>
-                                </div>
-                                <div class="progress">
-                                    <div class="progress-bar bg-warning" style="width: 0%"></div>
-                                </div>
-                            </div>
-
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="badge bg-warning text-dark">
-                                    <i class="fas fa-hourglass-half"></i> Queued
-                                </span>
-                                <button class="btn btn-sm btn-outline-secondary" disabled>
-                                    <i class="fas fa-clock"></i> Waiting
-                                </button>
-                            </div>
-
-                            <small class="text-muted d-block mt-2">
-                                <i class="fas fa-robot"></i> AI Translation • 
-                                <i class="fas fa-clock"></i> Position 4 in queue
-                            </small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="card">
+        <div class="card" style="background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg)">
             <div class="card-body">
-                <h5 class="mb-3">
-                    <i class="fas fa-cog"></i> Translation Options
-                </h5>
+                <h5 class="mb-3"><i class="fas fa-cog text-accent"></i> <span data-i18n="translation.options">Translation Options</span></h5>
                 <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <button class="btn btn-outline-primary w-100">
-                            <i class="fas fa-plus"></i> Add More Languages
-                        </button>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <button class="btn btn-outline-success w-100">
-                            <i class="fas fa-user-tie"></i> Request Professional Review
-                        </button>
-                    </div>
+                    <div class="col-md-6 mb-3"><button class="btn btn-outline-primary w-100"><i class="fas fa-plus me-1"></i><span data-i18n="translation.addLanguages">Add More Languages</span></button></div>
+                    <div class="col-md-6 mb-3"><button class="btn btn-outline-success w-100"><i class="fas fa-user-tie me-1"></i><span data-i18n="translation.requestReview">Request Professional Review</span></button></div>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Footer -->
-    <footer class="bg-dark text-white py-4 mt-5">
-        <div class="container text-center">
-            <p class="mb-0">&copy; 2024 Publisher. All rights reserved.</p>
+    <footer class="footer-custom mt-5">
+        <div class="container">
+            <div class="d-flex flex-wrap justify-content-between align-items-center">
+                <p class="small mb-0">&copy; 2025 Publisher</p>
+                <div class="d-flex gap-3">
+                    <a href="support/faq.html" class="text-secondary" data-i18n="footer.help">Help</a>
+                    <a href="terms.html" class="text-secondary" data-i18n="footer.terms">Terms</a>
+                    <a href="privacy.html" class="text-secondary" data-i18n="footer.privacy">Privacy</a>
+                </div>
+            </div>
         </div>
     </footer>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/translations.js"></script>
+    <script src="../js/language-switcher.js"></script>
     <script>
-        // Load work details (sample data for demo)
-        function loadWorkDetails() {
-            document.getElementById('workTitle').textContent = 'Midnight Stories';
-            document.getElementById('workAuthor').textContent = 'by Tanaka Kenji';
-            document.getElementById('contentType').textContent = 'Text';
-            document.getElementById('genre').textContent = 'Fiction';
-            document.getElementById('originalLang').textContent = 'Japanese';
-        }
-
-        // Auto-refresh every 10 seconds (in real app, this would fetch from API)
-        setInterval(() => {
-            console.log('Checking for translation updates...');
-            // In production: fetch updated status from API
-        }, 10000);
-
-        // Initialize
+        function loadWorkDetails(){document.getElementById('workTitle').textContent='Midnight Stories';document.getElementById('workAuthor').textContent='by Tanaka Kenji';document.getElementById('contentType').textContent='Text';document.getElementById('genre').textContent='Fiction';document.getElementById('originalLang').textContent='Japanese'}
+        setInterval(()=>console.log('Checking for translation updates...'),10000);
         loadWorkDetails();
     </script>
-    
-    <!-- Notification Bell Auto-Insert -->
-    <script src="../js/header-notification.js"></script>
 </body>
 </html>
