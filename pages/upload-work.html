@@ -3,691 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Work - Publisher</title>
-    
-    <!-- Google Fonts -->
+    <title data-i18n="upload.title">Upload Work - Publisher</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
-    <!-- Custom Styles -->
     <link href="../css/style-new.css" rel="stylesheet">
     <link href="../css/mobile-fixes.css" rel="stylesheet">
-    
     <style>
-        .upload-container {
-            padding: var(--spacing-xl) 0;
-            min-height: 100vh;
-        }
-
-        .page-header {
-            margin-bottom: var(--spacing-xl);
-        }
-
-        .page-header h1 {
-            font-size: var(--font-size-2xl);
-            margin-bottom: var(--spacing-xs);
-        }
-
-        .page-header p {
-            color: var(--color-text-secondary);
-            margin: 0;
-        }
-
-        .upload-card {
-            background: var(--color-bg-card);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-lg);
-            margin-bottom: var(--spacing-lg);
-        }
-
-        .upload-card .card-header {
-            background: transparent;
-            border-bottom: 1px solid var(--color-border);
-            padding: var(--spacing-lg);
-        }
-
-        .upload-card .card-header h2 {
-            font-size: var(--font-size-lg);
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-        }
-
-        .upload-card .card-body {
-            padding: var(--spacing-lg);
-        }
-
-        .form-label {
-            font-weight: 500;
-            color: var(--color-text-primary);
-            margin-bottom: var(--spacing-xs);
-            font-size: var(--font-size-sm);
-        }
-
-        .form-control, .form-select {
-            background-color: var(--color-bg-card);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-md);
-            padding: var(--spacing-sm) var(--spacing-md);
-            font-size: 16px;
-            color: var(--color-text-primary);
-            transition: all var(--transition-fast);
-        }
-
-        .form-control:focus, .form-select:focus {
-            border-color: var(--color-accent);
-            box-shadow: 0 0 0 3px rgba(139, 115, 85, 0.1);
-            outline: none;
-        }
-
-        /* AI Translation Section */
-        .ai-translation-card {
-            background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
-            border: none;
-            color: white;
-        }
-
-        .ai-translation-card .card-header {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .ai-translation-card .card-header h2 {
-            color: white;
-        }
-
-        .ai-translation-card .form-label {
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        .ai-translation-card .form-text {
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        /* Language Grid */
-        .language-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: var(--spacing-sm);
-        }
-
-        .language-option {
-            background: rgba(255, 255, 255, 0.15);
-            border: 2px solid transparent;
-            border-radius: var(--radius-md);
-            padding: var(--spacing-sm);
-            text-align: center;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-        }
-
-        .language-option:hover {
-            background: rgba(255, 255, 255, 0.25);
-        }
-
-        .language-option.selected {
-            background: rgba(255, 255, 255, 0.3);
-            border-color: white;
-        }
-
-        .language-option .lang-flag {
-            font-size: 1.5rem;
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        .language-option .lang-name {
-            font-size: var(--font-size-xs);
-            font-weight: 500;
-        }
-
-        .language-option input {
-            display: none;
-        }
-
-        /* Benefits */
-        .ai-benefits {
-            display: flex;
-            gap: var(--spacing-lg);
-            margin-top: var(--spacing-md);
-            flex-wrap: wrap;
-        }
-
-        .benefit-item {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-            font-size: var(--font-size-sm);
-        }
-
-        .benefit-item i {
-            background: rgba(255, 255, 255, 0.2);
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Toggle Switch */
-        .form-switch .form-check-input {
-            width: 48px;
-            height: 24px;
-            cursor: pointer;
-        }
-
-        .form-switch .form-check-input:checked {
-            background-color: white;
-            border-color: white;
-        }
-
-        .form-switch .form-check-input:checked::before {
-            background-color: var(--color-accent);
-        }
-
-        /* File Upload */
-        .file-upload-area {
-            border: 2px dashed var(--color-border);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-xl);
-            text-align: center;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-            background: var(--color-bg-main);
-        }
-
-        .file-upload-area:hover {
-            border-color: var(--color-accent);
-            background: var(--color-bg-hover);
-        }
-
-        .file-upload-area.dragover {
-            border-color: var(--color-accent);
-            background: rgba(139, 115, 85, 0.1);
-        }
-
-        .file-upload-area i {
-            font-size: 3rem;
-            color: var(--color-accent-light);
-            margin-bottom: var(--spacing-md);
-        }
-
-        .file-upload-area h4 {
-            font-size: var(--font-size-base);
-            margin-bottom: var(--spacing-xs);
-        }
-
-        .file-upload-area p {
-            font-size: var(--font-size-sm);
-            color: var(--color-text-secondary);
-            margin: 0;
-        }
-
-        .file-upload-area input {
-            display: none;
-        }
-
-        .uploaded-file {
-            display: flex;
-            align-items: center;
-            background: var(--color-bg-hover);
-            padding: var(--spacing-md);
-            border-radius: var(--radius-md);
-            margin-top: var(--spacing-md);
-        }
-
-        .uploaded-file i {
-            font-size: 1.5rem;
-            color: var(--color-accent);
-            margin-right: var(--spacing-md);
-        }
-
-        .uploaded-file .file-info {
-            flex-grow: 1;
-        }
-
-        .uploaded-file .file-name {
-            font-weight: 500;
-        }
-
-        .uploaded-file .file-size {
-            font-size: var(--font-size-sm);
-            color: var(--color-text-secondary);
-        }
-
-        .uploaded-file .btn-remove {
-            background: none;
-            border: none;
-            color: var(--color-text-secondary);
-            cursor: pointer;
-        }
-
-        .uploaded-file .btn-remove:hover {
-            color: var(--color-error);
-        }
-
-        /* Price Input */
-        .price-input-group {
-            position: relative;
-        }
-
-        .price-input-group .currency {
-            position: absolute;
-            left: var(--spacing-md);
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--color-text-secondary);
-            font-weight: 500;
-        }
-
-        .price-input-group .form-control {
-            padding-left: 2rem;
-        }
-
-        /* Submit Button */
-        .btn-publish {
-            background-color: var(--color-accent);
-            border: none;
-            color: white;
-            padding: var(--spacing-md) var(--spacing-xl);
-            border-radius: var(--radius-md);
-            font-weight: 600;
-            font-size: var(--font-size-base);
-            transition: all var(--transition-fast);
-        }
-
-        .btn-publish:hover {
-            background-color: var(--color-accent-hover);
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
-            color: white;
-        }
-
-        .btn-draft {
-            background: transparent;
-            border: 2px solid var(--color-border);
-            color: var(--color-text-secondary);
-            padding: var(--spacing-md) var(--spacing-xl);
-            border-radius: var(--radius-md);
-            font-weight: 600;
-            transition: all var(--transition-fast);
-        }
-
-        .btn-draft:hover {
-            border-color: var(--color-accent);
-            color: var(--color-accent);
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .language-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .ai-benefits {
-                flex-direction: column;
-                gap: var(--spacing-sm);
-            }
-        }
+        .language-selector{position:fixed;top:80px;right:20px;z-index:1000}.language-selector select{padding:8px 12px;border:1px solid var(--color-border);border-radius:var(--radius-md);background:var(--color-bg-card);font-size:var(--font-size-sm);cursor:pointer}
+        .upload-container{padding:var(--spacing-xl) 0;min-height:100vh}.page-header{margin-bottom:var(--spacing-xl)}.page-header h1{font-size:var(--font-size-2xl);margin-bottom:var(--spacing-xs)}.page-header p{color:var(--color-text-secondary);margin:0}
+        .upload-card{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);margin-bottom:var(--spacing-lg)}.upload-card .card-header{background:transparent;border-bottom:1px solid var(--color-border);padding:var(--spacing-lg)}.upload-card .card-header h2{font-size:var(--font-size-lg);margin:0;display:flex;align-items:center;gap:var(--spacing-sm)}.upload-card .card-body{padding:var(--spacing-lg)}
+        .form-label{font-weight:500;color:var(--color-text-primary);margin-bottom:var(--spacing-xs);font-size:var(--font-size-sm)}.form-control,.form-select{background-color:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--spacing-sm) var(--spacing-md);font-size:16px;color:var(--color-text-primary);transition:all var(--transition-fast)}.form-control:focus,.form-select:focus{border-color:var(--color-accent);box-shadow:0 0 0 3px rgba(139,115,85,0.1);outline:none}
+        .ai-translation-card{background:linear-gradient(135deg,var(--color-accent) 0%,var(--color-accent-light) 100%);border:none;color:white}.ai-translation-card .card-header{border-bottom:1px solid rgba(255,255,255,0.2)}.ai-translation-card .card-header h2{color:white}.ai-translation-card .form-label{color:rgba(255,255,255,0.9)}.ai-translation-card .form-text{color:rgba(255,255,255,0.7)}
+        .language-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--spacing-sm)}.language-option{background:rgba(255,255,255,0.15);border:2px solid transparent;border-radius:var(--radius-md);padding:var(--spacing-sm);text-align:center;cursor:pointer;transition:all var(--transition-fast)}.language-option:hover{background:rgba(255,255,255,0.25)}.language-option.selected{background:rgba(255,255,255,0.3);border-color:white}.language-option .lang-flag{font-size:1.5rem;display:block;margin-bottom:4px}.language-option .lang-name{font-size:var(--font-size-xs);font-weight:500}.language-option input{display:none}
+        .ai-benefits{display:flex;gap:var(--spacing-lg);margin-top:var(--spacing-md);flex-wrap:wrap}.benefit-item{display:flex;align-items:center;gap:var(--spacing-sm);font-size:var(--font-size-sm)}.benefit-item i{background:rgba(255,255,255,0.2);width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+        .file-upload-area{border:2px dashed var(--color-border);border-radius:var(--radius-lg);padding:var(--spacing-xl);text-align:center;cursor:pointer;transition:all var(--transition-fast);background:var(--color-bg-main)}.file-upload-area:hover{border-color:var(--color-accent);background:var(--color-bg-hover)}.file-upload-area.dragover{border-color:var(--color-accent);background:rgba(139,115,85,0.1)}.file-upload-area i{font-size:3rem;color:var(--color-accent-light);margin-bottom:var(--spacing-md)}.file-upload-area h4{font-size:var(--font-size-base);margin-bottom:var(--spacing-xs)}.file-upload-area p{font-size:var(--font-size-sm);color:var(--color-text-secondary);margin:0}.file-upload-area input{display:none}
+        .uploaded-file{display:flex;align-items:center;background:var(--color-bg-hover);padding:var(--spacing-md);border-radius:var(--radius-md);margin-top:var(--spacing-md)}.uploaded-file i{font-size:1.5rem;color:var(--color-accent);margin-right:var(--spacing-md)}.uploaded-file .file-info{flex-grow:1}.uploaded-file .file-name{font-weight:500}.uploaded-file .file-size{font-size:var(--font-size-sm);color:var(--color-text-secondary)}.uploaded-file .btn-remove{background:none;border:none;color:var(--color-text-secondary);cursor:pointer}.uploaded-file .btn-remove:hover{color:var(--color-error)}
+        .price-input-group{position:relative}.price-input-group .currency{position:absolute;left:var(--spacing-md);top:50%;transform:translateY(-50%);color:var(--color-text-secondary);font-weight:500}.price-input-group .form-control{padding-left:2rem}
+        .btn-publish{background-color:var(--color-accent);border:none;color:white;padding:var(--spacing-md) var(--spacing-xl);border-radius:var(--radius-md);font-weight:600;font-size:var(--font-size-base);transition:all var(--transition-fast)}.btn-publish:hover{background-color:var(--color-accent-hover);transform:translateY(-1px);box-shadow:var(--shadow-md);color:white}
+        .btn-draft{background:transparent;border:2px solid var(--color-border);color:var(--color-text-secondary);padding:var(--spacing-md) var(--spacing-xl);border-radius:var(--radius-md);font-weight:600;transition:all var(--transition-fast)}.btn-draft:hover{border-color:var(--color-accent);color:var(--color-accent)}
+        @media(max-width:768px){.language-grid{grid-template-columns:repeat(2,1fr)}.ai-benefits{flex-direction:column;gap:var(--spacing-sm)}}
+        @media(max-width:576px){.language-selector{top:70px;right:10px}}
     </style>
 </head>
 <body>
-    <!-- Navigation -->
+    <div class="language-selector">
+        <select id="languageSelect" onchange="changeLanguage(this.value)">
+            <option value="en">🇬🇧 English</option><option value="ja">🇯🇵 日本語</option><option value="zh">🇨🇳 中文</option><option value="es">🇪🇸 Español</option><option value="fr">🇫🇷 Français</option><option value="de">🇩🇪 Deutsch</option><option value="ko">🇰🇷 한국어</option><option value="ar">🇸🇦 العربية</option><option value="pt">🇧🇷 Português</option>
+        </select>
+    </div>
     <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="../index.html">
-                <i class="fas fa-book-open"></i>
-                Publisher
-            </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
+            <a class="navbar-brand" href="../index.html"><i class="fas fa-book-open"></i> Publisher</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="dashboard.html">
-                            <i class="fas fa-th-large me-1"></i> Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="my-works.html">
-                            <i class="fas fa-book me-1"></i> My Works
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="earnings.html">
-                            <i class="fas fa-coins me-1"></i> Earnings
-                        </a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="dashboard.html"><i class="fas fa-th-large me-1"></i><span data-i18n="nav.dashboard">Dashboard</span></a></li>
+                    <li class="nav-item"><a class="nav-link" href="browse.html"><i class="fas fa-compass me-1"></i><span data-i18n="nav.browse">Browse</span></a></li>
                 </ul>
-                
                 <div class="d-flex align-items-center gap-3">
-                    <!-- Notification Bell -->
-                    <a href="notifications.html" class="btn btn-outline-secondary position-relative" title="通知">
-                        <i class="fas fa-bell"></i>
-                        <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; display: none;">0</span>
-                    </a>
-                    <a href="dashboard.html" class="btn btn-soft-custom">
-                        <i class="fas fa-arrow-left me-1"></i> Back
-                    </a>
+                    <a href="notifications.html" class="btn btn-soft-custom position-relative"><i class="fas fa-bell"></i><span id="notificationBadge" class="position-absolute badge rounded-pill bg-danger" style="font-size:0.6rem;display:none;top:0;right:0;">0</span></a>
+                    <a href="dashboard.html" class="btn btn-soft-custom"><i class="fas fa-arrow-left me-1"></i><span data-i18n="common.back">Back</span></a>
                 </div>
             </div>
         </div>
     </nav>
-
-    <!-- Main Content -->
     <main class="upload-container">
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-lg-8">
-                    <!-- Page Header -->
                     <div class="page-header fade-in">
-                        <h1><i class="fas fa-upload me-2 text-accent"></i>Upload New Work</h1>
-                        <p>Share your story with readers around the world</p>
+                        <h1><i class="fas fa-upload me-2 text-accent"></i><span data-i18n="upload.title">Upload Work</span></h1>
+                        <p data-i18n="upload.subtitle">Share your creation with the world</p>
                     </div>
-
                     <form id="uploadForm">
-                        <!-- Basic Information -->
                         <div class="upload-card fade-in">
-                            <div class="card-header">
-                                <h2><i class="fas fa-info-circle text-accent"></i> Basic Information</h2>
-                            </div>
+                            <div class="card-header"><h2><i class="fas fa-info-circle text-accent"></i> Basic Information</h2></div>
                             <div class="card-body">
                                 <div class="mb-3">
-                                    <label class="form-label" for="title">Title *</label>
-                                    <input type="text" class="form-control" id="title" placeholder="Enter your work's title" required>
+                                    <label class="form-label" for="title" data-i18n="upload.workTitle">Title</label>
+                                    <input type="text" class="form-control" id="title" placeholder="Enter title" required>
                                 </div>
-
                                 <div class="mb-3">
-                                    <label class="form-label" for="description">Description *</label>
-                                    <textarea class="form-control" id="description" rows="4" placeholder="Write a compelling description of your work..." required></textarea>
+                                    <label class="form-label" for="description" data-i18n="upload.description">Description</label>
+                                    <textarea class="form-control" id="description" rows="4" placeholder="Write a description..." required></textarea>
                                 </div>
-
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label" for="originalLanguage">Original Language *</label>
+                                        <label class="form-label" for="originalLanguage" data-i18n="upload.language">Language</label>
                                         <select class="form-select" id="originalLanguage" required>
-                                            <option value="">Select language...</option>
-                                            <option value="en">🇬🇧 English</option>
-                                            <option value="ja">🇯🇵 日本語 (Japanese)</option>
-                                            <option value="es">🇪🇸 Español (Spanish)</option>
-                                            <option value="de">🇩🇪 Deutsch (German)</option>
-                                            <option value="fr">🇫🇷 Français (French)</option>
-                                            <option value="zh">🇨🇳 中文 (Chinese)</option>
-                                            <option value="ko">🇰🇷 한국어 (Korean)</option>
-                                            <option value="ar">🇸🇦 العربية (Arabic)</option>
+                                            <option value="">Select...</option>
+                                            <option value="en">🇬🇧 English</option><option value="ja">🇯🇵 日本語</option><option value="es">🇪🇸 Español</option><option value="de">🇩🇪 Deutsch</option><option value="fr">🇫🇷 Français</option><option value="zh">🇨🇳 中文</option><option value="ko">🇰🇷 한국어</option><option value="ar">🇸🇦 العربية</option>
                                         </select>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label" for="genre">Genre *</label>
+                                        <label class="form-label" for="genre" data-i18n="upload.category">Category</label>
                                         <select class="form-select" id="genre" required>
-                                            <option value="">Select genre...</option>
-                                            <option value="fiction">Fiction</option>
-                                            <option value="non-fiction">Non-Fiction</option>
-                                            <option value="romance">Romance</option>
-                                            <option value="mystery">Mystery / Thriller</option>
-                                            <option value="scifi">Science Fiction</option>
-                                            <option value="fantasy">Fantasy</option>
-                                            <option value="horror">Horror</option>
-                                            <option value="poetry">Poetry</option>
-                                            <option value="manga">Manga / Comics</option>
-                                            <option value="other">Other</option>
+                                            <option value="">Select...</option>
+                                            <option value="fiction">Fiction</option><option value="non-fiction">Non-Fiction</option><option value="romance">Romance</option><option value="mystery">Mystery</option><option value="scifi">Sci-Fi</option><option value="fantasy">Fantasy</option><option value="horror">Horror</option><option value="poetry">Poetry</option><option value="manga">Manga</option><option value="other">Other</option>
                                         </select>
                                     </div>
                                 </div>
-
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label" for="price">Price (USD)</label>
-                                        <div class="price-input-group">
-                                            <span class="currency">$</span>
-                                            <input type="number" class="form-control" id="price" placeholder="9.99" min="0" step="0.01">
-                                        </div>
-                                        <div class="form-text">Leave empty or 0 for free</div>
+                                        <label class="form-label" for="price" data-i18n="upload.pricing">Pricing</label>
+                                        <div class="price-input-group"><span class="currency">$</span><input type="number" class="form-control" id="price" placeholder="9.99" min="0" step="0.01"></div>
+                                        <div class="form-text" data-i18n="common.free">Leave empty for free</div>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label" for="contentType">Content Type *</label>
+                                        <label class="form-label" for="contentType">Content Type</label>
                                         <select class="form-select" id="contentType" required>
-                                            <option value="novel">Novel / Book</option>
-                                            <option value="short-story">Short Story</option>
-                                            <option value="article">Article</option>
-                                            <option value="manga">Manga / Comic</option>
-                                            <option value="poetry">Poetry Collection</option>
+                                            <option value="novel">Novel</option><option value="short-story">Short Story</option><option value="article">Article</option><option value="manga">Manga</option><option value="poetry">Poetry</option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- AI Translation -->
                         <div class="upload-card ai-translation-card fade-in">
-                            <div class="card-header">
-                                <h2><i class="fas fa-robot"></i> AI Translation</h2>
-                            </div>
+                            <div class="card-header"><h2><i class="fas fa-robot"></i> AI Translation</h2></div>
                             <div class="card-body">
                                 <div class="form-check form-switch mb-4">
                                     <input class="form-check-input" type="checkbox" id="enableTranslation" checked>
-                                    <label class="form-check-label" for="enableTranslation" style="font-weight: 600;">
-                                        Enable AI Translation
-                                    </label>
+                                    <label class="form-check-label" for="enableTranslation" style="font-weight:600;">Enable AI Translation</label>
                                 </div>
-
                                 <div id="translationOptions">
-                                    <label class="form-label">Select Target Languages</label>
+                                    <label class="form-label">Target Languages</label>
                                     <div class="language-grid mb-3">
-                                        <label class="language-option selected">
-                                            <input type="checkbox" name="targetLang" value="en" checked>
-                                            <span class="lang-flag">🇬🇧</span>
-                                            <span class="lang-name">English</span>
-                                        </label>
-                                        <label class="language-option selected">
-                                            <input type="checkbox" name="targetLang" value="es" checked>
-                                            <span class="lang-flag">🇪🇸</span>
-                                            <span class="lang-name">Español</span>
-                                        </label>
-                                        <label class="language-option selected">
-                                            <input type="checkbox" name="targetLang" value="de" checked>
-                                            <span class="lang-flag">🇩🇪</span>
-                                            <span class="lang-name">Deutsch</span>
-                                        </label>
-                                        <label class="language-option selected">
-                                            <input type="checkbox" name="targetLang" value="fr" checked>
-                                            <span class="lang-flag">🇫🇷</span>
-                                            <span class="lang-name">Français</span>
-                                        </label>
-                                        <label class="language-option selected">
-                                            <input type="checkbox" name="targetLang" value="ja" checked>
-                                            <span class="lang-flag">🇯🇵</span>
-                                            <span class="lang-name">日本語</span>
-                                        </label>
-                                        <label class="language-option selected">
-                                            <input type="checkbox" name="targetLang" value="zh" checked>
-                                            <span class="lang-flag">🇨🇳</span>
-                                            <span class="lang-name">中文</span>
-                                        </label>
-                                        <label class="language-option selected">
-                                            <input type="checkbox" name="targetLang" value="ko" checked>
-                                            <span class="lang-flag">🇰🇷</span>
-                                            <span class="lang-name">한국어</span>
-                                        </label>
-                                        <label class="language-option selected">
-                                            <input type="checkbox" name="targetLang" value="ar" checked>
-                                            <span class="lang-flag">🇸🇦</span>
-                                            <span class="lang-name">العربية</span>
-                                        </label>
+                                        <label class="language-option selected"><input type="checkbox" name="targetLang" value="en" checked><span class="lang-flag">🇬🇧</span><span class="lang-name">English</span></label>
+                                        <label class="language-option selected"><input type="checkbox" name="targetLang" value="es" checked><span class="lang-flag">🇪🇸</span><span class="lang-name">Español</span></label>
+                                        <label class="language-option selected"><input type="checkbox" name="targetLang" value="de" checked><span class="lang-flag">🇩🇪</span><span class="lang-name">Deutsch</span></label>
+                                        <label class="language-option selected"><input type="checkbox" name="targetLang" value="fr" checked><span class="lang-flag">🇫🇷</span><span class="lang-name">Français</span></label>
+                                        <label class="language-option selected"><input type="checkbox" name="targetLang" value="ja" checked><span class="lang-flag">🇯🇵</span><span class="lang-name">日本語</span></label>
+                                        <label class="language-option selected"><input type="checkbox" name="targetLang" value="zh" checked><span class="lang-flag">🇨🇳</span><span class="lang-name">中文</span></label>
+                                        <label class="language-option selected"><input type="checkbox" name="targetLang" value="ko" checked><span class="lang-flag">🇰🇷</span><span class="lang-name">한국어</span></label>
+                                        <label class="language-option selected"><input type="checkbox" name="targetLang" value="ar" checked><span class="lang-flag">🇸🇦</span><span class="lang-name">العربية</span></label>
                                     </div>
-
                                     <div class="ai-benefits">
-                                        <div class="benefit-item">
-                                            <i class="fas fa-bolt"></i>
-                                            <span>Instant translation</span>
-                                        </div>
-                                        <div class="benefit-item">
-                                            <i class="fas fa-gift"></i>
-                                            <span>5 works/month free</span>
-                                        </div>
-                                        <div class="benefit-item">
-                                            <i class="fas fa-globe"></i>
-                                            <span>Reach global readers</span>
-                                        </div>
+                                        <div class="benefit-item"><i class="fas fa-bolt"></i><span>Instant translation</span></div>
+                                        <div class="benefit-item"><i class="fas fa-gift"></i><span>5 free/month</span></div>
+                                        <div class="benefit-item"><i class="fas fa-globe"></i><span>Global reach</span></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- File Upload -->
                         <div class="upload-card fade-in">
-                            <div class="card-header">
-                                <h2><i class="fas fa-file-upload text-accent"></i> Upload Files</h2>
-                            </div>
+                            <div class="card-header"><h2><i class="fas fa-file-upload text-accent"></i> Upload Files</h2></div>
                             <div class="card-body">
                                 <label class="form-label">Content File *</label>
                                 <div class="file-upload-area" id="contentUploadArea">
                                     <i class="fas fa-cloud-upload-alt d-block"></i>
-                                    <h4>Drop your file here or click to browse</h4>
-                                    <p>Supports: PDF, DOCX, TXT, EPUB (Max 50MB)</p>
+                                    <h4 data-i18n="upload.dragDrop">Drag and drop your file here</h4>
+                                    <p data-i18n="upload.supportedFormats">PDF, DOCX, TXT, EPUB (Max 50MB)</p>
                                     <input type="file" id="contentFile" accept=".pdf,.docx,.txt,.epub">
                                 </div>
                                 <div id="contentFilePreview"></div>
-
                                 <label class="form-label mt-4">Cover Image (Optional)</label>
                                 <div class="file-upload-area" id="coverUploadArea">
                                     <i class="fas fa-image d-block"></i>
-                                    <h4>Drop your cover image here</h4>
-                                    <p>Supports: JPG, PNG, WebP (Recommended: 600x900px)</p>
+                                    <h4>Drop cover image here</h4>
+                                    <p>JPG, PNG, WebP (600x900px)</p>
                                     <input type="file" id="coverFile" accept=".jpg,.jpeg,.png,.webp">
                                 </div>
                                 <div id="coverFilePreview"></div>
                             </div>
                         </div>
-
-                        <!-- Submit Buttons -->
                         <div class="d-flex gap-3 justify-content-end fade-in">
-                            <button type="button" class="btn btn-draft">
-                                <i class="fas fa-save me-2"></i>Save as Draft
-                            </button>
-                            <button type="submit" class="btn btn-publish">
-                                <i class="fas fa-paper-plane me-2"></i>Publish Work
-                            </button>
+                            <button type="button" class="btn btn-draft"><i class="fas fa-save me-2"></i><span data-i18n="upload.saveDraft">Save as Draft</span></button>
+                            <button type="submit" class="btn btn-publish"><i class="fas fa-paper-plane me-2"></i><span data-i18n="upload.publishNow">Publish Now</span></button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </main>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Language selection
-        document.querySelectorAll('.language-option').forEach(option => {
-            option.addEventListener('click', function() {
-                const checkbox = this.querySelector('input[type="checkbox"]');
-                checkbox.checked = !checkbox.checked;
-                this.classList.toggle('selected', checkbox.checked);
-            });
-        });
-
-        // Toggle translation options
-        document.getElementById('enableTranslation').addEventListener('change', function() {
-            document.getElementById('translationOptions').style.display = this.checked ? 'block' : 'none';
-        });
-
-        // File upload handling
-        function setupFileUpload(areaId, inputId, previewId) {
-            const area = document.getElementById(areaId);
-            const input = document.getElementById(inputId);
-            const preview = document.getElementById(previewId);
-
-            area.addEventListener('click', () => input.click());
-
-            area.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                area.classList.add('dragover');
-            });
-
-            area.addEventListener('dragleave', () => {
-                area.classList.remove('dragover');
-            });
-
-            area.addEventListener('drop', (e) => {
-                e.preventDefault();
-                area.classList.remove('dragover');
-                if (e.dataTransfer.files.length) {
-                    input.files = e.dataTransfer.files;
-                    showFilePreview(input.files[0], preview);
-                }
-            });
-
-            input.addEventListener('change', () => {
-                if (input.files.length) {
-                    showFilePreview(input.files[0], preview);
-                }
-            });
-        }
-
-        function showFilePreview(file, previewElement) {
-            const size = (file.size / 1024 / 1024).toFixed(2);
-            previewElement.innerHTML = `
-                <div class="uploaded-file">
-                    <i class="fas fa-file"></i>
-                    <div class="file-info">
-                        <div class="file-name">${file.name}</div>
-                        <div class="file-size">${size} MB</div>
-                    </div>
-                    <button type="button" class="btn-remove" onclick="removeFile('${previewElement.id}')">
-                        <i class="fas fa-times"></i>
-                    </button>
+    <footer class="footer-custom mt-5">
+        <div class="container">
+            <div class="d-flex flex-wrap justify-content-between align-items-center">
+                <p class="small mb-0">&copy; 2025 Publisher</p>
+                <div class="d-flex gap-3">
+                    <a href="support/faq.html" class="text-secondary" data-i18n="footer.help">Help</a>
+                    <a href="terms.html" class="text-secondary" data-i18n="footer.terms">Terms</a>
+                    <a href="privacy.html" class="text-secondary" data-i18n="footer.privacy">Privacy</a>
                 </div>
-            `;
-        }
-
-        function removeFile(previewId) {
-            document.getElementById(previewId).innerHTML = '';
-            if (previewId === 'contentFilePreview') {
-                document.getElementById('contentFile').value = '';
-            } else {
-                document.getElementById('coverFile').value = '';
-            }
-        }
-
-        setupFileUpload('contentUploadArea', 'contentFile', 'contentFilePreview');
-        setupFileUpload('coverUploadArea', 'coverFile', 'coverFilePreview');
-
-        // Form submission
-        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const selectedLanguages = [];
-            document.querySelectorAll('input[name="targetLang"]:checked').forEach(cb => {
-                selectedLanguages.push(cb.value);
-            });
-
-            const formData = {
-                title: document.getElementById('title').value,
-                description: document.getElementById('description').value,
-                originalLanguage: document.getElementById('originalLanguage').value,
-                genre: document.getElementById('genre').value,
-                price: document.getElementById('price').value || 0,
-                contentType: document.getElementById('contentType').value,
-                enableTranslation: document.getElementById('enableTranslation').checked,
-                targetLanguages: selectedLanguages
-            };
-
-            console.log('Form data:', formData);
-            alert('Work uploaded successfully! AI translation will begin shortly.');
-            // window.location.href = 'translation-status.html';
-        });
+            </div>
+        </div>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/translations.js"></script>
+    <script src="../js/language-switcher.js"></script>
+    <script>
+        document.querySelectorAll('.language-option').forEach(o=>{o.addEventListener('click',function(){const c=this.querySelector('input[type="checkbox"]');c.checked=!c.checked;this.classList.toggle('selected',c.checked)})});
+        document.getElementById('enableTranslation').addEventListener('change',function(){document.getElementById('translationOptions').style.display=this.checked?'block':'none'});
+        function setupFileUpload(a,i,p){const area=document.getElementById(a),input=document.getElementById(i),preview=document.getElementById(p);area.addEventListener('click',()=>input.click());area.addEventListener('dragover',e=>{e.preventDefault();area.classList.add('dragover')});area.addEventListener('dragleave',()=>area.classList.remove('dragover'));area.addEventListener('drop',e=>{e.preventDefault();area.classList.remove('dragover');if(e.dataTransfer.files.length){input.files=e.dataTransfer.files;showFilePreview(input.files[0],preview)}});input.addEventListener('change',()=>{if(input.files.length)showFilePreview(input.files[0],preview)})}
+        function showFilePreview(f,p){const s=(f.size/1024/1024).toFixed(2);p.innerHTML=`<div class="uploaded-file"><i class="fas fa-file"></i><div class="file-info"><div class="file-name">${f.name}</div><div class="file-size">${s} MB</div></div><button type="button" class="btn-remove" onclick="removeFile('${p.id}')"><i class="fas fa-times"></i></button></div>`}
+        function removeFile(id){document.getElementById(id).innerHTML='';if(id==='contentFilePreview')document.getElementById('contentFile').value='';else document.getElementById('coverFile').value=''}
+        setupFileUpload('contentUploadArea','contentFile','contentFilePreview');setupFileUpload('coverUploadArea','coverFile','coverFilePreview');
+        document.getElementById('uploadForm').addEventListener('submit',async function(e){e.preventDefault();const langs=[];document.querySelectorAll('input[name="targetLang"]:checked').forEach(c=>langs.push(c.value));const data={title:document.getElementById('title').value,description:document.getElementById('description').value,originalLanguage:document.getElementById('originalLanguage').value,genre:document.getElementById('genre').value,price:document.getElementById('price').value||0,contentType:document.getElementById('contentType').value,enableTranslation:document.getElementById('enableTranslation').checked,targetLanguages:langs};console.log(data);alert('Work uploaded! AI translation will begin.')});
     </script>
-    
-    <!-- Notification Badge -->
-    <script src="../js/notification-badge.js"></script>
 </body>
 </html>
