@@ -16,8 +16,25 @@
     
     <!-- Custom Styles -->
     <link href="../../css/style-new.css" rel="stylesheet">
+    <link href="../../css/mobile-fixes.css" rel="stylesheet">
     
     <style>
+        /* モバイルで言語セレクターを常に表示 */
+        .navbar-lang-selector {
+            display: flex;
+            align-items: center;
+            margin-right: 0.5rem;
+        }
+        
+        @media (max-width: 991.98px) {
+            .navbar-lang-selector {
+                order: 1;
+            }
+            .navbar-toggler {
+                order: 2;
+            }
+        }
+        
         .faq-hero { background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%); padding: var(--spacing-2xl) 0; color: white; text-align: center; }
         .faq-hero h1 { color: white; font-size: var(--font-size-3xl); margin-bottom: var(--spacing-sm); }
         .faq-hero p { color: rgba(255, 255, 255, 0.9); margin-bottom: var(--spacing-lg); }
@@ -58,7 +75,6 @@
         .troubleshoot-cta p { color: rgba(255, 255, 255, 0.9); margin-bottom: var(--spacing-lg); }
         .troubleshoot-cta .btn { background: white; color: var(--color-accent); border: none; font-weight: 600; }
         .troubleshoot-cta .btn:hover { background: var(--color-cream); }
-        .lang-option.active { background-color: var(--color-bg-hover); font-weight: 600; }
         @media (max-width: 992px) { .category-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 576px) { .category-grid { grid-template-columns: 1fr; } .faq-section-header { flex-direction: column; gap: var(--spacing-md); } }
     </style>
@@ -71,9 +87,26 @@
                 <i class="fas fa-book-open"></i>
                 Publisher
             </a>
+            
+            <!-- Language Selector (モバイル用 - 常に表示) -->
+            <div class="navbar-lang-selector d-lg-none">
+                <select class="language-selector" id="languageSelectorMobile">
+                    <option value="en">🇬🇧 EN</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="es">🇪🇸 ES</option>
+                    <option value="fr">🇫🇷 FR</option>
+                    <option value="de">🇩🇪 DE</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="ar">🇸🇦 عربي</option>
+                    <option value="pt">🇧🇷 PT</option>
+                </select>
+            </div>
+            
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
+            
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
@@ -92,26 +125,21 @@
                         </a>
                     </li>
                 </ul>
+                
                 <div class="d-flex align-items-center gap-3">
-                    <!-- Language Selector -->
-                    <div class="dropdown">
-                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-globe me-1"></i>
-                            <span id="currentLangFlag">🇬🇧</span>
-                            <span id="currentLangName">English</span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item lang-option" href="#" data-lang="en">🇬🇧 English</a></li>
-                            <li><a class="dropdown-item lang-option" href="#" data-lang="ja">🇯🇵 日本語</a></li>
-                            <li><a class="dropdown-item lang-option" href="#" data-lang="zh">🇨🇳 中文</a></li>
-                            <li><a class="dropdown-item lang-option" href="#" data-lang="es">🇪🇸 Español</a></li>
-                            <li><a class="dropdown-item lang-option" href="#" data-lang="fr">🇫🇷 Français</a></li>
-                            <li><a class="dropdown-item lang-option" href="#" data-lang="de">🇩🇪 Deutsch</a></li>
-                            <li><a class="dropdown-item lang-option" href="#" data-lang="ko">🇰🇷 한국어</a></li>
-                            <li><a class="dropdown-item lang-option" href="#" data-lang="ar">🇸🇦 العربية</a></li>
-                            <li><a class="dropdown-item lang-option" href="#" data-lang="pt">🇧🇷 Português</a></li>
-                        </ul>
-                    </div>
+                    <!-- Language Selector (デスクトップ用) -->
+                    <select class="language-selector d-none d-lg-block" id="languageSelector">
+                        <option value="en">🇬🇧 EN</option>
+                        <option value="ja">🇯🇵 日本語</option>
+                        <option value="zh">🇨🇳 中文</option>
+                        <option value="es">🇪🇸 ES</option>
+                        <option value="fr">🇫🇷 FR</option>
+                        <option value="de">🇩🇪 DE</option>
+                        <option value="ko">🇰🇷 한국어</option>
+                        <option value="ar">🇸🇦 عربي</option>
+                        <option value="pt">🇧🇷 PT</option>
+                    </select>
+                    
                     <!-- Auth Nav -->
                     <div id="authNav">
                         <a href="../login.html" class="btn btn-soft-custom">
@@ -195,11 +223,11 @@
         </div>
     </footer>
 
-    <!-- Translation Script -->
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../../js/translations.js"></script>
     <script src="../../js/language-switcher.js"></script>
     
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const API_BASE = 'http://localhost:3000/api';
         let categories = [];
@@ -212,7 +240,37 @@
             loadFaqs();
             setupSearchHandler();
             checkAuth();
+            setupLanguageSelectors();
         });
+
+        // 言語セレクターの設定
+        function setupLanguageSelectors() {
+            const desktopSelector = document.getElementById('languageSelector');
+            const mobileSelector = document.getElementById('languageSelectorMobile');
+            
+            if (desktopSelector && mobileSelector) {
+                // 初期値を同期
+                const savedLang = localStorage.getItem('preferredLanguage') || 'en';
+                desktopSelector.value = savedLang;
+                mobileSelector.value = savedLang;
+                
+                // モバイル用セレクターの変更イベント
+                mobileSelector.addEventListener('change', function() {
+                    desktopSelector.value = this.value;
+                    if (typeof changeLanguage === 'function') {
+                        changeLanguage(this.value);
+                    }
+                });
+                
+                // デスクトップ用セレクターの変更イベント
+                desktopSelector.addEventListener('change', function() {
+                    mobileSelector.value = this.value;
+                    if (typeof changeLanguage === 'function') {
+                        changeLanguage(this.value);
+                    }
+                });
+            }
+        }
 
         // Listen for language changes
         document.addEventListener('languageChanged', function(e) {
