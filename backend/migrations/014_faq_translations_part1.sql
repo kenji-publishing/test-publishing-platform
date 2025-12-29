@@ -46,7 +46,7 @@ UPDATE faq_items SET
     question_es = '¿Cómo cancelo mi suscripción?',
     answer_es = 'Puede cancelar su suscripción en cualquier momento desde "Configuración" → "Gestión de suscripción" en su panel. Después de cancelar, su suscripción permanecerá activa hasta el final del período de facturación actual. No se le cobrará después de la cancelación.',
     question_fr = 'Comment annuler mon abonnement ?',
-    answer_fr = 'Vous pouvez annuler votre abonnement à tout moment depuis "Paramètres" → "Gestion de l\'abonnement" dans votre tableau de bord. Après l\'annulation, votre abonnement restera actif jusqu\'à la fin de la période de facturation en cours. Aucun frais ne sera prélevé après l\'annulation.',
+    answer_fr = 'Vous pouvez annuler votre abonnement à tout moment depuis "Paramètres" → "Gestion de l''abonnement" dans votre tableau de bord. Après l''annulation, votre abonnement restera actif jusqu''à la fin de la période de facturation en cours. Aucun frais ne sera prélevé après l''annulation.',
     question_de = 'Wie kündige ich mein Abonnement?',
     answer_de = 'Sie können Ihr Abonnement jederzeit unter "Einstellungen" → "Abonnementverwaltung" in Ihrem Dashboard kündigen. Nach der Kündigung bleibt Ihr Abonnement bis zum Ende des aktuellen Abrechnungszeitraums aktiv. Nach der Kündigung werden keine weiteren Gebühren erhoben.',
     question_ko = '구독을 취소하려면 어떻게 해야 하나요?',
