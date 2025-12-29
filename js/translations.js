@@ -1,6 +1,6 @@
 /**
  * Publisher Platform - Translations
- * Phase 12-4a: Account Settings translations added
+ * Phase 12-4a: Account Settings + Reader translations added
  * 対応言語: en, ja, zh, es, fr, de, ko, ar, pt (9言語)
  */
 
@@ -31,6 +31,16 @@ const translations = {
             demo: { banner: 'Demo Mode: Displaying with dummy data. Actual features available after login.', notSaved: 'Not saved in demo mode' },
             loginRequired: { title: 'Login Required', message: 'Please log in to view and change account settings', login: 'Login' }
         },
+        reader: {
+            toolbar: { backToDashboard: 'Dashboard', search: 'Search', bookmarks: 'Bookmarks', addBookmark: 'Add Bookmark', settings: 'Settings', previous: 'Previous', next: 'Next' },
+            settings: { textSize: 'Text Size', small: 'S', medium: 'M', large: 'L', xlarge: 'XL', theme: 'Theme', light: 'Light', dark: 'Dark', sepia: 'Sepia', direction: 'Direction', horizontal: 'Horizontal', vertical: 'Vertical', rtl: 'RTL' },
+            search: { placeholder: 'Search...', noResults: 'No results found', foundMatches: 'Found {count} matches' },
+            bookmarks: { title: 'Bookmarks', noBookmarks: 'No bookmarks yet', page: 'Page' },
+            highlight: { yellow: 'Yellow', green: 'Green', blue: 'Blue', pink: 'Pink', remove: 'Remove', reportIssue: 'Report Translation Issue', selectText: 'Please select text to report' },
+            notes: { title: 'Notes', addPlaceholder: 'Add a note...', noNotes: 'No notes to export', exportTxt: 'TXT', exportWord: 'Word', exportJson: 'JSON', page: 'Page', exported: 'Exported' },
+            touchHint: 'Swipe left/right to turn pages • Long press to highlight',
+            cannotHighlight: 'Cannot highlight across elements'
+        },
         footer: { tagline: 'A multilingual publishing platform.', explore: 'Explore', authors: 'Authors', creators: 'Creators', write: 'Write', translate: 'Translate', pricing: 'Pricing', help: 'Help', faq: 'FAQ', legal: 'Legal', terms: 'Terms', privacy: 'Privacy', contact: 'Contact' },
         common: { loading: 'Loading...', save: 'Save', cancel: 'Cancel', delete: 'Delete', edit: 'Edit', submit: 'Submit', search: 'Search', filter: 'Filter', all: 'All', none: 'None', yes: 'Yes', no: 'No', back: 'Back', next: 'Next', previous: 'Previous', free: 'Free' }
     },
@@ -59,6 +69,16 @@ const translations = {
             modals: { changeEmail: 'メールアドレスの変更', securityRequired: 'セキュリティ質問に正しく回答する必要があります。', newEmail: '新しいメールアドレス', cancel: 'キャンセル', deleteConfirm: 'アカウント削除の確認', deleteWarning: '警告: この操作は取り消せません！', deleteList1: '投稿した作品', deleteList2: '購入履歴と購入した作品へのアクセス', deleteList3: '収益データと支払い履歴', deleteList4: '翻訳依頼と翻訳履歴', deleteList5: 'すべてのアカウント情報', typeConfirm: '本当に削除する場合は、確認のため以下に「アカウントを削除する」と入力してください。', confirmText: 'アカウントを削除する', permanentDelete: '完全に削除する', newBackupCodes: '新しいバックアップコード', codesOnce: 'これらのコードは一度だけ表示されます。安全な場所に保存してください。', copyCode: 'コードをコピー', saved: '保存しました' },
             demo: { banner: 'デモモード: ダミーデータで表示しています。実際の機能はログイン後に利用できます。', notSaved: 'デモモードのため保存されません' },
             loginRequired: { title: 'ログインが必要です', message: 'アカウント設定を確認・変更するにはログインしてください', login: 'ログイン' }
+        },
+        reader: {
+            toolbar: { backToDashboard: 'ダッシュボード', search: '検索', bookmarks: 'ブックマーク', addBookmark: 'ブックマーク追加', settings: '設定', previous: '前へ', next: '次へ' },
+            settings: { textSize: '文字サイズ', small: '小', medium: '中', large: '大', xlarge: '特大', theme: 'テーマ', light: 'ライト', dark: 'ダーク', sepia: 'セピア', direction: '表示方向', horizontal: '横書き', vertical: '縦書き', rtl: 'RTL' },
+            search: { placeholder: '検索...', noResults: '結果がありません', foundMatches: '{count}件見つかりました' },
+            bookmarks: { title: 'ブックマーク', noBookmarks: 'ブックマークがありません', page: 'ページ' },
+            highlight: { yellow: '黄色', green: '緑', blue: '青', pink: 'ピンク', remove: '削除', reportIssue: '翻訳問題を報告', selectText: '報告するテキストを選択してください' },
+            notes: { title: 'メモ', addPlaceholder: 'メモを追加...', noNotes: 'エクスポートするメモがありません', exportTxt: 'TXT', exportWord: 'Word', exportJson: 'JSON', page: 'ページ', exported: 'エクスポート' },
+            touchHint: '左右スワイプでページ移動 • 長押しでハイライト',
+            cannotHighlight: '要素をまたいでハイライトできません'
         },
         footer: { tagline: '多言語出版プラットフォーム', explore: '探索', authors: '著者', creators: 'クリエイター', write: '執筆', translate: '翻訳', pricing: '料金', help: 'ヘルプ', faq: 'FAQ', legal: '法的情報', terms: '利用規約', privacy: 'プライバシー', contact: 'お問い合わせ' },
         common: { loading: '読み込み中...', save: '保存', cancel: 'キャンセル', delete: '削除', edit: '編集', submit: '送信', search: '検索', filter: 'フィルター', all: 'すべて', none: 'なし', yes: 'はい', no: 'いいえ', back: '戻る', next: '次へ', previous: '前へ', free: '無料' }
@@ -89,6 +109,16 @@ const translations = {
             demo: { banner: '演示模式：正在显示模拟数据。实际功能需登录后使用。', notSaved: '演示模式下不会保存' },
             loginRequired: { title: '需要登录', message: '请登录以查看和更改账户设置', login: '登录' }
         },
+        reader: {
+            toolbar: { backToDashboard: '仪表板', search: '搜索', bookmarks: '书签', addBookmark: '添加书签', settings: '设置', previous: '上一页', next: '下一页' },
+            settings: { textSize: '字体大小', small: '小', medium: '中', large: '大', xlarge: '特大', theme: '主题', light: '浅色', dark: '深色', sepia: '护眼', direction: '方向', horizontal: '横排', vertical: '竖排', rtl: 'RTL' },
+            search: { placeholder: '搜索...', noResults: '未找到结果', foundMatches: '找到{count}个匹配' },
+            bookmarks: { title: '书签', noBookmarks: '暂无书签', page: '页' },
+            highlight: { yellow: '黄色', green: '绿色', blue: '蓝色', pink: '粉色', remove: '删除', reportIssue: '报告翻译问题', selectText: '请选择要报告的文本' },
+            notes: { title: '笔记', addPlaceholder: '添加笔记...', noNotes: '没有可导出的笔记', exportTxt: 'TXT', exportWord: 'Word', exportJson: 'JSON', page: '页', exported: '已导出' },
+            touchHint: '左右滑动翻页 • 长按高亮',
+            cannotHighlight: '无法跨元素高亮'
+        },
         footer: { tagline: '多语言出版平台', explore: '探索', authors: '作者', creators: '创作者', write: '写作', translate: '翻译', pricing: '定价', help: '帮助', faq: '常见问题', legal: '法律', terms: '条款', privacy: '隐私', contact: '联系' },
         common: { loading: '加载中...', save: '保存', cancel: '取消', delete: '删除', edit: '编辑', submit: '提交', search: '搜索', filter: '筛选', all: '全部', none: '无', yes: '是', no: '否', back: '返回', next: '下一个', previous: '上一个', free: '免费' }
     },
@@ -117,6 +147,16 @@ const translations = {
             modals: { changeEmail: 'Cambiar Email', securityRequired: 'Debes responder correctamente las preguntas.', newEmail: 'Nuevo Email', cancel: 'Cancelar', deleteConfirm: 'Confirmar Eliminación', deleteWarning: '¡Advertencia: Esta acción no se puede deshacer!', deleteList1: 'Tus obras publicadas', deleteList2: 'Historial de compras', deleteList3: 'Datos de ganancias', deleteList4: 'Solicitudes de traducción', deleteList5: 'Toda la información de cuenta', typeConfirm: 'Para confirmar, escribe "Eliminar mi cuenta":', confirmText: 'Eliminar mi cuenta', permanentDelete: 'Eliminar Permanentemente', newBackupCodes: 'Nuevos Códigos', codesOnce: 'Estos códigos solo se muestran una vez.', copyCode: 'Copiar', saved: 'Guardado' },
             demo: { banner: 'Modo Demo: Mostrando datos de prueba.', notSaved: 'No guardado en modo demo' },
             loginRequired: { title: 'Inicio de Sesión Requerido', message: 'Inicia sesión para ver la configuración', login: 'Iniciar Sesión' }
+        },
+        reader: {
+            toolbar: { backToDashboard: 'Panel', search: 'Buscar', bookmarks: 'Marcadores', addBookmark: 'Añadir Marcador', settings: 'Ajustes', previous: 'Anterior', next: 'Siguiente' },
+            settings: { textSize: 'Tamaño', small: 'P', medium: 'M', large: 'G', xlarge: 'XG', theme: 'Tema', light: 'Claro', dark: 'Oscuro', sepia: 'Sepia', direction: 'Dirección', horizontal: 'Horizontal', vertical: 'Vertical', rtl: 'RTL' },
+            search: { placeholder: 'Buscar...', noResults: 'Sin resultados', foundMatches: '{count} encontrados' },
+            bookmarks: { title: 'Marcadores', noBookmarks: 'Sin marcadores', page: 'Página' },
+            highlight: { yellow: 'Amarillo', green: 'Verde', blue: 'Azul', pink: 'Rosa', remove: 'Eliminar', reportIssue: 'Reportar Problema', selectText: 'Seleccione texto para reportar' },
+            notes: { title: 'Notas', addPlaceholder: 'Añadir nota...', noNotes: 'Sin notas para exportar', exportTxt: 'TXT', exportWord: 'Word', exportJson: 'JSON', page: 'Página', exported: 'Exportado' },
+            touchHint: 'Desliza para cambiar página • Mantén para resaltar',
+            cannotHighlight: 'No se puede resaltar entre elementos'
         },
         footer: { tagline: 'Plataforma multilingüe', explore: 'Explorar', authors: 'Autores', creators: 'Creadores', write: 'Escribir', translate: 'Traducir', pricing: 'Precios', help: 'Ayuda', faq: 'FAQ', legal: 'Legal', terms: 'Términos', privacy: 'Privacidad', contact: 'Contacto' },
         common: { loading: 'Cargando...', save: 'Guardar', cancel: 'Cancelar', delete: 'Eliminar', edit: 'Editar', submit: 'Enviar', search: 'Buscar', filter: 'Filtrar', all: 'Todo', none: 'Ninguno', yes: 'Sí', no: 'No', back: 'Volver', next: 'Siguiente', previous: 'Anterior', free: 'Gratis' }
@@ -147,6 +187,16 @@ const translations = {
             demo: { banner: 'Mode Démo : Affichage de données de test.', notSaved: 'Non enregistré en mode démo' },
             loginRequired: { title: 'Connexion Requise', message: 'Connectez-vous pour voir les paramètres', login: 'Connexion' }
         },
+        reader: {
+            toolbar: { backToDashboard: 'Tableau', search: 'Rechercher', bookmarks: 'Signets', addBookmark: 'Ajouter Signet', settings: 'Paramètres', previous: 'Précédent', next: 'Suivant' },
+            settings: { textSize: 'Taille', small: 'P', medium: 'M', large: 'G', xlarge: 'TG', theme: 'Thème', light: 'Clair', dark: 'Sombre', sepia: 'Sépia', direction: 'Direction', horizontal: 'Horizontal', vertical: 'Vertical', rtl: 'RTL' },
+            search: { placeholder: 'Rechercher...', noResults: 'Aucun résultat', foundMatches: '{count} trouvés' },
+            bookmarks: { title: 'Signets', noBookmarks: 'Aucun signet', page: 'Page' },
+            highlight: { yellow: 'Jaune', green: 'Vert', blue: 'Bleu', pink: 'Rose', remove: 'Supprimer', reportIssue: 'Signaler Problème', selectText: 'Sélectionnez le texte à signaler' },
+            notes: { title: 'Notes', addPlaceholder: 'Ajouter une note...', noNotes: 'Aucune note à exporter', exportTxt: 'TXT', exportWord: 'Word', exportJson: 'JSON', page: 'Page', exported: 'Exporté' },
+            touchHint: 'Glissez pour changer de page • Appuyez long pour surligner',
+            cannotHighlight: 'Impossible de surligner entre éléments'
+        },
         footer: { tagline: 'Plateforme multilingue', explore: 'Explorer', authors: 'Auteurs', creators: 'Créateurs', write: 'Écrire', translate: 'Traduire', pricing: 'Tarifs', help: 'Aide', faq: 'FAQ', legal: 'Légal', terms: 'Conditions', privacy: 'Confidentialité', contact: 'Contact' },
         common: { loading: 'Chargement...', save: 'Enregistrer', cancel: 'Annuler', delete: 'Supprimer', edit: 'Modifier', submit: 'Soumettre', search: 'Rechercher', filter: 'Filtrer', all: 'Tout', none: 'Aucun', yes: 'Oui', no: 'Non', back: 'Retour', next: 'Suivant', previous: 'Précédent', free: 'Gratuit' }
     },
@@ -175,6 +225,16 @@ const translations = {
             modals: { changeEmail: 'E-Mail Ändern', securityRequired: 'Sie müssen die Fragen korrekt beantworten.', newEmail: 'Neue E-Mail', cancel: 'Abbrechen', deleteConfirm: 'Löschung Bestätigen', deleteWarning: 'Warnung: Diese Aktion kann nicht rückgängig gemacht werden!', deleteList1: 'Ihre veröffentlichten Werke', deleteList2: 'Kaufhistorie', deleteList3: 'Einnahmedaten', deleteList4: 'Übersetzungsanfragen', deleteList5: 'Alle Kontoinformationen', typeConfirm: 'Zur Bestätigung geben Sie "Mein Konto löschen" ein:', confirmText: 'Mein Konto löschen', permanentDelete: 'Dauerhaft Löschen', newBackupCodes: 'Neue Codes', codesOnce: 'Diese Codes werden nur einmal angezeigt.', copyCode: 'Kopieren', saved: 'Gespeichert' },
             demo: { banner: 'Demo-Modus: Testdaten werden angezeigt.', notSaved: 'Im Demo-Modus nicht gespeichert' },
             loginRequired: { title: 'Anmeldung Erforderlich', message: 'Melden Sie sich an, um Einstellungen zu sehen', login: 'Anmelden' }
+        },
+        reader: {
+            toolbar: { backToDashboard: 'Dashboard', search: 'Suchen', bookmarks: 'Lesezeichen', addBookmark: 'Lesezeichen hinzufügen', settings: 'Einstellungen', previous: 'Zurück', next: 'Weiter' },
+            settings: { textSize: 'Größe', small: 'K', medium: 'M', large: 'G', xlarge: 'XG', theme: 'Thema', light: 'Hell', dark: 'Dunkel', sepia: 'Sepia', direction: 'Richtung', horizontal: 'Horizontal', vertical: 'Vertikal', rtl: 'RTL' },
+            search: { placeholder: 'Suchen...', noResults: 'Keine Ergebnisse', foundMatches: '{count} gefunden' },
+            bookmarks: { title: 'Lesezeichen', noBookmarks: 'Keine Lesezeichen', page: 'Seite' },
+            highlight: { yellow: 'Gelb', green: 'Grün', blue: 'Blau', pink: 'Rosa', remove: 'Entfernen', reportIssue: 'Problem melden', selectText: 'Text zum Melden auswählen' },
+            notes: { title: 'Notizen', addPlaceholder: 'Notiz hinzufügen...', noNotes: 'Keine Notizen zum Exportieren', exportTxt: 'TXT', exportWord: 'Word', exportJson: 'JSON', page: 'Seite', exported: 'Exportiert' },
+            touchHint: 'Wischen zum Blättern • Lange drücken zum Markieren',
+            cannotHighlight: 'Kann nicht über Elemente hinweg markieren'
         },
         footer: { tagline: 'Mehrsprachige Plattform', explore: 'Entdecken', authors: 'Autoren', creators: 'Kreative', write: 'Schreiben', translate: 'Übersetzen', pricing: 'Preise', help: 'Hilfe', faq: 'FAQ', legal: 'Rechtliches', terms: 'Bedingungen', privacy: 'Datenschutz', contact: 'Kontakt' },
         common: { loading: 'Laden...', save: 'Speichern', cancel: 'Abbrechen', delete: 'Löschen', edit: 'Bearbeiten', submit: 'Absenden', search: 'Suchen', filter: 'Filtern', all: 'Alle', none: 'Keine', yes: 'Ja', no: 'Nein', back: 'Zurück', next: 'Weiter', previous: 'Zurück', free: 'Kostenlos' }
@@ -205,6 +265,16 @@ const translations = {
             demo: { banner: '데모 모드: 테스트 데이터를 표시합니다.', notSaved: '데모 모드에서는 저장되지 않음' },
             loginRequired: { title: '로그인 필요', message: '설정을 보려면 로그인하세요', login: '로그인' }
         },
+        reader: {
+            toolbar: { backToDashboard: '대시보드', search: '검색', bookmarks: '북마크', addBookmark: '북마크 추가', settings: '설정', previous: '이전', next: '다음' },
+            settings: { textSize: '글자 크기', small: '소', medium: '중', large: '대', xlarge: '특대', theme: '테마', light: '라이트', dark: '다크', sepia: '세피아', direction: '방향', horizontal: '가로', vertical: '세로', rtl: 'RTL' },
+            search: { placeholder: '검색...', noResults: '결과 없음', foundMatches: '{count}개 발견' },
+            bookmarks: { title: '북마크', noBookmarks: '북마크 없음', page: '페이지' },
+            highlight: { yellow: '노랑', green: '초록', blue: '파랑', pink: '분홍', remove: '삭제', reportIssue: '번역 문제 보고', selectText: '보고할 텍스트를 선택하세요' },
+            notes: { title: '메모', addPlaceholder: '메모 추가...', noNotes: '내보낼 메모 없음', exportTxt: 'TXT', exportWord: 'Word', exportJson: 'JSON', page: '페이지', exported: '내보냄' },
+            touchHint: '좌우 스와이프로 페이지 이동 • 길게 눌러 하이라이트',
+            cannotHighlight: '요소 간 하이라이트 불가'
+        },
         footer: { tagline: '다국어 플랫폼', explore: '탐색', authors: '저자', creators: '창작자', write: '쓰기', translate: '번역', pricing: '가격', help: '도움말', faq: 'FAQ', legal: '법적', terms: '약관', privacy: '개인정보', contact: '연락처' },
         common: { loading: '로딩...', save: '저장', cancel: '취소', delete: '삭제', edit: '편집', submit: '제출', search: '검색', filter: '필터', all: '전체', none: '없음', yes: '예', no: '아니오', back: '뒤로', next: '다음', previous: '이전', free: '무료' }
     },
@@ -234,6 +304,16 @@ const translations = {
             demo: { banner: 'وضع تجريبي: عرض بيانات اختبارية.', notSaved: 'لم يتم الحفظ في الوضع التجريبي' },
             loginRequired: { title: 'تسجيل الدخول مطلوب', message: 'سجل الدخول لعرض الإعدادات', login: 'تسجيل الدخول' }
         },
+        reader: {
+            toolbar: { backToDashboard: 'لوحة', search: 'بحث', bookmarks: 'إشارات', addBookmark: 'إضافة إشارة', settings: 'إعدادات', previous: 'السابق', next: 'التالي' },
+            settings: { textSize: 'الحجم', small: 'ص', medium: 'م', large: 'ك', xlarge: 'كبير جداً', theme: 'المظهر', light: 'فاتح', dark: 'داكن', sepia: 'سيبيا', direction: 'الاتجاه', horizontal: 'أفقي', vertical: 'عمودي', rtl: 'RTL' },
+            search: { placeholder: 'بحث...', noResults: 'لا نتائج', foundMatches: 'وجد {count}' },
+            bookmarks: { title: 'إشارات مرجعية', noBookmarks: 'لا توجد إشارات', page: 'صفحة' },
+            highlight: { yellow: 'أصفر', green: 'أخضر', blue: 'أزرق', pink: 'وردي', remove: 'حذف', reportIssue: 'الإبلاغ عن مشكلة', selectText: 'اختر النص للإبلاغ' },
+            notes: { title: 'ملاحظات', addPlaceholder: 'إضافة ملاحظة...', noNotes: 'لا ملاحظات للتصدير', exportTxt: 'TXT', exportWord: 'Word', exportJson: 'JSON', page: 'صفحة', exported: 'تم التصدير' },
+            touchHint: 'اسحب للتنقل • اضغط مطولاً للتمييز',
+            cannotHighlight: 'لا يمكن التمييز عبر العناصر'
+        },
         footer: { tagline: 'منصة متعددة', explore: 'استكشف', authors: 'مؤلفون', creators: 'مبدعون', write: 'اكتب', translate: 'ترجم', pricing: 'أسعار', help: 'مساعدة', faq: 'أسئلة', legal: 'قانوني', terms: 'شروط', privacy: 'خصوصية', contact: 'اتصل' },
         common: { loading: 'تحميل...', save: 'حفظ', cancel: 'إلغاء', delete: 'حذف', edit: 'تعديل', submit: 'إرسال', search: 'بحث', filter: 'تصفية', all: 'الكل', none: 'لا شيء', yes: 'نعم', no: 'لا', back: 'رجوع', next: 'التالي', previous: 'السابق', free: 'مجاني' }
     },
@@ -262,6 +342,16 @@ const translations = {
             modals: { changeEmail: 'Alterar Email', securityRequired: 'Você precisa responder corretamente às perguntas.', newEmail: 'Novo Email', cancel: 'Cancelar', deleteConfirm: 'Confirmar Exclusão', deleteWarning: 'Aviso: Esta ação não pode ser desfeita!', deleteList1: 'Suas obras publicadas', deleteList2: 'Histórico de compras', deleteList3: 'Dados de ganhos', deleteList4: 'Solicitações de tradução', deleteList5: 'Todas as informações da conta', typeConfirm: 'Para confirmar, digite "Excluir minha conta":', confirmText: 'Excluir minha conta', permanentDelete: 'Excluir Permanentemente', newBackupCodes: 'Novos Códigos', codesOnce: 'Estes códigos são exibidos apenas uma vez.', copyCode: 'Copiar', saved: 'Salvo' },
             demo: { banner: 'Modo Demo: Exibindo dados de teste.', notSaved: 'Não salvo no modo demo' },
             loginRequired: { title: 'Login Necessário', message: 'Faça login para ver as configurações', login: 'Entrar' }
+        },
+        reader: {
+            toolbar: { backToDashboard: 'Painel', search: 'Buscar', bookmarks: 'Marcadores', addBookmark: 'Adicionar Marcador', settings: 'Configurações', previous: 'Anterior', next: 'Próximo' },
+            settings: { textSize: 'Tamanho', small: 'P', medium: 'M', large: 'G', xlarge: 'XG', theme: 'Tema', light: 'Claro', dark: 'Escuro', sepia: 'Sépia', direction: 'Direção', horizontal: 'Horizontal', vertical: 'Vertical', rtl: 'RTL' },
+            search: { placeholder: 'Buscar...', noResults: 'Sem resultados', foundMatches: '{count} encontrados' },
+            bookmarks: { title: 'Marcadores', noBookmarks: 'Sem marcadores', page: 'Página' },
+            highlight: { yellow: 'Amarelo', green: 'Verde', blue: 'Azul', pink: 'Rosa', remove: 'Remover', reportIssue: 'Reportar Problema', selectText: 'Selecione o texto para reportar' },
+            notes: { title: 'Notas', addPlaceholder: 'Adicionar nota...', noNotes: 'Sem notas para exportar', exportTxt: 'TXT', exportWord: 'Word', exportJson: 'JSON', page: 'Página', exported: 'Exportado' },
+            touchHint: 'Deslize para mudar página • Pressione para destacar',
+            cannotHighlight: 'Não é possível destacar entre elementos'
         },
         footer: { tagline: 'Plataforma multilíngue', explore: 'Explorar', authors: 'Autores', creators: 'Criadores', write: 'Escrever', translate: 'Traduzir', pricing: 'Preços', help: 'Ajuda', faq: 'FAQ', legal: 'Legal', terms: 'Termos', privacy: 'Privacidade', contact: 'Contato' },
         common: { loading: 'Carregando...', save: 'Salvar', cancel: 'Cancelar', delete: 'Excluir', edit: 'Editar', submit: 'Enviar', search: 'Buscar', filter: 'Filtrar', all: 'Todos', none: 'Nenhum', yes: 'Sim', no: 'Não', back: 'Voltar', next: 'Próximo', previous: 'Anterior', free: 'Grátis' }
