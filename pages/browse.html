@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="nav.browse">Browse Works - Publisher</title>
+    <title data-i18n="browse.title">Browse Works - Publisher</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
@@ -31,6 +31,8 @@
         .work-meta { display: flex; justify-content: space-between; align-items: center; font-size: var(--font-size-sm); }
         .work-price { font-weight: 600; color: var(--color-accent); }
         .work-rating { color: var(--color-warning); }
+        .results-count { margin-bottom: var(--spacing-md); color: var(--color-text-secondary); font-size: var(--font-size-sm); }
+        .no-results { text-align: center; padding: var(--spacing-2xl); color: var(--color-text-secondary); }
         @media (max-width: 768px) { .filter-sidebar { margin-bottom: var(--spacing-lg); } }
         @media (max-width: 576px) { .language-selector { top: 70px; right: 10px; } .work-grid { grid-template-columns: repeat(2, 1fr); gap: var(--spacing-md); } .work-cover { height: 180px; } }
     </style>
@@ -59,7 +61,7 @@
                     <li class="nav-item"><a class="nav-link active" href="browse.html"><i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span></a></li>
                 </ul>
                 <div class="d-flex align-items-center gap-3">
-                    <a href="notifications.html" class="btn btn-soft-custom position-relative"><i class="fas fa-bell"></i></a>
+                    <a href="notifications.html" class="btn btn-soft-custom position-relative"><i class="fas fa-bell"></i><span id="notificationBadge" class="position-absolute badge rounded-pill bg-danger" style="font-size:0.55rem;display:none;top:0;right:0;">0</span></a>
                     <div class="dropdown">
                         <button class="btn btn-soft-custom dropdown-toggle" type="button" data-bs-toggle="dropdown"><i class="fas fa-user-circle me-1"></i><span id="userName">User</span></button>
                         <ul class="dropdown-menu dropdown-menu-end">
@@ -85,10 +87,10 @@
                             <h3 data-i18n="browse.category">Category</h3>
                             <select class="form-select" id="categoryFilter">
                                 <option value="" data-i18n="browse.allCategories">All Categories</option>
-                                <option value="fiction">Fiction</option>
-                                <option value="non-fiction">Non-Fiction</option>
-                                <option value="manga">Manga</option>
-                                <option value="poetry">Poetry</option>
+                                <option value="fiction" data-i18n="browse.categories.fiction">Fiction</option>
+                                <option value="non-fiction" data-i18n="browse.categories.nonFiction">Non-Fiction</option>
+                                <option value="manga" data-i18n="browse.categories.manga">Manga</option>
+                                <option value="poetry" data-i18n="browse.categories.poetry">Poetry</option>
                             </select>
                         </div>
                         <div class="filter-section">
@@ -100,6 +102,10 @@
                                 <option value="zh">中文</option>
                                 <option value="es">Español</option>
                                 <option value="fr">Français</option>
+                                <option value="de">Deutsch</option>
+                                <option value="ko">한국어</option>
+                                <option value="ar">العربية</option>
+                                <option value="pt">Português</option>
                             </select>
                         </div>
                         <div class="filter-section">
@@ -111,15 +117,17 @@
                                 <option value="price-low" data-i18n="browse.priceLowHigh">Price: Low to High</option>
                             </select>
                         </div>
-                        <button class="btn btn-custom w-100" data-i18n="browse.applyFilters">Apply Filters</button>
+                        <button class="btn btn-custom w-100" onclick="applyFilters()" data-i18n="browse.applyFilters">Apply Filters</button>
                     </div>
                 </div>
                 <div class="col-lg-9 col-md-8">
+                    <div class="results-count"><span id="resultsCount">4</span> <span data-i18n="browse.worksFound">works found</span></div>
                     <div class="work-grid" id="workGrid">
-                        <div class="work-card"><div class="work-cover"><i class="fas fa-book"></i></div><div class="work-info"><div class="work-title">The Adventure of Magic Academy</div><div class="work-author">by Sarah Chen</div><div class="work-meta"><span class="work-price">$4.99</span><span class="work-rating"><i class="fas fa-star"></i> 4.8</span></div></div></div>
-                        <div class="work-card"><div class="work-cover"><i class="fas fa-book"></i></div><div class="work-info"><div class="work-title">Whispers of Tomorrow</div><div class="work-author">by James Miller</div><div class="work-meta"><span class="work-price">$3.99</span><span class="work-rating"><i class="fas fa-star"></i> 4.6</span></div></div></div>
-                        <div class="work-card"><div class="work-cover"><i class="fas fa-book"></i></div><div class="work-info"><div class="work-title">Digital Dreams</div><div class="work-author">by Yuki Tanaka</div><div class="work-meta"><span class="work-price">$5.99</span><span class="work-rating"><i class="fas fa-star"></i> 4.9</span></div></div></div>
-                        <div class="work-card"><div class="work-cover"><i class="fas fa-book"></i></div><div class="work-info"><div class="work-title">The Last Kingdom</div><div class="work-author">by Maria Garcia</div><div class="work-meta"><span class="work-price">$2.99</span><span class="work-rating"><i class="fas fa-star"></i> 4.5</span></div></div></div>
+                        <!-- Works will be loaded dynamically -->
+                    </div>
+                    <div class="no-results" id="noResults" style="display:none;">
+                        <i class="fas fa-search fa-3x mb-3"></i>
+                        <p data-i18n="browse.noResults">No works found matching your criteria</p>
                     </div>
                 </div>
             </div>
@@ -128,7 +136,7 @@
     <footer class="footer-custom">
         <div class="container">
             <div class="d-flex flex-wrap justify-content-between align-items-center">
-                <p class="small mb-0">&copy; 2024 Publisher. All rights reserved.</p>
+                <p class="small mb-0">&copy; 2025 Publisher. All rights reserved.</p>
                 <div class="d-flex gap-3">
                     <a href="support/faq.html" class="text-secondary" data-i18n="footer.help">Help</a>
                     <a href="terms.html" class="text-secondary" data-i18n="footer.terms">Terms</a>
@@ -140,12 +148,110 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/translations.js"></script>
     <script src="../js/language-switcher.js"></script>
+    <script src="../js/header-notification.js"></script>
     <script>
+        // i18n helper
+        function t(key) {
+            const lang = localStorage.getItem('publisher_language') || 'en';
+            const keys = key.split('.');
+            let value = translations[lang];
+            for (const k of keys) {
+                if (value && value[k] !== undefined) {
+                    value = value[k];
+                } else {
+                    value = translations['en'];
+                    for (const k2 of keys) {
+                        if (value && value[k2] !== undefined) value = value[k2];
+                        else return key;
+                    }
+                    break;
+                }
+            }
+            return typeof value === 'string' ? value : key;
+        }
+
+        // Sample works data
+        const sampleWorks = [
+            { id: 1, title: 'The Adventure of Magic Academy', author: 'Sarah Chen', price: 4.99, rating: 4.8, category: 'fiction', language: 'en' },
+            { id: 2, title: 'Whispers of Tomorrow', author: 'James Miller', price: 3.99, rating: 4.6, category: 'fiction', language: 'en' },
+            { id: 3, title: 'Digital Dreams', author: 'Yuki Tanaka', price: 5.99, rating: 4.9, category: 'manga', language: 'ja' },
+            { id: 4, title: 'The Last Kingdom', author: 'Maria Garcia', price: 2.99, rating: 4.5, category: 'fiction', language: 'es' },
+            { id: 5, title: '月光の詩', author: '田中花子', price: 0, rating: 4.7, category: 'poetry', language: 'ja' },
+            { id: 6, title: 'Le Monde Nouveau', author: 'Pierre Dubois', price: 3.49, rating: 4.4, category: 'non-fiction', language: 'fr' }
+        ];
+
+        function renderWorks(works) {
+            const grid = document.getElementById('workGrid');
+            const noResults = document.getElementById('noResults');
+            const countEl = document.getElementById('resultsCount');
+            
+            if (works.length === 0) {
+                grid.style.display = 'none';
+                noResults.style.display = 'block';
+                countEl.textContent = '0';
+                return;
+            }
+            
+            grid.style.display = 'grid';
+            noResults.style.display = 'none';
+            countEl.textContent = works.length;
+            
+            grid.innerHTML = works.map(work => `
+                <div class="work-card" onclick="viewWork(${work.id})">
+                    <div class="work-cover"><i class="fas fa-book"></i></div>
+                    <div class="work-info">
+                        <div class="work-title">${escapeHtml(work.title)}</div>
+                        <div class="work-author">${t('browse.by')} ${escapeHtml(work.author)}</div>
+                        <div class="work-meta">
+                            <span class="work-price">${work.price === 0 ? t('common.free') : '$' + work.price.toFixed(2)}</span>
+                            <span class="work-rating"><i class="fas fa-star"></i> ${work.rating}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function applyFilters() {
+            const category = document.getElementById('categoryFilter').value;
+            const language = document.getElementById('languageFilter').value;
+            const sort = document.getElementById('sortFilter').value;
+            
+            let filtered = [...sampleWorks];
+            
+            if (category) filtered = filtered.filter(w => w.category === category);
+            if (language) filtered = filtered.filter(w => w.language === language);
+            
+            switch(sort) {
+                case 'newest': filtered.reverse(); break;
+                case 'rating': filtered.sort((a, b) => b.rating - a.rating); break;
+                case 'price-low': filtered.sort((a, b) => a.price - b.price); break;
+                default: filtered.sort((a, b) => b.rating - a.rating);
+            }
+            
+            renderWorks(filtered);
+        }
+
+        function viewWork(id) {
+            window.location.href = `reader.html?id=${id}`;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const user = JSON.parse(localStorage.getItem('user') || '{}');
             if (user.firstName) document.getElementById('userName').textContent = user.firstName;
+            renderWorks(sampleWorks);
         });
-        function logout() { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = 'login.html'; }
     </script>
 </body>
 </html>
