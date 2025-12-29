@@ -227,6 +227,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../../js/translations.js"></script>
     <script src="../../js/language-switcher.js"></script>
+    <script src="../../js/faq-data.js"></script>
     
     <script>
         const API_BASE = 'http://localhost:3000/api';
@@ -255,27 +256,24 @@
 
         /**
          * オブジェクトから現在の言語に対応するテキストを取得
-         * フォールバック: 現在の言語 → 英語
-         * @param {Object} item - データオブジェクト (例: category, faq)
-         * @param {String} field - フィールド名 (例: 'name', 'question', 'answer')
-         * @returns {String} ローカライズされたテキスト
+         * フォールバック: 現在の言語 → 英語 → 日本語
          */
         function getLocalizedText(item, field) {
             const lang = getCurrentLang();
             const key = `${field}_${lang}`;
             const fallbackKey = `${field}_en`;
+            const jaKey = `${field}_ja`;
             
             // 現在の言語のテキストがあればそれを使用
             if (item[key] && item[key].trim() !== '') {
                 return item[key];
             }
             // なければ英語にフォールバック
-            if (item[fallbackKey]) {
+            if (item[fallbackKey] && item[fallbackKey].trim() !== '') {
                 return item[fallbackKey];
             }
             // それもなければ日本語を試す
-            const jaKey = `${field}_ja`;
-            if (item[jaKey]) {
+            if (item[jaKey] && item[jaKey].trim() !== '') {
                 return item[jaKey];
             }
             return '';
@@ -287,17 +285,14 @@
             const mobileSelector = document.getElementById('languageSelectorMobile');
             
             if (desktopSelector && mobileSelector) {
-                // 初期値を同期
                 const savedLang = localStorage.getItem('preferredLanguage') || 'en';
                 desktopSelector.value = savedLang;
                 mobileSelector.value = savedLang;
                 
-                // モバイル → デスクトップ 同期
                 mobileSelector.addEventListener('change', function() {
                     desktopSelector.value = this.value;
                 });
                 
-                // デスクトップ → モバイル 同期
                 desktopSelector.addEventListener('change', function() {
                     mobileSelector.value = this.value;
                 });
@@ -306,7 +301,6 @@
 
         // Listen for language changes
         document.addEventListener('languageChanged', function(e) {
-            // セレクターの値を同期
             const lang = e.detail.language || e.detail.lang;
             if (lang) {
                 const desktopSelector = document.getElementById('languageSelector');
@@ -318,7 +312,6 @@
             renderCategories();
             renderCategoryFilter();
             renderFaqs();
-            // プレースホルダーも更新
             updatePlaceholders();
         });
 
@@ -360,8 +353,15 @@
             try {
                 const response = await fetch(`${API_BASE}/support/faq/categories`);
                 const data = await response.json();
-                if (data.success) { categories = data.categories; renderCategories(); renderCategoryFilter(); }
-            } catch (error) { console.error('Error loading categories:', error); renderFallbackCategories(); }
+                if (data.success) { 
+                    categories = data.categories; 
+                    renderCategories(); 
+                    renderCategoryFilter(); 
+                }
+            } catch (error) { 
+                console.error('Error loading categories:', error); 
+                renderFallbackCategories(); 
+            }
         }
 
         function renderFallbackCategories() {
@@ -411,119 +411,37 @@
             try {
                 const response = await fetch(`${API_BASE}/support/faq`);
                 const data = await response.json();
-                if (data.success) { faqs = data.faqs; renderFaqs(); }
-            } catch (error) { console.error('Error loading FAQs:', error); renderFallbackFaqs(); }
+                if (data.success) { 
+                    faqs = data.faqs; 
+                    renderFaqs(); 
+                }
+            } catch (error) { 
+                console.error('Error loading FAQs:', error); 
+                renderFallbackFaqs(); 
+            }
         }
 
         function renderFallbackFaqs() {
-            // デモ用のFAQデータ（9言語対応）
-            const demoFaqs = [
-                {
-                    id: 1, category_id: 1,
-                    question_en: 'How do I create an account?',
-                    question_ja: 'アカウントを作成するにはどうすればいいですか？',
-                    question_zh: '如何创建账户？',
-                    question_es: '¿Cómo creo una cuenta?',
-                    question_fr: 'Comment créer un compte ?',
-                    question_de: 'Wie erstelle ich ein Konto?',
-                    question_ko: '계정을 만들려면 어떻게 해야 하나요?',
-                    question_ar: 'كيف أنشئ حسابًا؟',
-                    question_pt: 'Como crio uma conta?',
-                    answer_en: 'Click the "Sign Up" button at the top right of the homepage and enter your email address and password.',
-                    answer_ja: 'トップページ右上の「新規登録」ボタンをクリックし、メールアドレスとパスワードを入力してください。',
-                    answer_zh: '点击首页右上角的"注册"按钮，输入您的电子邮件地址和密码。',
-                    answer_es: 'Haga clic en el botón "Registrarse" en la esquina superior derecha de la página de inicio.',
-                    answer_fr: 'Cliquez sur le bouton "S\'inscrire" en haut à droite de la page d\'accueil.',
-                    answer_de: 'Klicken Sie oben rechts auf der Startseite auf "Registrieren".',
-                    answer_ko: '홈페이지 오른쪽 상단의 "회원가입" 버튼을 클릭하세요.',
-                    answer_ar: 'انقر على زر "التسجيل" في الزاوية العلوية اليمنى.',
-                    answer_pt: 'Clique no botão "Cadastrar" no canto superior direito.',
-                    category_name_en: 'Account', category_name_ja: 'アカウント',
-                    helpful_count: 15, not_helpful_count: 2
-                },
-                {
-                    id: 2, category_id: 1,
-                    question_en: 'I forgot my password',
-                    question_ja: 'パスワードを忘れてしまいました',
-                    question_zh: '我忘记了密码',
-                    question_es: 'Olvidé mi contraseña',
-                    question_fr: 'J\'ai oublié mon mot de passe',
-                    question_de: 'Ich habe mein Passwort vergessen',
-                    question_ko: '비밀번호를 잊어버렸습니다',
-                    question_ar: 'نسيت كلمة المرور',
-                    question_pt: 'Esqueci minha senha',
-                    answer_en: 'Click "Forgot password?" on the login page and enter your email. We\'ll send a reset link.',
-                    answer_ja: 'ログインページの「パスワードをお忘れですか？」をクリックし、メールアドレスを入力してください。',
-                    answer_zh: '点击登录页面的"忘记密码？"链接，输入您的电子邮件地址。',
-                    answer_es: 'Haga clic en "¿Olvidó su contraseña?" en la página de inicio de sesión.',
-                    answer_fr: 'Cliquez sur "Mot de passe oublié ?" sur la page de connexion.',
-                    answer_de: 'Klicken Sie auf "Passwort vergessen?" auf der Anmeldeseite.',
-                    answer_ko: '로그인 페이지에서 "비밀번호를 잊으셨나요?"를 클릭하세요.',
-                    answer_ar: 'انقر على "نسيت كلمة المرور؟" في صفحة تسجيل الدخول.',
-                    answer_pt: 'Clique em "Esqueceu a senha?" na página de login.',
-                    category_name_en: 'Account', category_name_ja: 'アカウント',
-                    helpful_count: 12, not_helpful_count: 1
-                },
-                {
-                    id: 4, category_id: 2,
-                    question_en: 'What payment methods are available?',
-                    question_ja: '利用可能な支払い方法は？',
-                    question_zh: '可用的支付方式有哪些？',
-                    question_es: '¿Qué métodos de pago están disponibles?',
-                    question_fr: 'Quels modes de paiement sont disponibles ?',
-                    question_de: 'Welche Zahlungsmethoden sind verfügbar?',
-                    question_ko: '어떤 결제 방법을 사용할 수 있나요?',
-                    question_ar: 'ما هي طرق الدفع المتاحة؟',
-                    question_pt: 'Quais métodos de pagamento estão disponíveis?',
-                    answer_en: 'We accept credit cards (Visa, Mastercard, American Express) and PayPal.',
-                    answer_ja: 'クレジットカード（Visa、Mastercard、American Express）およびPayPalがご利用いただけます。',
-                    answer_zh: '我们接受信用卡（Visa、Mastercard、American Express）和PayPal。',
-                    answer_es: 'Aceptamos tarjetas de crédito (Visa, Mastercard, American Express) y PayPal.',
-                    answer_fr: 'Nous acceptons les cartes de crédit (Visa, Mastercard, American Express) et PayPal.',
-                    answer_de: 'Wir akzeptieren Kreditkarten (Visa, Mastercard, American Express) und PayPal.',
-                    answer_ko: '신용카드(Visa, Mastercard, American Express)와 PayPal을 사용할 수 있습니다.',
-                    answer_ar: 'نقبل بطاقات الائتمان (Visa و Mastercard و American Express) و PayPal.',
-                    answer_pt: 'Aceitamos cartões de crédito (Visa, Mastercard, American Express) e PayPal.',
-                    category_name_en: 'Payment', category_name_ja: 'お支払い',
-                    helpful_count: 20, not_helpful_count: 0
-                },
-                {
-                    id: 6, category_id: 4,
-                    question_en: 'How accurate is the AI translation?',
-                    question_ja: 'AI翻訳の精度はどのくらいですか？',
-                    question_zh: 'AI翻译的准确度如何？',
-                    question_es: '¿Qué tan precisa es la traducción por IA?',
-                    question_fr: 'Quelle est la précision de la traduction IA ?',
-                    question_de: 'Wie genau ist die KI-Übersetzung?',
-                    question_ko: 'AI 번역의 정확도는 어떤가요?',
-                    question_ar: 'ما مدى دقة الترجمة بالذكاء الاصطناعي؟',
-                    question_pt: 'Qual é a precisão da tradução por IA?',
-                    answer_en: 'AI translation uses advanced machine learning models and can translate general text with high accuracy. For technical terms or literary expressions, we recommend professional translators.',
-                    answer_ja: 'AI翻訳は高度な機械学習モデルを使用しており、一般的な文章については高い精度で翻訳できます。専門用語や文学的表現については、プロの翻訳者をお勧めします。',
-                    answer_zh: 'AI翻译使用先进的机器学习模型，可以高精度翻译一般文本。对于专业术语或文学表达，我们建议使用专业翻译人员。',
-                    answer_es: 'La traducción por IA utiliza modelos avanzados de aprendizaje automático.',
-                    answer_fr: 'La traduction IA utilise des modèles d\'apprentissage automatique avancés.',
-                    answer_de: 'Die KI-Übersetzung verwendet fortschrittliche Machine-Learning-Modelle.',
-                    answer_ko: 'AI 번역은 고급 머신러닝 모델을 사용하여 높은 정확도로 번역합니다.',
-                    answer_ar: 'تستخدم الترجمة بالذكاء الاصطناعي نماذج تعلم آلي متقدمة.',
-                    answer_pt: 'A tradução por IA usa modelos avançados de aprendizado de máquina.',
-                    category_name_en: 'Translation', category_name_ja: '翻訳サービス',
-                    helpful_count: 18, not_helpful_count: 3
-                }
-            ];
-            faqs = demoFaqs;
+            // 外部ファイルからデータを使用
+            if (typeof faqMultilingualData !== 'undefined') {
+                faqs = faqMultilingualData;
+            } else {
+                faqs = [];
+            }
             renderFaqs();
         }
 
         function renderEmptyFaqs() {
             const container = document.getElementById('faqAccordion');
-            container.innerHTML = `<div class="text-center py-5 text-muted"><i class="fas fa-database fa-3x mb-3"></i><p data-i18n="support.faq.loadError">Unable to load FAQs. Please try again later.</p></div>`;
+            container.innerHTML = `<div class="text-center py-5 text-muted"><i class="fas fa-database fa-3x mb-3"></i><p>${t('support.faq.loadError')}</p></div>`;
         }
 
         function renderFaqs() {
             const container = document.getElementById('faqAccordion');
             let filteredFaqs = faqs;
-            if (currentCategory !== 'all') { filteredFaqs = faqs.filter(faq => faq.category_id == currentCategory); }
+            if (currentCategory !== 'all') { 
+                filteredFaqs = faqs.filter(faq => faq.category_id == currentCategory); 
+            }
             if (filteredFaqs.length === 0) {
                 container.innerHTML = `<div class="text-center py-5 text-muted"><i class="fas fa-inbox fa-3x mb-3"></i><p>${t('support.faq.noQuestions')}</p></div>`;
                 return;
@@ -631,23 +549,39 @@
         function showFaqDetail(faqId) {
             hideSearchResults();
             const accordion = document.getElementById(`faq${faqId}`);
-            if (accordion) { new bootstrap.Collapse(accordion, { toggle: true }); setTimeout(() => { accordion.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 300); }
+            if (accordion) { 
+                new bootstrap.Collapse(accordion, { toggle: true }); 
+                setTimeout(() => { 
+                    accordion.scrollIntoView({ behavior: 'smooth', block: 'center' }); 
+                }, 300); 
+            }
         }
 
         async function voteFaq(faqId, helpful, event) {
             event.stopPropagation();
             try {
-                const response = await fetch(`${API_BASE}/support/faq/${faqId}/vote`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ helpful }) });
+                const response = await fetch(`${API_BASE}/support/faq/${faqId}/vote`, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ helpful }) 
+                });
                 const data = await response.json();
                 if (data.success) {
                     const faq = faqs.find(f => f.id === faqId);
-                    if (faq) { faq.helpful_count = data.helpful_count; faq.not_helpful_count = data.not_helpful_count; renderFaqs(); }
+                    if (faq) { 
+                        faq.helpful_count = data.helpful_count; 
+                        faq.not_helpful_count = data.not_helpful_count; 
+                        renderFaqs(); 
+                    }
                     alert(t('support.faq.thanksFeedback'));
                 }
             } catch (error) { console.error('Vote error:', error); }
         }
 
-        function logout() { fetch(`${API_BASE}/auth/logout`, { method: 'POST', credentials: 'include' }).then(() => window.location.reload()); }
+        function logout() { 
+            fetch(`${API_BASE}/auth/logout`, { method: 'POST', credentials: 'include' })
+                .then(() => window.location.reload()); 
+        }
     </script>
     <script src="../../js/header-notification.js"></script>
 </body>
