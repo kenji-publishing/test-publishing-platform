@@ -2,6 +2,7 @@
 // Phase 8: Support System API
 // FAQ・問い合わせチケット管理
 // Phase 8E: 自動メール応答追加
+// Phase 12-4e: 多言語対応強化
 // =============================================
 
 const express = require('express');
@@ -115,6 +116,7 @@ async function getUserInfo(userId) {
 /**
  * FAQカテゴリ一覧取得
  * GET /api/support/faq/categories
+ * 多言語対応: 全言語カラムを返す
  */
 router.get('/faq/categories', async (req, res) => {
     try {
@@ -145,16 +147,25 @@ router.get('/faq/categories', async (req, res) => {
 /**
  * FAQ一覧取得（カテゴリ別）
  * GET /api/support/faq?category_id=1
+ * 多言語対応: カテゴリ名も全言語返す
  */
 router.get('/faq', async (req, res) => {
     try {
         const { category_id } = req.query;
         
+        // 全言語のカテゴリ名を取得
         let query = `
             SELECT 
                 f.*,
                 c.name_ja as category_name_ja,
-                c.name_en as category_name_en
+                c.name_en as category_name_en,
+                c.name_zh as category_name_zh,
+                c.name_es as category_name_es,
+                c.name_fr as category_name_fr,
+                c.name_de as category_name_de,
+                c.name_ko as category_name_ko,
+                c.name_ar as category_name_ar,
+                c.name_pt as category_name_pt
             FROM faq_items f
             JOIN faq_categories c ON f.category_id = c.id
             WHERE f.is_active = true AND c.is_active = true
@@ -186,6 +197,7 @@ router.get('/faq', async (req, res) => {
 /**
  * FAQ検索
  * GET /api/support/faq/search?q=パスワード
+ * 多言語対応: 全言語で検索、カテゴリ名も全言語返す
  */
 router.get('/faq/search', async (req, res) => {
     try {
@@ -204,15 +216,36 @@ router.get('/faq/search', async (req, res) => {
             SELECT 
                 f.*,
                 c.name_ja as category_name_ja,
-                c.name_en as category_name_en
+                c.name_en as category_name_en,
+                c.name_zh as category_name_zh,
+                c.name_es as category_name_es,
+                c.name_fr as category_name_fr,
+                c.name_de as category_name_de,
+                c.name_ko as category_name_ko,
+                c.name_ar as category_name_ar,
+                c.name_pt as category_name_pt
             FROM faq_items f
             JOIN faq_categories c ON f.category_id = c.id
             WHERE f.is_active = true AND c.is_active = true
             AND (
                 f.question_ja ILIKE $1 OR
                 f.question_en ILIKE $1 OR
+                f.question_zh ILIKE $1 OR
+                f.question_es ILIKE $1 OR
+                f.question_fr ILIKE $1 OR
+                f.question_de ILIKE $1 OR
+                f.question_ko ILIKE $1 OR
+                f.question_ar ILIKE $1 OR
+                f.question_pt ILIKE $1 OR
                 f.answer_ja ILIKE $1 OR
                 f.answer_en ILIKE $1 OR
+                f.answer_zh ILIKE $1 OR
+                f.answer_es ILIKE $1 OR
+                f.answer_fr ILIKE $1 OR
+                f.answer_de ILIKE $1 OR
+                f.answer_ko ILIKE $1 OR
+                f.answer_ar ILIKE $1 OR
+                f.answer_pt ILIKE $1 OR
                 f.keywords ILIKE $1
             )
             ORDER BY f.view_count DESC, f.display_order ASC
