@@ -240,11 +240,11 @@
             loadFaqs();
             setupSearchHandler();
             checkAuth();
-            setupLanguageSelectors();
+            syncLanguageSelectors();
         });
 
-        // 言語セレクターの設定
-        function setupLanguageSelectors() {
+        // モバイルとデスクトップのセレクターを同期
+        function syncLanguageSelectors() {
             const desktopSelector = document.getElementById('languageSelector');
             const mobileSelector = document.getElementById('languageSelectorMobile');
             
@@ -254,26 +254,28 @@
                 desktopSelector.value = savedLang;
                 mobileSelector.value = savedLang;
                 
-                // モバイル用セレクターの変更イベント
+                // モバイル → デスクトップ 同期
                 mobileSelector.addEventListener('change', function() {
                     desktopSelector.value = this.value;
-                    if (typeof changeLanguage === 'function') {
-                        changeLanguage(this.value);
-                    }
                 });
                 
-                // デスクトップ用セレクターの変更イベント
+                // デスクトップ → モバイル 同期
                 desktopSelector.addEventListener('change', function() {
                     mobileSelector.value = this.value;
-                    if (typeof changeLanguage === 'function') {
-                        changeLanguage(this.value);
-                    }
                 });
             }
         }
 
         // Listen for language changes
         document.addEventListener('languageChanged', function(e) {
+            // セレクターの値を同期
+            const lang = e.detail.language || e.detail.lang;
+            if (lang) {
+                const desktopSelector = document.getElementById('languageSelector');
+                const mobileSelector = document.getElementById('languageSelectorMobile');
+                if (desktopSelector) desktopSelector.value = lang;
+                if (mobileSelector) mobileSelector.value = lang;
+            }
             renderCategories();
             renderCategoryFilter();
             renderFaqs();
