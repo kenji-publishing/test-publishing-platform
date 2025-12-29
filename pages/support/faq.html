@@ -235,6 +235,9 @@
         let currentCategory = 'all';
         const categoryIcons = { 1: 'fa-user-circle', 2: 'fa-credit-card', 3: 'fa-book', 4: 'fa-language', 5: 'fa-pen-fancy', 6: 'fa-globe', 7: 'fa-cog', 8: 'fa-question-circle' };
 
+        // 対応言語リスト
+        const supportedLanguages = ['en', 'ja', 'zh', 'es', 'fr', 'de', 'ko', 'ar', 'pt'];
+
         document.addEventListener('DOMContentLoaded', function() {
             loadCategories();
             loadFaqs();
@@ -242,6 +245,41 @@
             checkAuth();
             syncLanguageSelectors();
         });
+
+        /**
+         * 現在の言語を取得
+         */
+        function getCurrentLang() {
+            return localStorage.getItem('preferredLanguage') || 'en';
+        }
+
+        /**
+         * オブジェクトから現在の言語に対応するテキストを取得
+         * フォールバック: 現在の言語 → 英語
+         * @param {Object} item - データオブジェクト (例: category, faq)
+         * @param {String} field - フィールド名 (例: 'name', 'question', 'answer')
+         * @returns {String} ローカライズされたテキスト
+         */
+        function getLocalizedText(item, field) {
+            const lang = getCurrentLang();
+            const key = `${field}_${lang}`;
+            const fallbackKey = `${field}_en`;
+            
+            // 現在の言語のテキストがあればそれを使用
+            if (item[key] && item[key].trim() !== '') {
+                return item[key];
+            }
+            // なければ英語にフォールバック
+            if (item[fallbackKey]) {
+                return item[fallbackKey];
+            }
+            // それもなければ日本語を試す
+            const jaKey = `${field}_ja`;
+            if (item[jaKey]) {
+                return item[jaKey];
+            }
+            return '';
+        }
 
         // モバイルとデスクトップのセレクターを同期
         function syncLanguageSelectors() {
@@ -276,10 +314,20 @@
                 if (desktopSelector) desktopSelector.value = lang;
                 if (mobileSelector) mobileSelector.value = lang;
             }
+            // 言語が変わったらコンテンツを再描画
             renderCategories();
             renderCategoryFilter();
             renderFaqs();
+            // プレースホルダーも更新
+            updatePlaceholders();
         });
+
+        function updatePlaceholders() {
+            const searchInput = document.getElementById('faqSearch');
+            if (searchInput) {
+                searchInput.placeholder = t('support.faq.searchPlaceholder');
+            }
+        }
 
         async function checkAuth() {
             try {
@@ -318,10 +366,14 @@
 
         function renderFallbackCategories() {
             const defaultCategories = [
-                { id: 1, name_en: 'Account', item_count: 0 }, { id: 2, name_en: 'Payment', item_count: 0 },
-                { id: 3, name_en: 'Works', item_count: 0 }, { id: 4, name_en: 'Translation', item_count: 0 },
-                { id: 5, name_en: 'For Authors', item_count: 0 }, { id: 6, name_en: 'For Translators', item_count: 0 },
-                { id: 7, name_en: 'Technical', item_count: 0 }, { id: 8, name_en: 'Other', item_count: 0 }
+                { id: 1, name_en: 'Account', name_ja: 'アカウント', name_zh: '账户', name_es: 'Cuenta', name_fr: 'Compte', name_de: 'Konto', name_ko: '계정', name_ar: 'الحساب', name_pt: 'Conta', item_count: 3 },
+                { id: 2, name_en: 'Payment', name_ja: 'お支払い', name_zh: '付款', name_es: 'Pago', name_fr: 'Paiement', name_de: 'Zahlung', name_ko: '결제', name_ar: 'الدفع', name_pt: 'Pagamento', item_count: 2 },
+                { id: 3, name_en: 'Works', name_ja: '作品について', name_zh: '作品', name_es: 'Obras', name_fr: 'Œuvres', name_de: 'Werke', name_ko: '작품', name_ar: 'الأعمال', name_pt: 'Obras', item_count: 0 },
+                { id: 4, name_en: 'Translation', name_ja: '翻訳サービス', name_zh: '翻译服务', name_es: 'Traducción', name_fr: 'Traduction', name_de: 'Übersetzung', name_ko: '번역 서비스', name_ar: 'الترجمة', name_pt: 'Tradução', item_count: 2 },
+                { id: 5, name_en: 'For Authors', name_ja: '著者向け', name_zh: '作者专区', name_es: 'Para Autores', name_fr: 'Pour les Auteurs', name_de: 'Für Autoren', name_ko: '저자용', name_ar: 'للمؤلفين', name_pt: 'Para Autores', item_count: 0 },
+                { id: 6, name_en: 'For Translators', name_ja: '翻訳者向け', name_zh: '译者专区', name_es: 'Para Traductores', name_fr: 'Pour les Traducteurs', name_de: 'Für Übersetzer', name_ko: '번역가용', name_ar: 'للمترجمين', name_pt: 'Para Tradutores', item_count: 0 },
+                { id: 7, name_en: 'Technical Issues', name_ja: '技術的な問題', name_zh: '技术问题', name_es: 'Problemas Técnicos', name_fr: 'Problèmes Techniques', name_de: 'Technische Probleme', name_ko: '기술 문제', name_ar: 'مشاكل تقنية', name_pt: 'Problemas Técnicos', item_count: 2 },
+                { id: 8, name_en: 'Other', name_ja: 'その他', name_zh: '其他', name_es: 'Otros', name_fr: 'Autres', name_de: 'Sonstiges', name_ko: '기타', name_ar: 'أخرى', name_pt: 'Outros', item_count: 0 }
             ];
             categories = defaultCategories;
             renderCategories();
@@ -331,20 +383,27 @@
         function renderCategories() {
             const container = document.getElementById('categoriesList');
             const questionsLabel = t('support.faq.questions');
-            container.innerHTML = categories.map(cat => `
-                <div class="category-card ${currentCategory == cat.id ? 'active' : ''}" onclick="filterByCategory(${cat.id})">
-                    <div class="icon"><i class="fas ${categoryIcons[cat.id] || 'fa-folder'}"></i></div>
-                    <h3>${cat.name_en}</h3>
-                    <div class="count">${cat.item_count || 0} ${questionsLabel}</div>
-                </div>
-            `).join('');
+            container.innerHTML = categories.map(cat => {
+                const categoryName = getLocalizedText(cat, 'name');
+                return `
+                    <div class="category-card ${currentCategory == cat.id ? 'active' : ''}" onclick="filterByCategory(${cat.id})">
+                        <div class="icon"><i class="fas ${categoryIcons[cat.id] || 'fa-folder'}"></i></div>
+                        <h3>${categoryName}</h3>
+                        <div class="count">${cat.item_count || 0} ${questionsLabel}</div>
+                    </div>
+                `;
+            }).join('');
         }
 
         function renderCategoryFilter() {
             const select = document.getElementById('categoryFilter');
             const allCatLabel = t('support.faq.allCategories');
-            const options = categories.map(cat => `<option value="${cat.id}">${cat.name_en}</option>`).join('');
+            const options = categories.map(cat => {
+                const categoryName = getLocalizedText(cat, 'name');
+                return `<option value="${cat.id}">${categoryName}</option>`;
+            }).join('');
             select.innerHTML = `<option value="all">${allCatLabel}</option>${options}`;
+            select.value = currentCategory;
             select.addEventListener('change', function() { currentCategory = this.value; renderFaqs(); renderCategories(); });
         }
 
@@ -353,7 +412,107 @@
                 const response = await fetch(`${API_BASE}/support/faq`);
                 const data = await response.json();
                 if (data.success) { faqs = data.faqs; renderFaqs(); }
-            } catch (error) { console.error('Error loading FAQs:', error); renderEmptyFaqs(); }
+            } catch (error) { console.error('Error loading FAQs:', error); renderFallbackFaqs(); }
+        }
+
+        function renderFallbackFaqs() {
+            // デモ用のFAQデータ（9言語対応）
+            const demoFaqs = [
+                {
+                    id: 1, category_id: 1,
+                    question_en: 'How do I create an account?',
+                    question_ja: 'アカウントを作成するにはどうすればいいですか？',
+                    question_zh: '如何创建账户？',
+                    question_es: '¿Cómo creo una cuenta?',
+                    question_fr: 'Comment créer un compte ?',
+                    question_de: 'Wie erstelle ich ein Konto?',
+                    question_ko: '계정을 만들려면 어떻게 해야 하나요?',
+                    question_ar: 'كيف أنشئ حسابًا؟',
+                    question_pt: 'Como crio uma conta?',
+                    answer_en: 'Click the "Sign Up" button at the top right of the homepage and enter your email address and password.',
+                    answer_ja: 'トップページ右上の「新規登録」ボタンをクリックし、メールアドレスとパスワードを入力してください。',
+                    answer_zh: '点击首页右上角的"注册"按钮，输入您的电子邮件地址和密码。',
+                    answer_es: 'Haga clic en el botón "Registrarse" en la esquina superior derecha de la página de inicio.',
+                    answer_fr: 'Cliquez sur le bouton "S\'inscrire" en haut à droite de la page d\'accueil.',
+                    answer_de: 'Klicken Sie oben rechts auf der Startseite auf "Registrieren".',
+                    answer_ko: '홈페이지 오른쪽 상단의 "회원가입" 버튼을 클릭하세요.',
+                    answer_ar: 'انقر على زر "التسجيل" في الزاوية العلوية اليمنى.',
+                    answer_pt: 'Clique no botão "Cadastrar" no canto superior direito.',
+                    category_name_en: 'Account', category_name_ja: 'アカウント',
+                    helpful_count: 15, not_helpful_count: 2
+                },
+                {
+                    id: 2, category_id: 1,
+                    question_en: 'I forgot my password',
+                    question_ja: 'パスワードを忘れてしまいました',
+                    question_zh: '我忘记了密码',
+                    question_es: 'Olvidé mi contraseña',
+                    question_fr: 'J\'ai oublié mon mot de passe',
+                    question_de: 'Ich habe mein Passwort vergessen',
+                    question_ko: '비밀번호를 잊어버렸습니다',
+                    question_ar: 'نسيت كلمة المرور',
+                    question_pt: 'Esqueci minha senha',
+                    answer_en: 'Click "Forgot password?" on the login page and enter your email. We\'ll send a reset link.',
+                    answer_ja: 'ログインページの「パスワードをお忘れですか？」をクリックし、メールアドレスを入力してください。',
+                    answer_zh: '点击登录页面的"忘记密码？"链接，输入您的电子邮件地址。',
+                    answer_es: 'Haga clic en "¿Olvidó su contraseña?" en la página de inicio de sesión.',
+                    answer_fr: 'Cliquez sur "Mot de passe oublié ?" sur la page de connexion.',
+                    answer_de: 'Klicken Sie auf "Passwort vergessen?" auf der Anmeldeseite.',
+                    answer_ko: '로그인 페이지에서 "비밀번호를 잊으셨나요?"를 클릭하세요.',
+                    answer_ar: 'انقر على "نسيت كلمة المرور؟" في صفحة تسجيل الدخول.',
+                    answer_pt: 'Clique em "Esqueceu a senha?" na página de login.',
+                    category_name_en: 'Account', category_name_ja: 'アカウント',
+                    helpful_count: 12, not_helpful_count: 1
+                },
+                {
+                    id: 4, category_id: 2,
+                    question_en: 'What payment methods are available?',
+                    question_ja: '利用可能な支払い方法は？',
+                    question_zh: '可用的支付方式有哪些？',
+                    question_es: '¿Qué métodos de pago están disponibles?',
+                    question_fr: 'Quels modes de paiement sont disponibles ?',
+                    question_de: 'Welche Zahlungsmethoden sind verfügbar?',
+                    question_ko: '어떤 결제 방법을 사용할 수 있나요?',
+                    question_ar: 'ما هي طرق الدفع المتاحة؟',
+                    question_pt: 'Quais métodos de pagamento estão disponíveis?',
+                    answer_en: 'We accept credit cards (Visa, Mastercard, American Express) and PayPal.',
+                    answer_ja: 'クレジットカード（Visa、Mastercard、American Express）およびPayPalがご利用いただけます。',
+                    answer_zh: '我们接受信用卡（Visa、Mastercard、American Express）和PayPal。',
+                    answer_es: 'Aceptamos tarjetas de crédito (Visa, Mastercard, American Express) y PayPal.',
+                    answer_fr: 'Nous acceptons les cartes de crédit (Visa, Mastercard, American Express) et PayPal.',
+                    answer_de: 'Wir akzeptieren Kreditkarten (Visa, Mastercard, American Express) und PayPal.',
+                    answer_ko: '신용카드(Visa, Mastercard, American Express)와 PayPal을 사용할 수 있습니다.',
+                    answer_ar: 'نقبل بطاقات الائتمان (Visa و Mastercard و American Express) و PayPal.',
+                    answer_pt: 'Aceitamos cartões de crédito (Visa, Mastercard, American Express) e PayPal.',
+                    category_name_en: 'Payment', category_name_ja: 'お支払い',
+                    helpful_count: 20, not_helpful_count: 0
+                },
+                {
+                    id: 6, category_id: 4,
+                    question_en: 'How accurate is the AI translation?',
+                    question_ja: 'AI翻訳の精度はどのくらいですか？',
+                    question_zh: 'AI翻译的准确度如何？',
+                    question_es: '¿Qué tan precisa es la traducción por IA?',
+                    question_fr: 'Quelle est la précision de la traduction IA ?',
+                    question_de: 'Wie genau ist die KI-Übersetzung?',
+                    question_ko: 'AI 번역의 정확도는 어떤가요?',
+                    question_ar: 'ما مدى دقة الترجمة بالذكاء الاصطناعي؟',
+                    question_pt: 'Qual é a precisão da tradução por IA?',
+                    answer_en: 'AI translation uses advanced machine learning models and can translate general text with high accuracy. For technical terms or literary expressions, we recommend professional translators.',
+                    answer_ja: 'AI翻訳は高度な機械学習モデルを使用しており、一般的な文章については高い精度で翻訳できます。専門用語や文学的表現については、プロの翻訳者をお勧めします。',
+                    answer_zh: 'AI翻译使用先进的机器学习模型，可以高精度翻译一般文本。对于专业术语或文学表达，我们建议使用专业翻译人员。',
+                    answer_es: 'La traducción por IA utiliza modelos avanzados de aprendizaje automático.',
+                    answer_fr: 'La traduction IA utilise des modèles d\'apprentissage automatique avancés.',
+                    answer_de: 'Die KI-Übersetzung verwendet fortschrittliche Machine-Learning-Modelle.',
+                    answer_ko: 'AI 번역은 고급 머신러닝 모델을 사용하여 높은 정확도로 번역합니다.',
+                    answer_ar: 'تستخدم الترجمة بالذكاء الاصطناعي نماذج تعلم آلي متقدمة.',
+                    answer_pt: 'A tradução por IA usa modelos avançados de aprendizado de máquina.',
+                    category_name_en: 'Translation', category_name_ja: '翻訳サービス',
+                    helpful_count: 18, not_helpful_count: 3
+                }
+            ];
+            faqs = demoFaqs;
+            renderFaqs();
         }
 
         function renderEmptyFaqs() {
@@ -366,31 +525,38 @@
             let filteredFaqs = faqs;
             if (currentCategory !== 'all') { filteredFaqs = faqs.filter(faq => faq.category_id == currentCategory); }
             if (filteredFaqs.length === 0) {
-                container.innerHTML = `<div class="text-center py-5 text-muted"><i class="fas fa-inbox fa-3x mb-3"></i><p data-i18n="support.faq.noQuestions">No questions in this category</p></div>`;
+                container.innerHTML = `<div class="text-center py-5 text-muted"><i class="fas fa-inbox fa-3x mb-3"></i><p>${t('support.faq.noQuestions')}</p></div>`;
                 return;
             }
             const wasHelpful = t('support.faq.wasHelpful');
             const yesLabel = t('support.faq.yes');
             const noLabel = t('support.faq.no');
-            container.innerHTML = filteredFaqs.map((faq, index) => `
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq${faq.id}">
-                            <span class="badge badge-soft me-2">${faq.category_name_en || 'General'}</span> ${faq.question_en}
-                        </button>
-                    </h2>
-                    <div id="faq${faq.id}" class="accordion-collapse collapse">
-                        <div class="accordion-body">
-                            ${faq.answer_en}
-                            <div class="helpful-section">
-                                <span>${wasHelpful}</span>
-                                <button class="helpful-btn" onclick="voteFaq(${faq.id}, true, event)"><i class="fas fa-thumbs-up me-1"></i> ${yesLabel} (${faq.helpful_count || 0})</button>
-                                <button class="helpful-btn" onclick="voteFaq(${faq.id}, false, event)"><i class="fas fa-thumbs-down me-1"></i> ${noLabel} (${faq.not_helpful_count || 0})</button>
+            
+            container.innerHTML = filteredFaqs.map((faq, index) => {
+                const question = getLocalizedText(faq, 'question');
+                const answer = getLocalizedText(faq, 'answer');
+                const categoryName = getLocalizedText(faq, 'category_name');
+                
+                return `
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq${faq.id}">
+                                <span class="badge badge-soft me-2">${categoryName || 'General'}</span> ${question}
+                            </button>
+                        </h2>
+                        <div id="faq${faq.id}" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                ${answer}
+                                <div class="helpful-section">
+                                    <span>${wasHelpful}</span>
+                                    <button class="helpful-btn" onclick="voteFaq(${faq.id}, true, event)"><i class="fas fa-thumbs-up me-1"></i> ${yesLabel} (${faq.helpful_count || 0})</button>
+                                    <button class="helpful-btn" onclick="voteFaq(${faq.id}, false, event)"><i class="fas fa-thumbs-down me-1"></i> ${noLabel} (${faq.not_helpful_count || 0})</button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function filterByCategory(categoryId) {
@@ -418,7 +584,16 @@
                 const response = await fetch(`${API_BASE}/support/faq/search?q=${encodeURIComponent(query)}`);
                 const data = await response.json();
                 if (data.success) { showSearchResults(query, data.faqs); }
-            } catch (error) { console.error('Search error:', error); }
+            } catch (error) { 
+                console.error('Search error:', error);
+                // ローカル検索にフォールバック
+                const results = faqs.filter(faq => {
+                    const question = getLocalizedText(faq, 'question').toLowerCase();
+                    const answer = getLocalizedText(faq, 'answer').toLowerCase();
+                    return question.includes(query.toLowerCase()) || answer.includes(query.toLowerCase());
+                });
+                showSearchResults(query, results);
+            }
         }
 
         function showSearchResults(query, results) {
@@ -426,10 +601,21 @@
             const container = document.getElementById('searchResults');
             if (results.length === 0) {
                 const noResultsMsg = t('support.faq.noResults');
-                const tryTroubleshoot = t('support.faq.tryTroubleshoot');
+                const tryTroubleshoot = t('support.faq.startTroubleshoot');
                 container.innerHTML = `<div class="text-center py-5 text-muted"><i class="fas fa-search fa-3x mb-3"></i><p>${noResultsMsg} "${query}"</p><a href="troubleshoot.html" class="btn btn-primary-custom mt-2"><i class="fas fa-tools me-2"></i>${tryTroubleshoot}</a></div>`;
             } else {
-                container.innerHTML = results.map(faq => `<div class="search-result-item" onclick="showFaqDetail(${faq.id})"><span class="badge badge-soft mb-2">${faq.category_name_en || 'General'}</span><h4>${faq.question_en}</h4><p>${faq.answer_en.substring(0, 150)}...</p></div>`).join('');
+                container.innerHTML = results.map(faq => {
+                    const question = getLocalizedText(faq, 'question');
+                    const answer = getLocalizedText(faq, 'answer');
+                    const categoryName = getLocalizedText(faq, 'category_name');
+                    return `
+                        <div class="search-result-item" onclick="showFaqDetail(${faq.id})">
+                            <span class="badge badge-soft mb-2">${categoryName || 'General'}</span>
+                            <h4>${question}</h4>
+                            <p>${answer.substring(0, 150)}...</p>
+                        </div>
+                    `;
+                }).join('');
             }
             document.getElementById('searchResultsSection').style.display = 'block';
             document.getElementById('categoriesSection').style.display = 'none';
