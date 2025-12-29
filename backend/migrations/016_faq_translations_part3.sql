@@ -1,6 +1,6 @@
 -- =============================================
 -- Phase 12-4e: FAQ追加翻訳 Part 3
--- 著者・翻訳者向けFAQ (9件)
+-- 著者・翻訳者向けFAQ (8件)
 -- =============================================
 
 -- FAQ: When do I receive my earnings?
@@ -10,7 +10,7 @@ UPDATE faq_items SET
     question_es = '¿Cuándo recibo mis ganancias?',
     answer_es = 'Las ganancias se calculan el día 15 de cada mes y se pagan el día 1 del mes siguiente a su cuenta de pago registrada. El monto mínimo de pago es $50 USD. Si no alcanza el mínimo, las ganancias se acumulan para el próximo mes.',
     question_fr = 'Quand est-ce que je reçois mes revenus ?',
-    answer_fr = 'Les revenus sont calculés le 15 de chaque mois et payés le 1er du mois suivant sur votre compte de paiement enregistré. Le montant minimum de paiement est de 50 $ USD. Si vous n\'atteignez pas le minimum, les revenus sont reportés au mois suivant.',
+    answer_fr = 'Les revenus sont calculés le 15 de chaque mois et payés le 1er du mois suivant sur votre compte de paiement enregistré. Le montant minimum de paiement est de 50 $ USD. Si vous n''atteignez pas le minimum, les revenus sont reportés au mois suivant.',
     question_de = 'Wann erhalte ich meine Einnahmen?',
     answer_de = 'Die Einnahmen werden am 15. jedes Monats berechnet und am 1. des Folgemonats auf Ihr registriertes Zahlungskonto ausgezahlt. Der Mindestauszahlungsbetrag beträgt 50 USD. Wenn Sie das Minimum nicht erreichen, werden die Einnahmen auf den nächsten Monat übertragen.',
     question_ko = '수익은 언제 받을 수 있나요?',
@@ -28,7 +28,7 @@ UPDATE faq_items SET
     question_es = '¿Cuál es la estructura de reparto de ingresos?',
     answer_es = 'Los autores reciben 40-70% de las ventas (dependiendo del precio y tipo de suscripción). Los traductores reciben 20% de las ventas de obras traducidas. Los editores reciben 10%. La plataforma retiene 30% para operaciones y promoción.',
     question_fr = 'Quelle est la structure de partage des revenus ?',
-    answer_fr = 'Les auteurs reçoivent 40 à 70 % des ventes (selon le prix et le type d\'abonnement). Les traducteurs reçoivent 20 % des ventes des œuvres traduites. Les éditeurs reçoivent 10 %. La plateforme conserve 30 % pour les opérations et la promotion.',
+    answer_fr = 'Les auteurs reçoivent 40 à 70 % des ventes (selon le prix et le type d''abonnement). Les traducteurs reçoivent 20 % des ventes des œuvres traduites. Les éditeurs reçoivent 10 %. La plateforme conserve 30 % pour les opérations et la promotion.',
     question_de = 'Wie ist die Umsatzbeteiligungsstruktur?',
     answer_de = 'Autoren erhalten 40-70% des Verkaufserlöses (abhängig von Preis und Abonnementtyp). Übersetzer erhalten 20% der Verkäufe übersetzter Werke. Redakteure erhalten 10%. Die Plattform behält 30% für Betrieb und Werbung.',
     question_ko = '수익 분배 구조는 어떻게 되나요?',
@@ -46,7 +46,7 @@ UPDATE faq_items SET
     question_es = '¿Puedo establecer mi propio precio?',
     answer_es = 'Sí, los autores pueden establecer libremente precios para sus obras entre $0.99 y $99.99 USD. También puede elegir publicar gratis o establecer descuentos por tiempo limitado. Recomendamos revisar precios de obras similares como referencia.',
     question_fr = 'Puis-je fixer mon propre prix ?',
-    answer_fr = 'Oui, les auteurs peuvent fixer librement les prix de leurs œuvres entre 0,99 $ et 99,99 $ USD. Vous pouvez également choisir de publier gratuitement ou de définir des remises à durée limitée. Nous recommandons de consulter les prix d\'œuvres similaires comme référence.',
+    answer_fr = 'Oui, les auteurs peuvent fixer librement les prix de leurs œuvres entre 0,99 $ et 99,99 $ USD. Vous pouvez également choisir de publier gratuitement ou de définir des remises à durée limitée. Nous recommandons de consulter les prix d''œuvres similaires comme référence.',
     question_de = 'Kann ich meinen eigenen Preis festlegen?',
     answer_de = 'Ja, Autoren können Preise für ihre Werke frei zwischen 0,99 $ und 99,99 $ USD festlegen. Sie können auch wählen, kostenlos zu veröffentlichen oder zeitlich begrenzte Rabatte festzulegen. Wir empfehlen, Preise ähnlicher Werke als Referenz zu prüfen.',
     question_ko = '가격을 직접 설정할 수 있나요?',
@@ -62,9 +62,9 @@ UPDATE faq_items SET
     question_zh = '版权归谁所有？',
     answer_zh = '您保留对您作品的完全版权所有权。通过在我们平台发布，您只是授予我们非独家分发许可。您可以随时将作品下架，也可以在其他平台同时发布。',
     question_es = '¿Quién posee los derechos de autor?',
-    answer_es = 'Usted conserva la propiedad total de los derechos de autor de su trabajo. Al publicar en nuestra plataforma, simplemente nos otorga una licencia de distribución no exclusiva. Puede retirar su trabajo en cualmomento y publicar simultáneamente en otras plataformas.',
-    question_fr = 'À qui appartiennent les droits d\'auteur ?',
-    answer_fr = 'Vous conservez la pleine propriété des droits d\'auteur sur votre travail. En publiant sur notre plateforme, vous nous accordez simplement une licence de distribution non exclusive. Vous pouvez retirer votre travail à tout moment et publier simultanément sur d\'autres plateformes.',
+    answer_es = 'Usted conserva la propiedad total de los derechos de autor de su trabajo. Al publicar en nuestra plataforma, simplemente nos otorga una licencia de distribución no exclusiva. Puede retirar su trabajo en cualquier momento y publicar simultáneamente en otras plataformas.',
+    question_fr = 'À qui appartiennent les droits d''auteur ?',
+    answer_fr = 'Vous conservez la pleine propriété des droits d''auteur sur votre travail. En publiant sur notre plateforme, vous nous accordez simplement une licence de distribution non exclusive. Vous pouvez retirer votre travail à tout moment et publier simultanément sur d''autres plateformes.',
     question_de = 'Wem gehört das Urheberrecht?',
     answer_de = 'Sie behalten das vollständige Urheberrecht an Ihrem Werk. Durch die Veröffentlichung auf unserer Plattform erteilen Sie uns lediglich eine nicht-exklusive Vertriebslizenz. Sie können Ihr Werk jederzeit entfernen und gleichzeitig auf anderen Plattformen veröffentlichen.',
     question_ko = '저작권은 누구에게 있나요?',
@@ -81,7 +81,7 @@ UPDATE faq_items SET
     answer_zh = '点击"成为翻译者"页面进行注册。您需要提供语言能力证明（证书或测试分数）、翻译样本和个人简介。申请将在3-5个工作日内审核。',
     question_es = '¿Cómo me registro como traductor?',
     answer_es = 'Haga clic en la página "Convertirse en traductor" para registrarse. Deberá proporcionar prueba de competencia lingüística (certificados o puntajes de pruebas), muestras de traducción y una biografía. Las solicitudes se revisan dentro de 3-5 días hábiles.',
-    question_fr = 'Comment m\'inscrire en tant que traducteur ?',
+    question_fr = 'Comment m''inscrire en tant que traducteur ?',
     answer_fr = 'Cliquez sur la page "Devenir traducteur" pour vous inscrire. Vous devrez fournir une preuve de compétence linguistique (certificats ou scores de tests), des échantillons de traduction et une biographie. Les candidatures sont examinées dans les 3 à 5 jours ouvrables.',
     question_de = 'Wie registriere ich mich als Übersetzer?',
     answer_de = 'Klicken Sie auf die Seite "Übersetzer werden", um sich zu registrieren. Sie müssen einen Nachweis der Sprachkompetenz (Zertifikate oder Testergebnisse), Übersetzungsproben und eine Biografie vorlegen. Bewerbungen werden innerhalb von 3-5 Werktagen geprüft.',
@@ -139,7 +139,7 @@ UPDATE faq_items SET
     answer_fr = 'Complétez votre profil : ajoutez une photo professionnelle, des compétences linguistiques et des spécialités détaillées, des échantillons de travaux de traduction précédents, des certifications pertinentes et des avis de clients précédents. Maintenir des temps de réponse rapides est également important.',
     question_de = 'Wie kann ich mein Übersetzer-Profil attraktiv gestalten?',
     answer_de = 'Vervollständigen Sie Ihr Profil: Fügen Sie ein professionelles Foto, detaillierte Sprachkenntnisse und Fachgebiete, Proben früherer Übersetzungsarbeiten, relevante Zertifizierungen und Bewertungen früherer Kunden hinzu. Schnelle Reaktionszeiten sind ebenfalls wichtig.',
-    question_ko: '번역가 프로필을 어떻게 매력적으로 만들 수 있나요?',
+    question_ko = '번역가 프로필을 어떻게 매력적으로 만들 수 있나요?',
     answer_ko = '프로필을 완성하세요: 전문적인 사진, 상세한 언어 능력 및 전문 분야, 이전 번역 작업 샘플, 관련 자격증, 이전 고객의 리뷰를 추가하세요. 빠른 응답 시간을 유지하는 것도 중요합니다.',
     question_ar = 'كيف أجعل ملفي الشخصي كمترجم جذابًا؟',
     answer_ar = 'أكمل ملفك الشخصي: أضف صورة احترافية، ومهارات لغوية وتخصصات مفصلة، وعينات من أعمال الترجمة السابقة، والشهادات ذات الصلة، ومراجعات العملاء السابقين. الحفاظ على أوقات استجابة سريعة مهم أيضًا.',
