@@ -70,12 +70,12 @@
     <main class="container py-4">
         <div class="period-selector d-flex align-items-center justify-content-between flex-wrap gap-2">
             <div class="d-flex align-items-center gap-2">
-                <span class="text-muted me-2">Period:</span>
-                <button class="period-btn" data-period="7">7 days</button>
-                <button class="period-btn active" data-period="30">30 days</button>
-                <button class="period-btn" data-period="90">90 days</button>
+                <span class="text-muted me-2" data-i18n="analytics.period">Period:</span>
+                <button class="period-btn" data-period="7" data-i18n="analytics.days7">7 days</button>
+                <button class="period-btn active" data-period="30" data-i18n="analytics.days30">30 days</button>
+                <button class="period-btn" data-period="90" data-i18n="analytics.days90">90 days</button>
             </div>
-            <div class="text-muted small"><i class="fas fa-sync-alt me-1"></i><span id="lastUpdated">Last update: --</span></div>
+            <div class="text-muted small"><i class="fas fa-sync-alt me-1"></i><span data-i18n="analytics.lastUpdate">Last update</span>: <span id="lastUpdated">--</span></div>
         </div>
         <div class="row g-3 mb-4" id="statsCards">
             <div class="col-md-6 col-lg-3">
@@ -98,7 +98,7 @@
                 <div class="stat-card">
                     <div class="stat-icon time"><i class="fas fa-clock"></i></div>
                     <div class="stat-value" id="statTime">--</div>
-                    <div class="stat-label">Reading Time</div>
+                    <div class="stat-label" data-i18n="analytics.readingTime">Reading Time</div>
                     <div class="stat-change neutral"><span class="text-muted" data-i18n="analytics.growth">Growth</span></div>
                 </div>
             </div>
@@ -114,18 +114,18 @@
         <div class="row g-4 mb-4">
             <div class="col-lg-8">
                 <div class="chart-card">
-                    <h3><i class="fas fa-chart-area"></i> <span data-i18n="analytics.views">Views</span> Trend</h3>
+                    <h3><i class="fas fa-chart-area"></i> <span data-i18n="analytics.views">Views</span> <span data-i18n="analytics.trend">Trend</span></h3>
                     <div style="height:300px;"><canvas id="viewsChart"></canvas></div>
                 </div>
             </div>
             <div class="col-lg-4">
                 <div class="chart-card">
-                    <h3><i class="fas fa-heart"></i> Engagement</h3>
+                    <h3><i class="fas fa-heart"></i> <span data-i18n="analytics.engagement">Engagement</span></h3>
                     <div class="engagement-grid" id="engagementStats">
-                        <div class="engagement-item"><i class="fas fa-heart text-danger"></i><div class="value" id="engLikes">--</div><div class="label">Likes</div></div>
-                        <div class="engagement-item"><i class="fas fa-comment text-primary"></i><div class="value" id="engComments">--</div><div class="label">Comments</div></div>
-                        <div class="engagement-item"><i class="fas fa-bookmark text-warning"></i><div class="value" id="engBookmarks">--</div><div class="label">Bookmarks</div></div>
-                        <div class="engagement-item"><i class="fas fa-download text-success"></i><div class="value" id="engDownloads">--</div><div class="label">Downloads</div></div>
+                        <div class="engagement-item"><i class="fas fa-heart text-danger"></i><div class="value" id="engLikes">--</div><div class="label" data-i18n="analytics.likes">Likes</div></div>
+                        <div class="engagement-item"><i class="fas fa-comment text-primary"></i><div class="value" id="engComments">--</div><div class="label" data-i18n="analytics.comments">Comments</div></div>
+                        <div class="engagement-item"><i class="fas fa-bookmark text-warning"></i><div class="value" id="engBookmarks">--</div><div class="label" data-i18n="analytics.bookmarks">Bookmarks</div></div>
+                        <div class="engagement-item"><i class="fas fa-download text-success"></i><div class="value" id="engDownloads">--</div><div class="label" data-i18n="analytics.downloads">Downloads</div></div>
                     </div>
                 </div>
             </div>
@@ -137,9 +137,9 @@
                     <thead>
                         <tr>
                             <th style="width:50px;">#</th>
-                            <th>Title</th>
+                            <th data-i18n="analytics.workTitle">Title</th>
                             <th class="text-end" data-i18n="analytics.views">Views</th>
-                            <th class="text-end">Readers</th>
+                            <th class="text-end" data-i18n="analytics.readers">Readers</th>
                             <th class="text-end" data-i18n="analytics.revenue">Revenue</th>
                         </tr>
                     </thead>
@@ -168,18 +168,39 @@
     <script src="../js/header-notification.js"></script>
     <script>
         let currentPeriod=30,viewsChart=null;
-        function checkAuth(){const t=localStorage.getItem('token'),u=localStorage.getItem('user');if(!t||!u){window.location.href='login.html';return null}const d=JSON.parse(u);document.getElementById('userDisplayName').textContent=d.display_name||d.email;return{token:t,user:d}}
+        
+        // i18n helper
+        function t(key) {
+            const lang = localStorage.getItem('publisher_language') || 'en';
+            const keys = key.split('.');
+            let value = translations[lang];
+            for (const k of keys) {
+                if (value && value[k] !== undefined) {
+                    value = value[k];
+                } else {
+                    value = translations['en'];
+                    for (const k2 of keys) {
+                        if (value && value[k2] !== undefined) value = value[k2];
+                        else return key;
+                    }
+                    break;
+                }
+            }
+            return typeof value === 'string' ? value : key;
+        }
+
+        function checkAuth(){const tok=localStorage.getItem('token'),u=localStorage.getItem('user');if(!tok||!u){window.location.href='login.html';return null}const d=JSON.parse(u);document.getElementById('userDisplayName').textContent=d.display_name||d.email;return{token:tok,user:d}}
         function logout(){localStorage.removeItem('token');localStorage.removeItem('user');window.location.href='login.html'}
         async function fetchAnalytics(){const{token}=checkAuth();if(!token)return;try{const r=await fetch(`http://localhost:3000/api/analytics/author/overview?period=${currentPeriod}`,{headers:{'Authorization':`Bearer ${token}`}});if(!r.ok)throw new Error('Failed');const d=await r.json();if(d.success){updateStats(d.overview);updateChart(d.trend);updateTopWorks(d.topWorks);updateLastUpdated()}}catch(e){console.error(e);showEmptyState()}}
         function updateStats(o){document.getElementById('statViews').textContent=formatNumber(o.views.value);updateChangeIndicator('statViewsChange',o.views.change);document.getElementById('statReaders').textContent=formatNumber(o.readers.value);updateChangeIndicator('statReadersChange',o.readers.change);document.getElementById('statTime').textContent=o.readingTime.formatted;document.getElementById('statRevenue').textContent='$'+formatNumber(o.revenue.value);updateChangeIndicator('statRevenueChange',o.revenue.change);document.getElementById('engLikes').textContent=formatNumber(o.engagement.likes);document.getElementById('engComments').textContent=formatNumber(o.engagement.comments);document.getElementById('engBookmarks').textContent=formatNumber(o.engagement.bookmarks);document.getElementById('engDownloads').textContent=formatNumber(o.engagement.downloads)}
         function updateChangeIndicator(id,c){const e=document.getElementById(id),v=parseFloat(c);if(v>0){e.className='stat-change positive';e.innerHTML=`<i class="fas fa-arrow-up"></i> ${v}%`}else if(v<0){e.className='stat-change negative';e.innerHTML=`<i class="fas fa-arrow-down"></i> ${Math.abs(v)}%`}else{e.className='stat-change neutral';e.innerHTML=`<i class="fas fa-minus"></i> 0%`}}
-        function updateChart(t){const ctx=document.getElementById('viewsChart').getContext('2d');if(viewsChart)viewsChart.destroy();viewsChart=new Chart(ctx,{type:'line',data:{labels:t.map(d=>formatDate(d.date)),datasets:[{label:'Views',data:t.map(d=>d.views),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.1)',fill:true,tension:0.3},{label:'Readers',data:t.map(d=>d.readers),borderColor:'#10b981',backgroundColor:'transparent',borderDash:[5,5],tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',align:'end'}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.05)'}}},interaction:{intersect:false,mode:'index'}}})}
-        function updateTopWorks(w){const b=document.getElementById('topWorksBody');if(!w||!w.length){b.innerHTML='<tr><td colspan="5" class="text-center text-muted py-4"><i class="fas fa-inbox fa-2x mb-2 d-block"></i>No data yet</td></tr>';return}b.innerHTML=w.map((x,i)=>`<tr><td><span class="work-rank ${i<3?'rank-'+(i+1):''}">${i+1}</span></td><td><a href="work-detail.html?id=${x.id}" class="text-decoration-none">${escapeHtml(x.title)}</a></td><td class="text-end">${formatNumber(x.views)}</td><td class="text-end">${formatNumber(x.readers)}</td><td class="text-end">$${formatNumber(x.revenue)}</td></tr>`).join('')}
-        function updateLastUpdated(){document.getElementById('lastUpdated').textContent=`Last update: ${new Date().toLocaleTimeString()}`}
-        function showEmptyState(){document.getElementById('topWorksBody').innerHTML='<tr><td colspan="5" class="text-center text-muted py-4"><i class="fas fa-exclamation-circle fa-2x mb-2 d-block"></i>Failed to load data</td></tr>'}
+        function updateChart(trendData){const ctx=document.getElementById('viewsChart').getContext('2d');if(viewsChart)viewsChart.destroy();viewsChart=new Chart(ctx,{type:'line',data:{labels:trendData.map(d=>formatDate(d.date)),datasets:[{label:t('analytics.views'),data:trendData.map(d=>d.views),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.1)',fill:true,tension:0.3},{label:t('analytics.readers'),data:trendData.map(d=>d.readers),borderColor:'#10b981',backgroundColor:'transparent',borderDash:[5,5],tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',align:'end'}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.05)'}}},interaction:{intersect:false,mode:'index'}}})}
+        function updateTopWorks(w){const b=document.getElementById('topWorksBody');if(!w||!w.length){b.innerHTML=`<tr><td colspan="5" class="text-center text-muted py-4"><i class="fas fa-inbox fa-2x mb-2 d-block"></i>${t('analytics.noData')}</td></tr>`;return}b.innerHTML=w.map((x,i)=>`<tr><td><span class="work-rank ${i<3?'rank-'+(i+1):''}">${i+1}</span></td><td><a href="work-detail.html?id=${x.id}" class="text-decoration-none">${escapeHtml(x.title)}</a></td><td class="text-end">${formatNumber(x.views)}</td><td class="text-end">${formatNumber(x.readers)}</td><td class="text-end">$${formatNumber(x.revenue)}</td></tr>`).join('')}
+        function updateLastUpdated(){document.getElementById('lastUpdated').textContent=new Date().toLocaleTimeString()}
+        function showEmptyState(){document.getElementById('topWorksBody').innerHTML=`<tr><td colspan="5" class="text-center text-muted py-4"><i class="fas fa-exclamation-circle fa-2x mb-2 d-block"></i>${t('analytics.loadFailed')}</td></tr>`}
         function formatNumber(n){if(n==null)return'0';return Number(n).toLocaleString()}
         function formatDate(d){const x=new Date(d);return`${x.getMonth()+1}/${x.getDate()}`}
-        function escapeHtml(t){const d=document.createElement('div');d.textContent=t;return d.innerHTML}
+        function escapeHtml(txt){const d=document.createElement('div');d.textContent=txt;return d.innerHTML}
         document.querySelectorAll('.period-btn').forEach(b=>{b.addEventListener('click',function(){document.querySelectorAll('.period-btn').forEach(x=>x.classList.remove('active'));this.classList.add('active');currentPeriod=parseInt(this.dataset.period);fetchAnalytics()})});
         document.addEventListener('DOMContentLoaded',function(){if(checkAuth())fetchAnalytics()});
     </script>
