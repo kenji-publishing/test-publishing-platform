@@ -58,6 +58,7 @@
         .troubleshoot-cta p { color: rgba(255, 255, 255, 0.9); margin-bottom: var(--spacing-lg); }
         .troubleshoot-cta .btn { background: white; color: var(--color-accent); border: none; font-weight: 600; }
         .troubleshoot-cta .btn:hover { background: var(--color-cream); }
+        .lang-option.active { background-color: var(--color-bg-hover); font-weight: 600; }
         @media (max-width: 992px) { .category-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 576px) { .category-grid { grid-template-columns: 1fr; } .faq-section-header { flex-direction: column; gap: var(--spacing-md); } }
     </style>
@@ -91,13 +92,35 @@
                         </a>
                     </li>
                 </ul>
-                <div class="d-flex align-items-center gap-3" id="authNav">
-                    <a href="../login.html" class="btn btn-soft-custom">
-                        <i class="fas fa-sign-in-alt me-1"></i> <span data-i18n="nav.login">Sign In</span>
-                    </a>
-                    <a href="../register.html" class="btn btn-primary-custom" data-i18n="nav.getStarted">
-                        Get Started
-                    </a>
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Language Selector -->
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-globe me-1"></i>
+                            <span id="currentLangFlag">🇬🇧</span>
+                            <span id="currentLangName">English</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item lang-option" href="#" data-lang="en">🇬🇧 English</a></li>
+                            <li><a class="dropdown-item lang-option" href="#" data-lang="ja">🇯🇵 日本語</a></li>
+                            <li><a class="dropdown-item lang-option" href="#" data-lang="zh">🇨🇳 中文</a></li>
+                            <li><a class="dropdown-item lang-option" href="#" data-lang="es">🇪🇸 Español</a></li>
+                            <li><a class="dropdown-item lang-option" href="#" data-lang="fr">🇫🇷 Français</a></li>
+                            <li><a class="dropdown-item lang-option" href="#" data-lang="de">🇩🇪 Deutsch</a></li>
+                            <li><a class="dropdown-item lang-option" href="#" data-lang="ko">🇰🇷 한국어</a></li>
+                            <li><a class="dropdown-item lang-option" href="#" data-lang="ar">🇸🇦 العربية</a></li>
+                            <li><a class="dropdown-item lang-option" href="#" data-lang="pt">🇧🇷 Português</a></li>
+                        </ul>
+                    </div>
+                    <!-- Auth Nav -->
+                    <div id="authNav">
+                        <a href="../login.html" class="btn btn-soft-custom">
+                            <i class="fas fa-sign-in-alt me-1"></i> <span data-i18n="nav.login">Sign In</span>
+                        </a>
+                        <a href="../register.html" class="btn btn-primary-custom" data-i18n="nav.getStarted">
+                            Get Started
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -189,6 +212,13 @@
             loadFaqs();
             setupSearchHandler();
             checkAuth();
+        });
+
+        // Listen for language changes
+        document.addEventListener('languageChanged', function(e) {
+            renderCategories();
+            renderCategoryFilter();
+            renderFaqs();
         });
 
         async function checkAuth() {
