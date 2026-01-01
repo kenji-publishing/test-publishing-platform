@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>お問い合わせ履歴 - Publisher</title>
+    <title data-i18n="support.tickets.pageTitle">Support Tickets - Publisher</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -124,13 +124,24 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="../../index.html">ホーム</a>
+                        <a class="nav-link" href="../../index.html" data-i18n="nav.home">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="faq.html">FAQ</a>
+                        <a class="nav-link" href="faq.html" data-i18n="support.faq.title">FAQ</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="contact.html">お問い合わせ</a>
+                        <a class="nav-link" href="contact.html" data-i18n="support.contact.title">Contact Us</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav align-items-center">
+                    <!-- Desktop Language Selector -->
+                    <li class="nav-item dropdown d-none d-lg-block me-2">
+                        <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-globe"></i> <span id="currentLanguage">English</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown" id="languageMenu">
+                            <!-- Languages populated by JS -->
+                        </ul>
                     </li>
                 </ul>
                 <ul class="navbar-nav" id="authNav">
@@ -140,12 +151,24 @@
         </div>
     </nav>
 
+    <!-- Mobile Language Selector -->
+    <div class="d-lg-none bg-light border-bottom py-2">
+        <div class="container">
+            <div class="d-flex align-items-center justify-content-end">
+                <i class="fas fa-globe text-muted me-2"></i>
+                <select id="mobileLanguageSelect" class="form-select form-select-sm" style="width: auto; min-width: 140px;">
+                    <!-- Languages populated by JS -->
+                </select>
+            </div>
+        </div>
+    </div>
+
     <!-- メインコンテンツ -->
     <main class="container py-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><i class="bi bi-list-ul"></i> お問い合わせ履歴</h2>
+            <h2><i class="bi bi-list-ul"></i> <span data-i18n="support.tickets.title">Support Tickets</span></h2>
             <a href="contact.html" class="btn btn-primary">
-                <i class="bi bi-plus-lg"></i> 新規お問い合わせ
+                <i class="bi bi-plus-lg"></i> <span data-i18n="support.tickets.newTicket">New Ticket</span>
             </a>
         </div>
 
@@ -154,23 +177,23 @@
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-md-4">
-                        <label class="form-label small text-muted">ステータス</label>
+                        <label class="form-label small text-muted" data-i18n="support.tickets.status">Status</label>
                         <select class="form-select" id="statusFilter">
-                            <option value="all">すべて</option>
-                            <option value="open">新規</option>
-                            <option value="in_progress">対応中</option>
-                            <option value="waiting_user">返答待ち</option>
-                            <option value="waiting_admin">サポート対応待ち</option>
-                            <option value="resolved">解決済み</option>
-                            <option value="closed">クローズ</option>
+                            <option value="all" data-i18n="common.all">All</option>
+                            <option value="open" data-i18n="support.tickets.statuses.open">Open</option>
+                            <option value="in_progress" data-i18n="support.tickets.statuses.inProgress">In Progress</option>
+                            <option value="waiting_user" data-i18n="support.tickets.statuses.waitingUser">Waiting for Reply</option>
+                            <option value="waiting_admin" data-i18n="support.tickets.statuses.waitingAdmin">Waiting for Support</option>
+                            <option value="resolved" data-i18n="support.tickets.statuses.resolved">Resolved</option>
+                            <option value="closed" data-i18n="support.tickets.statuses.closed">Closed</option>
                         </select>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label small text-muted">&nbsp;</label>
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="unreadOnly">
-                            <label class="form-check-label" for="unreadOnly">
-                                未読メッセージがあるもののみ
+                            <label class="form-check-label" for="unreadOnly" data-i18n="support.tickets.unreadOnly">
+                                Only with unread messages
                             </label>
                         </div>
                     </div>
@@ -182,7 +205,7 @@
         <div id="ticketList">
             <div class="text-center py-5" id="loading">
                 <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">読み込み中...</span>
+                    <span class="visually-hidden" data-i18n="common.loading">Loading...</span>
                 </div>
             </div>
         </div>
@@ -192,10 +215,10 @@
             <div class="icon">
                 <i class="bi bi-inbox"></i>
             </div>
-            <h4>お問い合わせ履歴がありません</h4>
-            <p class="text-muted mb-4">質問やご要望がございましたら、お気軽にお問い合わせください</p>
+            <h4 data-i18n="support.tickets.noTickets">No tickets found</h4>
+            <p class="text-muted mb-4" data-i18n="support.tickets.noTicketsDesc">If you have questions or requests, please feel free to contact us</p>
             <a href="contact.html" class="btn btn-primary">
-                <i class="bi bi-envelope"></i> お問い合わせ
+                <i class="bi bi-envelope"></i> <span data-i18n="support.contact.title">Contact Us</span>
             </a>
         </div>
     </main>
@@ -206,7 +229,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <div>
-                        <h5 class="modal-title" id="modalTicketSubject">件名</h5>
+                        <h5 class="modal-title" id="modalTicketSubject">Subject</h5>
                         <small class="text-muted" id="modalTicketNumber">TKT-XXXXXXXX-XXXX</small>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -214,23 +237,23 @@
                 <div class="modal-body">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <div>
-                            <span class="status-badge" id="modalTicketStatus">ステータス</span>
-                            <span class="ms-2 text-muted small" id="modalTicketDate">作成日</span>
+                            <span class="status-badge" id="modalTicketStatus">Status</span>
+                            <span class="ms-2 text-muted small" id="modalTicketDate">Created</span>
                         </div>
                         <div id="ticketActions"></div>
                     </div>
                     <div class="message-list" id="messageList"></div>
                     <div id="replyForm" class="mt-4">
-                        <h6><i class="bi bi-reply"></i> 返信</h6>
-                        <textarea class="form-control mb-2" id="replyMessage" rows="3" placeholder="返信内容を入力してください"></textarea>
+                        <h6><i class="bi bi-reply"></i> <span data-i18n="support.tickets.reply">Reply</span></h6>
+                        <textarea class="form-control mb-2" id="replyMessage" rows="3" data-i18n-placeholder="support.tickets.replyPlaceholder" placeholder="Enter your reply"></textarea>
                         <div class="text-end">
                             <button class="btn btn-primary" id="sendReplyBtn">
-                                <i class="bi bi-send"></i> 送信
+                                <i class="bi bi-send"></i> <span data-i18n="support.tickets.send">Send</span>
                             </button>
                         </div>
                     </div>
                     <div id="ratingForm" class="mt-4 p-4 bg-light rounded" style="display: none;">
-                        <h6 class="text-center mb-3">対応はいかがでしたか？</h6>
+                        <h6 class="text-center mb-3" data-i18n="support.tickets.ratingQuestion">How was our support?</h6>
                         <div class="rating-stars text-center mb-3" id="ratingStars">
                             <i class="bi bi-star-fill" data-rating="1"></i>
                             <i class="bi bi-star-fill" data-rating="2"></i>
@@ -238,10 +261,10 @@
                             <i class="bi bi-star-fill" data-rating="4"></i>
                             <i class="bi bi-star-fill" data-rating="5"></i>
                         </div>
-                        <textarea class="form-control mb-2" id="ratingComment" rows="2" placeholder="コメント（任意）"></textarea>
+                        <textarea class="form-control mb-2" id="ratingComment" rows="2" data-i18n-placeholder="support.tickets.commentOptional" placeholder="Comment (optional)"></textarea>
                         <div class="text-center">
                             <button class="btn btn-success" id="submitRatingBtn">
-                                <i class="bi bi-check-lg"></i> 評価を送信
+                                <i class="bi bi-check-lg"></i> <span data-i18n="support.tickets.submitRating">Submit Rating</span>
                             </button>
                         </div>
                     </div>
@@ -255,18 +278,20 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
-                    <p class="mb-0">&copy; 2024 Publisher. All rights reserved.</p>
+                    <p class="mb-0" data-i18n="footer.copyright">&copy; 2024 Publisher. All rights reserved.</p>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <a href="../terms.html" class="text-light me-3">利用規約</a>
-                    <a href="../privacy.html" class="text-light me-3">プライバシーポリシー</a>
-                    <a href="faq.html" class="text-light">FAQ</a>
+                    <a href="../terms.html" class="text-light me-3" data-i18n="footer.terms">Terms</a>
+                    <a href="../privacy.html" class="text-light me-3" data-i18n="footer.privacy">Privacy</a>
+                    <a href="faq.html" class="text-light" data-i18n="support.faq.title">FAQ</a>
                 </div>
             </div>
         </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../js/translations.js"></script>
+    <script src="../../js/language-switcher.js"></script>
     <script>
         const API_BASE = 'http://localhost:3000/api';
         let tickets = [];
@@ -276,21 +301,35 @@
         // デモモード判定
         const isDemo = new URLSearchParams(window.location.search).get('demo') === 'true';
 
-        const statusLabels = {
-            'open': '新規', 'in_progress': '対応中', 'waiting_user': '返答待ち',
-            'waiting_admin': 'サポート対応待ち', 'resolved': '解決済み', 'closed': 'クローズ'
-        };
-        const categoryLabels = {
-            'account': 'アカウント', 'payment': 'お支払い', 'translation': '翻訳',
-            'technical': '技術的問題', 'copyright': '著作権', 'other': 'その他'
-        };
+        // Get translated status labels
+        function getStatusLabels() {
+            return {
+                'open': t('support.tickets.statuses.open'),
+                'in_progress': t('support.tickets.statuses.inProgress'),
+                'waiting_user': t('support.tickets.statuses.waitingUser'),
+                'waiting_admin': t('support.tickets.statuses.waitingAdmin'),
+                'resolved': t('support.tickets.statuses.resolved'),
+                'closed': t('support.tickets.statuses.closed')
+            };
+        }
+        
+        function getCategoryLabels() {
+            return {
+                'account': t('support.tickets.categories.account'),
+                'payment': t('support.tickets.categories.payment'),
+                'translation': t('support.tickets.categories.translation'),
+                'technical': t('support.tickets.categories.technical'),
+                'copyright': t('support.tickets.categories.copyright'),
+                'other': t('support.tickets.categories.other')
+            };
+        }
         
         // デモ用チケットデータ
         const DEMO_TICKETS = [
             {
                 id: 1,
                 ticket_number: 'TKT-20241201-0001',
-                subject: '翻訳の品質について',
+                subject: 'Translation quality question',
                 category: 'translation',
                 status: 'in_progress',
                 unread_count: 1,
@@ -300,7 +339,7 @@
             {
                 id: 2,
                 ticket_number: 'TKT-20241128-0002',
-                subject: '支払い方法の変更について',
+                subject: 'Payment method change',
                 category: 'payment',
                 status: 'resolved',
                 unread_count: 0,
@@ -310,7 +349,7 @@
             {
                 id: 3,
                 ticket_number: 'TKT-20241125-0003',
-                subject: 'アカウント設定が保存されない',
+                subject: 'Account settings not saving',
                 category: 'technical',
                 status: 'closed',
                 unread_count: 0,
@@ -325,10 +364,15 @@
             setupModal();
         });
 
+        // Re-render tickets when language changes
+        document.addEventListener('languageChanged', function() {
+            renderTickets();
+        });
+
         async function checkAuth() {
             // デモモードの場合はログインチェックをスキップ
             if (isDemo) {
-                updateAuthNav({ display_name: 'デモユーザー', email: 'demo@example.com' });
+                updateAuthNav({ display_name: 'Demo User', email: 'demo@example.com' });
                 loadTickets();
                 return;
             }
@@ -343,7 +387,7 @@
                 updateAuthNav(data.user);
                 loadTickets();
             } catch (error) {
-                console.error('認証エラー:', error);
+                console.error('Auth error:', error);
                 window.location.href = '../login.html?redirect=/pages/support/tickets.html';
             }
         }
@@ -356,10 +400,10 @@
                         <i class="bi bi-person-circle"></i> ${user.display_name || user.email}
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="../dashboard.html">ダッシュボード</a></li>
-                        <li><a class="dropdown-item active" href="tickets.html">お問い合わせ履歴</a></li>
+                        <li><a class="dropdown-item" href="../dashboard.html" data-i18n="nav.dashboard">Dashboard</a></li>
+                        <li><a class="dropdown-item active" href="tickets.html" data-i18n="support.tickets.title">Support Tickets</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" onclick="logout()">ログアウト</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="logout()" data-i18n="nav.logout">Logout</a></li>
                     </ul>
                 </li>
             `;
@@ -399,18 +443,20 @@
                     }
                     renderTickets();
                 } else {
-                    alert(data.error || 'チケットの取得に失敗しました');
+                    alert(data.error || t('support.tickets.loadError'));
                 }
             } catch (error) {
-                console.error('チケット取得エラー:', error);
+                console.error('Ticket load error:', error);
                 document.getElementById('loading').style.display = 'none';
-                alert('チケットの取得に失敗しました');
+                alert(t('support.tickets.loadError'));
             }
         }
 
         function renderTickets() {
             const container = document.getElementById('ticketList');
             const emptyState = document.getElementById('emptyState');
+            const statusLabels = getStatusLabels();
+            const categoryLabels = getCategoryLabels();
 
             if (tickets.length === 0) {
                 container.innerHTML = '';
@@ -426,14 +472,14 @@
                             <div>
                                 <span class="ticket-number">${ticket.ticket_number}</span>
                                 <span class="badge bg-light text-dark ms-2">${categoryLabels[ticket.category] || ticket.category}</span>
-                                ${ticket.unread_count > 0 ? `<span class="badge bg-danger ms-2">${ticket.unread_count}件の未読</span>` : ''}
+                                ${ticket.unread_count > 0 ? `<span class="badge bg-danger ms-2">${ticket.unread_count} ${t('support.tickets.unread')}</span>` : ''}
                             </div>
                             <span class="status-badge status-${ticket.status}">${statusLabels[ticket.status] || ticket.status}</span>
                         </div>
                         <h5 class="mt-2 mb-1">${escapeHtml(ticket.subject)}</h5>
                         <p class="text-muted small mb-0">
                             ${formatDate(ticket.created_at)}
-                            ${ticket.last_message_at !== ticket.created_at ? ` · 最終更新: ${formatDate(ticket.last_message_at)}` : ''}
+                            ${ticket.last_message_at !== ticket.created_at ? ` · ${t('support.tickets.lastUpdate')}: ${formatDate(ticket.last_message_at)}` : ''}
                         </p>
                     </div>
                 </div>
@@ -459,13 +505,15 @@
         }
 
         async function openTicket(ticketId) {
+            const statusLabels = getStatusLabels();
+            
             // デモモードの場合
             if (isDemo) {
                 const ticket = DEMO_TICKETS.find(t => t.id === ticketId);
                 if (ticket) {
                     const demoMessages = [
-                        { sender_type: 'user', message: 'お問い合わせ内容です。\n詳細をお知らせください。', created_at: ticket.created_at },
-                        { sender_type: 'admin', message: 'お問い合わせありがとうございます。\n確認いたします。', created_at: new Date(Date.parse(ticket.created_at) + 60 * 60 * 1000).toISOString() }
+                        { sender_type: 'user', message: 'This is my inquiry.\nPlease provide more details.', created_at: ticket.created_at },
+                        { sender_type: 'admin', message: 'Thank you for your inquiry.\nWe will look into it.', created_at: new Date(Date.parse(ticket.created_at) + 60 * 60 * 1000).toISOString() }
                     ];
                     currentTicket = ticket;
                     showTicketModal(ticket, demoMessages);
@@ -480,27 +528,29 @@
                     currentTicket = data.ticket;
                     showTicketModal(data.ticket, data.messages);
                 } else {
-                    alert(data.error || 'チケットの取得に失敗しました');
+                    alert(data.error || t('support.tickets.loadError'));
                 }
             } catch (error) {
-                console.error('チケット詳細取得エラー:', error);
-                alert('チケットの取得に失敗しました');
+                console.error('Ticket detail error:', error);
+                alert(t('support.tickets.loadError'));
             }
         }
 
         function showTicketModal(ticket, messages) {
+            const statusLabels = getStatusLabels();
+            
             document.getElementById('modalTicketSubject').textContent = ticket.subject;
             document.getElementById('modalTicketNumber').textContent = ticket.ticket_number;
             document.getElementById('modalTicketStatus').textContent = statusLabels[ticket.status] || ticket.status;
             document.getElementById('modalTicketStatus').className = `status-badge status-${ticket.status}`;
-            document.getElementById('modalTicketDate').textContent = `作成: ${formatDate(ticket.created_at)}`;
+            document.getElementById('modalTicketDate').textContent = `${t('support.tickets.created')}: ${formatDate(ticket.created_at)}`;
 
             const messageList = document.getElementById('messageList');
             messageList.innerHTML = messages.map(msg => `
                 <div class="message-item ${msg.sender_type}">
                     <div class="message-bubble">${escapeHtml(msg.message).replace(/\n/g, '<br>')}</div>
                     <div class="message-meta ${msg.sender_type === 'user' ? 'text-end' : ''}">
-                        ${msg.sender_type === 'admin' ? '<i class="bi bi-headset"></i> サポート · ' : ''}
+                        ${msg.sender_type === 'admin' ? '<i class="bi bi-headset"></i> ' + t('support.tickets.supportTeam') + ' · ' : ''}
                         ${msg.sender_type === 'system' ? '' : formatDateTime(msg.created_at)}
                     </div>
                 </div>
@@ -509,7 +559,7 @@
 
             const actionsContainer = document.getElementById('ticketActions');
             actionsContainer.innerHTML = ticket.status !== 'closed' ? 
-                `<button class="btn btn-outline-secondary btn-sm" onclick="closeTicket()"><i class="bi bi-x-lg"></i> クローズ</button>` : '';
+                `<button class="btn btn-outline-secondary btn-sm" onclick="closeTicket()"><i class="bi bi-x-lg"></i> ${t('support.tickets.close')}</button>` : '';
 
             document.getElementById('replyForm').style.display = ticket.status === 'closed' ? 'none' : 'block';
             document.getElementById('ratingForm').style.display = (ticket.status === 'resolved' || ticket.status === 'closed') ? 'block' : 'none';
@@ -519,11 +569,11 @@
 
         async function sendReply() {
             const message = document.getElementById('replyMessage').value.trim();
-            if (!message) { alert('メッセージを入力してください'); return; }
+            if (!message) { alert(t('support.tickets.enterMessage')); return; }
 
             // デモモードの場合
             if (isDemo) {
-                alert('デモモードでは送信できません');
+                alert(t('support.tickets.demoModeMessage'));
                 return;
             }
 
@@ -543,23 +593,23 @@
                     await openTicket(currentTicket.id);
                     loadTickets();
                 } else {
-                    alert(data.error || '送信に失敗しました');
+                    alert(data.error || t('support.tickets.sendError'));
                 }
             } catch (error) {
-                console.error('返信エラー:', error);
-                alert('送信に失敗しました');
+                console.error('Reply error:', error);
+                alert(t('support.tickets.sendError'));
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="bi bi-send"></i> 送信';
+                btn.innerHTML = '<i class="bi bi-send"></i> ' + t('support.tickets.send');
             }
         }
 
         async function closeTicket() {
-            if (!confirm('このチケットをクローズしますか？')) return;
+            if (!confirm(t('support.tickets.closeConfirm'))) return;
             
             // デモモードの場合
             if (isDemo) {
-                alert('デモモードでは操作できません');
+                alert(t('support.tickets.demoModeMessage'));
                 return;
             }
             
@@ -571,13 +621,13 @@
                 if (data.success) {
                     bootstrap.Modal.getInstance(document.getElementById('ticketModal')).hide();
                     loadTickets();
-                    alert('チケットをクローズしました');
+                    alert(t('support.tickets.closedSuccess'));
                 } else {
-                    alert(data.error || 'クローズに失敗しました');
+                    alert(data.error || t('support.tickets.closeError'));
                 }
             } catch (error) {
-                console.error('クローズエラー:', error);
-                alert('クローズに失敗しました');
+                console.error('Close error:', error);
+                alert(t('support.tickets.closeError'));
             }
         }
 
@@ -594,11 +644,11 @@
         }
 
         async function submitRating() {
-            if (selectedRating === 0) { alert('評価を選択してください'); return; }
+            if (selectedRating === 0) { alert(t('support.tickets.selectRating')); return; }
             
             // デモモードの場合
             if (isDemo) {
-                alert('デモモードでは操作できません');
+                alert(t('support.tickets.demoModeMessage'));
                 return;
             }
             
@@ -614,20 +664,20 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    alert('評価ありがとうございます！');
+                    alert(t('support.tickets.ratingThanks'));
                     document.getElementById('ratingForm').innerHTML = `
                         <div class="text-center text-success">
                             <i class="bi bi-check-circle" style="font-size: 2rem;"></i>
-                            <p class="mt-2 mb-0">評価を送信しました</p>
+                            <p class="mt-2 mb-0">${t('support.tickets.ratingSubmitted')}</p>
                         </div>
                     `;
                 } else {
-                    alert(data.error || '評価の送信に失敗しました');
+                    alert(data.error || t('support.tickets.ratingError'));
                     btn.disabled = false;
                 }
             } catch (error) {
-                console.error('評価エラー:', error);
-                alert('評価の送信に失敗しました');
+                console.error('Rating error:', error);
+                alert(t('support.tickets.ratingError'));
                 btn.disabled = false;
             }
         }
@@ -639,11 +689,15 @@
         }
 
         function formatDate(dateStr) {
-            return new Date(dateStr).toLocaleDateString('ja-JP', { year: 'numeric', month: 'short', day: 'numeric' });
+            const lang = getCurrentLanguage();
+            const locale = lang === 'ja' ? 'ja-JP' : lang === 'zh' ? 'zh-CN' : lang === 'ko' ? 'ko-KR' : lang === 'ar' ? 'ar-SA' : 'en-US';
+            return new Date(dateStr).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' });
         }
 
         function formatDateTime(dateStr) {
-            return new Date(dateStr).toLocaleString('ja-JP', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            const lang = getCurrentLanguage();
+            const locale = lang === 'ja' ? 'ja-JP' : lang === 'zh' ? 'zh-CN' : lang === 'ko' ? 'ko-KR' : lang === 'ar' ? 'ar-SA' : 'en-US';
+            return new Date(dateStr).toLocaleString(locale, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
         }
 
         async function logout() {
@@ -651,7 +705,7 @@
                 await fetch(`${API_BASE}/auth/logout`, { method: 'POST', credentials: 'include' });
                 window.location.href = '../login.html';
             } catch (error) {
-                console.error('ログアウトエラー:', error);
+                console.error('Logout error:', error);
             }
         }
     </script>
