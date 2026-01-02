@@ -324,12 +324,12 @@
             };
         }
         
-        // デモ用チケットデータ
-        const DEMO_TICKETS = [
+        // デモ用チケットデータ（subjectKeyを使用して翻訳キーを保存）
+        const DEMO_TICKETS_DATA = [
             {
                 id: 1,
                 ticket_number: 'TKT-20241201-0001',
-                subject: 'Translation quality question',
+                subjectKey: 'translationQuality',
                 category: 'translation',
                 status: 'in_progress',
                 unread_count: 1,
@@ -339,7 +339,7 @@
             {
                 id: 2,
                 ticket_number: 'TKT-20241128-0002',
-                subject: 'Payment method change',
+                subjectKey: 'paymentChange',
                 category: 'payment',
                 status: 'resolved',
                 unread_count: 0,
@@ -349,7 +349,7 @@
             {
                 id: 3,
                 ticket_number: 'TKT-20241125-0003',
-                subject: 'Account settings not saving',
+                subjectKey: 'accountSettings',
                 category: 'technical',
                 status: 'closed',
                 unread_count: 0,
@@ -357,6 +357,14 @@
                 last_message_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
             }
         ];
+
+        // デモチケットを翻訳されたsubjectで返す
+        function getDemoTickets() {
+            return DEMO_TICKETS_DATA.map(ticket => ({
+                ...ticket,
+                subject: t(`support.tickets.demo.${ticket.subjectKey}`)
+            }));
+        }
 
         document.addEventListener('DOMContentLoaded', function() {
             checkAuth();
@@ -413,7 +421,7 @@
             // デモモードの場合
             if (isDemo) {
                 document.getElementById('loading').style.display = 'none';
-                tickets = [...DEMO_TICKETS];
+                tickets = getDemoTickets();
                 
                 const status = document.getElementById('statusFilter').value;
                 if (status !== 'all') {
@@ -509,7 +517,8 @@
             
             // デモモードの場合
             if (isDemo) {
-                const ticket = DEMO_TICKETS.find(t => t.id === ticketId);
+                const demoTickets = getDemoTickets();
+                const ticket = demoTickets.find(t => t.id === ticketId);
                 if (ticket) {
                     const demoMessages = [
                         { sender_type: 'user', message: 'This is my inquiry.\nPlease provide more details.', created_at: ticket.created_at },
