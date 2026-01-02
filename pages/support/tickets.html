@@ -454,7 +454,7 @@
             syncLanguageSelectors();
         });
 
-        // Re-render tickets when language changes
+        // Re-load tickets when language changes (to get new translations for demo mode)
         document.addEventListener('languageChanged', function(e) {
             const lang = e.detail.language || e.detail.lang;
             if (lang) {
@@ -462,6 +462,10 @@
                 const mobileSelector = document.getElementById('languageSelectorMobile');
                 if (desktopSelector) desktopSelector.value = lang;
                 if (mobileSelector) mobileSelector.value = lang;
+            }
+            // For demo mode, reload tickets to get fresh translations
+            if (isDemo) {
+                tickets = getDemoTickets();
             }
             renderTickets();
         });
