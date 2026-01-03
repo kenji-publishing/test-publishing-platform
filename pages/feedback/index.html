@@ -1,198 +1,87 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>翻訳フィードバック - Publisher</title>
+    <title>Translation Feedback - Publisher</title>
     
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
-    <!-- Custom Styles -->
     <link href="../../css/style-new.css" rel="stylesheet">
     
     <style>
-        .page-header {
-            background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
-            color: white;
-            padding: var(--spacing-xl) 0;
-            margin-bottom: var(--spacing-xl);
-        }
+        .navbar-lang-selector { display: flex; align-items: center; margin-right: 0.5rem; }
+        @media (max-width: 991.98px) { .navbar-lang-selector { order: 1; } .navbar-toggler { order: 2; } }
+        .page-header { background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%); color: white; padding: var(--spacing-xl) 0; margin-bottom: var(--spacing-xl); }
         .page-header h1 { color: white; font-size: var(--font-size-2xl); margin-bottom: var(--spacing-xs); }
         .page-header p { color: rgba(255,255,255,0.9); margin: 0; }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: var(--spacing-md);
-            margin-bottom: var(--spacing-xl);
-        }
-        .stat-card {
-            background: var(--color-bg-card);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-lg);
-            text-align: center;
-        }
-        .stat-card .stat-value {
-            font-family: var(--font-heading);
-            font-size: var(--font-size-2xl);
-            font-weight: 700;
-            color: var(--color-text-primary);
-        }
-        .stat-card .stat-label {
-            font-size: var(--font-size-sm);
-            color: var(--color-text-secondary);
-        }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--spacing-md); margin-bottom: var(--spacing-xl); }
+        .stat-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-lg); text-align: center; }
+        .stat-card .stat-value { font-family: var(--font-heading); font-size: var(--font-size-2xl); font-weight: 700; color: var(--color-text-primary); }
+        .stat-card .stat-label { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
         .stat-card.warning .stat-value { color: var(--color-warning); }
         .stat-card.success .stat-value { color: var(--color-success); }
-        
-        .feedback-card {
-            background: var(--color-bg-card);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-lg);
-            margin-bottom: var(--spacing-md);
-            transition: all var(--transition-fast);
-        }
-        .feedback-card:hover {
-            box-shadow: var(--shadow-md);
-        }
-        .feedback-card.high-priority {
-            border-left: 4px solid var(--color-warning);
-        }
-        
-        .feedback-text {
-            background: var(--color-bg-hover);
-            border-radius: var(--radius-md);
-            padding: var(--spacing-md);
-            margin: var(--spacing-md) 0;
-            font-family: var(--font-body);
-        }
-        .feedback-text .original {
-            color: var(--color-text-secondary);
-            font-size: var(--font-size-sm);
-            margin-bottom: var(--spacing-sm);
-        }
-        .feedback-text .translated {
-            color: var(--color-text-primary);
-            border-left: 3px solid var(--color-warning);
-            padding-left: var(--spacing-sm);
-        }
-        
-        .category-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: var(--radius-full);
-            font-size: var(--font-size-xs);
-            font-weight: 500;
-        }
+        .feedback-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-lg); margin-bottom: var(--spacing-md); transition: all var(--transition-fast); }
+        .feedback-card:hover { box-shadow: var(--shadow-md); }
+        .feedback-card.high-priority { border-left: 4px solid var(--color-warning); }
+        .feedback-text { background: var(--color-bg-hover); border-radius: var(--radius-md); padding: var(--spacing-md); margin: var(--spacing-md) 0; font-family: var(--font-body); }
+        .feedback-text .original { color: var(--color-text-secondary); font-size: var(--font-size-sm); margin-bottom: var(--spacing-sm); }
+        .feedback-text .translated { color: var(--color-text-primary); border-left: 3px solid var(--color-warning); padding-left: var(--spacing-sm); }
+        .category-badge { display: inline-block; padding: 4px 12px; border-radius: var(--radius-full); font-size: var(--font-size-xs); font-weight: 500; }
         .category-badge.mistranslation { background: rgba(231, 76, 60, 0.1); color: #e74c3c; }
         .category-badge.unnatural { background: rgba(241, 196, 15, 0.1); color: #f1c40f; }
         .category-badge.unclear { background: rgba(52, 152, 219, 0.1); color: #3498db; }
         .category-badge.typo { background: rgba(155, 89, 182, 0.1); color: #9b59b6; }
         .category-badge.cultural { background: rgba(230, 126, 34, 0.1); color: #e67e22; }
         .category-badge.other { background: rgba(149, 165, 166, 0.1); color: #95a5a6; }
-        
-        .status-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: var(--radius-full);
-            font-size: var(--font-size-xs);
-            font-weight: 500;
-        }
+        .status-badge { display: inline-block; padding: 4px 12px; border-radius: var(--radius-full); font-size: var(--font-size-xs); font-weight: 500; }
         .status-badge.pending { background: rgba(241, 196, 15, 0.1); color: #f1c40f; }
         .status-badge.reviewing { background: rgba(52, 152, 219, 0.1); color: #3498db; }
         .status-badge.accepted { background: rgba(46, 204, 113, 0.1); color: #2ecc71; }
         .status-badge.rejected { background: rgba(231, 76, 60, 0.1); color: #e74c3c; }
         .status-badge.fixed { background: rgba(46, 204, 113, 0.1); color: #2ecc71; }
-        
-        .agree-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 16px;
-            border-radius: var(--radius-full);
-            font-size: var(--font-size-sm);
-            cursor: pointer;
-            transition: all var(--transition-fast);
-            border: 1px solid var(--color-border);
-            background: var(--color-bg-card);
-            color: var(--color-text-secondary);
-        }
-        .agree-btn:hover {
-            border-color: var(--color-accent);
-            color: var(--color-accent);
-        }
-        .agree-btn.agreed {
-            background: rgba(139, 115, 85, 0.1);
-            border-color: var(--color-accent);
-            color: var(--color-accent);
-        }
-        .agree-btn .count {
-            font-weight: 600;
-        }
-        
-        .filter-bar {
-            background: var(--color-bg-card);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-md);
-            margin-bottom: var(--spacing-lg);
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: var(--spacing-2xl);
-            color: var(--color-text-secondary);
-        }
-        .empty-state i {
-            font-size: 4rem;
-            margin-bottom: var(--spacing-md);
-            opacity: 0.3;
-        }
-        
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
+        .agree-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 16px; border-radius: var(--radius-full); font-size: var(--font-size-sm); cursor: pointer; transition: all var(--transition-fast); border: 1px solid var(--color-border); background: var(--color-bg-card); color: var(--color-text-secondary); }
+        .agree-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
+        .agree-btn.agreed { background: rgba(139, 115, 85, 0.1); border-color: var(--color-accent); color: var(--color-accent); }
+        .agree-btn .count { font-weight: 600; }
+        .filter-bar { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-md); margin-bottom: var(--spacing-lg); }
+        .empty-state { text-align: center; padding: var(--spacing-2xl); color: var(--color-text-secondary); }
+        .empty-state i { font-size: 4rem; margin-bottom: var(--spacing-md); opacity: 0.3; }
+        @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="../../index.html">
-                <i class="fas fa-book-open"></i>
-                Publisher
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+            <a class="navbar-brand" href="../../index.html"><i class="fas fa-book-open"></i> Publisher</a>
+            <div class="navbar-lang-selector d-lg-none">
+                <select class="language-selector" id="languageSelectorMobile">
+                    <option value="en">🇬🇧 EN</option><option value="ja">🇯🇵 日本語</option><option value="zh">🇨🇳 中文</option><option value="es">🇪🇸 ES</option><option value="fr">🇫🇷 FR</option><option value="de">🇩🇪 DE</option><option value="ko">🇰🇷 한국어</option><option value="ar">🇸🇦 عربي</option><option value="pt">🇧🇷 PT</option>
+                </select>
+            </div>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link" href="../dashboard.html"><i class="fas fa-th-large me-1"></i>Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="../browse.html"><i class="fas fa-compass me-1"></i>Browse</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="index.html"><i class="fas fa-comments me-1"></i>フィードバック</a></li>
+                    <li class="nav-item"><a class="nav-link" href="../dashboard.html"><i class="fas fa-th-large me-1"></i><span id="navDashboard">Dashboard</span></a></li>
+                    <li class="nav-item"><a class="nav-link" href="../browse.html"><i class="fas fa-compass me-1"></i><span id="navBrowse">Browse</span></a></li>
+                    <li class="nav-item"><a class="nav-link active" href="index.html"><i class="fas fa-comments me-1"></i><span id="navFeedback">Feedback</span></a></li>
                 </ul>
                 <div class="d-flex align-items-center gap-3">
+                    <select class="language-selector d-none d-lg-block" id="languageSelector">
+                        <option value="en">🇬🇧 EN</option><option value="ja">🇯🇵 日本語</option><option value="zh">🇨🇳 中文</option><option value="es">🇪🇸 ES</option><option value="fr">🇫🇷 FR</option><option value="de">🇩🇪 DE</option><option value="ko">🇰🇷 한국어</option><option value="ar">🇸🇦 عربي</option><option value="pt">🇧🇷 PT</option>
+                    </select>
                     <div class="dropdown">
                         <button class="btn btn-soft-custom dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user-circle me-1"></i>
-                            <span id="userName">User</span>
+                            <i class="fas fa-user-circle me-1"></i><span id="userName">User</span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="../profile.html"><i class="fas fa-user me-2"></i>Profile</a></li>
-                            <li><a class="dropdown-item" href="../settings.html"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                            <li><a class="dropdown-item" href="../profile.html"><i class="fas fa-user me-2"></i><span id="menuProfile">Profile</span></a></li>
+                            <li><a class="dropdown-item" href="../settings.html"><i class="fas fa-cog me-2"></i><span id="menuSettings">Settings</span></a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Sign Out</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i><span id="menuSignOut">Sign Out</span></a></li>
                         </ul>
                     </div>
                 </div>
@@ -200,129 +89,118 @@
         </div>
     </nav>
 
-    <!-- Page Header -->
     <div class="page-header">
         <div class="container">
-            <h1><i class="fas fa-comments me-2"></i>翻訳フィードバック</h1>
-            <p>読者からの翻訳に関するフィードバックを確認・管理できます</p>
+            <h1><i class="fas fa-comments me-2"></i><span id="pageTitle">Translation Feedback</span></h1>
+            <p id="pageSubtitle">Review and manage translation feedback from readers</p>
         </div>
     </div>
 
     <div class="container mb-5">
-        <!-- Work Selection (for authors/translators) -->
         <div class="filter-bar">
             <div class="row align-items-center">
-                <div class="col-md-4">
-                    <label class="form-label mb-0">作品を選択</label>
-                </div>
+                <div class="col-md-4"><label class="form-label mb-0" id="labelSelectWork">Select Work</label></div>
                 <div class="col-md-8">
                     <select class="form-select" id="work-select" onchange="loadFeedback()">
-                        <option value="">作品を選択してください</option>
+                        <option value="" id="optSelectWork">Select a work</option>
                     </select>
                 </div>
             </div>
         </div>
 
-        <!-- Stats Grid -->
         <div class="stats-grid" id="stats-grid" style="display: none;">
             <div class="stat-card">
                 <div class="stat-value" id="stat-total">0</div>
-                <div class="stat-label">総フィードバック</div>
+                <div class="stat-label" id="labelTotalFeedback">Total Feedback</div>
             </div>
             <div class="stat-card warning">
                 <div class="stat-value" id="stat-priority">0</div>
-                <div class="stat-label">要対応（3件以上同意）</div>
+                <div class="stat-label" id="labelNeedsAction">Needs Action (3+ agrees)</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value" id="stat-pending">0</div>
-                <div class="stat-label">未対応</div>
+                <div class="stat-label" id="labelPending">Pending</div>
             </div>
             <div class="stat-card success">
                 <div class="stat-value" id="stat-fixed">0</div>
-                <div class="stat-label">修正済み</div>
+                <div class="stat-label" id="labelFixed">Fixed</div>
             </div>
         </div>
 
-        <!-- Filters -->
         <div class="filter-bar" id="filter-bar" style="display: none;">
             <div class="row g-3 align-items-center">
                 <div class="col-md-3">
                     <select class="form-select" id="filter-status" onchange="loadFeedback()">
-                        <option value="">すべてのステータス</option>
-                        <option value="pending">未対応</option>
-                        <option value="reviewing">確認中</option>
-                        <option value="accepted">承認済み</option>
-                        <option value="fixed">修正済み</option>
-                        <option value="rejected">却下</option>
+                        <option value="" id="optAllStatuses">All Statuses</option>
+                        <option value="pending" id="optPending">Pending</option>
+                        <option value="reviewing" id="optReviewing">Reviewing</option>
+                        <option value="accepted" id="optAccepted">Accepted</option>
+                        <option value="fixed" id="optFixed">Fixed</option>
+                        <option value="rejected" id="optRejected">Rejected</option>
                     </select>
                 </div>
                 <div class="col-md-3">
                     <select class="form-select" id="filter-category" onchange="loadFeedback()">
-                        <option value="">すべてのカテゴリ</option>
-                        <option value="mistranslation">誤訳</option>
-                        <option value="unnatural">不自然な表現</option>
-                        <option value="unclear">意味不明</option>
-                        <option value="typo">誤字・脱字</option>
-                        <option value="cultural">文化的な問題</option>
-                        <option value="other">その他</option>
+                        <option value="" id="optAllCategories">All Categories</option>
+                        <option value="mistranslation" id="optMistranslation">Mistranslation</option>
+                        <option value="unnatural" id="optUnnatural">Unnatural</option>
+                        <option value="unclear" id="optUnclear">Unclear</option>
+                        <option value="typo" id="optTypo">Typo</option>
+                        <option value="cultural" id="optCultural">Cultural Issue</option>
+                        <option value="other" id="optOther">Other</option>
                     </select>
                 </div>
                 <div class="col-md-3">
                     <select class="form-select" id="filter-sort" onchange="loadFeedback()">
-                        <option value="newest">新しい順</option>
-                        <option value="oldest">古い順</option>
-                        <option value="agrees">同意数順</option>
+                        <option value="newest" id="optNewest">Newest First</option>
+                        <option value="oldest" id="optOldest">Oldest First</option>
+                        <option value="agrees" id="optAgrees">Most Agrees</option>
                     </select>
                 </div>
                 <div class="col-md-3 text-end">
                     <button class="btn btn-soft-custom" onclick="resetFilters()">
-                        <i class="fas fa-redo me-1"></i>リセット
+                        <i class="fas fa-redo me-1"></i><span id="btnReset">Reset</span>
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Feedback List -->
         <div id="feedback-list"></div>
 
-        <!-- Empty State -->
         <div id="empty-state" class="empty-state" style="display: none;">
             <i class="fas fa-check-circle"></i>
-            <h4>フィードバックはありません</h4>
-            <p>この作品にはまだ翻訳フィードバックが報告されていません</p>
+            <h4 id="emptyTitle">No feedback</h4>
+            <p id="emptyDesc">No translation feedback has been reported for this work</p>
         </div>
 
-        <!-- Loading -->
         <div id="loading" class="text-center py-5" style="display: none;">
             <div class="spinner-border text-accent" role="status"></div>
         </div>
 
-        <!-- Pagination -->
         <div id="pagination" class="d-flex justify-content-center mt-4"></div>
     </div>
 
-    <!-- Feedback Detail Modal -->
     <div class="modal fade" id="feedbackModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-comment-alt me-2"></i>フィードバック詳細</h5>
+                    <h5 class="modal-title"><i class="fas fa-comment-alt me-2"></i><span id="modalTitle">Feedback Details</span></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" id="feedback-detail-content">
                     <div class="text-center py-4"><div class="spinner-border text-accent"></div></div>
                 </div>
                 <div class="modal-footer" id="feedback-modal-footer" style="display: none;">
-                    <button type="button" class="btn btn-soft-custom" data-bs-dismiss="modal">閉じる</button>
+                    <button type="button" class="btn btn-soft-custom" data-bs-dismiss="modal" id="btnClose">Close</button>
                     <div class="btn-group" id="resolve-buttons">
                         <button class="btn btn-outline-secondary" onclick="resolveFeedback('reviewing')">
-                            <i class="fas fa-eye me-1"></i>確認中
+                            <i class="fas fa-eye me-1"></i><span id="btnReviewing">Reviewing</span>
                         </button>
                         <button class="btn btn-outline-success" onclick="resolveFeedback('fixed')">
-                            <i class="fas fa-check me-1"></i>修正済み
+                            <i class="fas fa-check me-1"></i><span id="btnFixed">Fixed</span>
                         </button>
                         <button class="btn btn-outline-danger" onclick="resolveFeedback('rejected')">
-                            <i class="fas fa-times me-1"></i>却下
+                            <i class="fas fa-times me-1"></i><span id="btnRejected">Reject</span>
                         </button>
                     </div>
                 </div>
@@ -330,60 +208,182 @@
         </div>
     </div>
 
-    <!-- Footer -->
     <footer class="footer-custom">
         <div class="container">
             <div class="d-flex flex-wrap justify-content-between align-items-center">
                 <p class="small mb-0">&copy; 2024 Publisher. All rights reserved.</p>
                 <div class="d-flex gap-3">
-                    <a href="../help.html" class="text-secondary">Help</a>
-                    <a href="../legal/terms.html" class="text-secondary">Terms</a>
-                    <a href="../legal/privacy.html" class="text-secondary">Privacy</a>
+                    <a href="../support/faq.html" class="text-secondary" id="footerHelp">Help</a>
+                    <a href="../terms.html" class="text-secondary" id="footerTerms">Terms</a>
+                    <a href="../privacy.html" class="text-secondary" id="footerPrivacy">Privacy</a>
                 </div>
             </div>
         </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../js/translations.js"></script>
+    <script src="../../js/language-switcher.js"></script>
     <script>
         const API_BASE = 'http://localhost:3000/api';
-        let currentWorkId = null;
-        let currentFeedbackId = null;
-        let currentPage = 1;
-        
+        let currentWorkId = null, currentFeedbackId = null, currentPage = 1;
+
+        const uiText = {
+            pageTitle: { en: 'Translation Feedback', ja: '翻訳フィードバック', zh: '翻译反馈', es: 'Comentarios de traducción', fr: 'Retours de traduction', de: 'Übersetzungsfeedback', ko: '번역 피드백', ar: 'ملاحظات الترجمة', pt: 'Feedback de tradução' },
+            pageSubtitle: { en: 'Review and manage translation feedback from readers', ja: '読者からの翻訳に関するフィードバックを確認・管理できます', zh: '查看和管理读者的翻译反馈', es: 'Revisa y gestiona los comentarios de traducción de los lectores', fr: 'Consultez et gérez les retours de traduction des lecteurs', de: 'Überprüfen und verwalten Sie Übersetzungsfeedback von Lesern', ko: '독자들의 번역 피드백을 확인하고 관리하세요', ar: 'راجع وأدر ملاحظات الترجمة من القراء', pt: 'Revise e gerencie feedback de tradução dos leitores' },
+            navDashboard: { en: 'Dashboard', ja: 'ダッシュボード', zh: '仪表板', es: 'Panel', fr: 'Tableau de bord', de: 'Dashboard', ko: '대시보드', ar: 'لوحة التحكم', pt: 'Painel' },
+            navBrowse: { en: 'Browse', ja: '作品を探す', zh: '浏览', es: 'Explorar', fr: 'Parcourir', de: 'Durchsuchen', ko: '둘러보기', ar: 'تصفح', pt: 'Explorar' },
+            navFeedback: { en: 'Feedback', ja: 'フィードバック', zh: '反馈', es: 'Comentarios', fr: 'Retours', de: 'Feedback', ko: '피드백', ar: 'ملاحظات', pt: 'Feedback' },
+            menuProfile: { en: 'Profile', ja: 'プロフィール', zh: '个人资料', es: 'Perfil', fr: 'Profil', de: 'Profil', ko: '프로필', ar: 'الملف الشخصي', pt: 'Perfil' },
+            menuSettings: { en: 'Settings', ja: '設定', zh: '设置', es: 'Configuración', fr: 'Paramètres', de: 'Einstellungen', ko: '설정', ar: 'الإعدادات', pt: 'Configurações' },
+            menuSignOut: { en: 'Sign Out', ja: 'ログアウト', zh: '退出', es: 'Cerrar sesión', fr: 'Déconnexion', de: 'Abmelden', ko: '로그아웃', ar: 'تسجيل الخروج', pt: 'Sair' },
+            labelSelectWork: { en: 'Select Work', ja: '作品を選択', zh: '选择作品', es: 'Seleccionar obra', fr: 'Sélectionner l\'œuvre', de: 'Werk auswählen', ko: '작품 선택', ar: 'اختر العمل', pt: 'Selecionar obra' },
+            optSelectWork: { en: 'Select a work', ja: '作品を選択してください', zh: '请选择作品', es: 'Seleccione una obra', fr: 'Sélectionnez une œuvre', de: 'Wählen Sie ein Werk', ko: '작품을 선택하세요', ar: 'اختر عملاً', pt: 'Selecione uma obra' },
+            labelTotalFeedback: { en: 'Total Feedback', ja: '総フィードバック', zh: '总反馈', es: 'Total de comentarios', fr: 'Total des retours', de: 'Gesamtfeedback', ko: '총 피드백', ar: 'إجمالي الملاحظات', pt: 'Total de feedback' },
+            labelNeedsAction: { en: 'Needs Action (3+ agrees)', ja: '要対応（3件以上同意）', zh: '需处理（3+同意）', es: 'Requiere acción (3+ acuerdos)', fr: 'Action requise (3+ accords)', de: 'Handlung erforderlich (3+ Zustimmungen)', ko: '조치 필요 (3+ 동의)', ar: 'يحتاج إجراء (3+ موافقات)', pt: 'Ação necessária (3+ concordâncias)' },
+            labelPending: { en: 'Pending', ja: '未対応', zh: '待处理', es: 'Pendiente', fr: 'En attente', de: 'Ausstehend', ko: '대기 중', ar: 'قيد الانتظار', pt: 'Pendente' },
+            labelFixed: { en: 'Fixed', ja: '修正済み', zh: '已修复', es: 'Corregido', fr: 'Corrigé', de: 'Behoben', ko: '수정됨', ar: 'تم الإصلاح', pt: 'Corrigido' },
+            optAllStatuses: { en: 'All Statuses', ja: 'すべてのステータス', zh: '所有状态', es: 'Todos los estados', fr: 'Tous les statuts', de: 'Alle Status', ko: '모든 상태', ar: 'جميع الحالات', pt: 'Todos os status' },
+            optPending: { en: 'Pending', ja: '未対応', zh: '待处理', es: 'Pendiente', fr: 'En attente', de: 'Ausstehend', ko: '대기 중', ar: 'قيد الانتظار', pt: 'Pendente' },
+            optReviewing: { en: 'Reviewing', ja: '確認中', zh: '审核中', es: 'Revisando', fr: 'En cours de révision', de: 'In Prüfung', ko: '검토 중', ar: 'قيد المراجعة', pt: 'Revisando' },
+            optAccepted: { en: 'Accepted', ja: '承認済み', zh: '已接受', es: 'Aceptado', fr: 'Accepté', de: 'Akzeptiert', ko: '승인됨', ar: 'مقبول', pt: 'Aceito' },
+            optFixed: { en: 'Fixed', ja: '修正済み', zh: '已修复', es: 'Corregido', fr: 'Corrigé', de: 'Behoben', ko: '수정됨', ar: 'تم الإصلاح', pt: 'Corrigido' },
+            optRejected: { en: 'Rejected', ja: '却下', zh: '已拒绝', es: 'Rechazado', fr: 'Rejeté', de: 'Abgelehnt', ko: '거부됨', ar: 'مرفوض', pt: 'Rejeitado' },
+            optAllCategories: { en: 'All Categories', ja: 'すべてのカテゴリ', zh: '所有类别', es: 'Todas las categorías', fr: 'Toutes les catégories', de: 'Alle Kategorien', ko: '모든 카테고리', ar: 'جميع الفئات', pt: 'Todas as categorias' },
+            optMistranslation: { en: 'Mistranslation', ja: '誤訳', zh: '误译', es: 'Error de traducción', fr: 'Erreur de traduction', de: 'Fehlübersetzung', ko: '오역', ar: 'خطأ ترجمة', pt: 'Erro de tradução' },
+            optUnnatural: { en: 'Unnatural', ja: '不自然な表現', zh: '不自然', es: 'Antinatural', fr: 'Non naturel', de: 'Unnatürlich', ko: '부자연스러움', ar: 'غير طبيعي', pt: 'Não natural' },
+            optUnclear: { en: 'Unclear', ja: '意味不明', zh: '不清楚', es: 'Confuso', fr: 'Pas clair', de: 'Unklar', ko: '불명확', ar: 'غير واضح', pt: 'Confuso' },
+            optTypo: { en: 'Typo', ja: '誤字・脱字', zh: '错别字', es: 'Error tipográfico', fr: 'Faute de frappe', de: 'Tippfehler', ko: '오타', ar: 'خطأ مطبعي', pt: 'Erro de digitação' },
+            optCultural: { en: 'Cultural Issue', ja: '文化的な問題', zh: '文化问题', es: 'Problema cultural', fr: 'Problème culturel', de: 'Kulturelles Problem', ko: '문화적 문제', ar: 'مشكلة ثقافية', pt: 'Problema cultural' },
+            optOther: { en: 'Other', ja: 'その他', zh: '其他', es: 'Otro', fr: 'Autre', de: 'Sonstiges', ko: '기타', ar: 'أخرى', pt: 'Outro' },
+            optNewest: { en: 'Newest First', ja: '新しい順', zh: '最新优先', es: 'Más recientes', fr: 'Plus récents', de: 'Neueste zuerst', ko: '최신순', ar: 'الأحدث أولاً', pt: 'Mais recentes' },
+            optOldest: { en: 'Oldest First', ja: '古い順', zh: '最旧优先', es: 'Más antiguos', fr: 'Plus anciens', de: 'Älteste zuerst', ko: '오래된순', ar: 'الأقدم أولاً', pt: 'Mais antigos' },
+            optAgrees: { en: 'Most Agrees', ja: '同意数順', zh: '最多同意', es: 'Más acuerdos', fr: 'Plus d\'accords', de: 'Meiste Zustimmungen', ko: '동의 많은순', ar: 'الأكثر موافقة', pt: 'Mais concordâncias' },
+            btnReset: { en: 'Reset', ja: 'リセット', zh: '重置', es: 'Restablecer', fr: 'Réinitialiser', de: 'Zurücksetzen', ko: '초기화', ar: 'إعادة تعيين', pt: 'Redefinir' },
+            emptyTitle: { en: 'No feedback', ja: 'フィードバックはありません', zh: '没有反馈', es: 'Sin comentarios', fr: 'Aucun retour', de: 'Kein Feedback', ko: '피드백 없음', ar: 'لا توجد ملاحظات', pt: 'Sem feedback' },
+            emptyDesc: { en: 'No translation feedback has been reported for this work', ja: 'この作品にはまだ翻訳フィードバックが報告されていません', zh: '此作品尚未收到翻译反馈', es: 'No se han reportado comentarios de traducción para esta obra', fr: 'Aucun retour de traduction n\'a été signalé pour cette œuvre', de: 'Für dieses Werk wurde kein Übersetzungsfeedback gemeldet', ko: '이 작품에 대한 번역 피드백이 없습니다', ar: 'لم يتم الإبلاغ عن ملاحظات ترجمة لهذا العمل', pt: 'Nenhum feedback de tradução foi reportado para esta obra' },
+            modalTitle: { en: 'Feedback Details', ja: 'フィードバック詳細', zh: '反馈详情', es: 'Detalles del comentario', fr: 'Détails du retour', de: 'Feedback-Details', ko: '피드백 상세', ar: 'تفاصيل الملاحظات', pt: 'Detalhes do feedback' },
+            btnClose: { en: 'Close', ja: '閉じる', zh: '关闭', es: 'Cerrar', fr: 'Fermer', de: 'Schließen', ko: '닫기', ar: 'إغلاق', pt: 'Fechar' },
+            btnReviewing: { en: 'Reviewing', ja: '確認中', zh: '审核中', es: 'Revisando', fr: 'En révision', de: 'In Prüfung', ko: '검토 중', ar: 'قيد المراجعة', pt: 'Revisando' },
+            btnFixed: { en: 'Fixed', ja: '修正済み', zh: '已修复', es: 'Corregido', fr: 'Corrigé', de: 'Behoben', ko: '수정됨', ar: 'تم الإصلاح', pt: 'Corrigido' },
+            btnRejected: { en: 'Reject', ja: '却下', zh: '拒绝', es: 'Rechazar', fr: 'Rejeter', de: 'Ablehnen', ko: '거부', ar: 'رفض', pt: 'Rejeitar' },
+            footerHelp: { en: 'Help', ja: 'ヘルプ', zh: '帮助', es: 'Ayuda', fr: 'Aide', de: 'Hilfe', ko: '도움말', ar: 'مساعدة', pt: 'Ajuda' },
+            footerTerms: { en: 'Terms', ja: '利用規約', zh: '条款', es: 'Términos', fr: 'Conditions', de: 'Bedingungen', ko: '약관', ar: 'الشروط', pt: 'Termos' },
+            footerPrivacy: { en: 'Privacy', ja: 'プライバシー', zh: '隐私', es: 'Privacidad', fr: 'Confidentialité', de: 'Datenschutz', ko: '개인정보', ar: 'الخصوصية', pt: 'Privacidade' },
+            agree: { en: 'Agree', ja: '同意', zh: '同意', es: 'De acuerdo', fr: 'D\'accord', de: 'Zustimmen', ko: '동의', ar: 'موافق', pt: 'Concordar' },
+            details: { en: 'Details', ja: '詳細', zh: '详情', es: 'Detalles', fr: 'Détails', de: 'Details', ko: '상세', ar: 'تفاصيل', pt: 'Detalhes' },
+            reporter: { en: 'Reporter', ja: '報告者', zh: '报告者', es: 'Reportador', fr: 'Rapporteur', de: 'Melder', ko: '보고자', ar: 'المُبلغ', pt: 'Relator' },
+            anonymous: { en: 'Anonymous', ja: '匿名', zh: '匿名', es: 'Anónimo', fr: 'Anonyme', de: 'Anonym', ko: '익명', ar: 'مجهول', pt: 'Anônimo' },
+            needsAction: { en: 'Needs Action', ja: '要対応', zh: '需处理', es: 'Requiere acción', fr: 'Action requise', de: 'Handlung erforderlich', ko: '조치 필요', ar: 'يحتاج إجراء', pt: 'Ação necessária' },
+            original: { en: 'Original', ja: '原文', zh: '原文', es: 'Original', fr: 'Original', de: 'Original', ko: '원문', ar: 'الأصل', pt: 'Original' },
+            loadFailed: { en: 'Failed to load feedback', ja: 'フィードバックの読み込みに失敗しました', zh: '加载反馈失败', es: 'Error al cargar comentarios', fr: 'Échec du chargement des retours', de: 'Feedback konnte nicht geladen werden', ko: '피드백 로드 실패', ar: 'فشل تحميل الملاحظات', pt: 'Falha ao carregar feedback' },
+            alertLogin: { en: 'Login required', ja: 'ログインが必要です', zh: '需要登录', es: 'Inicio de sesión requerido', fr: 'Connexion requise', de: 'Anmeldung erforderlich', ko: '로그인이 필요합니다', ar: 'تسجيل الدخول مطلوب', pt: 'Login necessário' },
+            alertError: { en: 'An error occurred', ja: 'エラーが発生しました', zh: '发生错误', es: 'Ocurrió un error', fr: 'Une erreur s\'est produite', de: 'Ein Fehler ist aufgetreten', ko: '오류가 발생했습니다', ar: 'حدث خطأ', pt: 'Ocorreu um erro' },
+            promptReject: { en: 'Enter rejection reason (optional):', ja: '却下理由を入力してください（任意）:', zh: '输入拒绝原因（可选）：', es: 'Ingrese el motivo del rechazo (opcional):', fr: 'Entrez la raison du rejet (optionnel) :', de: 'Geben Sie den Ablehnungsgrund ein (optional):', ko: '거부 사유를 입력하세요 (선택):', ar: 'أدخل سبب الرفض (اختياري):', pt: 'Digite o motivo da rejeição (opcional):' },
+            work: { en: 'Work', ja: '作品', zh: '作品', es: 'Obra', fr: 'Œuvre', de: 'Werk', ko: '작품', ar: 'العمل', pt: 'Obra' },
+            translation: { en: 'Translation', ja: '翻訳', zh: '翻译', es: 'Traducción', fr: 'Traduction', de: 'Übersetzung', ko: '번역', ar: 'الترجمة', pt: 'Tradução' },
+            description: { en: 'Description', ja: '説明', zh: '描述', es: 'Descripción', fr: 'Description', de: 'Beschreibung', ko: '설명', ar: 'الوصف', pt: 'Descrição' },
+            suggestion: { en: 'Suggested Correction', ja: '修正提案', zh: '建议修正', es: 'Corrección sugerida', fr: 'Correction suggérée', de: 'Korrekturvorschlag', ko: '수정 제안', ar: 'تصحيح مقترح', pt: 'Correção sugerida' },
+            reportedAt: { en: 'Reported', ja: '報告日時', zh: '报告时间', es: 'Reportado', fr: 'Signalé', de: 'Gemeldet', ko: '보고됨', ar: 'تم الإبلاغ', pt: 'Reportado' },
+            resolved: { en: 'Resolved', ja: '対応済み', zh: '已解决', es: 'Resuelto', fr: 'Résolu', de: 'Gelöst', ko: '해결됨', ar: 'تم الحل', pt: 'Resolvido' },
+            agreedBy: { en: 'agreed', ja: 'が同意', zh: '同意', es: 'de acuerdo', fr: 'd\'accord', de: 'zugestimmt', ko: '동의', ar: 'موافقون', pt: 'concordaram' }
+        };
+
         const CATEGORY_NAMES = {
-            'mistranslation': '誤訳',
-            'unnatural': '不自然な表現',
-            'unclear': '意味不明',
-            'typo': '誤字・脱字',
-            'cultural': '文化的な問題',
-            'other': 'その他'
+            mistranslation: { en: 'Mistranslation', ja: '誤訳', zh: '误译', es: 'Error de traducción', fr: 'Erreur de traduction', de: 'Fehlübersetzung', ko: '오역', ar: 'خطأ ترجمة', pt: 'Erro de tradução' },
+            unnatural: { en: 'Unnatural', ja: '不自然な表現', zh: '不自然', es: 'Antinatural', fr: 'Non naturel', de: 'Unnatürlich', ko: '부자연스러움', ar: 'غير طبيعي', pt: 'Não natural' },
+            unclear: { en: 'Unclear', ja: '意味不明', zh: '不清楚', es: 'Confuso', fr: 'Pas clair', de: 'Unklar', ko: '불명확', ar: 'غير واضح', pt: 'Confuso' },
+            typo: { en: 'Typo', ja: '誤字・脱字', zh: '错别字', es: 'Error tipográfico', fr: 'Faute de frappe', de: 'Tippfehler', ko: '오타', ar: 'خطأ مطبعي', pt: 'Erro de digitação' },
+            cultural: { en: 'Cultural Issue', ja: '文化的な問題', zh: '文化问题', es: 'Problema cultural', fr: 'Problème culturel', de: 'Kulturelles Problem', ko: '문화적 문제', ar: 'مشكلة ثقافية', pt: 'Problema cultural' },
+            other: { en: 'Other', ja: 'その他', zh: '其他', es: 'Otro', fr: 'Autre', de: 'Sonstiges', ko: '기타', ar: 'أخرى', pt: 'Outro' }
         };
-        
+
         const STATUS_NAMES = {
-            'pending': '未対応',
-            'reviewing': '確認中',
-            'accepted': '承認済み',
-            'rejected': '却下',
-            'fixed': '修正済み'
+            pending: { en: 'Pending', ja: '未対応', zh: '待处理', es: 'Pendiente', fr: 'En attente', de: 'Ausstehend', ko: '대기 중', ar: 'قيد الانتظار', pt: 'Pendente' },
+            reviewing: { en: 'Reviewing', ja: '確認中', zh: '审核中', es: 'Revisando', fr: 'En révision', de: 'In Prüfung', ko: '검토 중', ar: 'قيد المراجعة', pt: 'Revisando' },
+            accepted: { en: 'Accepted', ja: '承認済み', zh: '已接受', es: 'Aceptado', fr: 'Accepté', de: 'Akzeptiert', ko: '승인됨', ar: 'مقبول', pt: 'Aceito' },
+            rejected: { en: 'Rejected', ja: '却下', zh: '已拒绝', es: 'Rechazado', fr: 'Rejeté', de: 'Abgelehnt', ko: '거부됨', ar: 'مرفوض', pt: 'Rejeitado' },
+            fixed: { en: 'Fixed', ja: '修正済み', zh: '已修复', es: 'Corregido', fr: 'Corrigé', de: 'Behoben', ko: '수정됨', ar: 'تم الإصلاح', pt: 'Corrigido' }
         };
-        
-        // Load user's works on page load
+
+        function getCurrentLang() { return localStorage.getItem('preferredLanguage') || 'en'; }
+        function getL(obj) { if (!obj) return ''; const l = getCurrentLang(); return obj[l] || obj['en'] || ''; }
+        function getCatName(cat) { return CATEGORY_NAMES[cat] ? getL(CATEGORY_NAMES[cat]) : cat; }
+        function getStatusName(status) { return STATUS_NAMES[status] ? getL(STATUS_NAMES[status]) : status; }
+
+        function updateAllText() {
+            document.title = getL(uiText.pageTitle) + ' - Publisher';
+            document.getElementById('pageTitle').textContent = getL(uiText.pageTitle);
+            document.getElementById('pageSubtitle').textContent = getL(uiText.pageSubtitle);
+            document.getElementById('navDashboard').textContent = getL(uiText.navDashboard);
+            document.getElementById('navBrowse').textContent = getL(uiText.navBrowse);
+            document.getElementById('navFeedback').textContent = getL(uiText.navFeedback);
+            document.getElementById('menuProfile').textContent = getL(uiText.menuProfile);
+            document.getElementById('menuSettings').textContent = getL(uiText.menuSettings);
+            document.getElementById('menuSignOut').textContent = getL(uiText.menuSignOut);
+            document.getElementById('labelSelectWork').textContent = getL(uiText.labelSelectWork);
+            document.getElementById('optSelectWork').textContent = getL(uiText.optSelectWork);
+            document.getElementById('labelTotalFeedback').textContent = getL(uiText.labelTotalFeedback);
+            document.getElementById('labelNeedsAction').textContent = getL(uiText.labelNeedsAction);
+            document.getElementById('labelPending').textContent = getL(uiText.labelPending);
+            document.getElementById('labelFixed').textContent = getL(uiText.labelFixed);
+            document.getElementById('optAllStatuses').textContent = getL(uiText.optAllStatuses);
+            document.getElementById('optPending').textContent = getL(uiText.optPending);
+            document.getElementById('optReviewing').textContent = getL(uiText.optReviewing);
+            document.getElementById('optAccepted').textContent = getL(uiText.optAccepted);
+            document.getElementById('optFixed').textContent = getL(uiText.optFixed);
+            document.getElementById('optRejected').textContent = getL(uiText.optRejected);
+            document.getElementById('optAllCategories').textContent = getL(uiText.optAllCategories);
+            document.getElementById('optMistranslation').textContent = getL(uiText.optMistranslation);
+            document.getElementById('optUnnatural').textContent = getL(uiText.optUnnatural);
+            document.getElementById('optUnclear').textContent = getL(uiText.optUnclear);
+            document.getElementById('optTypo').textContent = getL(uiText.optTypo);
+            document.getElementById('optCultural').textContent = getL(uiText.optCultural);
+            document.getElementById('optOther').textContent = getL(uiText.optOther);
+            document.getElementById('optNewest').textContent = getL(uiText.optNewest);
+            document.getElementById('optOldest').textContent = getL(uiText.optOldest);
+            document.getElementById('optAgrees').textContent = getL(uiText.optAgrees);
+            document.getElementById('btnReset').textContent = getL(uiText.btnReset);
+            document.getElementById('emptyTitle').textContent = getL(uiText.emptyTitle);
+            document.getElementById('emptyDesc').textContent = getL(uiText.emptyDesc);
+            document.getElementById('modalTitle').textContent = getL(uiText.modalTitle);
+            document.getElementById('btnClose').textContent = getL(uiText.btnClose);
+            document.getElementById('btnReviewing').textContent = getL(uiText.btnReviewing);
+            document.getElementById('btnFixed').textContent = getL(uiText.btnFixed);
+            document.getElementById('btnRejected').textContent = getL(uiText.btnRejected);
+            document.getElementById('footerHelp').textContent = getL(uiText.footerHelp);
+            document.getElementById('footerTerms').textContent = getL(uiText.footerTerms);
+            document.getElementById('footerPrivacy').textContent = getL(uiText.footerPrivacy);
+        }
+
+        function syncSelectors() {
+            const d = document.getElementById('languageSelector'), m = document.getElementById('languageSelectorMobile'), l = getCurrentLang();
+            if (d) d.value = l; if (m) m.value = l;
+            if (m) m.addEventListener('change', function() { if (d) d.value = this.value; localStorage.setItem('preferredLanguage', this.value); updateAllText(); if (currentWorkId) loadFeedback(); });
+            if (d) d.addEventListener('change', function() { if (m) m.value = this.value; localStorage.setItem('preferredLanguage', this.value); updateAllText(); if (currentWorkId) loadFeedback(); });
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             const user = JSON.parse(localStorage.getItem('user') || '{}');
             if (user.firstName) document.getElementById('userName').textContent = user.firstName;
-            
+            syncSelectors();
+            updateAllText();
             await loadUserWorks();
         });
-        
+
+        document.addEventListener('languageChanged', function(e) {
+            const l = e.detail.language || e.detail.lang;
+            if (l) { const d = document.getElementById('languageSelector'), m = document.getElementById('languageSelectorMobile'); if (d) d.value = l; if (m) m.value = l; }
+            updateAllText();
+            if (currentWorkId) loadFeedback();
+        });
+
         async function loadUserWorks() {
             const userId = localStorage.getItem('userId');
             if (!userId) return;
-            
             try {
                 const response = await fetch(`${API_BASE}/works?author_id=${userId}`);
                 const data = await response.json();
-                
                 const select = document.getElementById('work-select');
                 if (data.works && data.works.length > 0) {
                     data.works.forEach(work => {
@@ -393,11 +393,9 @@
                         select.appendChild(option);
                     });
                 }
-            } catch (error) {
-                console.error('Failed to load works:', error);
-            }
+            } catch (error) { console.error('Failed to load works:', error); }
         }
-        
+
         async function loadFeedback(page = 1) {
             currentWorkId = document.getElementById('work-select').value;
             if (!currentWorkId) {
@@ -407,40 +405,24 @@
                 document.getElementById('empty-state').style.display = 'none';
                 return;
             }
-            
             currentPage = page;
             document.getElementById('loading').style.display = 'block';
             document.getElementById('feedback-list').innerHTML = '';
             document.getElementById('empty-state').style.display = 'none';
-            
-            // Load stats
             await loadStats();
-            
-            // Load feedback list
             const status = document.getElementById('filter-status').value;
             const category = document.getElementById('filter-category').value;
             const sort = document.getElementById('filter-sort').value;
-            
-            const params = new URLSearchParams({
-                status, category, sort,
-                page: page,
-                limit: 10
-            });
-            
+            const params = new URLSearchParams({ status, category, sort, page, limit: 10 });
             try {
                 const userId = localStorage.getItem('userId');
-                const response = await fetch(`${API_BASE}/feedback/work/${currentWorkId}?${params}`, {
-                    headers: userId ? { 'X-User-ID': userId } : {}
-                });
+                const response = await fetch(`${API_BASE}/feedback/work/${currentWorkId}?${params}`, { headers: userId ? { 'X-User-ID': userId } : {} });
                 const data = await response.json();
-                
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('stats-grid').style.display = 'grid';
                 document.getElementById('filter-bar').style.display = 'block';
-                
                 if (data.feedback && data.feedback.length > 0) {
-                    document.getElementById('feedback-list').innerHTML = 
-                        data.feedback.map(f => renderFeedbackCard(f)).join('');
+                    document.getElementById('feedback-list').innerHTML = data.feedback.map(f => renderFeedbackCard(f)).join('');
                     renderPagination(data.pagination);
                 } else {
                     document.getElementById('empty-state').style.display = 'block';
@@ -449,241 +431,141 @@
             } catch (error) {
                 console.error('Failed to load feedback:', error);
                 document.getElementById('loading').style.display = 'none';
-                document.getElementById('feedback-list').innerHTML = 
-                    '<div class="alert alert-danger">フィードバックの読み込みに失敗しました</div>';
+                document.getElementById('feedback-list').innerHTML = '<div class="alert alert-danger">' + getL(uiText.loadFailed) + '</div>';
             }
         }
-        
+
         async function loadStats() {
             try {
                 const response = await fetch(`${API_BASE}/feedback/stats/work/${currentWorkId}`);
                 const data = await response.json();
-                
                 document.getElementById('stat-total').textContent = data.total || 0;
                 document.getElementById('stat-priority').textContent = data.highPriority || 0;
                 document.getElementById('stat-pending').textContent = data.byStatus?.pending || 0;
                 document.getElementById('stat-fixed').textContent = data.byStatus?.fixed || 0;
-            } catch (error) {
-                console.error('Failed to load stats:', error);
-            }
+            } catch (error) { console.error('Failed to load stats:', error); }
         }
-        
+
         function renderFeedbackCard(feedback) {
             const isHighPriority = feedback.agree_count >= 3 && feedback.status === 'pending';
-            
             return `
                 <div class="feedback-card ${isHighPriority ? 'high-priority' : ''}">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div>
-                            <span class="category-badge ${feedback.category}">${CATEGORY_NAMES[feedback.category] || feedback.category}</span>
-                            <span class="status-badge ${feedback.status} ms-2">${STATUS_NAMES[feedback.status] || feedback.status}</span>
-                            ${isHighPriority ? '<span class="badge bg-warning text-dark ms-2"><i class="fas fa-exclamation-triangle me-1"></i>要対応</span>' : ''}
+                            <span class="category-badge ${feedback.category}">${getCatName(feedback.category)}</span>
+                            <span class="status-badge ${feedback.status} ms-2">${getStatusName(feedback.status)}</span>
+                            ${isHighPriority ? '<span class="badge bg-warning text-dark ms-2"><i class="fas fa-exclamation-triangle me-1"></i>' + getL(uiText.needsAction) + '</span>' : ''}
                         </div>
-                        <small class="text-secondary">${new Date(feedback.created_at).toLocaleDateString('ja-JP')}</small>
+                        <small class="text-secondary">${new Date(feedback.created_at).toLocaleDateString()}</small>
                     </div>
-                    
                     <div class="feedback-text">
-                        ${feedback.original_text ? `<div class="original"><i class="fas fa-file-alt me-1"></i>原文: ${escapeHtml(feedback.original_text)}</div>` : ''}
+                        ${feedback.original_text ? `<div class="original"><i class="fas fa-file-alt me-1"></i>${getL(uiText.original)}: ${escapeHtml(feedback.original_text)}</div>` : ''}
                         <div class="translated"><i class="fas fa-language me-1"></i>${escapeHtml(feedback.translated_text)}</div>
                     </div>
-                    
                     ${feedback.description ? `<p class="small text-secondary mb-2">${escapeHtml(feedback.description)}</p>` : ''}
-                    
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <button class="agree-btn ${feedback.hasUserAgreed ? 'agreed' : ''}" onclick="toggleAgree('${feedback.feedback_id}', this)">
-                                <i class="fas fa-thumbs-up"></i>
-                                <span class="count">${feedback.agree_count}</span>
-                                同意
+                                <i class="fas fa-thumbs-up"></i><span class="count">${feedback.agree_count}</span> ${getL(uiText.agree)}
                             </button>
-                            <small class="text-secondary ms-3">報告者: ${escapeHtml(feedback.reporter_name || '匿名')}</small>
+                            <small class="text-secondary ms-3">${getL(uiText.reporter)}: ${escapeHtml(feedback.reporter_name || getL(uiText.anonymous))}</small>
                         </div>
                         <button class="btn btn-soft-custom btn-sm" onclick="viewFeedbackDetail('${feedback.feedback_id}')">
-                            <i class="fas fa-expand me-1"></i>詳細
+                            <i class="fas fa-expand me-1"></i>${getL(uiText.details)}
                         </button>
                     </div>
                 </div>
             `;
         }
-        
+
         async function toggleAgree(feedbackId, btn) {
             const userId = localStorage.getItem('userId');
-            if (!userId) {
-                alert('ログインが必要です');
-                return;
-            }
-            
+            if (!userId) { alert(getL(uiText.alertLogin)); return; }
             const isAgreed = btn.classList.contains('agreed');
-            const method = isAgreed ? 'DELETE' : 'POST';
-            
             try {
-                const response = await fetch(`${API_BASE}/feedback/${feedbackId}/agree`, {
-                    method,
-                    headers: { 'X-User-ID': userId }
-                });
-                
+                const response = await fetch(`${API_BASE}/feedback/${feedbackId}/agree`, { method: isAgreed ? 'DELETE' : 'POST', headers: { 'X-User-ID': userId } });
                 const data = await response.json();
-                
-                if (response.ok) {
-                    btn.classList.toggle('agreed');
-                    btn.querySelector('.count').textContent = data.agreeCount;
-                } else {
-                    alert(data.error || '操作に失敗しました');
-                }
-            } catch (error) {
-                alert('エラーが発生しました');
-            }
+                if (response.ok) { btn.classList.toggle('agreed'); btn.querySelector('.count').textContent = data.agreeCount; }
+                else { alert(data.error || getL(uiText.alertError)); }
+            } catch (error) { alert(getL(uiText.alertError)); }
         }
-        
+
         async function viewFeedbackDetail(feedbackId) {
             currentFeedbackId = feedbackId;
             const modal = new bootstrap.Modal(document.getElementById('feedbackModal'));
             const content = document.getElementById('feedback-detail-content');
             const footer = document.getElementById('feedback-modal-footer');
-            
             content.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-accent"></div></div>';
             footer.style.display = 'none';
             modal.show();
-            
             try {
                 const userId = localStorage.getItem('userId');
-                const response = await fetch(`${API_BASE}/feedback/${feedbackId}`, {
-                    headers: userId ? { 'X-User-ID': userId } : {}
-                });
+                const response = await fetch(`${API_BASE}/feedback/${feedbackId}`, { headers: userId ? { 'X-User-ID': userId } : {} });
                 const data = await response.json();
                 const f = data.feedback;
-                
                 content.innerHTML = `
-                    <div class="mb-4">
-                        <span class="category-badge ${f.category}">${CATEGORY_NAMES[f.category]}</span>
-                        <span class="status-badge ${f.status} ms-2">${STATUS_NAMES[f.status]}</span>
-                    </div>
-                    
-                    <h6>作品</h6>
-                    <p>${escapeHtml(f.work_title)}${f.chapter_title ? ` - ${escapeHtml(f.chapter_title)}` : ''}</p>
-                    
-                    <h6>問題の翻訳</h6>
+                    <div class="mb-4"><span class="category-badge ${f.category}">${getCatName(f.category)}</span><span class="status-badge ${f.status} ms-2">${getStatusName(f.status)}</span></div>
+                    <h6>${getL(uiText.work)}</h6><p>${escapeHtml(f.work_title)}${f.chapter_title ? ` - ${escapeHtml(f.chapter_title)}` : ''}</p>
+                    <h6>${getL(uiText.translation)}</h6>
                     <div class="feedback-text">
-                        ${f.original_text ? `<div class="original"><strong>原文:</strong> ${escapeHtml(f.original_text)}</div>` : ''}
-                        <div class="translated"><strong>翻訳:</strong> ${escapeHtml(f.translated_text)}</div>
+                        ${f.original_text ? `<div class="original"><strong>${getL(uiText.original)}:</strong> ${escapeHtml(f.original_text)}</div>` : ''}
+                        <div class="translated"><strong>${getL(uiText.translation)}:</strong> ${escapeHtml(f.translated_text)}</div>
                     </div>
-                    
-                    ${f.description ? `<h6>説明</h6><p>${escapeHtml(f.description)}</p>` : ''}
-                    ${f.suggested_correction ? `<h6>修正提案</h6><p class="text-success">${escapeHtml(f.suggested_correction)}</p>` : ''}
-                    
-                    <div class="row mt-4">
-                        <div class="col-6">
-                            <h6>報告者</h6>
-                            <p>${escapeHtml(f.reporter_name || '匿名')}</p>
-                        </div>
-                        <div class="col-6">
-                            <h6>報告日時</h6>
-                            <p>${new Date(f.created_at).toLocaleString('ja-JP')}</p>
-                        </div>
-                    </div>
-                    
+                    ${f.description ? `<h6>${getL(uiText.description)}</h6><p>${escapeHtml(f.description)}</p>` : ''}
+                    ${f.suggested_correction ? `<h6>${getL(uiText.suggestion)}</h6><p class="text-success">${escapeHtml(f.suggested_correction)}</p>` : ''}
+                    <div class="row mt-4"><div class="col-6"><h6>${getL(uiText.reporter)}</h6><p>${escapeHtml(f.reporter_name || getL(uiText.anonymous))}</p></div><div class="col-6"><h6>${getL(uiText.reportedAt)}</h6><p>${new Date(f.created_at).toLocaleString()}</p></div></div>
                     <div class="d-flex align-items-center mt-3">
-                        <button class="agree-btn ${f.hasUserAgreed ? 'agreed' : ''}" onclick="toggleAgree('${f.feedback_id}', this)">
-                            <i class="fas fa-thumbs-up"></i>
-                            <span class="count">${f.agree_count}</span>
-                            同意
-                        </button>
-                        <span class="text-secondary ms-3">${f.agreers?.length > 0 ? f.agreers.map(a => a.pen_name).join(', ') + 'が同意' : ''}</span>
+                        <button class="agree-btn ${f.hasUserAgreed ? 'agreed' : ''}" onclick="toggleAgree('${f.feedback_id}', this)"><i class="fas fa-thumbs-up"></i><span class="count">${f.agree_count}</span> ${getL(uiText.agree)}</button>
+                        <span class="text-secondary ms-3">${f.agreers?.length > 0 ? f.agreers.map(a => a.pen_name).join(', ') + ' ' + getL(uiText.agreedBy) : ''}</span>
                     </div>
-                    
-                    ${f.resolved_by ? `
-                        <div class="alert alert-info mt-4">
-                            <strong>対応済み:</strong> ${escapeHtml(f.resolver_name)} (${new Date(f.resolved_at).toLocaleString('ja-JP')})
-                            ${f.resolution_note ? `<br><small>${escapeHtml(f.resolution_note)}</small>` : ''}
-                        </div>
-                    ` : ''}
+                    ${f.resolved_by ? `<div class="alert alert-info mt-4"><strong>${getL(uiText.resolved)}:</strong> ${escapeHtml(f.resolver_name)} (${new Date(f.resolved_at).toLocaleString()})${f.resolution_note ? `<br><small>${escapeHtml(f.resolution_note)}</small>` : ''}</div>` : ''}
                 `;
-                
-                // Show resolve buttons for author/translator
-                if (f.status === 'pending' || f.status === 'reviewing') {
-                    footer.style.display = 'flex';
-                }
-                
-            } catch (error) {
-                content.innerHTML = '<div class="alert alert-danger">詳細の読み込みに失敗しました</div>';
-            }
+                if (f.status === 'pending' || f.status === 'reviewing') footer.style.display = 'flex';
+            } catch (error) { content.innerHTML = '<div class="alert alert-danger">' + getL(uiText.loadFailed) + '</div>'; }
         }
-        
+
         async function resolveFeedback(status) {
             const userId = localStorage.getItem('userId');
             if (!userId || !currentFeedbackId) return;
-            
-            const note = status === 'rejected' ? prompt('却下理由を入力してください（任意）:') : null;
-            
+            const note = status === 'rejected' ? prompt(getL(uiText.promptReject)) : null;
             try {
                 const response = await fetch(`${API_BASE}/feedback/${currentFeedbackId}/resolve`, {
                     method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-User-ID': userId
-                    },
+                    headers: { 'Content-Type': 'application/json', 'X-User-ID': userId },
                     body: JSON.stringify({ status, resolutionNote: note })
                 });
-                
-                if (response.ok) {
-                    bootstrap.Modal.getInstance(document.getElementById('feedbackModal')).hide();
-                    loadFeedback(currentPage);
-                } else {
-                    const data = await response.json();
-                    alert(data.error || '操作に失敗しました');
-                }
-            } catch (error) {
-                alert('エラーが発生しました');
-            }
+                if (response.ok) { bootstrap.Modal.getInstance(document.getElementById('feedbackModal')).hide(); loadFeedback(currentPage); }
+                else { const data = await response.json(); alert(data.error || getL(uiText.alertError)); }
+            } catch (error) { alert(getL(uiText.alertError)); }
         }
-        
+
         function renderPagination(pagination) {
             const container = document.getElementById('pagination');
-            if (pagination.totalPages <= 1) {
-                container.innerHTML = '';
-                return;
-            }
-            
+            if (pagination.totalPages <= 1) { container.innerHTML = ''; return; }
             let html = '<nav><ul class="pagination">';
-            html += `<li class="page-item ${pagination.page === 1 ? 'disabled' : ''}">
-                <a class="page-link" href="#" onclick="loadFeedback(${pagination.page - 1})">&laquo;</a></li>`;
-            
+            html += `<li class="page-item ${pagination.page === 1 ? 'disabled' : ''}"><a class="page-link" href="#" onclick="loadFeedback(${pagination.page - 1})">&laquo;</a></li>`;
             for (let i = 1; i <= pagination.totalPages; i++) {
                 if (i === 1 || i === pagination.totalPages || (i >= pagination.page - 2 && i <= pagination.page + 2)) {
-                    html += `<li class="page-item ${i === pagination.page ? 'active' : ''}">
-                        <a class="page-link" href="#" onclick="loadFeedback(${i})">${i}</a></li>`;
+                    html += `<li class="page-item ${i === pagination.page ? 'active' : ''}"><a class="page-link" href="#" onclick="loadFeedback(${i})">${i}</a></li>`;
                 } else if (i === pagination.page - 3 || i === pagination.page + 3) {
                     html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
                 }
             }
-            
-            html += `<li class="page-item ${pagination.page === pagination.totalPages ? 'disabled' : ''}">
-                <a class="page-link" href="#" onclick="loadFeedback(${pagination.page + 1})">&raquo;</a></li>`;
+            html += `<li class="page-item ${pagination.page === pagination.totalPages ? 'disabled' : ''}"><a class="page-link" href="#" onclick="loadFeedback(${pagination.page + 1})">&raquo;</a></li>`;
             html += '</ul></nav>';
             container.innerHTML = html;
         }
-        
+
         function resetFilters() {
             document.getElementById('filter-status').value = '';
             document.getElementById('filter-category').value = '';
             document.getElementById('filter-sort').value = 'newest';
             loadFeedback();
         }
-        
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-        
-        function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = '../login.html';
-        }
+
+        function escapeHtml(text) { if (!text) return ''; const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
+        function logout() { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = '../login.html'; }
     </script>
-    <!-- Notification Badge -->
     <script src="../../js/header-notification.js"></script>
 </body>
 </html>
