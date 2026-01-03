@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title data-i18n="pageTitle">Reader - Publisher</title>
+    <title>Reader - Publisher</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -73,6 +73,16 @@
         .back-link:hover { color: var(--reader-accent); }
 
         .work-title { font-weight: 600; font-size: 0.95rem; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        .lang-selector-reader {
+            padding: 0.3rem 0.5rem;
+            border: 1px solid var(--reader-border);
+            border-radius: 6px;
+            background: transparent;
+            color: var(--reader-text);
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
 
         .settings-panel, .bookmarks-panel, .search-panel {
             position: fixed; top: 55px;
@@ -261,6 +271,7 @@
             .btn-toolbar span { display: none; }
             .toolbar-center { gap: 0.25rem; }
             .page-info { font-size: 0.75rem; }
+            .lang-selector-reader { font-size: 0.7rem; padding: 0.25rem 0.4rem; }
         }
 
         @media (max-width: 480px) {
@@ -278,70 +289,73 @@
 
     <div class="touch-hint" id="touchHint">
         <i class="fas fa-hand-pointer me-2"></i>
-        <span data-i18n="reader.touchHint">Swipe left/right to turn pages • Long press to highlight</span>
+        <span id="touchHintText">Swipe left/right to turn pages • Long press to highlight</span>
     </div>
 
     <div class="reader-toolbar">
         <div class="toolbar-left">
-            <a href="dashboard.html" class="back-link" data-i18n-title="reader.toolbar.backToDashboard" title="Back to Dashboard">
+            <a href="dashboard.html" class="back-link" id="backLink" title="Back to Dashboard">
                 <i class="fas fa-arrow-left"></i>
-                <span data-i18n="reader.toolbar.backToDashboard">Dashboard</span>
+                <span id="backLinkText">Dashboard</span>
             </a>
             <span class="work-title" id="workTitle">Sample Story</span>
         </div>
         
         <div class="toolbar-center">
-            <button class="btn-toolbar" onclick="prevPage()" data-i18n-title="reader.toolbar.previous" title="Previous"><i class="fas fa-chevron-left"></i></button>
+            <button class="btn-toolbar" onclick="prevPage()" id="btnPrev" title="Previous"><i class="fas fa-chevron-left"></i></button>
             <span class="page-info" id="pageInfo">1 / 3</span>
-            <button class="btn-toolbar" onclick="nextPage()" data-i18n-title="reader.toolbar.next" title="Next"><i class="fas fa-chevron-right"></i></button>
+            <button class="btn-toolbar" onclick="nextPage()" id="btnNext" title="Next"><i class="fas fa-chevron-right"></i></button>
         </div>
         
         <div class="toolbar-right">
+            <select class="lang-selector-reader" id="langSelector">
+                <option value="en">EN</option><option value="ja">日本語</option><option value="zh">中文</option><option value="es">ES</option><option value="fr">FR</option><option value="de">DE</option><option value="ko">한국어</option><option value="ar">عربي</option><option value="pt">PT</option>
+            </select>
             <a href="notifications.html" class="btn-toolbar position-relative" title="Notifications" id="notificationBellContainer"><i class="fas fa-bell"></i><span id="notificationBadge" class="position-absolute badge rounded-pill bg-danger" style="font-size: 0.55rem; display: none; top: -2px; right: -6px; padding: 2px 5px;">0</span></a>
-            <button class="btn-toolbar" onclick="toggleSearch()" data-i18n-title="reader.toolbar.search" title="Search"><i class="fas fa-search"></i></button>
-            <button class="btn-toolbar" onclick="toggleBookmarks()" data-i18n-title="reader.toolbar.bookmarks" title="Bookmarks"><i class="fas fa-bookmark"></i></button>
-            <button class="btn-toolbar" onclick="addBookmark()" data-i18n-title="reader.toolbar.addBookmark" title="Add Bookmark"><i class="fas fa-plus"></i></button>
-            <button class="btn-toolbar" onclick="toggleSettings()" data-i18n-title="reader.toolbar.settings" title="Settings"><i class="fas fa-cog"></i></button>
+            <button class="btn-toolbar" onclick="toggleSearch()" id="btnSearch" title="Search"><i class="fas fa-search"></i></button>
+            <button class="btn-toolbar" onclick="toggleBookmarks()" id="btnBookmarks" title="Bookmarks"><i class="fas fa-bookmark"></i></button>
+            <button class="btn-toolbar" onclick="addBookmark()" id="btnAddBookmark" title="Add Bookmark"><i class="fas fa-plus"></i></button>
+            <button class="btn-toolbar" onclick="toggleSettings()" id="btnSettings" title="Settings"><i class="fas fa-cog"></i></button>
         </div>
     </div>
 
     <div class="settings-panel" id="settingsPanel">
         <div class="settings-section">
-            <div class="settings-label"><i class="fas fa-text-height me-1"></i> <span data-i18n="reader.settings.textSize">Text Size</span></div>
+            <div class="settings-label"><i class="fas fa-text-height me-1"></i> <span id="labelTextSize">Text Size</span></div>
             <div class="settings-row">
-                <button class="settings-btn" onclick="setTextSize('small')" data-i18n="reader.settings.small">S</button>
-                <button class="settings-btn active" onclick="setTextSize('medium')" data-i18n="reader.settings.medium">M</button>
-                <button class="settings-btn" onclick="setTextSize('large')" data-i18n="reader.settings.large">L</button>
-                <button class="settings-btn" onclick="setTextSize('xlarge')" data-i18n="reader.settings.xlarge">XL</button>
+                <button class="settings-btn" onclick="setTextSize('small')" id="sizeS">S</button>
+                <button class="settings-btn active" onclick="setTextSize('medium')" id="sizeM">M</button>
+                <button class="settings-btn" onclick="setTextSize('large')" id="sizeL">L</button>
+                <button class="settings-btn" onclick="setTextSize('xlarge')" id="sizeXL">XL</button>
             </div>
         </div>
         <div class="settings-section">
-            <div class="settings-label"><i class="fas fa-palette me-1"></i> <span data-i18n="reader.settings.theme">Theme</span></div>
+            <div class="settings-label"><i class="fas fa-palette me-1"></i> <span id="labelTheme">Theme</span></div>
             <div class="settings-row">
                 <button class="settings-btn theme-btn active" onclick="setTheme('light')">
-                    <div class="theme-preview light"></div><span data-i18n="reader.settings.light">Light</span>
+                    <div class="theme-preview light"></div><span id="themeLight">Light</span>
                 </button>
                 <button class="settings-btn theme-btn" onclick="setTheme('dark')">
-                    <div class="theme-preview dark"></div><span data-i18n="reader.settings.dark">Dark</span>
+                    <div class="theme-preview dark"></div><span id="themeDark">Dark</span>
                 </button>
                 <button class="settings-btn theme-btn" onclick="setTheme('sepia')">
-                    <div class="theme-preview sepia"></div><span data-i18n="reader.settings.sepia">Sepia</span>
+                    <div class="theme-preview sepia"></div><span id="themeSepia">Sepia</span>
                 </button>
             </div>
         </div>
         <div class="settings-section">
-            <div class="settings-label"><i class="fas fa-align-left me-1"></i> <span data-i18n="reader.settings.direction">Direction</span></div>
+            <div class="settings-label"><i class="fas fa-align-left me-1"></i> <span id="labelDirection">Direction</span></div>
             <div class="settings-row">
-                <button class="settings-btn active" onclick="setWritingMode('horizontal')" data-i18n="reader.settings.horizontal">Horizontal</button>
-                <button class="settings-btn" onclick="setWritingMode('vertical')" data-i18n="reader.settings.vertical">Vertical</button>
-                <button class="settings-btn" onclick="setWritingMode('rtl')" data-i18n="reader.settings.rtl">RTL</button>
+                <button class="settings-btn active" onclick="setWritingMode('horizontal')" id="dirHorizontal">Horizontal</button>
+                <button class="settings-btn" onclick="setWritingMode('vertical')" id="dirVertical">Vertical</button>
+                <button class="settings-btn" onclick="setWritingMode('rtl')" id="dirRtl">RTL</button>
             </div>
         </div>
     </div>
 
     <div class="search-panel" id="searchPanel">
         <div class="search-input-row">
-            <input type="text" class="search-input" id="searchInput" data-i18n-placeholder="reader.search.placeholder" placeholder="Search...">
+            <input type="text" class="search-input" id="searchInput" placeholder="Search...">
             <button class="btn-toolbar" onclick="searchText()"><i class="fas fa-search"></i></button>
             <button class="btn-toolbar" onclick="clearSearch()"><i class="fas fa-times"></i></button>
         </div>
@@ -350,23 +364,23 @@
 
     <div class="bookmarks-panel" id="bookmarksPanel">
         <div class="bookmarks-header">
-            <span><i class="fas fa-bookmark me-2"></i><span data-i18n="reader.bookmarks.title">Bookmarks</span></span>
+            <span><i class="fas fa-bookmark me-2"></i><span id="bookmarksTitle">Bookmarks</span></span>
             <button class="btn-toolbar" onclick="toggleBookmarks()" style="padding: 0.2rem 0.4rem;"><i class="fas fa-times"></i></button>
         </div>
         <div class="bookmarks-list" id="bookmarksList">
-            <p style="text-align: center; color: var(--reader-secondary); padding: 1rem; font-size: 0.85rem;" data-i18n="reader.bookmarks.noBookmarks">No bookmarks yet</p>
+            <p style="text-align: center; color: var(--reader-secondary); padding: 1rem; font-size: 0.85rem;" id="noBookmarksText">No bookmarks yet</p>
         </div>
     </div>
 
     <!-- Highlight Toolbar with Report Button -->
     <div class="highlight-toolbar" id="highlightToolbar">
-        <button class="highlight-color-btn yellow" onclick="applyHighlight('yellow')" data-i18n-title="reader.highlight.yellow" title="Yellow"></button>
-        <button class="highlight-color-btn green" onclick="applyHighlight('green')" data-i18n-title="reader.highlight.green" title="Green"></button>
-        <button class="highlight-color-btn blue" onclick="applyHighlight('blue')" data-i18n-title="reader.highlight.blue" title="Blue"></button>
-        <button class="highlight-color-btn pink" onclick="applyHighlight('pink')" data-i18n-title="reader.highlight.pink" title="Pink"></button>
-        <button class="highlight-remove-btn" onclick="removeHighlight()" data-i18n-title="reader.highlight.remove" title="Remove"><i class="fas fa-times"></i></button>
+        <button class="highlight-color-btn yellow" onclick="applyHighlight('yellow')" id="hlYellow" title="Yellow"></button>
+        <button class="highlight-color-btn green" onclick="applyHighlight('green')" id="hlGreen" title="Green"></button>
+        <button class="highlight-color-btn blue" onclick="applyHighlight('blue')" id="hlBlue" title="Blue"></button>
+        <button class="highlight-color-btn pink" onclick="applyHighlight('pink')" id="hlPink" title="Pink"></button>
+        <button class="highlight-remove-btn" onclick="removeHighlight()" id="hlRemove" title="Remove"><i class="fas fa-times"></i></button>
         <div class="toolbar-divider"></div>
-        <button class="highlight-report-btn" onclick="reportTranslationIssue()" data-i18n-title="reader.highlight.reportIssue" title="Report Translation Issue">
+        <button class="highlight-report-btn" onclick="reportTranslationIssue()" id="hlReport" title="Report Translation Issue">
             <i class="fas fa-flag"></i>
         </button>
     </div>
@@ -403,79 +417,109 @@
 
     <div class="notes-section" id="notesSection">
         <div class="notes-header" onclick="toggleNotes()">
-            <h4><i class="fas fa-sticky-note"></i> <span data-i18n="reader.notes.title">Notes</span> <span id="notesCount" style="font-weight: normal; color: var(--reader-secondary);">(0)</span></h4>
+            <h4><i class="fas fa-sticky-note"></i> <span id="notesTitle">Notes</span> <span id="notesCount" style="font-weight: normal; color: var(--reader-secondary);">(0)</span></h4>
             <button class="notes-toggle" id="notesToggleBtn"><i class="fas fa-chevron-up"></i></button>
         </div>
         <div class="notes-content" id="notesContent">
             <div class="notes-inner">
                 <div class="note-input-row">
-                    <textarea class="note-input" id="noteInput" rows="2" data-i18n-placeholder="reader.notes.addPlaceholder" placeholder="Add a note..."></textarea>
+                    <textarea class="note-input" id="noteInput" rows="2" placeholder="Add a note..."></textarea>
                     <button class="btn-add-note" onclick="addNote()"><i class="fas fa-plus"></i></button>
                 </div>
                 <div class="notes-list" id="notesList"></div>
                 <div class="notes-export">
-                    <button class="btn-export" onclick="exportNotes('txt')"><i class="fas fa-file-alt"></i> <span data-i18n="reader.notes.exportTxt">TXT</span></button>
-                    <button class="btn-export" onclick="exportNotes('word')"><i class="fas fa-file-word"></i> <span data-i18n="reader.notes.exportWord">Word</span></button>
-                    <button class="btn-export" onclick="exportNotes('json')"><i class="fas fa-file-code"></i> <span data-i18n="reader.notes.exportJson">JSON</span></button>
+                    <button class="btn-export" onclick="exportNotes('txt')"><i class="fas fa-file-alt"></i> <span id="exportTxt">TXT</span></button>
+                    <button class="btn-export" onclick="exportNotes('word')"><i class="fas fa-file-word"></i> <span id="exportWord">Word</span></button>
+                    <button class="btn-export" onclick="exportNotes('json')"><i class="fas fa-file-code"></i> <span id="exportJson">JSON</span></button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- i18n Script -->
-    <script src="../js/translations.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // i18n Helper Function
-        function t(key, replacements = {}) {
-            const lang = localStorage.getItem('publisher_language') || 'en';
-            const keys = key.split('.');
-            let value = translations[lang];
-            
-            for (const k of keys) {
-                if (value && value[k] !== undefined) {
-                    value = value[k];
-                } else {
-                    // Fallback to English
-                    value = translations['en'];
-                    for (const k2 of keys) {
-                        if (value && value[k2] !== undefined) {
-                            value = value[k2];
-                        } else {
-                            return key;
-                        }
-                    }
-                    break;
-                }
-            }
-            
-            if (typeof value === 'string') {
-                Object.keys(replacements).forEach(rKey => {
-                    value = value.replace(`{${rKey}}`, replacements[rKey]);
-                });
-                return value;
-            }
-            return key;
+        // UI Text for 9 languages
+        const uiText = {
+            touchHint: { en: 'Swipe left/right to turn pages • Long press to highlight', ja: '左右スワイプでページ移動 • 長押しでハイライト', zh: '左右滑动翻页 • 长按高亮', es: 'Desliza para cambiar página • Mantén presionado para resaltar', fr: 'Glissez pour tourner les pages • Appui long pour surligner', de: 'Wischen zum Blättern • Lange drücken zum Markieren', ko: '좌우 스와이프로 페이지 이동 • 길게 눌러 하이라이트', ar: 'اسحب لتغيير الصفحة • اضغط مطولاً للتمييز', pt: 'Deslize para virar páginas • Pressione para destacar' },
+            backToDashboard: { en: 'Dashboard', ja: 'ダッシュボード', zh: '仪表板', es: 'Panel', fr: 'Tableau de bord', de: 'Dashboard', ko: '대시보드', ar: 'لوحة التحكم', pt: 'Painel' },
+            previous: { en: 'Previous', ja: '前へ', zh: '上一页', es: 'Anterior', fr: 'Précédent', de: 'Zurück', ko: '이전', ar: 'السابق', pt: 'Anterior' },
+            next: { en: 'Next', ja: '次へ', zh: '下一页', es: 'Siguiente', fr: 'Suivant', de: 'Weiter', ko: '다음', ar: 'التالي', pt: 'Próximo' },
+            search: { en: 'Search', ja: '検索', zh: '搜索', es: 'Buscar', fr: 'Rechercher', de: 'Suchen', ko: '검색', ar: 'بحث', pt: 'Buscar' },
+            bookmarks: { en: 'Bookmarks', ja: 'ブックマーク', zh: '书签', es: 'Marcadores', fr: 'Signets', de: 'Lesezeichen', ko: '북마크', ar: 'المفضلة', pt: 'Favoritos' },
+            addBookmark: { en: 'Add Bookmark', ja: 'ブックマーク追加', zh: '添加书签', es: 'Añadir marcador', fr: 'Ajouter un signet', de: 'Lesezeichen hinzufügen', ko: '북마크 추가', ar: 'إضافة مفضلة', pt: 'Adicionar favorito' },
+            settings: { en: 'Settings', ja: '設定', zh: '设置', es: 'Configuración', fr: 'Paramètres', de: 'Einstellungen', ko: '설정', ar: 'الإعدادات', pt: 'Configurações' },
+            textSize: { en: 'Text Size', ja: '文字サイズ', zh: '字体大小', es: 'Tamaño del texto', fr: 'Taille du texte', de: 'Textgröße', ko: '글자 크기', ar: 'حجم النص', pt: 'Tamanho do texto' },
+            theme: { en: 'Theme', ja: 'テーマ', zh: '主题', es: 'Tema', fr: 'Thème', de: 'Thema', ko: '테마', ar: 'السمة', pt: 'Tema' },
+            light: { en: 'Light', ja: 'ライト', zh: '浅色', es: 'Claro', fr: 'Clair', de: 'Hell', ko: '라이트', ar: 'فاتح', pt: 'Claro' },
+            dark: { en: 'Dark', ja: 'ダーク', zh: '深色', es: 'Oscuro', fr: 'Sombre', de: 'Dunkel', ko: '다크', ar: 'داكن', pt: 'Escuro' },
+            sepia: { en: 'Sepia', ja: 'セピア', zh: '护眼', es: 'Sepia', fr: 'Sépia', de: 'Sepia', ko: '세피아', ar: 'بني داكن', pt: 'Sépia' },
+            direction: { en: 'Direction', ja: '表示方向', zh: '排列方向', es: 'Dirección', fr: 'Direction', de: 'Richtung', ko: '방향', ar: 'الاتجاه', pt: 'Direção' },
+            horizontal: { en: 'Horizontal', ja: '横書き', zh: '横向', es: 'Horizontal', fr: 'Horizontal', de: 'Horizontal', ko: '가로', ar: 'أفقي', pt: 'Horizontal' },
+            vertical: { en: 'Vertical', ja: '縦書き', zh: '竖向', es: 'Vertical', fr: 'Vertical', de: 'Vertikal', ko: '세로', ar: 'عمودي', pt: 'Vertical' },
+            rtl: { en: 'RTL', ja: 'RTL', zh: '从右到左', es: 'RTL', fr: 'RTL', de: 'RTL', ko: 'RTL', ar: 'يمين لليسار', pt: 'RTL' },
+            searchPlaceholder: { en: 'Search...', ja: '検索...', zh: '搜索...', es: 'Buscar...', fr: 'Rechercher...', de: 'Suchen...', ko: '검색...', ar: 'بحث...', pt: 'Buscar...' },
+            noBookmarks: { en: 'No bookmarks yet', ja: 'ブックマークはまだありません', zh: '暂无书签', es: 'No hay marcadores aún', fr: 'Pas encore de signets', de: 'Noch keine Lesezeichen', ko: '북마크 없음', ar: 'لا توجد مفضلات بعد', pt: 'Sem favoritos ainda' },
+            page: { en: 'Page', ja: 'ページ', zh: '页', es: 'Página', fr: 'Page', de: 'Seite', ko: '페이지', ar: 'صفحة', pt: 'Página' },
+            yellow: { en: 'Yellow', ja: '黄色', zh: '黄色', es: 'Amarillo', fr: 'Jaune', de: 'Gelb', ko: '노란색', ar: 'أصفر', pt: 'Amarelo' },
+            green: { en: 'Green', ja: '緑', zh: '绿色', es: 'Verde', fr: 'Vert', de: 'Grün', ko: '초록색', ar: 'أخضر', pt: 'Verde' },
+            blue: { en: 'Blue', ja: '青', zh: '蓝色', es: 'Azul', fr: 'Bleu', de: 'Blau', ko: '파란색', ar: 'أزرق', pt: 'Azul' },
+            pink: { en: 'Pink', ja: 'ピンク', zh: '粉色', es: 'Rosa', fr: 'Rose', de: 'Rosa', ko: '분홍색', ar: 'وردي', pt: 'Rosa' },
+            remove: { en: 'Remove', ja: '削除', zh: '删除', es: 'Eliminar', fr: 'Supprimer', de: 'Entfernen', ko: '삭제', ar: 'إزالة', pt: 'Remover' },
+            reportIssue: { en: 'Report Translation Issue', ja: '翻訳の問題を報告', zh: '报告翻译问题', es: 'Reportar problema de traducción', fr: 'Signaler un problème de traduction', de: 'Übersetzungsproblem melden', ko: '번역 문제 신고', ar: 'الإبلاغ عن مشكلة ترجمة', pt: 'Reportar problema de tradução' },
+            selectText: { en: 'Please select text first', ja: 'テキストを選択してください', zh: '请先选择文本', es: 'Por favor selecciona texto primero', fr: 'Veuillez d\'abord sélectionner du texte', de: 'Bitte wählen Sie zuerst Text aus', ko: '텍스트를 먼저 선택해주세요', ar: 'يرجى تحديد النص أولاً', pt: 'Por favor, selecione o texto primeiro' },
+            cannotHighlight: { en: 'Cannot highlight across elements', ja: '要素をまたいでハイライトできません', zh: '无法跨元素高亮', es: 'No se puede resaltar entre elementos', fr: 'Impossible de surligner entre les éléments', de: 'Kann nicht über Elemente hinweg markieren', ko: '요소 간 하이라이트 불가', ar: 'لا يمكن التمييز عبر العناصر', pt: 'Não é possível destacar entre elementos' },
+            notes: { en: 'Notes', ja: 'ノート', zh: '笔记', es: 'Notas', fr: 'Notes', de: 'Notizen', ko: '노트', ar: 'ملاحظات', pt: 'Notas' },
+            addNotePlaceholder: { en: 'Add a note...', ja: 'ノートを追加...', zh: '添加笔记...', es: 'Añadir una nota...', fr: 'Ajouter une note...', de: 'Notiz hinzufügen...', ko: '노트 추가...', ar: 'أضف ملاحظة...', pt: 'Adicionar uma nota...' },
+            noNotes: { en: 'No notes to export', ja: 'エクスポートするノートがありません', zh: '没有可导出的笔记', es: 'No hay notas para exportar', fr: 'Pas de notes à exporter', de: 'Keine Notizen zum Exportieren', ko: '내보낼 노트 없음', ar: 'لا توجد ملاحظات للتصدير', pt: 'Sem notas para exportar' },
+            exported: { en: 'Exported', ja: 'エクスポート日時', zh: '导出时间', es: 'Exportado', fr: 'Exporté', de: 'Exportiert', ko: '내보낸 날짜', ar: 'تم التصدير', pt: 'Exportado' },
+            foundMatches: { en: '{count} matches found', ja: '{count}件見つかりました', zh: '找到{count}个匹配', es: '{count} coincidencias encontradas', fr: '{count} correspondances trouvées', de: '{count} Treffer gefunden', ko: '{count}개 일치', ar: 'تم العثور على {count} نتائج', pt: '{count} correspondências encontradas' },
+            noResults: { en: 'No results found', ja: '結果が見つかりません', zh: '未找到结果', es: 'No se encontraron resultados', fr: 'Aucun résultat trouvé', de: 'Keine Ergebnisse gefunden', ko: '결과 없음', ar: 'لم يتم العثور على نتائج', pt: 'Nenhum resultado encontrado' }
+        };
+
+        function getCurrentLang() { return localStorage.getItem('preferredLanguage') || 'en'; }
+        function getL(obj, replacements = {}) {
+            if (!obj) return '';
+            const l = getCurrentLang();
+            let text = obj[l] || obj['en'] || '';
+            Object.keys(replacements).forEach(key => {
+                text = text.replace(`{${key}}`, replacements[key]);
+            });
+            return text;
         }
 
-        // Apply translations to page
-        function applyTranslations() {
-            // Text content
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                el.textContent = t(key);
-            });
-            
-            // Title attributes
-            document.querySelectorAll('[data-i18n-title]').forEach(el => {
-                const key = el.getAttribute('data-i18n-title');
-                el.setAttribute('title', t(key));
-            });
-            
-            // Placeholder attributes
-            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-                const key = el.getAttribute('data-i18n-placeholder');
-                el.setAttribute('placeholder', t(key));
-            });
+        function updateAllText() {
+            document.title = getL(uiText.notes) + ' - Publisher';
+            document.getElementById('touchHintText').textContent = getL(uiText.touchHint);
+            document.getElementById('backLinkText').textContent = getL(uiText.backToDashboard);
+            document.getElementById('backLink').title = getL(uiText.backToDashboard);
+            document.getElementById('btnPrev').title = getL(uiText.previous);
+            document.getElementById('btnNext').title = getL(uiText.next);
+            document.getElementById('btnSearch').title = getL(uiText.search);
+            document.getElementById('btnBookmarks').title = getL(uiText.bookmarks);
+            document.getElementById('btnAddBookmark').title = getL(uiText.addBookmark);
+            document.getElementById('btnSettings').title = getL(uiText.settings);
+            document.getElementById('labelTextSize').textContent = getL(uiText.textSize);
+            document.getElementById('labelTheme').textContent = getL(uiText.theme);
+            document.getElementById('themeLight').textContent = getL(uiText.light);
+            document.getElementById('themeDark').textContent = getL(uiText.dark);
+            document.getElementById('themeSepia').textContent = getL(uiText.sepia);
+            document.getElementById('labelDirection').textContent = getL(uiText.direction);
+            document.getElementById('dirHorizontal').textContent = getL(uiText.horizontal);
+            document.getElementById('dirVertical').textContent = getL(uiText.vertical);
+            document.getElementById('dirRtl').textContent = getL(uiText.rtl);
+            document.getElementById('searchInput').placeholder = getL(uiText.searchPlaceholder);
+            document.getElementById('bookmarksTitle').textContent = getL(uiText.bookmarks);
+            document.getElementById('noBookmarksText').textContent = getL(uiText.noBookmarks);
+            document.getElementById('hlYellow').title = getL(uiText.yellow);
+            document.getElementById('hlGreen').title = getL(uiText.green);
+            document.getElementById('hlBlue').title = getL(uiText.blue);
+            document.getElementById('hlPink').title = getL(uiText.pink);
+            document.getElementById('hlRemove').title = getL(uiText.remove);
+            document.getElementById('hlReport').title = getL(uiText.reportIssue);
+            document.getElementById('notesTitle').textContent = getL(uiText.notes);
+            document.getElementById('noteInput').placeholder = getL(uiText.addNotePlaceholder);
+            renderBookmarks();
+            renderNotes();
         }
 
         // Get work info from URL parameters
@@ -483,7 +527,6 @@
         const workId = urlParams.get('workId') || urlParams.get('work_id') || 'sample-work-id';
         const workTitle = urlParams.get('title') || document.getElementById('workTitle').textContent;
         
-        // Update work title if provided in URL
         if (urlParams.get('title')) {
             document.getElementById('workTitle').textContent = urlParams.get('title');
         }
@@ -502,7 +545,12 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            applyTranslations();
+            document.getElementById('langSelector').value = getCurrentLang();
+            document.getElementById('langSelector').addEventListener('change', function() {
+                localStorage.setItem('preferredLanguage', this.value);
+                updateAllText();
+            });
+            updateAllText();
             updatePageInfo();
             renderBookmarks();
             renderNotes();
@@ -593,27 +641,22 @@
             }
         }
 
-        // Report Translation Issue - NEW FEATURE
         function reportTranslationIssue() {
             const selection = window.getSelection();
             const text = selection.toString().trim() || selectedText;
             
             if (!text) {
-                alert(t('reader.highlight.selectText'));
+                alert(getL(uiText.selectText));
                 return;
             }
             
-            // Build URL with parameters
             const reportUrl = new URL('feedback/report.html', window.location.origin + '/pages/');
             reportUrl.searchParams.set('workId', workId);
             reportUrl.searchParams.set('text', text);
             reportUrl.searchParams.set('page', currentPage);
             reportUrl.searchParams.set('title', document.getElementById('workTitle').textContent);
             
-            // Hide toolbar
             document.getElementById('highlightToolbar').classList.remove('show');
-            
-            // Navigate to report page
             window.location.href = reportUrl.toString();
         }
 
@@ -628,7 +671,7 @@
                     range.surroundContents(span);
                     highlights.push({ id: span.dataset.highlightId, text: selection.toString(), color: color, page: currentPage });
                     localStorage.setItem('reader_highlights', JSON.stringify(highlights));
-                } catch (e) { alert(t('reader.cannotHighlight')); }
+                } catch (e) { alert(getL(uiText.cannotHighlight)); }
             }
             document.getElementById('highlightToolbar').classList.remove('show');
             window.getSelection().removeAllRanges();
@@ -695,7 +738,7 @@
         function addBookmark() {
             const content = document.querySelector(`.page[data-page="${currentPage}"]`);
             const preview = content ? content.textContent.substring(0, 80).trim() + '...' : '';
-            const bookmark = { id: Date.now(), page: currentPage, title: `${t('reader.bookmarks.page')} ${currentPage}`, preview: preview, createdAt: new Date().toISOString() };
+            const bookmark = { id: Date.now(), page: currentPage, title: `${getL(uiText.page)} ${currentPage}`, preview: preview, createdAt: new Date().toISOString() };
             bookmarks.push(bookmark);
             localStorage.setItem('reader_bookmarks', JSON.stringify(bookmarks));
             renderBookmarks();
@@ -708,7 +751,7 @@
         function renderBookmarks() {
             const list = document.getElementById('bookmarksList');
             if (bookmarks.length === 0) {
-                list.innerHTML = `<p style="text-align: center; color: var(--reader-secondary); padding: 1rem; font-size: 0.85rem;">${t('reader.bookmarks.noBookmarks')}</p>`;
+                list.innerHTML = `<p style="text-align: center; color: var(--reader-secondary); padding: 1rem; font-size: 0.85rem;">${getL(uiText.noBookmarks)}</p>`;
                 return;
             }
             list.innerHTML = bookmarks.map(b => `
@@ -749,7 +792,7 @@
                     <button class="note-delete" onclick="deleteNote(${n.id})"><i class="fas fa-times"></i></button>
                     <div class="note-time">${new Date(n.createdAt).toLocaleString()}</div>
                     <div class="note-text">${n.text}</div>
-                    <div class="note-page">📄 ${t('reader.notes.page')} ${n.page}</div>
+                    <div class="note-page">📄 ${getL(uiText.page)} ${n.page}</div>
                 </div>
             `).join('');
         }
@@ -757,17 +800,19 @@
         function deleteNote(id) { notes = notes.filter(n => n.id !== id); localStorage.setItem('reader_notes', JSON.stringify(notes)); renderNotes(); }
 
         function exportNotes(format) {
-            if (notes.length === 0) { alert(t('reader.notes.noNotes')); return; }
+            if (notes.length === 0) { alert(getL(uiText.noNotes)); return; }
             const title = document.getElementById('workTitle').textContent;
-            const exportedLabel = t('reader.notes.exported');
+            const exportedLabel = getL(uiText.exported);
+            const notesLabel = getL(uiText.notes);
+            const pageLabel = getL(uiText.page);
             let content = '', filename = '', mimeType = '';
             if (format === 'txt') {
-                content = `${t('reader.notes.title')}: ${title}\n${exportedLabel}: ${new Date().toLocaleString()}\n${'='.repeat(40)}\n\n`;
-                notes.forEach((n, i) => { content += `[${i + 1}] ${t('reader.notes.page')} ${n.page} - ${new Date(n.createdAt).toLocaleString()}\n${n.text}\n\n`; });
+                content = `${notesLabel}: ${title}\n${exportedLabel}: ${new Date().toLocaleString()}\n${'='.repeat(40)}\n\n`;
+                notes.forEach((n, i) => { content += `[${i + 1}] ${pageLabel} ${n.page} - ${new Date(n.createdAt).toLocaleString()}\n${n.text}\n\n`; });
                 filename = 'notes.txt'; mimeType = 'text/plain';
             } else if (format === 'word') {
-                content = `<html><head><meta charset="UTF-8"><style>body{font-family:Arial;}.note{margin:15px 0;padding:10px;background:#f5f5f5;border-left:4px solid #8B7355;}</style></head><body><h1>${t('reader.notes.title')}: ${title}</h1><p>${exportedLabel}: ${new Date().toLocaleString()}</p>`;
-                notes.forEach((n, i) => { content += `<div class="note"><small>${t('reader.notes.page')} ${n.page} - ${new Date(n.createdAt).toLocaleString()}</small><p>${n.text}</p></div>`; });
+                content = `<html><head><meta charset="UTF-8"><style>body{font-family:Arial;}.note{margin:15px 0;padding:10px;background:#f5f5f5;border-left:4px solid #8B7355;}</style></head><body><h1>${notesLabel}: ${title}</h1><p>${exportedLabel}: ${new Date().toLocaleString()}</p>`;
+                notes.forEach((n, i) => { content += `<div class="note"><small>${pageLabel} ${n.page} - ${new Date(n.createdAt).toLocaleString()}</small><p>${n.text}</p></div>`; });
                 content += '</body></html>'; filename = 'notes.doc'; mimeType = 'application/msword';
             } else if (format === 'json') {
                 content = JSON.stringify({ workTitle: title, exportedAt: new Date().toISOString(), notes }, null, 2);
@@ -795,7 +840,7 @@
             clearSearch();
             const content = document.getElementById('readerContent');
             const count = (content.textContent.toLowerCase().match(new RegExp(query, 'g')) || []).length;
-            results.innerHTML = count > 0 ? t('reader.search.foundMatches', { count: count }) : t('reader.search.noResults');
+            results.innerHTML = count > 0 ? getL(uiText.foundMatches, { count: count }) : getL(uiText.noResults);
         }
 
         function clearSearch() { document.getElementById('searchInput').value = ''; document.getElementById('searchResults').textContent = ''; }
