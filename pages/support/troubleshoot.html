@@ -22,492 +22,88 @@
     <link rel="stylesheet" href="../../css/mobile-fixes.css">
     
     <style>
-        /* Mobile language selector */
-        .navbar-lang-selector {
-            display: flex;
-            align-items: center;
-            margin-right: 0.5rem;
-        }
-        
-        @media (max-width: 991.98px) {
-            .navbar-lang-selector {
-                order: 1;
-            }
-            .navbar-toggler {
-                order: 2;
-            }
-        }
-
-        /* トラブルシューティング専用スタイル */
-        .troubleshoot-hero {
-            background: linear-gradient(135deg, var(--color-accent), var(--color-accent-light));
-            color: white;
-            padding: 3rem 0;
-            text-align: center;
-        }
-        
-        .troubleshoot-hero h1 {
-            font-family: var(--font-heading);
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-            color: white;
-        }
-        
-        .troubleshoot-hero p {
-            opacity: 0.9;
-            font-size: 1.1rem;
-        }
-        
-        /* プログレスバー */
-        .wizard-progress {
-            background: var(--color-cream);
-            padding: 1.5rem 0;
-            border-bottom: 1px solid var(--color-border);
-        }
-        
-        .progress-steps {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 0;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        
-        .progress-step {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--color-text-muted);
-            font-size: 0.9rem;
-        }
-        
-        .progress-step.active {
-            color: var(--color-accent);
-            font-weight: 500;
-        }
-        
-        .progress-step.completed {
-            color: var(--color-success);
-        }
-        
-        .step-number {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: var(--color-border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-        
-        .progress-step.active .step-number {
-            background: var(--color-accent);
-            color: white;
-        }
-        
-        .progress-step.completed .step-number {
-            background: var(--color-success);
-            color: white;
-        }
-        
-        .progress-line {
-            width: 60px;
-            height: 2px;
-            background: var(--color-border);
-            margin: 0 0.5rem;
-        }
-        
-        .progress-line.completed {
-            background: var(--color-success);
-        }
-        
-        /* ウィザードコンテンツ */
-        .wizard-content {
-            max-width: 800px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
-        
-        .wizard-step {
-            display: none;
-        }
-        
-        .wizard-step.active {
-            display: block;
-        }
-        
-        .wizard-question {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        
-        .wizard-question h2 {
-            font-family: var(--font-heading);
-            font-size: 1.5rem;
-            color: var(--color-text);
-            margin-bottom: 0.5rem;
-        }
-        
-        .wizard-question p {
-            color: var(--color-text-muted);
-        }
-        
-        /* 選択肢カード */
-        .option-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-        }
-        
-        @media (max-width: 576px) {
-            .option-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        .option-card {
-            background: white;
-            border: 2px solid var(--color-border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-align: center;
-        }
-        
-        .option-card:hover {
-            border-color: var(--color-accent);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        
-        .option-card.selected {
-            border-color: var(--color-accent);
-            background: var(--color-cream);
-        }
-        
-        .option-card i {
-            font-size: 2rem;
-            color: var(--color-accent);
-            margin-bottom: 0.75rem;
-        }
-        
-        .option-card h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-            color: var(--color-text);
-        }
-        
-        .option-card p {
-            font-size: 0.85rem;
-            color: var(--color-text-muted);
-            margin: 0;
-        }
-        
-        /* 解決策表示 */
-        .solution-card {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        .solution-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--color-border);
-        }
-        
-        .solution-header i {
-            font-size: 2.5rem;
-            color: var(--color-accent);
-        }
-        
-        .solution-header h3 {
-            font-family: var(--font-heading);
-            font-size: 1.25rem;
-            margin: 0;
-        }
-        
-        .solution-steps {
-            margin-bottom: 1.5rem;
-        }
-        
-        .solution-step {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-            padding: 1rem;
-            background: var(--color-cream);
-            border-radius: 8px;
-        }
-        
-        .solution-step-number {
-            width: 28px;
-            height: 28px;
-            background: var(--color-accent);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 0.85rem;
-            flex-shrink: 0;
-        }
-        
-        .solution-step-content h4 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-        }
-        
-        .solution-step-content p {
-            font-size: 0.9rem;
-            color: var(--color-text-muted);
-            margin: 0;
-        }
-        
-        .solution-action {
-            display: inline-block;
-            margin-top: 0.5rem;
-        }
-        
-        /* 解決確認 */
-        .resolution-check {
-            background: var(--color-cream);
-            border-radius: 12px;
-            padding: 1.5rem;
-            text-align: center;
-            margin-top: 1.5rem;
-        }
-        
-        .resolution-check h4 {
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-        }
-        
-        .resolution-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-        
-        .btn-resolved {
-            background: var(--color-success);
-            color: white;
-            border: none;
-            padding: 0.75rem 2rem;
-            border-radius: 8px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-resolved:hover {
-            background: #2e7d32;
-        }
-        
-        .btn-not-resolved {
-            background: white;
-            color: var(--color-text);
-            border: 2px solid var(--color-border);
-            padding: 0.75rem 2rem;
-            border-radius: 8px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-not-resolved:hover {
-            border-color: var(--color-accent);
-        }
-        
-        /* 関連FAQ */
-        .related-faqs {
-            margin-top: 2rem;
-            display: none;
-        }
-        
-        .related-faqs.show {
-            display: block;
-        }
-        
-        .related-faqs h4 {
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .related-faqs h4 i {
-            color: var(--color-accent);
-        }
-        
-        .faq-mini-card {
-            background: white;
-            border: 1px solid var(--color-border);
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 0.75rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .faq-mini-card:hover {
-            border-color: var(--color-accent);
-        }
-        
-        .faq-mini-card h5 {
-            font-size: 0.95rem;
-            margin: 0;
-            color: var(--color-text);
-        }
-        
-        .faq-mini-card .faq-answer {
-            display: none;
-            margin-top: 0.75rem;
-            padding-top: 0.75rem;
-            border-top: 1px solid var(--color-border);
-            font-size: 0.9rem;
-            color: var(--color-text-muted);
-        }
-        
-        .faq-mini-card.expanded .faq-answer {
-            display: block;
-        }
-        
-        /* お問い合わせセクション */
-        .contact-section {
-            margin-top: 2rem;
-            display: none;
-        }
-        
-        .contact-section.show {
-            display: block;
-        }
-        
-        .contact-card {
-            background: linear-gradient(135deg, var(--color-accent), var(--color-accent-light));
-            color: white;
-            border-radius: 12px;
-            padding: 2rem;
-            text-align: center;
-        }
-        
-        .contact-card h4 {
-            font-family: var(--font-heading);
-            font-size: 1.25rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .contact-card p {
-            opacity: 0.9;
-            margin-bottom: 1.5rem;
-        }
-        
-        .contact-card .btn {
-            background: white;
-            color: var(--color-accent);
-            font-weight: 600;
-        }
-        
-        .contact-card .btn:hover {
-            background: var(--color-cream);
-        }
-        
-        /* 成功画面 */
-        .success-screen {
-            text-align: center;
-            padding: 3rem 1rem;
-        }
-        
-        .success-icon {
-            width: 80px;
-            height: 80px;
-            background: var(--color-success);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
-            margin: 0 auto 1.5rem;
-        }
-        
-        .success-screen h2 {
-            font-family: var(--font-heading);
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .success-screen p {
-            color: var(--color-text-muted);
-            margin-bottom: 2rem;
-        }
-        
-        /* ナビゲーションボタン */
-        .wizard-nav {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 2rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--color-border);
-        }
-        
-        .btn-back {
-            background: transparent;
-            color: var(--color-text-muted);
-            border: none;
-            padding: 0.75rem 1.5rem;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .btn-back:hover {
-            color: var(--color-text);
-        }
+        .navbar-lang-selector { display: flex; align-items: center; margin-right: 0.5rem; }
+        @media (max-width: 991.98px) { .navbar-lang-selector { order: 1; } .navbar-toggler { order: 2; } }
+        .troubleshoot-hero { background: linear-gradient(135deg, var(--color-accent), var(--color-accent-light)); color: white; padding: 3rem 0; text-align: center; }
+        .troubleshoot-hero h1 { font-family: var(--font-heading); font-size: 2rem; margin-bottom: 0.5rem; color: white; }
+        .troubleshoot-hero p { opacity: 0.9; font-size: 1.1rem; }
+        .wizard-progress { background: var(--color-cream); padding: 1.5rem 0; border-bottom: 1px solid var(--color-border); }
+        .progress-steps { display: flex; justify-content: center; align-items: center; gap: 0; max-width: 600px; margin: 0 auto; }
+        .progress-step { display: flex; align-items: center; gap: 0.5rem; color: var(--color-text-muted); font-size: 0.9rem; }
+        .progress-step.active { color: var(--color-accent); font-weight: 500; }
+        .progress-step.completed { color: var(--color-success); }
+        .step-number { width: 28px; height: 28px; border-radius: 50%; background: var(--color-border); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.85rem; }
+        .progress-step.active .step-number { background: var(--color-accent); color: white; }
+        .progress-step.completed .step-number { background: var(--color-success); color: white; }
+        .progress-line { width: 60px; height: 2px; background: var(--color-border); margin: 0 0.5rem; }
+        .progress-line.completed { background: var(--color-success); }
+        .wizard-content { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+        .wizard-step { display: none; }
+        .wizard-step.active { display: block; }
+        .wizard-question { text-align: center; margin-bottom: 2rem; }
+        .wizard-question h2 { font-family: var(--font-heading); font-size: 1.5rem; color: var(--color-text); margin-bottom: 0.5rem; }
+        .wizard-question p { color: var(--color-text-muted); }
+        .option-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+        @media (max-width: 576px) { .option-grid { grid-template-columns: 1fr; } }
+        .option-card { background: white; border: 2px solid var(--color-border); border-radius: 12px; padding: 1.5rem; cursor: pointer; transition: all 0.2s ease; text-align: center; }
+        .option-card:hover { border-color: var(--color-accent); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .option-card.selected { border-color: var(--color-accent); background: var(--color-cream); }
+        .option-card i { font-size: 2rem; color: var(--color-accent); margin-bottom: 0.75rem; }
+        .option-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem; color: var(--color-text); }
+        .option-card p { font-size: 0.85rem; color: var(--color-text-muted); margin: 0; }
+        .solution-card { background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .solution-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--color-border); }
+        .solution-header i { font-size: 2.5rem; color: var(--color-accent); }
+        .solution-header h3 { font-family: var(--font-heading); font-size: 1.25rem; margin: 0; }
+        .solution-steps { margin-bottom: 1.5rem; }
+        .solution-step { display: flex; gap: 1rem; margin-bottom: 1rem; padding: 1rem; background: var(--color-cream); border-radius: 8px; }
+        .solution-step-number { width: 28px; height: 28px; background: var(--color-accent); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.85rem; flex-shrink: 0; }
+        .solution-step-content h4 { font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem; }
+        .solution-step-content p { font-size: 0.9rem; color: var(--color-text-muted); margin: 0; }
+        .solution-action { display: inline-block; margin-top: 0.5rem; }
+        .resolution-check { background: var(--color-cream); border-radius: 12px; padding: 1.5rem; text-align: center; margin-top: 1.5rem; }
+        .resolution-check h4 { font-size: 1.1rem; margin-bottom: 1rem; }
+        .resolution-buttons { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+        .btn-resolved { background: var(--color-success); color: white; border: none; padding: 0.75rem 2rem; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; }
+        .btn-resolved:hover { background: #2e7d32; }
+        .btn-not-resolved { background: white; color: var(--color-text); border: 2px solid var(--color-border); padding: 0.75rem 2rem; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; }
+        .btn-not-resolved:hover { border-color: var(--color-accent); }
+        .related-faqs { margin-top: 2rem; display: none; }
+        .related-faqs.show { display: block; }
+        .related-faqs h4 { font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .related-faqs h4 i { color: var(--color-accent); }
+        .faq-mini-card { background: white; border: 1px solid var(--color-border); border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem; cursor: pointer; transition: all 0.2s ease; }
+        .faq-mini-card:hover { border-color: var(--color-accent); }
+        .faq-mini-card h5 { font-size: 0.95rem; margin: 0; color: var(--color-text); }
+        .faq-mini-card .faq-answer { display: none; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--color-border); font-size: 0.9rem; color: var(--color-text-muted); }
+        .faq-mini-card.expanded .faq-answer { display: block; }
+        .contact-section { margin-top: 2rem; display: none; }
+        .contact-section.show { display: block; }
+        .contact-card { background: linear-gradient(135deg, var(--color-accent), var(--color-accent-light)); color: white; border-radius: 12px; padding: 2rem; text-align: center; }
+        .contact-card h4 { font-family: var(--font-heading); font-size: 1.25rem; margin-bottom: 0.5rem; }
+        .contact-card p { opacity: 0.9; margin-bottom: 1.5rem; }
+        .contact-card .btn { background: white; color: var(--color-accent); font-weight: 600; }
+        .contact-card .btn:hover { background: var(--color-cream); }
+        .success-screen { text-align: center; padding: 3rem 1rem; }
+        .success-icon { width: 80px; height: 80px; background: var(--color-success); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin: 0 auto 1.5rem; }
+        .success-screen h2 { font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .success-screen p { color: var(--color-text-muted); margin-bottom: 2rem; }
+        .wizard-nav { display: flex; justify-content: space-between; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--color-border); }
+        .btn-back { background: transparent; color: var(--color-text-muted); border: none; padding: 0.75rem 1.5rem; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; }
+        .btn-back:hover { color: var(--color-text); }
     </style>
 </head>
 <body>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="../../index.html">
-                <i class="fas fa-book-open"></i> Publisher
-            </a>
-            
-            <!-- Language Selector (Mobile) -->
+            <a class="navbar-brand" href="../../index.html"><i class="fas fa-book-open"></i> Publisher</a>
             <div class="navbar-lang-selector d-lg-none">
                 <select class="language-selector" id="languageSelectorMobile">
-                    <option value="en">🇬🇧 EN</option>
-                    <option value="ja">🇯🇵 日本語</option>
-                    <option value="zh">🇨🇳 中文</option>
-                    <option value="es">🇪🇸 ES</option>
-                    <option value="fr">🇫🇷 FR</option>
-                    <option value="de">🇩🇪 DE</option>
-                    <option value="ko">🇰🇷 한국어</option>
-                    <option value="ar">🇸🇦 عربي</option>
-                    <option value="pt">🇧🇷 PT</option>
+                    <option value="en">🇬🇧 EN</option><option value="ja">🇯🇵 日本語</option><option value="zh">🇨🇳 中文</option><option value="es">🇪🇸 ES</option><option value="fr">🇫🇷 FR</option><option value="de">🇩🇪 DE</option><option value="ko">🇰🇷 한국어</option><option value="ar">🇸🇦 عربي</option><option value="pt">🇧🇷 PT</option>
                 </select>
             </div>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item"><a class="nav-link" href="../../index.html" data-i18n="nav.home">Home</a></li>
@@ -516,26 +112,11 @@
                 </ul>
                 <ul class="navbar-nav align-items-center">
                     <li class="nav-item"><a class="nav-link active" href="faq.html" data-i18n="nav.help">Help</a></li>
-                    <li class="nav-item" id="notificationBellContainer">
-                        <a class="nav-link position-relative" href="../notifications.html" title="Notifications">
-                            <i class="fas fa-bell"></i>
-                            <span id="notificationBadge" class="position-absolute badge rounded-pill bg-danger" style="font-size: 0.55rem; display: none; top: 0; right: 0; transform: translate(25%, -25%);">0</span>
-                        </a>
-                    </li>
+                    <li class="nav-item" id="notificationBellContainer"><a class="nav-link position-relative" href="../notifications.html"><i class="fas fa-bell"></i><span id="notificationBadge" class="position-absolute badge rounded-pill bg-danger" style="font-size:0.55rem;display:none;top:0;right:0;transform:translate(25%,-25%);">0</span></a></li>
                     <li class="nav-item" id="loginNav"><a class="nav-link" href="../login.html" data-i18n="nav.login">Sign In</a></li>
-                    
-                    <!-- Language Selector (Desktop) -->
                     <li class="nav-item ms-2 d-none d-lg-block">
                         <select class="language-selector" id="languageSelector">
-                            <option value="en">🇬🇧 EN</option>
-                            <option value="ja">🇯🇵 日本語</option>
-                            <option value="zh">🇨🇳 中文</option>
-                            <option value="es">🇪🇸 ES</option>
-                            <option value="fr">🇫🇷 FR</option>
-                            <option value="de">🇩🇪 DE</option>
-                            <option value="ko">🇰🇷 한국어</option>
-                            <option value="ar">🇸🇦 عربي</option>
-                            <option value="pt">🇧🇷 PT</option>
+                            <option value="en">🇬🇧 EN</option><option value="ja">🇯🇵 日本語</option><option value="zh">🇨🇳 中文</option><option value="es">🇪🇸 ES</option><option value="fr">🇫🇷 FR</option><option value="de">🇩🇪 DE</option><option value="ko">🇰🇷 한국어</option><option value="ar">🇸🇦 عربي</option><option value="pt">🇧🇷 PT</option>
                         </select>
                     </li>
                 </ul>
@@ -555,748 +136,218 @@
     <section class="wizard-progress">
         <div class="container">
             <div class="progress-steps">
-                <div class="progress-step active" data-step="1">
-                    <span class="step-number">1</span>
-                    <span class="step-label d-none d-sm-inline" data-i18n="support.troubleshoot.progress.step1">Select Issue</span>
-                </div>
+                <div class="progress-step active" data-step="1"><span class="step-number">1</span><span class="step-label d-none d-sm-inline" data-i18n="support.troubleshoot.progress.step1">Select Issue</span></div>
                 <div class="progress-line"></div>
-                <div class="progress-step" data-step="2">
-                    <span class="step-number">2</span>
-                    <span class="step-label d-none d-sm-inline" data-i18n="support.troubleshoot.progress.step2">Select Details</span>
-                </div>
+                <div class="progress-step" data-step="2"><span class="step-number">2</span><span class="step-label d-none d-sm-inline" data-i18n="support.troubleshoot.progress.step2">Select Details</span></div>
                 <div class="progress-line"></div>
-                <div class="progress-step" data-step="3">
-                    <span class="step-number">3</span>
-                    <span class="step-label d-none d-sm-inline" data-i18n="support.troubleshoot.progress.step3">Solution</span>
-                </div>
+                <div class="progress-step" data-step="3"><span class="step-number">3</span><span class="step-label d-none d-sm-inline" data-i18n="support.troubleshoot.progress.step3">Solution</span></div>
             </div>
         </div>
     </section>
 
     <!-- Wizard Content -->
     <main class="wizard-content">
-        
-        <!-- Step 1: Category Selection -->
         <div class="wizard-step active" id="step1">
             <div class="wizard-question">
                 <h2 data-i18n="support.troubleshoot.questions.whatProblem">What problem are you experiencing?</h2>
                 <p data-i18n="support.troubleshoot.questions.selectClosest">Please select the closest category</p>
             </div>
-            <div class="option-grid" id="step1Options">
-                <!-- Generated by JavaScript -->
-            </div>
+            <div class="option-grid" id="step1Options"></div>
         </div>
 
-        <!-- Step 2: Detail Selection -->
         <div class="wizard-step" id="step2">
             <div class="wizard-question">
-                <h2 id="step2Title" data-i18n="support.troubleshoot.questions.tellMore">Tell us more about the situation</h2>
+                <h2 id="step2Title" data-i18n="support.troubleshoot.questions.tellMore">Tell us more</h2>
                 <p data-i18n="support.troubleshoot.questions.selectBestMatch">Please select the best match</p>
             </div>
-            <div class="option-grid" id="step2Options">
-                <!-- Generated by JavaScript -->
-            </div>
-            <div class="wizard-nav">
-                <button class="btn-back" onclick="goToStep(1)">
-                    <i class="fas fa-arrow-left"></i> <span data-i18n="support.troubleshoot.back">Back</span>
-                </button>
-            </div>
+            <div class="option-grid" id="step2Options"></div>
+            <div class="wizard-nav"><button class="btn-back" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> <span data-i18n="support.troubleshoot.back">Back</span></button></div>
         </div>
 
-        <!-- Step 3: Solution -->
         <div class="wizard-step" id="step3">
             <div class="solution-card">
-                <div class="solution-header">
-                    <i class="fas fa-lightbulb" id="solutionIcon"></i>
-                    <div>
-                        <h3 id="solutionTitle">Solution</h3>
-                    </div>
-                </div>
-                <div class="solution-steps" id="solutionSteps">
-                    <!-- Generated by JavaScript -->
-                </div>
-                
+                <div class="solution-header"><i class="fas fa-lightbulb" id="solutionIcon"></i><div><h3 id="solutionTitle">Solution</h3></div></div>
+                <div class="solution-steps" id="solutionSteps"></div>
                 <div class="resolution-check">
                     <h4 data-i18n="support.troubleshoot.resolution.didItHelp">Did this solution help?</h4>
                     <div class="resolution-buttons">
-                        <button class="btn-resolved" onclick="markResolved()">
-                            <i class="fas fa-check me-2"></i><span data-i18n="support.troubleshoot.resolution.resolved">Yes, resolved!</span>
-                        </button>
-                        <button class="btn-not-resolved" onclick="showMoreHelp()">
-                            <i class="fas fa-times me-2"></i><span data-i18n="support.troubleshoot.resolution.notResolved">No, not resolved</span>
-                        </button>
+                        <button class="btn-resolved" onclick="markResolved()"><i class="fas fa-check me-2"></i><span data-i18n="support.troubleshoot.resolution.resolved">Yes, resolved!</span></button>
+                        <button class="btn-not-resolved" onclick="showMoreHelp()"><i class="fas fa-times me-2"></i><span data-i18n="support.troubleshoot.resolution.notResolved">No, not resolved</span></button>
                     </div>
                 </div>
             </div>
-            
-            <!-- Related FAQ (shown when not resolved) -->
             <div class="related-faqs" id="relatedFaqs">
                 <h4><i class="fas fa-question-circle"></i> <span data-i18n="support.troubleshoot.resolution.relatedFaqs">Related FAQs</span></h4>
-                <div id="relatedFaqsList">
-                    <!-- Generated by JavaScript -->
-                </div>
-                
-                <!-- Contact Section (shown if FAQ doesn't help) -->
+                <div id="relatedFaqsList"></div>
                 <div class="contact-section" id="contactSection">
                     <div class="contact-card">
                         <h4><i class="fas fa-envelope me-2"></i><span data-i18n="support.troubleshoot.resolution.contactUs">Still not resolved?</span></h4>
                         <p data-i18n="support.troubleshoot.resolution.contactDesc">Our support team is here to help.</p>
-                        <a href="contact.html?from=wizard" class="btn btn-lg">
-                            <i class="fas fa-paper-plane me-2"></i><span data-i18n="support.troubleshoot.resolution.contactButton">Contact Us</span>
-                        </a>
+                        <a href="contact.html?from=wizard" class="btn btn-lg"><i class="fas fa-paper-plane me-2"></i><span data-i18n="support.troubleshoot.resolution.contactButton">Contact Us</span></a>
                     </div>
                 </div>
             </div>
-            
-            <div class="wizard-nav">
-                <button class="btn-back" onclick="goToStep(2)">
-                    <i class="fas fa-arrow-left"></i> <span data-i18n="support.troubleshoot.back">Back</span>
-                </button>
-            </div>
+            <div class="wizard-nav"><button class="btn-back" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> <span data-i18n="support.troubleshoot.back">Back</span></button></div>
         </div>
 
-        <!-- Success Screen -->
         <div class="wizard-step" id="stepSuccess">
             <div class="success-screen">
-                <div class="success-icon">
-                    <i class="fas fa-check"></i>
-                </div>
+                <div class="success-icon"><i class="fas fa-check"></i></div>
                 <h2 data-i18n="support.troubleshoot.success.title">Problem Resolved!</h2>
                 <p data-i18n="support.troubleshoot.success.message">Glad we could help.</p>
                 <div class="d-flex justify-content-center gap-3 flex-wrap">
-                    <a href="faq.html" class="btn btn-outline-secondary">
-                        <i class="fas fa-question-circle me-2"></i><span data-i18n="support.troubleshoot.success.viewFaq">View FAQ</span>
-                    </a>
-                    <a href="../../index.html" class="btn btn-primary-custom">
-                        <i class="fas fa-home me-2"></i><span data-i18n="support.troubleshoot.success.backHome">Back to Home</span>
-                    </a>
+                    <a href="faq.html" class="btn btn-outline-secondary"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.troubleshoot.success.viewFaq">View FAQ</span></a>
+                    <a href="../../index.html" class="btn btn-primary-custom"><i class="fas fa-home me-2"></i><span data-i18n="support.troubleshoot.success.backHome">Back to Home</span></a>
                 </div>
             </div>
         </div>
-
     </main>
 
     <!-- Footer -->
     <footer class="footer-custom mt-5">
         <div class="container">
             <div class="row">
-                <div class="col-md-4 mb-4">
-                    <h5><i class="fas fa-book-open me-2"></i>Publisher</h5>
-                    <p class="text-muted" data-i18n="footer.description">A multilingual publishing platform connecting readers and writers worldwide</p>
-                </div>
-                <div class="col-md-2 mb-4">
-                    <h6 data-i18n="footer.services">Services</h6>
-                    <ul class="list-unstyled">
-                        <li><a href="../browse.html" data-i18n="nav.browse">Browse</a></li>
-                        <li><a href="../upload.html" data-i18n="nav.publish">Publish</a></li>
-                        <li><a href="../translators/index.html" data-i18n="nav.translators">Translators</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-2 mb-4">
-                    <h6 data-i18n="footer.support">Support</h6>
-                    <ul class="list-unstyled">
-                        <li><a href="faq.html" data-i18n="support.faq.title">FAQ</a></li>
-                        <li><a href="troubleshoot.html" class="active" data-i18n="support.troubleshoot.title">Troubleshooting</a></li>
-                        <li><a href="contact.html" data-i18n="support.contact.title">Contact</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-2 mb-4">
-                    <h6 data-i18n="footer.company">Company</h6>
-                    <ul class="list-unstyled">
-                        <li><a href="../about.html" data-i18n="footer.about">About</a></li>
-                        <li><a href="../terms.html" data-i18n="footer.terms">Terms</a></li>
-                        <li><a href="../privacy.html" data-i18n="footer.privacy">Privacy</a></li>
-                    </ul>
-                </div>
+                <div class="col-md-4 mb-4"><h5><i class="fas fa-book-open me-2"></i>Publisher</h5><p class="text-muted" data-i18n="footer.description">A multilingual publishing platform</p></div>
+                <div class="col-md-2 mb-4"><h6 data-i18n="footer.services">Services</h6><ul class="list-unstyled"><li><a href="../browse.html" data-i18n="nav.browse">Browse</a></li><li><a href="../upload.html" data-i18n="nav.publish">Publish</a></li></ul></div>
+                <div class="col-md-2 mb-4"><h6 data-i18n="footer.support">Support</h6><ul class="list-unstyled"><li><a href="faq.html" data-i18n="support.faq.title">FAQ</a></li><li><a href="troubleshoot.html" data-i18n="support.troubleshoot.title">Troubleshooting</a></li></ul></div>
+                <div class="col-md-2 mb-4"><h6 data-i18n="footer.company">Company</h6><ul class="list-unstyled"><li><a href="../terms.html" data-i18n="footer.terms">Terms</a></li><li><a href="../privacy.html" data-i18n="footer.privacy">Privacy</a></li></ul></div>
             </div>
-            <hr>
-            <div class="text-center text-muted">
-                <small>&copy; 2025 Publisher. All rights reserved.</small>
-            </div>
+            <hr><div class="text-center text-muted"><small>&copy; 2025 Publisher. All rights reserved.</small></div>
         </div>
     </footer>
 
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../../js/translations.js"></script>
     <script src="../../js/language-switcher.js"></script>
 
     <script>
-        // =============================================
-        // Troubleshooting Data (Decision Tree) - Multilingual
-        // =============================================
-        function getTroubleshootData() {
-            return {
-                login: {
-                    titleKey: 'support.troubleshoot.categories.login.title',
-                    icon: 'fa-sign-in-alt',
-                    descKey: 'support.troubleshoot.categories.login.desc',
-                    options: [
-                        {
-                            id: 'password_wrong',
-                            titleKey: 'troubleshoot.login.passwordWrong.title',
-                            titleFallback: { en: 'Password is incorrect', ja: 'パスワードが正しくないと表示される' },
-                            descKey: 'troubleshoot.login.passwordWrong.desc',
-                            descFallback: { en: 'Error appears when entering password', ja: 'パスワードを入力してもエラーになる' },
-                            solution: {
-                                titleFallback: { en: 'Reset your password', ja: 'パスワードをリセットしましょう' },
-                                steps: [
-                                    { titleFallback: { en: 'Go to login page', ja: 'ログインページを開く' }, descFallback: { en: 'Click "Forgot Password" on the login page', ja: 'ログインページの「パスワードを忘れた方」をクリックします' }, action: { textFallback: { en: 'Go to Login', ja: 'ログインページへ' }, url: '../login.html' } },
-                                    { titleFallback: { en: 'Enter your email', ja: 'メールアドレスを入力' }, descFallback: { en: 'Enter the email address you used to register', ja: '登録時に使用したメールアドレスを入力します' } },
-                                    { titleFallback: { en: 'Check reset email', ja: 'リセットメールを確認' }, descFallback: { en: 'Click the link in the email to set a new password', ja: '届いたメールのリンクをクリックして新しいパスワードを設定します' } }
-                                ]
-                            }
-                        },
-                        {
-                            id: 'account_locked',
-                            titleFallback: { en: 'Account is locked', ja: 'アカウントがロックされた' },
-                            descFallback: { en: 'Locked after multiple failed attempts', ja: '何度か失敗してロックされた' },
-                            solution: {
-                                titleFallback: { en: 'Unlock your account', ja: 'アカウントロックの解除' },
-                                steps: [
-                                    { titleFallback: { en: 'Wait 30 minutes', ja: '30分待つ' }, descFallback: { en: 'For security, the lock is automatically released after 30 minutes', ja: 'セキュリティのため、30分後に自動的にロックが解除されます' } },
-                                    { titleFallback: { en: 'Or reset password', ja: 'または、パスワードをリセット' }, descFallback: { en: 'Resetting your password will immediately unlock your account', ja: 'パスワードリセットを行うと、即座にロックが解除されます' }, action: { textFallback: { en: 'Reset Password', ja: 'パスワードリセット' }, url: '../login.html' } }
-                                ]
-                            }
-                        },
-                        {
-                            id: 'email_not_found',
-                            titleFallback: { en: 'Email not found', ja: 'メールアドレスが見つからない' },
-                            descFallback: { en: 'Shows as not registered', ja: '登録していないと表示される' },
-                            solution: {
-                                titleFallback: { en: 'Verify your account', ja: 'アカウントの確認' },
-                                steps: [
-                                    { titleFallback: { en: 'Try another email', ja: '別のメールアドレスを試す' }, descFallback: { en: 'You may have registered with a different email address', ja: '登録時に別のメールアドレスを使用した可能性があります' } },
-                                    { titleFallback: { en: 'Check spelling', ja: 'スペルを確認' }, descFallback: { en: 'Make sure there are no typos in the email address', ja: 'メールアドレスに誤字がないか確認してください' } },
-                                    { titleFallback: { en: 'Register new account', ja: '新規登録' }, descFallback: { en: 'If you don\'t have an account, please register', ja: 'アカウントをお持ちでない場合は新規登録してください' }, action: { textFallback: { en: 'Register', ja: '新規登録' }, url: '../register.html' } }
-                                ]
-                            }
-                        },
-                        {
-                            id: 'page_not_loading',
-                            titleFallback: { en: 'Page not loading', ja: 'ページが読み込まれない' },
-                            descFallback: { en: 'Screen is blank or shows error', ja: '画面が真っ白になる、エラーが出る' },
-                            solution: {
-                                titleFallback: { en: 'Fix browser issues', ja: 'ブラウザの問題を解決' },
-                                steps: [
-                                    { titleFallback: { en: 'Hard refresh', ja: 'ページを再読み込み' }, descFallback: { en: 'Press Ctrl + F5 (Mac: Cmd + Shift + R) to force reload', ja: 'Ctrl + F5（Mac: Cmd + Shift + R）で強制リロードします' } },
-                                    { titleFallback: { en: 'Clear cache', ja: 'キャッシュをクリア' }, descFallback: { en: 'Clear cache and cookies from your browser settings', ja: 'ブラウザの設定からキャッシュと Cookieを削除します' } },
-                                    { titleFallback: { en: 'Try another browser', ja: '別のブラウザを試す' }, descFallback: { en: 'Try Chrome, Firefox, Safari, or another browser', ja: 'Chrome、Firefox、Safari など別のブラウザでお試しください' } }
-                                ]
-                            }
-                        }
-                    ]
-                },
-                payment: {
-                    titleKey: 'support.troubleshoot.categories.payment.title',
-                    icon: 'fa-credit-card',
-                    descKey: 'support.troubleshoot.categories.payment.desc',
-                    options: [
-                        {
-                            id: 'payment_failed',
-                            titleFallback: { en: 'Payment failed', ja: '支払いが失敗する' },
-                            descFallback: { en: 'Error appears and cannot purchase', ja: 'エラーが表示されて購入できない' },
-                            solution: {
-                                titleFallback: { en: 'Resolve payment error', ja: '支払いエラーの解決' },
-                                steps: [
-                                    { titleFallback: { en: 'Check card info', ja: 'カード情報を確認' }, descFallback: { en: 'Verify card number, expiry date, and security code', ja: 'カード番号、有効期限、セキュリティコードが正しいか確認します' } },
-                                    { titleFallback: { en: 'Check credit limit', ja: '利用限度額を確認' }, descFallback: { en: 'Ensure you haven\'t reached your card limit', ja: 'カードの利用限度額に達していないか確認します' } },
-                                    { titleFallback: { en: 'Try another method', ja: '別の支払い方法を試す' }, descFallback: { en: 'Try a different card or PayPal', ja: '別のカードまたはPayPalをお試しください' } },
-                                    { titleFallback: { en: 'Contact card issuer', ja: 'カード会社に確認' }, descFallback: { en: 'If problems persist, contact your card company', ja: '問題が続く場合は、カード発行会社にお問い合わせください' } }
-                                ]
-                            }
-                        },
-                        {
-                            id: 'refund_request',
-                            titleFallback: { en: 'Request refund', ja: '返金したい' },
-                            descFallback: { en: 'Want to cancel purchase', ja: '購入をキャンセルしたい' },
-                            solution: {
-                                titleFallback: { en: 'Refund request', ja: '返金リクエスト' },
-                                steps: [
-                                    { titleFallback: { en: 'Check eligibility', ja: '返金条件を確認' }, descFallback: { en: 'Refunds available within 7 days if content not viewed', ja: '購入後7日以内で、作品を閲覧していない場合は返金可能です' } },
-                                    { titleFallback: { en: 'Open purchase history', ja: '購入履歴を開く' }, descFallback: { en: 'Go to Dashboard → Purchase History', ja: 'ダッシュボード→購入履歴から該当の購入を見つけます' } },
-                                    { titleFallback: { en: 'Request refund', ja: '返金をリクエスト' }, descFallback: { en: 'Click "Request Refund" button', ja: '「返金をリクエスト」ボタンをクリックします' } }
-                                ]
-                            }
-                        },
-                        {
-                            id: 'receipt_needed',
-                            titleFallback: { en: 'Need receipt', ja: '領収書が欲しい' },
-                            descFallback: { en: 'Need receipt for expenses', ja: '経費精算用の領収書が必要' },
-                            solution: {
-                                titleFallback: { en: 'Download receipt', ja: '領収書のダウンロード' },
-                                steps: [
-                                    { titleFallback: { en: 'Open Dashboard', ja: 'ダッシュボードを開く' }, descFallback: { en: 'Access your dashboard after logging in', ja: 'ログイン後、ダッシュボードにアクセスします' } },
-                                    { titleFallback: { en: 'Select Purchase History', ja: '購入履歴を選択' }, descFallback: { en: 'Click "Purchase History" in the left menu', ja: '左メニューから「購入履歴」をクリックします' } },
-                                    { titleFallback: { en: 'Download receipt', ja: '領収書をダウンロード' }, descFallback: { en: 'Click "Receipt" button next to each purchase for PDF', ja: '各購入の横にある「領収書」ボタンでPDFをダウンロードできます' } }
-                                ]
-                            }
-                        }
-                    ]
-                },
-                reading: {
-                    titleKey: 'support.troubleshoot.categories.reading.title',
-                    icon: 'fa-book-reader',
-                    descKey: 'support.troubleshoot.categories.reading.desc',
-                    options: [
-                        {
-                            id: 'cannot_open',
-                            titleFallback: { en: 'Cannot open work', ja: '作品が開けない' },
-                            descFallback: { en: 'Error appears when trying to read', ja: 'エラーが表示されて読めない' },
-                            solution: {
-                                titleFallback: { en: 'Fix viewing error', ja: '閲覧エラーの解決' },
-                                steps: [
-                                    { titleFallback: { en: 'Refresh page', ja: 'ページを再読み込み' }, descFallback: { en: 'Click the browser refresh button', ja: 'ブラウザの更新ボタンをクリックします' } },
-                                    { titleFallback: { en: 'Check login status', ja: 'ログイン状態を確認' }, descFallback: { en: 'Log out and log back in', ja: 'ログアウトしてから再度ログインしてみてください' } },
-                                    { titleFallback: { en: 'Change browser', ja: 'ブラウザを変更' }, descFallback: { en: 'Try a different browser', ja: '別のブラウザでお試しください' } }
-                                ]
-                            }
-                        },
-                        {
-                            id: 'download_failed',
-                            titleFallback: { en: 'Download failed', ja: 'ダウンロードできない' },
-                            descFallback: { en: 'Download stops midway', ja: 'ダウンロードが途中で止まる' },
-                            solution: {
-                                titleFallback: { en: 'Fix download issues', ja: 'ダウンロード問題の解決' },
-                                steps: [
-                                    { titleFallback: { en: 'Check internet', ja: 'インターネット接続を確認' }, descFallback: { en: 'Try on a stable WiFi connection', ja: '安定したWi-Fi環境でお試しください' } },
-                                    { titleFallback: { en: 'Check storage', ja: 'ストレージ容量を確認' }, descFallback: { en: 'Ensure you have enough free space', ja: 'デバイスに十分な空き容量があるか確認します' } },
-                                    { titleFallback: { en: 'Try another format', ja: '別の形式を試す' }, descFallback: { en: 'If EPUB fails, try PDF format', ja: 'EPUBでダメならPDFなど、別の形式でダウンロードしてみてください' } }
-                                ]
-                            }
-                        }
-                    ]
-                },
-                translation: {
-                    titleKey: 'support.troubleshoot.categories.translation.title',
-                    icon: 'fa-language',
-                    descKey: 'support.troubleshoot.categories.translation.desc',
-                    options: [
-                        {
-                            id: 'ai_translation_error',
-                            titleFallback: { en: 'AI translation not working', ja: 'AI翻訳が動作しない' },
-                            descFallback: { en: 'Shows error or not translating', ja: 'エラーが表示される、翻訳されない' },
-                            solution: {
-                                titleFallback: { en: 'Fix AI translation error', ja: 'AI翻訳エラーの解決' },
-                                steps: [
-                                    { titleFallback: { en: 'Check free quota', ja: '無料枠を確認' }, descFallback: { en: 'Check if you\'ve used your 5 free monthly translations', ja: '月の無料翻訳回数（5回）を使い切っていないか確認します' } },
-                                    { titleFallback: { en: 'Check text length', ja: 'テキスト量を確認' }, descFallback: { en: 'There\'s a limit per translation. Try splitting the text', ja: '一度に翻訳できるテキスト量に制限があります。分割してお試しください' } },
-                                    { titleFallback: { en: 'Wait and retry', ja: '時間をおいて再試行' }, descFallback: { en: 'Server may be busy. Please try again later', ja: 'サーバーが混雑している可能性があります。少し時間をおいてお試しください' } }
-                                ]
-                            }
-                        },
-                        {
-                            id: 'translation_quality',
-                            titleFallback: { en: 'Poor translation quality', ja: '翻訳の品質が悪い' },
-                            descFallback: { en: 'Doesn\'t make sense or mistranslated', ja: '意味が通じない、誤訳がある' },
-                            solution: {
-                                titleFallback: { en: 'Improve translation quality', ja: '翻訳品質の改善' },
-                                steps: [
-                                    { titleFallback: { en: 'Try re-translating', ja: '再翻訳を試す' }, descFallback: { en: 'AI translations can vary each time', ja: 'AI翻訳は毎回少し異なる結果になることがあります' } },
-                                    { titleFallback: { en: 'Hire a professional', ja: 'プロの翻訳者に依頼' }, descFallback: { en: 'For high-quality translations, use our translator marketplace', ja: '高品質な翻訳が必要な場合は、翻訳者マーケットプレイスをご利用ください' }, action: { textFallback: { en: 'Find Translator', ja: '翻訳者を探す' }, url: '../translators/index.html' } }
-                                ]
-                            }
-                        }
-                    ]
-                },
-                publishing: {
-                    titleKey: 'support.troubleshoot.categories.publishing.title',
-                    icon: 'fa-upload',
-                    descKey: 'support.troubleshoot.categories.publishing.desc',
-                    options: [
-                        {
-                            id: 'upload_failed',
-                            titleFallback: { en: 'Upload failed', ja: 'アップロードが失敗する' },
-                            descFallback: { en: 'Cannot upload file', ja: 'ファイルがアップロードできない' },
-                            solution: {
-                                titleFallback: { en: 'Fix upload error', ja: 'アップロードエラーの解決' },
-                                steps: [
-                                    { titleFallback: { en: 'Check file size', ja: 'ファイルサイズを確認' }, descFallback: { en: 'Maximum 100MB allowed', ja: '最大100MBまでアップロード可能です' } },
-                                    { titleFallback: { en: 'Check file format', ja: 'ファイル形式を確認' }, descFallback: { en: 'Supported: PDF, EPUB, DOCX, TXT', ja: '対応形式：PDF、EPUB、DOCX、TXT' } },
-                                    { titleFallback: { en: 'Check internet', ja: 'インターネット接続を確認' }, descFallback: { en: 'Use a stable WiFi connection', ja: '安定したWi-Fi環境でお試しください' } },
-                                    { titleFallback: { en: 'Try another browser', ja: 'ブラウザを変更' }, descFallback: { en: 'Try a different browser', ja: '別のブラウザでお試しください' } }
-                                ]
-                            }
-                        },
-                        {
-                            id: 'work_not_published',
-                            titleFallback: { en: 'Work not published', ja: '作品が公開されない' },
-                            descFallback: { en: 'Submitted but not showing', ja: '投稿したのに表示されない' },
-                            solution: {
-                                titleFallback: { en: 'Check publication status', ja: '公開状況の確認' },
-                                steps: [
-                                    { titleFallback: { en: 'Check review status', ja: '審査状況を確認' }, descFallback: { en: 'Dashboard → My Works shows review status. Reviews take 1-3 business days', ja: 'ダッシュボード→投稿作品で審査状況を確認します。審査には1〜3営業日かかります' } },
-                                    { titleFallback: { en: 'Check email', ja: 'メールを確認' }, descFallback: { en: 'Review results are sent by email. Check spam folder too', ja: '審査結果はメールでお知らせします。迷惑メールフォルダもご確認ください' } },
-                                    { titleFallback: { en: 'Check guidelines', ja: 'ガイドラインを確認' }, descFallback: { en: 'If rejected, check guidelines and resubmit after corrections', ja: '却下された場合は、投稿ガイドラインを確認して修正後に再投稿してください' } }
-                                ]
-                            }
-                        }
-                    ]
-                },
-                account: {
-                    titleKey: 'support.troubleshoot.categories.account.title',
-                    icon: 'fa-user-cog',
-                    descKey: 'support.troubleshoot.categories.account.desc',
-                    options: [
-                        {
-                            id: 'change_email',
-                            titleFallback: { en: 'Change email address', ja: 'メールアドレスを変更したい' },
-                            descFallback: { en: 'Change to a different email', ja: '別のメールアドレスに変更する' },
-                            solution: {
-                                titleFallback: { en: 'Change email address', ja: 'メールアドレスの変更' },
-                                steps: [
-                                    { titleFallback: { en: 'Open account settings', ja: 'アカウント設定を開く' }, descFallback: { en: 'Go to Dashboard → Account Settings', ja: 'ダッシュボード→アカウント設定にアクセスします' } },
-                                    { titleFallback: { en: 'Enter new email', ja: '新しいメールアドレスを入力' }, descFallback: { en: 'Enter the new address in the email field', ja: 'メールアドレス欄に新しいアドレスを入力します' } },
-                                    { titleFallback: { en: 'Confirm via email', ja: '確認メールをクリック' }, descFallback: { en: 'Click the link in the confirmation email sent to new address', ja: '新しいアドレスに届く確認メールのリンクをクリックして完了です' } }
-                                ]
-                            }
-                        },
-                        {
-                            id: 'delete_account',
-                            titleFallback: { en: 'Delete account', ja: 'アカウントを削除したい' },
-                            descFallback: { en: 'Close account and delete all data', ja: '退会して全データを削除する' },
-                            solution: {
-                                titleFallback: { en: 'Delete account', ja: 'アカウント削除の手順' },
-                                steps: [
-                                    { titleFallback: { en: 'Warning', ja: 'ご注意' }, descFallback: { en: 'Deleting your account permanently removes all works, purchase history, and earnings', ja: 'アカウントを削除すると、投稿作品、購入履歴、収益など全てのデータが完全に削除され、復元できません' } },
-                                    { titleFallback: { en: 'Open account settings', ja: 'アカウント設定を開く' }, descFallback: { en: 'Go to Dashboard → Account Settings → Delete Account', ja: 'ダッシュボード→アカウント設定→「アカウントを削除」をクリック' } },
-                                    { titleFallback: { en: 'Enter password', ja: 'パスワードを入力' }, descFallback: { en: 'Enter your password to confirm and proceed', ja: '確認のためパスワードを入力し、削除を実行します' } }
-                                ]
-                            }
-                        },
-                        {
-                            id: 'profile_update',
-                            titleFallback: { en: 'Edit profile', ja: 'プロフィールを編集したい' },
-                            descFallback: { en: 'Change name or bio', ja: '名前や紹介文を変更する' },
-                            solution: {
-                                titleFallback: { en: 'Edit profile', ja: 'プロフィールの編集' },
-                                steps: [
-                                    { titleFallback: { en: 'Open profile settings', ja: 'プロフィール設定を開く' }, descFallback: { en: 'Go to Dashboard → Profile Settings', ja: 'ダッシュボード→プロフィール設定にアクセスします' } },
-                                    { titleFallback: { en: 'Edit info', ja: '情報を編集' }, descFallback: { en: 'Edit display name, bio, profile picture, etc.', ja: '表示名、紹介文、プロフィール画像などを編集できます' } },
-                                    { titleFallback: { en: 'Save', ja: '保存する' }, descFallback: { en: 'Click save changes to finish', ja: '変更を保存ボタンをクリックして完了です' } }
-                                ]
-                            }
-                        }
-                    ]
-                }
-            };
-        }
-
-        // =============================================
-        // State Management
-        // =============================================
-        let currentStep = 1;
-        let selectedCategory = null;
-        let selectedOption = null;
-        let helpClickCount = 0;
-
-        // =============================================
-        // Language Helper
-        // =============================================
-        function getCurrentLang() {
-            return localStorage.getItem('preferredLanguage') || 'en';
-        }
-
-        function getLocalizedText(obj, key) {
-            if (!obj) return '';
-            const lang = getCurrentLang();
-            if (obj[key]) {
-                return t(obj[key]) || obj[key];
+        // Multilingual category data with all 9 languages
+        const categoryData = {
+            login: {
+                icon: 'fa-sign-in-alt',
+                title: { en: 'Cannot Log In', ja: 'ログインできない', zh: '无法登录', es: 'No puedo iniciar sesión', fr: 'Connexion impossible', de: 'Anmeldung nicht möglich', ko: '로그인 불가', ar: 'لا يمكن تسجيل الدخول', pt: 'Não consigo entrar' },
+                desc: { en: 'Password forgotten, account locked', ja: 'パスワード忘れ、アカウントロック', zh: '忘记密码、账户锁定', es: 'Contraseña olvidada, cuenta bloqueada', fr: 'Mot de passe oublié, compte bloqué', de: 'Passwort vergessen, Konto gesperrt', ko: '비밀번호 분실, 계정 잠김', ar: 'نسيت كلمة المرور، الحساب مغلق', pt: 'Senha esquecida, conta bloqueada' }
+            },
+            payment: {
+                icon: 'fa-credit-card',
+                title: { en: 'Payment Issues', ja: '支払いに関する問題', zh: '支付问题', es: 'Problemas de pago', fr: 'Problèmes de paiement', de: 'Zahlungsprobleme', ko: '결제 문제', ar: 'مشاكل الدفع', pt: 'Problemas de pagamento' },
+                desc: { en: 'Payment errors, refunds, receipts', ja: '決済エラー、返金、領収書', zh: '支付错误、退款、收据', es: 'Errores de pago, reembolsos, recibos', fr: 'Erreurs de paiement, remboursements, reçus', de: 'Zahlungsfehler, Erstattungen, Quittungen', ko: '결제 오류, 환불, 영수증', ar: 'أخطاء الدفع، المبالغ المستردة، الإيصالات', pt: 'Erros de pagamento, reembolsos, recibos' }
+            },
+            reading: {
+                icon: 'fa-book-reader',
+                title: { en: 'Cannot Read Works', ja: '作品が読めない', zh: '无法阅读作品', es: 'No puedo leer obras', fr: 'Impossible de lire', de: 'Kann nicht lesen', ko: '작품 읽기 불가', ar: 'لا يمكن قراءة الأعمال', pt: 'Não consigo ler obras' },
+                desc: { en: 'Viewing errors, download issues', ja: '閲覧エラー、ダウンロード問題', zh: '浏览错误、下载问题', es: 'Errores de visualización, problemas de descarga', fr: 'Erreurs de visualisation, problèmes de téléchargement', de: 'Anzeigefehler, Download-Probleme', ko: '보기 오류, 다운로드 문제', ar: 'أخطاء العرض، مشاكل التنزيل', pt: 'Erros de visualização, problemas de download' }
+            },
+            translation: {
+                icon: 'fa-language',
+                title: { en: 'Translation Issues', ja: '翻訳に関する問題', zh: '翻译问题', es: 'Problemas de traducción', fr: 'Problèmes de traduction', de: 'Übersetzungsprobleme', ko: '번역 문제', ar: 'مشاكل الترجمة', pt: 'Problemas de tradução' },
+                desc: { en: 'AI translation, translator communication', ja: 'AI翻訳、翻訳者とのやり取り', zh: 'AI翻译、与翻译人员沟通', es: 'Traducción IA, comunicación con traductores', fr: 'Traduction IA, communication avec les traducteurs', de: 'KI-Übersetzung, Übersetzer-Kommunikation', ko: 'AI 번역, 번역가와의 소통', ar: 'ترجمة AI، التواصل مع المترجمين', pt: 'Tradução IA, comunicação com tradutores' }
+            },
+            publishing: {
+                icon: 'fa-upload',
+                title: { en: 'Cannot Upload Works', ja: '作品の投稿ができない', zh: '无法上传作品', es: 'No puedo subir obras', fr: 'Impossible de publier', de: 'Kann nicht hochladen', ko: '작품 업로드 불가', ar: 'لا يمكن رفع الأعمال', pt: 'Não consigo enviar obras' },
+                desc: { en: 'Upload errors, publishing issues', ja: 'アップロードエラー、公開問題', zh: '上传错误、发布问题', es: 'Errores de carga, problemas de publicación', fr: 'Erreurs de téléchargement, problèmes de publication', de: 'Upload-Fehler, Veröffentlichungsprobleme', ko: '업로드 오류, 게시 문제', ar: 'أخطاء الرفع، مشاكل النشر', pt: 'Erros de upload, problemas de publicação' }
+            },
+            account: {
+                icon: 'fa-user-cog',
+                title: { en: 'Account Settings', ja: 'アカウント設定', zh: '账户设置', es: 'Configuración de cuenta', fr: 'Paramètres du compte', de: 'Kontoeinstellungen', ko: '계정 설정', ar: 'إعدادات الحساب', pt: 'Configurações da conta' },
+                desc: { en: 'Profile changes, account deletion', ja: 'プロフィール変更、退会', zh: '个人资料更改、删除账户', es: 'Cambios de perfil, eliminación de cuenta', fr: 'Modifications de profil, suppression de compte', de: 'Profiländerungen, Kontolöschung', ko: '프로필 변경, 계정 삭제', ar: 'تغييرات الملف الشخصي، حذف الحساب', pt: 'Alterações de perfil, exclusão de conta' }
             }
-            if (obj[key + 'Fallback']) {
-                return obj[key + 'Fallback'][lang] || obj[key + 'Fallback']['en'] || '';
-            }
-            if (obj['titleFallback']) {
-                return obj['titleFallback'][lang] || obj['titleFallback']['en'] || '';
-            }
-            return '';
-        }
+        };
 
-        function getLocalizedFallback(fallbackObj) {
-            if (!fallbackObj) return '';
-            const lang = getCurrentLang();
-            return fallbackObj[lang] || fallbackObj['en'] || '';
-        }
+        // Detailed options for each category with all 9 languages
+        const optionData = {
+            login: [
+                { id: 'password_wrong', title: { en: 'Password is incorrect', ja: 'パスワードが正しくないと表示される', zh: '显示密码不正确', es: 'La contraseña es incorrecta', fr: 'Le mot de passe est incorrect', de: 'Passwort ist falsch', ko: '비밀번호가 틀리다고 표시됨', ar: 'كلمة المرور غير صحيحة', pt: 'Senha incorreta' }, desc: { en: 'Error appears when entering password', ja: 'パスワードを入力してもエラーになる', zh: '输入密码时出现错误', es: 'Aparece error al ingresar contraseña', fr: 'Erreur lors de la saisie du mot de passe', de: 'Fehler bei Passworteingabe', ko: '비밀번호 입력 시 오류 발생', ar: 'يظهر خطأ عند إدخال كلمة المرور', pt: 'Erro ao digitar senha' }, solution: { title: { en: 'Reset your password', ja: 'パスワードをリセットしましょう', zh: '重置密码', es: 'Restablece tu contraseña', fr: 'Réinitialisez votre mot de passe', de: 'Passwort zurücksetzen', ko: '비밀번호 재설정', ar: 'أعد تعيين كلمة المرور', pt: 'Redefinir senha' }, steps: [{ title: { en: 'Go to login page', ja: 'ログインページを開く', zh: '打开登录页面', es: 'Ir a la página de inicio de sesión', fr: 'Aller à la page de connexion', de: 'Zur Anmeldeseite gehen', ko: '로그인 페이지로 이동', ar: 'اذهب إلى صفحة تسجيل الدخول', pt: 'Ir para a página de login' }, desc: { en: 'Click "Forgot Password" on the login page', ja: 'ログインページの「パスワードを忘れた方」をクリック', zh: '点击登录页面上的"忘记密码"', es: 'Haz clic en "¿Olvidaste tu contraseña?"', fr: 'Cliquez sur "Mot de passe oublié"', de: 'Klicken Sie auf "Passwort vergessen"', ko: '"비밀번호 찾기"를 클릭하세요', ar: 'انقر على "نسيت كلمة المرور"', pt: 'Clique em "Esqueci a senha"' }, action: { text: { en: 'Go to Login', ja: 'ログインページへ', zh: '前往登录', es: 'Ir a iniciar sesión', fr: 'Aller à la connexion', de: 'Zur Anmeldung', ko: '로그인으로 이동', ar: 'اذهب لتسجيل الدخول', pt: 'Ir para login' }, url: '../login.html' }}, { title: { en: 'Enter your email', ja: 'メールアドレスを入力', zh: '输入电子邮件', es: 'Ingresa tu email', fr: 'Entrez votre email', de: 'E-Mail eingeben', ko: '이메일 입력', ar: 'أدخل بريدك الإلكتروني', pt: 'Digite seu email' }, desc: { en: 'Enter the email address you used to register', ja: '登録時に使用したメールアドレスを入力', zh: '输入注册时使用的电子邮件地址', es: 'Ingresa el email que usaste para registrarte', fr: 'Entrez l\'email utilisé pour l\'inscription', de: 'Geben Sie die bei der Registrierung verwendete E-Mail ein', ko: '가입 시 사용한 이메일 주소를 입력하세요', ar: 'أدخل البريد الإلكتروني المستخدم للتسجيل', pt: 'Digite o email usado no cadastro' }}, { title: { en: 'Check reset email', ja: 'リセットメールを確認', zh: '检查重置邮件', es: 'Revisa el email de restablecimiento', fr: 'Vérifiez l\'email de réinitialisation', de: 'Reset-E-Mail prüfen', ko: '재설정 이메일 확인', ar: 'تحقق من بريد إعادة التعيين', pt: 'Verifique o email de redefinição' }, desc: { en: 'Click the link in the email to set a new password', ja: '届いたメールのリンクをクリックして新しいパスワードを設定', zh: '点击邮件中的链接设置新密码', es: 'Haz clic en el enlace del email para establecer una nueva contraseña', fr: 'Cliquez sur le lien dans l\'email pour définir un nouveau mot de passe', de: 'Klicken Sie auf den Link in der E-Mail, um ein neues Passwort festzulegen', ko: '이메일의 링크를 클릭하여 새 비밀번호를 설정하세요', ar: 'انقر على الرابط في البريد الإلكتروني لتعيين كلمة مرور جديدة', pt: 'Clique no link do email para definir uma nova senha' }}]}},
+                { id: 'account_locked', title: { en: 'Account is locked', ja: 'アカウントがロックされた', zh: '账户被锁定', es: 'Cuenta bloqueada', fr: 'Compte verrouillé', de: 'Konto gesperrt', ko: '계정이 잠겼습니다', ar: 'الحساب مغلق', pt: 'Conta bloqueada' }, desc: { en: 'Locked after multiple failed attempts', ja: '何度か失敗してロックされた', zh: '多次失败后被锁定', es: 'Bloqueada tras varios intentos fallidos', fr: 'Verrouillé après plusieurs tentatives échouées', de: 'Nach mehreren Fehlversuchen gesperrt', ko: '여러 번 실패 후 잠김', ar: 'مغلق بعد عدة محاولات فاشلة', pt: 'Bloqueada após várias tentativas' }, solution: { title: { en: 'Unlock your account', ja: 'アカウントロックの解除', zh: '解锁账户', es: 'Desbloquear cuenta', fr: 'Débloquer le compte', de: 'Konto entsperren', ko: '계정 잠금 해제', ar: 'فتح الحساب', pt: 'Desbloquear conta' }, steps: [{ title: { en: 'Wait 30 minutes', ja: '30分待つ', zh: '等待30分钟', es: 'Espera 30 minutos', fr: 'Attendez 30 minutes', de: '30 Minuten warten', ko: '30분 기다리기', ar: 'انتظر 30 دقيقة', pt: 'Aguarde 30 minutos' }, desc: { en: 'The lock is automatically released after 30 minutes', ja: '30分後に自動的にロックが解除されます', zh: '30分钟后锁定会自动解除', es: 'El bloqueo se libera automáticamente después de 30 minutos', fr: 'Le verrouillage est automatiquement levé après 30 minutes', de: 'Die Sperre wird nach 30 Minuten automatisch aufgehoben', ko: '30분 후 자동으로 잠금이 해제됩니다', ar: 'يتم رفع القفل تلقائيًا بعد 30 دقيقة', pt: 'O bloqueio é liberado automaticamente após 30 minutos' }}, { title: { en: 'Or reset password', ja: 'または、パスワードをリセット', zh: '或重置密码', es: 'O restablece la contraseña', fr: 'Ou réinitialisez le mot de passe', de: 'Oder Passwort zurücksetzen', ko: '또는 비밀번호 재설정', ar: 'أو أعد تعيين كلمة المرور', pt: 'Ou redefina a senha' }, desc: { en: 'Resetting your password will immediately unlock your account', ja: 'パスワードリセットで即座にロック解除', zh: '重置密码将立即解锁账户', es: 'Restablecer la contraseña desbloqueará tu cuenta inmediatamente', fr: 'La réinitialisation du mot de passe débloquera immédiatement votre compte', de: 'Das Zurücksetzen des Passworts entsperrt Ihr Konto sofort', ko: '비밀번호를 재설정하면 즉시 계정 잠금이 해제됩니다', ar: 'إعادة تعيين كلمة المرور ستفتح حسابك فورًا', pt: 'Redefinir a senha desbloqueará sua conta imediatamente' }, action: { text: { en: 'Reset Password', ja: 'パスワードリセット', zh: '重置密码', es: 'Restablecer contraseña', fr: 'Réinitialiser', de: 'Zurücksetzen', ko: '비밀번호 재설정', ar: 'إعادة تعيين', pt: 'Redefinir senha' }, url: '../login.html' }}]}}
+            ],
+            payment: [
+                { id: 'payment_failed', title: { en: 'Payment failed', ja: '支払いが失敗する', zh: '支付失败', es: 'El pago falló', fr: 'Échec du paiement', de: 'Zahlung fehlgeschlagen', ko: '결제 실패', ar: 'فشل الدفع', pt: 'Pagamento falhou' }, desc: { en: 'Error appears and cannot purchase', ja: 'エラーが表示されて購入できない', zh: '出现错误无法购买', es: 'Aparece error y no puedo comprar', fr: 'Erreur et impossible d\'acheter', de: 'Fehler erscheint, kann nicht kaufen', ko: '오류가 표시되고 구매할 수 없음', ar: 'يظهر خطأ ولا يمكن الشراء', pt: 'Erro aparece e não consigo comprar' }, solution: { title: { en: 'Resolve payment error', ja: '支払いエラーの解決', zh: '解决支付错误', es: 'Resolver error de pago', fr: 'Résoudre l\'erreur de paiement', de: 'Zahlungsfehler beheben', ko: '결제 오류 해결', ar: 'حل خطأ الدفع', pt: 'Resolver erro de pagamento' }, steps: [{ title: { en: 'Check card info', ja: 'カード情報を確認', zh: '检查卡信息', es: 'Verifica los datos de la tarjeta', fr: 'Vérifiez les informations de la carte', de: 'Kartendaten prüfen', ko: '카드 정보 확인', ar: 'تحقق من معلومات البطاقة', pt: 'Verifique os dados do cartão' }, desc: { en: 'Verify card number, expiry date, and security code', ja: 'カード番号、有効期限、セキュリティコードを確認', zh: '验证卡号、有效期和安全码', es: 'Verifica número de tarjeta, fecha de vencimiento y código de seguridad', fr: 'Vérifiez le numéro de carte, la date d\'expiration et le code de sécurité', de: 'Überprüfen Sie Kartennummer, Ablaufdatum und Sicherheitscode', ko: '카드 번호, 만료일, 보안 코드를 확인하세요', ar: 'تحقق من رقم البطاقة وتاريخ انتهاء الصلاحية ورمز الأمان', pt: 'Verifique número do cartão, data de validade e código de segurança' }}, { title: { en: 'Try another method', ja: '別の支払い方法を試す', zh: '尝试其他支付方式', es: 'Prueba otro método', fr: 'Essayez une autre méthode', de: 'Andere Methode versuchen', ko: '다른 결제 방법 시도', ar: 'جرب طريقة أخرى', pt: 'Tente outro método' }, desc: { en: 'Try a different card or PayPal', ja: '別のカードまたはPayPalをお試しください', zh: '尝试其他卡或PayPal', es: 'Prueba otra tarjeta o PayPal', fr: 'Essayez une autre carte ou PayPal', de: 'Versuchen Sie eine andere Karte oder PayPal', ko: '다른 카드나 PayPal을 사용해 보세요', ar: 'جرب بطاقة أخرى أو PayPal', pt: 'Tente outro cartão ou PayPal' }}]}},
+                { id: 'refund_request', title: { en: 'Request refund', ja: '返金したい', zh: '申请退款', es: 'Solicitar reembolso', fr: 'Demander un remboursement', de: 'Erstattung anfordern', ko: '환불 요청', ar: 'طلب استرداد', pt: 'Solicitar reembolso' }, desc: { en: 'Want to cancel purchase', ja: '購入をキャンセルしたい', zh: '想取消购买', es: 'Quiero cancelar la compra', fr: 'Je veux annuler l\'achat', de: 'Kauf stornieren möchten', ko: '구매를 취소하고 싶음', ar: 'أريد إلغاء الشراء', pt: 'Quero cancelar a compra' }, solution: { title: { en: 'Refund request', ja: '返金リクエスト', zh: '退款请求', es: 'Solicitud de reembolso', fr: 'Demande de remboursement', de: 'Erstattungsanfrage', ko: '환불 요청', ar: 'طلب الاسترداد', pt: 'Solicitação de reembolso' }, steps: [{ title: { en: 'Check eligibility', ja: '返金条件を確認', zh: '检查资格', es: 'Verificar elegibilidad', fr: 'Vérifier l\'éligibilité', de: 'Berechtigung prüfen', ko: '자격 확인', ar: 'تحقق من الأهلية', pt: 'Verificar elegibilidade' }, desc: { en: 'Refunds available within 7 days if content not viewed', ja: '購入後7日以内で未閲覧なら返金可能', zh: '如果内容未查看，7天内可退款', es: 'Reembolsos disponibles en 7 días si no se vio el contenido', fr: 'Remboursements disponibles dans les 7 jours si le contenu n\'a pas été consulté', de: 'Erstattungen innerhalb von 7 Tagen möglich, wenn Inhalt nicht angesehen wurde', ko: '콘텐츠를 보지 않은 경우 7일 이내 환불 가능', ar: 'الاسترداد متاح خلال 7 أيام إذا لم تتم مشاهدة المحتوى', pt: 'Reembolsos disponíveis em 7 dias se o conteúdo não foi visualizado' }}, { title: { en: 'Open purchase history', ja: '購入履歴を開く', zh: '打开购买历史', es: 'Abrir historial de compras', fr: 'Ouvrir l\'historique des achats', de: 'Kaufhistorie öffnen', ko: '구매 내역 열기', ar: 'افتح سجل المشتريات', pt: 'Abrir histórico de compras' }, desc: { en: 'Go to Dashboard → Purchase History', ja: 'ダッシュボード→購入履歴', zh: '前往仪表板→购买历史', es: 'Ir a Panel → Historial de compras', fr: 'Aller au Tableau de bord → Historique des achats', de: 'Gehen Sie zu Dashboard → Kaufhistorie', ko: '대시보드 → 구매 내역으로 이동', ar: 'اذهب إلى لوحة التحكم ← سجل المشتريات', pt: 'Vá para Painel → Histórico de compras' }}]}}
+            ],
+            reading: [
+                { id: 'cannot_open', title: { en: 'Cannot open work', ja: '作品が開けない', zh: '无法打开作品', es: 'No puedo abrir la obra', fr: 'Impossible d\'ouvrir l\'œuvre', de: 'Kann Werk nicht öffnen', ko: '작품을 열 수 없음', ar: 'لا يمكن فتح العمل', pt: 'Não consigo abrir a obra' }, desc: { en: 'Error when trying to read', ja: 'エラーが表示されて読めない', zh: '尝试阅读时出错', es: 'Error al intentar leer', fr: 'Erreur lors de la lecture', de: 'Fehler beim Lesen', ko: '읽으려고 할 때 오류 발생', ar: 'خطأ عند محاولة القراءة', pt: 'Erro ao tentar ler' }, solution: { title: { en: 'Fix viewing error', ja: '閲覧エラーの解決', zh: '修复查看错误', es: 'Solucionar error de visualización', fr: 'Corriger l\'erreur de visualisation', de: 'Anzeigefehler beheben', ko: '보기 오류 해결', ar: 'إصلاح خطأ العرض', pt: 'Corrigir erro de visualização' }, steps: [{ title: { en: 'Refresh page', ja: 'ページを再読み込み', zh: '刷新页面', es: 'Actualizar página', fr: 'Actualiser la page', de: 'Seite aktualisieren', ko: '페이지 새로고침', ar: 'تحديث الصفحة', pt: 'Atualizar página' }, desc: { en: 'Click the browser refresh button', ja: 'ブラウザの更新ボタンをクリック', zh: '点击浏览器刷新按钮', es: 'Haz clic en el botón de actualizar del navegador', fr: 'Cliquez sur le bouton d\'actualisation du navigateur', de: 'Klicken Sie auf die Aktualisierungsschaltfläche des Browsers', ko: '브라우저 새로고침 버튼을 클릭하세요', ar: 'انقر على زر تحديث المتصفح', pt: 'Clique no botão atualizar do navegador' }}, { title: { en: 'Try another browser', ja: '別のブラウザを試す', zh: '尝试其他浏览器', es: 'Prueba otro navegador', fr: 'Essayez un autre navigateur', de: 'Anderen Browser versuchen', ko: '다른 브라우저 시도', ar: 'جرب متصفحًا آخر', pt: 'Tente outro navegador' }, desc: { en: 'Try Chrome, Firefox, Safari, or another browser', ja: 'Chrome、Firefox、Safari など別のブラウザでお試しください', zh: '尝试Chrome、Firefox、Safari或其他浏览器', es: 'Prueba Chrome, Firefox, Safari u otro navegador', fr: 'Essayez Chrome, Firefox, Safari ou un autre navigateur', de: 'Versuchen Sie Chrome, Firefox, Safari oder einen anderen Browser', ko: 'Chrome, Firefox, Safari 또는 다른 브라우저를 사용해 보세요', ar: 'جرب Chrome أو Firefox أو Safari أو متصفح آخر', pt: 'Tente Chrome, Firefox, Safari ou outro navegador' }}]}}
+            ],
+            translation: [
+                { id: 'ai_translation_error', title: { en: 'AI translation not working', ja: 'AI翻訳が動作しない', zh: 'AI翻译不工作', es: 'La traducción IA no funciona', fr: 'La traduction IA ne fonctionne pas', de: 'KI-Übersetzung funktioniert nicht', ko: 'AI 번역이 작동하지 않음', ar: 'ترجمة AI لا تعمل', pt: 'Tradução IA não funciona' }, desc: { en: 'Shows error or not translating', ja: 'エラーが表示される、翻訳されない', zh: '显示错误或不翻译', es: 'Muestra error o no traduce', fr: 'Affiche une erreur ou ne traduit pas', de: 'Zeigt Fehler oder übersetzt nicht', ko: '오류가 표시되거나 번역되지 않음', ar: 'يعرض خطأ أو لا يترجم', pt: 'Mostra erro ou não traduz' }, solution: { title: { en: 'Fix AI translation error', ja: 'AI翻訳エラーの解決', zh: '修复AI翻译错误', es: 'Solucionar error de traducción IA', fr: 'Corriger l\'erreur de traduction IA', de: 'KI-Übersetzungsfehler beheben', ko: 'AI 번역 오류 해결', ar: 'إصلاح خطأ ترجمة AI', pt: 'Corrigir erro de tradução IA' }, steps: [{ title: { en: 'Check free quota', ja: '無料枠を確認', zh: '检查免费额度', es: 'Verificar cuota gratuita', fr: 'Vérifier le quota gratuit', de: 'Freies Kontingent prüfen', ko: '무료 할당량 확인', ar: 'تحقق من الحصة المجانية', pt: 'Verificar cota gratuita' }, desc: { en: 'Check if you\'ve used your 5 free monthly translations', ja: '月の無料翻訳回数（5回）を使い切っていないか確認', zh: '检查是否已用完每月5次免费翻译', es: 'Verifica si has usado tus 5 traducciones gratuitas mensuales', fr: 'Vérifiez si vous avez utilisé vos 5 traductions gratuites mensuelles', de: 'Prüfen Sie, ob Sie Ihre 5 kostenlosen monatlichen Übersetzungen aufgebraucht haben', ko: '월 5회 무료 번역을 모두 사용했는지 확인하세요', ar: 'تحقق مما إذا كنت قد استخدمت ترجماتك المجانية الخمس الشهرية', pt: 'Verifique se você usou suas 5 traduções gratuitas mensais' }}, { title: { en: 'Wait and retry', ja: '時間をおいて再試行', zh: '稍后重试', es: 'Espera y vuelve a intentar', fr: 'Attendez et réessayez', de: 'Warten und erneut versuchen', ko: '잠시 후 다시 시도', ar: 'انتظر وأعد المحاولة', pt: 'Aguarde e tente novamente' }, desc: { en: 'Server may be busy. Please try again later', ja: 'サーバーが混雑している可能性があります。しばらくしてからお試しください', zh: '服务器可能繁忙，请稍后再试', es: 'El servidor puede estar ocupado. Por favor, inténtalo más tarde', fr: 'Le serveur peut être occupé. Veuillez réessayer plus tard', de: 'Der Server ist möglicherweise ausgelastet. Bitte versuchen Sie es später erneut', ko: '서버가 바쁠 수 있습니다. 나중에 다시 시도해 주세요', ar: 'قد يكون الخادم مشغولاً. يرجى المحاولة مرة أخرى لاحقًا', pt: 'O servidor pode estar ocupado. Por favor, tente novamente mais tarde' }}]}}
+            ],
+            publishing: [
+                { id: 'upload_failed', title: { en: 'Upload failed', ja: 'アップロードが失敗する', zh: '上传失败', es: 'La carga falló', fr: 'Échec du téléchargement', de: 'Upload fehlgeschlagen', ko: '업로드 실패', ar: 'فشل الرفع', pt: 'Upload falhou' }, desc: { en: 'Cannot upload file', ja: 'ファイルがアップロードできない', zh: '无法上传文件', es: 'No puedo subir el archivo', fr: 'Impossible de télécharger le fichier', de: 'Datei kann nicht hochgeladen werden', ko: '파일을 업로드할 수 없음', ar: 'لا يمكن رفع الملف', pt: 'Não consigo enviar o arquivo' }, solution: { title: { en: 'Fix upload error', ja: 'アップロードエラーの解決', zh: '修复上传错误', es: 'Solucionar error de carga', fr: 'Corriger l\'erreur de téléchargement', de: 'Upload-Fehler beheben', ko: '업로드 오류 해결', ar: 'إصلاح خطأ الرفع', pt: 'Corrigir erro de upload' }, steps: [{ title: { en: 'Check file size', ja: 'ファイルサイズを確認', zh: '检查文件大小', es: 'Verificar tamaño del archivo', fr: 'Vérifier la taille du fichier', de: 'Dateigröße prüfen', ko: '파일 크기 확인', ar: 'تحقق من حجم الملف', pt: 'Verificar tamanho do arquivo' }, desc: { en: 'Maximum 100MB allowed', ja: '最大100MBまでアップロード可能', zh: '最大允许100MB', es: 'Máximo 100MB permitido', fr: 'Maximum 100 Mo autorisé', de: 'Maximal 100 MB erlaubt', ko: '최대 100MB까지 허용', ar: 'الحد الأقصى 100 ميجابايت', pt: 'Máximo 100MB permitido' }}, { title: { en: 'Check file format', ja: 'ファイル形式を確認', zh: '检查文件格式', es: 'Verificar formato del archivo', fr: 'Vérifier le format du fichier', de: 'Dateiformat prüfen', ko: '파일 형식 확인', ar: 'تحقق من تنسيق الملف', pt: 'Verificar formato do arquivo' }, desc: { en: 'Supported: PDF, EPUB, DOCX, TXT', ja: '対応形式：PDF、EPUB、DOCX、TXT', zh: '支持：PDF、EPUB、DOCX、TXT', es: 'Soportados: PDF, EPUB, DOCX, TXT', fr: 'Supportés : PDF, EPUB, DOCX, TXT', de: 'Unterstützt: PDF, EPUB, DOCX, TXT', ko: '지원 형식: PDF, EPUB, DOCX, TXT', ar: 'المدعومة: PDF، EPUB، DOCX، TXT', pt: 'Suportados: PDF, EPUB, DOCX, TXT' }}]}}
+            ],
+            account: [
+                { id: 'change_email', title: { en: 'Change email address', ja: 'メールアドレスを変更したい', zh: '更改电子邮件地址', es: 'Cambiar dirección de email', fr: 'Changer l\'adresse email', de: 'E-Mail-Adresse ändern', ko: '이메일 주소 변경', ar: 'تغيير عنوان البريد الإلكتروني', pt: 'Alterar endereço de email' }, desc: { en: 'Change to a different email', ja: '別のメールアドレスに変更', zh: '更改为其他电子邮件', es: 'Cambiar a otro email', fr: 'Changer pour un autre email', de: 'Zu einer anderen E-Mail wechseln', ko: '다른 이메일로 변경', ar: 'التغيير إلى بريد إلكتروني مختلف', pt: 'Mudar para outro email' }, solution: { title: { en: 'Change email address', ja: 'メールアドレスの変更', zh: '更改电子邮件地址', es: 'Cambiar dirección de email', fr: 'Changer l\'adresse email', de: 'E-Mail-Adresse ändern', ko: '이메일 주소 변경', ar: 'تغيير عنوان البريد الإلكتروني', pt: 'Alterar endereço de email' }, steps: [{ title: { en: 'Open account settings', ja: 'アカウント設定を開く', zh: '打开账户设置', es: 'Abrir configuración de cuenta', fr: 'Ouvrir les paramètres du compte', de: 'Kontoeinstellungen öffnen', ko: '계정 설정 열기', ar: 'افتح إعدادات الحساب', pt: 'Abrir configurações da conta' }, desc: { en: 'Go to Dashboard → Account Settings', ja: 'ダッシュボード→アカウント設定', zh: '前往仪表板→账户设置', es: 'Ir a Panel → Configuración de cuenta', fr: 'Aller au Tableau de bord → Paramètres du compte', de: 'Gehen Sie zu Dashboard → Kontoeinstellungen', ko: '대시보드 → 계정 설정으로 이동', ar: 'اذهب إلى لوحة التحكم ← إعدادات الحساب', pt: 'Vá para Painel → Configurações da conta' }}, { title: { en: 'Enter new email', ja: '新しいメールアドレスを入力', zh: '输入新电子邮件', es: 'Ingresa el nuevo email', fr: 'Entrez le nouvel email', de: 'Neue E-Mail eingeben', ko: '새 이메일 입력', ar: 'أدخل البريد الإلكتروني الجديد', pt: 'Digite o novo email' }, desc: { en: 'Enter the new address in the email field', ja: 'メールアドレス欄に新しいアドレスを入力', zh: '在电子邮件字段中输入新地址', es: 'Ingresa la nueva dirección en el campo de email', fr: 'Entrez la nouvelle adresse dans le champ email', de: 'Geben Sie die neue Adresse in das E-Mail-Feld ein', ko: '이메일 필드에 새 주소를 입력하세요', ar: 'أدخل العنوان الجديد في حقل البريد الإلكتروني', pt: 'Digite o novo endereço no campo de email' }}]}},
+                { id: 'delete_account', title: { en: 'Delete account', ja: 'アカウントを削除したい', zh: '删除账户', es: 'Eliminar cuenta', fr: 'Supprimer le compte', de: 'Konto löschen', ko: '계정 삭제', ar: 'حذف الحساب', pt: 'Excluir conta' }, desc: { en: 'Close account and delete data', ja: '退会して全データを削除', zh: '关闭账户并删除数据', es: 'Cerrar cuenta y eliminar datos', fr: 'Fermer le compte et supprimer les données', de: 'Konto schließen und Daten löschen', ko: '계정 폐쇄 및 데이터 삭제', ar: 'إغلاق الحساب وحذف البيانات', pt: 'Fechar conta e excluir dados' }, solution: { title: { en: 'Delete account', ja: 'アカウント削除', zh: '删除账户', es: 'Eliminar cuenta', fr: 'Supprimer le compte', de: 'Konto löschen', ko: '계정 삭제', ar: 'حذف الحساب', pt: 'Excluir conta' }, steps: [{ title: { en: 'Warning', ja: 'ご注意', zh: '警告', es: 'Advertencia', fr: 'Avertissement', de: 'Warnung', ko: '경고', ar: 'تحذير', pt: 'Aviso' }, desc: { en: 'This will permanently delete all data', ja: '全てのデータが完全に削除され、復元できません', zh: '这将永久删除所有数据', es: 'Esto eliminará permanentemente todos los datos', fr: 'Cela supprimera définitivement toutes les données', de: 'Dadurch werden alle Daten dauerhaft gelöscht', ko: '모든 데이터가 영구적으로 삭제됩니다', ar: 'سيؤدي هذا إلى حذف جميع البيانات بشكل دائم', pt: 'Isso excluirá permanentemente todos os dados' }}, { title: { en: 'Go to settings', ja: '設定を開く', zh: '打开设置', es: 'Ir a configuración', fr: 'Aller aux paramètres', de: 'Zu Einstellungen gehen', ko: '설정으로 이동', ar: 'اذهب إلى الإعدادات', pt: 'Ir para configurações' }, desc: { en: 'Dashboard → Account Settings → Delete Account', ja: 'ダッシュボード→アカウント設定→アカウントを削除', zh: '仪表板→账户设置→删除账户', es: 'Panel → Configuración de cuenta → Eliminar cuenta', fr: 'Tableau de bord → Paramètres du compte → Supprimer le compte', de: 'Dashboard → Kontoeinstellungen → Konto löschen', ko: '대시보드 → 계정 설정 → 계정 삭제', ar: 'لوحة التحكم ← إعدادات الحساب ← حذف الحساب', pt: 'Painel → Configurações da conta → Excluir conta' }}]}}
+            ]
+        };
 
-        // =============================================
-        // Sync Language Selectors
-        // =============================================
+        let currentStep = 1, selectedCategory = null, selectedOption = null, helpClickCount = 0;
+        function getCurrentLang() { return localStorage.getItem('preferredLanguage') || 'en'; }
+        function getL(obj) { if (!obj) return ''; const lang = getCurrentLang(); return obj[lang] || obj['en'] || ''; }
+
         function syncLanguageSelectors() {
-            const desktopSelector = document.getElementById('languageSelector');
-            const mobileSelector = document.getElementById('languageSelectorMobile');
-            
-            if (desktopSelector && mobileSelector) {
-                const savedLang = localStorage.getItem('preferredLanguage') || 'en';
-                desktopSelector.value = savedLang;
-                mobileSelector.value = savedLang;
-                
-                mobileSelector.addEventListener('change', function() {
-                    desktopSelector.value = this.value;
-                });
-                
-                desktopSelector.addEventListener('change', function() {
-                    mobileSelector.value = this.value;
-                });
-            }
+            const d = document.getElementById('languageSelector'), m = document.getElementById('languageSelectorMobile');
+            if (d && m) { const l = getCurrentLang(); d.value = l; m.value = l; m.addEventListener('change', function() { d.value = this.value; }); d.addEventListener('change', function() { m.value = this.value; }); }
         }
 
-        // =============================================
-        // Wizard Control
-        // =============================================
         function goToStep(step) {
             document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active'));
-            
-            const stepElement = document.getElementById('step' + step);
-            if (stepElement) {
-                stepElement.classList.add('active');
-            }
-            
-            updateProgress(step);
-            currentStep = step;
-            
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            const e = document.getElementById('step' + step); if (e) e.classList.add('active');
+            document.querySelectorAll('.progress-step').forEach((el, i) => { el.classList.remove('active', 'completed'); if (i + 1 < step) el.classList.add('completed'); else if (i + 1 === step) el.classList.add('active'); });
+            document.querySelectorAll('.progress-line').forEach((el, i) => { if (i < step - 1) el.classList.add('completed'); else el.classList.remove('completed'); });
+            currentStep = step; window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function updateProgress(step) {
-            document.querySelectorAll('.progress-step').forEach((el, index) => {
-                const stepNum = index + 1;
-                el.classList.remove('active', 'completed');
-                if (stepNum < step) {
-                    el.classList.add('completed');
-                } else if (stepNum === step) {
-                    el.classList.add('active');
-                }
-            });
-            
-            document.querySelectorAll('.progress-line').forEach((el, index) => {
-                if (index < step - 1) {
-                    el.classList.add('completed');
-                } else {
-                    el.classList.remove('completed');
-                }
-            });
-        }
-
-        // =============================================
-        // Generate Step 1 Options
-        // =============================================
         function generateStep1Options() {
-            const data = getTroubleshootData();
-            const container = document.getElementById('step1Options');
-            container.innerHTML = '';
-            
-            Object.keys(data).forEach(categoryKey => {
-                const category = data[categoryKey];
-                const card = document.createElement('div');
-                card.className = 'option-card';
-                card.dataset.category = categoryKey;
-                
-                const title = t(category.titleKey) || getLocalizedFallback(category.titleFallback) || categoryKey;
-                const desc = t(category.descKey) || getLocalizedFallback(category.descFallback) || '';
-                
-                card.innerHTML = `
-                    <i class="fas ${category.icon}"></i>
-                    <h3>${title}</h3>
-                    <p>${desc}</p>
-                `;
-                card.addEventListener('click', function() {
-                    selectedCategory = categoryKey;
-                    document.querySelectorAll('#step1Options .option-card').forEach(c => c.classList.remove('selected'));
-                    this.classList.add('selected');
-                    generateStep2Options(categoryKey);
-                    setTimeout(() => goToStep(2), 300);
-                });
-                container.appendChild(card);
+            const c = document.getElementById('step1Options'); c.innerHTML = '';
+            Object.keys(categoryData).forEach(k => {
+                const cat = categoryData[k], card = document.createElement('div');
+                card.className = 'option-card'; card.dataset.category = k;
+                card.innerHTML = `<i class="fas ${cat.icon}"></i><h3>${getL(cat.title)}</h3><p>${getL(cat.desc)}</p>`;
+                card.addEventListener('click', function() { selectedCategory = k; document.querySelectorAll('#step1Options .option-card').forEach(x => x.classList.remove('selected')); this.classList.add('selected'); generateStep2Options(k); setTimeout(() => goToStep(2), 300); });
+                c.appendChild(card);
             });
         }
 
-        // =============================================
-        // Generate Step 2 Options
-        // =============================================
         function generateStep2Options(category) {
-            const data = getTroubleshootData();
-            const categoryData = data[category];
-            if (!categoryData) return;
-            
-            const title = t(categoryData.titleKey) || getLocalizedFallback(categoryData.titleFallback) || category;
-            document.getElementById('step2Title').textContent = title + ' - ' + (t('support.troubleshoot.questions.tellMore') || 'Tell us more');
-            
-            const optionsContainer = document.getElementById('step2Options');
-            optionsContainer.innerHTML = '';
-            
-            categoryData.options.forEach(option => {
-                const card = document.createElement('div');
-                card.className = 'option-card';
-                card.dataset.optionId = option.id;
-                
-                const optTitle = getLocalizedFallback(option.titleFallback);
-                const optDesc = getLocalizedFallback(option.descFallback);
-                
-                card.innerHTML = `
-                    <i class="fas ${categoryData.icon}"></i>
-                    <h3>${optTitle}</h3>
-                    <p>${optDesc}</p>
-                `;
-                card.addEventListener('click', function() {
-                    selectOption(option);
-                    document.querySelectorAll('#step2Options .option-card').forEach(c => c.classList.remove('selected'));
-                    this.classList.add('selected');
-                });
-                optionsContainer.appendChild(card);
+            document.getElementById('step2Title').textContent = getL(categoryData[category].title) + ' - ' + (t('support.troubleshoot.questions.tellMore') || 'Tell us more');
+            const c = document.getElementById('step2Options'); c.innerHTML = '';
+            (optionData[category] || []).forEach(opt => {
+                const card = document.createElement('div'); card.className = 'option-card'; card.dataset.optionId = opt.id;
+                card.innerHTML = `<i class="fas ${categoryData[category].icon}"></i><h3>${getL(opt.title)}</h3><p>${getL(opt.desc)}</p>`;
+                card.addEventListener('click', function() { selectedOption = opt; showSolution(opt.solution); document.querySelectorAll('#step2Options .option-card').forEach(x => x.classList.remove('selected')); this.classList.add('selected'); document.getElementById('relatedFaqs').classList.remove('show'); document.getElementById('contactSection').classList.remove('show'); helpClickCount = 0; setTimeout(() => goToStep(3), 300); });
+                c.appendChild(card);
             });
         }
 
-        function selectOption(option) {
-            selectedOption = option;
-            showSolution(option.solution);
-            
-            document.getElementById('relatedFaqs').classList.remove('show');
-            document.getElementById('contactSection').classList.remove('show');
-            helpClickCount = 0;
-            
-            setTimeout(() => goToStep(3), 300);
-        }
-
-        function showSolution(solution) {
-            const solTitle = getLocalizedFallback(solution.titleFallback);
-            document.getElementById('solutionTitle').textContent = solTitle;
-            
-            const stepsContainer = document.getElementById('solutionSteps');
-            stepsContainer.innerHTML = '';
-            
-            solution.steps.forEach((step, index) => {
-                const stepDiv = document.createElement('div');
-                stepDiv.className = 'solution-step';
-                
-                const stepTitle = getLocalizedFallback(step.titleFallback);
-                const stepDesc = getLocalizedFallback(step.descFallback);
-                
-                let actionHtml = '';
-                if (step.action) {
-                    const actionText = getLocalizedFallback(step.action.textFallback);
-                    actionHtml = `<a href="${step.action.url}" class="btn btn-sm btn-primary-custom solution-action">${actionText}</a>`;
-                }
-                
-                stepDiv.innerHTML = `
-                    <div class="solution-step-number">${index + 1}</div>
-                    <div class="solution-step-content">
-                        <h4>${stepTitle}</h4>
-                        <p>${stepDesc}</p>
-                        ${actionHtml}
-                    </div>
-                `;
-                stepsContainer.appendChild(stepDiv);
+        function showSolution(sol) {
+            document.getElementById('solutionTitle').textContent = getL(sol.title);
+            const c = document.getElementById('solutionSteps'); c.innerHTML = '';
+            sol.steps.forEach((s, i) => {
+                const d = document.createElement('div'); d.className = 'solution-step';
+                let actionHtml = ''; if (s.action) actionHtml = `<a href="${s.action.url}" class="btn btn-sm btn-primary-custom solution-action">${getL(s.action.text)}</a>`;
+                d.innerHTML = `<div class="solution-step-number">${i + 1}</div><div class="solution-step-content"><h4>${getL(s.title)}</h4><p>${getL(s.desc)}</p>${actionHtml}</div>`;
+                c.appendChild(d);
             });
         }
 
-        // =============================================
-        // Resolution
-        // =============================================
-        function markResolved() {
-            goToStep('Success');
-            document.getElementById('stepSuccess').classList.add('active');
-        }
-
-        function showMoreHelp() {
-            helpClickCount++;
-            
-            if (helpClickCount === 1) {
-                loadRelatedFaqs();
-                document.getElementById('relatedFaqs').classList.add('show');
-                document.getElementById('relatedFaqs').scrollIntoView({ behavior: 'smooth' });
-            } else {
-                document.getElementById('contactSection').classList.add('show');
-                document.getElementById('contactSection').scrollIntoView({ behavior: 'smooth' });
-            }
-        }
+        function markResolved() { goToStep('Success'); document.getElementById('stepSuccess').classList.add('active'); }
+        function showMoreHelp() { helpClickCount++; if (helpClickCount === 1) { loadRelatedFaqs(); document.getElementById('relatedFaqs').classList.add('show'); document.getElementById('relatedFaqs').scrollIntoView({ behavior: 'smooth' }); } else { document.getElementById('contactSection').classList.add('show'); document.getElementById('contactSection').scrollIntoView({ behavior: 'smooth' }); }}
 
         async function loadRelatedFaqs() {
             const lang = getCurrentLang();
-            
             try {
-                const response = await fetch(`http://localhost:3000/api/support/faq`);
-                const data = await response.json();
-                
-                const faqList = document.getElementById('relatedFaqsList');
-                faqList.innerHTML = '';
-                
+                const res = await fetch('http://localhost:3000/api/support/faq'), data = await res.json(), list = document.getElementById('relatedFaqsList'); list.innerHTML = '';
                 if (data.success && data.faqs.length > 0) {
-                    const questionKey = lang === 'ja' ? 'question_ja' : 'question_en';
-                    const answerKey = lang === 'ja' ? 'answer_ja' : 'answer_en';
-                    
-                    data.faqs.slice(0, 3).forEach(faq => {
-                        const faqCard = document.createElement('div');
-                        faqCard.className = 'faq-mini-card';
-                        faqCard.innerHTML = `
-                            <h5><i class="fas fa-chevron-right me-2"></i>${faq[questionKey] || faq.question_en}</h5>
-                            <div class="faq-answer">${faq[answerKey] || faq.answer_en}</div>
-                        `;
-                        faqCard.addEventListener('click', function() {
-                            this.classList.toggle('expanded');
-                            const icon = this.querySelector('i');
-                            if (this.classList.contains('expanded')) {
-                                icon.classList.replace('fa-chevron-right', 'fa-chevron-down');
-                            } else {
-                                icon.classList.replace('fa-chevron-down', 'fa-chevron-right');
-                            }
-                        });
-                        faqList.appendChild(faqCard);
-                    });
-                    
-                    const moreHelpMsg = document.createElement('p');
-                    moreHelpMsg.className = 'text-center text-muted mt-3';
-                    const stillNotResolvedText = t('support.troubleshoot.resolution.stillNotResolved') || 'If the above did not help, click "Not resolved" again';
-                    moreHelpMsg.innerHTML = `<small>${stillNotResolvedText}</small>`;
-                    faqList.appendChild(moreHelpMsg);
-                } else {
-                    const noFaqText = lang === 'ja' ? '関連するFAQが見つかりませんでした。' : 'No related FAQs found.';
-                    faqList.innerHTML = `<p class="text-muted">${noFaqText}</p>`;
-                    document.getElementById('contactSection').classList.add('show');
-                }
-            } catch (error) {
-                console.error('FAQ fetch error:', error);
-                document.getElementById('contactSection').classList.add('show');
-            }
+                    const qKey = lang === 'ja' ? 'question_ja' : 'question_en', aKey = lang === 'ja' ? 'answer_ja' : 'answer_en';
+                    data.faqs.slice(0, 3).forEach(faq => { const card = document.createElement('div'); card.className = 'faq-mini-card'; card.innerHTML = `<h5><i class="fas fa-chevron-right me-2"></i>${faq[qKey] || faq.question_en}</h5><div class="faq-answer">${faq[aKey] || faq.answer_en}</div>`; card.addEventListener('click', function() { this.classList.toggle('expanded'); const i = this.querySelector('i'); if (this.classList.contains('expanded')) i.classList.replace('fa-chevron-right', 'fa-chevron-down'); else i.classList.replace('fa-chevron-down', 'fa-chevron-right'); }); list.appendChild(card); });
+                    const msg = document.createElement('p'); msg.className = 'text-center text-muted mt-3'; msg.innerHTML = `<small>${t('support.troubleshoot.resolution.stillNotResolved') || 'If the above did not help, click "Not resolved" again'}</small>`; list.appendChild(msg);
+                } else { list.innerHTML = `<p class="text-muted">${lang === 'ja' ? '関連するFAQが見つかりませんでした。' : 'No related FAQs found.'}</p>`; document.getElementById('contactSection').classList.add('show'); }
+            } catch (e) { console.error(e); document.getElementById('contactSection').classList.add('show'); }
         }
 
-        // =============================================
-        // Initialization
-        // =============================================
-        document.addEventListener('DOMContentLoaded', function() {
-            syncLanguageSelectors();
-            generateStep1Options();
-            
-            // Check URL parameters
-            const params = new URLSearchParams(window.location.search);
-            const category = params.get('category');
-            
-            if (category && getTroubleshootData()[category]) {
-                selectedCategory = category;
-                generateStep2Options(category);
-                goToStep(2);
-            }
-        });
-
-        // Re-generate options when language changes
-        document.addEventListener('languageChanged', function(e) {
-            const lang = e.detail.language || e.detail.lang;
-            if (lang) {
-                const desktopSelector = document.getElementById('languageSelector');
-                const mobileSelector = document.getElementById('languageSelectorMobile');
-                if (desktopSelector) desktopSelector.value = lang;
-                if (mobileSelector) mobileSelector.value = lang;
-            }
-            
-            generateStep1Options();
-            if (selectedCategory) {
-                generateStep2Options(selectedCategory);
-            }
-            if (selectedOption && selectedOption.solution) {
-                showSolution(selectedOption.solution);
-            }
-        });
+        document.addEventListener('DOMContentLoaded', function() { syncLanguageSelectors(); generateStep1Options(); const p = new URLSearchParams(window.location.search), cat = p.get('category'); if (cat && categoryData[cat]) { selectedCategory = cat; generateStep2Options(cat); goToStep(2); } });
+        document.addEventListener('languageChanged', function(e) { const l = e.detail.language || e.detail.lang; if (l) { const d = document.getElementById('languageSelector'), m = document.getElementById('languageSelectorMobile'); if (d) d.value = l; if (m) m.value = l; } generateStep1Options(); if (selectedCategory) generateStep2Options(selectedCategory); if (selectedOption && selectedOption.solution) showSolution(selectedOption.solution); });
     </script>
-    <!-- Notification Badge -->
     <script src="../../js/header-notification.js"></script>
 </body>
 </html>
