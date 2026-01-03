@@ -1,165 +1,65 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>翻訳者として登録 - Publisher</title>
+    <title>Register as Translator - Publisher</title>
     
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
-    <!-- Custom Styles -->
     <link href="../../css/style-new.css" rel="stylesheet">
     
     <style>
-        .page-header {
-            background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
-            color: white;
-            padding: var(--spacing-xl) 0;
-            margin-bottom: var(--spacing-xl);
-        }
+        .navbar-lang-selector { display: flex; align-items: center; margin-right: 0.5rem; }
+        @media (max-width: 991.98px) { .navbar-lang-selector { order: 1; } .navbar-toggler { order: 2; } }
+        .page-header { background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%); color: white; padding: var(--spacing-xl) 0; margin-bottom: var(--spacing-xl); }
         .page-header h1 { color: white; font-size: var(--font-size-2xl); margin-bottom: var(--spacing-xs); }
         .page-header p { color: rgba(255,255,255,0.9); margin: 0; }
-        
-        .form-card {
-            background: var(--color-bg-card);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-xl);
-            margin-bottom: var(--spacing-lg);
-        }
-        .form-card h4 {
-            font-family: var(--font-heading);
-            color: var(--color-text-primary);
-            margin-bottom: var(--spacing-lg);
-            padding-bottom: var(--spacing-md);
-            border-bottom: 1px solid var(--color-border);
-        }
-        
-        .step-indicator {
-            display: flex;
-            justify-content: center;
-            margin-bottom: var(--spacing-xl);
-            gap: var(--spacing-sm);
-        }
-        .step {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-        }
-        .step-num {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: var(--color-bg-hover);
-            color: var(--color-text-secondary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            transition: all var(--transition-fast);
-        }
-        .step.active .step-num {
-            background: var(--color-accent);
-            color: white;
-        }
-        .step.completed .step-num {
-            background: var(--color-success);
-            color: white;
-        }
-        .step-label {
-            font-size: var(--font-size-sm);
-            color: var(--color-text-secondary);
-        }
+        .form-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-xl); margin-bottom: var(--spacing-lg); }
+        .form-card h4 { font-family: var(--font-heading); color: var(--color-text-primary); margin-bottom: var(--spacing-lg); padding-bottom: var(--spacing-md); border-bottom: 1px solid var(--color-border); }
+        .step-indicator { display: flex; justify-content: center; margin-bottom: var(--spacing-xl); gap: var(--spacing-sm); }
+        .step { display: flex; align-items: center; gap: var(--spacing-sm); }
+        .step-num { width: 36px; height: 36px; border-radius: 50%; background: var(--color-bg-hover); color: var(--color-text-secondary); display: flex; align-items: center; justify-content: center; font-weight: 600; transition: all var(--transition-fast); }
+        .step.active .step-num { background: var(--color-accent); color: white; }
+        .step.completed .step-num { background: var(--color-success); color: white; }
+        .step-label { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
         .step.active .step-label { color: var(--color-text-primary); font-weight: 500; }
-        .step-line {
-            width: 40px;
-            height: 2px;
-            background: var(--color-border);
-            margin: 0 var(--spacing-xs);
-        }
-        
-        .lang-pair-item {
-            background: var(--color-bg-hover);
-            border-radius: var(--radius-md);
-            padding: var(--spacing-md);
-            margin-bottom: var(--spacing-sm);
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-md);
-        }
-        .lang-pair-item .form-select { flex: 1; }
-        
-        .info-card {
-            background: var(--color-bg-card);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-lg);
-            margin-bottom: var(--spacing-lg);
-        }
-        .info-card h5 {
-            font-weight: 600;
-            margin-bottom: var(--spacing-md);
-            color: var(--color-text-primary);
-        }
-        
-        .benefits-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .benefits-list li {
-            padding: var(--spacing-sm) 0;
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-            color: var(--color-text-secondary);
-        }
+        .step-line { width: 40px; height: 2px; background: var(--color-border); margin: 0 var(--spacing-xs); }
+        .lang-pair-item { background: var(--color-bg-hover); border-radius: var(--radius-md); padding: var(--spacing-md); margin-bottom: var(--spacing-sm); display: flex; align-items: center; gap: var(--spacing-md); flex-wrap: wrap; }
+        .lang-pair-item .form-select { flex: 1; min-width: 120px; }
+        .info-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-lg); margin-bottom: var(--spacing-lg); }
+        .info-card h5 { font-weight: 600; margin-bottom: var(--spacing-md); color: var(--color-text-primary); }
+        .benefits-list { list-style: none; padding: 0; margin: 0; }
+        .benefits-list li { padding: var(--spacing-sm) 0; display: flex; align-items: center; gap: var(--spacing-sm); color: var(--color-text-secondary); }
         .benefits-list li i { color: var(--color-success); }
-        
-        .revenue-highlight {
-            background: linear-gradient(135deg, rgba(93, 156, 89, 0.1), rgba(93, 156, 89, 0.05));
-            border: 1px solid rgba(93, 156, 89, 0.3);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-lg);
-            text-align: center;
-            margin-bottom: var(--spacing-lg);
-        }
-        .revenue-highlight .percent {
-            font-family: var(--font-heading);
-            font-size: var(--font-size-3xl);
-            font-weight: 700;
-            color: var(--color-success);
-        }
-        .revenue-highlight .label {
-            color: var(--color-text-secondary);
-            font-size: var(--font-size-sm);
-        }
-        
-        .success-icon {
-            font-size: 5rem;
-            color: var(--color-success);
-            margin-bottom: var(--spacing-lg);
-        }
+        .revenue-highlight { background: linear-gradient(135deg, rgba(93, 156, 89, 0.1), rgba(93, 156, 89, 0.05)); border: 1px solid rgba(93, 156, 89, 0.3); border-radius: var(--radius-lg); padding: var(--spacing-lg); text-align: center; margin-bottom: var(--spacing-lg); }
+        .revenue-highlight .percent { font-family: var(--font-heading); font-size: var(--font-size-3xl); font-weight: 700; color: var(--color-success); }
+        .revenue-highlight .label { color: var(--color-text-secondary); font-size: var(--font-size-sm); }
+        .success-icon { font-size: 5rem; color: var(--color-success); margin-bottom: var(--spacing-lg); }
     </style>
 </head>
 <body>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="../../index.html">
-                <i class="fas fa-book-open"></i>
-                Publisher
-            </a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="index.html"><i class="fas fa-language me-1"></i>翻訳者を探す</a>
-                <a class="nav-link" href="../dashboard.html"><i class="fas fa-th-large me-1"></i>Dashboard</a>
+            <a class="navbar-brand" href="../../index.html"><i class="fas fa-book-open"></i> Publisher</a>
+            <div class="navbar-lang-selector d-lg-none">
+                <select class="language-selector" id="languageSelectorMobile">
+                    <option value="en">🇬🇧 EN</option><option value="ja">🇯🇵 日本語</option><option value="zh">🇨🇳 中文</option><option value="es">🇪🇸 ES</option><option value="fr">🇫🇷 FR</option><option value="de">🇩🇪 DE</option><option value="ko">🇰🇷 한국어</option><option value="ar">🇸🇦 عربي</option><option value="pt">🇧🇷 PT</option>
+                </select>
+            </div>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="navbar-nav ms-auto align-items-center">
+                    <a class="nav-link" href="index.html"><i class="fas fa-language me-1"></i><span id="navFindTranslators">Find Translators</span></a>
+                    <a class="nav-link" href="../dashboard.html"><i class="fas fa-th-large me-1"></i><span id="navDashboard">Dashboard</span></a>
+                    <select class="language-selector d-none d-lg-block ms-3" id="languageSelector">
+                        <option value="en">🇬🇧 EN</option><option value="ja">🇯🇵 日本語</option><option value="zh">🇨🇳 中文</option><option value="es">🇪🇸 ES</option><option value="fr">🇫🇷 FR</option><option value="de">🇩🇪 DE</option><option value="ko">🇰🇷 한국어</option><option value="ar">🇸🇦 عربي</option><option value="pt">🇧🇷 PT</option>
+                    </select>
+                </div>
             </div>
         </div>
     </nav>
@@ -167,8 +67,8 @@
     <!-- Page Header -->
     <div class="page-header">
         <div class="container">
-            <h1><i class="fas fa-user-plus me-2"></i>翻訳者として登録</h1>
-            <p>あなたの語学スキルを活かして収入を得ましょう</p>
+            <h1><i class="fas fa-user-plus me-2"></i><span id="pageTitle">Register as Translator</span></h1>
+            <p id="pageSubtitle">Use your language skills to earn income</p>
         </div>
     </div>
 
@@ -179,157 +79,124 @@
                 <div class="step-indicator">
                     <div class="step active" id="step1-indicator">
                         <div class="step-num">1</div>
-                        <span class="step-label">基本情報</span>
+                        <span class="step-label" id="stepLabel1">Basic Info</span>
                     </div>
                     <div class="step-line"></div>
                     <div class="step" id="step2-indicator">
                         <div class="step-num">2</div>
-                        <span class="step-label">言語設定</span>
+                        <span class="step-label" id="stepLabel2">Languages</span>
                     </div>
                     <div class="step-line"></div>
                     <div class="step" id="step3-indicator">
                         <div class="step-num">3</div>
-                        <span class="step-label">完了</span>
+                        <span class="step-label" id="stepLabel3">Complete</span>
                     </div>
                 </div>
 
                 <!-- Step 1: Basic Info -->
                 <div id="step1" class="form-card">
-                    <h4><i class="fas fa-user me-2 text-accent"></i>基本情報</h4>
+                    <h4><i class="fas fa-user me-2 text-accent"></i><span id="formTitle1">Basic Information</span></h4>
                     
                     <div class="mb-3">
-                        <label class="form-label">表示名 <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="display-name" placeholder="翻訳者としての名前">
-                        <small class="text-secondary">著者に表示される名前です</small>
+                        <label class="form-label" id="labelDisplayName">Display Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="display-name" placeholder="">
+                        <small class="text-secondary" id="hintDisplayName">This name will be shown to authors</small>
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label">自己紹介 <span class="text-danger">*</span></label>
-                        <textarea class="form-control" id="bio" rows="4" placeholder="あなたの経歴、翻訳スタイル、得意分野などを紹介してください"></textarea>
+                        <label class="form-label" id="labelBio">Bio <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="bio" rows="4" placeholder=""></textarea>
                     </div>
                     
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">翻訳経験年数</label>
+                            <label class="form-label" id="labelYearsExp">Years of Experience</label>
                             <input type="number" class="form-control" id="years-experience" min="0" max="50" value="0">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">平均返答時間（時間）</label>
+                            <label class="form-label" id="labelResponseTime">Avg Response Time (hours)</label>
                             <input type="number" class="form-control" id="response-hours" min="1" max="168" value="24">
                         </div>
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label">専門分野（複数選択可）</label>
+                        <label class="form-label" id="labelSpecialization">Specializations (select multiple)</label>
                         <div class="row">
                             <div class="col-6 col-md-4">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" value="fiction" id="spec-fiction">
-                                    <label class="form-check-label" for="spec-fiction">小説・フィクション</label>
+                                    <label class="form-check-label" for="spec-fiction" id="specFiction">Fiction</label>
                                 </div>
                             </div>
                             <div class="col-6 col-md-4">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" value="manga" id="spec-manga">
-                                    <label class="form-check-label" for="spec-manga">マンガ</label>
+                                    <label class="form-check-label" for="spec-manga" id="specManga">Manga</label>
                                 </div>
                             </div>
                             <div class="col-6 col-md-4">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" value="technical" id="spec-technical">
-                                    <label class="form-check-label" for="spec-technical">技術・専門書</label>
+                                    <label class="form-check-label" for="spec-technical" id="specTechnical">Technical</label>
                                 </div>
                             </div>
                             <div class="col-6 col-md-4">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" value="poetry" id="spec-poetry">
-                                    <label class="form-check-label" for="spec-poetry">詩・俳句</label>
+                                    <label class="form-check-label" for="spec-poetry" id="specPoetry">Poetry</label>
                                 </div>
                             </div>
                             <div class="col-6 col-md-4">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" value="business" id="spec-business">
-                                    <label class="form-check-label" for="spec-business">ビジネス</label>
+                                    <label class="form-check-label" for="spec-business" id="specBusiness">Business</label>
                                 </div>
                             </div>
                             <div class="col-6 col-md-4">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" value="academic" id="spec-academic">
-                                    <label class="form-check-label" for="spec-academic">学術</label>
+                                    <label class="form-check-label" for="spec-academic" id="specAcademic">Academic</label>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label">資格・認定（任意）</label>
-                        <input type="text" class="form-control" id="certifications" placeholder="例: JLPT N1, 翻訳検定1級">
+                        <label class="form-label" id="labelCertifications">Certifications (optional)</label>
+                        <input type="text" class="form-control" id="certifications" placeholder="">
                     </div>
                     
                     <div class="mb-4">
-                        <label class="form-label">ポートフォリオURL（任意）</label>
+                        <label class="form-label" id="labelPortfolio">Portfolio URL (optional)</label>
                         <input type="url" class="form-control" id="portfolio-url" placeholder="https://...">
                     </div>
                     
                     <div class="d-flex justify-content-end">
                         <button class="btn btn-custom" onclick="goToStep(2)">
-                            次へ：言語設定 <i class="fas fa-arrow-right ms-2"></i>
+                            <span id="btnNextLang">Next: Languages</span> <i class="fas fa-arrow-right ms-2"></i>
                         </button>
                     </div>
                 </div>
 
                 <!-- Step 2: Languages -->
                 <div id="step2" class="form-card" style="display: none;">
-                    <h4><i class="fas fa-language me-2 text-accent"></i>対応言語</h4>
-                    <p class="text-secondary mb-4">翻訳できる言語ペアを追加してください。最低1つ必要です。</p>
+                    <h4><i class="fas fa-language me-2 text-accent"></i><span id="formTitle2">Language Pairs</span></h4>
+                    <p class="text-secondary mb-4" id="langPairHint">Add the language pairs you can translate. At least one is required.</p>
                     
-                    <div id="language-pairs">
-                        <div class="lang-pair-item">
-                            <select class="form-select source-lang">
-                                <option value="">翻訳元</option>
-                                <option value="ja">日本語</option>
-                                <option value="en">English</option>
-                                <option value="zh">中文</option>
-                                <option value="es">Español</option>
-                                <option value="fr">Français</option>
-                                <option value="de">Deutsch</option>
-                                <option value="ko">한국어</option>
-                                <option value="ar">العربية</option>
-                            </select>
-                            <i class="fas fa-arrow-right text-secondary"></i>
-                            <select class="form-select target-lang">
-                                <option value="">翻訳先</option>
-                                <option value="ja">日本語</option>
-                                <option value="en">English</option>
-                                <option value="zh">中文</option>
-                                <option value="es">Español</option>
-                                <option value="fr">Français</option>
-                                <option value="de">Deutsch</option>
-                                <option value="ko">한국어</option>
-                                <option value="ar">العربية</option>
-                            </select>
-                            <div class="form-check">
-                                <input class="form-check-input is-native" type="checkbox">
-                                <label class="form-check-label">ネイティブ</label>
-                            </div>
-                            <button class="btn btn-soft-custom btn-sm" onclick="removeLanguagePair(this)" disabled>
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
+                    <div id="language-pairs"></div>
                     
                     <button class="btn btn-soft-custom mt-3" onclick="addLanguagePair()">
-                        <i class="fas fa-plus me-2"></i>言語ペアを追加
+                        <i class="fas fa-plus me-2"></i><span id="btnAddPair">Add Language Pair</span>
                     </button>
                     
                     <hr class="my-4">
                     
                     <div class="d-flex justify-content-between">
                         <button class="btn btn-soft-custom" onclick="goToStep(1)">
-                            <i class="fas fa-arrow-left me-2"></i>戻る
+                            <i class="fas fa-arrow-left me-2"></i><span id="btnBack">Back</span>
                         </button>
                         <button class="btn btn-custom" onclick="submitRegistration()">
-                            <i class="fas fa-check me-2"></i>登録を完了
+                            <i class="fas fa-check me-2"></i><span id="btnComplete">Complete Registration</span>
                         </button>
                     </div>
                 </div>
@@ -337,15 +204,15 @@
                 <!-- Step 3: Complete -->
                 <div id="step3" class="form-card text-center" style="display: none;">
                     <i class="fas fa-check-circle success-icon"></i>
-                    <h3 style="font-family: var(--font-heading);">登録が完了しました！</h3>
-                    <p class="text-secondary mb-4">翻訳者として活動を開始できます。著者からの依頼をお待ちください。</p>
+                    <h3 style="font-family: var(--font-heading);" id="successTitle">Registration Complete!</h3>
+                    <p class="text-secondary mb-4" id="successMessage">You can now start working as a translator. Wait for requests from authors.</p>
                     
-                    <div class="d-flex justify-content-center gap-3">
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
                         <a href="index.html" class="btn btn-soft-custom">
-                            <i class="fas fa-search me-2"></i>マーケットプレイスを見る
+                            <i class="fas fa-search me-2"></i><span id="btnViewMarket">View Marketplace</span>
                         </a>
                         <a href="../dashboard.html" class="btn btn-custom">
-                            <i class="fas fa-home me-2"></i>ダッシュボードへ
+                            <i class="fas fa-home me-2"></i><span id="btnGoDashboard">Go to Dashboard</span>
                         </a>
                     </div>
                 </div>
@@ -355,30 +222,30 @@
                 <!-- Revenue Model -->
                 <div class="revenue-highlight">
                     <div class="percent">20%</div>
-                    <div class="label">翻訳作品の収益があなたの報酬に</div>
+                    <div class="label" id="revenueLabel">of translated work sales become your earnings</div>
                 </div>
                 
                 <!-- Benefits -->
                 <div class="info-card">
-                    <h5><i class="fas fa-star me-2 text-warning"></i>翻訳者のメリット</h5>
+                    <h5><i class="fas fa-star me-2 text-warning"></i><span id="benefitsTitle">Translator Benefits</span></h5>
                     <ul class="benefits-list">
-                        <li><i class="fas fa-check-circle"></i>自分のペースで働ける</li>
-                        <li><i class="fas fa-check-circle"></i>翻訳作品の収益20%が報酬</li>
-                        <li><i class="fas fa-check-circle"></i>世界中の著者と繋がる</li>
-                        <li><i class="fas fa-check-circle"></i>人気作品でより多くの収入</li>
-                        <li><i class="fas fa-check-circle"></i>レビューで実績を積める</li>
+                        <li><i class="fas fa-check-circle"></i><span id="benefit1">Work at your own pace</span></li>
+                        <li><i class="fas fa-check-circle"></i><span id="benefit2">Earn 20% of translation sales</span></li>
+                        <li><i class="fas fa-check-circle"></i><span id="benefit3">Connect with global authors</span></li>
+                        <li><i class="fas fa-check-circle"></i><span id="benefit4">More income from popular works</span></li>
+                        <li><i class="fas fa-check-circle"></i><span id="benefit5">Build reputation with reviews</span></li>
                     </ul>
                 </div>
                 
                 <!-- Revenue Model Info -->
                 <div class="info-card">
-                    <h5><i class="fas fa-info-circle me-2 text-accent"></i>収益分配モデル</h5>
-                    <p class="small text-secondary mb-3">作品が売れた際の収益は以下のように分配されます：</p>
+                    <h5><i class="fas fa-info-circle me-2 text-accent"></i><span id="revenueModelTitle">Revenue Sharing Model</span></h5>
+                    <p class="small text-secondary mb-3" id="revenueModelDesc">When a work sells, revenue is distributed as follows:</p>
                     <table class="table table-sm mb-0">
-                        <tr><td>著者</td><td class="text-end"><strong>40-70%</strong></td></tr>
-                        <tr><td>翻訳者</td><td class="text-end text-success"><strong>20%</strong></td></tr>
-                        <tr><td>編集者</td><td class="text-end">10%</td></tr>
-                        <tr><td>プラットフォーム</td><td class="text-end">30%</td></tr>
+                        <tr><td id="revAuthor">Author</td><td class="text-end"><strong>40-70%</strong></td></tr>
+                        <tr><td id="revTranslator">Translator</td><td class="text-end text-success"><strong>20%</strong></td></tr>
+                        <tr><td id="revEditor">Editor</td><td class="text-end">10%</td></tr>
+                        <tr><td id="revPlatform">Platform</td><td class="text-end">30%</td></tr>
                     </table>
                 </div>
             </div>
@@ -391,26 +258,168 @@
             <div class="d-flex flex-wrap justify-content-between align-items-center">
                 <p class="small mb-0">&copy; 2024 Publisher. All rights reserved.</p>
                 <div class="d-flex gap-3">
-                    <a href="../help.html" class="text-secondary">Help</a>
-                    <a href="../legal/terms.html" class="text-secondary">Terms</a>
-                    <a href="../legal/privacy.html" class="text-secondary">Privacy</a>
+                    <a href="../support/faq.html" class="text-secondary" id="footerHelp">Help</a>
+                    <a href="../terms.html" class="text-secondary" id="footerTerms">Terms</a>
+                    <a href="../privacy.html" class="text-secondary" id="footerPrivacy">Privacy</a>
                 </div>
             </div>
         </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../js/translations.js"></script>
+    <script src="../../js/language-switcher.js"></script>
     <script>
         const API_BASE = 'http://localhost:3000/api';
         let currentStep = 1;
-        
+
+        // All UI text in 9 languages
+        const uiText = {
+            pageTitle: { en: 'Register as Translator', ja: '翻訳者として登録', zh: '注册成为翻译', es: 'Registrarse como Traductor', fr: "S'inscrire comme Traducteur", de: 'Als Übersetzer registrieren', ko: '번역가로 등록', ar: 'التسجيل كمترجم', pt: 'Registrar como Tradutor' },
+            pageSubtitle: { en: 'Use your language skills to earn income', ja: 'あなたの語学スキルを活かして収入を得ましょう', zh: '利用您的语言技能赚取收入', es: 'Usa tus habilidades lingüísticas para ganar dinero', fr: 'Utilisez vos compétences linguistiques pour gagner un revenu', de: 'Nutzen Sie Ihre Sprachkenntnisse zum Verdienen', ko: '언어 능력을 활용해 수입을 올리세요', ar: 'استخدم مهاراتك اللغوية لكسب الدخل', pt: 'Use suas habilidades linguísticas para ganhar renda' },
+            navFindTranslators: { en: 'Find Translators', ja: '翻訳者を探す', zh: '寻找翻译', es: 'Buscar Traductores', fr: 'Trouver des Traducteurs', de: 'Übersetzer finden', ko: '번역가 찾기', ar: 'ابحث عن مترجمين', pt: 'Encontrar Tradutores' },
+            navDashboard: { en: 'Dashboard', ja: 'ダッシュボード', zh: '仪表板', es: 'Panel', fr: 'Tableau de bord', de: 'Dashboard', ko: '대시보드', ar: 'لوحة التحكم', pt: 'Painel' },
+            stepLabel1: { en: 'Basic Info', ja: '基本情報', zh: '基本信息', es: 'Info Básica', fr: 'Infos de base', de: 'Grundinfos', ko: '기본 정보', ar: 'معلومات أساسية', pt: 'Info Básica' },
+            stepLabel2: { en: 'Languages', ja: '言語設定', zh: '语言设置', es: 'Idiomas', fr: 'Langues', de: 'Sprachen', ko: '언어 설정', ar: 'اللغات', pt: 'Idiomas' },
+            stepLabel3: { en: 'Complete', ja: '完了', zh: '完成', es: 'Completado', fr: 'Terminé', de: 'Fertig', ko: '완료', ar: 'اكتمل', pt: 'Concluído' },
+            formTitle1: { en: 'Basic Information', ja: '基本情報', zh: '基本信息', es: 'Información Básica', fr: 'Informations de base', de: 'Grundinformationen', ko: '기본 정보', ar: 'المعلومات الأساسية', pt: 'Informações Básicas' },
+            labelDisplayName: { en: 'Display Name', ja: '表示名', zh: '显示名称', es: 'Nombre para mostrar', fr: "Nom d'affichage", de: 'Anzeigename', ko: '표시 이름', ar: 'اسم العرض', pt: 'Nome de exibição' },
+            hintDisplayName: { en: 'This name will be shown to authors', ja: '著者に表示される名前です', zh: '此名称将显示给作者', es: 'Este nombre se mostrará a los autores', fr: 'Ce nom sera affiché aux auteurs', de: 'Dieser Name wird Autoren angezeigt', ko: '이 이름이 저자에게 표시됩니다', ar: 'سيظهر هذا الاسم للمؤلفين', pt: 'Este nome será mostrado aos autores' },
+            labelBio: { en: 'Bio', ja: '自己紹介', zh: '简介', es: 'Biografía', fr: 'Bio', de: 'Über mich', ko: '소개', ar: 'نبذة', pt: 'Bio' },
+            placeholderBio: { en: 'Describe your background, translation style, and specialties', ja: 'あなたの経歴、翻訳スタイル、得意分野などを紹介してください', zh: '描述您的背景、翻译风格和专业领域', es: 'Describa su experiencia, estilo de traducción y especialidades', fr: 'Décrivez votre parcours, style de traduction et spécialités', de: 'Beschreiben Sie Ihren Hintergrund, Übersetzungsstil und Spezialgebiete', ko: '경력, 번역 스타일, 전문 분야를 소개해주세요', ar: 'صف خلفيتك وأسلوب ترجمتك وتخصصاتك', pt: 'Descreva sua experiência, estilo de tradução e especialidades' },
+            labelYearsExp: { en: 'Years of Experience', ja: '翻訳経験年数', zh: '经验年数', es: 'Años de experiencia', fr: "Années d'expérience", de: 'Jahre Erfahrung', ko: '경력 년수', ar: 'سنوات الخبرة', pt: 'Anos de experiência' },
+            labelResponseTime: { en: 'Avg Response Time (hours)', ja: '平均返答時間（時間）', zh: '平均响应时间（小时）', es: 'Tiempo de respuesta promedio (horas)', fr: 'Temps de réponse moyen (heures)', de: 'Durchschn. Antwortzeit (Stunden)', ko: '평균 응답 시간 (시간)', ar: 'متوسط وقت الاستجابة (ساعات)', pt: 'Tempo médio de resposta (horas)' },
+            labelSpecialization: { en: 'Specializations (select multiple)', ja: '専門分野（複数選択可）', zh: '专业领域（可多选）', es: 'Especializaciones (selección múltiple)', fr: 'Spécialisations (sélection multiple)', de: 'Spezialisierungen (Mehrfachauswahl)', ko: '전문 분야 (복수 선택 가능)', ar: 'التخصصات (اختر عدة)', pt: 'Especializações (seleção múltipla)' },
+            specFiction: { en: 'Fiction', ja: '小説・フィクション', zh: '小说', es: 'Ficción', fr: 'Fiction', de: 'Belletristik', ko: '소설', ar: 'خيال', pt: 'Ficção' },
+            specManga: { en: 'Manga', ja: 'マンガ', zh: '漫画', es: 'Manga', fr: 'Manga', de: 'Manga', ko: '만화', ar: 'مانغا', pt: 'Mangá' },
+            specTechnical: { en: 'Technical', ja: '技術・専門書', zh: '技术', es: 'Técnico', fr: 'Technique', de: 'Technisch', ko: '기술', ar: 'تقني', pt: 'Técnico' },
+            specPoetry: { en: 'Poetry', ja: '詩・俳句', zh: '诗歌', es: 'Poesía', fr: 'Poésie', de: 'Poesie', ko: '시', ar: 'شعر', pt: 'Poesia' },
+            specBusiness: { en: 'Business', ja: 'ビジネス', zh: '商业', es: 'Negocios', fr: 'Affaires', de: 'Business', ko: '비즈니스', ar: 'أعمال', pt: 'Negócios' },
+            specAcademic: { en: 'Academic', ja: '学術', zh: '学术', es: 'Académico', fr: 'Académique', de: 'Akademisch', ko: '학술', ar: 'أكاديمي', pt: 'Acadêmico' },
+            labelCertifications: { en: 'Certifications (optional)', ja: '資格・認定（任意）', zh: '资格证书（可选）', es: 'Certificaciones (opcional)', fr: 'Certifications (optionnel)', de: 'Zertifizierungen (optional)', ko: '자격증 (선택)', ar: 'الشهادات (اختياري)', pt: 'Certificações (opcional)' },
+            placeholderCert: { en: 'e.g., JLPT N1, ATA Certification', ja: '例: JLPT N1, 翻訳検定1級', zh: '例如：JLPT N1，翻译资格证', es: 'ej., JLPT N1, Certificación ATA', fr: 'ex., JLPT N1, Certification ATA', de: 'z.B. JLPT N1, ATA-Zertifizierung', ko: '예: JLPT N1, 번역사 자격증', ar: 'مثال: JLPT N1، شهادة ATA', pt: 'ex., JLPT N1, Certificação ATA' },
+            labelPortfolio: { en: 'Portfolio URL (optional)', ja: 'ポートフォリオURL（任意）', zh: '作品集链接（可选）', es: 'URL del portafolio (opcional)', fr: 'URL du portfolio (optionnel)', de: 'Portfolio-URL (optional)', ko: '포트폴리오 URL (선택)', ar: 'رابط المحفظة (اختياري)', pt: 'URL do portfólio (opcional)' },
+            btnNextLang: { en: 'Next: Languages', ja: '次へ：言語設定', zh: '下一步：语言设置', es: 'Siguiente: Idiomas', fr: 'Suivant : Langues', de: 'Weiter: Sprachen', ko: '다음: 언어 설정', ar: 'التالي: اللغات', pt: 'Próximo: Idiomas' },
+            formTitle2: { en: 'Language Pairs', ja: '対応言語', zh: '语言对', es: 'Pares de idiomas', fr: 'Paires de langues', de: 'Sprachpaare', ko: '언어 쌍', ar: 'أزواج اللغات', pt: 'Pares de idiomas' },
+            langPairHint: { en: 'Add the language pairs you can translate. At least one is required.', ja: '翻訳できる言語ペアを追加してください。最低1つ必要です。', zh: '添加您能翻译的语言对。至少需要一个。', es: 'Agregue los pares de idiomas que puede traducir. Se requiere al menos uno.', fr: 'Ajoutez les paires de langues que vous pouvez traduire. Au moins une est requise.', de: 'Fügen Sie die Sprachpaare hinzu, die Sie übersetzen können. Mindestens eines ist erforderlich.', ko: '번역 가능한 언어 쌍을 추가하세요. 최소 1개 필요합니다.', ar: 'أضف أزواج اللغات التي يمكنك ترجمتها. مطلوب واحد على الأقل.', pt: 'Adicione os pares de idiomas que você pode traduzir. Pelo menos um é necessário.' },
+            optSource: { en: 'Source', ja: '翻訳元', zh: '源语言', es: 'Origen', fr: 'Source', de: 'Quelle', ko: '원본', ar: 'المصدر', pt: 'Origem' },
+            optTarget: { en: 'Target', ja: '翻訳先', zh: '目标语言', es: 'Destino', fr: 'Cible', de: 'Ziel', ko: '대상', ar: 'الهدف', pt: 'Destino' },
+            native: { en: 'Native', ja: 'ネイティブ', zh: '母语', es: 'Nativo', fr: 'Natif', de: 'Muttersprachler', ko: '원어민', ar: 'أصلي', pt: 'Nativo' },
+            btnAddPair: { en: 'Add Language Pair', ja: '言語ペアを追加', zh: '添加语言对', es: 'Agregar par de idiomas', fr: 'Ajouter une paire de langues', de: 'Sprachpaar hinzufügen', ko: '언어 쌍 추가', ar: 'إضافة زوج لغات', pt: 'Adicionar par de idiomas' },
+            btnBack: { en: 'Back', ja: '戻る', zh: '返回', es: 'Volver', fr: 'Retour', de: 'Zurück', ko: '뒤로', ar: 'رجوع', pt: 'Voltar' },
+            btnComplete: { en: 'Complete Registration', ja: '登録を完了', zh: '完成注册', es: 'Completar registro', fr: "Terminer l'inscription", de: 'Registrierung abschließen', ko: '등록 완료', ar: 'إكمال التسجيل', pt: 'Concluir registro' },
+            successTitle: { en: 'Registration Complete!', ja: '登録が完了しました！', zh: '注册完成！', es: '¡Registro completado!', fr: 'Inscription terminée !', de: 'Registrierung abgeschlossen!', ko: '등록이 완료되었습니다!', ar: 'اكتمل التسجيل!', pt: 'Registro concluído!' },
+            successMessage: { en: 'You can now start working as a translator. Wait for requests from authors.', ja: '翻訳者として活動を開始できます。著者からの依頼をお待ちください。', zh: '您现在可以开始翻译工作了。请等待作者的请求。', es: 'Ahora puede empezar a trabajar como traductor. Espere solicitudes de autores.', fr: 'Vous pouvez maintenant commencer à travailler comme traducteur. Attendez les demandes des auteurs.', de: 'Sie können jetzt als Übersetzer arbeiten. Warten Sie auf Anfragen von Autoren.', ko: '이제 번역가로 활동할 수 있습니다. 저자의 의뢰를 기다려주세요.', ar: 'يمكنك الآن البدء في العمل كمترجم. انتظر طلبات المؤلفين.', pt: 'Agora você pode começar a trabalhar como tradutor. Aguarde solicitações de autores.' },
+            btnViewMarket: { en: 'View Marketplace', ja: 'マーケットプレイスを見る', zh: '查看市场', es: 'Ver Mercado', fr: 'Voir le marché', de: 'Marktplatz ansehen', ko: '마켓플레이스 보기', ar: 'عرض السوق', pt: 'Ver Mercado' },
+            btnGoDashboard: { en: 'Go to Dashboard', ja: 'ダッシュボードへ', zh: '前往仪表板', es: 'Ir al Panel', fr: 'Aller au tableau de bord', de: 'Zum Dashboard', ko: '대시보드로', ar: 'اذهب إلى لوحة التحكم', pt: 'Ir para o Painel' },
+            revenueLabel: { en: 'of translated work sales become your earnings', ja: '翻訳作品の収益があなたの報酬に', zh: '翻译作品销售额将成为您的收入', es: 'de las ventas de obras traducidas serán sus ganancias', fr: 'des ventes des œuvres traduites deviennent vos revenus', de: 'der Verkäufe übersetzter Werke werden Ihr Verdienst', ko: '번역 작품 판매 수익이 수입이 됩니다', ar: 'من مبيعات الأعمال المترجمة تصبح أرباحك', pt: 'das vendas de obras traduzidas se tornam seus ganhos' },
+            benefitsTitle: { en: 'Translator Benefits', ja: '翻訳者のメリット', zh: '翻译的好处', es: 'Beneficios del Traductor', fr: 'Avantages du Traducteur', de: 'Vorteile für Übersetzer', ko: '번역가 혜택', ar: 'مزايا المترجم', pt: 'Benefícios do Tradutor' },
+            benefit1: { en: 'Work at your own pace', ja: '自分のペースで働ける', zh: '按自己的节奏工作', es: 'Trabaja a tu propio ritmo', fr: 'Travaillez à votre rythme', de: 'Arbeiten Sie in Ihrem Tempo', ko: '자신의 페이스로 일하기', ar: 'اعمل بالوتيرة التي تناسبك', pt: 'Trabalhe no seu próprio ritmo' },
+            benefit2: { en: 'Earn 20% of translation sales', ja: '翻訳作品の収益20%が報酬', zh: '获得翻译销售额的20%', es: 'Gana el 20% de las ventas de traducción', fr: 'Gagnez 20% des ventes de traduction', de: 'Verdienen Sie 20% der Übersetzungsverkäufe', ko: '번역 판매 수익의 20% 획득', ar: 'اكسب 20% من مبيعات الترجمة', pt: 'Ganhe 20% das vendas de tradução' },
+            benefit3: { en: 'Connect with global authors', ja: '世界中の著者と繋がる', zh: '与全球作者建立联系', es: 'Conéctate con autores globales', fr: 'Connectez-vous avec des auteurs du monde entier', de: 'Verbinden Sie sich mit globalen Autoren', ko: '전 세계 저자와 연결', ar: 'تواصل مع مؤلفين عالميين', pt: 'Conecte-se com autores globais' },
+            benefit4: { en: 'More income from popular works', ja: '人気作品でより多くの収入', zh: '热门作品带来更多收入', es: 'Más ingresos de obras populares', fr: 'Plus de revenus des œuvres populaires', de: 'Mehr Einkommen durch beliebte Werke', ko: '인기 작품으로 더 많은 수입', ar: 'المزيد من الدخل من الأعمال الشائعة', pt: 'Mais renda de obras populares' },
+            benefit5: { en: 'Build reputation with reviews', ja: 'レビューで実績を積める', zh: '通过评论建立声誉', es: 'Construye reputación con reseñas', fr: 'Construisez votre réputation avec des avis', de: 'Bauen Sie Reputation durch Bewertungen auf', ko: '리뷰로 명성 쌓기', ar: 'ابنِ سمعتك من خلال التقييمات', pt: 'Construa reputação com avaliações' },
+            revenueModelTitle: { en: 'Revenue Sharing Model', ja: '収益分配モデル', zh: '收益分成模式', es: 'Modelo de reparto de ingresos', fr: 'Modèle de partage des revenus', de: 'Umsatzbeteiligungsmodell', ko: '수익 분배 모델', ar: 'نموذج تقاسم الإيرادات', pt: 'Modelo de divisão de receita' },
+            revenueModelDesc: { en: 'When a work sells, revenue is distributed as follows:', ja: '作品が売れた際の収益は以下のように分配されます：', zh: '作品出售时，收益分配如下：', es: 'Cuando se vende una obra, los ingresos se distribuyen así:', fr: "Lorsqu'une œuvre est vendue, les revenus sont distribués comme suit :", de: 'Wenn ein Werk verkauft wird, wird der Umsatz wie folgt verteilt:', ko: '작품 판매 시 수익은 다음과 같이 분배됩니다:', ar: 'عند بيع عمل، يتم توزيع الإيرادات كالتالي:', pt: 'Quando uma obra é vendida, a receita é distribuída assim:' },
+            revAuthor: { en: 'Author', ja: '著者', zh: '作者', es: 'Autor', fr: 'Auteur', de: 'Autor', ko: '저자', ar: 'المؤلف', pt: 'Autor' },
+            revTranslator: { en: 'Translator', ja: '翻訳者', zh: '翻译', es: 'Traductor', fr: 'Traducteur', de: 'Übersetzer', ko: '번역가', ar: 'المترجم', pt: 'Tradutor' },
+            revEditor: { en: 'Editor', ja: '編集者', zh: '编辑', es: 'Editor', fr: 'Éditeur', de: 'Lektor', ko: '편집자', ar: 'المحرر', pt: 'Editor' },
+            revPlatform: { en: 'Platform', ja: 'プラットフォーム', zh: '平台', es: 'Plataforma', fr: 'Plateforme', de: 'Plattform', ko: '플랫폼', ar: 'المنصة', pt: 'Plataforma' },
+            footerHelp: { en: 'Help', ja: 'ヘルプ', zh: '帮助', es: 'Ayuda', fr: 'Aide', de: 'Hilfe', ko: '도움말', ar: 'مساعدة', pt: 'Ajuda' },
+            footerTerms: { en: 'Terms', ja: '利用規約', zh: '条款', es: 'Términos', fr: 'Conditions', de: 'Bedingungen', ko: '약관', ar: 'الشروط', pt: 'Termos' },
+            footerPrivacy: { en: 'Privacy', ja: 'プライバシー', zh: '隐私', es: 'Privacidad', fr: 'Confidentialité', de: 'Datenschutz', ko: '개인정보', ar: 'الخصوصية', pt: 'Privacidade' },
+            alertDisplayName: { en: 'Please enter a display name', ja: '表示名を入力してください', zh: '请输入显示名称', es: 'Por favor ingrese un nombre para mostrar', fr: "Veuillez entrer un nom d'affichage", de: 'Bitte geben Sie einen Anzeigenamen ein', ko: '표시 이름을 입력해주세요', ar: 'يرجى إدخال اسم العرض', pt: 'Por favor insira um nome de exibição' },
+            alertBio: { en: 'Please enter a bio', ja: '自己紹介を入力してください', zh: '请输入简介', es: 'Por favor ingrese una biografía', fr: 'Veuillez entrer une bio', de: 'Bitte geben Sie eine Bio ein', ko: '소개를 입력해주세요', ar: 'يرجى إدخال نبذة', pt: 'Por favor insira uma bio' },
+            alertLoginRequired: { en: 'Login required', ja: 'ログインが必要です', zh: '需要登录', es: 'Inicio de sesión requerido', fr: 'Connexion requise', de: 'Anmeldung erforderlich', ko: '로그인이 필요합니다', ar: 'تسجيل الدخول مطلوب', pt: 'Login necessário' },
+            alertAtLeastOnePair: { en: 'Please add at least one language pair', ja: '最低1つの言語ペアを設定してください', zh: '请至少添加一个语言对', es: 'Por favor agregue al menos un par de idiomas', fr: 'Veuillez ajouter au moins une paire de langues', de: 'Bitte fügen Sie mindestens ein Sprachpaar hinzu', ko: '최소 1개의 언어 쌍을 추가해주세요', ar: 'يرجى إضافة زوج لغات واحد على الأقل', pt: 'Por favor adicione pelo menos um par de idiomas' },
+            alertRegFailed: { en: 'Registration failed', ja: '登録に失敗しました', zh: '注册失败', es: 'Registro fallido', fr: "L'inscription a échoué", de: 'Registrierung fehlgeschlagen', ko: '등록 실패', ar: 'فشل التسجيل', pt: 'Registro falhou' }
+        };
+
+        function getCurrentLang() { return localStorage.getItem('preferredLanguage') || 'en'; }
+        function getL(obj) { if (!obj) return ''; const l = getCurrentLang(); return obj[l] || obj['en'] || ''; }
+
+        function updateAllText() {
+            const l = getCurrentLang();
+            document.title = getL(uiText.pageTitle) + ' - Publisher';
+            document.getElementById('pageTitle').textContent = getL(uiText.pageTitle);
+            document.getElementById('pageSubtitle').textContent = getL(uiText.pageSubtitle);
+            document.getElementById('navFindTranslators').textContent = getL(uiText.navFindTranslators);
+            document.getElementById('navDashboard').textContent = getL(uiText.navDashboard);
+            document.getElementById('stepLabel1').textContent = getL(uiText.stepLabel1);
+            document.getElementById('stepLabel2').textContent = getL(uiText.stepLabel2);
+            document.getElementById('stepLabel3').textContent = getL(uiText.stepLabel3);
+            document.getElementById('formTitle1').textContent = getL(uiText.formTitle1);
+            document.getElementById('labelDisplayName').innerHTML = getL(uiText.labelDisplayName) + ' <span class="text-danger">*</span>';
+            document.getElementById('display-name').placeholder = getL(uiText.labelDisplayName);
+            document.getElementById('hintDisplayName').textContent = getL(uiText.hintDisplayName);
+            document.getElementById('labelBio').innerHTML = getL(uiText.labelBio) + ' <span class="text-danger">*</span>';
+            document.getElementById('bio').placeholder = getL(uiText.placeholderBio);
+            document.getElementById('labelYearsExp').textContent = getL(uiText.labelYearsExp);
+            document.getElementById('labelResponseTime').textContent = getL(uiText.labelResponseTime);
+            document.getElementById('labelSpecialization').textContent = getL(uiText.labelSpecialization);
+            document.getElementById('specFiction').textContent = getL(uiText.specFiction);
+            document.getElementById('specManga').textContent = getL(uiText.specManga);
+            document.getElementById('specTechnical').textContent = getL(uiText.specTechnical);
+            document.getElementById('specPoetry').textContent = getL(uiText.specPoetry);
+            document.getElementById('specBusiness').textContent = getL(uiText.specBusiness);
+            document.getElementById('specAcademic').textContent = getL(uiText.specAcademic);
+            document.getElementById('labelCertifications').textContent = getL(uiText.labelCertifications);
+            document.getElementById('certifications').placeholder = getL(uiText.placeholderCert);
+            document.getElementById('labelPortfolio').textContent = getL(uiText.labelPortfolio);
+            document.getElementById('btnNextLang').textContent = getL(uiText.btnNextLang);
+            document.getElementById('formTitle2').textContent = getL(uiText.formTitle2);
+            document.getElementById('langPairHint').textContent = getL(uiText.langPairHint);
+            document.getElementById('btnAddPair').textContent = getL(uiText.btnAddPair);
+            document.getElementById('btnBack').textContent = getL(uiText.btnBack);
+            document.getElementById('btnComplete').textContent = getL(uiText.btnComplete);
+            document.getElementById('successTitle').textContent = getL(uiText.successTitle);
+            document.getElementById('successMessage').textContent = getL(uiText.successMessage);
+            document.getElementById('btnViewMarket').textContent = getL(uiText.btnViewMarket);
+            document.getElementById('btnGoDashboard').textContent = getL(uiText.btnGoDashboard);
+            document.getElementById('revenueLabel').textContent = getL(uiText.revenueLabel);
+            document.getElementById('benefitsTitle').textContent = getL(uiText.benefitsTitle);
+            document.getElementById('benefit1').textContent = getL(uiText.benefit1);
+            document.getElementById('benefit2').textContent = getL(uiText.benefit2);
+            document.getElementById('benefit3').textContent = getL(uiText.benefit3);
+            document.getElementById('benefit4').textContent = getL(uiText.benefit4);
+            document.getElementById('benefit5').textContent = getL(uiText.benefit5);
+            document.getElementById('revenueModelTitle').textContent = getL(uiText.revenueModelTitle);
+            document.getElementById('revenueModelDesc').textContent = getL(uiText.revenueModelDesc);
+            document.getElementById('revAuthor').textContent = getL(uiText.revAuthor);
+            document.getElementById('revTranslator').textContent = getL(uiText.revTranslator);
+            document.getElementById('revEditor').textContent = getL(uiText.revEditor);
+            document.getElementById('revPlatform').textContent = getL(uiText.revPlatform);
+            document.getElementById('footerHelp').textContent = getL(uiText.footerHelp);
+            document.getElementById('footerTerms').textContent = getL(uiText.footerTerms);
+            document.getElementById('footerPrivacy').textContent = getL(uiText.footerPrivacy);
+            // Update language pair labels
+            updateLanguagePairLabels();
+        }
+
+        function updateLanguagePairLabels() {
+            document.querySelectorAll('.lang-pair-item').forEach(item => {
+                const sourceSelect = item.querySelector('.source-lang');
+                const targetSelect = item.querySelector('.target-lang');
+                const nativeLabel = item.querySelector('.native-label');
+                if (sourceSelect && sourceSelect.options[0]) sourceSelect.options[0].textContent = getL(uiText.optSource);
+                if (targetSelect && targetSelect.options[0]) targetSelect.options[0].textContent = getL(uiText.optTarget);
+                if (nativeLabel) nativeLabel.textContent = getL(uiText.native);
+            });
+        }
+
+        function syncSelectors() {
+            const d = document.getElementById('languageSelector'), m = document.getElementById('languageSelectorMobile'), l = getCurrentLang();
+            if (d) d.value = l; if (m) m.value = l;
+            if (m) m.addEventListener('change', function() { if (d) d.value = this.value; localStorage.setItem('preferredLanguage', this.value); updateAllText(); });
+            if (d) d.addEventListener('change', function() { if (m) m.value = this.value; localStorage.setItem('preferredLanguage', this.value); updateAllText(); });
+        }
+
         function goToStep(step) {
             if (step === 2 && currentStep === 1) {
                 const displayName = document.getElementById('display-name').value.trim();
                 const bio = document.getElementById('bio').value.trim();
-                
-                if (!displayName) { alert('表示名を入力してください'); return; }
-                if (!bio) { alert('自己紹介を入力してください'); return; }
+                if (!displayName) { alert(getL(uiText.alertDisplayName)); return; }
+                if (!bio) { alert(getL(uiText.alertBio)); return; }
             }
             
             document.getElementById('step1').style.display = 'none';
@@ -424,17 +433,13 @@
                 if (i < step) indicator.classList.add('completed');
                 if (i === step) indicator.classList.add('active');
             }
-            
             currentStep = step;
         }
-        
-        function addLanguagePair() {
-            const container = document.getElementById('language-pairs');
-            const newPair = document.createElement('div');
-            newPair.className = 'lang-pair-item';
-            newPair.innerHTML = `
+
+        function createLanguagePairHtml() {
+            return `
                 <select class="form-select source-lang">
-                    <option value="">翻訳元</option>
+                    <option value="">${getL(uiText.optSource)}</option>
                     <option value="ja">日本語</option>
                     <option value="en">English</option>
                     <option value="zh">中文</option>
@@ -443,10 +448,11 @@
                     <option value="de">Deutsch</option>
                     <option value="ko">한국어</option>
                     <option value="ar">العربية</option>
+                    <option value="pt">Português</option>
                 </select>
                 <i class="fas fa-arrow-right text-secondary"></i>
                 <select class="form-select target-lang">
-                    <option value="">翻訳先</option>
+                    <option value="">${getL(uiText.optTarget)}</option>
                     <option value="ja">日本語</option>
                     <option value="en">English</option>
                     <option value="zh">中文</option>
@@ -455,24 +461,32 @@
                     <option value="de">Deutsch</option>
                     <option value="ko">한국어</option>
                     <option value="ar">العربية</option>
+                    <option value="pt">Português</option>
                 </select>
                 <div class="form-check">
                     <input class="form-check-input is-native" type="checkbox">
-                    <label class="form-check-label">ネイティブ</label>
+                    <label class="form-check-label native-label">${getL(uiText.native)}</label>
                 </div>
                 <button class="btn btn-soft-custom btn-sm" onclick="removeLanguagePair(this)">
                     <i class="fas fa-trash"></i>
                 </button>
             `;
+        }
+
+        function addLanguagePair() {
+            const container = document.getElementById('language-pairs');
+            const newPair = document.createElement('div');
+            newPair.className = 'lang-pair-item';
+            newPair.innerHTML = createLanguagePairHtml();
             container.appendChild(newPair);
             updateRemoveButtons();
         }
-        
+
         function removeLanguagePair(btn) {
             btn.closest('.lang-pair-item').remove();
             updateRemoveButtons();
         }
-        
+
         function updateRemoveButtons() {
             const pairs = document.querySelectorAll('.lang-pair-item');
             pairs.forEach((pair, index) => {
@@ -480,11 +494,11 @@
                 btn.disabled = pairs.length <= 1;
             });
         }
-        
+
         async function submitRegistration() {
             const userId = localStorage.getItem('userId');
             if (!userId) {
-                alert('ログインが必要です');
+                alert(getL(uiText.alertLoginRequired));
                 window.location.href = '../login.html';
                 return;
             }
@@ -500,7 +514,7 @@
             });
             
             if (pairs.length === 0) {
-                alert('最低1つの言語ペアを設定してください');
+                alert(getL(uiText.alertAtLeastOnePair));
                 return;
             }
             
@@ -526,7 +540,7 @@
                 
                 if (!profileResponse.ok) {
                     const data = await profileResponse.json();
-                    throw new Error(data.error || 'プロフィールの作成に失敗しました');
+                    throw new Error(data.error || getL(uiText.alertRegFailed));
                 }
                 
                 for (const pair of pairs) {
@@ -540,9 +554,28 @@
                 goToStep(3);
                 
             } catch (error) {
-                alert('登録に失敗しました: ' + error.message);
+                alert(getL(uiText.alertRegFailed) + ': ' + error.message);
             }
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            syncSelectors();
+            // Initialize first language pair
+            const container = document.getElementById('language-pairs');
+            const firstPair = document.createElement('div');
+            firstPair.className = 'lang-pair-item';
+            firstPair.innerHTML = createLanguagePairHtml();
+            container.appendChild(firstPair);
+            updateRemoveButtons();
+            updateAllText();
+        });
+
+        document.addEventListener('languageChanged', function(e) {
+            const l = e.detail.language || e.detail.lang;
+            if (l) { const d = document.getElementById('languageSelector'), m = document.getElementById('languageSelectorMobile'); if (d) d.value = l; if (m) m.value = l; }
+            updateAllText();
+        });
     </script>
+    <script src="../../js/header-notification.js"></script>
 </body>
 </html>
