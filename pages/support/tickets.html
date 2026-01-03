@@ -427,6 +427,22 @@
             }));
         }
 
+        // デモメッセージを翻訳キーから取得
+        function getDemoMessages(ticket) {
+            return [
+                { 
+                    sender_type: 'user', 
+                    message: t('support.tickets.demo.userMessage'), 
+                    created_at: ticket.created_at 
+                },
+                { 
+                    sender_type: 'admin', 
+                    message: t('support.tickets.demo.adminMessage'), 
+                    created_at: new Date(Date.parse(ticket.created_at) + 60 * 60 * 1000).toISOString() 
+                }
+            ];
+        }
+
         // モバイルとデスクトップのセレクターを同期
         function syncLanguageSelectors() {
             const desktopSelector = document.getElementById('languageSelector');
@@ -613,10 +629,8 @@
                 const demoTickets = getDemoTickets();
                 const ticket = demoTickets.find(t => t.id === ticketId);
                 if (ticket) {
-                    const demoMessages = [
-                        { sender_type: 'user', message: 'This is my inquiry.\nPlease provide more details.', created_at: ticket.created_at },
-                        { sender_type: 'admin', message: 'Thank you for your inquiry.\nWe will look into it.', created_at: new Date(Date.parse(ticket.created_at) + 60 * 60 * 1000).toISOString() }
-                    ];
+                    // 翻訳キーからデモメッセージを取得
+                    const demoMessages = getDemoMessages(ticket);
                     currentTicket = ticket;
                     showTicketModal(ticket, demoMessages);
                 }
