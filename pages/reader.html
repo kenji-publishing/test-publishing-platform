@@ -308,7 +308,7 @@
         </div>
         
         <div class="toolbar-right">
-            <select class="lang-selector-reader" id="langSelector">
+            <select class="lang-selector-reader" id="langSelector" onchange="changeLanguage(this.value)">
                 <option value="en">EN</option><option value="ja">日本語</option><option value="zh">中文</option><option value="es">ES</option><option value="fr">FR</option><option value="de">DE</option><option value="ko">한국어</option><option value="ar">عربي</option><option value="pt">PT</option>
             </select>
             <a href="notifications.html" class="btn-toolbar position-relative" title="Notifications" id="notificationBellContainer"><i class="fas fa-bell"></i><span id="notificationBadge" class="position-absolute badge rounded-pill bg-danger" style="font-size: 0.55rem; display: none; top: -2px; right: -6px; padding: 2px 5px;">0</span></a>
@@ -476,21 +476,26 @@
             noResults: { en: 'No results found', ja: '結果が見つかりません', zh: '未找到结果', es: 'No se encontraron resultados', fr: 'Aucun résultat trouvé', de: 'Keine Ergebnisse gefunden', ko: '결과 없음', ar: 'لم يتم العثور على نتائج', pt: 'Nenhum resultado encontrado' }
         };
 
-        function getCurrentLang() { return localStorage.getItem('preferredLanguage') || 'en'; }
+        let currentLang = localStorage.getItem('preferredLanguage') || 'en';
+
+        function getCurrentLang() { return currentLang; }
+        
         function getL(obj, replacements = {}) {
             if (!obj) return '';
-            const l = getCurrentLang();
-            let text = obj[l] || obj['en'] || '';
+            let text = obj[currentLang] || obj['en'] || '';
             Object.keys(replacements).forEach(key => {
                 text = text.replace(`{${key}}`, replacements[key]);
             });
             return text;
         }
 
+        function changeLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('preferredLanguage', lang);
+            updateAllText();
+        }
+
         function updateAllText() {
-            const noteInputEl = document.getElementById('noteInput');
-            const searchInputEl = document.getElementById('searchInput');
-            
             document.title = getL(uiText.notes) + ' - Publisher';
             document.getElementById('touchHintText').textContent = getL(uiText.touchHint);
             document.getElementById('backLinkText').textContent = getL(uiText.backToDashboard);
@@ -520,9 +525,9 @@
             document.getElementById('hlReport').title = getL(uiText.reportIssue);
             document.getElementById('notesTitle').textContent = getL(uiText.notes);
             
-            // Use setAttribute for more reliable placeholder updates
-            if (noteInputEl) noteInputEl.setAttribute('placeholder', getL(uiText.addNotePlaceholder));
-            if (searchInputEl) searchInputEl.setAttribute('placeholder', getL(uiText.searchPlaceholder));
+            // Update placeholders directly
+            document.getElementById('noteInput').placeholder = getL(uiText.addNotePlaceholder);
+            document.getElementById('searchInput').placeholder = getL(uiText.searchPlaceholder);
             
             renderBookmarks();
             renderNotes();
@@ -551,11 +556,7 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('langSelector').value = getCurrentLang();
-            document.getElementById('langSelector').addEventListener('change', function() {
-                localStorage.setItem('preferredLanguage', this.value);
-                updateAllText();
-            });
+            document.getElementById('langSelector').value = currentLang;
             updateAllText();
             updatePageInfo();
             renderBookmarks();
