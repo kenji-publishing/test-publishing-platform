@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="browse.title">Browse Works - Publisher</title>
+    <title>Browse Works - Publisher</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
@@ -12,8 +12,8 @@
     <link href="../css/style-new.css" rel="stylesheet">
     <link href="../css/mobile-fixes.css" rel="stylesheet">
     <style>
-        .language-selector { position: fixed; top: 80px; right: 20px; z-index: 1000; }
-        .language-selector select { padding: 8px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-bg-card); font-size: var(--font-size-sm); cursor: pointer; }
+        .navbar-lang-selector { display: flex; align-items: center; margin-right: 0.5rem; }
+        @media (max-width: 991.98px) { .navbar-lang-selector { order: 1; } .navbar-toggler { order: 2; } }
         .browse-container { padding: var(--spacing-xl) 0; }
         .page-header { margin-bottom: var(--spacing-xl); }
         .page-header h1 { font-size: var(--font-size-2xl); margin-bottom: var(--spacing-xs); }
@@ -21,7 +21,7 @@
         .filter-section { margin-bottom: var(--spacing-lg); }
         .filter-section h3 { font-size: var(--font-size-base); margin-bottom: var(--spacing-md); }
         .work-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--spacing-lg); }
-        .work-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; transition: all var(--transition-fast); }
+        .work-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; transition: all var(--transition-fast); cursor: pointer; }
         .work-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
         .work-cover { height: 280px; background: var(--color-bg-hover); display: flex; align-items: center; justify-content: center; }
         .work-cover i { font-size: 4rem; color: var(--color-accent-light); }
@@ -34,69 +34,65 @@
         .results-count { margin-bottom: var(--spacing-md); color: var(--color-text-secondary); font-size: var(--font-size-sm); }
         .no-results { text-align: center; padding: var(--spacing-2xl); color: var(--color-text-secondary); }
         @media (max-width: 768px) { .filter-sidebar { margin-bottom: var(--spacing-lg); } }
-        @media (max-width: 576px) { .language-selector { top: 70px; right: 10px; } .work-grid { grid-template-columns: repeat(2, 1fr); gap: var(--spacing-md); } .work-cover { height: 180px; } }
+        @media (max-width: 576px) { .work-grid { grid-template-columns: repeat(2, 1fr); gap: var(--spacing-md); } .work-cover { height: 180px; } }
     </style>
 </head>
 <body>
-    <div class="language-selector">
-        <select id="languageSelect" onchange="changeLanguage(this.value)">
-            <option value="en">🇬🇧 English</option>
-            <option value="ja">🇯🇵 日本語</option>
-            <option value="zh">🇨🇳 中文</option>
-            <option value="es">🇪🇸 Español</option>
-            <option value="fr">🇫🇷 Français</option>
-            <option value="de">🇩🇪 Deutsch</option>
-            <option value="ko">🇰🇷 한국어</option>
-            <option value="ar">🇸🇦 العربية</option>
-            <option value="pt">🇧🇷 Português</option>
-        </select>
-    </div>
     <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
         <div class="container">
             <a class="navbar-brand" href="../index.html"><i class="fas fa-book-open"></i> Publisher</a>
+            <div class="navbar-lang-selector d-lg-none">
+                <select class="language-selector" id="languageSelectorMobile">
+                    <option value="en">🇬🇧 EN</option><option value="ja">🇯🇵 日本語</option><option value="zh">🇨🇳 中文</option><option value="es">🇪🇸 ES</option><option value="fr">🇫🇷 FR</option><option value="de">🇩🇪 DE</option><option value="ko">🇰🇷 한국어</option><option value="ar">🇸🇦 عربي</option><option value="pt">🇧🇷 PT</option>
+                </select>
+            </div>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link" href="dashboard.html"><i class="fas fa-th-large me-1"></i> <span data-i18n="nav.dashboard">Dashboard</span></a></li>
-                    <li class="nav-item"><a class="nav-link active" href="browse.html"><i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span></a></li>
+                    <li class="nav-item"><a class="nav-link" href="dashboard.html"><i class="fas fa-th-large me-1"></i><span id="navDashboard">Dashboard</span></a></li>
+                    <li class="nav-item"><a class="nav-link active" href="browse.html"><i class="fas fa-compass me-1"></i><span id="navBrowse">Browse</span></a></li>
                 </ul>
                 <div class="d-flex align-items-center gap-3">
+                    <select class="language-selector d-none d-lg-block" id="languageSelector">
+                        <option value="en">🇬🇧 EN</option><option value="ja">🇯🇵 日本語</option><option value="zh">🇨🇳 中文</option><option value="es">🇪🇸 ES</option><option value="fr">🇫🇷 FR</option><option value="de">🇩🇪 DE</option><option value="ko">🇰🇷 한국어</option><option value="ar">🇸🇦 عربي</option><option value="pt">🇧🇷 PT</option>
+                    </select>
                     <a href="notifications.html" class="btn btn-soft-custom position-relative"><i class="fas fa-bell"></i><span id="notificationBadge" class="position-absolute badge rounded-pill bg-danger" style="font-size:0.55rem;display:none;top:0;right:0;">0</span></a>
                     <div class="dropdown">
                         <button class="btn btn-soft-custom dropdown-toggle" type="button" data-bs-toggle="dropdown"><i class="fas fa-user-circle me-1"></i><span id="userName">User</span></button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="account-settings.html"><i class="fas fa-cog me-2"></i><span data-i18n="nav.settings">Settings</span></a></li>
+                            <li><a class="dropdown-item" href="account-settings.html"><i class="fas fa-cog me-2"></i><span id="menuSettings">Settings</span></a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i><span data-i18n="nav.logout">Logout</span></a></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i><span id="menuLogout">Logout</span></a></li>
                         </ul>
                     </div>
                 </div>
             </div>
         </div>
     </nav>
+
     <main class="browse-container">
         <div class="container">
             <div class="page-header">
-                <h1><i class="fas fa-compass me-2 text-accent"></i><span data-i18n="browse.title">Browse Works</span></h1>
-                <p data-i18n="browse.subtitle">Discover amazing stories from creators worldwide</p>
+                <h1><i class="fas fa-compass me-2 text-accent"></i><span id="pageTitle">Browse Works</span></h1>
+                <p id="pageSubtitle">Discover amazing stories from creators worldwide</p>
             </div>
             <div class="row">
                 <div class="col-lg-3 col-md-4">
                     <div class="filter-sidebar">
                         <div class="filter-section">
-                            <h3 data-i18n="browse.category">Category</h3>
+                            <h3 id="filterCategory">Category</h3>
                             <select class="form-select" id="categoryFilter">
-                                <option value="" data-i18n="browse.allCategories">All Categories</option>
-                                <option value="fiction" data-i18n="browse.categories.fiction">Fiction</option>
-                                <option value="non-fiction" data-i18n="browse.categories.nonFiction">Non-Fiction</option>
-                                <option value="manga" data-i18n="browse.categories.manga">Manga</option>
-                                <option value="poetry" data-i18n="browse.categories.poetry">Poetry</option>
+                                <option value="" id="optAllCategories">All Categories</option>
+                                <option value="fiction" id="optFiction">Fiction</option>
+                                <option value="non-fiction" id="optNonFiction">Non-Fiction</option>
+                                <option value="manga" id="optManga">Manga</option>
+                                <option value="poetry" id="optPoetry">Poetry</option>
                             </select>
                         </div>
                         <div class="filter-section">
-                            <h3 data-i18n="browse.language">Language</h3>
+                            <h3 id="filterLanguage">Language</h3>
                             <select class="form-select" id="languageFilter">
-                                <option value="" data-i18n="browse.allLanguages">All Languages</option>
+                                <option value="" id="optAllLanguages">All Languages</option>
                                 <option value="en">English</option>
                                 <option value="ja">日本語</option>
                                 <option value="zh">中文</option>
@@ -109,66 +105,78 @@
                             </select>
                         </div>
                         <div class="filter-section">
-                            <h3 data-i18n="browse.sortBy">Sort By</h3>
+                            <h3 id="filterSortBy">Sort By</h3>
                             <select class="form-select" id="sortFilter">
-                                <option value="popular" data-i18n="browse.mostPopular">Most Popular</option>
-                                <option value="newest" data-i18n="browse.newest">Newest</option>
-                                <option value="rating" data-i18n="browse.highestRated">Highest Rated</option>
-                                <option value="price-low" data-i18n="browse.priceLowHigh">Price: Low to High</option>
+                                <option value="popular" id="optPopular">Most Popular</option>
+                                <option value="newest" id="optNewest">Newest</option>
+                                <option value="rating" id="optRating">Highest Rated</option>
+                                <option value="price-low" id="optPriceLow">Price: Low to High</option>
                             </select>
                         </div>
-                        <button class="btn btn-custom w-100" onclick="applyFilters()" data-i18n="browse.applyFilters">Apply Filters</button>
+                        <button class="btn btn-custom w-100" onclick="applyFilters()" id="btnApplyFilters">Apply Filters</button>
                     </div>
                 </div>
                 <div class="col-lg-9 col-md-8">
-                    <div class="results-count"><span id="resultsCount">4</span> <span data-i18n="browse.worksFound">works found</span></div>
-                    <div class="work-grid" id="workGrid">
-                        <!-- Works will be loaded dynamically -->
-                    </div>
+                    <div class="results-count"><span id="resultsCount">0</span> <span id="worksFoundLabel">works found</span></div>
+                    <div class="work-grid" id="workGrid"></div>
                     <div class="no-results" id="noResults" style="display:none;">
                         <i class="fas fa-search fa-3x mb-3"></i>
-                        <p data-i18n="browse.noResults">No works found matching your criteria</p>
+                        <p id="noResultsText">No works found matching your criteria</p>
                     </div>
                 </div>
             </div>
         </div>
     </main>
+
     <footer class="footer-custom">
         <div class="container">
             <div class="d-flex flex-wrap justify-content-between align-items-center">
                 <p class="small mb-0">&copy; 2025 Publisher. All rights reserved.</p>
                 <div class="d-flex gap-3">
-                    <a href="support/faq.html" class="text-secondary" data-i18n="footer.help">Help</a>
-                    <a href="terms.html" class="text-secondary" data-i18n="footer.terms">Terms</a>
-                    <a href="privacy.html" class="text-secondary" data-i18n="footer.privacy">Privacy</a>
+                    <a href="support/faq.html" class="text-secondary" id="footerHelp">Help</a>
+                    <a href="terms.html" class="text-secondary" id="footerTerms">Terms</a>
+                    <a href="privacy.html" class="text-secondary" id="footerPrivacy">Privacy</a>
                 </div>
             </div>
         </div>
     </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/translations.js"></script>
     <script src="../js/language-switcher.js"></script>
     <script src="../js/header-notification.js"></script>
     <script>
-        // i18n helper
-        function t(key) {
-            const lang = localStorage.getItem('publisher_language') || 'en';
-            const keys = key.split('.');
-            let value = translations[lang];
-            for (const k of keys) {
-                if (value && value[k] !== undefined) {
-                    value = value[k];
-                } else {
-                    value = translations['en'];
-                    for (const k2 of keys) {
-                        if (value && value[k2] !== undefined) value = value[k2];
-                        else return key;
-                    }
-                    break;
-                }
-            }
-            return typeof value === 'string' ? value : key;
-        }
+        const API_BASE = 'http://localhost:3000/api';
+
+        const uiText = {
+            pageTitle: { en: 'Browse Works', ja: '作品を探す', zh: '浏览作品', es: 'Explorar Obras', fr: 'Parcourir les œuvres', de: 'Werke durchsuchen', ko: '작품 둘러보기', ar: 'تصفح الأعمال', pt: 'Explorar Obras' },
+            pageSubtitle: { en: 'Discover amazing stories from creators worldwide', ja: '世界中のクリエイターの素晴らしい作品を発見しよう', zh: '发现来自全球创作者的精彩故事', es: 'Descubre historias increíbles de creadores de todo el mundo', fr: 'Découvrez des histoires incroyables de créateurs du monde entier', de: 'Entdecken Sie erstaunliche Geschichten von Schöpfern weltweit', ko: '전 세계 크리에이터들의 놀라운 이야기를 발견하세요', ar: 'اكتشف قصصًا رائعة من المبدعين في جميع أنحاء العالم', pt: 'Descubra histórias incríveis de criadores de todo o mundo' },
+            navDashboard: { en: 'Dashboard', ja: 'ダッシュボード', zh: '仪表板', es: 'Panel', fr: 'Tableau de bord', de: 'Dashboard', ko: '대시보드', ar: 'لوحة التحكم', pt: 'Painel' },
+            navBrowse: { en: 'Browse', ja: '作品を探す', zh: '浏览', es: 'Explorar', fr: 'Parcourir', de: 'Durchsuchen', ko: '둘러보기', ar: 'تصفح', pt: 'Explorar' },
+            menuSettings: { en: 'Settings', ja: '設定', zh: '设置', es: 'Configuración', fr: 'Paramètres', de: 'Einstellungen', ko: '설정', ar: 'الإعدادات', pt: 'Configurações' },
+            menuLogout: { en: 'Logout', ja: 'ログアウト', zh: '退出', es: 'Cerrar sesión', fr: 'Déconnexion', de: 'Abmelden', ko: '로그아웃', ar: 'تسجيل الخروج', pt: 'Sair' },
+            filterCategory: { en: 'Category', ja: 'カテゴリ', zh: '类别', es: 'Categoría', fr: 'Catégorie', de: 'Kategorie', ko: '카테고리', ar: 'الفئة', pt: 'Categoria' },
+            optAllCategories: { en: 'All Categories', ja: 'すべてのカテゴリ', zh: '所有类别', es: 'Todas las categorías', fr: 'Toutes les catégories', de: 'Alle Kategorien', ko: '모든 카테고리', ar: 'جميع الفئات', pt: 'Todas as categorias' },
+            optFiction: { en: 'Fiction', ja: '小説', zh: '小说', es: 'Ficción', fr: 'Fiction', de: 'Belletristik', ko: '소설', ar: 'خيال', pt: 'Ficção' },
+            optNonFiction: { en: 'Non-Fiction', ja: 'ノンフィクション', zh: '非虚构', es: 'No ficción', fr: 'Non-fiction', de: 'Sachbuch', ko: '논픽션', ar: 'غير خيالي', pt: 'Não ficção' },
+            optManga: { en: 'Manga', ja: 'マンガ', zh: '漫画', es: 'Manga', fr: 'Manga', de: 'Manga', ko: '만화', ar: 'مانغا', pt: 'Mangá' },
+            optPoetry: { en: 'Poetry', ja: '詩', zh: '诗歌', es: 'Poesía', fr: 'Poésie', de: 'Poesie', ko: '시', ar: 'شعر', pt: 'Poesia' },
+            filterLanguage: { en: 'Language', ja: '言語', zh: '语言', es: 'Idioma', fr: 'Langue', de: 'Sprache', ko: '언어', ar: 'اللغة', pt: 'Idioma' },
+            optAllLanguages: { en: 'All Languages', ja: 'すべての言語', zh: '所有语言', es: 'Todos los idiomas', fr: 'Toutes les langues', de: 'Alle Sprachen', ko: '모든 언어', ar: 'جميع اللغات', pt: 'Todos os idiomas' },
+            filterSortBy: { en: 'Sort By', ja: '並び替え', zh: '排序', es: 'Ordenar por', fr: 'Trier par', de: 'Sortieren nach', ko: '정렬', ar: 'ترتيب حسب', pt: 'Ordenar por' },
+            optPopular: { en: 'Most Popular', ja: '人気順', zh: '最受欢迎', es: 'Más popular', fr: 'Plus populaire', de: 'Beliebteste', ko: '인기순', ar: 'الأكثر شعبية', pt: 'Mais popular' },
+            optNewest: { en: 'Newest', ja: '新着順', zh: '最新', es: 'Más reciente', fr: 'Plus récent', de: 'Neueste', ko: '최신순', ar: 'الأحدث', pt: 'Mais recente' },
+            optRating: { en: 'Highest Rated', ja: '評価順', zh: '评分最高', es: 'Mejor calificado', fr: 'Mieux noté', de: 'Bestbewertet', ko: '평점순', ar: 'الأعلى تقييمًا', pt: 'Mais bem avaliado' },
+            optPriceLow: { en: 'Price: Low to High', ja: '価格: 安い順', zh: '价格：从低到高', es: 'Precio: de menor a mayor', fr: 'Prix: croissant', de: 'Preis: aufsteigend', ko: '가격: 낮은순', ar: 'السعر: من الأقل للأعلى', pt: 'Preço: menor para maior' },
+            btnApplyFilters: { en: 'Apply Filters', ja: 'フィルター適用', zh: '应用筛选', es: 'Aplicar filtros', fr: 'Appliquer les filtres', de: 'Filter anwenden', ko: '필터 적용', ar: 'تطبيق المرشحات', pt: 'Aplicar filtros' },
+            worksFound: { en: 'works found', ja: '件の作品', zh: '个作品', es: 'obras encontradas', fr: 'œuvres trouvées', de: 'Werke gefunden', ko: '개의 작품', ar: 'عمل تم العثور عليه', pt: 'obras encontradas' },
+            noResults: { en: 'No works found matching your criteria', ja: '条件に一致する作品が見つかりませんでした', zh: '没有找到符合条件的作品', es: 'No se encontraron obras que coincidan con sus criterios', fr: 'Aucune œuvre trouvée correspondant à vos critères', de: 'Keine Werke gefunden, die Ihren Kriterien entsprechen', ko: '조건에 맞는 작품을 찾을 수 없습니다', ar: 'لم يتم العثور على أعمال تطابق معاييرك', pt: 'Nenhuma obra encontrada correspondendo aos seus critérios' },
+            by: { en: 'by', ja: '著者:', zh: '作者:', es: 'por', fr: 'par', de: 'von', ko: '저자:', ar: 'بواسطة', pt: 'por' },
+            free: { en: 'Free', ja: '無料', zh: '免费', es: 'Gratis', fr: 'Gratuit', de: 'Kostenlos', ko: '무료', ar: 'مجاني', pt: 'Grátis' },
+            footerHelp: { en: 'Help', ja: 'ヘルプ', zh: '帮助', es: 'Ayuda', fr: 'Aide', de: 'Hilfe', ko: '도움말', ar: 'مساعدة', pt: 'Ajuda' },
+            footerTerms: { en: 'Terms', ja: '利用規約', zh: '条款', es: 'Términos', fr: 'Conditions', de: 'Bedingungen', ko: '약관', ar: 'الشروط', pt: 'Termos' },
+            footerPrivacy: { en: 'Privacy', ja: 'プライバシー', zh: '隐私', es: 'Privacidad', fr: 'Confidentialité', de: 'Datenschutz', ko: '개인정보', ar: 'الخصوصية', pt: 'Privacidade' }
+        };
 
         // Sample works data
         const sampleWorks = [
@@ -179,6 +187,47 @@
             { id: 5, title: '月光の詩', author: '田中花子', price: 0, rating: 4.7, category: 'poetry', language: 'ja' },
             { id: 6, title: 'Le Monde Nouveau', author: 'Pierre Dubois', price: 3.49, rating: 4.4, category: 'non-fiction', language: 'fr' }
         ];
+
+        function getCurrentLang() { return localStorage.getItem('preferredLanguage') || 'en'; }
+        function getL(obj) { if (!obj) return ''; const l = getCurrentLang(); return obj[l] || obj['en'] || ''; }
+
+        function updateAllText() {
+            document.title = getL(uiText.pageTitle) + ' - Publisher';
+            document.getElementById('pageTitle').textContent = getL(uiText.pageTitle);
+            document.getElementById('pageSubtitle').textContent = getL(uiText.pageSubtitle);
+            document.getElementById('navDashboard').textContent = getL(uiText.navDashboard);
+            document.getElementById('navBrowse').textContent = getL(uiText.navBrowse);
+            document.getElementById('menuSettings').textContent = getL(uiText.menuSettings);
+            document.getElementById('menuLogout').textContent = getL(uiText.menuLogout);
+            document.getElementById('filterCategory').textContent = getL(uiText.filterCategory);
+            document.getElementById('optAllCategories').textContent = getL(uiText.optAllCategories);
+            document.getElementById('optFiction').textContent = getL(uiText.optFiction);
+            document.getElementById('optNonFiction').textContent = getL(uiText.optNonFiction);
+            document.getElementById('optManga').textContent = getL(uiText.optManga);
+            document.getElementById('optPoetry').textContent = getL(uiText.optPoetry);
+            document.getElementById('filterLanguage').textContent = getL(uiText.filterLanguage);
+            document.getElementById('optAllLanguages').textContent = getL(uiText.optAllLanguages);
+            document.getElementById('filterSortBy').textContent = getL(uiText.filterSortBy);
+            document.getElementById('optPopular').textContent = getL(uiText.optPopular);
+            document.getElementById('optNewest').textContent = getL(uiText.optNewest);
+            document.getElementById('optRating').textContent = getL(uiText.optRating);
+            document.getElementById('optPriceLow').textContent = getL(uiText.optPriceLow);
+            document.getElementById('btnApplyFilters').textContent = getL(uiText.btnApplyFilters);
+            document.getElementById('worksFoundLabel').textContent = getL(uiText.worksFound);
+            document.getElementById('noResultsText').textContent = getL(uiText.noResults);
+            document.getElementById('footerHelp').textContent = getL(uiText.footerHelp);
+            document.getElementById('footerTerms').textContent = getL(uiText.footerTerms);
+            document.getElementById('footerPrivacy').textContent = getL(uiText.footerPrivacy);
+            // Re-render works to update "by" and "Free" text
+            applyFilters();
+        }
+
+        function syncSelectors() {
+            const d = document.getElementById('languageSelector'), m = document.getElementById('languageSelectorMobile'), l = getCurrentLang();
+            if (d) d.value = l; if (m) m.value = l;
+            if (m) m.addEventListener('change', function() { if (d) d.value = this.value; localStorage.setItem('preferredLanguage', this.value); updateAllText(); });
+            if (d) d.addEventListener('change', function() { if (m) m.value = this.value; localStorage.setItem('preferredLanguage', this.value); updateAllText(); });
+        }
 
         function renderWorks(works) {
             const grid = document.getElementById('workGrid');
@@ -201,9 +250,9 @@
                     <div class="work-cover"><i class="fas fa-book"></i></div>
                     <div class="work-info">
                         <div class="work-title">${escapeHtml(work.title)}</div>
-                        <div class="work-author">${t('browse.by')} ${escapeHtml(work.author)}</div>
+                        <div class="work-author">${getL(uiText.by)} ${escapeHtml(work.author)}</div>
                         <div class="work-meta">
-                            <span class="work-price">${work.price === 0 ? t('common.free') : '$' + work.price.toFixed(2)}</span>
+                            <span class="work-price">${work.price === 0 ? getL(uiText.free) : '$' + work.price.toFixed(2)}</span>
                             <span class="work-rating"><i class="fas fa-star"></i> ${work.rating}</span>
                         </div>
                     </div>
@@ -250,7 +299,14 @@
         document.addEventListener('DOMContentLoaded', function() {
             const user = JSON.parse(localStorage.getItem('user') || '{}');
             if (user.firstName) document.getElementById('userName').textContent = user.firstName;
-            renderWorks(sampleWorks);
+            syncSelectors();
+            updateAllText();
+        });
+
+        document.addEventListener('languageChanged', function(e) {
+            const l = e.detail.language || e.detail.lang;
+            if (l) { const d = document.getElementById('languageSelector'), m = document.getElementById('languageSelectorMobile'); if (d) d.value = l; if (m) m.value = l; }
+            updateAllText();
         });
     </script>
 </body>
