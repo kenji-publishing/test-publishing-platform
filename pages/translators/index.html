@@ -1,181 +1,51 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>翻訳者を探す - Publisher</title>
+    <title>Find Translators - Publisher</title>
     
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
-    <!-- Custom Styles -->
     <link href="../../css/style-new.css" rel="stylesheet">
     
     <style>
-        .page-header {
-            background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
-            color: white;
-            padding: var(--spacing-xl) 0;
-            margin-bottom: var(--spacing-xl);
-        }
+        .navbar-lang-selector { display: flex; align-items: center; margin-right: 0.5rem; }
+        @media (max-width: 991.98px) { .navbar-lang-selector { order: 1; } .navbar-toggler { order: 2; } }
+        .page-header { background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%); color: white; padding: var(--spacing-xl) 0; margin-bottom: var(--spacing-xl); }
         .page-header h1 { color: white; font-size: var(--font-size-2xl); margin-bottom: var(--spacing-xs); }
         .page-header p { color: rgba(255,255,255,0.9); margin: 0; }
-        
-        .filter-card {
-            background: var(--color-bg-card);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-lg);
-            margin-bottom: var(--spacing-lg);
-        }
+        .filter-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-lg); margin-bottom: var(--spacing-lg); }
         .filter-card h5 { font-weight: 600; margin-bottom: var(--spacing-lg); color: var(--color-text-primary); }
-        
-        .translator-card {
-            background: var(--color-bg-card);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-lg);
-            margin-bottom: var(--spacing-md);
-            transition: all var(--transition-fast);
-        }
-        .translator-card:hover {
-            box-shadow: var(--shadow-md);
-            transform: translateY(-2px);
-        }
-        
-        .translator-avatar {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--color-accent), var(--color-accent-light));
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            font-weight: bold;
-            flex-shrink: 0;
-        }
-        
-        .translator-name {
-            font-family: var(--font-heading);
-            font-size: var(--font-size-lg);
-            font-weight: 600;
-            color: var(--color-text-primary);
-            margin-bottom: 4px;
-        }
-        
-        .translator-bio {
-            color: var(--color-text-secondary);
-            font-size: var(--font-size-sm);
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            margin-bottom: var(--spacing-sm);
-        }
-        
+        .translator-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-lg); margin-bottom: var(--spacing-md); transition: all var(--transition-fast); }
+        .translator-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+        .translator-avatar { width: 70px; height: 70px; border-radius: 50%; background: linear-gradient(135deg, var(--color-accent), var(--color-accent-light)); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: bold; flex-shrink: 0; }
+        .translator-name { font-family: var(--font-heading); font-size: var(--font-size-lg); font-weight: 600; color: var(--color-text-primary); margin-bottom: 4px; }
+        .translator-bio { color: var(--color-text-secondary); font-size: var(--font-size-sm); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: var(--spacing-sm); }
         .rating-stars { color: var(--color-warning); }
         .rating-count { color: var(--color-text-secondary); font-size: var(--font-size-sm); margin-left: 8px; }
-        
-        .lang-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            background: rgba(139, 115, 85, 0.1);
-            color: var(--color-accent);
-            padding: 4px 12px;
-            border-radius: var(--radius-full);
-            font-size: var(--font-size-sm);
-            margin: 3px;
-        }
-        
-        .native-badge {
-            background: rgba(212, 168, 83, 0.2);
-            color: var(--color-warning);
-            font-size: var(--font-size-xs);
-            padding: 2px 6px;
-            border-radius: var(--radius-sm);
-            margin-left: 5px;
-        }
-        
-        .specialization-tag {
-            background: var(--color-bg-hover);
-            color: var(--color-text-secondary);
-            padding: 4px 10px;
-            border-radius: var(--radius-full);
-            font-size: var(--font-size-xs);
-            margin: 2px;
-            display: inline-block;
-        }
-        
-        .revenue-badge {
-            background: rgba(93, 156, 89, 0.1);
-            color: var(--color-success);
-            padding: var(--spacing-sm) var(--spacing-md);
-            border-radius: var(--radius-md);
-            font-weight: 600;
-            text-align: center;
-        }
+        .lang-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(139, 115, 85, 0.1); color: var(--color-accent); padding: 4px 12px; border-radius: var(--radius-full); font-size: var(--font-size-sm); margin: 3px; }
+        .native-badge { background: rgba(212, 168, 83, 0.2); color: var(--color-warning); font-size: var(--font-size-xs); padding: 2px 6px; border-radius: var(--radius-sm); margin-left: 5px; }
+        .specialization-tag { background: var(--color-bg-hover); color: var(--color-text-secondary); padding: 4px 10px; border-radius: var(--radius-full); font-size: var(--font-size-xs); margin: 2px; display: inline-block; }
+        .revenue-badge { background: rgba(93, 156, 89, 0.1); color: var(--color-success); padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--radius-md); font-weight: 600; text-align: center; }
         .revenue-badge .percent { font-size: var(--font-size-xl); }
         .revenue-badge .label { font-size: var(--font-size-xs); }
-        
-        .stats-row {
-            display: flex;
-            justify-content: space-around;
-            padding-top: var(--spacing-md);
-            border-top: 1px solid var(--color-border);
-            margin-top: var(--spacing-md);
-        }
+        .stats-row { display: flex; justify-content: space-around; padding-top: var(--spacing-md); border-top: 1px solid var(--color-border); margin-top: var(--spacing-md); }
         .stat-item { text-align: center; }
-        .stat-item .number {
-            font-family: var(--font-heading);
-            font-size: var(--font-size-lg);
-            font-weight: 700;
-            color: var(--color-text-primary);
-        }
-        .stat-item .label {
-            font-size: var(--font-size-xs);
-            color: var(--color-text-secondary);
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: var(--spacing-2xl);
-            color: var(--color-text-secondary);
-        }
+        .stat-item .number { font-family: var(--font-heading); font-size: var(--font-size-lg); font-weight: 700; color: var(--color-text-primary); }
+        .stat-item .label { font-size: var(--font-size-xs); color: var(--color-text-secondary); }
+        .empty-state { text-align: center; padding: var(--spacing-2xl); color: var(--color-text-secondary); }
         .empty-state i { font-size: 4rem; margin-bottom: var(--spacing-md); opacity: 0.3; }
-        
-        .loading-spinner {
-            display: flex;
-            justify-content: center;
-            padding: var(--spacing-2xl);
-        }
-        
-        .cta-card {
-            background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
-            color: white;
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-lg);
-            text-align: center;
-        }
+        .loading-spinner { display: flex; justify-content: center; padding: var(--spacing-2xl); }
+        .cta-card { background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%); color: white; border-radius: var(--radius-lg); padding: var(--spacing-lg); text-align: center; }
         .cta-card h6 { color: white; margin-bottom: var(--spacing-sm); }
         .cta-card p { color: rgba(255,255,255,0.9); font-size: var(--font-size-sm); margin-bottom: var(--spacing-md); }
         .cta-card .btn { background: white; color: var(--color-accent); border: none; }
         .cta-card .btn:hover { background: var(--color-bg-hover); }
-        
-        .info-card {
-            background: var(--color-bg-card);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-lg);
-        }
+        .info-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-lg); }
         .info-card h6 { font-weight: 600; margin-bottom: var(--spacing-md); }
         .info-card ul { padding-left: var(--spacing-md); margin: 0; }
         .info-card li { margin-bottom: var(--spacing-xs); font-size: var(--font-size-sm); color: var(--color-text-secondary); }
@@ -185,30 +55,32 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="../../index.html">
-                <i class="fas fa-book-open"></i>
-                Publisher
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+            <a class="navbar-brand" href="../../index.html"><i class="fas fa-book-open"></i> Publisher</a>
+            <div class="navbar-lang-selector d-lg-none">
+                <select class="language-selector" id="languageSelectorMobile">
+                    <option value="en">🇬🇧 EN</option><option value="ja">🇯🇵 日本語</option><option value="zh">🇨🇳 中文</option><option value="es">🇪🇸 ES</option><option value="fr">🇫🇷 FR</option><option value="de">🇩🇪 DE</option><option value="ko">🇰🇷 한국어</option><option value="ar">🇸🇦 عربي</option><option value="pt">🇧🇷 PT</option>
+                </select>
+            </div>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link" href="../dashboard.html"><i class="fas fa-th-large me-1"></i>Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="../browse.html"><i class="fas fa-compass me-1"></i>Browse</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="index.html"><i class="fas fa-language me-1"></i>翻訳者</a></li>
+                    <li class="nav-item"><a class="nav-link" href="../dashboard.html"><i class="fas fa-th-large me-1"></i><span id="navDashboard">Dashboard</span></a></li>
+                    <li class="nav-item"><a class="nav-link" href="../browse.html"><i class="fas fa-compass me-1"></i><span id="navBrowse">Browse</span></a></li>
+                    <li class="nav-item"><a class="nav-link active" href="index.html"><i class="fas fa-language me-1"></i><span id="navTranslators">Translators</span></a></li>
                 </ul>
                 <div class="d-flex align-items-center gap-3">
+                    <select class="language-selector d-none d-lg-block" id="languageSelector">
+                        <option value="en">🇬🇧 EN</option><option value="ja">🇯🇵 日本語</option><option value="zh">🇨🇳 中文</option><option value="es">🇪🇸 ES</option><option value="fr">🇫🇷 FR</option><option value="de">🇩🇪 DE</option><option value="ko">🇰🇷 한국어</option><option value="ar">🇸🇦 عربي</option><option value="pt">🇧🇷 PT</option>
+                    </select>
                     <div class="dropdown">
                         <button class="btn btn-soft-custom dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user-circle me-1"></i>
-                            <span id="userName">User</span>
+                            <i class="fas fa-user-circle me-1"></i><span id="userName">User</span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="../profile.html"><i class="fas fa-user me-2"></i>Profile</a></li>
-                            <li><a class="dropdown-item" href="../settings.html"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                            <li><a class="dropdown-item" href="../profile.html"><i class="fas fa-user me-2"></i><span id="menuProfile">Profile</span></a></li>
+                            <li><a class="dropdown-item" href="../settings.html"><i class="fas fa-cog me-2"></i><span id="menuSettings">Settings</span></a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Sign Out</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i><span id="menuSignOut">Sign Out</span></a></li>
                         </ul>
                     </div>
                 </div>
@@ -219,8 +91,8 @@
     <!-- Page Header -->
     <div class="page-header">
         <div class="container">
-            <h1><i class="fas fa-language me-2"></i>翻訳者を探す</h1>
-            <p>あなたの作品を世界中の読者に届けましょう。経験豊富な翻訳者が待っています。</p>
+            <h1><i class="fas fa-language me-2"></i><span id="pageTitle">Find Translators</span></h1>
+            <p id="pageSubtitle">Bring your work to readers worldwide. Experienced translators are waiting.</p>
         </div>
     </div>
 
@@ -229,12 +101,12 @@
             <!-- Filters Sidebar -->
             <div class="col-lg-3">
                 <div class="filter-card">
-                    <h5><i class="fas fa-filter me-2"></i>絞り込み</h5>
+                    <h5><i class="fas fa-filter me-2"></i><span id="filterTitle">Filter</span></h5>
                     
                     <div class="mb-4">
-                        <label class="form-label">翻訳元言語</label>
+                        <label class="form-label" id="labelSourceLang">Source Language</label>
                         <select class="form-select" id="source-language">
-                            <option value="">すべて</option>
+                            <option value="" id="optAll">All</option>
                             <option value="ja">日本語</option>
                             <option value="en">English</option>
                             <option value="zh">中文</option>
@@ -247,9 +119,9 @@
                     </div>
                     
                     <div class="mb-4">
-                        <label class="form-label">翻訳先言語</label>
+                        <label class="form-label" id="labelTargetLang">Target Language</label>
                         <select class="form-select" id="target-language">
-                            <option value="">すべて</option>
+                            <option value="">All</option>
                             <option value="ja">日本語</option>
                             <option value="en">English</option>
                             <option value="zh">中文</option>
@@ -262,88 +134,81 @@
                     </div>
                     
                     <div class="mb-4">
-                        <label class="form-label">最低評価</label>
+                        <label class="form-label" id="labelMinRating">Minimum Rating</label>
                         <select class="form-select" id="min-rating">
-                            <option value="">指定なし</option>
-                            <option value="4.5">★4.5以上</option>
-                            <option value="4">★4.0以上</option>
-                            <option value="3.5">★3.5以上</option>
-                            <option value="3">★3.0以上</option>
+                            <option value="" id="optNoPreference">No preference</option>
+                            <option value="4.5">★4.5+</option>
+                            <option value="4">★4.0+</option>
+                            <option value="3.5">★3.5+</option>
+                            <option value="3">★3.0+</option>
                         </select>
                     </div>
                     
                     <div class="mb-4">
-                        <label class="form-label">専門分野</label>
+                        <label class="form-label" id="labelSpecialization">Specialization</label>
                         <select class="form-select" id="specialization">
-                            <option value="">すべて</option>
-                            <option value="fiction">小説・フィクション</option>
-                            <option value="manga">マンガ</option>
-                            <option value="technical">技術・専門書</option>
-                            <option value="poetry">詩・俳句</option>
-                            <option value="business">ビジネス</option>
-                            <option value="academic">学術</option>
+                            <option value="">All</option>
+                            <option value="fiction" id="specFiction">Fiction</option>
+                            <option value="manga" id="specManga">Manga</option>
+                            <option value="technical" id="specTechnical">Technical</option>
+                            <option value="poetry" id="specPoetry">Poetry</option>
+                            <option value="business" id="specBusiness">Business</option>
+                            <option value="academic" id="specAcademic">Academic</option>
                         </select>
                     </div>
                     
                     <button class="btn btn-custom w-100 mb-2" onclick="searchTranslators()">
-                        <i class="fas fa-search me-2"></i>検索
+                        <i class="fas fa-search me-2"></i><span id="btnSearch">Search</span>
                     </button>
                     <button class="btn btn-soft-custom w-100" onclick="resetFilters()">
-                        <i class="fas fa-times me-2"></i>リセット
+                        <i class="fas fa-times me-2"></i><span id="btnReset">Reset</span>
                     </button>
                 </div>
                 
                 <!-- Revenue Info -->
                 <div class="info-card mb-3">
-                    <h6><i class="fas fa-info-circle me-2 text-accent"></i>収益分配について</h6>
-                    <p class="small text-secondary mb-2">翻訳者は翻訳作品の収益から報酬を受け取ります：</p>
+                    <h6><i class="fas fa-info-circle me-2 text-accent"></i><span id="revenueTitle">Revenue Sharing</span></h6>
+                    <p class="small text-secondary mb-2" id="revenueDesc">Translators earn from translated work sales:</p>
                     <ul>
-                        <li><strong>翻訳者: 20%</strong></li>
-                        <li>著者: 40-70%</li>
-                        <li>編集者: 10%</li>
-                        <li>プラットフォーム: 30%</li>
+                        <li><strong id="revTranslator">Translator: 20%</strong></li>
+                        <li id="revAuthor">Author: 40-70%</li>
+                        <li id="revEditor">Editor: 10%</li>
+                        <li id="revPlatform">Platform: 30%</li>
                     </ul>
                 </div>
                 
                 <!-- Become a Translator CTA -->
                 <div class="cta-card">
                     <i class="fas fa-user-plus fa-2x mb-3"></i>
-                    <h6>翻訳者として登録</h6>
-                    <p>あなたのスキルを活かして収入を得ましょう</p>
-                    <a href="register.html" class="btn btn-sm">登録する</a>
+                    <h6 id="ctaTitle">Become a Translator</h6>
+                    <p id="ctaDesc">Use your skills to earn income</p>
+                    <a href="register.html" class="btn btn-sm" id="ctaBtn">Register</a>
                 </div>
             </div>
             
             <!-- Translators List -->
             <div class="col-lg-9">
-                <!-- Sort & Results Count -->
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div id="results-count" class="text-secondary">--人の翻訳者が見つかりました</div>
+                    <div id="results-count" class="text-secondary">-- translators found</div>
                     <select class="form-select" id="sort-order" style="width: auto;" onchange="searchTranslators()">
-                        <option value="rating">評価が高い順</option>
-                        <option value="projects">実績が多い順</option>
-                        <option value="reviews">レビューが多い順</option>
+                        <option value="rating" id="sortRating">Highest Rated</option>
+                        <option value="projects" id="sortProjects">Most Projects</option>
+                        <option value="reviews" id="sortReviews">Most Reviews</option>
                     </select>
                 </div>
                 
-                <!-- Loading -->
                 <div id="loading" class="loading-spinner">
-                    <div class="spinner-border text-accent" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
+                    <div class="spinner-border text-accent" role="status"><span class="visually-hidden">Loading...</span></div>
                 </div>
                 
-                <!-- Translator Cards -->
                 <div id="translator-list"></div>
                 
-                <!-- Empty State -->
                 <div id="empty-state" class="empty-state" style="display: none;">
                     <i class="fas fa-search"></i>
-                    <h4>翻訳者が見つかりませんでした</h4>
-                    <p>条件を変更して再検索してください</p>
+                    <h4 id="emptyTitle">No translators found</h4>
+                    <p id="emptyDesc">Try changing your search criteria</p>
                 </div>
                 
-                <!-- Pagination -->
                 <div id="pagination" class="d-flex justify-content-center mt-4"></div>
             </div>
         </div>
@@ -354,7 +219,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-user me-2"></i>翻訳者プロフィール</h5>
+                    <h5 class="modal-title"><i class="fas fa-user me-2"></i><span id="modalProfileTitle">Translator Profile</span></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" id="translator-detail-content">
@@ -369,57 +234,46 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-paper-plane me-2"></i>翻訳を依頼</h5>
+                    <h5 class="modal-title"><i class="fas fa-paper-plane me-2"></i><span id="modalRequestTitle">Request Translation</span></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="request-profile-id">
-                    
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle me-2"></i>
-                        <strong>収益分配モデル:</strong> 翻訳者は翻訳作品の収益の<strong>20%</strong>を受け取ります。
+                        <span id="requestRevenueInfo"><strong>Revenue Model:</strong> Translators receive <strong>20%</strong> of translated work sales.</span>
                     </div>
-                    
                     <div class="mb-3">
-                        <label class="form-label">作品を選択 <span class="text-danger">*</span></label>
-                        <select class="form-select" id="request-work">
-                            <option value="">作品を選択してください</option>
-                        </select>
+                        <label class="form-label" id="labelSelectWork">Select Work <span class="text-danger">*</span></label>
+                        <select class="form-select" id="request-work"><option value="" id="optSelectWork">Select a work</option></select>
                     </div>
-                    
                     <div class="row mb-3">
                         <div class="col-6">
-                            <label class="form-label">翻訳元</label>
+                            <label class="form-label" id="labelReqSource">Source</label>
                             <select class="form-select" id="request-source-lang">
-                                <option value="ja">日本語</option>
-                                <option value="en">English</option>
-                                <option value="zh">中文</option>
+                                <option value="ja">日本語</option><option value="en">English</option><option value="zh">中文</option>
                             </select>
                         </div>
                         <div class="col-6">
-                            <label class="form-label">翻訳先</label>
+                            <label class="form-label" id="labelReqTarget">Target</label>
                             <select class="form-select" id="request-target-lang">
-                                <option value="en">English</option>
-                                <option value="ja">日本語</option>
-                                <option value="zh">中文</option>
+                                <option value="en">English</option><option value="ja">日本語</option><option value="zh">中文</option>
                             </select>
                         </div>
                     </div>
-                    
                     <div class="mb-3">
-                        <label class="form-label">メッセージ（任意）</label>
-                        <textarea class="form-control" id="request-message" rows="3" placeholder="翻訳者への要望やコメントがあれば記入してください"></textarea>
+                        <label class="form-label" id="labelMessage">Message (optional)</label>
+                        <textarea class="form-control" id="request-message" rows="3" placeholder=""></textarea>
                     </div>
-                    
                     <div class="mb-3">
-                        <label class="form-label">希望納期（任意）</label>
+                        <label class="form-label" id="labelDeadline">Preferred Deadline (optional)</label>
                         <input type="date" class="form-control" id="request-deadline">
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-soft-custom" data-bs-dismiss="modal">キャンセル</button>
+                    <button type="button" class="btn btn-soft-custom" data-bs-dismiss="modal" id="btnCancel">Cancel</button>
                     <button type="button" class="btn btn-custom" onclick="submitRequest()">
-                        <i class="fas fa-paper-plane me-2"></i>依頼を送信
+                        <i class="fas fa-paper-plane me-2"></i><span id="btnSubmitRequest">Send Request</span>
                     </button>
                 </div>
             </div>
@@ -432,38 +286,186 @@
             <div class="d-flex flex-wrap justify-content-between align-items-center">
                 <p class="small mb-0">&copy; 2024 Publisher. All rights reserved.</p>
                 <div class="d-flex gap-3">
-                    <a href="../help.html" class="text-secondary">Help</a>
-                    <a href="../legal/terms.html" class="text-secondary">Terms</a>
-                    <a href="../legal/privacy.html" class="text-secondary">Privacy</a>
+                    <a href="../support/faq.html" class="text-secondary" id="footerHelp">Help</a>
+                    <a href="../terms.html" class="text-secondary" id="footerTerms">Terms</a>
+                    <a href="../privacy.html" class="text-secondary" id="footerPrivacy">Privacy</a>
                 </div>
             </div>
         </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../js/translations.js"></script>
+    <script src="../../js/language-switcher.js"></script>
     <script>
         const API_BASE = 'http://localhost:3000/api';
-        const LANG_NAMES = {
-            'ja': '日本語', 'en': 'English', 'zh': '中文',
-            'es': 'Español', 'fr': 'Français', 'de': 'Deutsch',
-            'ko': '한국어', 'ar': 'العربية'
+        
+        // All UI text in 9 languages
+        const uiText = {
+            pageTitle: { en: 'Find Translators', ja: '翻訳者を探す', zh: '寻找翻译', es: 'Buscar Traductores', fr: 'Trouver des Traducteurs', de: 'Übersetzer finden', ko: '번역가 찾기', ar: 'ابحث عن مترجمين', pt: 'Encontrar Tradutores' },
+            pageSubtitle: { en: 'Bring your work to readers worldwide. Experienced translators are waiting.', ja: 'あなたの作品を世界中の読者に届けましょう。経験豊富な翻訳者が待っています。', zh: '将您的作品带给全世界的读者。经验丰富的翻译正在等待。', es: 'Lleva tu trabajo a lectores de todo el mundo. Traductores experimentados están esperando.', fr: 'Apportez votre travail aux lecteurs du monde entier. Des traducteurs expérimentés vous attendent.', de: 'Bringen Sie Ihre Arbeit zu Lesern weltweit. Erfahrene Übersetzer warten.', ko: '전 세계 독자에게 작품을 전달하세요. 경험 많은 번역가들이 기다리고 있습니다.', ar: 'أوصل عملك إلى القراء في جميع أنحاء العالم. المترجمون ذوو الخبرة ينتظرون.', pt: 'Leve seu trabalho a leitores do mundo todo. Tradutores experientes estão esperando.' },
+            navDashboard: { en: 'Dashboard', ja: 'ダッシュボード', zh: '仪表板', es: 'Panel', fr: 'Tableau de bord', de: 'Dashboard', ko: '대시보드', ar: 'لوحة التحكم', pt: 'Painel' },
+            navBrowse: { en: 'Browse', ja: '作品を探す', zh: '浏览', es: 'Explorar', fr: 'Parcourir', de: 'Durchsuchen', ko: '둘러보기', ar: 'تصفح', pt: 'Explorar' },
+            navTranslators: { en: 'Translators', ja: '翻訳者', zh: '翻译', es: 'Traductores', fr: 'Traducteurs', de: 'Übersetzer', ko: '번역가', ar: 'المترجمين', pt: 'Tradutores' },
+            menuProfile: { en: 'Profile', ja: 'プロフィール', zh: '个人资料', es: 'Perfil', fr: 'Profil', de: 'Profil', ko: '프로필', ar: 'الملف الشخصي', pt: 'Perfil' },
+            menuSettings: { en: 'Settings', ja: '設定', zh: '设置', es: 'Configuración', fr: 'Paramètres', de: 'Einstellungen', ko: '설정', ar: 'الإعدادات', pt: 'Configurações' },
+            menuSignOut: { en: 'Sign Out', ja: 'ログアウト', zh: '退出', es: 'Cerrar sesión', fr: 'Déconnexion', de: 'Abmelden', ko: '로그아웃', ar: 'تسجيل الخروج', pt: 'Sair' },
+            filterTitle: { en: 'Filter', ja: '絞り込み', zh: '筛选', es: 'Filtrar', fr: 'Filtrer', de: 'Filtern', ko: '필터', ar: 'تصفية', pt: 'Filtrar' },
+            labelSourceLang: { en: 'Source Language', ja: '翻訳元言語', zh: '源语言', es: 'Idioma de origen', fr: 'Langue source', de: 'Ausgangssprache', ko: '원본 언어', ar: 'اللغة المصدر', pt: 'Idioma de origem' },
+            labelTargetLang: { en: 'Target Language', ja: '翻訳先言語', zh: '目标语言', es: 'Idioma de destino', fr: 'Langue cible', de: 'Zielsprache', ko: '대상 언어', ar: 'اللغة الهدف', pt: 'Idioma de destino' },
+            labelMinRating: { en: 'Minimum Rating', ja: '最低評価', zh: '最低评分', es: 'Calificación mínima', fr: 'Note minimale', de: 'Mindestbewertung', ko: '최소 평점', ar: 'الحد الأدنى للتقييم', pt: 'Avaliação mínima' },
+            labelSpecialization: { en: 'Specialization', ja: '専門分野', zh: '专业领域', es: 'Especialización', fr: 'Spécialisation', de: 'Spezialisierung', ko: '전문 분야', ar: 'التخصص', pt: 'Especialização' },
+            optAll: { en: 'All', ja: 'すべて', zh: '全部', es: 'Todos', fr: 'Tous', de: 'Alle', ko: '전체', ar: 'الكل', pt: 'Todos' },
+            optNoPreference: { en: 'No preference', ja: '指定なし', zh: '不限', es: 'Sin preferencia', fr: 'Pas de préférence', de: 'Keine Präferenz', ko: '선호 없음', ar: 'بدون تفضيل', pt: 'Sem preferência' },
+            specFiction: { en: 'Fiction', ja: '小説・フィクション', zh: '小说', es: 'Ficción', fr: 'Fiction', de: 'Belletristik', ko: '소설', ar: 'خيال', pt: 'Ficção' },
+            specManga: { en: 'Manga', ja: 'マンガ', zh: '漫画', es: 'Manga', fr: 'Manga', de: 'Manga', ko: '만화', ar: 'مانغا', pt: 'Mangá' },
+            specTechnical: { en: 'Technical', ja: '技術・専門書', zh: '技术', es: 'Técnico', fr: 'Technique', de: 'Technisch', ko: '기술', ar: 'تقني', pt: 'Técnico' },
+            specPoetry: { en: 'Poetry', ja: '詩・俳句', zh: '诗歌', es: 'Poesía', fr: 'Poésie', de: 'Poesie', ko: '시', ar: 'شعر', pt: 'Poesia' },
+            specBusiness: { en: 'Business', ja: 'ビジネス', zh: '商业', es: 'Negocios', fr: 'Affaires', de: 'Business', ko: '비즈니스', ar: 'أعمال', pt: 'Negócios' },
+            specAcademic: { en: 'Academic', ja: '学術', zh: '学术', es: 'Académico', fr: 'Académique', de: 'Akademisch', ko: '학술', ar: 'أكاديمي', pt: 'Acadêmico' },
+            btnSearch: { en: 'Search', ja: '検索', zh: '搜索', es: 'Buscar', fr: 'Rechercher', de: 'Suchen', ko: '검색', ar: 'بحث', pt: 'Buscar' },
+            btnReset: { en: 'Reset', ja: 'リセット', zh: '重置', es: 'Restablecer', fr: 'Réinitialiser', de: 'Zurücksetzen', ko: '초기화', ar: 'إعادة تعيين', pt: 'Redefinir' },
+            revenueTitle: { en: 'Revenue Sharing', ja: '収益分配について', zh: '收益分成', es: 'Reparto de ingresos', fr: 'Partage des revenus', de: 'Umsatzbeteiligung', ko: '수익 분배', ar: 'تقاسم الإيرادات', pt: 'Divisão de receita' },
+            revenueDesc: { en: 'Translators earn from translated work sales:', ja: '翻訳者は翻訳作品の収益から報酬を受け取ります：', zh: '翻译从翻译作品的销售中获得收入：', es: 'Los traductores ganan de las ventas de obras traducidas:', fr: 'Les traducteurs gagnent des ventes des œuvres traduites :', de: 'Übersetzer verdienen an übersetzten Werken:', ko: '번역가는 번역 작품 판매 수익을 받습니다:', ar: 'يكسب المترجمون من مبيعات الأعمال المترجمة:', pt: 'Tradutores ganham com vendas de obras traduzidas:' },
+            revTranslator: { en: 'Translator: 20%', ja: '翻訳者: 20%', zh: '翻译: 20%', es: 'Traductor: 20%', fr: 'Traducteur : 20%', de: 'Übersetzer: 20%', ko: '번역가: 20%', ar: 'المترجم: 20%', pt: 'Tradutor: 20%' },
+            revAuthor: { en: 'Author: 40-70%', ja: '著者: 40-70%', zh: '作者: 40-70%', es: 'Autor: 40-70%', fr: 'Auteur : 40-70%', de: 'Autor: 40-70%', ko: '저자: 40-70%', ar: 'المؤلف: 40-70%', pt: 'Autor: 40-70%' },
+            revEditor: { en: 'Editor: 10%', ja: '編集者: 10%', zh: '编辑: 10%', es: 'Editor: 10%', fr: 'Éditeur : 10%', de: 'Lektor: 10%', ko: '편집자: 10%', ar: 'المحرر: 10%', pt: 'Editor: 10%' },
+            revPlatform: { en: 'Platform: 30%', ja: 'プラットフォーム: 30%', zh: '平台: 30%', es: 'Plataforma: 30%', fr: 'Plateforme : 30%', de: 'Plattform: 30%', ko: '플랫폼: 30%', ar: 'المنصة: 30%', pt: 'Plataforma: 30%' },
+            ctaTitle: { en: 'Become a Translator', ja: '翻訳者として登録', zh: '成为翻译', es: 'Conviértete en Traductor', fr: 'Devenir Traducteur', de: 'Übersetzer werden', ko: '번역가 되기', ar: 'كن مترجمًا', pt: 'Torne-se Tradutor' },
+            ctaDesc: { en: 'Use your skills to earn income', ja: 'あなたのスキルを活かして収入を得ましょう', zh: '用您的技能赚取收入', es: 'Usa tus habilidades para ganar dinero', fr: 'Utilisez vos compétences pour gagner un revenu', de: 'Nutzen Sie Ihre Fähigkeiten zum Verdienen', ko: '당신의 실력으로 수입을 올리세요', ar: 'استخدم مهاراتك لكسب الدخل', pt: 'Use suas habilidades para ganhar renda' },
+            ctaBtn: { en: 'Register', ja: '登録する', zh: '注册', es: 'Registrarse', fr: "S'inscrire", de: 'Registrieren', ko: '등록', ar: 'تسجيل', pt: 'Registrar' },
+            sortRating: { en: 'Highest Rated', ja: '評価が高い順', zh: '评分最高', es: 'Mejor valorados', fr: 'Mieux notés', de: 'Beste Bewertung', ko: '평점 높은 순', ar: 'الأعلى تقييمًا', pt: 'Mais bem avaliados' },
+            sortProjects: { en: 'Most Projects', ja: '実績が多い順', zh: '项目最多', es: 'Más proyectos', fr: 'Plus de projets', de: 'Meiste Projekte', ko: '프로젝트 많은 순', ar: 'أكثر المشاريع', pt: 'Mais projetos' },
+            sortReviews: { en: 'Most Reviews', ja: 'レビューが多い順', zh: '评论最多', es: 'Más reseñas', fr: 'Plus d\'avis', de: 'Meiste Bewertungen', ko: '리뷰 많은 순', ar: 'أكثر التقييمات', pt: 'Mais avaliações' },
+            resultsFound: { en: '{n} translators found', ja: '{n}人の翻訳者が見つかりました', zh: '找到 {n} 位翻译', es: '{n} traductores encontrados', fr: '{n} traducteurs trouvés', de: '{n} Übersetzer gefunden', ko: '번역가 {n}명 검색됨', ar: 'تم العثور على {n} مترجم', pt: '{n} tradutores encontrados' },
+            emptyTitle: { en: 'No translators found', ja: '翻訳者が見つかりませんでした', zh: '未找到翻译', es: 'No se encontraron traductores', fr: 'Aucun traducteur trouvé', de: 'Keine Übersetzer gefunden', ko: '번역가를 찾을 수 없습니다', ar: 'لم يتم العثور على مترجمين', pt: 'Nenhum tradutor encontrado' },
+            emptyDesc: { en: 'Try changing your search criteria', ja: '条件を変更して再検索してください', zh: '尝试更改搜索条件', es: 'Intenta cambiar los criterios de búsqueda', fr: 'Essayez de modifier vos critères de recherche', de: 'Versuchen Sie andere Suchkriterien', ko: '검색 조건을 변경해 보세요', ar: 'حاول تغيير معايير البحث', pt: 'Tente alterar os critérios de busca' },
+            btnRequest: { en: 'Request', ja: '依頼する', zh: '请求', es: 'Solicitar', fr: 'Demander', de: 'Anfragen', ko: '의뢰', ar: 'طلب', pt: 'Solicitar' },
+            btnViewProfile: { en: 'Profile', ja: 'プロフィール', zh: '资料', es: 'Perfil', fr: 'Profil', de: 'Profil', ko: '프로필', ar: 'الملف', pt: 'Perfil' },
+            revenueShare: { en: 'Revenue Share', ja: '収益分配', zh: '收益分成', es: 'Participación', fr: 'Part des revenus', de: 'Umsatzanteil', ko: '수익 분배', ar: 'حصة الإيرادات', pt: 'Participação' },
+            completedProjects: { en: 'Completed', ja: '完了案件', zh: '已完成', es: 'Completados', fr: 'Terminés', de: 'Abgeschlossen', ko: '완료', ar: 'مكتملة', pt: 'Concluídos' },
+            yearsExp: { en: 'Experience', ja: '経験年数', zh: '经验', es: 'Experiencia', fr: 'Expérience', de: 'Erfahrung', ko: '경력', ar: 'الخبرة', pt: 'Experiência' },
+            responseTime: { en: 'Response', ja: '返答時間', zh: '响应', es: 'Respuesta', fr: 'Réponse', de: 'Antwortzeit', ko: '응답', ar: 'الاستجابة', pt: 'Resposta' },
+            noBioYet: { en: 'No bio yet', ja: '自己紹介はまだありません', zh: '暂无简介', es: 'Sin biografía', fr: 'Pas de bio', de: 'Noch keine Bio', ko: '소개 없음', ar: 'لا توجد نبذة', pt: 'Sem bio' },
+            noPairsSet: { en: 'No language pairs set', ja: '言語ペア未設定', zh: '未设置语言对', es: 'Sin pares de idiomas', fr: 'Pas de paires de langues', de: 'Keine Sprachpaare', ko: '언어 쌍 미설정', ar: 'لا توجد أزواج لغات', pt: 'Sem pares de idiomas' },
+            native: { en: 'Native', ja: 'ネイティブ', zh: '母语', es: 'Nativo', fr: 'Natif', de: 'Muttersprachler', ko: '원어민', ar: 'أصلي', pt: 'Nativo' },
+            reviews: { en: 'reviews', ja: '件', zh: '条评论', es: 'reseñas', fr: 'avis', de: 'Bewertungen', ko: '개 리뷰', ar: 'تقييمات', pt: 'avaliações' },
+            modalProfileTitle: { en: 'Translator Profile', ja: '翻訳者プロフィール', zh: '翻译资料', es: 'Perfil del traductor', fr: 'Profil du traducteur', de: 'Übersetzer-Profil', ko: '번역가 프로필', ar: 'ملف المترجم', pt: 'Perfil do tradutor' },
+            modalRequestTitle: { en: 'Request Translation', ja: '翻訳を依頼', zh: '请求翻译', es: 'Solicitar traducción', fr: 'Demander une traduction', de: 'Übersetzung anfragen', ko: '번역 의뢰', ar: 'طلب ترجمة', pt: 'Solicitar tradução' },
+            requestRevenueInfo: { en: '<strong>Revenue Model:</strong> Translators receive <strong>20%</strong> of translated work sales.', ja: '<strong>収益分配モデル:</strong> 翻訳者は翻訳作品の収益の<strong>20%</strong>を受け取ります。', zh: '<strong>收益模式：</strong>翻译获得翻译作品销售额的<strong>20%</strong>。', es: '<strong>Modelo de ingresos:</strong> Los traductores reciben el <strong>20%</strong> de las ventas.', fr: '<strong>Modèle de revenus :</strong> Les traducteurs reçoivent <strong>20%</strong> des ventes.', de: '<strong>Umsatzmodell:</strong> Übersetzer erhalten <strong>20%</strong> der Verkäufe.', ko: '<strong>수익 모델:</strong> 번역가는 번역 작품 판매 수익의 <strong>20%</strong>를 받습니다.', ar: '<strong>نموذج الإيرادات:</strong> يحصل المترجمون على <strong>20%</strong> من مبيعات الأعمال المترجمة.', pt: '<strong>Modelo de receita:</strong> Tradutores recebem <strong>20%</strong> das vendas.' },
+            labelSelectWork: { en: 'Select Work', ja: '作品を選択', zh: '选择作品', es: 'Seleccionar obra', fr: 'Sélectionner l\'œuvre', de: 'Werk auswählen', ko: '작품 선택', ar: 'اختر العمل', pt: 'Selecionar obra' },
+            optSelectWork: { en: 'Select a work', ja: '作品を選択してください', zh: '请选择作品', es: 'Seleccione una obra', fr: 'Sélectionnez une œuvre', de: 'Wählen Sie ein Werk', ko: '작품을 선택하세요', ar: 'اختر عملاً', pt: 'Selecione uma obra' },
+            labelReqSource: { en: 'Source', ja: '翻訳元', zh: '源语言', es: 'Origen', fr: 'Source', de: 'Quelle', ko: '원본', ar: 'المصدر', pt: 'Origem' },
+            labelReqTarget: { en: 'Target', ja: '翻訳先', zh: '目标语言', es: 'Destino', fr: 'Cible', de: 'Ziel', ko: '대상', ar: 'الهدف', pt: 'Destino' },
+            labelMessage: { en: 'Message (optional)', ja: 'メッセージ（任意）', zh: '留言（可选）', es: 'Mensaje (opcional)', fr: 'Message (optionnel)', de: 'Nachricht (optional)', ko: '메시지 (선택)', ar: 'رسالة (اختياري)', pt: 'Mensagem (opcional)' },
+            labelDeadline: { en: 'Preferred Deadline (optional)', ja: '希望納期（任意）', zh: '期望截止日期（可选）', es: 'Fecha límite preferida (opcional)', fr: 'Date limite souhaitée (optionnel)', de: 'Gewünschte Frist (optional)', ko: '희망 마감일 (선택)', ar: 'الموعد النهائي المفضل (اختياري)', pt: 'Prazo preferido (opcional)' },
+            btnCancel: { en: 'Cancel', ja: 'キャンセル', zh: '取消', es: 'Cancelar', fr: 'Annuler', de: 'Abbrechen', ko: '취소', ar: 'إلغاء', pt: 'Cancelar' },
+            btnSubmitRequest: { en: 'Send Request', ja: '依頼を送信', zh: '发送请求', es: 'Enviar solicitud', fr: 'Envoyer la demande', de: 'Anfrage senden', ko: '의뢰 보내기', ar: 'إرسال الطلب', pt: 'Enviar solicitação' },
+            footerHelp: { en: 'Help', ja: 'ヘルプ', zh: '帮助', es: 'Ayuda', fr: 'Aide', de: 'Hilfe', ko: '도움말', ar: 'مساعدة', pt: 'Ajuda' },
+            footerTerms: { en: 'Terms', ja: '利用規約', zh: '条款', es: 'Términos', fr: 'Conditions', de: 'Bedingungen', ko: '약관', ar: 'الشروط', pt: 'Termos' },
+            footerPrivacy: { en: 'Privacy', ja: 'プライバシー', zh: '隐私', es: 'Privacidad', fr: 'Confidentialité', de: 'Datenschutz', ko: '개인정보', ar: 'الخصوصية', pt: 'Privacidade' },
+            profileBio: { en: 'Bio', ja: '自己紹介', zh: '简介', es: 'Biografía', fr: 'Bio', de: 'Bio', ko: '소개', ar: 'نبذة', pt: 'Bio' },
+            profileLanguages: { en: 'Languages', ja: '対応言語', zh: '语言', es: 'Idiomas', fr: 'Langues', de: 'Sprachen', ko: '언어', ar: 'اللغات', pt: 'Idiomas' },
+            profileYearsExp: { en: 'Years of Experience:', ja: '経験年数:', zh: '经验年数：', es: 'Años de experiencia:', fr: 'Années d\'expérience :', de: 'Jahre Erfahrung:', ko: '경력:', ar: 'سنوات الخبرة:', pt: 'Anos de experiência:' },
+            profileCompleted: { en: 'Completed Projects:', ja: '完了案件:', zh: '已完成项目：', es: 'Proyectos completados:', fr: 'Projets terminés :', de: 'Abgeschlossene Projekte:', ko: '완료 프로젝트:', ar: 'المشاريع المكتملة:', pt: 'Projetos concluídos:' },
+            profileCertifications: { en: 'Certifications:', ja: '資格:', zh: '认证：', es: 'Certificaciones:', fr: 'Certifications :', de: 'Zertifizierungen:', ko: '자격증:', ar: 'الشهادات:', pt: 'Certificações:' },
+            profileReviews: { en: 'Reviews', ja: 'レビュー', zh: '评论', es: 'Reseñas', fr: 'Avis', de: 'Bewertungen', ko: '리뷰', ar: 'التقييمات', pt: 'Avaliações' },
+            noReviewsYet: { en: 'No reviews yet', ja: 'まだレビューがありません', zh: '暂无评论', es: 'Sin reseñas aún', fr: 'Pas encore d\'avis', de: 'Noch keine Bewertungen', ko: '아직 리뷰 없음', ar: 'لا توجد تقييمات بعد', pt: 'Sem avaliações ainda' },
+            anonymous: { en: 'Anonymous', ja: '匿名', zh: '匿名', es: 'Anónimo', fr: 'Anonyme', de: 'Anonym', ko: '익명', ar: 'مجهول', pt: 'Anônimo' },
+            alertSelectWork: { en: 'Please select a work', ja: '作品を選択してください', zh: '请选择作品', es: 'Por favor seleccione una obra', fr: 'Veuillez sélectionner une œuvre', de: 'Bitte wählen Sie ein Werk', ko: '작품을 선택해주세요', ar: 'يرجى اختيار عمل', pt: 'Por favor selecione uma obra' },
+            alertLoginRequired: { en: 'Login required', ja: 'ログインが必要です', zh: '需要登录', es: 'Inicio de sesión requerido', fr: 'Connexion requise', de: 'Anmeldung erforderlich', ko: '로그인이 필요합니다', ar: 'تسجيل الدخول مطلوب', pt: 'Login necessário' },
+            alertRequestSent: { en: 'Translation request sent! Please wait for translator response.', ja: '翻訳依頼を送信しました！翻訳者からの返答をお待ちください。', zh: '翻译请求已发送！请等待翻译回复。', es: '¡Solicitud enviada! Espere la respuesta del traductor.', fr: 'Demande envoyée ! Veuillez attendre la réponse du traducteur.', de: 'Anfrage gesendet! Bitte warten Sie auf die Antwort.', ko: '번역 의뢰를 보냈습니다! 번역가의 응답을 기다려주세요.', ar: 'تم إرسال طلب الترجمة! يرجى انتظار رد المترجم.', pt: 'Solicitação enviada! Aguarde a resposta do tradutor.' },
+            alertError: { en: 'Error', ja: 'エラー', zh: '错误', es: 'Error', fr: 'Erreur', de: 'Fehler', ko: '오류', ar: 'خطأ', pt: 'Erro' },
+            alertSendFailed: { en: 'Failed to send', ja: '送信に失敗しました', zh: '发送失败', es: 'Error al enviar', fr: 'Échec de l\'envoi', de: 'Senden fehlgeschlagen', ko: '전송 실패', ar: 'فشل الإرسال', pt: 'Falha ao enviar' },
+            loadingWorks: { en: 'Loading...', ja: '読み込み中...', zh: '加载中...', es: 'Cargando...', fr: 'Chargement...', de: 'Laden...', ko: '로딩 중...', ar: 'جار التحميل...', pt: 'Carregando...' },
+            loadWorksFailed: { en: 'Failed to load works', ja: '作品を読み込めませんでした', zh: '加载作品失败', es: 'Error al cargar obras', fr: 'Échec du chargement', de: 'Laden fehlgeschlagen', ko: '작품 로드 실패', ar: 'فشل تحميل الأعمال', pt: 'Falha ao carregar obras' },
+            searchFailed: { en: 'Failed to search translators', ja: '翻訳者の検索に失敗しました', zh: '搜索翻译失败', es: 'Error al buscar traductores', fr: 'Échec de la recherche', de: 'Suche fehlgeschlagen', ko: '번역가 검색 실패', ar: 'فشل البحث عن مترجمين', pt: 'Falha na busca' },
+            profileLoadFailed: { en: 'Failed to load profile', ja: 'プロフィールの読み込みに失敗しました', zh: '加载资料失败', es: 'Error al cargar perfil', fr: 'Échec du chargement du profil', de: 'Profil laden fehlgeschlagen', ko: '프로필 로드 실패', ar: 'فشل تحميل الملف الشخصي', pt: 'Falha ao carregar perfil' }
         };
+
         const SPEC_NAMES = {
-            'fiction': '小説', 'manga': 'マンガ', 'technical': '技術書',
-            'poetry': '詩', 'business': 'ビジネス', 'academic': '学術'
+            fiction: { en: 'Fiction', ja: '小説', zh: '小说', es: 'Ficción', fr: 'Fiction', de: 'Belletristik', ko: '소설', ar: 'خيال', pt: 'Ficção' },
+            manga: { en: 'Manga', ja: 'マンガ', zh: '漫画', es: 'Manga', fr: 'Manga', de: 'Manga', ko: '만화', ar: 'مانغا', pt: 'Mangá' },
+            technical: { en: 'Technical', ja: '技術書', zh: '技术', es: 'Técnico', fr: 'Technique', de: 'Technisch', ko: '기술', ar: 'تقني', pt: 'Técnico' },
+            poetry: { en: 'Poetry', ja: '詩', zh: '诗歌', es: 'Poesía', fr: 'Poésie', de: 'Poesie', ko: '시', ar: 'شعر', pt: 'Poesia' },
+            business: { en: 'Business', ja: 'ビジネス', zh: '商业', es: 'Negocios', fr: 'Affaires', de: 'Business', ko: '비즈니스', ar: 'أعمال', pt: 'Negócios' },
+            academic: { en: 'Academic', ja: '学術', zh: '学术', es: 'Académico', fr: 'Académique', de: 'Akademisch', ko: '학술', ar: 'أكاديمي', pt: 'Acadêmico' }
         };
-        
+
+        const LANG_NAMES = { ja: '日本語', en: 'English', zh: '中文', es: 'Español', fr: 'Français', de: 'Deutsch', ko: '한국어', ar: 'العربية', pt: 'Português' };
+
         let currentPage = 1;
-        
+        function getCurrentLang() { return localStorage.getItem('preferredLanguage') || 'en'; }
+        function getL(obj) { if (!obj) return ''; const l = getCurrentLang(); return obj[l] || obj['en'] || ''; }
+        function getSpecName(key) { return SPEC_NAMES[key] ? getL(SPEC_NAMES[key]) : key; }
+
+        function updateAllText() {
+            const l = getCurrentLang();
+            document.title = getL(uiText.pageTitle) + ' - Publisher';
+            document.getElementById('pageTitle').textContent = getL(uiText.pageTitle);
+            document.getElementById('pageSubtitle').textContent = getL(uiText.pageSubtitle);
+            document.getElementById('navDashboard').textContent = getL(uiText.navDashboard);
+            document.getElementById('navBrowse').textContent = getL(uiText.navBrowse);
+            document.getElementById('navTranslators').textContent = getL(uiText.navTranslators);
+            document.getElementById('menuProfile').textContent = getL(uiText.menuProfile);
+            document.getElementById('menuSettings').textContent = getL(uiText.menuSettings);
+            document.getElementById('menuSignOut').textContent = getL(uiText.menuSignOut);
+            document.getElementById('filterTitle').textContent = getL(uiText.filterTitle);
+            document.getElementById('labelSourceLang').textContent = getL(uiText.labelSourceLang);
+            document.getElementById('labelTargetLang').textContent = getL(uiText.labelTargetLang);
+            document.getElementById('labelMinRating').textContent = getL(uiText.labelMinRating);
+            document.getElementById('labelSpecialization').textContent = getL(uiText.labelSpecialization);
+            document.getElementById('optAll').textContent = getL(uiText.optAll);
+            document.getElementById('optNoPreference').textContent = getL(uiText.optNoPreference);
+            document.getElementById('specFiction').textContent = getL(uiText.specFiction);
+            document.getElementById('specManga').textContent = getL(uiText.specManga);
+            document.getElementById('specTechnical').textContent = getL(uiText.specTechnical);
+            document.getElementById('specPoetry').textContent = getL(uiText.specPoetry);
+            document.getElementById('specBusiness').textContent = getL(uiText.specBusiness);
+            document.getElementById('specAcademic').textContent = getL(uiText.specAcademic);
+            document.getElementById('btnSearch').textContent = getL(uiText.btnSearch);
+            document.getElementById('btnReset').textContent = getL(uiText.btnReset);
+            document.getElementById('revenueTitle').textContent = getL(uiText.revenueTitle);
+            document.getElementById('revenueDesc').textContent = getL(uiText.revenueDesc);
+            document.getElementById('revTranslator').innerHTML = '<strong>' + getL(uiText.revTranslator) + '</strong>';
+            document.getElementById('revAuthor').textContent = getL(uiText.revAuthor);
+            document.getElementById('revEditor').textContent = getL(uiText.revEditor);
+            document.getElementById('revPlatform').textContent = getL(uiText.revPlatform);
+            document.getElementById('ctaTitle').textContent = getL(uiText.ctaTitle);
+            document.getElementById('ctaDesc').textContent = getL(uiText.ctaDesc);
+            document.getElementById('ctaBtn').textContent = getL(uiText.ctaBtn);
+            document.getElementById('sortRating').textContent = getL(uiText.sortRating);
+            document.getElementById('sortProjects').textContent = getL(uiText.sortProjects);
+            document.getElementById('sortReviews').textContent = getL(uiText.sortReviews);
+            document.getElementById('emptyTitle').textContent = getL(uiText.emptyTitle);
+            document.getElementById('emptyDesc').textContent = getL(uiText.emptyDesc);
+            document.getElementById('modalProfileTitle').textContent = getL(uiText.modalProfileTitle);
+            document.getElementById('modalRequestTitle').textContent = getL(uiText.modalRequestTitle);
+            document.getElementById('requestRevenueInfo').innerHTML = getL(uiText.requestRevenueInfo);
+            document.getElementById('labelSelectWork').innerHTML = getL(uiText.labelSelectWork) + ' <span class="text-danger">*</span>';
+            document.getElementById('optSelectWork').textContent = getL(uiText.optSelectWork);
+            document.getElementById('labelReqSource').textContent = getL(uiText.labelReqSource);
+            document.getElementById('labelReqTarget').textContent = getL(uiText.labelReqTarget);
+            document.getElementById('labelMessage').textContent = getL(uiText.labelMessage);
+            document.getElementById('labelDeadline').textContent = getL(uiText.labelDeadline);
+            document.getElementById('btnCancel').textContent = getL(uiText.btnCancel);
+            document.getElementById('btnSubmitRequest').textContent = getL(uiText.btnSubmitRequest);
+            document.getElementById('footerHelp').textContent = getL(uiText.footerHelp);
+            document.getElementById('footerTerms').textContent = getL(uiText.footerTerms);
+            document.getElementById('footerPrivacy').textContent = getL(uiText.footerPrivacy);
+        }
+
+        function syncSelectors() {
+            const d = document.getElementById('languageSelector'), m = document.getElementById('languageSelectorMobile'), l = getCurrentLang();
+            if (d) d.value = l; if (m) m.value = l;
+            if (m) m.addEventListener('change', function() { if (d) d.value = this.value; localStorage.setItem('preferredLanguage', this.value); updateAllText(); searchTranslators(); });
+            if (d) d.addEventListener('change', function() { if (m) m.value = this.value; localStorage.setItem('preferredLanguage', this.value); updateAllText(); searchTranslators(); });
+        }
+
         async function searchTranslators(page = 1) {
             currentPage = page;
-            const loading = document.getElementById('loading');
-            const list = document.getElementById('translator-list');
-            const emptyState = document.getElementById('empty-state');
-            
-            loading.style.display = 'flex';
-            list.innerHTML = '';
-            emptyState.style.display = 'none';
+            const loading = document.getElementById('loading'), list = document.getElementById('translator-list'), emptyState = document.getElementById('empty-state');
+            loading.style.display = 'flex'; list.innerHTML = ''; emptyState.style.display = 'none';
             
             const params = new URLSearchParams({
                 source_language: document.getElementById('source-language').value,
@@ -471,34 +473,32 @@
                 min_rating: document.getElementById('min-rating').value,
                 specialization: document.getElementById('specialization').value,
                 sort: document.getElementById('sort-order').value,
-                page: page,
-                limit: 10
+                page: page, limit: 10
             });
             
             try {
                 const response = await fetch(`${API_BASE}/translators?${params}`);
                 const data = await response.json();
-                
                 loading.style.display = 'none';
                 
                 if (data.translators && data.translators.length > 0) {
-                    document.getElementById('results-count').textContent = `${data.pagination.total}人の翻訳者が見つかりました`;
+                    document.getElementById('results-count').textContent = getL(uiText.resultsFound).replace('{n}', data.pagination.total);
                     list.innerHTML = data.translators.map(t => renderTranslatorCard(t)).join('');
                     renderPagination(data.pagination);
                 } else {
-                    document.getElementById('results-count').textContent = '0人の翻訳者が見つかりました';
+                    document.getElementById('results-count').textContent = getL(uiText.resultsFound).replace('{n}', '0');
                     emptyState.style.display = 'block';
                     document.getElementById('pagination').innerHTML = '';
                 }
             } catch (error) {
                 console.error('Error:', error);
                 loading.style.display = 'none';
-                list.innerHTML = '<div class="alert alert-danger">翻訳者の検索に失敗しました</div>';
+                list.innerHTML = '<div class="alert alert-danger">' + getL(uiText.searchFailed) + '</div>';
             }
         }
-        
+
         function renderTranslatorCard(translator) {
-            const name = translator.display_name || translator.pen_name || '翻訳者';
+            const name = translator.display_name || translator.pen_name || 'Translator';
             const initial = name.charAt(0).toUpperCase();
             const rating = parseFloat(translator.avg_rating) || 0;
             const stars = '★'.repeat(Math.floor(rating)) + (rating % 1 >= 0.5 ? '☆' : '');
@@ -507,93 +507,61 @@
             if (translator.language_pairs) {
                 const pairs = Array.isArray(translator.language_pairs) ? translator.language_pairs : [];
                 langPairsHtml = pairs.slice(0, 4).map(lp => `
-                    <span class="lang-badge">
-                        ${LANG_NAMES[lp.source] || lp.source} → ${LANG_NAMES[lp.target] || lp.target}
-                        ${lp.is_native ? '<span class="native-badge">ネイティブ</span>' : ''}
-                    </span>
+                    <span class="lang-badge">${LANG_NAMES[lp.source] || lp.source} → ${LANG_NAMES[lp.target] || lp.target}${lp.is_native ? '<span class="native-badge">' + getL(uiText.native) + '</span>' : ''}</span>
                 `).join('');
                 if (pairs.length > 4) langPairsHtml += `<span class="lang-badge">+${pairs.length - 4}</span>`;
             }
             
             let specsHtml = '';
             if (translator.specializations && translator.specializations.length > 0) {
-                specsHtml = translator.specializations.map(s => 
-                    `<span class="specialization-tag">${SPEC_NAMES[s] || s}</span>`
-                ).join('');
+                specsHtml = translator.specializations.map(s => `<span class="specialization-tag">${getSpecName(s)}</span>`).join('');
             }
             
             return `
                 <div class="translator-card">
                     <div class="row align-items-center">
-                        <div class="col-auto">
-                            <div class="translator-avatar">${initial}</div>
-                        </div>
+                        <div class="col-auto"><div class="translator-avatar">${initial}</div></div>
                         <div class="col">
                             <div class="translator-name">${escapeHtml(name)}</div>
-                            <div class="mb-2">
-                                <span class="rating-stars">${stars || '☆☆☆☆☆'}</span>
-                                <span class="rating-count">(${translator.total_reviews || 0}件)</span>
-                            </div>
-                            <div class="translator-bio">${escapeHtml(translator.bio) || '自己紹介はまだありません'}</div>
-                            <div class="mb-2">${langPairsHtml || '<span class="text-secondary small">言語ペア未設定</span>'}</div>
+                            <div class="mb-2"><span class="rating-stars">${stars || '☆☆☆☆☆'}</span><span class="rating-count">(${translator.total_reviews || 0} ${getL(uiText.reviews)})</span></div>
+                            <div class="translator-bio">${escapeHtml(translator.bio) || getL(uiText.noBioYet)}</div>
+                            <div class="mb-2">${langPairsHtml || '<span class="text-secondary small">' + getL(uiText.noPairsSet) + '</span>'}</div>
                             <div>${specsHtml}</div>
                         </div>
                         <div class="col-auto text-center">
-                            <div class="revenue-badge mb-3">
-                                <div class="percent">20%</div>
-                                <div class="label">収益分配</div>
-                            </div>
+                            <div class="revenue-badge mb-3"><div class="percent">20%</div><div class="label">${getL(uiText.revenueShare)}</div></div>
                             <div class="d-grid gap-2">
-                                <button class="btn btn-custom btn-sm" onclick="openRequestModal('${translator.profile_id}')">
-                                    <i class="fas fa-paper-plane me-1"></i>依頼する
-                                </button>
-                                <button class="btn btn-soft-custom btn-sm" onclick="viewProfile('${translator.profile_id}')">
-                                    <i class="fas fa-user me-1"></i>プロフィール
-                                </button>
+                                <button class="btn btn-custom btn-sm" onclick="openRequestModal('${translator.profile_id}')"><i class="fas fa-paper-plane me-1"></i>${getL(uiText.btnRequest)}</button>
+                                <button class="btn btn-soft-custom btn-sm" onclick="viewProfile('${translator.profile_id}')"><i class="fas fa-user me-1"></i>${getL(uiText.btnViewProfile)}</button>
                             </div>
                         </div>
                     </div>
                     <div class="stats-row">
-                        <div class="stat-item">
-                            <div class="number">${translator.completed_projects || 0}</div>
-                            <div class="label">完了案件</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="number">${translator.years_experience || 0}年</div>
-                            <div class="label">経験年数</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="number">${translator.avg_response_hours || 24}h</div>
-                            <div class="label">返答時間</div>
-                        </div>
+                        <div class="stat-item"><div class="number">${translator.completed_projects || 0}</div><div class="label">${getL(uiText.completedProjects)}</div></div>
+                        <div class="stat-item"><div class="number">${translator.years_experience || 0}${getCurrentLang() === 'ja' ? '年' : 'y'}</div><div class="label">${getL(uiText.yearsExp)}</div></div>
+                        <div class="stat-item"><div class="number">${translator.avg_response_hours || 24}h</div><div class="label">${getL(uiText.responseTime)}</div></div>
                     </div>
                 </div>
             `;
         }
-        
+
         function renderPagination(pagination) {
             const container = document.getElementById('pagination');
             if (pagination.totalPages <= 1) { container.innerHTML = ''; return; }
-            
             let html = '<nav><ul class="pagination">';
-            html += `<li class="page-item ${pagination.page === 1 ? 'disabled' : ''}">
-                <a class="page-link" href="#" onclick="searchTranslators(${pagination.page - 1})">&laquo;</a></li>`;
-            
+            html += `<li class="page-item ${pagination.page === 1 ? 'disabled' : ''}"><a class="page-link" href="#" onclick="searchTranslators(${pagination.page - 1})">&laquo;</a></li>`;
             for (let i = 1; i <= pagination.totalPages; i++) {
                 if (i === 1 || i === pagination.totalPages || (i >= pagination.page - 2 && i <= pagination.page + 2)) {
-                    html += `<li class="page-item ${i === pagination.page ? 'active' : ''}">
-                        <a class="page-link" href="#" onclick="searchTranslators(${i})">${i}</a></li>`;
+                    html += `<li class="page-item ${i === pagination.page ? 'active' : ''}"><a class="page-link" href="#" onclick="searchTranslators(${i})">${i}</a></li>`;
                 } else if (i === pagination.page - 3 || i === pagination.page + 3) {
                     html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
                 }
             }
-            
-            html += `<li class="page-item ${pagination.page === pagination.totalPages ? 'disabled' : ''}">
-                <a class="page-link" href="#" onclick="searchTranslators(${pagination.page + 1})">&raquo;</a></li>`;
+            html += `<li class="page-item ${pagination.page === pagination.totalPages ? 'disabled' : ''}"><a class="page-link" href="#" onclick="searchTranslators(${pagination.page + 1})">&raquo;</a></li>`;
             html += '</ul></nav>';
             container.innerHTML = html;
         }
-        
+
         async function viewProfile(profileId) {
             const modal = new bootstrap.Modal(document.getElementById('translatorModal'));
             const content = document.getElementById('translator-detail-content');
@@ -603,83 +571,52 @@
             try {
                 const response = await fetch(`${API_BASE}/translators/${profileId}`);
                 const data = await response.json();
-                const profile = data.profile;
-                const languages = data.languages || [];
-                const reviews = data.reviews || [];
-                
-                const name = profile.display_name || profile.pen_name || '翻訳者';
+                const profile = data.profile, languages = data.languages || [], reviews = data.reviews || [];
+                const name = profile.display_name || profile.pen_name || 'Translator';
                 const rating = parseFloat(profile.avg_rating) || 0;
                 const stars = '★'.repeat(Math.floor(rating)) + (rating % 1 >= 0.5 ? '☆' : '');
                 
                 content.innerHTML = `
                     <div class="row">
                         <div class="col-md-4 text-center mb-4">
-                            <div class="translator-avatar mx-auto mb-3" style="width: 100px; height: 100px; font-size: 2.5rem;">
-                                ${name.charAt(0).toUpperCase()}
-                            </div>
+                            <div class="translator-avatar mx-auto mb-3" style="width: 100px; height: 100px; font-size: 2.5rem;">${name.charAt(0).toUpperCase()}</div>
                             <h4 style="font-family: var(--font-heading);">${escapeHtml(name)}</h4>
-                            <div class="mb-2">
-                                <span class="rating-stars">${stars || '☆☆☆☆☆'}</span>
-                                <span class="text-secondary">${rating.toFixed(1)}</span>
-                            </div>
-                            <div class="revenue-badge d-inline-block mb-3">
-                                <div class="percent">20%</div>
-                                <div class="label">収益分配</div>
-                            </div>
-                            <div class="d-grid">
-                                <button class="btn btn-custom" onclick="openRequestModal('${profile.profile_id}')">
-                                    <i class="fas fa-paper-plane me-2"></i>依頼する
-                                </button>
-                            </div>
+                            <div class="mb-2"><span class="rating-stars">${stars || '☆☆☆☆☆'}</span><span class="text-secondary">${rating.toFixed(1)}</span></div>
+                            <div class="revenue-badge d-inline-block mb-3"><div class="percent">20%</div><div class="label">${getL(uiText.revenueShare)}</div></div>
+                            <div class="d-grid"><button class="btn btn-custom" onclick="openRequestModal('${profile.profile_id}')"><i class="fas fa-paper-plane me-2"></i>${getL(uiText.btnRequest)}</button></div>
                         </div>
                         <div class="col-md-8">
-                            <h5>自己紹介</h5>
-                            <p>${escapeHtml(profile.bio) || 'まだ自己紹介がありません'}</p>
-                            
-                            <h5>対応言語</h5>
-                            <div class="mb-3">
-                                ${languages.map(l => `
-                                    <span class="lang-badge mb-2">
-                                        ${LANG_NAMES[l.source_language] || l.source_language} → ${LANG_NAMES[l.target_language] || l.target_language}
-                                        ${l.is_native_target ? '<span class="native-badge">ネイティブ</span>' : ''}
-                                    </span>
-                                `).join('')}
-                            </div>
-                            
+                            <h5>${getL(uiText.profileBio)}</h5>
+                            <p>${escapeHtml(profile.bio) || getL(uiText.noBioYet)}</p>
+                            <h5>${getL(uiText.profileLanguages)}</h5>
+                            <div class="mb-3">${languages.map(l => `<span class="lang-badge mb-2">${LANG_NAMES[l.source_language] || l.source_language} → ${LANG_NAMES[l.target_language] || l.target_language}${l.is_native_target ? '<span class="native-badge">' + getL(uiText.native) + '</span>' : ''}</span>`).join('')}</div>
                             <div class="row mb-3">
-                                <div class="col-6"><strong>経験年数:</strong> ${profile.years_experience || 0}年</div>
-                                <div class="col-6"><strong>完了案件:</strong> ${profile.completed_projects || 0}件</div>
+                                <div class="col-6"><strong>${getL(uiText.profileYearsExp)}</strong> ${profile.years_experience || 0}</div>
+                                <div class="col-6"><strong>${getL(uiText.profileCompleted)}</strong> ${profile.completed_projects || 0}</div>
                             </div>
-                            
-                            ${profile.certifications ? `<p><strong>資格:</strong> ${escapeHtml(profile.certifications)}</p>` : ''}
-                            
-                            <h5 class="mt-4">レビュー (${reviews.length}件)</h5>
+                            ${profile.certifications ? `<p><strong>${getL(uiText.profileCertifications)}</strong> ${escapeHtml(profile.certifications)}</p>` : ''}
+                            <h5 class="mt-4">${getL(uiText.profileReviews)} (${reviews.length})</h5>
                             ${reviews.length > 0 ? reviews.map(r => `
                                 <div class="p-3 mb-2" style="background: var(--color-bg-hover); border-radius: var(--radius-md);">
-                                    <div class="d-flex justify-content-between">
-                                        <strong>${escapeHtml(r.reviewer_name) || '匿名'}</strong>
-                                        <span class="rating-stars">${'★'.repeat(r.overall_rating)}</span>
-                                    </div>
+                                    <div class="d-flex justify-content-between"><strong>${escapeHtml(r.reviewer_name) || getL(uiText.anonymous)}</strong><span class="rating-stars">${'★'.repeat(r.overall_rating)}</span></div>
                                     ${r.review_text ? `<p class="mb-1 small">${escapeHtml(r.review_text)}</p>` : ''}
-                                    <small class="text-secondary">${new Date(r.created_at).toLocaleDateString('ja-JP')}</small>
+                                    <small class="text-secondary">${new Date(r.created_at).toLocaleDateString()}</small>
                                 </div>
-                            `).join('') : '<p class="text-secondary">まだレビューがありません</p>'}
+                            `).join('') : '<p class="text-secondary">' + getL(uiText.noReviewsYet) + '</p>'}
                         </div>
                     </div>
                 `;
             } catch (error) {
-                content.innerHTML = '<div class="alert alert-danger">プロフィールの読み込みに失敗しました</div>';
+                content.innerHTML = '<div class="alert alert-danger">' + getL(uiText.profileLoadFailed) + '</div>';
             }
         }
-        
+
         async function openRequestModal(profileId) {
             document.getElementById('request-profile-id').value = profileId;
             document.getElementById('request-message').value = '';
             document.getElementById('request-deadline').value = '';
-            
-            // Load user's works
             const workSelect = document.getElementById('request-work');
-            workSelect.innerHTML = '<option value="">読み込み中...</option>';
+            workSelect.innerHTML = '<option value="">' + getL(uiText.loadingWorks) + '</option>';
             
             const profileModal = bootstrap.Modal.getInstance(document.getElementById('translatorModal'));
             if (profileModal) profileModal.hide();
@@ -692,16 +629,15 @@
                 if (userId) {
                     const response = await fetch(`${API_BASE}/works?author_id=${userId}`);
                     const data = await response.json();
-                    workSelect.innerHTML = '<option value="">作品を選択してください</option>' +
-                        (data.works || []).map(w => `<option value="${w.work_id}">${escapeHtml(w.title)}</option>`).join('');
+                    workSelect.innerHTML = '<option value="">' + getL(uiText.optSelectWork) + '</option>' + (data.works || []).map(w => `<option value="${w.work_id}">${escapeHtml(w.title)}</option>`).join('');
                 } else {
-                    workSelect.innerHTML = '<option value="">ログインが必要です</option>';
+                    workSelect.innerHTML = '<option value="">' + getL(uiText.alertLoginRequired) + '</option>';
                 }
             } catch (error) {
-                workSelect.innerHTML = '<option value="">作品を読み込めませんでした</option>';
+                workSelect.innerHTML = '<option value="">' + getL(uiText.loadWorksFailed) + '</option>';
             }
         }
-        
+
         async function submitRequest() {
             const profileId = document.getElementById('request-profile-id').value;
             const workId = document.getElementById('request-work').value;
@@ -710,44 +646,29 @@
             const message = document.getElementById('request-message').value;
             const deadline = document.getElementById('request-deadline').value;
             
-            if (!workId) {
-                alert('作品を選択してください');
-                return;
-            }
-            
+            if (!workId) { alert(getL(uiText.alertSelectWork)); return; }
             const userId = localStorage.getItem('userId');
-            if (!userId) {
-                alert('ログインが必要です');
-                window.location.href = '../login.html';
-                return;
-            }
+            if (!userId) { alert(getL(uiText.alertLoginRequired)); window.location.href = '../login.html'; return; }
             
             try {
                 const response = await fetch(`${API_BASE}/translators/${profileId}/request`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-User-ID': userId },
-                    body: JSON.stringify({
-                        workId,
-                        sourceLanguage,
-                        targetLanguage,
-                        title: '翻訳依頼',
-                        description: message,
-                        deadline: deadline || null
-                    })
+                    body: JSON.stringify({ workId, sourceLanguage, targetLanguage, title: 'Translation Request', description: message, deadline: deadline || null })
                 });
                 
                 if (response.ok) {
-                    alert('翻訳依頼を送信しました！翻訳者からの返答をお待ちください。');
+                    alert(getL(uiText.alertRequestSent));
                     bootstrap.Modal.getInstance(document.getElementById('requestModal')).hide();
                 } else {
                     const data = await response.json();
-                    alert('エラー: ' + (data.error || '送信に失敗しました'));
+                    alert(getL(uiText.alertError) + ': ' + (data.error || getL(uiText.alertSendFailed)));
                 }
             } catch (error) {
-                alert('送信に失敗しました: ' + error.message);
+                alert(getL(uiText.alertSendFailed) + ': ' + error.message);
             }
         }
-        
+
         function resetFilters() {
             document.getElementById('source-language').value = '';
             document.getElementById('target-language').value = '';
@@ -756,27 +677,25 @@
             document.getElementById('sort-order').value = 'rating';
             searchTranslators();
         }
-        
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-        
-        function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = '../login.html';
-        }
-        
+
+        function escapeHtml(text) { if (!text) return ''; const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
+        function logout() { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = '../login.html'; }
+
         document.addEventListener('DOMContentLoaded', () => {
+            syncSelectors();
+            updateAllText();
             const user = JSON.parse(localStorage.getItem('user') || '{}');
             if (user.firstName) document.getElementById('userName').textContent = user.firstName;
             searchTranslators();
         });
+
+        document.addEventListener('languageChanged', function(e) {
+            const l = e.detail.language || e.detail.lang;
+            if (l) { const d = document.getElementById('languageSelector'), m = document.getElementById('languageSelectorMobile'); if (d) d.value = l; if (m) m.value = l; }
+            updateAllText();
+            searchTranslators();
+        });
     </script>
-    <!-- Notification Badge -->
     <script src="../../js/header-notification.js"></script>
 </body>
 </html>
