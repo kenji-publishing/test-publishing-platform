@@ -1,25 +1,43 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>トラブルシューティング - Publisher</title>
+    <title data-i18n="support.troubleshoot.title">Troubleshooting - Publisher</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&amp;family=Noto+Serif+JP:wght@400;700&amp;display=swap" rel="stylesheet">
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="../../css/style-new.css">
+    <link rel="stylesheet" href="../../css/mobile-fixes.css">
     
     <style>
+        /* Mobile language selector */
+        .navbar-lang-selector {
+            display: flex;
+            align-items: center;
+            margin-right: 0.5rem;
+        }
+        
+        @media (max-width: 991.98px) {
+            .navbar-lang-selector {
+                order: 1;
+            }
+            .navbar-toggler {
+                order: 2;
+            }
+        }
+
         /* トラブルシューティング専用スタイル */
         .troubleshoot-hero {
             background: linear-gradient(135deg, var(--color-accent), var(--color-accent-light));
@@ -32,6 +50,7 @@
             font-family: var(--font-heading);
             font-size: 2rem;
             margin-bottom: 0.5rem;
+            color: white;
         }
         
         .troubleshoot-hero p {
@@ -279,6 +298,7 @@
             display: flex;
             justify-content: center;
             gap: 1rem;
+            flex-wrap: wrap;
         }
         
         .btn-resolved {
@@ -463,29 +483,61 @@
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-custom">
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
         <div class="container">
             <a class="navbar-brand" href="../../index.html">
                 <i class="fas fa-book-open"></i> Publisher
             </a>
+            
+            <!-- Language Selector (Mobile) -->
+            <div class="navbar-lang-selector d-lg-none">
+                <select class="language-selector" id="languageSelectorMobile">
+                    <option value="en">🇬🇧 EN</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="es">🇪🇸 ES</option>
+                    <option value="fr">🇫🇷 FR</option>
+                    <option value="de">🇩🇪 DE</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="ar">🇸🇦 عربي</option>
+                    <option value="pt">🇧🇷 PT</option>
+                </select>
+            </div>
+            
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
+            
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link" href="../../index.html">ホーム</a></li>
-                    <li class="nav-item"><a class="nav-link" href="../explore.html">作品を探す</a></li>
-                    <li class="nav-item"><a class="nav-link" href="../translator-marketplace.html">翻訳者</a></li>
+                    <li class="nav-item"><a class="nav-link" href="../../index.html" data-i18n="nav.home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="../browse.html" data-i18n="nav.browse">Browse</a></li>
+                    <li class="nav-item"><a class="nav-link" href="../translators/index.html" data-i18n="nav.translators">Translators</a></li>
                 </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item"><a class="nav-link active" href="faq.html">ヘルプ</a></li>
+                <ul class="navbar-nav align-items-center">
+                    <li class="nav-item"><a class="nav-link active" href="faq.html" data-i18n="nav.help">Help</a></li>
                     <li class="nav-item" id="notificationBellContainer">
-                        <a class="nav-link position-relative" href="../notifications.html" title="通知">
+                        <a class="nav-link position-relative" href="../notifications.html" title="Notifications">
                             <i class="fas fa-bell"></i>
                             <span id="notificationBadge" class="position-absolute badge rounded-pill bg-danger" style="font-size: 0.55rem; display: none; top: 0; right: 0; transform: translate(25%, -25%);">0</span>
                         </a>
                     </li>
-                    <li class="nav-item" id="loginNav"><a class="nav-link" href="../login.html">ログイン</a></li>
+                    <li class="nav-item" id="loginNav"><a class="nav-link" href="../login.html" data-i18n="nav.login">Sign In</a></li>
+                    
+                    <!-- Language Selector (Desktop) -->
+                    <li class="nav-item ms-2 d-none d-lg-block">
+                        <select class="language-selector" id="languageSelector">
+                            <option value="en">🇬🇧 EN</option>
+                            <option value="ja">🇯🇵 日本語</option>
+                            <option value="zh">🇨🇳 中文</option>
+                            <option value="es">🇪🇸 ES</option>
+                            <option value="fr">🇫🇷 FR</option>
+                            <option value="de">🇩🇪 DE</option>
+                            <option value="ko">🇰🇷 한국어</option>
+                            <option value="ar">🇸🇦 عربي</option>
+                            <option value="pt">🇧🇷 PT</option>
+                        </select>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -494,8 +546,8 @@
     <!-- Hero -->
     <section class="troubleshoot-hero">
         <div class="container">
-            <h1><i class="fas fa-tools me-2"></i>トラブルシューティング</h1>
-            <p>問題を解決するお手伝いをします</p>
+            <h1><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.heroTitle">Troubleshooting</span></h1>
+            <p data-i18n="support.troubleshoot.heroSubtitle">Let us help you solve your problem</p>
         </div>
     </section>
 
@@ -505,17 +557,17 @@
             <div class="progress-steps">
                 <div class="progress-step active" data-step="1">
                     <span class="step-number">1</span>
-                    <span class="step-label d-none d-sm-inline">問題を選択</span>
+                    <span class="step-label d-none d-sm-inline" data-i18n="support.troubleshoot.progress.step1">Select Issue</span>
                 </div>
                 <div class="progress-line"></div>
                 <div class="progress-step" data-step="2">
                     <span class="step-number">2</span>
-                    <span class="step-label d-none d-sm-inline">詳細を選択</span>
+                    <span class="step-label d-none d-sm-inline" data-i18n="support.troubleshoot.progress.step2">Select Details</span>
                 </div>
                 <div class="progress-line"></div>
                 <div class="progress-step" data-step="3">
                     <span class="step-number">3</span>
-                    <span class="step-label d-none d-sm-inline">解決策</span>
+                    <span class="step-label d-none d-sm-inline" data-i18n="support.troubleshoot.progress.step3">Solution</span>
                 </div>
             </div>
         </div>
@@ -524,102 +576,73 @@
     <!-- Wizard Content -->
     <main class="wizard-content">
         
-        <!-- Step 1: カテゴリ選択 -->
+        <!-- Step 1: Category Selection -->
         <div class="wizard-step active" id="step1">
             <div class="wizard-question">
-                <h2>どのような問題でお困りですか？</h2>
-                <p>最も近いカテゴリを選択してください</p>
+                <h2 data-i18n="support.troubleshoot.questions.whatProblem">What problem are you experiencing?</h2>
+                <p data-i18n="support.troubleshoot.questions.selectClosest">Please select the closest category</p>
             </div>
-            <div class="option-grid">
-                <div class="option-card" data-category="login">
-                    <i class="fas fa-sign-in-alt"></i>
-                    <h3>ログインできない</h3>
-                    <p>パスワード忘れ、アカウントロック</p>
-                </div>
-                <div class="option-card" data-category="payment">
-                    <i class="fas fa-credit-card"></i>
-                    <h3>支払いに関する問題</h3>
-                    <p>決済エラー、返金、領収書</p>
-                </div>
-                <div class="option-card" data-category="reading">
-                    <i class="fas fa-book-reader"></i>
-                    <h3>作品が読めない</h3>
-                    <p>閲覧エラー、ダウンロード問題</p>
-                </div>
-                <div class="option-card" data-category="translation">
-                    <i class="fas fa-language"></i>
-                    <h3>翻訳に関する問題</h3>
-                    <p>AI翻訳、翻訳者とのやり取り</p>
-                </div>
-                <div class="option-card" data-category="publishing">
-                    <i class="fas fa-upload"></i>
-                    <h3>作品の投稿ができない</h3>
-                    <p>アップロードエラー、公開問題</p>
-                </div>
-                <div class="option-card" data-category="account">
-                    <i class="fas fa-user-cog"></i>
-                    <h3>アカウント設定</h3>
-                    <p>プロフィール変更、退会</p>
-                </div>
+            <div class="option-grid" id="step1Options">
+                <!-- Generated by JavaScript -->
             </div>
         </div>
 
-        <!-- Step 2: 詳細選択 -->
+        <!-- Step 2: Detail Selection -->
         <div class="wizard-step" id="step2">
             <div class="wizard-question">
-                <h2 id="step2Title">詳しい状況を教えてください</h2>
-                <p>最も当てはまるものを選択してください</p>
+                <h2 id="step2Title" data-i18n="support.troubleshoot.questions.tellMore">Tell us more about the situation</h2>
+                <p data-i18n="support.troubleshoot.questions.selectBestMatch">Please select the best match</p>
             </div>
             <div class="option-grid" id="step2Options">
-                <!-- JavaScriptで動的に生成 -->
+                <!-- Generated by JavaScript -->
             </div>
             <div class="wizard-nav">
                 <button class="btn-back" onclick="goToStep(1)">
-                    <i class="fas fa-arrow-left"></i> 戻る
+                    <i class="fas fa-arrow-left"></i> <span data-i18n="support.troubleshoot.back">Back</span>
                 </button>
             </div>
         </div>
 
-        <!-- Step 3: 解決策 -->
+        <!-- Step 3: Solution -->
         <div class="wizard-step" id="step3">
             <div class="solution-card">
                 <div class="solution-header">
                     <i class="fas fa-lightbulb" id="solutionIcon"></i>
                     <div>
-                        <h3 id="solutionTitle">解決策</h3>
+                        <h3 id="solutionTitle">Solution</h3>
                     </div>
                 </div>
                 <div class="solution-steps" id="solutionSteps">
-                    <!-- JavaScriptで動的に生成 -->
+                    <!-- Generated by JavaScript -->
                 </div>
                 
                 <div class="resolution-check">
-                    <h4>この方法で問題は解決しましたか？</h4>
+                    <h4 data-i18n="support.troubleshoot.resolution.didItHelp">Did this solution help?</h4>
                     <div class="resolution-buttons">
                         <button class="btn-resolved" onclick="markResolved()">
-                            <i class="fas fa-check me-2"></i>解決しました
+                            <i class="fas fa-check me-2"></i><span data-i18n="support.troubleshoot.resolution.resolved">Yes, resolved!</span>
                         </button>
                         <button class="btn-not-resolved" onclick="showMoreHelp()">
-                            <i class="fas fa-times me-2"></i>解決しません
+                            <i class="fas fa-times me-2"></i><span data-i18n="support.troubleshoot.resolution.notResolved">No, not resolved</span>
                         </button>
                     </div>
                 </div>
             </div>
             
-            <!-- 関連FAQ（解決しない場合に表示） -->
+            <!-- Related FAQ (shown when not resolved) -->
             <div class="related-faqs" id="relatedFaqs">
-                <h4><i class="fas fa-question-circle"></i> 関連するよくある質問</h4>
+                <h4><i class="fas fa-question-circle"></i> <span data-i18n="support.troubleshoot.resolution.relatedFaqs">Related FAQs</span></h4>
                 <div id="relatedFaqsList">
-                    <!-- JavaScriptで動的に生成 -->
+                    <!-- Generated by JavaScript -->
                 </div>
                 
-                <!-- お問い合わせセクション（FAQでも解決しない場合に表示） -->
+                <!-- Contact Section (shown if FAQ doesn't help) -->
                 <div class="contact-section" id="contactSection">
                     <div class="contact-card">
-                        <h4><i class="fas fa-envelope me-2"></i>それでも解決しない場合</h4>
-                        <p>サポートチームがお手伝いします。数営業日中に回答いたします。</p>
+                        <h4><i class="fas fa-envelope me-2"></i><span data-i18n="support.troubleshoot.resolution.contactUs">Still not resolved?</span></h4>
+                        <p data-i18n="support.troubleshoot.resolution.contactDesc">Our support team is here to help.</p>
                         <a href="contact.html?from=wizard" class="btn btn-lg">
-                            <i class="fas fa-paper-plane me-2"></i>お問い合わせ
+                            <i class="fas fa-paper-plane me-2"></i><span data-i18n="support.troubleshoot.resolution.contactButton">Contact Us</span>
                         </a>
                     </div>
                 </div>
@@ -627,25 +650,25 @@
             
             <div class="wizard-nav">
                 <button class="btn-back" onclick="goToStep(2)">
-                    <i class="fas fa-arrow-left"></i> 戻る
+                    <i class="fas fa-arrow-left"></i> <span data-i18n="support.troubleshoot.back">Back</span>
                 </button>
             </div>
         </div>
 
-        <!-- 成功画面 -->
+        <!-- Success Screen -->
         <div class="wizard-step" id="stepSuccess">
             <div class="success-screen">
                 <div class="success-icon">
                     <i class="fas fa-check"></i>
                 </div>
-                <h2>問題が解決しました！</h2>
-                <p>お役に立てて嬉しいです。</p>
-                <div class="d-flex justify-content-center gap-3">
+                <h2 data-i18n="support.troubleshoot.success.title">Problem Resolved!</h2>
+                <p data-i18n="support.troubleshoot.success.message">Glad we could help.</p>
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
                     <a href="faq.html" class="btn btn-outline-secondary">
-                        <i class="fas fa-question-circle me-2"></i>FAQを見る
+                        <i class="fas fa-question-circle me-2"></i><span data-i18n="support.troubleshoot.success.viewFaq">View FAQ</span>
                     </a>
                     <a href="../../index.html" class="btn btn-primary-custom">
-                        <i class="fas fa-home me-2"></i>ホームへ戻る
+                        <i class="fas fa-home me-2"></i><span data-i18n="support.troubleshoot.success.backHome">Back to Home</span>
                     </a>
                 </div>
             </div>
@@ -659,38 +682,31 @@
             <div class="row">
                 <div class="col-md-4 mb-4">
                     <h5><i class="fas fa-book-open me-2"></i>Publisher</h5>
-                    <p class="text-muted">世界中の読者と作家をつなぐ多言語出版プラットフォーム</p>
+                    <p class="text-muted" data-i18n="footer.description">A multilingual publishing platform connecting readers and writers worldwide</p>
                 </div>
                 <div class="col-md-2 mb-4">
-                    <h6>サービス</h6>
+                    <h6 data-i18n="footer.services">Services</h6>
                     <ul class="list-unstyled">
-                        <li><a href="../explore.html">作品を探す</a></li>
-                        <li><a href="../publish.html">作品を投稿</a></li>
-                        <li><a href="../translator-marketplace.html">翻訳者になる</a></li>
+                        <li><a href="../browse.html" data-i18n="nav.browse">Browse</a></li>
+                        <li><a href="../upload.html" data-i18n="nav.publish">Publish</a></li>
+                        <li><a href="../translators/index.html" data-i18n="nav.translators">Translators</a></li>
                     </ul>
                 </div>
                 <div class="col-md-2 mb-4">
-                    <h6>サポート</h6>
+                    <h6 data-i18n="footer.support">Support</h6>
                     <ul class="list-unstyled">
-                        <li><a href="faq.html">よくある質問</a></li>
-                        <li><a href="troubleshoot.html" class="active">トラブルシューティング</a></li>
-                        <li><a href="contact.html">お問い合わせ</a></li>
+                        <li><a href="faq.html" data-i18n="support.faq.title">FAQ</a></li>
+                        <li><a href="troubleshoot.html" class="active" data-i18n="support.troubleshoot.title">Troubleshooting</a></li>
+                        <li><a href="contact.html" data-i18n="support.contact.title">Contact</a></li>
                     </ul>
                 </div>
                 <div class="col-md-2 mb-4">
-                    <h6>会社情報</h6>
+                    <h6 data-i18n="footer.company">Company</h6>
                     <ul class="list-unstyled">
-                        <li><a href="../about.html">会社概要</a></li>
-                        <li><a href="../terms.html">利用規約</a></li>
-                        <li><a href="../privacy.html">プライバシーポリシー</a></li>
+                        <li><a href="../about.html" data-i18n="footer.about">About</a></li>
+                        <li><a href="../terms.html" data-i18n="footer.terms">Terms</a></li>
+                        <li><a href="../privacy.html" data-i18n="footer.privacy">Privacy</a></li>
                     </ul>
-                </div>
-                <div class="col-md-2 mb-4">
-                    <h6>言語</h6>
-                    <select class="form-select form-select-sm" id="languageSelect">
-                        <option value="ja" selected>日本語</option>
-                        <option value="en">English</option>
-                    </select>
                 </div>
             </div>
             <hr>
@@ -702,346 +718,272 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../js/translations.js"></script>
+    <script src="../../js/language-switcher.js"></script>
 
     <script>
         // =============================================
-        // トラブルシューティングデータ（決定木）
+        // Troubleshooting Data (Decision Tree) - Multilingual
         // =============================================
-        const troubleshootData = {
-            login: {
-                title: 'ログインの問題',
-                icon: 'fa-sign-in-alt',
-                options: [
-                    {
-                        id: 'password_wrong',
-                        title: 'パスワードが正しくないと表示される',
-                        description: 'パスワードを入力してもエラーになる',
-                        solution: {
-                            title: 'パスワードをリセットしましょう',
-                            steps: [
-                                { title: 'ログインページを開く', description: 'ログインページの「パスワードを忘れた方」をクリックします', action: { text: 'ログインページへ', url: '../login.html' } },
-                                { title: 'メールアドレスを入力', description: '登録時に使用したメールアドレスを入力します' },
-                                { title: 'リセットメールを確認', description: '届いたメールのリンクをクリックして新しいパスワードを設定します' }
-                            ],
-                            relatedFaqKeywords: 'パスワード,ログイン'
+        function getTroubleshootData() {
+            return {
+                login: {
+                    titleKey: 'support.troubleshoot.categories.login.title',
+                    icon: 'fa-sign-in-alt',
+                    descKey: 'support.troubleshoot.categories.login.desc',
+                    options: [
+                        {
+                            id: 'password_wrong',
+                            titleKey: 'troubleshoot.login.passwordWrong.title',
+                            titleFallback: { en: 'Password is incorrect', ja: 'パスワードが正しくないと表示される' },
+                            descKey: 'troubleshoot.login.passwordWrong.desc',
+                            descFallback: { en: 'Error appears when entering password', ja: 'パスワードを入力してもエラーになる' },
+                            solution: {
+                                titleFallback: { en: 'Reset your password', ja: 'パスワードをリセットしましょう' },
+                                steps: [
+                                    { titleFallback: { en: 'Go to login page', ja: 'ログインページを開く' }, descFallback: { en: 'Click "Forgot Password" on the login page', ja: 'ログインページの「パスワードを忘れた方」をクリックします' }, action: { textFallback: { en: 'Go to Login', ja: 'ログインページへ' }, url: '../login.html' } },
+                                    { titleFallback: { en: 'Enter your email', ja: 'メールアドレスを入力' }, descFallback: { en: 'Enter the email address you used to register', ja: '登録時に使用したメールアドレスを入力します' } },
+                                    { titleFallback: { en: 'Check reset email', ja: 'リセットメールを確認' }, descFallback: { en: 'Click the link in the email to set a new password', ja: '届いたメールのリンクをクリックして新しいパスワードを設定します' } }
+                                ]
+                            }
+                        },
+                        {
+                            id: 'account_locked',
+                            titleFallback: { en: 'Account is locked', ja: 'アカウントがロックされた' },
+                            descFallback: { en: 'Locked after multiple failed attempts', ja: '何度か失敗してロックされた' },
+                            solution: {
+                                titleFallback: { en: 'Unlock your account', ja: 'アカウントロックの解除' },
+                                steps: [
+                                    { titleFallback: { en: 'Wait 30 minutes', ja: '30分待つ' }, descFallback: { en: 'For security, the lock is automatically released after 30 minutes', ja: 'セキュリティのため、30分後に自動的にロックが解除されます' } },
+                                    { titleFallback: { en: 'Or reset password', ja: 'または、パスワードをリセット' }, descFallback: { en: 'Resetting your password will immediately unlock your account', ja: 'パスワードリセットを行うと、即座にロックが解除されます' }, action: { textFallback: { en: 'Reset Password', ja: 'パスワードリセット' }, url: '../login.html' } }
+                                ]
+                            }
+                        },
+                        {
+                            id: 'email_not_found',
+                            titleFallback: { en: 'Email not found', ja: 'メールアドレスが見つからない' },
+                            descFallback: { en: 'Shows as not registered', ja: '登録していないと表示される' },
+                            solution: {
+                                titleFallback: { en: 'Verify your account', ja: 'アカウントの確認' },
+                                steps: [
+                                    { titleFallback: { en: 'Try another email', ja: '別のメールアドレスを試す' }, descFallback: { en: 'You may have registered with a different email address', ja: '登録時に別のメールアドレスを使用した可能性があります' } },
+                                    { titleFallback: { en: 'Check spelling', ja: 'スペルを確認' }, descFallback: { en: 'Make sure there are no typos in the email address', ja: 'メールアドレスに誤字がないか確認してください' } },
+                                    { titleFallback: { en: 'Register new account', ja: '新規登録' }, descFallback: { en: 'If you don\'t have an account, please register', ja: 'アカウントをお持ちでない場合は新規登録してください' }, action: { textFallback: { en: 'Register', ja: '新規登録' }, url: '../register.html' } }
+                                ]
+                            }
+                        },
+                        {
+                            id: 'page_not_loading',
+                            titleFallback: { en: 'Page not loading', ja: 'ページが読み込まれない' },
+                            descFallback: { en: 'Screen is blank or shows error', ja: '画面が真っ白になる、エラーが出る' },
+                            solution: {
+                                titleFallback: { en: 'Fix browser issues', ja: 'ブラウザの問題を解決' },
+                                steps: [
+                                    { titleFallback: { en: 'Hard refresh', ja: 'ページを再読み込み' }, descFallback: { en: 'Press Ctrl + F5 (Mac: Cmd + Shift + R) to force reload', ja: 'Ctrl + F5（Mac: Cmd + Shift + R）で強制リロードします' } },
+                                    { titleFallback: { en: 'Clear cache', ja: 'キャッシュをクリア' }, descFallback: { en: 'Clear cache and cookies from your browser settings', ja: 'ブラウザの設定からキャッシュと Cookieを削除します' } },
+                                    { titleFallback: { en: 'Try another browser', ja: '別のブラウザを試す' }, descFallback: { en: 'Try Chrome, Firefox, Safari, or another browser', ja: 'Chrome、Firefox、Safari など別のブラウザでお試しください' } }
+                                ]
+                            }
                         }
-                    },
-                    {
-                        id: 'account_locked',
-                        title: 'アカウントがロックされた',
-                        description: '何度か失敗してロックされた',
-                        solution: {
-                            title: 'アカウントロックの解除',
-                            steps: [
-                                { title: '30分待つ', description: 'セキュリティのため、30分後に自動的にロックが解除されます' },
-                                { title: 'または、パスワードをリセット', description: 'パスワードリセットを行うと、即座にロックが解除されます', action: { text: 'パスワードリセット', url: '../login.html' } }
-                            ],
-                            relatedFaqKeywords: 'ロック,アカウント'
+                    ]
+                },
+                payment: {
+                    titleKey: 'support.troubleshoot.categories.payment.title',
+                    icon: 'fa-credit-card',
+                    descKey: 'support.troubleshoot.categories.payment.desc',
+                    options: [
+                        {
+                            id: 'payment_failed',
+                            titleFallback: { en: 'Payment failed', ja: '支払いが失敗する' },
+                            descFallback: { en: 'Error appears and cannot purchase', ja: 'エラーが表示されて購入できない' },
+                            solution: {
+                                titleFallback: { en: 'Resolve payment error', ja: '支払いエラーの解決' },
+                                steps: [
+                                    { titleFallback: { en: 'Check card info', ja: 'カード情報を確認' }, descFallback: { en: 'Verify card number, expiry date, and security code', ja: 'カード番号、有効期限、セキュリティコードが正しいか確認します' } },
+                                    { titleFallback: { en: 'Check credit limit', ja: '利用限度額を確認' }, descFallback: { en: 'Ensure you haven\'t reached your card limit', ja: 'カードの利用限度額に達していないか確認します' } },
+                                    { titleFallback: { en: 'Try another method', ja: '別の支払い方法を試す' }, descFallback: { en: 'Try a different card or PayPal', ja: '別のカードまたはPayPalをお試しください' } },
+                                    { titleFallback: { en: 'Contact card issuer', ja: 'カード会社に確認' }, descFallback: { en: 'If problems persist, contact your card company', ja: '問題が続く場合は、カード発行会社にお問い合わせください' } }
+                                ]
+                            }
+                        },
+                        {
+                            id: 'refund_request',
+                            titleFallback: { en: 'Request refund', ja: '返金したい' },
+                            descFallback: { en: 'Want to cancel purchase', ja: '購入をキャンセルしたい' },
+                            solution: {
+                                titleFallback: { en: 'Refund request', ja: '返金リクエスト' },
+                                steps: [
+                                    { titleFallback: { en: 'Check eligibility', ja: '返金条件を確認' }, descFallback: { en: 'Refunds available within 7 days if content not viewed', ja: '購入後7日以内で、作品を閲覧していない場合は返金可能です' } },
+                                    { titleFallback: { en: 'Open purchase history', ja: '購入履歴を開く' }, descFallback: { en: 'Go to Dashboard → Purchase History', ja: 'ダッシュボード→購入履歴から該当の購入を見つけます' } },
+                                    { titleFallback: { en: 'Request refund', ja: '返金をリクエスト' }, descFallback: { en: 'Click "Request Refund" button', ja: '「返金をリクエスト」ボタンをクリックします' } }
+                                ]
+                            }
+                        },
+                        {
+                            id: 'receipt_needed',
+                            titleFallback: { en: 'Need receipt', ja: '領収書が欲しい' },
+                            descFallback: { en: 'Need receipt for expenses', ja: '経費精算用の領収書が必要' },
+                            solution: {
+                                titleFallback: { en: 'Download receipt', ja: '領収書のダウンロード' },
+                                steps: [
+                                    { titleFallback: { en: 'Open Dashboard', ja: 'ダッシュボードを開く' }, descFallback: { en: 'Access your dashboard after logging in', ja: 'ログイン後、ダッシュボードにアクセスします' } },
+                                    { titleFallback: { en: 'Select Purchase History', ja: '購入履歴を選択' }, descFallback: { en: 'Click "Purchase History" in the left menu', ja: '左メニューから「購入履歴」をクリックします' } },
+                                    { titleFallback: { en: 'Download receipt', ja: '領収書をダウンロード' }, descFallback: { en: 'Click "Receipt" button next to each purchase for PDF', ja: '各購入の横にある「領収書」ボタンでPDFをダウンロードできます' } }
+                                ]
+                            }
                         }
-                    },
-                    {
-                        id: 'email_not_found',
-                        title: 'メールアドレスが見つからない',
-                        description: '登録していないと表示される',
-                        solution: {
-                            title: 'アカウントの確認',
-                            steps: [
-                                { title: '別のメールアドレスを試す', description: '登録時に別のメールアドレスを使用した可能性があります' },
-                                { title: 'スペルを確認', description: 'メールアドレスに誤字がないか確認してください' },
-                                { title: '新規登録', description: 'アカウントをお持ちでない場合は新規登録してください', action: { text: '新規登録', url: '../register.html' } }
-                            ],
-                            relatedFaqKeywords: 'メール,登録'
+                    ]
+                },
+                reading: {
+                    titleKey: 'support.troubleshoot.categories.reading.title',
+                    icon: 'fa-book-reader',
+                    descKey: 'support.troubleshoot.categories.reading.desc',
+                    options: [
+                        {
+                            id: 'cannot_open',
+                            titleFallback: { en: 'Cannot open work', ja: '作品が開けない' },
+                            descFallback: { en: 'Error appears when trying to read', ja: 'エラーが表示されて読めない' },
+                            solution: {
+                                titleFallback: { en: 'Fix viewing error', ja: '閲覧エラーの解決' },
+                                steps: [
+                                    { titleFallback: { en: 'Refresh page', ja: 'ページを再読み込み' }, descFallback: { en: 'Click the browser refresh button', ja: 'ブラウザの更新ボタンをクリックします' } },
+                                    { titleFallback: { en: 'Check login status', ja: 'ログイン状態を確認' }, descFallback: { en: 'Log out and log back in', ja: 'ログアウトしてから再度ログインしてみてください' } },
+                                    { titleFallback: { en: 'Change browser', ja: 'ブラウザを変更' }, descFallback: { en: 'Try a different browser', ja: '別のブラウザでお試しください' } }
+                                ]
+                            }
+                        },
+                        {
+                            id: 'download_failed',
+                            titleFallback: { en: 'Download failed', ja: 'ダウンロードできない' },
+                            descFallback: { en: 'Download stops midway', ja: 'ダウンロードが途中で止まる' },
+                            solution: {
+                                titleFallback: { en: 'Fix download issues', ja: 'ダウンロード問題の解決' },
+                                steps: [
+                                    { titleFallback: { en: 'Check internet', ja: 'インターネット接続を確認' }, descFallback: { en: 'Try on a stable WiFi connection', ja: '安定したWi-Fi環境でお試しください' } },
+                                    { titleFallback: { en: 'Check storage', ja: 'ストレージ容量を確認' }, descFallback: { en: 'Ensure you have enough free space', ja: 'デバイスに十分な空き容量があるか確認します' } },
+                                    { titleFallback: { en: 'Try another format', ja: '別の形式を試す' }, descFallback: { en: 'If EPUB fails, try PDF format', ja: 'EPUBでダメならPDFなど、別の形式でダウンロードしてみてください' } }
+                                ]
+                            }
                         }
-                    },
-                    {
-                        id: 'page_not_loading',
-                        title: 'ページが読み込まれない',
-                        description: '画面が真っ白になる、エラーが出る',
-                        solution: {
-                            title: 'ブラウザの問題を解決',
-                            steps: [
-                                { title: 'ページを再読み込み', description: 'Ctrl + F5（Mac: Cmd + Shift + R）で強制リロードします' },
-                                { title: 'キャッシュをクリア', description: 'ブラウザの設定からキャッシュと Cookieを削除します' },
-                                { title: '別のブラウザを試す', description: 'Chrome、Firefox、Safari など別のブラウザでお試しください' }
-                            ],
-                            relatedFaqKeywords: '表示,ブラウザ'
+                    ]
+                },
+                translation: {
+                    titleKey: 'support.troubleshoot.categories.translation.title',
+                    icon: 'fa-language',
+                    descKey: 'support.troubleshoot.categories.translation.desc',
+                    options: [
+                        {
+                            id: 'ai_translation_error',
+                            titleFallback: { en: 'AI translation not working', ja: 'AI翻訳が動作しない' },
+                            descFallback: { en: 'Shows error or not translating', ja: 'エラーが表示される、翻訳されない' },
+                            solution: {
+                                titleFallback: { en: 'Fix AI translation error', ja: 'AI翻訳エラーの解決' },
+                                steps: [
+                                    { titleFallback: { en: 'Check free quota', ja: '無料枠を確認' }, descFallback: { en: 'Check if you\'ve used your 5 free monthly translations', ja: '月の無料翻訳回数（5回）を使い切っていないか確認します' } },
+                                    { titleFallback: { en: 'Check text length', ja: 'テキスト量を確認' }, descFallback: { en: 'There\'s a limit per translation. Try splitting the text', ja: '一度に翻訳できるテキスト量に制限があります。分割してお試しください' } },
+                                    { titleFallback: { en: 'Wait and retry', ja: '時間をおいて再試行' }, descFallback: { en: 'Server may be busy. Please try again later', ja: 'サーバーが混雑している可能性があります。少し時間をおいてお試しください' } }
+                                ]
+                            }
+                        },
+                        {
+                            id: 'translation_quality',
+                            titleFallback: { en: 'Poor translation quality', ja: '翻訳の品質が悪い' },
+                            descFallback: { en: 'Doesn\'t make sense or mistranslated', ja: '意味が通じない、誤訳がある' },
+                            solution: {
+                                titleFallback: { en: 'Improve translation quality', ja: '翻訳品質の改善' },
+                                steps: [
+                                    { titleFallback: { en: 'Try re-translating', ja: '再翻訳を試す' }, descFallback: { en: 'AI translations can vary each time', ja: 'AI翻訳は毎回少し異なる結果になることがあります' } },
+                                    { titleFallback: { en: 'Hire a professional', ja: 'プロの翻訳者に依頼' }, descFallback: { en: 'For high-quality translations, use our translator marketplace', ja: '高品質な翻訳が必要な場合は、翻訳者マーケットプレイスをご利用ください' }, action: { textFallback: { en: 'Find Translator', ja: '翻訳者を探す' }, url: '../translators/index.html' } }
+                                ]
+                            }
                         }
-                    }
-                ]
-            },
-            payment: {
-                title: '支払いの問題',
-                icon: 'fa-credit-card',
-                options: [
-                    {
-                        id: 'payment_failed',
-                        title: '支払いが失敗する',
-                        description: 'エラーが表示されて購入できない',
-                        solution: {
-                            title: '支払いエラーの解決',
-                            steps: [
-                                { title: 'カード情報を確認', description: 'カード番号、有効期限、セキュリティコードが正しいか確認します' },
-                                { title: '利用限度額を確認', description: 'カードの利用限度額に達していないか確認します' },
-                                { title: '別の支払い方法を試す', description: '別のカードまたはPayPalをお試しください' },
-                                { title: 'カード会社に確認', description: '問題が続く場合は、カード発行会社にお問い合わせください' }
-                            ],
-                            relatedFaqKeywords: '支払い,エラー,カード'
+                    ]
+                },
+                publishing: {
+                    titleKey: 'support.troubleshoot.categories.publishing.title',
+                    icon: 'fa-upload',
+                    descKey: 'support.troubleshoot.categories.publishing.desc',
+                    options: [
+                        {
+                            id: 'upload_failed',
+                            titleFallback: { en: 'Upload failed', ja: 'アップロードが失敗する' },
+                            descFallback: { en: 'Cannot upload file', ja: 'ファイルがアップロードできない' },
+                            solution: {
+                                titleFallback: { en: 'Fix upload error', ja: 'アップロードエラーの解決' },
+                                steps: [
+                                    { titleFallback: { en: 'Check file size', ja: 'ファイルサイズを確認' }, descFallback: { en: 'Maximum 100MB allowed', ja: '最大100MBまでアップロード可能です' } },
+                                    { titleFallback: { en: 'Check file format', ja: 'ファイル形式を確認' }, descFallback: { en: 'Supported: PDF, EPUB, DOCX, TXT', ja: '対応形式：PDF、EPUB、DOCX、TXT' } },
+                                    { titleFallback: { en: 'Check internet', ja: 'インターネット接続を確認' }, descFallback: { en: 'Use a stable WiFi connection', ja: '安定したWi-Fi環境でお試しください' } },
+                                    { titleFallback: { en: 'Try another browser', ja: 'ブラウザを変更' }, descFallback: { en: 'Try a different browser', ja: '別のブラウザでお試しください' } }
+                                ]
+                            }
+                        },
+                        {
+                            id: 'work_not_published',
+                            titleFallback: { en: 'Work not published', ja: '作品が公開されない' },
+                            descFallback: { en: 'Submitted but not showing', ja: '投稿したのに表示されない' },
+                            solution: {
+                                titleFallback: { en: 'Check publication status', ja: '公開状況の確認' },
+                                steps: [
+                                    { titleFallback: { en: 'Check review status', ja: '審査状況を確認' }, descFallback: { en: 'Dashboard → My Works shows review status. Reviews take 1-3 business days', ja: 'ダッシュボード→投稿作品で審査状況を確認します。審査には1〜3営業日かかります' } },
+                                    { titleFallback: { en: 'Check email', ja: 'メールを確認' }, descFallback: { en: 'Review results are sent by email. Check spam folder too', ja: '審査結果はメールでお知らせします。迷惑メールフォルダもご確認ください' } },
+                                    { titleFallback: { en: 'Check guidelines', ja: 'ガイドラインを確認' }, descFallback: { en: 'If rejected, check guidelines and resubmit after corrections', ja: '却下された場合は、投稿ガイドラインを確認して修正後に再投稿してください' } }
+                                ]
+                            }
                         }
-                    },
-                    {
-                        id: 'refund_request',
-                        title: '返金したい',
-                        description: '購入をキャンセルしたい',
-                        solution: {
-                            title: '返金リクエスト',
-                            steps: [
-                                { title: '返金条件を確認', description: '購入後7日以内で、作品を閲覧していない場合は返金可能です' },
-                                { title: '購入履歴を開く', description: 'ダッシュボード→購入履歴から該当の購入を見つけます' },
-                                { title: '返金をリクエスト', description: '「返金をリクエスト」ボタンをクリックします' }
-                            ],
-                            relatedFaqKeywords: '返金,キャンセル'
+                    ]
+                },
+                account: {
+                    titleKey: 'support.troubleshoot.categories.account.title',
+                    icon: 'fa-user-cog',
+                    descKey: 'support.troubleshoot.categories.account.desc',
+                    options: [
+                        {
+                            id: 'change_email',
+                            titleFallback: { en: 'Change email address', ja: 'メールアドレスを変更したい' },
+                            descFallback: { en: 'Change to a different email', ja: '別のメールアドレスに変更する' },
+                            solution: {
+                                titleFallback: { en: 'Change email address', ja: 'メールアドレスの変更' },
+                                steps: [
+                                    { titleFallback: { en: 'Open account settings', ja: 'アカウント設定を開く' }, descFallback: { en: 'Go to Dashboard → Account Settings', ja: 'ダッシュボード→アカウント設定にアクセスします' } },
+                                    { titleFallback: { en: 'Enter new email', ja: '新しいメールアドレスを入力' }, descFallback: { en: 'Enter the new address in the email field', ja: 'メールアドレス欄に新しいアドレスを入力します' } },
+                                    { titleFallback: { en: 'Confirm via email', ja: '確認メールをクリック' }, descFallback: { en: 'Click the link in the confirmation email sent to new address', ja: '新しいアドレスに届く確認メールのリンクをクリックして完了です' } }
+                                ]
+                            }
+                        },
+                        {
+                            id: 'delete_account',
+                            titleFallback: { en: 'Delete account', ja: 'アカウントを削除したい' },
+                            descFallback: { en: 'Close account and delete all data', ja: '退会して全データを削除する' },
+                            solution: {
+                                titleFallback: { en: 'Delete account', ja: 'アカウント削除の手順' },
+                                steps: [
+                                    { titleFallback: { en: 'Warning', ja: 'ご注意' }, descFallback: { en: 'Deleting your account permanently removes all works, purchase history, and earnings', ja: 'アカウントを削除すると、投稿作品、購入履歴、収益など全てのデータが完全に削除され、復元できません' } },
+                                    { titleFallback: { en: 'Open account settings', ja: 'アカウント設定を開く' }, descFallback: { en: 'Go to Dashboard → Account Settings → Delete Account', ja: 'ダッシュボード→アカウント設定→「アカウントを削除」をクリック' } },
+                                    { titleFallback: { en: 'Enter password', ja: 'パスワードを入力' }, descFallback: { en: 'Enter your password to confirm and proceed', ja: '確認のためパスワードを入力し、削除を実行します' } }
+                                ]
+                            }
+                        },
+                        {
+                            id: 'profile_update',
+                            titleFallback: { en: 'Edit profile', ja: 'プロフィールを編集したい' },
+                            descFallback: { en: 'Change name or bio', ja: '名前や紹介文を変更する' },
+                            solution: {
+                                titleFallback: { en: 'Edit profile', ja: 'プロフィールの編集' },
+                                steps: [
+                                    { titleFallback: { en: 'Open profile settings', ja: 'プロフィール設定を開く' }, descFallback: { en: 'Go to Dashboard → Profile Settings', ja: 'ダッシュボード→プロフィール設定にアクセスします' } },
+                                    { titleFallback: { en: 'Edit info', ja: '情報を編集' }, descFallback: { en: 'Edit display name, bio, profile picture, etc.', ja: '表示名、紹介文、プロフィール画像などを編集できます' } },
+                                    { titleFallback: { en: 'Save', ja: '保存する' }, descFallback: { en: 'Click save changes to finish', ja: '変更を保存ボタンをクリックして完了です' } }
+                                ]
+                            }
                         }
-                    },
-                    {
-                        id: 'receipt_needed',
-                        title: '領収書が欲しい',
-                        description: '経費精算用の領収書が必要',
-                        solution: {
-                            title: '領収書のダウンロード',
-                            steps: [
-                                { title: 'ダッシュボードを開く', description: 'ログイン後、ダッシュボードにアクセスします' },
-                                { title: '購入履歴を選択', description: '左メニューから「購入履歴」をクリックします' },
-                                { title: '領収書をダウンロード', description: '各購入の横にある「領収書」ボタンでPDFをダウンロードできます' }
-                            ],
-                            relatedFaqKeywords: '領収書,請求書'
-                        }
-                    },
-                    {
-                        id: 'double_charge',
-                        title: '二重に請求された',
-                        description: '同じ購入が2回請求されている',
-                        solution: {
-                            title: '二重請求の確認',
-                            steps: [
-                                { title: '購入履歴を確認', description: 'まず、購入履歴で本当に2回購入されているか確認します' },
-                                { title: '銀行明細を確認', description: 'オーソリ（仮押さえ）と実際の請求を混同している場合があります' },
-                                { title: '48時間待つ', description: 'オーソリは通常48時間以内に自動的に解除されます' }
-                            ],
-                            relatedFaqKeywords: '請求,二重'
-                        }
-                    }
-                ]
-            },
-            reading: {
-                title: '作品閲覧の問題',
-                icon: 'fa-book-reader',
-                options: [
-                    {
-                        id: 'cannot_open',
-                        title: '作品が開けない',
-                        description: 'エラーが表示されて読めない',
-                        solution: {
-                            title: '閲覧エラーの解決',
-                            steps: [
-                                { title: 'ページを再読み込み', description: 'ブラウザの更新ボタンをクリックします' },
-                                { title: 'ログイン状態を確認', description: 'ログアウトしてから再度ログインしてみてください' },
-                                { title: 'ブラウザを変更', description: '別のブラウザでお試しください' }
-                            ],
-                            relatedFaqKeywords: '閲覧,エラー'
-                        }
-                    },
-                    {
-                        id: 'download_failed',
-                        title: 'ダウンロードできない',
-                        description: 'ダウンロードが途中で止まる',
-                        solution: {
-                            title: 'ダウンロード問題の解決',
-                            steps: [
-                                { title: 'インターネット接続を確認', description: '安定したWi-Fi環境でお試しください' },
-                                { title: 'ストレージ容量を確認', description: 'デバイスに十分な空き容量があるか確認します' },
-                                { title: '別の形式を試す', description: 'EPUBでダメならPDFなど、別の形式でダウンロードしてみてください' }
-                            ],
-                            relatedFaqKeywords: 'ダウンロード,失敗'
-                        }
-                    },
-                    {
-                        id: 'purchased_not_shown',
-                        title: '購入した作品が見つからない',
-                        description: 'ライブラリに表示されない',
-                        solution: {
-                            title: '購入作品の確認',
-                            steps: [
-                                { title: 'ログインアカウントを確認', description: '購入時と同じアカウントでログインしているか確認します' },
-                                { title: 'ページを更新', description: 'ライブラリページを再読み込みします' },
-                                { title: '購入履歴を確認', description: 'ダッシュボード→購入履歴で購入が完了しているか確認します' }
-                            ],
-                            relatedFaqKeywords: '購入,ライブラリ'
-                        }
-                    }
-                ]
-            },
-            translation: {
-                title: '翻訳の問題',
-                icon: 'fa-language',
-                options: [
-                    {
-                        id: 'ai_translation_error',
-                        title: 'AI翻訳が動作しない',
-                        description: 'エラーが表示される、翻訳されない',
-                        solution: {
-                            title: 'AI翻訳エラーの解決',
-                            steps: [
-                                { title: '無料枠を確認', description: '月の無料翻訳回数（5回）を使い切っていないか確認します' },
-                                { title: 'テキスト量を確認', description: '一度に翻訳できるテキスト量に制限があります。分割してお試しください' },
-                                { title: '時間をおいて再試行', description: 'サーバーが混雑している可能性があります。少し時間をおいてお試しください' }
-                            ],
-                            relatedFaqKeywords: 'AI翻訳,エラー'
-                        }
-                    },
-                    {
-                        id: 'translation_quality',
-                        title: '翻訳の品質が悪い',
-                        description: '意味が通じない、誤訳がある',
-                        solution: {
-                            title: '翻訳品質の改善',
-                            steps: [
-                                { title: '再翻訳を試す', description: 'AI翻訳は毎回少し異なる結果になることがあります' },
-                                { title: 'プロの翻訳者に依頼', description: '高品質な翻訳が必要な場合は、翻訳者マーケットプレイスをご利用ください', action: { text: '翻訳者を探す', url: '../translator-marketplace.html' } }
-                            ],
-                            relatedFaqKeywords: '翻訳,品質'
-                        }
-                    },
-                    {
-                        id: 'translator_issue',
-                        title: '翻訳者とのトラブル',
-                        description: '連絡が取れない、納期遅延',
-                        solution: {
-                            title: '翻訳者とのトラブル解決',
-                            steps: [
-                                { title: 'メッセージを確認', description: 'ダッシュボードのメッセージで翻訳者からの連絡がないか確認します' },
-                                { title: '契約内容を確認', description: '最初に合意した納期と条件を確認します' },
-                                { title: 'サポートに連絡', description: '解決しない場合は、具体的な状況をサポートにご連絡ください' }
-                            ],
-                            relatedFaqKeywords: '翻訳者,トラブル'
-                        }
-                    }
-                ]
-            },
-            publishing: {
-                title: '作品投稿の問題',
-                icon: 'fa-upload',
-                options: [
-                    {
-                        id: 'upload_failed',
-                        title: 'アップロードが失敗する',
-                        description: 'ファイルがアップロードできない',
-                        solution: {
-                            title: 'アップロードエラーの解決',
-                            steps: [
-                                { title: 'ファイルサイズを確認', description: '最大100MBまでアップロード可能です' },
-                                { title: 'ファイル形式を確認', description: '対応形式：PDF、EPUB、DOCX、TXT' },
-                                { title: 'インターネット接続を確認', description: '安定したWi-Fi環境でお試しください' },
-                                { title: 'ブラウザを変更', description: '別のブラウザでお試しください' }
-                            ],
-                            relatedFaqKeywords: 'アップロード,投稿'
-                        }
-                    },
-                    {
-                        id: 'work_not_published',
-                        title: '作品が公開されない',
-                        description: '投稿したのに表示されない',
-                        solution: {
-                            title: '公開状況の確認',
-                            steps: [
-                                { title: '審査状況を確認', description: 'ダッシュボード→投稿作品で審査状況を確認します。審査には1〜3営業日かかります' },
-                                { title: 'メールを確認', description: '審査結果はメールでお知らせします。迷惑メールフォルダもご確認ください' },
-                                { title: 'ガイドラインを確認', description: '却下された場合は、投稿ガイドラインを確認して修正後に再投稿してください' }
-                            ],
-                            relatedFaqKeywords: '公開,審査'
-                        }
-                    },
-                    {
-                        id: 'cover_image_issue',
-                        title: '表紙画像の問題',
-                        description: '画像がアップロードできない、表示されない',
-                        solution: {
-                            title: '表紙画像の問題解決',
-                            steps: [
-                                { title: '画像形式を確認', description: 'JPG、PNG形式に対応しています' },
-                                { title: 'サイズを確認', description: '推奨サイズ：1600×2400px、最大5MB' },
-                                { title: '画像を最適化', description: '画像が大きすぎる場合は圧縮してからアップロードしてください' }
-                            ],
-                            relatedFaqKeywords: '表紙,画像'
-                        }
-                    }
-                ]
-            },
-            account: {
-                title: 'アカウント設定',
-                icon: 'fa-user-cog',
-                options: [
-                    {
-                        id: 'change_email',
-                        title: 'メールアドレスを変更したい',
-                        description: '別のメールアドレスに変更する',
-                        solution: {
-                            title: 'メールアドレスの変更',
-                            steps: [
-                                { title: 'アカウント設定を開く', description: 'ダッシュボード→アカウント設定にアクセスします' },
-                                { title: '新しいメールアドレスを入力', description: 'メールアドレス欄に新しいアドレスを入力します' },
-                                { title: '確認メールをクリック', description: '新しいアドレスに届く確認メールのリンクをクリックして完了です' }
-                            ],
-                            relatedFaqKeywords: 'メール,変更'
-                        }
-                    },
-                    {
-                        id: 'delete_account',
-                        title: 'アカウントを削除したい',
-                        description: '退会して全データを削除する',
-                        solution: {
-                            title: 'アカウント削除の手順',
-                            steps: [
-                                { title: 'ご注意', description: 'アカウントを削除すると、投稿作品、購入履歴、収益など全てのデータが完全に削除され、復元できません' },
-                                { title: 'アカウント設定を開く', description: 'ダッシュボード→アカウント設定→「アカウントを削除」をクリック' },
-                                { title: 'パスワードを入力', description: '確認のためパスワードを入力し、削除を実行します' }
-                            ],
-                            relatedFaqKeywords: '削除,退会'
-                        }
-                    },
-                    {
-                        id: 'profile_update',
-                        title: 'プロフィールを編集したい',
-                        description: '名前や紹介文を変更する',
-                        solution: {
-                            title: 'プロフィールの編集',
-                            steps: [
-                                { title: 'プロフィール設定を開く', description: 'ダッシュボード→プロフィール設定にアクセスします' },
-                                { title: '情報を編集', description: '表示名、紹介文、プロフィール画像などを編集できます' },
-                                { title: '保存する', description: '変更を保存ボタンをクリックして完了です' }
-                            ],
-                            relatedFaqKeywords: 'プロフィール,編集'
-                        }
-                    },
-                    {
-                        id: 'notification_settings',
-                        title: '通知設定を変更したい',
-                        description: 'メール通知を減らしたい',
-                        solution: {
-                            title: '通知設定の変更',
-                            steps: [
-                                { title: '通知設定を開く', description: 'ダッシュボード→アカウント設定→通知設定にアクセスします' },
-                                { title: '通知タイプを選択', description: '受け取りたい通知の種類を選択します' },
-                                { title: '保存する', description: '設定を保存して完了です' }
-                            ],
-                            relatedFaqKeywords: '通知,メール,設定'
-                        }
-                    }
-                ]
-            }
-        };
+                    ]
+                }
+            };
+        }
 
         // =============================================
-        // 状態管理
+        // State Management
         // =============================================
         let currentStep = 1;
         let selectedCategory = null;
@@ -1049,23 +991,69 @@
         let helpClickCount = 0;
 
         // =============================================
-        // ウィザード制御
+        // Language Helper
+        // =============================================
+        function getCurrentLang() {
+            return localStorage.getItem('preferredLanguage') || 'en';
+        }
+
+        function getLocalizedText(obj, key) {
+            if (!obj) return '';
+            const lang = getCurrentLang();
+            if (obj[key]) {
+                return t(obj[key]) || obj[key];
+            }
+            if (obj[key + 'Fallback']) {
+                return obj[key + 'Fallback'][lang] || obj[key + 'Fallback']['en'] || '';
+            }
+            if (obj['titleFallback']) {
+                return obj['titleFallback'][lang] || obj['titleFallback']['en'] || '';
+            }
+            return '';
+        }
+
+        function getLocalizedFallback(fallbackObj) {
+            if (!fallbackObj) return '';
+            const lang = getCurrentLang();
+            return fallbackObj[lang] || fallbackObj['en'] || '';
+        }
+
+        // =============================================
+        // Sync Language Selectors
+        // =============================================
+        function syncLanguageSelectors() {
+            const desktopSelector = document.getElementById('languageSelector');
+            const mobileSelector = document.getElementById('languageSelectorMobile');
+            
+            if (desktopSelector && mobileSelector) {
+                const savedLang = localStorage.getItem('preferredLanguage') || 'en';
+                desktopSelector.value = savedLang;
+                mobileSelector.value = savedLang;
+                
+                mobileSelector.addEventListener('change', function() {
+                    desktopSelector.value = this.value;
+                });
+                
+                desktopSelector.addEventListener('change', function() {
+                    mobileSelector.value = this.value;
+                });
+            }
+        }
+
+        // =============================================
+        // Wizard Control
         // =============================================
         function goToStep(step) {
-            // 現在のステップを非表示
             document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active'));
             
-            // 新しいステップを表示
             const stepElement = document.getElementById('step' + step);
             if (stepElement) {
                 stepElement.classList.add('active');
             }
             
-            // プログレスバーを更新
             updateProgress(step);
             currentStep = step;
             
-            // ページトップにスクロール
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -1090,29 +1078,48 @@
         }
 
         // =============================================
-        // カテゴリ選択
+        // Generate Step 1 Options
         // =============================================
-        document.querySelectorAll('#step1 .option-card').forEach(card => {
-            card.addEventListener('click', function() {
-                selectedCategory = this.dataset.category;
+        function generateStep1Options() {
+            const data = getTroubleshootData();
+            const container = document.getElementById('step1Options');
+            container.innerHTML = '';
+            
+            Object.keys(data).forEach(categoryKey => {
+                const category = data[categoryKey];
+                const card = document.createElement('div');
+                card.className = 'option-card';
+                card.dataset.category = categoryKey;
                 
-                // 選択状態を更新
-                document.querySelectorAll('#step1 .option-card').forEach(c => c.classList.remove('selected'));
-                this.classList.add('selected');
+                const title = t(category.titleKey) || getLocalizedFallback(category.titleFallback) || categoryKey;
+                const desc = t(category.descKey) || getLocalizedFallback(category.descFallback) || '';
                 
-                // Step 2のオプションを生成
-                generateStep2Options(selectedCategory);
-                
-                // 少し遅延してStep 2へ
-                setTimeout(() => goToStep(2), 300);
+                card.innerHTML = `
+                    <i class="fas ${category.icon}"></i>
+                    <h3>${title}</h3>
+                    <p>${desc}</p>
+                `;
+                card.addEventListener('click', function() {
+                    selectedCategory = categoryKey;
+                    document.querySelectorAll('#step1Options .option-card').forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+                    generateStep2Options(categoryKey);
+                    setTimeout(() => goToStep(2), 300);
+                });
+                container.appendChild(card);
             });
-        });
+        }
 
+        // =============================================
+        // Generate Step 2 Options
+        // =============================================
         function generateStep2Options(category) {
-            const categoryData = troubleshootData[category];
+            const data = getTroubleshootData();
+            const categoryData = data[category];
             if (!categoryData) return;
             
-            document.getElementById('step2Title').textContent = categoryData.title + ' - 詳しい状況を教えてください';
+            const title = t(categoryData.titleKey) || getLocalizedFallback(categoryData.titleFallback) || category;
+            document.getElementById('step2Title').textContent = title + ' - ' + (t('support.troubleshoot.questions.tellMore') || 'Tell us more');
             
             const optionsContainer = document.getElementById('step2Options');
             optionsContainer.innerHTML = '';
@@ -1121,37 +1128,38 @@
                 const card = document.createElement('div');
                 card.className = 'option-card';
                 card.dataset.optionId = option.id;
+                
+                const optTitle = getLocalizedFallback(option.titleFallback);
+                const optDesc = getLocalizedFallback(option.descFallback);
+                
                 card.innerHTML = `
                     <i class="fas ${categoryData.icon}"></i>
-                    <h3>${option.title}</h3>
-                    <p>${option.description}</p>
+                    <h3>${optTitle}</h3>
+                    <p>${optDesc}</p>
                 `;
-                card.addEventListener('click', () => selectOption(option));
+                card.addEventListener('click', function() {
+                    selectOption(option);
+                    document.querySelectorAll('#step2Options .option-card').forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+                });
                 optionsContainer.appendChild(card);
             });
         }
 
         function selectOption(option) {
             selectedOption = option;
-            
-            // 選択状態を更新
-            document.querySelectorAll('#step2 .option-card').forEach(c => c.classList.remove('selected'));
-            event.target.closest('.option-card').classList.add('selected');
-            
-            // 解決策を表示
             showSolution(option.solution);
             
-            // 関連FAQとお問い合わせを非表示にリセット
             document.getElementById('relatedFaqs').classList.remove('show');
             document.getElementById('contactSection').classList.remove('show');
             helpClickCount = 0;
             
-            // 少し遅延してStep 3へ
             setTimeout(() => goToStep(3), 300);
         }
 
         function showSolution(solution) {
-            document.getElementById('solutionTitle').textContent = solution.title;
+            const solTitle = getLocalizedFallback(solution.titleFallback);
+            document.getElementById('solutionTitle').textContent = solTitle;
             
             const stepsContainer = document.getElementById('solutionSteps');
             stepsContainer.innerHTML = '';
@@ -1160,16 +1168,20 @@
                 const stepDiv = document.createElement('div');
                 stepDiv.className = 'solution-step';
                 
+                const stepTitle = getLocalizedFallback(step.titleFallback);
+                const stepDesc = getLocalizedFallback(step.descFallback);
+                
                 let actionHtml = '';
                 if (step.action) {
-                    actionHtml = `<a href="${step.action.url}" class="btn btn-sm btn-primary-custom solution-action">${step.action.text}</a>`;
+                    const actionText = getLocalizedFallback(step.action.textFallback);
+                    actionHtml = `<a href="${step.action.url}" class="btn btn-sm btn-primary-custom solution-action">${actionText}</a>`;
                 }
                 
                 stepDiv.innerHTML = `
                     <div class="solution-step-number">${index + 1}</div>
                     <div class="solution-step-content">
-                        <h4>${step.title}</h4>
-                        <p>${step.description}</p>
+                        <h4>${stepTitle}</h4>
+                        <p>${stepDesc}</p>
                         ${actionHtml}
                     </div>
                 `;
@@ -1178,7 +1190,7 @@
         }
 
         // =============================================
-        // 解決確認
+        // Resolution
         // =============================================
         function markResolved() {
             goToStep('Success');
@@ -1189,38 +1201,35 @@
             helpClickCount++;
             
             if (helpClickCount === 1) {
-                // 関連FAQを表示
                 loadRelatedFaqs();
                 document.getElementById('relatedFaqs').classList.add('show');
-                
-                // スクロール
                 document.getElementById('relatedFaqs').scrollIntoView({ behavior: 'smooth' });
             } else {
-                // お問い合わせセクションを表示
                 document.getElementById('contactSection').classList.add('show');
                 document.getElementById('contactSection').scrollIntoView({ behavior: 'smooth' });
             }
         }
 
         async function loadRelatedFaqs() {
-            if (!selectedOption || !selectedOption.solution.relatedFaqKeywords) return;
-            
-            const keywords = selectedOption.solution.relatedFaqKeywords.split(',')[0];
+            const lang = getCurrentLang();
             
             try {
-                const response = await fetch(`http://localhost:3000/api/support/faq/search?q=${encodeURIComponent(keywords)}`);
+                const response = await fetch(`http://localhost:3000/api/support/faq`);
                 const data = await response.json();
                 
                 const faqList = document.getElementById('relatedFaqsList');
                 faqList.innerHTML = '';
                 
                 if (data.success && data.faqs.length > 0) {
+                    const questionKey = lang === 'ja' ? 'question_ja' : 'question_en';
+                    const answerKey = lang === 'ja' ? 'answer_ja' : 'answer_en';
+                    
                     data.faqs.slice(0, 3).forEach(faq => {
                         const faqCard = document.createElement('div');
                         faqCard.className = 'faq-mini-card';
                         faqCard.innerHTML = `
-                            <h5><i class="fas fa-chevron-right me-2"></i>${faq.question_ja}</h5>
-                            <div class="faq-answer">${faq.answer_ja}</div>
+                            <h5><i class="fas fa-chevron-right me-2"></i>${faq[questionKey] || faq.question_en}</h5>
+                            <div class="faq-answer">${faq[answerKey] || faq.answer_en}</div>
                         `;
                         faqCard.addEventListener('click', function() {
                             this.classList.toggle('expanded');
@@ -1234,34 +1243,56 @@
                         faqList.appendChild(faqCard);
                     });
                     
-                    // FAQの後に「それでも解決しない」メッセージを追加
                     const moreHelpMsg = document.createElement('p');
                     moreHelpMsg.className = 'text-center text-muted mt-3';
-                    moreHelpMsg.innerHTML = '<small>上記で解決しない場合は、もう一度「解決しません」をクリックしてください</small>';
+                    const stillNotResolvedText = t('support.troubleshoot.resolution.stillNotResolved') || 'If the above did not help, click "Not resolved" again';
+                    moreHelpMsg.innerHTML = `<small>${stillNotResolvedText}</small>`;
                     faqList.appendChild(moreHelpMsg);
                 } else {
-                    faqList.innerHTML = '<p class="text-muted">関連するFAQが見つかりませんでした。</p>';
-                    // FAQがない場合は直接お問い合わせを表示
+                    const noFaqText = lang === 'ja' ? '関連するFAQが見つかりませんでした。' : 'No related FAQs found.';
+                    faqList.innerHTML = `<p class="text-muted">${noFaqText}</p>`;
                     document.getElementById('contactSection').classList.add('show');
                 }
             } catch (error) {
-                console.error('FAQ取得エラー:', error);
+                console.error('FAQ fetch error:', error);
                 document.getElementById('contactSection').classList.add('show');
             }
         }
 
         // =============================================
-        // 初期化
+        // Initialization
         // =============================================
         document.addEventListener('DOMContentLoaded', function() {
-            // URLパラメータをチェック
+            syncLanguageSelectors();
+            generateStep1Options();
+            
+            // Check URL parameters
             const params = new URLSearchParams(window.location.search);
             const category = params.get('category');
             
-            if (category && troubleshootData[category]) {
+            if (category && getTroubleshootData()[category]) {
                 selectedCategory = category;
                 generateStep2Options(category);
                 goToStep(2);
+            }
+        });
+
+        // Re-generate options when language changes
+        document.addEventListener('languageChanged', function(e) {
+            const lang = e.detail.language || e.detail.lang;
+            if (lang) {
+                const desktopSelector = document.getElementById('languageSelector');
+                const mobileSelector = document.getElementById('languageSelectorMobile');
+                if (desktopSelector) desktopSelector.value = lang;
+                if (mobileSelector) mobileSelector.value = lang;
+            }
+            
+            generateStep1Options();
+            if (selectedCategory) {
+                generateStep2Options(selectedCategory);
+            }
+            if (selectedOption && selectedOption.solution) {
+                showSolution(selectedOption.solution);
             }
         });
     </script>
