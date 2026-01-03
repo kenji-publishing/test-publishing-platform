@@ -224,7 +224,7 @@
         .notes-content.expanded { max-height: 280px; }
         .notes-inner { padding: 0.75rem; }
         .note-input-row { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
-        .note-input { flex: 1; padding: 0.6rem; border: 1px solid var(--reader-border); border-radius: 8px; font-size: 0.85rem; background: var(--reader-bg); color: var(--reader-text); resize: none; }
+        .note-input { flex: 1; padding: 0.6rem; border: 1px solid var(--reader-border); border-radius: 8px; font-size: 16px; background: var(--reader-bg); color: var(--reader-text); resize: none; -webkit-appearance: none; }
         .note-input:focus { outline: none; border-color: var(--reader-accent); }
         .btn-add-note { padding: 0.6rem 0.75rem; background: var(--reader-accent); color: white; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap; font-size: 0.85rem; }
         .notes-list { max-height: 120px; overflow-y: auto; }
@@ -239,7 +239,7 @@
 
         .page-info { font-size: 0.85rem; color: var(--reader-secondary); }
         .search-input-row { display: flex; gap: 0.4rem; }
-        .search-input { flex: 1; padding: 0.6rem; border: 1px solid var(--reader-border); border-radius: 8px; font-size: 0.85rem; background: var(--reader-bg); color: var(--reader-text); }
+        .search-input { flex: 1; padding: 0.6rem; border: 1px solid var(--reader-border); border-radius: 8px; font-size: 16px; background: var(--reader-bg); color: var(--reader-text); -webkit-appearance: none; }
         .search-results { margin-top: 0.5rem; font-size: 0.8rem; color: var(--reader-secondary); }
 
         .swipe-indicator {
@@ -488,6 +488,9 @@
         }
 
         function updateAllText() {
+            const noteInputEl = document.getElementById('noteInput');
+            const searchInputEl = document.getElementById('searchInput');
+            
             document.title = getL(uiText.notes) + ' - Publisher';
             document.getElementById('touchHintText').textContent = getL(uiText.touchHint);
             document.getElementById('backLinkText').textContent = getL(uiText.backToDashboard);
@@ -507,7 +510,6 @@
             document.getElementById('dirHorizontal').textContent = getL(uiText.horizontal);
             document.getElementById('dirVertical').textContent = getL(uiText.vertical);
             document.getElementById('dirRtl').textContent = getL(uiText.rtl);
-            document.getElementById('searchInput').placeholder = getL(uiText.searchPlaceholder);
             document.getElementById('bookmarksTitle').textContent = getL(uiText.bookmarks);
             document.getElementById('noBookmarksText').textContent = getL(uiText.noBookmarks);
             document.getElementById('hlYellow').title = getL(uiText.yellow);
@@ -517,7 +519,11 @@
             document.getElementById('hlRemove').title = getL(uiText.remove);
             document.getElementById('hlReport').title = getL(uiText.reportIssue);
             document.getElementById('notesTitle').textContent = getL(uiText.notes);
-            document.getElementById('noteInput').placeholder = getL(uiText.addNotePlaceholder);
+            
+            // Use setAttribute for more reliable placeholder updates
+            if (noteInputEl) noteInputEl.setAttribute('placeholder', getL(uiText.addNotePlaceholder));
+            if (searchInputEl) searchInputEl.setAttribute('placeholder', getL(uiText.searchPlaceholder));
+            
             renderBookmarks();
             renderNotes();
         }
