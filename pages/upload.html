@@ -26,6 +26,14 @@
         .content-type-btn:hover { border-color: var(--color-accent); }
         .content-type-btn.active { border-color: var(--color-accent); background: rgba(139, 115, 85, 0.1); }
         .content-type-btn i { font-size: 2rem; display: block; margin-bottom: var(--spacing-sm); color: var(--color-accent); }
+        .lang-selection-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-sm); margin: var(--spacing-md) 0; padding: var(--spacing-md); background: var(--color-bg-hover); border-radius: var(--radius-md); }
+        @media (max-width: 576px) { .lang-selection-grid { grid-template-columns: repeat(2, 1fr); } }
+        .lang-checkbox { display: flex; align-items: center; gap: var(--spacing-xs); padding: var(--spacing-xs) var(--spacing-sm); border-radius: var(--radius-sm); transition: background var(--transition-fast); }
+        .lang-checkbox:hover { background: rgba(139, 115, 85, 0.1); }
+        .lang-checkbox.disabled { opacity: 0.5; pointer-events: none; }
+        .translation-hint { background: rgba(139, 115, 85, 0.1); border-left: 3px solid var(--color-accent); padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--radius-sm); font-size: var(--font-size-sm); margin-top: var(--spacing-sm); }
+        .translation-hint i { color: var(--color-accent); margin-right: var(--spacing-xs); }
+        .selected-count { font-weight: 600; color: var(--color-accent); }
     </style>
 </head>
 <body>
@@ -100,7 +108,7 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="workLanguage" class="form-label"><span id="labelLanguage">Original Language</span> *</label>
-                                    <select class="form-select" id="workLanguage" required>
+                                    <select class="form-select" id="workLanguage" required onchange="updateTranslationLanguages()">
                                         <option value="" id="optSelectLang">Select language</option>
                                         <option value="en">English</option>
                                         <option value="ja">日本語</option>
@@ -166,14 +174,69 @@
                         <div class="form-card">
                             <h5><i class="fas fa-language me-2"></i><span id="sectionTranslation">Translation Options</span></h5>
                             
+                            <!-- AI Translation -->
                             <div class="form-check mb-3">
-                                <input class="form-check-input" type="checkbox" id="useAiTranslation" checked>
+                                <input class="form-check-input" type="checkbox" id="useAiTranslation" onchange="toggleAiTranslation()">
                                 <label class="form-check-label" for="useAiTranslation">
-                                    <strong id="optAiTranslation">Enable Free AI Translation</strong><br>
-                                    <small class="text-secondary" id="optAiTranslationDesc">Automatically translate to all 9 languages</small>
+                                    <strong id="optAiTranslation">Enable AI Translation</strong><br>
+                                    <small class="text-secondary" id="optAiTranslationDesc">Select target languages for automatic translation</small>
                                 </label>
                             </div>
 
+                            <!-- Language Selection (shown when AI translation enabled) -->
+                            <div id="langSelectionArea" style="display: none;">
+                                <label class="form-label" id="labelSelectTargetLangs">Select target languages:</label>
+                                <div class="lang-selection-grid" id="langSelectionGrid">
+                                    <label class="lang-checkbox" data-lang="en">
+                                        <input type="checkbox" class="form-check-input" name="targetLang" value="en">
+                                        <span>🇬🇧 English</span>
+                                    </label>
+                                    <label class="lang-checkbox" data-lang="ja">
+                                        <input type="checkbox" class="form-check-input" name="targetLang" value="ja">
+                                        <span>🇯🇵 日本語</span>
+                                    </label>
+                                    <label class="lang-checkbox" data-lang="zh">
+                                        <input type="checkbox" class="form-check-input" name="targetLang" value="zh">
+                                        <span>🇨🇳 中文</span>
+                                    </label>
+                                    <label class="lang-checkbox" data-lang="es">
+                                        <input type="checkbox" class="form-check-input" name="targetLang" value="es">
+                                        <span>🇪🇸 Español</span>
+                                    </label>
+                                    <label class="lang-checkbox" data-lang="fr">
+                                        <input type="checkbox" class="form-check-input" name="targetLang" value="fr">
+                                        <span>🇫🇷 Français</span>
+                                    </label>
+                                    <label class="lang-checkbox" data-lang="de">
+                                        <input type="checkbox" class="form-check-input" name="targetLang" value="de">
+                                        <span>🇩🇪 Deutsch</span>
+                                    </label>
+                                    <label class="lang-checkbox" data-lang="ko">
+                                        <input type="checkbox" class="form-check-input" name="targetLang" value="ko">
+                                        <span>🇰🇷 한국어</span>
+                                    </label>
+                                    <label class="lang-checkbox" data-lang="ar">
+                                        <input type="checkbox" class="form-check-input" name="targetLang" value="ar">
+                                        <span>🇸🇦 العربية</span>
+                                    </label>
+                                    <label class="lang-checkbox" data-lang="pt">
+                                        <input type="checkbox" class="form-check-input" name="targetLang" value="pt">
+                                        <span>🇧🇷 Português</span>
+                                    </label>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-secondary small"><span id="selectedCountLabel">Selected:</span> <span class="selected-count" id="selectedLangCount">0</span> <span id="languagesLabel">languages</span></span>
+                                    <button type="button" class="btn btn-sm btn-soft-custom" onclick="selectAllLanguages()" id="btnSelectAll">Select All</button>
+                                </div>
+                                <div class="translation-hint">
+                                    <i class="fas fa-lightbulb"></i>
+                                    <span id="translationHint">Recommendation: English + Japanese covers the largest reader base</span>
+                                </div>
+                            </div>
+
+                            <hr class="my-3">
+
+                            <!-- Human Translation -->
                             <div class="form-check mb-3">
                                 <input class="form-check-input" type="checkbox" id="requestHumanTranslation">
                                 <label class="form-check-label" for="requestHumanTranslation">
@@ -182,6 +245,7 @@
                                 </label>
                             </div>
 
+                            <!-- Self Translation -->
                             <div class="form-check mb-3">
                                 <input class="form-check-input" type="checkbox" id="selfTranslate">
                                 <label class="form-check-label" for="selfTranslate">
@@ -290,8 +354,13 @@
             sectionCover: { en: 'Cover Image (Optional)', ja: 'カバー画像（任意）', zh: '封面图片（可选）', es: 'Imagen de portada (opcional)', fr: 'Image de couverture (optionnel)', de: 'Coverbild (optional)', ko: '커버 이미지 (선택)', ar: 'صورة الغلاف (اختياري)', pt: 'Imagem de capa (opcional)' },
             hintCover: { en: 'Recommended size: 600x900px', ja: '推奨サイズ: 600x900px', zh: '推荐尺寸：600x900px', es: 'Tamaño recomendado: 600x900px', fr: 'Taille recommandée : 600x900px', de: 'Empfohlene Größe: 600x900px', ko: '권장 크기: 600x900px', ar: 'الحجم الموصى به: 600×900 بكسل', pt: 'Tamanho recomendado: 600x900px' },
             sectionTranslation: { en: 'Translation Options', ja: '翻訳オプション', zh: '翻译选项', es: 'Opciones de traducción', fr: 'Options de traduction', de: 'Übersetzungsoptionen', ko: '번역 옵션', ar: 'خيارات الترجمة', pt: 'Opções de tradução' },
-            optAiTranslation: { en: 'Enable Free AI Translation', ja: '無料AI翻訳を有効化', zh: '启用免费AI翻译', es: 'Habilitar traducción IA gratuita', fr: 'Activer la traduction IA gratuite', de: 'Kostenlose KI-Übersetzung aktivieren', ko: '무료 AI 번역 활성화', ar: 'تفعيل الترجمة الآلية المجانية', pt: 'Ativar tradução IA gratuita' },
-            optAiTranslationDesc: { en: 'Automatically translate to all 9 languages', ja: '自動的に9言語に翻訳されます', zh: '自动翻译成全部9种语言', es: 'Traducir automáticamente a los 9 idiomas', fr: 'Traduire automatiquement dans les 9 langues', de: 'Automatisch in alle 9 Sprachen übersetzen', ko: '자동으로 9개 언어로 번역', ar: 'ترجمة تلقائية إلى جميع اللغات التسع', pt: 'Traduzir automaticamente para os 9 idiomas' },
+            optAiTranslation: { en: 'Enable AI Translation', ja: 'AI翻訳を有効化', zh: '启用AI翻译', es: 'Habilitar traducción IA', fr: 'Activer la traduction IA', de: 'KI-Übersetzung aktivieren', ko: 'AI 번역 활성화', ar: 'تفعيل الترجمة الآلية', pt: 'Ativar tradução IA' },
+            optAiTranslationDesc: { en: 'Select target languages for automatic translation', ja: '自動翻訳するターゲット言語を選択', zh: '选择自动翻译的目标语言', es: 'Selecciona idiomas de destino para traducción automática', fr: 'Sélectionnez les langues cibles pour la traduction automatique', de: 'Wählen Sie Zielsprachen für automatische Übersetzung', ko: '자동 번역할 대상 언어 선택', ar: 'حدد اللغات المستهدفة للترجمة التلقائية', pt: 'Selecione idiomas de destino para tradução automática' },
+            labelSelectTargetLangs: { en: 'Select target languages:', ja: '翻訳先言語を選択:', zh: '选择目标语言：', es: 'Seleccionar idiomas de destino:', fr: 'Sélectionner les langues cibles :', de: 'Zielsprachen auswählen:', ko: '대상 언어 선택:', ar: 'حدد اللغات المستهدفة:', pt: 'Selecionar idiomas de destino:' },
+            selectedCountLabel: { en: 'Selected:', ja: '選択中:', zh: '已选择：', es: 'Seleccionados:', fr: 'Sélectionnés :', de: 'Ausgewählt:', ko: '선택됨:', ar: 'المحدد:', pt: 'Selecionados:' },
+            languagesLabel: { en: 'languages', ja: '言語', zh: '种语言', es: 'idiomas', fr: 'langues', de: 'Sprachen', ko: '개 언어', ar: 'لغات', pt: 'idiomas' },
+            btnSelectAll: { en: 'Select All', ja: 'すべて選択', zh: '全选', es: 'Seleccionar todo', fr: 'Tout sélectionner', de: 'Alle auswählen', ko: '모두 선택', ar: 'تحديد الكل', pt: 'Selecionar tudo' },
+            translationHint: { en: 'Recommendation: English + Japanese covers the largest reader base', ja: '推奨: 英語 + 日本語が最大の読者層をカバー', zh: '推荐：英语 + 日语覆盖最大读者群', es: 'Recomendación: Inglés + Japonés cubre la mayor base de lectores', fr: 'Recommandation : Anglais + Japonais couvre la plus grande base de lecteurs', de: 'Empfehlung: Englisch + Japanisch deckt die größte Leserschaft ab', ko: '추천: 영어 + 일본어가 가장 큰 독자층을 커버', ar: 'توصية: الإنجليزية + اليابانية تغطي أكبر قاعدة قراء', pt: 'Recomendação: Inglês + Japonês cobre a maior base de leitores' },
             optHumanTranslation: { en: 'Request Human Translation', ja: '人間翻訳を依頼', zh: '请求人工翻译', es: 'Solicitar traducción humana', fr: 'Demander une traduction humaine', de: 'Menschliche Übersetzung anfordern', ko: '인간 번역 요청', ar: 'طلب ترجمة بشرية', pt: 'Solicitar tradução humana' },
             optHumanTranslationDesc: { en: 'Professional translators will be notified (20% revenue share)', ja: 'プロの翻訳者に通知されます（収益の20%）', zh: '将通知专业翻译人员（收益分成20%）', es: 'Se notificará a traductores profesionales (20% de ingresos)', fr: 'Les traducteurs professionnels seront notifiés (20% des revenus)', de: 'Professionelle Übersetzer werden benachrichtigt (20% Umsatzbeteiligung)', ko: '전문 번역가에게 알림이 전송됩니다 (수익의 20%)', ar: 'سيتم إخطار المترجمين المحترفين (20% من الإيرادات)', pt: 'Tradutores profissionais serão notificados (20% da receita)' },
             optSelfTranslation: { en: "I'll Translate It Myself", ja: '自分で翻訳する', zh: '我自己翻译', es: 'Lo traduciré yo mismo', fr: 'Je le traduirai moi-même', de: 'Ich übersetze es selbst', ko: '직접 번역하겠습니다', ar: 'سأترجمه بنفسي', pt: 'Eu mesmo traduzirei' },
@@ -354,6 +423,11 @@
             document.getElementById('sectionTranslation').textContent = getL(uiText.sectionTranslation);
             document.getElementById('optAiTranslation').textContent = getL(uiText.optAiTranslation);
             document.getElementById('optAiTranslationDesc').textContent = getL(uiText.optAiTranslationDesc);
+            document.getElementById('labelSelectTargetLangs').textContent = getL(uiText.labelSelectTargetLangs);
+            document.getElementById('selectedCountLabel').textContent = getL(uiText.selectedCountLabel);
+            document.getElementById('languagesLabel').textContent = getL(uiText.languagesLabel);
+            document.getElementById('btnSelectAll').textContent = getL(uiText.btnSelectAll);
+            document.getElementById('translationHint').textContent = getL(uiText.translationHint);
             document.getElementById('optHumanTranslation').textContent = getL(uiText.optHumanTranslation);
             document.getElementById('optHumanTranslationDesc').textContent = getL(uiText.optHumanTranslationDesc);
             document.getElementById('optSelfTranslation').textContent = getL(uiText.optSelfTranslation);
@@ -385,6 +459,48 @@
             btn.classList.add('active');
             document.getElementById('contentType').value = type;
         }
+
+        // Translation language selection
+        function toggleAiTranslation() {
+            const enabled = document.getElementById('useAiTranslation').checked;
+            document.getElementById('langSelectionArea').style.display = enabled ? 'block' : 'none';
+            if (enabled) updateTranslationLanguages();
+        }
+
+        function updateTranslationLanguages() {
+            const originalLang = document.getElementById('workLanguage').value;
+            document.querySelectorAll('.lang-checkbox').forEach(label => {
+                const lang = label.dataset.lang;
+                const checkbox = label.querySelector('input');
+                if (lang === originalLang) {
+                    label.classList.add('disabled');
+                    checkbox.checked = false;
+                    checkbox.disabled = true;
+                } else {
+                    label.classList.remove('disabled');
+                    checkbox.disabled = false;
+                }
+            });
+            updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+            const count = document.querySelectorAll('input[name="targetLang"]:checked').length;
+            document.getElementById('selectedLangCount').textContent = count;
+        }
+
+        function selectAllLanguages() {
+            const originalLang = document.getElementById('workLanguage').value;
+            document.querySelectorAll('input[name="targetLang"]').forEach(cb => {
+                if (cb.value !== originalLang) cb.checked = true;
+            });
+            updateSelectedCount();
+        }
+
+        // Add event listeners to language checkboxes
+        document.querySelectorAll('input[name="targetLang"]').forEach(cb => {
+            cb.addEventListener('change', updateSelectedCount);
+        });
 
         // Drag and drop functionality
         const uploadArea = document.getElementById('uploadArea');
@@ -428,6 +544,9 @@
         // Form submission
         document.getElementById('uploadForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            // Collect selected languages
+            const selectedLangs = Array.from(document.querySelectorAll('input[name="targetLang"]:checked')).map(cb => cb.value);
+            console.log('Selected translation languages:', selectedLangs);
             alert(getL(uiText.alertSuccess));
         });
 
