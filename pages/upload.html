@@ -4,297 +4,409 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload Work - Publisher</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="../css/style.css" rel="stylesheet">
+    <link href="../css/style-new.css" rel="stylesheet">
     <style>
-        .upload-area {
-            border: 3px dashed #dee2e6;
-            border-radius: 15px;
-            padding: 3rem;
-            text-align: center;
-            transition: all 0.3s;
-            background: #f8f9fa;
-        }
-        .upload-area:hover {
-            border-color: #0d6efd;
-            background: #e7f1ff;
-        }
-        .upload-area.dragover {
-            border-color: #0d6efd;
-            background: #e7f1ff;
-            transform: scale(1.02);
-        }
-        .preview-image {
-            max-width: 200px;
-            max-height: 200px;
-            margin: 10px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
+        .navbar-lang-selector { display: flex; align-items: center; margin-right: 0.5rem; }
+        @media (max-width: 991.98px) { .navbar-lang-selector { order: 1; } .navbar-toggler { order: 2; } }
+        .upload-container { padding: var(--spacing-xl) 0; }
+        .page-header { margin-bottom: var(--spacing-xl); }
+        .page-header h1 { font-size: var(--font-size-2xl); margin-bottom: var(--spacing-xs); }
+        .form-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-lg); margin-bottom: var(--spacing-lg); }
+        .form-card h5 { font-weight: 600; margin-bottom: var(--spacing-md); color: var(--color-text-primary); }
+        .upload-area { border: 3px dashed var(--color-border); border-radius: var(--radius-lg); padding: 3rem; text-align: center; transition: all 0.3s; background: var(--color-bg-hover); }
+        .upload-area:hover { border-color: var(--color-accent); background: rgba(139, 115, 85, 0.05); }
+        .upload-area.dragover { border-color: var(--color-accent); background: rgba(139, 115, 85, 0.1); transform: scale(1.02); }
+        .preview-image { max-width: 200px; max-height: 200px; margin: 10px; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); }
+        .content-type-btn { flex: 1; text-align: center; padding: var(--spacing-md); border: 1px solid var(--color-border); border-radius: var(--radius-md); cursor: pointer; transition: all var(--transition-fast); }
+        .content-type-btn:hover { border-color: var(--color-accent); }
+        .content-type-btn.active { border-color: var(--color-accent); background: rgba(139, 115, 85, 0.1); }
+        .content-type-btn i { font-size: 2rem; display: block; margin-bottom: var(--spacing-sm); color: var(--color-accent); }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="../index.html">
-                <i class="fas fa-book-open"></i> Publisher
-            </a>
-            <div class="ms-auto">
-                <a href="dashboard.html" class="btn btn-outline-light btn-sm">
-                    <i class="fas fa-home"></i> Dashboard
-                </a>
+            <a class="navbar-brand" href="../index.html"><i class="fas fa-book-open"></i> Publisher</a>
+            <div class="navbar-lang-selector d-lg-none">
+                <select class="language-selector" id="languageSelectorMobile">
+                    <option value="en">🇬🇧 EN</option><option value="ja">🇯🇵 日本語</option><option value="zh">🇨🇳 中文</option><option value="es">🇪🇸 ES</option><option value="fr">🇫🇷 FR</option><option value="de">🇩🇪 DE</option><option value="ko">🇰🇷 한국어</option><option value="ar">🇸🇦 عربي</option><option value="pt">🇧🇷 PT</option>
+                </select>
+            </div>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="dashboard.html"><i class="fas fa-th-large me-1"></i><span id="navDashboard">Dashboard</span></a></li>
+                    <li class="nav-item"><a class="nav-link" href="browse.html"><i class="fas fa-compass me-1"></i><span id="navBrowse">Browse</span></a></li>
+                </ul>
+                <div class="d-flex align-items-center gap-3">
+                    <select class="language-selector d-none d-lg-block" id="languageSelector">
+                        <option value="en">🇬🇧 EN</option><option value="ja">🇯🇵 日本語</option><option value="zh">🇨🇳 中文</option><option value="es">🇪🇸 ES</option><option value="fr">🇫🇷 FR</option><option value="de">🇩🇪 DE</option><option value="ko">🇰🇷 한국어</option><option value="ar">🇸🇦 عربي</option><option value="pt">🇧🇷 PT</option>
+                    </select>
+                </div>
             </div>
         </div>
     </nav>
 
-    <section class="py-5">
+    <main class="upload-container">
         <div class="container">
             <div class="row">
                 <div class="col-lg-8 mx-auto">
-                    <h2 class="mb-4"><i class="fas fa-cloud-upload-alt"></i> Upload Your Work</h2>
+                    <div class="page-header">
+                        <h1><i class="fas fa-cloud-upload-alt me-2 text-accent"></i><span id="pageTitle">Upload Your Work</span></h1>
+                        <p id="pageSubtitle">Share your creation with readers worldwide</p>
+                    </div>
                     
                     <form id="uploadForm">
-                        <!-- Work Type -->
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <h5 class="card-title">Content Type *</h5>
-                                <div class="btn-group w-100" role="group">
-                                    <input type="radio" class="btn-check" name="contentType" id="typeText" value="text" checked>
-                                    <label class="btn btn-outline-primary" for="typeText">
-                                        <i class="fas fa-file-alt fa-2x d-block mb-2"></i>
-                                        Text/Novel
-                                    </label>
-                                    
-                                    <input type="radio" class="btn-check" name="contentType" id="typeManga" value="manga">
-                                    <label class="btn btn-outline-primary" for="typeManga">
-                                        <i class="fas fa-book-open fa-2x d-block mb-2"></i>
-                                        Manga/Comics
-                                    </label>
-                                    
-                                    <input type="radio" class="btn-check" name="contentType" id="typeArt" value="art">
-                                    <label class="btn btn-outline-primary" for="typeArt">
-                                        <i class="fas fa-palette fa-2x d-block mb-2"></i>
-                                        Artwork
-                                    </label>
+                        <!-- Content Type -->
+                        <div class="form-card">
+                            <h5><span id="sectionContentType">Content Type</span> *</h5>
+                            <div class="d-flex gap-3 flex-wrap">
+                                <div class="content-type-btn active" onclick="selectContentType('text', this)">
+                                    <i class="fas fa-file-alt"></i>
+                                    <span id="typeText">Text/Novel</span>
+                                </div>
+                                <div class="content-type-btn" onclick="selectContentType('manga', this)">
+                                    <i class="fas fa-book-open"></i>
+                                    <span id="typeManga">Manga/Comics</span>
+                                </div>
+                                <div class="content-type-btn" onclick="selectContentType('art', this)">
+                                    <i class="fas fa-palette"></i>
+                                    <span id="typeArt">Artwork</span>
                                 </div>
                             </div>
+                            <input type="hidden" id="contentType" value="text">
                         </div>
 
-                        <!-- Basic Information -->
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <h5 class="card-title">Work Details</h5>
-                                
-                                <div class="mb-3">
-                                    <label for="workTitle" class="form-label">Title *</label>
-                                    <input type="text" class="form-control" id="workTitle" required>
-                                </div>
+                        <!-- Work Details -->
+                        <div class="form-card">
+                            <h5 id="sectionDetails">Work Details</h5>
+                            
+                            <div class="mb-3">
+                                <label for="workTitle" class="form-label"><span id="labelTitle">Title</span> *</label>
+                                <input type="text" class="form-control" id="workTitle" required>
+                            </div>
 
-                                <div class="mb-3">
-                                    <label for="workDescription" class="form-label">Description *</label>
-                                    <textarea class="form-control" id="workDescription" rows="4" required></textarea>
-                                    <small class="text-muted">Brief summary of your work (max 500 characters)</small>
-                                </div>
+                            <div class="mb-3">
+                                <label for="workDescription" class="form-label"><span id="labelDescription">Description</span> *</label>
+                                <textarea class="form-control" id="workDescription" rows="4" required></textarea>
+                                <small class="text-secondary" id="hintDescription">Brief summary of your work (max 500 characters)</small>
+                            </div>
 
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="workLanguage" class="form-label">Original Language *</label>
-                                        <select class="form-select" id="workLanguage" required>
-                                            <option value="">Select language</option>
-                                            <option value="en">English</option>
-                                            <option value="es">Spanish</option>
-                                            <option value="de">German</option>
-                                            <option value="fr">French</option>
-                                            <option value="ja">Japanese</option>
-                                            <option value="zh">Chinese</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="workGenre" class="form-label">Genre *</label>
-                                        <select class="form-select" id="workGenre" required>
-                                            <option value="">Select genre</option>
-                                            <option value="fiction">Fiction</option>
-                                            <option value="nonfiction">Non-Fiction</option>
-                                            <option value="manga">Manga</option>
-                                            <option value="poetry">Poetry</option>
-                                            <option value="scifi">Science Fiction</option>
-                                            <option value="fantasy">Fantasy</option>
-                                            <option value="romance">Romance</option>
-                                            <option value="mystery">Mystery</option>
-                                            <option value="horror">Horror</option>
-                                        </select>
-                                    </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="workLanguage" class="form-label"><span id="labelLanguage">Original Language</span> *</label>
+                                    <select class="form-select" id="workLanguage" required>
+                                        <option value="" id="optSelectLang">Select language</option>
+                                        <option value="en">English</option>
+                                        <option value="ja">日本語</option>
+                                        <option value="zh">中文</option>
+                                        <option value="es">Español</option>
+                                        <option value="fr">Français</option>
+                                        <option value="de">Deutsch</option>
+                                        <option value="ko">한국어</option>
+                                        <option value="ar">العربية</option>
+                                        <option value="pt">Português</option>
+                                    </select>
                                 </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="workGenre" class="form-label"><span id="labelGenre">Genre</span> *</label>
+                                    <select class="form-select" id="workGenre" required>
+                                        <option value="" id="optSelectGenre">Select genre</option>
+                                        <option value="fiction" id="genreFiction">Fiction</option>
+                                        <option value="nonfiction" id="genreNonfiction">Non-Fiction</option>
+                                        <option value="manga" id="genreManga">Manga</option>
+                                        <option value="poetry" id="genrePoetry">Poetry</option>
+                                        <option value="scifi" id="genreScifi">Science Fiction</option>
+                                        <option value="fantasy" id="genreFantasy">Fantasy</option>
+                                        <option value="romance" id="genreRomance">Romance</option>
+                                        <option value="mystery" id="genreMystery">Mystery</option>
+                                        <option value="horror" id="genreHorror">Horror</option>
+                                    </select>
+                                </div>
+                            </div>
 
-                                <div class="mb-3">
-                                    <label for="tags" class="form-label">Tags (Optional)</label>
-                                    <input type="text" class="form-control" id="tags" placeholder="adventure, action, romance (comma separated)">
-                                </div>
+                            <div class="mb-3">
+                                <label for="tags" class="form-label" id="labelTags">Tags (Optional)</label>
+                                <input type="text" class="form-control" id="tags" placeholder="">
                             </div>
                         </div>
 
                         <!-- File Upload -->
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <h5 class="card-title">Upload Files</h5>
-                                
-                                <div class="upload-area" id="uploadArea">
-                                    <i class="fas fa-cloud-upload-alt fa-4x text-primary mb-3"></i>
-                                    <h5>Drag & Drop Files Here</h5>
-                                    <p class="text-muted">or click to browse</p>
-                                    <input type="file" id="fileInput" class="d-none" multiple accept=".txt,.doc,.docx,.pdf,.jpg,.jpeg,.png,.gif">
-                                    <button type="button" class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
-                                        <i class="fas fa-folder-open"></i> Browse Files
-                                    </button>
-                                    <p class="mt-3 small text-muted">
-                                        Supported formats: TXT, DOC, DOCX, PDF (text) | JPG, PNG, GIF (images/manga)
-                                    </p>
-                                </div>
-
-                                <div id="fileList" class="mt-4"></div>
-                                <div id="previewArea" class="mt-4 d-flex flex-wrap"></div>
+                        <div class="form-card">
+                            <h5 id="sectionUpload">Upload Files</h5>
+                            
+                            <div class="upload-area" id="uploadArea">
+                                <i class="fas fa-cloud-upload-alt fa-4x text-accent mb-3"></i>
+                                <h5 id="uploadDragText">Drag & Drop Files Here</h5>
+                                <p class="text-secondary" id="uploadOrText">or click to browse</p>
+                                <input type="file" id="fileInput" class="d-none" multiple accept=".txt,.doc,.docx,.pdf,.jpg,.jpeg,.png,.gif">
+                                <button type="button" class="btn btn-custom" onclick="document.getElementById('fileInput').click()">
+                                    <i class="fas fa-folder-open me-2"></i><span id="btnBrowseFiles">Browse Files</span>
+                                </button>
+                                <p class="mt-3 small text-secondary" id="uploadFormats">Supported formats: TXT, DOC, DOCX, PDF (text) | JPG, PNG, GIF (images/manga)</p>
                             </div>
+
+                            <div id="fileList" class="mt-4"></div>
+                            <div id="previewArea" class="mt-4 d-flex flex-wrap"></div>
                         </div>
 
                         <!-- Cover Image -->
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <h5 class="card-title">Cover Image (Optional)</h5>
-                                <input type="file" class="form-control" id="coverImage" accept=".jpg,.jpeg,.png">
-                                <small class="text-muted">Recommended size: 600x900px</small>
-                            </div>
+                        <div class="form-card">
+                            <h5 id="sectionCover">Cover Image (Optional)</h5>
+                            <input type="file" class="form-control" id="coverImage" accept=".jpg,.jpeg,.png">
+                            <small class="text-secondary" id="hintCover">Recommended size: 600x900px</small>
                         </div>
 
                         <!-- Translation Options -->
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <h5 class="card-title"><i class="fas fa-language"></i> Translation Options</h5>
-                                
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="useAiTranslation" checked>
-                                    <label class="form-check-label" for="useAiTranslation">
-                                        <strong>Enable Free AI Translation</strong>
-                                        <br>
-                                        <small class="text-muted">Automatically translate to all 6 languages</small>
-                                    </label>
-                                </div>
+                        <div class="form-card">
+                            <h5><i class="fas fa-language me-2"></i><span id="sectionTranslation">Translation Options</span></h5>
+                            
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="useAiTranslation" checked>
+                                <label class="form-check-label" for="useAiTranslation">
+                                    <strong id="optAiTranslation">Enable Free AI Translation</strong><br>
+                                    <small class="text-secondary" id="optAiTranslationDesc">Automatically translate to all 9 languages</small>
+                                </label>
+                            </div>
 
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="requestHumanTranslation">
-                                    <label class="form-check-label" for="requestHumanTranslation">
-                                        <strong>Request Human Translation</strong>
-                                        <br>
-                                        <small class="text-muted">Professional translators will be notified (20% revenue share)</small>
-                                    </label>
-                                </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="requestHumanTranslation">
+                                <label class="form-check-label" for="requestHumanTranslation">
+                                    <strong id="optHumanTranslation">Request Human Translation</strong><br>
+                                    <small class="text-secondary" id="optHumanTranslationDesc">Professional translators will be notified (20% revenue share)</small>
+                                </label>
+                            </div>
 
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="selfTranslate">
-                                    <label class="form-check-label" for="selfTranslate">
-                                        <strong>I'll Translate It Myself</strong>
-                                        <br>
-                                        <small class="text-muted">Earn additional 20% (total 60%)</small>
-                                    </label>
-                                </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="selfTranslate">
+                                <label class="form-check-label" for="selfTranslate">
+                                    <strong id="optSelfTranslation">I'll Translate It Myself</strong><br>
+                                    <small class="text-secondary" id="optSelfTranslationDesc">Earn additional 20% (total 60%)</small>
+                                </label>
                             </div>
                         </div>
 
                         <!-- Rights & Pricing -->
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <h5 class="card-title"><i class="fas fa-copyright"></i> Rights & Pricing</h5>
-                                
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="rightsConfirm" required>
-                                    <label class="form-check-label" for="rightsConfirm">
-                                        I confirm that I own all rights to this work and have the authority to publish it *
-                                    </label>
-                                </div>
+                        <div class="form-card">
+                            <h5><i class="fas fa-copyright me-2"></i><span id="sectionRights">Rights & Pricing</span></h5>
+                            
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="rightsConfirm" required>
+                                <label class="form-check-label" for="rightsConfirm" id="labelRightsConfirm">
+                                    I confirm that I own all rights to this work and have the authority to publish it *
+                                </label>
+                            </div>
 
-                                <div class="mb-3">
-                                    <label for="pricing" class="form-label">Pricing Model *</label>
-                                    <select class="form-select" id="pricing" required>
-                                        <option value="">Select pricing model</option>
-                                        <option value="free">Free (Ad-supported)</option>
-                                        <option value="0.99">$0.99</option>
-                                        <option value="1.99">$1.99</option>
-                                        <option value="2.99">$2.99</option>
-                                        <option value="4.99">$4.99</option>
-                                        <option value="9.99">$9.99</option>
-                                        <option value="custom">Custom Price</option>
-                                    </select>
-                                </div>
+                            <div class="mb-3">
+                                <label for="pricing" class="form-label"><span id="labelPricing">Pricing Model</span> *</label>
+                                <select class="form-select" id="pricing" required>
+                                    <option value="" id="optSelectPricing">Select pricing model</option>
+                                    <option value="free" id="priceFree">Free (Ad-supported)</option>
+                                    <option value="0.99">$0.99</option>
+                                    <option value="1.99">$1.99</option>
+                                    <option value="2.99">$2.99</option>
+                                    <option value="4.99">$4.99</option>
+                                    <option value="9.99">$9.99</option>
+                                    <option value="custom" id="priceCustom">Custom Price</option>
+                                </select>
+                            </div>
 
-                                <div class="mb-3" id="customPriceDiv" style="display: none;">
-                                    <label for="customPrice" class="form-label">Custom Price ($)</label>
-                                    <input type="number" class="form-control" id="customPrice" step="0.01" min="0">
-                                </div>
+                            <div class="mb-3" id="customPriceDiv" style="display: none;">
+                                <label for="customPrice" class="form-label" id="labelCustomPrice">Custom Price ($)</label>
+                                <input type="number" class="form-control" id="customPrice" step="0.01" min="0">
                             </div>
                         </div>
 
                         <!-- Submit -->
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-upload"></i> Publish Work
+                            <button type="submit" class="btn btn-custom btn-lg">
+                                <i class="fas fa-upload me-2"></i><span id="btnPublish">Publish Work</span>
                             </button>
-                            <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
-                                <i class="fas fa-arrow-left"></i> Cancel
+                            <button type="button" class="btn btn-soft-custom" onclick="history.back()">
+                                <i class="fas fa-arrow-left me-2"></i><span id="btnCancel">Cancel</span>
                             </button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
-    </section>
+    </main>
 
-    <footer class="bg-dark text-white py-4 mt-5">
-        <div class="container text-center">
-            <p class="mb-0">&copy; 2024 Publisher. All rights reserved.</p>
+    <footer class="footer-custom">
+        <div class="container">
+            <div class="d-flex flex-wrap justify-content-between align-items-center">
+                <p class="small mb-0">&copy; 2024 Publisher. All rights reserved.</p>
+                <div class="d-flex gap-3">
+                    <a href="support/faq.html" class="text-secondary" id="footerHelp">Help</a>
+                    <a href="terms.html" class="text-secondary" id="footerTerms">Terms</a>
+                    <a href="privacy.html" class="text-secondary" id="footerPrivacy">Privacy</a>
+                </div>
+            </div>
         </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/translations.js"></script>
+    <script src="../js/language-switcher.js"></script>
     <script>
+        const uiText = {
+            pageTitle: { en: 'Upload Your Work', ja: '作品をアップロード', zh: '上传作品', es: 'Subir tu obra', fr: 'Télécharger votre œuvre', de: 'Werk hochladen', ko: '작품 업로드', ar: 'رفع عملك', pt: 'Enviar sua obra' },
+            pageSubtitle: { en: 'Share your creation with readers worldwide', ja: '世界中の読者にあなたの作品を届けましょう', zh: '与全球读者分享您的创作', es: 'Comparte tu creación con lectores de todo el mundo', fr: 'Partagez votre création avec des lecteurs du monde entier', de: 'Teilen Sie Ihre Kreation mit Lesern weltweit', ko: '전 세계 독자들과 작품을 공유하세요', ar: 'شارك إبداعك مع القراء حول العالم', pt: 'Compartilhe sua criação com leitores do mundo todo' },
+            navDashboard: { en: 'Dashboard', ja: 'ダッシュボード', zh: '仪表板', es: 'Panel', fr: 'Tableau de bord', de: 'Dashboard', ko: '대시보드', ar: 'لوحة التحكم', pt: 'Painel' },
+            navBrowse: { en: 'Browse', ja: '作品を探す', zh: '浏览', es: 'Explorar', fr: 'Parcourir', de: 'Durchsuchen', ko: '둘러보기', ar: 'تصفح', pt: 'Explorar' },
+            sectionContentType: { en: 'Content Type', ja: 'コンテンツタイプ', zh: '内容类型', es: 'Tipo de contenido', fr: 'Type de contenu', de: 'Inhaltstyp', ko: '콘텐츠 유형', ar: 'نوع المحتوى', pt: 'Tipo de conteúdo' },
+            typeText: { en: 'Text/Novel', ja: 'テキスト/小説', zh: '文本/小说', es: 'Texto/Novela', fr: 'Texte/Roman', de: 'Text/Roman', ko: '텍스트/소설', ar: 'نص/رواية', pt: 'Texto/Romance' },
+            typeManga: { en: 'Manga/Comics', ja: 'マンガ/コミック', zh: '漫画', es: 'Manga/Cómics', fr: 'Manga/BD', de: 'Manga/Comics', ko: '만화/코믹스', ar: 'مانغا/كوميكس', pt: 'Mangá/Quadrinhos' },
+            typeArt: { en: 'Artwork', ja: 'アートワーク', zh: '艺术作品', es: 'Arte', fr: 'Œuvre d\'art', de: 'Kunstwerk', ko: '아트워크', ar: 'عمل فني', pt: 'Arte' },
+            sectionDetails: { en: 'Work Details', ja: '作品詳細', zh: '作品详情', es: 'Detalles de la obra', fr: 'Détails de l\'œuvre', de: 'Werkdetails', ko: '작품 상세', ar: 'تفاصيل العمل', pt: 'Detalhes da obra' },
+            labelTitle: { en: 'Title', ja: 'タイトル', zh: '标题', es: 'Título', fr: 'Titre', de: 'Titel', ko: '제목', ar: 'العنوان', pt: 'Título' },
+            labelDescription: { en: 'Description', ja: '説明', zh: '描述', es: 'Descripción', fr: 'Description', de: 'Beschreibung', ko: '설명', ar: 'الوصف', pt: 'Descrição' },
+            hintDescription: { en: 'Brief summary of your work (max 500 characters)', ja: '作品の簡単な説明（最大500文字）', zh: '作品简介（最多500字）', es: 'Resumen breve de tu obra (máx. 500 caracteres)', fr: 'Résumé bref de votre œuvre (max 500 caractères)', de: 'Kurze Zusammenfassung Ihres Werks (max. 500 Zeichen)', ko: '작품의 간단한 설명 (최대 500자)', ar: 'ملخص موجز لعملك (بحد أقصى 500 حرف)', pt: 'Resumo breve da sua obra (máx. 500 caracteres)' },
+            labelLanguage: { en: 'Original Language', ja: '原作の言語', zh: '原文语言', es: 'Idioma original', fr: 'Langue originale', de: 'Originalsprache', ko: '원본 언어', ar: 'اللغة الأصلية', pt: 'Idioma original' },
+            optSelectLang: { en: 'Select language', ja: '言語を選択', zh: '选择语言', es: 'Seleccionar idioma', fr: 'Sélectionner la langue', de: 'Sprache auswählen', ko: '언어 선택', ar: 'اختر اللغة', pt: 'Selecionar idioma' },
+            labelGenre: { en: 'Genre', ja: 'ジャンル', zh: '类型', es: 'Género', fr: 'Genre', de: 'Genre', ko: '장르', ar: 'النوع', pt: 'Gênero' },
+            optSelectGenre: { en: 'Select genre', ja: 'ジャンルを選択', zh: '选择类型', es: 'Seleccionar género', fr: 'Sélectionner le genre', de: 'Genre auswählen', ko: '장르 선택', ar: 'اختر النوع', pt: 'Selecionar gênero' },
+            genreFiction: { en: 'Fiction', ja: '小説', zh: '小说', es: 'Ficción', fr: 'Fiction', de: 'Belletristik', ko: '소설', ar: 'خيال', pt: 'Ficção' },
+            genreNonfiction: { en: 'Non-Fiction', ja: 'ノンフィクション', zh: '非虚构', es: 'No ficción', fr: 'Non-fiction', de: 'Sachbuch', ko: '논픽션', ar: 'غير خيالي', pt: 'Não ficção' },
+            genreManga: { en: 'Manga', ja: 'マンガ', zh: '漫画', es: 'Manga', fr: 'Manga', de: 'Manga', ko: '만화', ar: 'مانغا', pt: 'Mangá' },
+            genrePoetry: { en: 'Poetry', ja: '詩', zh: '诗歌', es: 'Poesía', fr: 'Poésie', de: 'Poesie', ko: '시', ar: 'شعر', pt: 'Poesia' },
+            genreScifi: { en: 'Science Fiction', ja: 'SF', zh: '科幻', es: 'Ciencia ficción', fr: 'Science-fiction', de: 'Science-Fiction', ko: 'SF', ar: 'خيال علمي', pt: 'Ficção científica' },
+            genreFantasy: { en: 'Fantasy', ja: 'ファンタジー', zh: '奇幻', es: 'Fantasía', fr: 'Fantaisie', de: 'Fantasy', ko: '판타지', ar: 'فانتازيا', pt: 'Fantasia' },
+            genreRomance: { en: 'Romance', ja: 'ロマンス', zh: '言情', es: 'Romance', fr: 'Romance', de: 'Romantik', ko: '로맨스', ar: 'رومانسية', pt: 'Romance' },
+            genreMystery: { en: 'Mystery', ja: 'ミステリー', zh: '悬疑', es: 'Misterio', fr: 'Mystère', de: 'Krimi', ko: '미스터리', ar: 'غموض', pt: 'Mistério' },
+            genreHorror: { en: 'Horror', ja: 'ホラー', zh: '恐怖', es: 'Terror', fr: 'Horreur', de: 'Horror', ko: '호러', ar: 'رعب', pt: 'Terror' },
+            labelTags: { en: 'Tags (Optional)', ja: 'タグ（任意）', zh: '标签（可选）', es: 'Etiquetas (opcional)', fr: 'Tags (optionnel)', de: 'Tags (optional)', ko: '태그 (선택)', ar: 'الوسوم (اختياري)', pt: 'Tags (opcional)' },
+            placeholderTags: { en: 'adventure, action, romance (comma separated)', ja: '冒険, アクション, 恋愛（カンマ区切り）', zh: '冒险, 动作, 浪漫（逗号分隔）', es: 'aventura, acción, romance (separados por comas)', fr: 'aventure, action, romance (séparés par des virgules)', de: 'Abenteuer, Action, Romantik (durch Kommas getrennt)', ko: '모험, 액션, 로맨스 (쉼표로 구분)', ar: 'مغامرة، أكشن، رومانسية (مفصولة بفواصل)', pt: 'aventura, ação, romance (separados por vírgulas)' },
+            sectionUpload: { en: 'Upload Files', ja: 'ファイルをアップロード', zh: '上传文件', es: 'Subir archivos', fr: 'Télécharger des fichiers', de: 'Dateien hochladen', ko: '파일 업로드', ar: 'رفع الملفات', pt: 'Enviar arquivos' },
+            uploadDragText: { en: 'Drag & Drop Files Here', ja: 'ここにファイルをドラッグ＆ドロップ', zh: '将文件拖放到此处', es: 'Arrastra y suelta archivos aquí', fr: 'Glissez-déposez les fichiers ici', de: 'Dateien hierher ziehen', ko: '파일을 여기에 드래그 앤 드롭', ar: 'اسحب وأفلت الملفات هنا', pt: 'Arraste e solte arquivos aqui' },
+            uploadOrText: { en: 'or click to browse', ja: 'またはクリックして参照', zh: '或点击浏览', es: 'o haz clic para explorar', fr: 'ou cliquez pour parcourir', de: 'oder klicken zum Durchsuchen', ko: '또는 클릭하여 찾아보기', ar: 'أو انقر للتصفح', pt: 'ou clique para navegar' },
+            btnBrowseFiles: { en: 'Browse Files', ja: 'ファイルを選択', zh: '浏览文件', es: 'Explorar archivos', fr: 'Parcourir les fichiers', de: 'Dateien durchsuchen', ko: '파일 찾아보기', ar: 'تصفح الملفات', pt: 'Procurar arquivos' },
+            uploadFormats: { en: 'Supported formats: TXT, DOC, DOCX, PDF (text) | JPG, PNG, GIF (images/manga)', ja: '対応形式: TXT, DOC, DOCX, PDF（テキスト）| JPG, PNG, GIF（画像/マンガ）', zh: '支持格式：TXT, DOC, DOCX, PDF（文本）| JPG, PNG, GIF（图片/漫画）', es: 'Formatos soportados: TXT, DOC, DOCX, PDF (texto) | JPG, PNG, GIF (imágenes/manga)', fr: 'Formats pris en charge : TXT, DOC, DOCX, PDF (texte) | JPG, PNG, GIF (images/manga)', de: 'Unterstützte Formate: TXT, DOC, DOCX, PDF (Text) | JPG, PNG, GIF (Bilder/Manga)', ko: '지원 형식: TXT, DOC, DOCX, PDF (텍스트) | JPG, PNG, GIF (이미지/만화)', ar: 'الصيغ المدعومة: TXT, DOC, DOCX, PDF (نص) | JPG, PNG, GIF (صور/مانغا)', pt: 'Formatos suportados: TXT, DOC, DOCX, PDF (texto) | JPG, PNG, GIF (imagens/mangá)' },
+            sectionCover: { en: 'Cover Image (Optional)', ja: 'カバー画像（任意）', zh: '封面图片（可选）', es: 'Imagen de portada (opcional)', fr: 'Image de couverture (optionnel)', de: 'Coverbild (optional)', ko: '커버 이미지 (선택)', ar: 'صورة الغلاف (اختياري)', pt: 'Imagem de capa (opcional)' },
+            hintCover: { en: 'Recommended size: 600x900px', ja: '推奨サイズ: 600x900px', zh: '推荐尺寸：600x900px', es: 'Tamaño recomendado: 600x900px', fr: 'Taille recommandée : 600x900px', de: 'Empfohlene Größe: 600x900px', ko: '권장 크기: 600x900px', ar: 'الحجم الموصى به: 600×900 بكسل', pt: 'Tamanho recomendado: 600x900px' },
+            sectionTranslation: { en: 'Translation Options', ja: '翻訳オプション', zh: '翻译选项', es: 'Opciones de traducción', fr: 'Options de traduction', de: 'Übersetzungsoptionen', ko: '번역 옵션', ar: 'خيارات الترجمة', pt: 'Opções de tradução' },
+            optAiTranslation: { en: 'Enable Free AI Translation', ja: '無料AI翻訳を有効化', zh: '启用免费AI翻译', es: 'Habilitar traducción IA gratuita', fr: 'Activer la traduction IA gratuite', de: 'Kostenlose KI-Übersetzung aktivieren', ko: '무료 AI 번역 활성화', ar: 'تفعيل الترجمة الآلية المجانية', pt: 'Ativar tradução IA gratuita' },
+            optAiTranslationDesc: { en: 'Automatically translate to all 9 languages', ja: '自動的に9言語に翻訳されます', zh: '自动翻译成全部9种语言', es: 'Traducir automáticamente a los 9 idiomas', fr: 'Traduire automatiquement dans les 9 langues', de: 'Automatisch in alle 9 Sprachen übersetzen', ko: '자동으로 9개 언어로 번역', ar: 'ترجمة تلقائية إلى جميع اللغات التسع', pt: 'Traduzir automaticamente para os 9 idiomas' },
+            optHumanTranslation: { en: 'Request Human Translation', ja: '人間翻訳を依頼', zh: '请求人工翻译', es: 'Solicitar traducción humana', fr: 'Demander une traduction humaine', de: 'Menschliche Übersetzung anfordern', ko: '인간 번역 요청', ar: 'طلب ترجمة بشرية', pt: 'Solicitar tradução humana' },
+            optHumanTranslationDesc: { en: 'Professional translators will be notified (20% revenue share)', ja: 'プロの翻訳者に通知されます（収益の20%）', zh: '将通知专业翻译人员（收益分成20%）', es: 'Se notificará a traductores profesionales (20% de ingresos)', fr: 'Les traducteurs professionnels seront notifiés (20% des revenus)', de: 'Professionelle Übersetzer werden benachrichtigt (20% Umsatzbeteiligung)', ko: '전문 번역가에게 알림이 전송됩니다 (수익의 20%)', ar: 'سيتم إخطار المترجمين المحترفين (20% من الإيرادات)', pt: 'Tradutores profissionais serão notificados (20% da receita)' },
+            optSelfTranslation: { en: "I'll Translate It Myself", ja: '自分で翻訳する', zh: '我自己翻译', es: 'Lo traduciré yo mismo', fr: 'Je le traduirai moi-même', de: 'Ich übersetze es selbst', ko: '직접 번역하겠습니다', ar: 'سأترجمه بنفسي', pt: 'Eu mesmo traduzirei' },
+            optSelfTranslationDesc: { en: 'Earn additional 20% (total 60%)', ja: '追加で20%獲得（合計60%）', zh: '额外获得20%（共60%）', es: 'Gana un 20% adicional (total 60%)', fr: 'Gagnez 20% supplémentaires (total 60%)', de: 'Zusätzlich 20% verdienen (insgesamt 60%)', ko: '추가 20% 획득 (총 60%)', ar: 'اكسب 20% إضافية (إجمالي 60%)', pt: 'Ganhe 20% adicional (total 60%)' },
+            sectionRights: { en: 'Rights & Pricing', ja: '権利と価格設定', zh: '权利与定价', es: 'Derechos y precios', fr: 'Droits et tarification', de: 'Rechte & Preise', ko: '권리 및 가격', ar: 'الحقوق والتسعير', pt: 'Direitos e preços' },
+            labelRightsConfirm: { en: 'I confirm that I own all rights to this work and have the authority to publish it *', ja: 'この作品のすべての権利を所有し、公開する権限があることを確認します *', zh: '我确认我拥有此作品的所有权利并有权发布 *', es: 'Confirmo que poseo todos los derechos de esta obra y tengo autoridad para publicarla *', fr: 'Je confirme que je possède tous les droits sur cette œuvre et que j\'ai l\'autorité de la publier *', de: 'Ich bestätige, dass ich alle Rechte an diesem Werk besitze und die Befugnis zur Veröffentlichung habe *', ko: '이 작품의 모든 권리를 소유하고 있으며 게시할 권한이 있음을 확인합니다 *', ar: 'أؤكد أنني أملك جميع الحقوق لهذا العمل ولدي السلطة لنشره *', pt: 'Confirmo que possuo todos os direitos desta obra e tenho autoridade para publicá-la *' },
+            labelPricing: { en: 'Pricing Model', ja: '価格設定', zh: '定价模式', es: 'Modelo de precios', fr: 'Modèle de tarification', de: 'Preismodell', ko: '가격 모델', ar: 'نموذج التسعير', pt: 'Modelo de preços' },
+            optSelectPricing: { en: 'Select pricing model', ja: '価格モデルを選択', zh: '选择定价模式', es: 'Seleccionar modelo de precios', fr: 'Sélectionner le modèle de tarification', de: 'Preismodell auswählen', ko: '가격 모델 선택', ar: 'اختر نموذج التسعير', pt: 'Selecionar modelo de preços' },
+            priceFree: { en: 'Free (Ad-supported)', ja: '無料（広告付き）', zh: '免费（有广告）', es: 'Gratis (con anuncios)', fr: 'Gratuit (avec publicités)', de: 'Kostenlos (werbefinanziert)', ko: '무료 (광고 지원)', ar: 'مجاني (مدعوم بالإعلانات)', pt: 'Grátis (com anúncios)' },
+            priceCustom: { en: 'Custom Price', ja: 'カスタム価格', zh: '自定义价格', es: 'Precio personalizado', fr: 'Prix personnalisé', de: 'Benutzerdefinierter Preis', ko: '사용자 지정 가격', ar: 'سعر مخصص', pt: 'Preço personalizado' },
+            labelCustomPrice: { en: 'Custom Price ($)', ja: 'カスタム価格（$）', zh: '自定义价格（$）', es: 'Precio personalizado ($)', fr: 'Prix personnalisé ($)', de: 'Benutzerdefinierter Preis ($)', ko: '사용자 지정 가격 ($)', ar: 'السعر المخصص ($)', pt: 'Preço personalizado ($)' },
+            btnPublish: { en: 'Publish Work', ja: '作品を公開', zh: '发布作品', es: 'Publicar obra', fr: 'Publier l\'œuvre', de: 'Werk veröffentlichen', ko: '작품 게시', ar: 'نشر العمل', pt: 'Publicar obra' },
+            btnCancel: { en: 'Cancel', ja: 'キャンセル', zh: '取消', es: 'Cancelar', fr: 'Annuler', de: 'Abbrechen', ko: '취소', ar: 'إلغاء', pt: 'Cancelar' },
+            footerHelp: { en: 'Help', ja: 'ヘルプ', zh: '帮助', es: 'Ayuda', fr: 'Aide', de: 'Hilfe', ko: '도움말', ar: 'مساعدة', pt: 'Ajuda' },
+            footerTerms: { en: 'Terms', ja: '利用規約', zh: '条款', es: 'Términos', fr: 'Conditions', de: 'Bedingungen', ko: '약관', ar: 'الشروط', pt: 'Termos' },
+            footerPrivacy: { en: 'Privacy', ja: 'プライバシー', zh: '隐私', es: 'Privacidad', fr: 'Confidentialité', de: 'Datenschutz', ko: '개인정보', ar: 'الخصوصية', pt: 'Privacidade' },
+            selectedFiles: { en: 'Selected Files:', ja: '選択されたファイル:', zh: '已选文件：', es: 'Archivos seleccionados:', fr: 'Fichiers sélectionnés :', de: 'Ausgewählte Dateien:', ko: '선택된 파일:', ar: 'الملفات المحددة:', pt: 'Arquivos selecionados:' },
+            alertSuccess: { en: 'Work uploaded successfully!', ja: '作品のアップロードに成功しました！', zh: '作品上传成功！', es: '¡Obra subida con éxito!', fr: 'Œuvre téléchargée avec succès !', de: 'Werk erfolgreich hochgeladen!', ko: '작품이 성공적으로 업로드되었습니다!', ar: 'تم رفع العمل بنجاح!', pt: 'Obra enviada com sucesso!' }
+        };
+
+        function getCurrentLang() { return localStorage.getItem('preferredLanguage') || 'en'; }
+        function getL(obj) { if (!obj) return ''; const l = getCurrentLang(); return obj[l] || obj['en'] || ''; }
+
+        function updateAllText() {
+            document.title = getL(uiText.pageTitle) + ' - Publisher';
+            document.getElementById('pageTitle').textContent = getL(uiText.pageTitle);
+            document.getElementById('pageSubtitle').textContent = getL(uiText.pageSubtitle);
+            document.getElementById('navDashboard').textContent = getL(uiText.navDashboard);
+            document.getElementById('navBrowse').textContent = getL(uiText.navBrowse);
+            document.getElementById('sectionContentType').textContent = getL(uiText.sectionContentType);
+            document.getElementById('typeText').textContent = getL(uiText.typeText);
+            document.getElementById('typeManga').textContent = getL(uiText.typeManga);
+            document.getElementById('typeArt').textContent = getL(uiText.typeArt);
+            document.getElementById('sectionDetails').textContent = getL(uiText.sectionDetails);
+            document.getElementById('labelTitle').textContent = getL(uiText.labelTitle);
+            document.getElementById('labelDescription').textContent = getL(uiText.labelDescription);
+            document.getElementById('hintDescription').textContent = getL(uiText.hintDescription);
+            document.getElementById('labelLanguage').textContent = getL(uiText.labelLanguage);
+            document.getElementById('optSelectLang').textContent = getL(uiText.optSelectLang);
+            document.getElementById('labelGenre').textContent = getL(uiText.labelGenre);
+            document.getElementById('optSelectGenre').textContent = getL(uiText.optSelectGenre);
+            document.getElementById('genreFiction').textContent = getL(uiText.genreFiction);
+            document.getElementById('genreNonfiction').textContent = getL(uiText.genreNonfiction);
+            document.getElementById('genreManga').textContent = getL(uiText.genreManga);
+            document.getElementById('genrePoetry').textContent = getL(uiText.genrePoetry);
+            document.getElementById('genreScifi').textContent = getL(uiText.genreScifi);
+            document.getElementById('genreFantasy').textContent = getL(uiText.genreFantasy);
+            document.getElementById('genreRomance').textContent = getL(uiText.genreRomance);
+            document.getElementById('genreMystery').textContent = getL(uiText.genreMystery);
+            document.getElementById('genreHorror').textContent = getL(uiText.genreHorror);
+            document.getElementById('labelTags').textContent = getL(uiText.labelTags);
+            document.getElementById('tags').placeholder = getL(uiText.placeholderTags);
+            document.getElementById('sectionUpload').textContent = getL(uiText.sectionUpload);
+            document.getElementById('uploadDragText').textContent = getL(uiText.uploadDragText);
+            document.getElementById('uploadOrText').textContent = getL(uiText.uploadOrText);
+            document.getElementById('btnBrowseFiles').textContent = getL(uiText.btnBrowseFiles);
+            document.getElementById('uploadFormats').textContent = getL(uiText.uploadFormats);
+            document.getElementById('sectionCover').textContent = getL(uiText.sectionCover);
+            document.getElementById('hintCover').textContent = getL(uiText.hintCover);
+            document.getElementById('sectionTranslation').textContent = getL(uiText.sectionTranslation);
+            document.getElementById('optAiTranslation').textContent = getL(uiText.optAiTranslation);
+            document.getElementById('optAiTranslationDesc').textContent = getL(uiText.optAiTranslationDesc);
+            document.getElementById('optHumanTranslation').textContent = getL(uiText.optHumanTranslation);
+            document.getElementById('optHumanTranslationDesc').textContent = getL(uiText.optHumanTranslationDesc);
+            document.getElementById('optSelfTranslation').textContent = getL(uiText.optSelfTranslation);
+            document.getElementById('optSelfTranslationDesc').textContent = getL(uiText.optSelfTranslationDesc);
+            document.getElementById('sectionRights').textContent = getL(uiText.sectionRights);
+            document.getElementById('labelRightsConfirm').textContent = getL(uiText.labelRightsConfirm);
+            document.getElementById('labelPricing').textContent = getL(uiText.labelPricing);
+            document.getElementById('optSelectPricing').textContent = getL(uiText.optSelectPricing);
+            document.getElementById('priceFree').textContent = getL(uiText.priceFree);
+            document.getElementById('priceCustom').textContent = getL(uiText.priceCustom);
+            document.getElementById('labelCustomPrice').textContent = getL(uiText.labelCustomPrice);
+            document.getElementById('btnPublish').textContent = getL(uiText.btnPublish);
+            document.getElementById('btnCancel').textContent = getL(uiText.btnCancel);
+            document.getElementById('footerHelp').textContent = getL(uiText.footerHelp);
+            document.getElementById('footerTerms').textContent = getL(uiText.footerTerms);
+            document.getElementById('footerPrivacy').textContent = getL(uiText.footerPrivacy);
+        }
+
+        function syncSelectors() {
+            const d = document.getElementById('languageSelector'), m = document.getElementById('languageSelectorMobile'), l = getCurrentLang();
+            if (d) d.value = l; if (m) m.value = l;
+            if (m) m.addEventListener('change', function() { if (d) d.value = this.value; localStorage.setItem('preferredLanguage', this.value); updateAllText(); });
+            if (d) d.addEventListener('change', function() { if (m) m.value = this.value; localStorage.setItem('preferredLanguage', this.value); updateAllText(); });
+        }
+
+        // Content type selection
+        function selectContentType(type, btn) {
+            document.querySelectorAll('.content-type-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('contentType').value = type;
+        }
+
         // Drag and drop functionality
         const uploadArea = document.getElementById('uploadArea');
         const fileInput = document.getElementById('fileInput');
         const fileList = document.getElementById('fileList');
         const previewArea = document.getElementById('previewArea');
 
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
-        });
-
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('dragover');
-        });
-
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            handleFiles(e.dataTransfer.files);
-        });
-
-        fileInput.addEventListener('change', (e) => {
-            handleFiles(e.target.files);
-        });
+        uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+        uploadArea.addEventListener('dragleave', () => { uploadArea.classList.remove('dragover'); });
+        uploadArea.addEventListener('drop', (e) => { e.preventDefault(); uploadArea.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
+        fileInput.addEventListener('change', (e) => { handleFiles(e.target.files); });
 
         function handleFiles(files) {
-            fileList.innerHTML = '<h6>Selected Files:</h6>';
+            fileList.innerHTML = '<h6>' + getL(uiText.selectedFiles) + '</h6>';
             previewArea.innerHTML = '';
             
             for (let file of files) {
                 const fileItem = document.createElement('div');
                 fileItem.className = 'alert alert-info d-flex justify-content-between align-items-center';
-                fileItem.innerHTML = `
-                    <span><i class="fas fa-file"></i> ${file.name} (${(file.size / 1024).toFixed(2)} KB)</span>
-                    <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
-                `;
+                fileItem.innerHTML = `<span><i class="fas fa-file me-2"></i>${file.name} (${(file.size / 1024).toFixed(2)} KB)</span><button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>`;
                 fileList.appendChild(fileItem);
 
-                // Preview images
                 if (file.type.startsWith('image/')) {
                     const reader = new FileReader();
                     reader.onload = (e) => {
@@ -310,14 +422,24 @@
 
         // Show custom price input
         document.getElementById('pricing').addEventListener('change', function() {
-            document.getElementById('customPriceDiv').style.display = 
-                this.value === 'custom' ? 'block' : 'none';
+            document.getElementById('customPriceDiv').style.display = this.value === 'custom' ? 'block' : 'none';
         });
 
         // Form submission
         document.getElementById('uploadForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            alert('Work uploaded successfully! (This will connect to backend in production)');
+            alert(getL(uiText.alertSuccess));
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            syncSelectors();
+            updateAllText();
+        });
+
+        document.addEventListener('languageChanged', function(e) {
+            const l = e.detail.language || e.detail.lang;
+            if (l) { const d = document.getElementById('languageSelector'), m = document.getElementById('languageSelectorMobile'); if (d) d.value = l; if (m) m.value = l; }
+            updateAllText();
         });
     </script>
 </body>
