@@ -623,6 +623,68 @@
             .editor-paper {
                 padding: 1.5rem;
             }
+
+            .navbar-content {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .navbar-content > div:first-child {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .navbar-content > div:last-child {
+                width: 100%;
+                justify-content: flex-end;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .doc-title-input {
+                max-width: 150px;
+                font-size: 0.9rem;
+            }
+
+            .lang-selector {
+                order: -1;
+            }
+
+            .toolbar {
+                top: 80px;
+                overflow-x: auto;
+            }
+
+            .main-container {
+                padding-top: 130px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar {
+                padding: 0.4rem 0.5rem;
+            }
+
+            .navbar-content > div:last-child {
+                gap: 0.3rem;
+            }
+
+            .toolbar-btn {
+                padding: 0.3rem 0.4rem;
+                font-size: 0.8rem;
+            }
+
+            .toolbar-btn span {
+                display: none;
+            }
+
+            .save-status span {
+                display: none;
+            }
+
+            .doc-title-input {
+                max-width: 120px;
+            }
         }
 
         /* Hidden file input */
@@ -644,20 +706,35 @@
             </div>
             <div style="display: flex; align-items: center; gap: 1rem;">
                 <span class="save-status saved" id="saveStatus">
-                    <i class="fas fa-check-circle"></i> Saved
+                    <i class="fas fa-check-circle"></i> <span id="saveStatusText">Saved</span>
                 </span>
-                <a href="notifications.html" class="toolbar-btn position-relative" title="??" id="notificationBellContainer" style="margin-right: 0.5rem;"><i class="fas fa-bell"></i><span id="notificationBadge" class="position-absolute badge rounded-pill bg-danger" style="font-size: 0.55rem; display: none; top: -2px; right: -6px; padding: 2px 5px;">0</span></a>`n                <div class="export-dropdown">
+                <select class="lang-selector" id="langSelector" onchange="changeLanguage(this.value)" style="padding:0.3rem 0.5rem;border:1px solid var(--color-border);border-radius:6px;font-size:0.8rem;cursor:pointer;">
+                    <option value="en">EN</option>
+                    <option value="ja">日本語</option>
+                    <option value="zh">中文</option>
+                    <option value="es">ES</option>
+                    <option value="fr">FR</option>
+                    <option value="de">DE</option>
+                    <option value="ko">한국어</option>
+                    <option value="ar">عربي</option>
+                    <option value="pt">PT</option>
+                </select>
+                <a href="notifications.html" class="toolbar-btn position-relative" title="Notifications" id="notificationBellContainer" style="margin-right: 0.5rem;">
+                    <i class="fas fa-bell"></i>
+                    <span id="notificationBadge" class="position-absolute badge rounded-pill bg-danger" style="font-size: 0.55rem; display: none; top: -2px; right: -6px; padding: 2px 5px;">0</span>
+                </a>
+                <div class="export-dropdown">
                     <button class="toolbar-btn" onclick="toggleExportMenu()">
-                        <i class="fas fa-download"></i> Export
+                        <i class="fas fa-download"></i> <span id="exportBtnText">Export</span>
                     </button>
                     <div class="export-menu" id="exportMenu">
-                        <button onclick="exportDocument('txt')"><i class="fas fa-file-alt"></i> Plain Text (.txt)</button>
-                        <button onclick="exportDocument('html')"><i class="fas fa-file-code"></i> HTML (.html)</button>
-                        <button onclick="exportDocument('word')"><i class="fas fa-file-word"></i> Word (.doc)</button>
+                        <button onclick="exportDocument('txt')"><i class="fas fa-file-alt"></i> <span id="exportTxtText">Plain Text (.txt)</span></button>
+                        <button onclick="exportDocument('html')"><i class="fas fa-file-code"></i> <span id="exportHtmlText">HTML (.html)</span></button>
+                        <button onclick="exportDocument('word')"><i class="fas fa-file-word"></i> <span id="exportWordText">Word (.doc)</span></button>
                     </div>
                 </div>
                 <button class="toolbar-btn" onclick="publishToPublisher()" style="background: var(--color-accent); color: white;">
-                    <i class="fas fa-cloud-upload-alt"></i> Publish
+                    <i class="fas fa-cloud-upload-alt"></i> <span id="publishBtnText">Publish</span>
                 </button>
             </div>
         </div>
@@ -764,7 +841,7 @@
     <!-- Search & Replace Panel -->
     <div class="search-panel" id="searchPanel">
         <h4>
-            Find & Replace
+            <span id="findReplaceTitle">Find &amp; Replace</span>
             <button onclick="toggleSearchPanel()" style="background:none;border:none;cursor:pointer;">
                 <i class="fas fa-times"></i>
             </button>
@@ -772,10 +849,10 @@
         <input type="text" id="searchInput" placeholder="Find..." oninput="performSearch()">
         <input type="text" id="replaceInput" placeholder="Replace with...">
         <div class="search-actions">
-            <button onclick="findNext()">Next</button>
-            <button onclick="findPrev()">Prev</button>
-            <button onclick="replaceOne()">Replace</button>
-            <button onclick="replaceAll()">Replace All</button>
+            <button onclick="findNext()" id="btnFindNext">Next</button>
+            <button onclick="findPrev()" id="btnFindPrev">Prev</button>
+            <button onclick="replaceOne()" id="btnReplaceOne">Replace</button>
+            <button onclick="replaceAll()" id="btnReplaceAll">Replace All</button>
         </div>
         <div class="search-results-info" id="searchResultsInfo"></div>
     </div>
@@ -795,19 +872,19 @@
         <!-- Comments Panel -->
         <div class="comments-panel" id="commentsPanel">
             <div class="comments-header">
-                <h3><i class="fas fa-comments me-2"></i>Comments</h3>
+                <h3><i class="fas fa-comments me-2"></i><span id="commentsPanelTitle">Comments</span></h3>
                 <span id="commentCount">0</span>
             </div>
             <div id="commentsList">
-                <p style="color: var(--color-text-secondary); font-size: 0.9rem; text-align: center;">
+                <p style="color: var(--color-text-secondary); font-size: 0.9rem; text-align: center;" id="noCommentsText">
                     No comments yet.<br>Select text and click <i class="fas fa-comment"></i> to add.
                 </p>
             </div>
             <div class="add-comment-form" id="addCommentForm" style="display: none;">
                 <textarea id="newCommentText" rows="3" placeholder="Add your comment..."></textarea>
                 <div style="display: flex; gap: 0.5rem;">
-                    <button class="btn-primary" onclick="submitComment()" style="flex:1; padding: 0.5rem;">Add</button>
-                    <button class="btn-secondary" onclick="cancelComment()" style="padding: 0.5rem;">Cancel</button>
+                    <button class="btn-primary" onclick="submitComment()" style="flex:1; padding: 0.5rem;" id="btnAddComment">Add</button>
+                    <button class="btn-secondary" onclick="cancelComment()" style="padding: 0.5rem;" id="btnCancelComment">Cancel</button>
                 </div>
             </div>
         </div>
@@ -816,12 +893,12 @@
     <!-- Footer -->
     <div class="editor-footer">
         <div>
-            <span id="wordCount">0</span> words | 
-            <span id="charCount">0</span> characters | 
-            <span id="pageCount">0</span> pages
+            <span id="wordCount">0</span> <span id="wordsLabel">words</span> | 
+            <span id="charCount">0</span> <span id="charsLabel">characters</span> | 
+            <span id="pageCount">0</span> <span id="pagesLabel">pages</span>
         </div>
         <div>
-            Last edited: <span id="lastEdited">-</span>
+            <span id="lastEditedLabel">Last edited:</span> <span id="lastEdited">-</span>
         </div>
     </div>
 
@@ -829,49 +906,271 @@
     <div class="modal-overlay" id="imageModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="fas fa-image me-2"></i>Insert Image</h3>
+                <h3><i class="fas fa-image me-2"></i><span id="insertImageTitle">Insert Image</span></h3>
                 <button class="modal-close" onclick="closeImageModal()">&times;</button>
             </div>
             <div class="modal-body">
                 <input type="file" id="imageInput" accept="image/*" onchange="handleImageSelect(event)">
-                <button class="btn-secondary" onclick="document.getElementById('imageInput').click()" style="width: 100%; margin-bottom: 0.75rem;">
-                    <i class="fas fa-upload me-2"></i>Upload from Computer
+                <button class="btn-secondary" onclick="document.getElementById('imageInput').click()" style="width: 100%; margin-bottom: 0.75rem;" id="btnUploadImage">
+                    <i class="fas fa-upload me-2"></i><span id="uploadFromComputerText">Upload from Computer</span>
                 </button>
-                <p style="text-align: center; color: var(--color-text-secondary); margin: 0.5rem 0;">or</p>
+                <p style="text-align: center; color: var(--color-text-secondary); margin: 0.5rem 0;" id="orText">or</p>
                 <input type="text" id="imageUrl" placeholder="Paste image URL...">
                 <img id="imagePreview" class="image-preview" style="display: none;">
                 <input type="text" id="imageAlt" placeholder="Image description (alt text)">
             </div>
             <div class="modal-footer">
-                <button class="btn-secondary" onclick="closeImageModal()">Cancel</button>
-                <button class="btn-primary" onclick="insertImage()">Insert</button>
+                <button class="btn-secondary" onclick="closeImageModal()" id="btnCancelImage">Cancel</button>
+                <button class="btn-primary" onclick="insertImage()" id="btnInsertImage">Insert</button>
             </div>
         </div>
     </div>
 
     <script>
+        // UI Text for 9 languages
+        const uiText = {
+            saved: { en: 'Saved', ja: '保存済み', zh: '已保存', es: 'Guardado', fr: 'Enregistré', de: 'Gespeichert', ko: '저장됨', ar: 'تم الحفظ', pt: 'Salvo' },
+            saving: { en: 'Saving...', ja: '保存中...', zh: '保存中...', es: 'Guardando...', fr: 'Enregistrement...', de: 'Speichern...', ko: '저장 중...', ar: 'جاري الحفظ...', pt: 'Salvando...' },
+            exportBtn: { en: 'Export', ja: 'エクスポート', zh: '导出', es: 'Exportar', fr: 'Exporter', de: 'Exportieren', ko: '내보내기', ar: 'تصدير', pt: 'Exportar' },
+            exportTxt: { en: 'Plain Text (.txt)', ja: 'テキスト (.txt)', zh: '纯文本 (.txt)', es: 'Texto plano (.txt)', fr: 'Texte brut (.txt)', de: 'Klartext (.txt)', ko: '텍스트 (.txt)', ar: 'نص عادي (.txt)', pt: 'Texto simples (.txt)' },
+            exportHtml: { en: 'HTML (.html)', ja: 'HTML (.html)', zh: 'HTML (.html)', es: 'HTML (.html)', fr: 'HTML (.html)', de: 'HTML (.html)', ko: 'HTML (.html)', ar: 'HTML (.html)', pt: 'HTML (.html)' },
+            exportWord: { en: 'Word (.doc)', ja: 'Word (.doc)', zh: 'Word (.doc)', es: 'Word (.doc)', fr: 'Word (.doc)', de: 'Word (.doc)', ko: 'Word (.doc)', ar: 'Word (.doc)', pt: 'Word (.doc)' },
+            publish: { en: 'Publish', ja: '公開', zh: '发布', es: 'Publicar', fr: 'Publier', de: 'Veröffentlichen', ko: '게시', ar: 'نشر', pt: 'Publicar' },
+            undo: { en: 'Undo', ja: '元に戻す', zh: '撤销', es: 'Deshacer', fr: 'Annuler', de: 'Rückgängig', ko: '실행 취소', ar: 'تراجع', pt: 'Desfazer' },
+            redo: { en: 'Redo', ja: 'やり直す', zh: '重做', es: 'Rehacer', fr: 'Rétablir', de: 'Wiederholen', ko: '다시 실행', ar: 'إعادة', pt: 'Refazer' },
+            bold: { en: 'Bold', ja: '太字', zh: '粗体', es: 'Negrita', fr: 'Gras', de: 'Fett', ko: '굵게', ar: 'غامق', pt: 'Negrito' },
+            italic: { en: 'Italic', ja: '斜体', zh: '斜体', es: 'Cursiva', fr: 'Italique', de: 'Kursiv', ko: '기울임', ar: 'مائل', pt: 'Itálico' },
+            underline: { en: 'Underline', ja: '下線', zh: '下划线', es: 'Subrayado', fr: 'Souligné', de: 'Unterstrichen', ko: '밑줄', ar: 'تسطير', pt: 'Sublinhado' },
+            strikethrough: { en: 'Strikethrough', ja: '取り消し線', zh: '删除线', es: 'Tachado', fr: 'Barré', de: 'Durchgestrichen', ko: '취소선', ar: 'يتوسطه خط', pt: 'Tachado' },
+            alignLeft: { en: 'Align Left', ja: '左揃え', zh: '左对齐', es: 'Alinear a la izquierda', fr: 'Aligner à gauche', de: 'Links ausrichten', ko: '왼쪽 정렬', ar: 'محاذاة لليسار', pt: 'Alinhar à esquerda' },
+            alignCenter: { en: 'Align Center', ja: '中央揃え', zh: '居中', es: 'Centrar', fr: 'Centrer', de: 'Zentrieren', ko: '가운데 정렬', ar: 'توسيط', pt: 'Centralizar' },
+            alignRight: { en: 'Align Right', ja: '右揃え', zh: '右对齐', es: 'Alinear a la derecha', fr: 'Aligner à droite', de: 'Rechts ausrichten', ko: '오른쪽 정렬', ar: 'محاذاة لليمين', pt: 'Alinhar à direita' },
+            justify: { en: 'Justify', ja: '両端揃え', zh: '两端对齐', es: 'Justificar', fr: 'Justifier', de: 'Blocksatz', ko: '양쪽 정렬', ar: 'ضبط', pt: 'Justificar' },
+            bulletList: { en: 'Bullet List', ja: '箇条書き', zh: '项目符号', es: 'Lista con viñetas', fr: 'Liste à puces', de: 'Aufzählung', ko: '글머리 기호', ar: 'قائمة نقطية', pt: 'Lista com marcadores' },
+            numberedList: { en: 'Numbered List', ja: '番号付きリスト', zh: '编号列表', es: 'Lista numerada', fr: 'Liste numérotée', de: 'Nummerierte Liste', ko: '번호 매기기', ar: 'قائمة مرقمة', pt: 'Lista numerada' },
+            indent: { en: 'Indent', ja: 'インデント', zh: '增加缩进', es: 'Aumentar sangría', fr: 'Augmenter le retrait', de: 'Einzug vergrößern', ko: '들여쓰기', ar: 'زيادة المسافة البادئة', pt: 'Aumentar recuo' },
+            outdent: { en: 'Outdent', ja: 'インデント解除', zh: '减少缩进', es: 'Disminuir sangría', fr: 'Diminuer le retrait', de: 'Einzug verkleinern', ko: '내어쓰기', ar: 'تقليل المسافة البادئة', pt: 'Diminuir recuo' },
+            insertImage: { en: 'Insert Image', ja: '画像を挿入', zh: '插入图片', es: 'Insertar imagen', fr: 'Insérer une image', de: 'Bild einfügen', ko: '이미지 삽입', ar: 'إدراج صورة', pt: 'Inserir imagem' },
+            insertLink: { en: 'Insert Link', ja: 'リンクを挿入', zh: '插入链接', es: 'Insertar enlace', fr: 'Insérer un lien', de: 'Link einfügen', ko: '링크 삽입', ar: 'إدراج رابط', pt: 'Inserir link' },
+            horizontalLine: { en: 'Horizontal Line', ja: '水平線', zh: '水平线', es: 'Línea horizontal', fr: 'Ligne horizontale', de: 'Horizontale Linie', ko: '수평선', ar: 'خط أفقي', pt: 'Linha horizontal' },
+            findReplace: { en: 'Find & Replace', ja: '検索と置換', zh: '查找和替换', es: 'Buscar y reemplazar', fr: 'Rechercher et remplacer', de: 'Suchen & Ersetzen', ko: '찾기 및 바꾸기', ar: 'بحث واستبدال', pt: 'Localizar e substituir' },
+            addComment: { en: 'Add Comment', ja: 'コメント追加', zh: '添加评论', es: 'Añadir comentario', fr: 'Ajouter un commentaire', de: 'Kommentar hinzufügen', ko: '댓글 추가', ar: 'إضافة تعليق', pt: 'Adicionar comentário' },
+            toggleComments: { en: 'Toggle Comments Panel', ja: 'コメントパネル切替', zh: '切换评论面板', es: 'Alternar panel de comentarios', fr: 'Basculer le panneau des commentaires', de: 'Kommentarfeld umschalten', ko: '댓글 패널 전환', ar: 'تبديل لوحة التعليقات', pt: 'Alternar painel de comentários' },
+            normal: { en: 'Normal', ja: '標準', zh: '正文', es: 'Normal', fr: 'Normal', de: 'Normal', ko: '일반', ar: 'عادي', pt: 'Normal' },
+            heading1: { en: 'Heading 1', ja: '見出し1', zh: '标题1', es: 'Título 1', fr: 'Titre 1', de: 'Überschrift 1', ko: '제목 1', ar: 'عنوان 1', pt: 'Título 1' },
+            heading2: { en: 'Heading 2', ja: '見出し2', zh: '标题2', es: 'Título 2', fr: 'Titre 2', de: 'Überschrift 2', ko: '제목 2', ar: 'عنوان 2', pt: 'Título 2' },
+            heading3: { en: 'Heading 3', ja: '見出し3', zh: '标题3', es: 'Título 3', fr: 'Titre 3', de: 'Überschrift 3', ko: '제목 3', ar: 'عنوان 3', pt: 'Título 3' },
+            quote: { en: 'Quote', ja: '引用', zh: '引用', es: 'Cita', fr: 'Citation', de: 'Zitat', ko: '인용', ar: 'اقتباس', pt: 'Citação' },
+            find: { en: 'Find...', ja: '検索...', zh: '查找...', es: 'Buscar...', fr: 'Rechercher...', de: 'Suchen...', ko: '찾기...', ar: 'بحث...', pt: 'Localizar...' },
+            replaceWith: { en: 'Replace with...', ja: '置換...', zh: '替换为...', es: 'Reemplazar con...', fr: 'Remplacer par...', de: 'Ersetzen durch...', ko: '바꿀 내용...', ar: 'استبدال بـ...', pt: 'Substituir por...' },
+            next: { en: 'Next', ja: '次へ', zh: '下一个', es: 'Siguiente', fr: 'Suivant', de: 'Weiter', ko: '다음', ar: 'التالي', pt: 'Próximo' },
+            prev: { en: 'Prev', ja: '前へ', zh: '上一个', es: 'Anterior', fr: 'Précédent', de: 'Zurück', ko: '이전', ar: 'السابق', pt: 'Anterior' },
+            replace: { en: 'Replace', ja: '置換', zh: '替换', es: 'Reemplazar', fr: 'Remplacer', de: 'Ersetzen', ko: '바꾸기', ar: 'استبدال', pt: 'Substituir' },
+            replaceAll: { en: 'Replace All', ja: 'すべて置換', zh: '全部替换', es: 'Reemplazar todo', fr: 'Tout remplacer', de: 'Alle ersetzen', ko: '모두 바꾸기', ar: 'استبدال الكل', pt: 'Substituir tudo' },
+            matchesFound: { en: '{count} matches found', ja: '{count}件見つかりました', zh: '找到{count}个匹配', es: '{count} coincidencias', fr: '{count} correspondances', de: '{count} Treffer', ko: '{count}개 일치', ar: 'تم العثور على {count}', pt: '{count} correspondências' },
+            noMatches: { en: 'No matches found', ja: '一致なし', zh: '未找到', es: 'Sin coincidencias', fr: 'Aucune correspondance', de: 'Keine Treffer', ko: '일치 항목 없음', ar: 'لم يتم العثور على نتائج', pt: 'Nenhuma correspondência' },
+            comments: { en: 'Comments', ja: 'コメント', zh: '评论', es: 'Comentarios', fr: 'Commentaires', de: 'Kommentare', ko: '댓글', ar: 'التعليقات', pt: 'Comentários' },
+            noComments: { en: 'No comments yet.<br>Select text and click <i class="fas fa-comment"></i> to add.', ja: 'コメントはまだありません。<br>テキストを選択して<i class="fas fa-comment"></i>をクリック', zh: '暂无评论。<br>选择文本并点击<i class="fas fa-comment"></i>添加', es: 'Sin comentarios aún.<br>Selecciona texto y haz clic en <i class="fas fa-comment"></i>', fr: 'Pas encore de commentaires.<br>Sélectionnez du texte et cliquez sur <i class="fas fa-comment"></i>', de: 'Noch keine Kommentare.<br>Text auswählen und <i class="fas fa-comment"></i> klicken', ko: '댓글이 없습니다.<br>텍스트를 선택하고 <i class="fas fa-comment"></i> 클릭', ar: 'لا توجد تعليقات بعد.<br>حدد النص وانقر <i class="fas fa-comment"></i>', pt: 'Sem comentários ainda.<br>Selecione o texto e clique em <i class="fas fa-comment"></i>' },
+            addCommentPlaceholder: { en: 'Add your comment...', ja: 'コメントを入力...', zh: '添加您的评论...', es: 'Añade tu comentario...', fr: 'Ajoutez votre commentaire...', de: 'Kommentar hinzufügen...', ko: '댓글 입력...', ar: 'أضف تعليقك...', pt: 'Adicione seu comentário...' },
+            add: { en: 'Add', ja: '追加', zh: '添加', es: 'Añadir', fr: 'Ajouter', de: 'Hinzufügen', ko: '추가', ar: 'إضافة', pt: 'Adicionar' },
+            cancel: { en: 'Cancel', ja: 'キャンセル', zh: '取消', es: 'Cancelar', fr: 'Annuler', de: 'Abbrechen', ko: '취소', ar: 'إلغاء', pt: 'Cancelar' },
+            resolve: { en: 'Resolve', ja: '解決', zh: '解决', es: 'Resolver', fr: 'Résoudre', de: 'Lösen', ko: '해결', ar: 'حل', pt: 'Resolver' },
+            unresolve: { en: 'Unresolve', ja: '未解決に戻す', zh: '取消解决', es: 'No resolver', fr: 'Non résolu', de: 'Ungelöst', ko: '해결 취소', ar: 'إلغاء الحل', pt: 'Desfazer resolução' },
+            deleteText: { en: 'Delete', ja: '削除', zh: '删除', es: 'Eliminar', fr: 'Supprimer', de: 'Löschen', ko: '삭제', ar: 'حذف', pt: 'Excluir' },
+            words: { en: 'words', ja: '語', zh: '字', es: 'palabras', fr: 'mots', de: 'Wörter', ko: '단어', ar: 'كلمات', pt: 'palavras' },
+            characters: { en: 'characters', ja: '文字', zh: '字符', es: 'caracteres', fr: 'caractères', de: 'Zeichen', ko: '문자', ar: 'أحرف', pt: 'caracteres' },
+            pages: { en: 'pages', ja: 'ページ', zh: '页', es: 'páginas', fr: 'pages', de: 'Seiten', ko: '페이지', ar: 'صفحات', pt: 'páginas' },
+            lastEdited: { en: 'Last edited:', ja: '最終編集:', zh: '最后编辑:', es: 'Última edición:', fr: 'Dernière modification:', de: 'Zuletzt bearbeitet:', ko: '마지막 수정:', ar: 'آخر تعديل:', pt: 'Última edição:' },
+            uploadFromComputer: { en: 'Upload from Computer', ja: 'コンピュータからアップロード', zh: '从电脑上传', es: 'Subir desde el ordenador', fr: "Télécharger depuis l'ordinateur", de: 'Vom Computer hochladen', ko: '컴퓨터에서 업로드', ar: 'رفع من الكمبيوتر', pt: 'Carregar do computador' },
+            or: { en: 'or', ja: 'または', zh: '或', es: 'o', fr: 'ou', de: 'oder', ko: '또는', ar: 'أو', pt: 'ou' },
+            imageUrlPlaceholder: { en: 'Paste image URL...', ja: '画像URLを貼り付け...', zh: '粘贴图片URL...', es: 'Pegar URL de imagen...', fr: "Coller l'URL de l'image...", de: 'Bild-URL einfügen...', ko: '이미지 URL 붙여넣기...', ar: 'لصق رابط الصورة...', pt: 'Colar URL da imagem...' },
+            imageAltPlaceholder: { en: 'Image description (alt text)', ja: '画像の説明（代替テキスト）', zh: '图片描述（替代文本）', es: 'Descripción de la imagen (texto alt)', fr: "Description de l'image (texte alt)", de: 'Bildbeschreibung (Alt-Text)', ko: '이미지 설명 (대체 텍스트)', ar: 'وصف الصورة (نص بديل)', pt: 'Descrição da imagem (texto alt)' },
+            insert: { en: 'Insert', ja: '挿入', zh: '插入', es: 'Insertar', fr: 'Insérer', de: 'Einfügen', ko: '삽입', ar: 'إدراج', pt: 'Inserir' },
+            documentTitle: { en: 'Untitled Document', ja: '無題のドキュメント', zh: '未命名文档', es: 'Documento sin título', fr: 'Document sans titre', de: 'Unbenanntes Dokument', ko: '제목 없는 문서', ar: 'مستند بدون عنوان', pt: 'Documento sem título' },
+            documentTitlePlaceholder: { en: 'Document title...', ja: 'ドキュメントタイトル...', zh: '文档标题...', es: 'Título del documento...', fr: 'Titre du document...', de: 'Dokumenttitel...', ko: '문서 제목...', ar: 'عنوان المستند...', pt: 'Título do documento...' },
+            editorTitlePlaceholder: { en: 'Enter title', ja: 'タイトルを入力', zh: '输入标题', es: 'Introducir título', fr: 'Entrez le titre', de: 'Titel eingeben', ko: '제목 입력', ar: 'أدخل العنوان', pt: 'Digite o título' },
+            editorBodyPlaceholder: { en: 'Start writing here...', ja: 'ここから本文を書き始めてください...', zh: '从这里开始写作...', es: 'Empieza a escribir aquí...', fr: 'Commencez à écrire ici...', de: 'Beginnen Sie hier zu schreiben...', ko: '여기에 글을 쓰세요...', ar: 'ابدأ الكتابة هنا...', pt: 'Comece a escrever aqui...' },
+            selectTextToComment: { en: 'Please select text to comment on', ja: 'コメントするテキストを選択してください', zh: '请选择要评论的文本', es: 'Por favor selecciona texto para comentar', fr: 'Veuillez sélectionner du texte à commenter', de: 'Bitte Text zum Kommentieren auswählen', ko: '댓글을 달 텍스트를 선택하세요', ar: 'يرجى تحديد نص للتعليق عليه', pt: 'Por favor, selecione o texto para comentar' },
+            cannotCommentAcross: { en: 'Cannot comment across elements. Please select within a single paragraph.', ja: '要素をまたいでコメントできません。単一の段落内で選択してください。', zh: '无法跨元素评论。请在单个段落内选择。', es: 'No se puede comentar entre elementos. Por favor selecciona dentro de un solo párrafo.', fr: 'Impossible de commenter entre les éléments. Veuillez sélectionner dans un seul paragraphe.', de: 'Kommentieren über Elemente hinweg nicht möglich. Bitte innerhalb eines Absatzes auswählen.', ko: '요소 간 댓글 불가. 단일 단락 내에서 선택하세요.', ar: 'لا يمكن التعليق عبر العناصر. يرجى التحديد داخل فقرة واحدة.', pt: 'Não é possível comentar entre elementos. Por favor, selecione dentro de um único parágrafo.' },
+            deleteComment: { en: 'Delete this comment?', ja: 'このコメントを削除しますか？', zh: '删除此评论？', es: '¿Eliminar este comentario?', fr: 'Supprimer ce commentaire?', de: 'Diesen Kommentar löschen?', ko: '이 댓글을 삭제하시겠습니까?', ar: 'حذف هذا التعليق؟', pt: 'Excluir este comentário?' },
+            enterUrl: { en: 'Enter URL:', ja: 'URLを入力:', zh: '输入URL:', es: 'Introduce la URL:', fr: "Entrez l'URL:", de: 'URL eingeben:', ko: 'URL 입력:', ar: 'أدخل الرابط:', pt: 'Insira a URL:' },
+            selectImageOrUrl: { en: 'Please select an image or enter a URL', ja: '画像を選択するかURLを入力してください', zh: '请选择图片或输入URL', es: 'Por favor selecciona una imagen o introduce una URL', fr: 'Veuillez sélectionner une image ou entrer une URL', de: 'Bitte Bild auswählen oder URL eingeben', ko: '이미지를 선택하거나 URL을 입력하세요', ar: 'يرجى اختيار صورة أو إدخال رابط', pt: 'Por favor, selecione uma imagem ou insira uma URL' },
+            pleaseEnterTitle: { en: 'Please enter a title for your work', ja: '作品のタイトルを入力してください', zh: '请输入作品标题', es: 'Por favor introduce un título para tu obra', fr: 'Veuillez entrer un titre pour votre œuvre', de: 'Bitte Titel für Ihr Werk eingeben', ko: '작품 제목을 입력하세요', ar: 'يرجى إدخال عنوان لعملك', pt: 'Por favor, insira um título para sua obra' },
+            contentTooShort: { en: 'Content is too short. Please write more before publishing.', ja: 'コンテンツが短すぎます。公開前にもっと書いてください。', zh: '内容太短。请在发布前多写一些。', es: 'El contenido es demasiado corto. Por favor escribe más antes de publicar.', fr: 'Le contenu est trop court. Veuillez écrire davantage avant de publier.', de: 'Inhalt ist zu kurz. Bitte mehr schreiben vor der Veröffentlichung.', ko: '내용이 너무 짧습니다. 게시하기 전에 더 작성하세요.', ar: 'المحتوى قصير جداً. يرجى كتابة المزيد قبل النشر.', pt: 'O conteúdo é muito curto. Por favor, escreva mais antes de publicar.' },
+            readyToPublish: { en: 'Ready to publish "{title}"?\n\nYou will be redirected to the upload page to add details like synopsis, genre, and pricing.', ja: '「{title}」を公開しますか？\n\nあらすじ、ジャンル、価格などを追加するアップロードページに移動します。', zh: '准备发布"{title}"吗？\n\n您将被重定向到上传页面添加简介、类型和定价等详情。', es: '¿Listo para publicar "{title}"?\n\nSerás redirigido a la página de carga para añadir detalles como sinopsis, género y precio.', fr: 'Prêt à publier "{title}"?\n\nVous serez redirigé vers la page de téléchargement pour ajouter des détails comme le synopsis, le genre et le prix.', de: 'Bereit "{title}" zu veröffentlichen?\n\nSie werden zur Upload-Seite weitergeleitet, um Details wie Zusammenfassung, Genre und Preis hinzuzufügen.', ko: '"{title}"을 게시할 준비가 되셨나요?\n\n줄거리, 장르, 가격 등의 세부 정보를 추가하는 업로드 페이지로 이동합니다.', ar: 'هل أنت جاهز لنشر "{title}"؟\n\nسيتم توجيهك إلى صفحة الرفع لإضافة تفاصيل مثل الملخص والنوع والسعر.', pt: 'Pronto para publicar "{title}"?\n\nVocê será redirecionado para a página de upload para adicionar detalhes como sinopse, gênero e preço.' },
+            editor: { en: 'Editor', ja: 'エディター', zh: '编辑器', es: 'Editor', fr: 'Éditeur', de: 'Editor', ko: '에디터', ar: 'المحرر', pt: 'Editor' }
+        };
+
+        let currentLang = localStorage.getItem('preferredLanguage') || 'en';
+
+        function getL(obj, replacements) {
+            if (!obj) return '';
+            let text = obj[currentLang] || obj['en'] || '';
+            if (replacements) {
+                Object.keys(replacements).forEach(function(key) {
+                    text = text.replace('{' + key + '}', replacements[key]);
+                });
+            }
+            return text;
+        }
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('preferredLanguage', lang);
+            updateAllText();
+        }
+
+        function updateAllText() {
+            document.title = getL(uiText.editor) + ' - Publisher';
+            
+            var el;
+            // Status
+            el = document.getElementById('saveStatusText'); if (el) el.textContent = getL(uiText.saved);
+            // Export
+            el = document.getElementById('exportBtnText'); if (el) el.textContent = getL(uiText.exportBtn);
+            el = document.getElementById('exportTxtText'); if (el) el.textContent = getL(uiText.exportTxt);
+            el = document.getElementById('exportHtmlText'); if (el) el.textContent = getL(uiText.exportHtml);
+            el = document.getElementById('exportWordText'); if (el) el.textContent = getL(uiText.exportWord);
+            el = document.getElementById('publishBtnText'); if (el) el.textContent = getL(uiText.publish);
+            // Search panel
+            el = document.getElementById('findReplaceTitle'); if (el) el.textContent = getL(uiText.findReplace);
+            el = document.getElementById('searchInput'); if (el) el.placeholder = getL(uiText.find);
+            el = document.getElementById('replaceInput'); if (el) el.placeholder = getL(uiText.replaceWith);
+            el = document.getElementById('btnFindNext'); if (el) el.textContent = getL(uiText.next);
+            el = document.getElementById('btnFindPrev'); if (el) el.textContent = getL(uiText.prev);
+            el = document.getElementById('btnReplaceOne'); if (el) el.textContent = getL(uiText.replace);
+            el = document.getElementById('btnReplaceAll'); if (el) el.textContent = getL(uiText.replaceAll);
+            // Comments panel
+            el = document.getElementById('commentsPanelTitle'); if (el) el.textContent = getL(uiText.comments);
+            el = document.getElementById('noCommentsText'); if (el) el.innerHTML = getL(uiText.noComments);
+            el = document.getElementById('newCommentText'); if (el) el.placeholder = getL(uiText.addCommentPlaceholder);
+            el = document.getElementById('btnAddComment'); if (el) el.textContent = getL(uiText.add);
+            el = document.getElementById('btnCancelComment'); if (el) el.textContent = getL(uiText.cancel);
+            // Footer
+            el = document.getElementById('wordsLabel'); if (el) el.textContent = getL(uiText.words);
+            el = document.getElementById('charsLabel'); if (el) el.textContent = getL(uiText.characters);
+            el = document.getElementById('pagesLabel'); if (el) el.textContent = getL(uiText.pages);
+            el = document.getElementById('lastEditedLabel'); if (el) el.textContent = getL(uiText.lastEdited);
+            // Image modal
+            el = document.getElementById('insertImageTitle'); if (el) el.textContent = getL(uiText.insertImage);
+            el = document.getElementById('uploadFromComputerText'); if (el) el.textContent = getL(uiText.uploadFromComputer);
+            el = document.getElementById('orText'); if (el) el.textContent = getL(uiText.or);
+            el = document.getElementById('imageUrl'); if (el) el.placeholder = getL(uiText.imageUrlPlaceholder);
+            el = document.getElementById('imageAlt'); if (el) el.placeholder = getL(uiText.imageAltPlaceholder);
+            el = document.getElementById('btnCancelImage'); if (el) el.textContent = getL(uiText.cancel);
+            el = document.getElementById('btnInsertImage'); if (el) el.textContent = getL(uiText.insert);
+            // Doc title placeholder
+            el = document.getElementById('docTitle'); if (el) el.placeholder = getL(uiText.documentTitlePlaceholder);
+            
+            // Update doc title if it's still default
+            updateDefaultDocTitle();
+            // Update editor content if it's still default
+            updateDefaultEditorContent();
+            
+            updateToolbarTitles();
+            renderComments();
+        }
+        
+        // List of all default document titles in all languages
+        var defaultTitles = ['Untitled Document', '無題のドキュメント', '未命名文档', 'Documento sin título', 'Document sans titre', 'Unbenanntes Dokument', '제목 없는 문서', 'مستند بدون عنوان', 'Documento sem título'];
+        
+        // List of all default editor titles in all languages
+        var defaultEditorTitles = ['Enter title', 'タイトルを入力', '输入标题', 'Introducir título', 'Entrez le titre', 'Titel eingeben', '제목 입력', 'أدخل العنوان', 'Digite o título'];
+        
+        // List of all default editor body texts in all languages
+        var defaultEditorBodies = ['Start writing here...', 'ここから本文を書き始めてください...', '从这里开始写作...', 'Empieza a escribir aquí...', 'Commencez à écrire ici...', 'Beginnen Sie hier zu schreiben...', '여기에 글을 쓰세요...', 'ابدأ الكتابة هنا...', 'Comece a escrever aqui...'];
+        
+        function updateDefaultDocTitle() {
+            var el = document.getElementById('docTitle');
+            if (!el) return;
+            var currentVal = el.value.trim();
+            // Only update if current value is one of the default titles
+            if (defaultTitles.indexOf(currentVal) !== -1 || currentVal === '') {
+                el.value = getL(uiText.documentTitle);
+            }
+        }
+        
+        function updateDefaultEditorContent() {
+            var editor = document.getElementById('editorContent');
+            if (!editor) return;
+            
+            // Check h1 element
+            var h1 = editor.querySelector('h1');
+            if (h1) {
+                var h1Text = h1.textContent.trim();
+                if (defaultEditorTitles.indexOf(h1Text) !== -1) {
+                    h1.textContent = getL(uiText.editorTitlePlaceholder);
+                }
+            }
+            
+            // Check first p element
+            var p = editor.querySelector('p');
+            if (p) {
+                var pText = p.textContent.trim();
+                if (defaultEditorBodies.indexOf(pText) !== -1) {
+                    p.textContent = getL(uiText.editorBodyPlaceholder);
+                }
+            }
+        }
+        
+        function updateToolbarTitles() {
+            var toolbarBtns = document.querySelectorAll('.toolbar-btn');
+            var titles = {
+                'undo': uiText.undo,
+                'redo': uiText.redo,
+                'bold': uiText.bold,
+                'italic': uiText.italic,
+                'underline': uiText.underline,
+                'strikethrough': uiText.strikethrough,
+                'justifyLeft': uiText.alignLeft,
+                'justifyCenter': uiText.alignCenter,
+                'justifyRight': uiText.alignRight,
+                'justifyFull': uiText.justify,
+                'insertUnorderedList': uiText.bulletList,
+                'insertOrderedList': uiText.numberedList,
+                'indent': uiText.indent,
+                'outdent': uiText.outdent,
+                'showImageModal': uiText.insertImage,
+                'insertLink': uiText.insertLink,
+                'insertHorizontalRule': uiText.horizontalLine,
+                'toggleSearchPanel': uiText.findReplace,
+                'addComment': uiText.addComment,
+                'toggleComments': uiText.toggleComments
+            };
+            toolbarBtns.forEach(function(btn) {
+                var onclick = btn.getAttribute('onclick');
+                if (onclick) {
+                    for (var cmd in titles) {
+                        if (onclick.indexOf(cmd) !== -1) {
+                            btn.title = getL(titles[cmd]);
+                            break;
+                        }
+                    }
+                }
+            });
+        }
+
         // State
-        let comments = [];
-        let selectedRange = null;
-        let autoSaveTimer = null;
-        let searchMatches = [];
-        let currentMatchIndex = -1;
+        var comments = [];
+        var selectedRange = null;
+        var autoSaveTimer = null;
+        var searchMatches = [];
+        var currentMatchIndex = -1;
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            const editor = document.getElementById('editorContent');
+            var editor = document.getElementById('editorContent');
             
-            // Load saved content
+            document.getElementById('langSelector').value = currentLang;
+            updateAllText();
             loadContent();
 
-            // Event listeners
             editor.addEventListener('input', function() {
                 updateCounts();
                 autoSave();
             });
 
             editor.addEventListener('keydown', function(e) {
-                // Keyboard shortcuts
                 if (e.ctrlKey) {
                     switch(e.key.toLowerCase()) {
                         case 's':
@@ -886,82 +1185,72 @@
                 }
             });
 
-            // Initial count
             updateCounts();
         });
 
-        // Execute Command
-        function execCmd(command, value = null) {
-            document.execCommand(command, false, value);
+        function execCmd(command, value) {
+            document.execCommand(command, false, value || null);
             document.getElementById('editorContent').focus();
         }
 
-        // Change Font Size
         function changeFontSize(size) {
-            const selection = window.getSelection();
+            var selection = window.getSelection();
             if (selection.rangeCount > 0) {
-                const range = selection.getRangeAt(0);
-                const span = document.createElement('span');
+                var range = selection.getRangeAt(0);
+                var span = document.createElement('span');
                 span.style.fontSize = size;
                 range.surroundContents(span);
             }
         }
 
-        // Update Word/Character/Page Counts
         function updateCounts() {
-            const editor = document.getElementById('editorContent');
-            const text = editor.innerText || '';
+            var editor = document.getElementById('editorContent');
+            var text = editor.innerText || '';
             
-            // Character count
-            const charCount = text.length;
+            var charCount = text.length;
             document.getElementById('charCount').textContent = charCount.toLocaleString();
             
-            // Word count (handle both English and Japanese)
-            const englishWords = text.match(/[a-zA-Z]+/g) || [];
-            const japaneseChars = text.match(/[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]/g) || [];
-            const wordCount = englishWords.length + Math.ceil(japaneseChars.length / 2);
+            var englishWords = text.match(/[a-zA-Z]+/g) || [];
+            var japaneseChars = text.match(/[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]/g) || [];
+            var wordCount = englishWords.length + Math.ceil(japaneseChars.length / 2);
             document.getElementById('wordCount').textContent = wordCount.toLocaleString();
             
-            // Page count (roughly 400 words per page)
-            const pageCount = Math.max(1, Math.ceil(wordCount / 400));
+            var pageCount = Math.max(1, Math.ceil(wordCount / 400));
             document.getElementById('pageCount').textContent = pageCount;
         }
 
-        // Auto Save
         function autoSave() {
-            const status = document.getElementById('saveStatus');
-            status.innerHTML = '<i class="fas fa-sync fa-spin"></i> Saving...';
+            var status = document.getElementById('saveStatus');
+            status.innerHTML = '<i class="fas fa-sync fa-spin"></i> <span id="saveStatusText">' + getL(uiText.saving) + '</span>';
             status.className = 'save-status saving';
 
             clearTimeout(autoSaveTimer);
-            autoSaveTimer = setTimeout(() => {
+            autoSaveTimer = setTimeout(function() {
                 saveContent();
             }, 2000);
         }
 
-        // Save Content
         function saveContent() {
-            const title = document.getElementById('docTitle').value;
-            const content = document.getElementById('editorContent').innerHTML;
+            var title = document.getElementById('docTitle').value;
+            var content = document.getElementById('editorContent').innerHTML;
             
             localStorage.setItem('editor_title', title);
             localStorage.setItem('editor_content', content);
             localStorage.setItem('editor_comments', JSON.stringify(comments));
             localStorage.setItem('editor_lastSaved', new Date().toISOString());
 
-            const status = document.getElementById('saveStatus');
-            status.innerHTML = '<i class="fas fa-check-circle"></i> Saved';
+            var status = document.getElementById('saveStatus');
+            status.innerHTML = '<i class="fas fa-check-circle"></i> <span id="saveStatusText">' + getL(uiText.saved) + '</span>';
             status.className = 'save-status saved';
 
             document.getElementById('lastEdited').textContent = new Date().toLocaleTimeString();
         }
 
-        // Load Content
         function loadContent() {
-            const title = localStorage.getItem('editor_title');
-            const content = localStorage.getItem('editor_content');
-            const savedComments = localStorage.getItem('editor_comments');
-            const lastSaved = localStorage.getItem('editor_lastSaved');
+            var title = localStorage.getItem('editor_title');
+            var content = localStorage.getItem('editor_content');
+            var savedComments = localStorage.getItem('editor_comments');
+            var lastSaved = localStorage.getItem('editor_lastSaved');
 
             if (title) document.getElementById('docTitle').value = title;
             if (content) document.getElementById('editorContent').innerHTML = content;
@@ -974,9 +1263,8 @@
             }
         }
 
-        // Search Functions
         function toggleSearchPanel() {
-            const panel = document.getElementById('searchPanel');
+            var panel = document.getElementById('searchPanel');
             panel.classList.toggle('show');
             if (panel.classList.contains('show')) {
                 document.getElementById('searchInput').focus();
@@ -984,10 +1272,9 @@
         }
 
         function performSearch() {
-            const query = document.getElementById('searchInput').value;
-            const info = document.getElementById('searchResultsInfo');
+            var query = document.getElementById('searchInput').value;
+            var info = document.getElementById('searchResultsInfo');
             
-            // Clear previous highlights
             clearSearchHighlights();
             searchMatches = [];
             currentMatchIndex = -1;
@@ -997,52 +1284,49 @@
                 return;
             }
 
-            const editor = document.getElementById('editorContent');
-            const text = editor.innerText;
-            const regex = new RegExp(query, 'gi');
-            let match;
-            let count = 0;
+            var editor = document.getElementById('editorContent');
+            var text = editor.innerText;
+            var regex = new RegExp(query, 'gi');
+            var match;
+            var count = 0;
 
             while ((match = regex.exec(text)) !== null) {
                 count++;
             }
 
-            info.textContent = count > 0 ? `${count} matches found` : 'No matches found';
+            info.textContent = count > 0 ? getL(uiText.matchesFound, { count: count }) : getL(uiText.noMatches);
         }
 
         function clearSearchHighlights() {
-            const editor = document.getElementById('editorContent');
-            const highlights = editor.querySelectorAll('.search-match');
-            highlights.forEach(h => {
-                const text = document.createTextNode(h.textContent);
+            var editor = document.getElementById('editorContent');
+            var highlights = editor.querySelectorAll('.search-match');
+            highlights.forEach(function(h) {
+                var text = document.createTextNode(h.textContent);
                 h.parentNode.replaceChild(text, h);
             });
         }
 
         function findNext() {
-            const query = document.getElementById('searchInput').value;
+            var query = document.getElementById('searchInput').value;
             if (!query) return;
-
-            const editor = document.getElementById('editorContent');
             if (window.find) {
                 window.find(query, false, false, true, false, true, false);
             }
         }
 
         function findPrev() {
-            const query = document.getElementById('searchInput').value;
+            var query = document.getElementById('searchInput').value;
             if (!query) return;
-
             if (window.find) {
                 window.find(query, false, true, true, false, true, false);
             }
         }
 
         function replaceOne() {
-            const query = document.getElementById('searchInput').value;
-            const replacement = document.getElementById('replaceInput').value;
+            var query = document.getElementById('searchInput').value;
+            var replacement = document.getElementById('replaceInput').value;
             
-            const selection = window.getSelection();
+            var selection = window.getSelection();
             if (selection.toString().toLowerCase() === query.toLowerCase()) {
                 document.execCommand('insertText', false, replacement);
                 findNext();
@@ -1052,26 +1336,25 @@
         }
 
         function replaceAll() {
-            const query = document.getElementById('searchInput').value;
-            const replacement = document.getElementById('replaceInput').value;
+            var query = document.getElementById('searchInput').value;
+            var replacement = document.getElementById('replaceInput').value;
             
             if (!query) return;
 
-            const editor = document.getElementById('editorContent');
-            const regex = new RegExp(query, 'gi');
+            var editor = document.getElementById('editorContent');
+            var regex = new RegExp(query, 'gi');
             editor.innerHTML = editor.innerHTML.replace(regex, replacement);
             
             performSearch();
             saveContent();
         }
 
-        // Comment Functions
         function addComment() {
-            const selection = window.getSelection();
-            const selectedText = selection.toString().trim();
+            var selection = window.getSelection();
+            var selectedText = selection.toString().trim();
 
             if (!selectedText) {
-                alert('Please select text to comment on');
+                alert(getL(uiText.selectTextToComment));
                 return;
             }
 
@@ -1081,23 +1364,21 @@
         }
 
         function submitComment() {
-            const text = document.getElementById('newCommentText').value.trim();
+            var text = document.getElementById('newCommentText').value.trim();
             if (!text || !selectedRange) return;
 
-            // Highlight the selected text
-            const span = document.createElement('span');
+            var span = document.createElement('span');
             span.className = 'comment-highlight';
             span.dataset.commentId = Date.now();
             
             try {
                 selectedRange.surroundContents(span);
             } catch (e) {
-                alert('Cannot comment across elements. Please select within a single paragraph.');
+                alert(getL(uiText.cannotCommentAcross));
                 return;
             }
 
-            // Add comment to list
-            const comment = {
+            var comment = {
                 id: span.dataset.commentId,
                 text: text,
                 context: selectedRange.toString().substring(0, 50) + '...',
@@ -1119,36 +1400,31 @@
         }
 
         function renderComments() {
-            const list = document.getElementById('commentsList');
+            var list = document.getElementById('commentsList');
             document.getElementById('commentCount').textContent = comments.length;
 
             if (comments.length === 0) {
-                list.innerHTML = `
-                    <p style="color: var(--color-text-secondary); font-size: 0.9rem; text-align: center;">
-                        No comments yet.<br>Select text and click <i class="fas fa-comment"></i> to add.
-                    </p>
-                `;
+                list.innerHTML = '<p style="color: var(--color-text-secondary); font-size: 0.9rem; text-align: center;" id="noCommentsText">' + getL(uiText.noComments) + '</p>';
                 return;
             }
 
-            list.innerHTML = comments.map(c => `
-                <div class="comment-item ${c.resolved ? 'resolved' : ''}" data-id="${c.id}">
-                    <div class="comment-meta">
-                        <span class="comment-author">${c.author}</span>
-                        <span class="comment-time">${new Date(c.createdAt).toLocaleString()}</span>
-                    </div>
-                    <div class="comment-context">"${c.context}"</div>
-                    <div class="comment-text">${c.text}</div>
-                    <div class="comment-actions">
-                        <button onclick="resolveComment('${c.id}')">${c.resolved ? 'Unresolve' : 'Resolve'}</button>
-                        <button onclick="deleteComment('${c.id}')">Delete</button>
-                    </div>
-                </div>
-            `).join('');
+            var html = '';
+            comments.forEach(function(c) {
+                html += '<div class="comment-item ' + (c.resolved ? 'resolved' : '') + '" data-id="' + c.id + '">';
+                html += '<div class="comment-meta"><span class="comment-author">' + c.author + '</span>';
+                html += '<span class="comment-time">' + new Date(c.createdAt).toLocaleString() + '</span></div>';
+                html += '<div class="comment-context">"' + c.context + '"</div>';
+                html += '<div class="comment-text">' + c.text + '</div>';
+                html += '<div class="comment-actions">';
+                html += '<button onclick="resolveComment(\'' + c.id + '\')">' + (c.resolved ? getL(uiText.unresolve) : getL(uiText.resolve)) + '</button>';
+                html += '<button onclick="deleteComment(\'' + c.id + '\')">' + getL(uiText.deleteText) + '</button>';
+                html += '</div></div>';
+            });
+            list.innerHTML = html;
         }
 
         function resolveComment(id) {
-            const comment = comments.find(c => c.id == id);
+            var comment = comments.find(function(c) { return c.id == id; });
             if (comment) {
                 comment.resolved = !comment.resolved;
                 renderComments();
@@ -1157,29 +1433,26 @@
         }
 
         function deleteComment(id) {
-            if (!confirm('Delete this comment?')) return;
+            if (!confirm(getL(uiText.deleteComment))) return;
             
-            // Remove highlight
-            const highlight = document.querySelector(`.comment-highlight[data-comment-id="${id}"]`);
+            var highlight = document.querySelector('.comment-highlight[data-comment-id="' + id + '"]');
             if (highlight) {
-                const text = document.createTextNode(highlight.textContent);
+                var text = document.createTextNode(highlight.textContent);
                 highlight.parentNode.replaceChild(text, highlight);
             }
 
-            // Remove from list
-            comments = comments.filter(c => c.id != id);
+            comments = comments.filter(function(c) { return c.id != id; });
             renderComments();
             saveContent();
         }
 
         function toggleComments() {
-            const container = document.getElementById('mainContainer');
-            const panel = document.getElementById('commentsPanel');
+            var container = document.getElementById('mainContainer');
+            var panel = document.getElementById('commentsPanel');
             container.classList.toggle('comments-hidden');
             panel.style.display = container.classList.contains('comments-hidden') ? 'none' : 'block';
         }
 
-        // Image Functions
         function showImageModal() {
             document.getElementById('imageModal').classList.add('show');
         }
@@ -1193,10 +1466,10 @@
         }
 
         function handleImageSelect(event) {
-            const file = event.target.files[0];
+            var file = event.target.files[0];
             if (!file) return;
 
-            const reader = new FileReader();
+            var reader = new FileReader();
             reader.onload = function(e) {
                 document.getElementById('imageUrl').value = e.target.result;
                 document.getElementById('imagePreview').src = e.target.result;
@@ -1205,25 +1478,27 @@
             reader.readAsDataURL(file);
         }
 
-        // URL input preview
-        document.getElementById('imageUrl')?.addEventListener('input', function() {
-            const url = this.value;
-            if (url && (url.startsWith('http') || url.startsWith('data:'))) {
-                document.getElementById('imagePreview').src = url;
-                document.getElementById('imagePreview').style.display = 'block';
-            }
-        });
+        var imageUrlInput = document.getElementById('imageUrl');
+        if (imageUrlInput) {
+            imageUrlInput.addEventListener('input', function() {
+                var url = this.value;
+                if (url && (url.indexOf('http') === 0 || url.indexOf('data:') === 0)) {
+                    document.getElementById('imagePreview').src = url;
+                    document.getElementById('imagePreview').style.display = 'block';
+                }
+            });
+        }
 
         function insertImage() {
-            const url = document.getElementById('imageUrl').value;
-            const alt = document.getElementById('imageAlt').value || 'Image';
+            var url = document.getElementById('imageUrl').value;
+            var alt = document.getElementById('imageAlt').value || 'Image';
 
             if (!url) {
-                alert('Please select an image or enter a URL');
+                alert(getL(uiText.selectImageOrUrl));
                 return;
             }
 
-            const img = `<img src="${url}" alt="${alt}" style="max-width:100%;">`;
+            var img = '<img src="' + url + '" alt="' + alt + '" style="max-width:100%;">';
             document.getElementById('editorContent').focus();
             document.execCommand('insertHTML', false, img);
             
@@ -1232,18 +1507,16 @@
         }
 
         function insertLink() {
-            const url = prompt('Enter URL:');
+            var url = prompt(getL(uiText.enterUrl));
             if (url) {
                 execCmd('createLink', url);
             }
         }
 
-        // Export Functions
         function toggleExportMenu() {
             document.getElementById('exportMenu').classList.toggle('show');
         }
 
-        // Close export menu when clicking outside
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.export-dropdown')) {
                 document.getElementById('exportMenu').classList.remove('show');
@@ -1251,53 +1524,36 @@
         });
 
         function exportDocument(format) {
-            const title = document.getElementById('docTitle').value || 'document';
-            const content = document.getElementById('editorContent');
-            let data, filename, mimeType;
+            var title = document.getElementById('docTitle').value || 'document';
+            var content = document.getElementById('editorContent');
+            var data, filename, mimeType;
 
             switch(format) {
                 case 'txt':
                     data = content.innerText;
-                    filename = `${title}.txt`;
+                    filename = title + '.txt';
                     mimeType = 'text/plain';
                     break;
                 case 'html':
-                    data = `<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>${title}</title>
-    <style>
-        body { font-family: 'Noto Sans JP', sans-serif; max-width: 800px; margin: 2rem auto; padding: 1rem; line-height: 1.8; }
-        h1 { border-bottom: 2px solid #8B7355; padding-bottom: 0.5rem; }
-        img { max-width: 100%; }
-        blockquote { border-left: 4px solid #8B7355; padding-left: 1rem; color: #666; }
-    </style>
-</head>
-<body>
-${content.innerHTML}
-    <!-- Notification Badge -->
-    <script src="../js/header-notification.js"></script>
-</body>
-</html>`;
-                    filename = `${title}.html`;
+                    data = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' + title + '</title>';
+                    data += '<style>body{font-family:"Noto Sans JP",sans-serif;max-width:800px;margin:2rem auto;padding:1rem;line-height:1.8;}';
+                    data += 'h1{border-bottom:2px solid #8B7355;padding-bottom:0.5rem;}img{max-width:100%;}';
+                    data += 'blockquote{border-left:4px solid #8B7355;padding-left:1rem;color:#666;}</style></head>';
+                    data += '<body>' + content.innerHTML + '</body></html>';
+                    filename = title + '.html';
                     mimeType = 'text/html';
                     break;
                 case 'word':
-                    data = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'>
-<head><meta charset="UTF-8"><title>${title}</title></head>
-<body style="font-family: Arial, sans-serif;">
-${content.innerHTML}
-    <!-- Notification Badge -->
-    <script src="../js/header-notification.js"></script>
-</body></html>`;
-                    filename = `${title}.doc`;
+                    data = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word">';
+                    data += '<head><meta charset="UTF-8"><title>' + title + '</title></head>';
+                    data += '<body style="font-family:Arial,sans-serif;">' + content.innerHTML + '</body></html>';
+                    filename = title + '.doc';
                     mimeType = 'application/msword';
                     break;
             }
 
-            const blob = new Blob([data], { type: mimeType });
-            const link = document.createElement('a');
+            var blob = new Blob([data], { type: mimeType });
+            var link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = filename;
             link.click();
@@ -1305,24 +1561,23 @@ ${content.innerHTML}
             toggleExportMenu();
         }
 
-        // Publish to Publisher
         function publishToPublisher() {
-            const title = document.getElementById('docTitle').value;
-            const content = document.getElementById('editorContent').innerHTML;
+            var title = document.getElementById('docTitle').value;
+            var content = document.getElementById('editorContent').innerHTML;
+            var defaultTitle = getL(uiText.documentTitle);
             
-            if (!title || title === '無題のドキュメント') {
-                alert('Please enter a title for your work');
+            if (!title || title === defaultTitle || title === '無題のドキュメント') {
+                alert(getL(uiText.pleaseEnterTitle));
                 document.getElementById('docTitle').focus();
                 return;
             }
 
             if (content.length < 100) {
-                alert('Content is too short. Please write more before publishing.');
+                alert(getL(uiText.contentTooShort));
                 return;
             }
 
-            // Save to localStorage for transfer to upload page
-            const workData = {
+            var workData = {
                 title: title,
                 content: content,
                 synopsis: '',
@@ -1334,13 +1589,11 @@ ${content.innerHTML}
 
             localStorage.setItem('editor_work_transfer', JSON.stringify(workData));
 
-            // Redirect to upload page
-            if (confirm('Ready to publish "' + title + '"?\n\nYou will be redirected to the upload page to add details like synopsis, genre, and pricing.')) {
+            if (confirm(getL(uiText.readyToPublish, { title: title }))) {
                 window.location.href = 'upload.html?from=editor';
             }
         }
     </script>
-    <!-- Notification Badge -->
     <script src="../js/header-notification.js"></script>
 </body>
 </html>
