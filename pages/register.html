@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Account - Publisher</title>
+    <title data-i18n="register.pageTitle">Create Account - Publisher</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -306,15 +306,15 @@
     <!-- Language Selector -->
     <div class="language-selector-mini">
         <select class="language-selector" id="languageSelector">
-            <option value="en">🇬🇧 EN</option>
+            <option value="en">🇬🇧 English</option>
             <option value="ja">🇯🇵 日本語</option>
             <option value="zh">🇨🇳 中文</option>
-            <option value="es">🇪🇸 ES</option>
-            <option value="fr">🇫🇷 FR</option>
-            <option value="de">🇩🇪 DE</option>
+            <option value="es">🇪🇸 Español</option>
+            <option value="fr">🇫🇷 Français</option>
+            <option value="de">🇩🇪 Deutsch</option>
             <option value="ko">🇰🇷 한국어</option>
-            <option value="ar">🇸🇦 عربي</option>
-            <option value="pt">🇧🇷 PT</option>
+            <option value="ar">🇸🇦 العربية</option>
+            <option value="pt">🇧🇷 Português</option>
         </select>
     </div>
 
@@ -427,14 +427,14 @@
                     <label class="form-label" for="preferredLanguage" data-i18n="register.preferredLanguage">Preferred Language</label>
                     <select class="form-control" id="preferredLanguage">
                         <option value="en">🇬🇧 English</option>
-                        <option value="ja">🇯🇵 日本語 (Japanese)</option>
-                        <option value="zh">🇨🇳 中文 (Chinese)</option>
-                        <option value="es">🇪🇸 Español (Spanish)</option>
-                        <option value="fr">🇫🇷 Français (French)</option>
-                        <option value="de">🇩🇪 Deutsch (German)</option>
-                        <option value="ko">🇰🇷 한국어 (Korean)</option>
-                        <option value="ar">🇸🇦 العربية (Arabic)</option>
-                        <option value="pt">🇧🇷 Português (Portuguese)</option>
+                        <option value="ja">🇯🇵 日本語</option>
+                        <option value="zh">🇨🇳 中文</option>
+                        <option value="es">🇪🇸 Español</option>
+                        <option value="fr">🇫🇷 Français</option>
+                        <option value="de">🇩🇪 Deutsch</option>
+                        <option value="ko">🇰🇷 한국어</option>
+                        <option value="ar">🇸🇦 العربية</option>
+                        <option value="pt">🇧🇷 Português</option>
                     </select>
                 </div>
 
@@ -484,6 +484,27 @@
     <script src="../js/translations.js"></script>
     <script src="../js/language-switcher.js"></script>
     <script>
+        // Language switching
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentLang = localStorage.getItem('preferredLanguage') || 'en';
+            const langSelector = document.getElementById('languageSelector');
+            const prefLangSelector = document.getElementById('preferredLanguage');
+            
+            if (langSelector) {
+                langSelector.value = currentLang;
+                langSelector.addEventListener('change', function() {
+                    localStorage.setItem('preferredLanguage', this.value);
+                    if (typeof LanguageSwitcher !== 'undefined') {
+                        LanguageSwitcher.changeLanguage(this.value);
+                    }
+                });
+            }
+            
+            if (prefLangSelector) {
+                prefLangSelector.value = currentLang;
+            }
+        });
+
         // Role selection
         function selectRole(role) {
             document.querySelectorAll('.role-option').forEach(el => {
