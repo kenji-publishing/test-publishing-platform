@@ -226,9 +226,37 @@
     <script src="../js/translations.js"></script>
     <script src="../js/language-switcher.js"></script>
     <script>
+        // Language switching function for this page
+        function switchLanguage(lang) {
+            localStorage.setItem('preferredLanguage', lang);
+            
+            // Update display
+            const currentLanguageDisplay = document.getElementById('currentLanguage');
+            if (currentLanguageDisplay && typeof availableLanguages !== 'undefined' && availableLanguages[lang]) {
+                currentLanguageDisplay.textContent = availableLanguages[lang].nativeName;
+            }
+            
+            // Update mobile select
+            const mobileSelect = document.getElementById('mobileLanguageSelect');
+            if (mobileSelect) {
+                mobileSelect.value = lang;
+            }
+            
+            // Update active state in dropdown
+            document.querySelectorAll('#languageMenu .dropdown-item').forEach(item => {
+                item.classList.toggle('active', item.getAttribute('data-lang') === lang);
+            });
+            
+            // Use LanguageSwitcher if available
+            if (typeof LanguageSwitcher !== 'undefined') {
+                LanguageSwitcher.changeLanguage(lang);
+            } else if (typeof loadLanguage === 'function') {
+                loadLanguage(lang);
+            }
+        }
+
         // Initialize language selectors
         document.addEventListener('DOMContentLoaded', function() {
-            // Populate desktop language menu
             const languageMenu = document.getElementById('languageMenu');
             const mobileSelect = document.getElementById('mobileLanguageSelect');
             const currentLanguageDisplay = document.getElementById('currentLanguage');
@@ -236,22 +264,29 @@
             if (typeof availableLanguages !== 'undefined') {
                 const currentLang = localStorage.getItem('preferredLanguage') || 'en';
                 
-                // Desktop dropdown
+                // Desktop dropdown - with click event
                 if (languageMenu) {
                     languageMenu.innerHTML = '';
                     for (const [code, info] of Object.entries(availableLanguages)) {
                         const li = document.createElement('li');
                         const a = document.createElement('a');
-                        a.className = 'dropdown-item lang-option' + (code === currentLang ? ' active' : '');
+                        a.className = 'dropdown-item' + (code === currentLang ? ' active' : '');
                         a.href = '#';
                         a.setAttribute('data-lang', code);
                         a.textContent = info.flag + ' ' + info.nativeName;
+                        
+                        // Add click event directly
+                        a.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            switchLanguage(code);
+                        });
+                        
                         li.appendChild(a);
                         languageMenu.appendChild(li);
                     }
                 }
                 
-                // Mobile select
+                // Mobile select - with change event
                 if (mobileSelect) {
                     mobileSelect.innerHTML = '';
                     for (const [code, info] of Object.entries(availableLanguages)) {
@@ -261,6 +296,11 @@
                         if (code === currentLang) option.selected = true;
                         mobileSelect.appendChild(option);
                     }
+                    
+                    // Add change event
+                    mobileSelect.addEventListener('change', function() {
+                        switchLanguage(this.value);
+                    });
                 }
                 
                 // Update display
