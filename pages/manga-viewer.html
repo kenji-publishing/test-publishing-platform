@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manga Viewer - Publisher</title>
+    <title data-i18n="mangaViewer.pageTitle">Manga Viewer - Publisher</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="../css/mobile-fixes.css" rel="stylesheet">
@@ -202,10 +202,10 @@
                 </div>
                 <div class="d-flex gap-2">
                     <button class="btn btn-outline-light btn-sm" onclick="toggleFullscreen()">
-                        <i class="fas fa-expand"></i> <span class="d-none d-md-inline">Fullscreen</span>
+                        <i class="fas fa-expand"></i> <span class="d-none d-md-inline" data-i18n="mangaViewer.fullscreen">Fullscreen</span>
                     </button>
                     <button class="btn btn-outline-light btn-sm" onclick="showThumbnails()">
-                        <i class="fas fa-th"></i> <span class="d-none d-md-inline">Pages</span>
+                        <i class="fas fa-th"></i> <span class="d-none d-md-inline" data-i18n="mangaViewer.pages">Pages</span>
                     </button>
                     <!-- Notification Bell -->
                     <a href="notifications.html" class="btn btn-outline-light btn-sm notification-btn" title="通知" id="notificationBellContainer">
@@ -213,7 +213,7 @@
                         <span id="notificationBadge" class="badge rounded-pill bg-danger notification-badge" style="display: none;">0</span>
                     </a>
                     <a href="dashboard.html" class="btn btn-outline-light btn-sm">
-                        <i class="fas fa-times"></i> <span class="d-none d-md-inline">Close</span>
+                        <i class="fas fa-times"></i> <span class="d-none d-md-inline" data-i18n="mangaViewer.close">Close</span>
                     </a>
                 </div>
             </div>
@@ -224,7 +224,7 @@
             <!-- Loading indicator (shown initially) -->
             <div class="page-loading" id="pageLoading">
                 <div class="spinner"></div>
-                <p>Loading page...</p>
+                <p data-i18n="mangaViewer.loadingPage">Loading page...</p>
             </div>
             
             <!-- Manga page with lazy loading -->
@@ -257,13 +257,13 @@
         <div class="viewer-controls">
             <div class="reading-mode-switch">
                 <button class="mode-btn active" id="ltrBtn" onclick="setReadingMode('ltr')">
-                    <i class="fas fa-arrow-right"></i> <span class="d-none d-sm-inline">Left to Right</span>
+                    <i class="fas fa-arrow-right"></i> <span class="d-none d-sm-inline" data-i18n="mangaViewer.leftToRight">Left to Right</span>
                 </button>
                 <button class="mode-btn" id="rtlBtn" onclick="setReadingMode('rtl')">
-                    <i class="fas fa-arrow-left"></i> <span class="d-none d-sm-inline">Right to Left</span>
+                    <i class="fas fa-arrow-left"></i> <span class="d-none d-sm-inline" data-i18n="mangaViewer.rightToLeft">Right to Left</span>
                 </button>
                 <button class="mode-btn" id="verticalBtn" onclick="setReadingMode('vertical')">
-                    <i class="fas fa-arrow-down"></i> <span class="d-none d-sm-inline">Vertical</span>
+                    <i class="fas fa-arrow-down"></i> <span class="d-none d-sm-inline" data-i18n="mangaViewer.vertical">Vertical</span>
                 </button>
             </div>
 
@@ -293,9 +293,20 @@
         </div>
     </div>
 
+    <script src="../js/translations.js"></script>
     <script src="../js/lazy-loader.js"></script>
     <script>
         // =====================================================
+        // =====================================================
+        // Translation Functions
+        // =====================================================
+        function applyTranslations() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                el.textContent = t(key);
+            });
+            document.title = t('mangaViewer.pageTitle');
+        }
         // Configuration
         // =====================================================
         const totalPages = 24;
@@ -321,6 +332,7 @@
         // Initialization
         // =====================================================
         document.addEventListener('DOMContentLoaded', function() {
+            applyTranslations();
             initThumbnails();
             loadPage(1);
             preloadPages(1);
@@ -359,7 +371,7 @@
                 img.onerror = function() {
                     loading.innerHTML = `
                         <i class="fas fa-exclamation-triangle fa-3x text-warning"></i>
-                        <p>Failed to load page. <a href="#" onclick="loadPage(${pageNum})" class="text-info">Retry</a></p>
+                        <p>${t('mangaViewer.loadFailed')} <a href="#" onclick="loadPage(${pageNum})" class="text-info">${t('mangaViewer.retry')}</a></p>
                     `;
                 };
                 img.src = url;
@@ -522,7 +534,7 @@
             
             if (mode === 'vertical') {
                 // Switch to vertical scrolling mode (future implementation)
-                alert('Vertical scrolling mode (Webtoon style) - Coming soon!');
+                alert(t('mangaViewer.verticalComingSoon'));
             }
         }
 
