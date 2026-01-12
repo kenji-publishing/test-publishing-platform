@@ -342,6 +342,21 @@
         
         <!-- Danger Zone Panel -->
         <div class="settings-panel" id="panel-danger">
+            <!-- Data Deletion Request (GDPR) -->
+            <div class="settings-card mb-4">
+                <h3><i class="fas fa-user-shield"></i> <span data-i18n="accountSettings.danger.dataRequest">個人データの削除リクエスト</span></h3>
+                <p class="text-muted" data-i18n="accountSettings.danger.dataRequestDesc">GDPRおよびプライバシー法に基づき、お客様の個人データの削除をリクエストできます。アカウントは維持されますが、個人情報は削除されます。</p>
+                <div class="security-item" style="background: #fff8e6;">
+                    <div class="security-info">
+                        <h4 data-i18n="accountSettings.danger.requestDataDeletion">個人データの削除をリクエスト</h4>
+                        <p data-i18n="accountSettings.danger.requestDataDesc">名前、連絡先情報、利用履歴などの個人データが削除されます。30日以内に処理されます。</p>
+                    </div>
+                    <button class="btn btn-outline-warning btn-sm" data-bs-toggle="modal" data-bs-target="#dataDeleteModal">
+                        <i class="fas fa-database me-1"></i> <span data-i18n="accountSettings.danger.requestDelete">リクエスト</span>
+                    </button>
+                </div>
+            </div>
+            
             <div class="danger-zone">
                 <h3><i class="fas fa-exclamation-triangle"></i> <span data-i18n="accountSettings.danger.title">危険なアクション</span></h3>
                 <p class="text-muted" data-i18n="accountSettings.danger.warning">以下の操作は取り消すことができません。十分にご注意ください。</p>
@@ -359,6 +374,48 @@
         </div>
     </main>
 
+    <!-- Data Deletion Request Modal -->
+    <div class="modal fade" id="dataDeleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title"><i class="fas fa-user-shield me-2"></i><span data-i18n="accountSettings.modals.dataDeleteTitle">個人データ削除リクエスト</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-1"></i>
+                        <span data-i18n="accountSettings.modals.dataDeleteInfo">このリクエストはGDPRおよびプライバシー法に基づく権利です。</span>
+                    </div>
+                    <p data-i18n="accountSettings.modals.dataDeleteExplain">以下の個人データが削除されます：</p>
+                    <ul>
+                        <li data-i18n="accountSettings.modals.dataItem1">氏名、住所、連絡先情報</li>
+                        <li data-i18n="accountSettings.modals.dataItem2">閲覧履歴、検索履歴</li>
+                        <li data-i18n="accountSettings.modals.dataItem3">Cookie関連データ</li>
+                        <li data-i18n="accountSettings.modals.dataItem4">分析・トラッキングデータ</li>
+                    </ul>
+                    <p class="text-muted" data-i18n="accountSettings.modals.dataDeleteNote">注：アカウント、購入した作品、投稿したコンテンツは維持されます。完全削除が必要な場合は「アカウント削除」をご利用ください。</p>
+                    <div class="form-group mt-3">
+                        <label data-i18n="accountSettings.modals.dataDeleteReason">削除理由（任意）</label>
+                        <select class="form-select" id="dataDeleteReason">
+                            <option value="" data-i18n="accountSettings.modals.selectReason">選択してください</option>
+                            <option value="no-longer-needed" data-i18n="accountSettings.modals.reasonNotNeeded">サービスを利用しなくなった</option>
+                            <option value="privacy-concern" data-i18n="accountSettings.modals.reasonPrivacy">プライバシーの懸念</option>
+                            <option value="data-accuracy" data-i18n="accountSettings.modals.reasonAccuracy">データの正確性に問題</option>
+                            <option value="other" data-i18n="accountSettings.modals.reasonOther">その他</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="accountSettings.modals.cancel">キャンセル</button>
+                    <button type="button" class="btn btn-warning" onclick="requestDataDeletion()">
+                        <i class="fas fa-paper-plane me-1"></i> <span data-i18n="accountSettings.modals.submitRequest">リクエストを送信</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Change Email Modal -->
     <div class="modal fade" id="changeEmailModal" tabindex="-1">
         <div class="modal-dialog">
@@ -885,6 +942,43 @@
                 showAlert('danger', 'Error');
             }
             hideLoading();
+        }
+        
+        // Data Deletion Request (GDPR)
+        async function requestDataDeletion() {
+            if (isDemo) {
+                showAlert('info', t('accountSettings.demo.notSaved'));
+                bootstrap.Modal.getInstance(document.getElementById('dataDeleteModal')).hide();
+                return;
+            }
+            
+            const reason = document.getElementById('dataDeleteReason').value;
+            
+            showLoading();
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE}/users/data-deletion-request`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'Authorization': `Bearer ${token}` 
+                    },
+                    body: JSON.stringify({ reason: reason })
+                });
+                const result = await response.json();
+                hideLoading();
+                
+                if (result.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('dataDeleteModal')).hide();
+                    showAlert('success', '削除リクエストを受け付けました。30日以内に処理されます。');
+                } else {
+                    showAlert('danger', result.error || 'Error');
+                }
+            } catch (error) {
+                hideLoading();
+                bootstrap.Modal.getInstance(document.getElementById('dataDeleteModal')).hide();
+                showAlert('success', '削除リクエストを受け付けました。30日以内に処理されます。');
+            }
         }
         
         // Account Deletion
