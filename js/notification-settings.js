@@ -1,6 +1,7 @@
 /**
  * Notification Settings Manager
  * Phase 9D: 通知設定ページの強化
+ * Phase 12-8d: 多言語対応
  * 
  * account-settings.htmlの通知設定を管理
  */
@@ -8,18 +9,63 @@
 // API Base URL
 const NOTIFICATION_API = 'http://localhost:3000/api/notifications';
 
-// 通知タイプの定義
+// 通知タイプの定義（翻訳キー対応）
 const NOTIFICATION_TYPES = [
-    { type: 'sale', label: '💰 売上通知', description: '作品が購入されたとき' },
-    { type: 'translation_complete', label: '🌐 翻訳完了通知', description: '依頼した翻訳が完了したとき' },
-    { type: 'comment', label: '💬 コメント通知', description: 'あなたの作品にコメントがあったとき' },
-    { type: 'feedback', label: '⭐ フィードバック通知', description: '読者からの評価やフィードバック' },
-    { type: 'ticket_reply', label: '🎧 サポート通知', description: '問い合わせへの返信があったとき' },
-    { type: 'system', label: '🔔 システム通知', description: 'メンテナンスや重要なお知らせ' }
+    { type: 'sale', labelKey: 'notificationManager.sale', descKey: 'notificationManager.saleDesc', icon: '💰' },
+    { type: 'translation_complete', labelKey: 'notificationManager.translationComplete', descKey: 'notificationManager.translationCompleteDesc', icon: '🌐' },
+    { type: 'comment', labelKey: 'notificationManager.comment', descKey: 'notificationManager.commentDesc', icon: '💬' },
+    { type: 'feedback', labelKey: 'notificationManager.feedback', descKey: 'notificationManager.feedbackDesc', icon: '⭐' },
+    { type: 'ticket_reply', labelKey: 'notificationManager.ticketReply', descKey: 'notificationManager.ticketReplyDesc', icon: '🎧' },
+    { type: 'system', labelKey: 'notificationManager.system', descKey: 'notificationManager.systemDesc', icon: '🔔' }
 ];
 
 // 設定の状態を保持
 let notificationPreferences = {};
+
+/**
+ * 翻訳取得ヘルパー
+ */
+function getNotifTranslation(key) {
+    if (typeof t === 'function') {
+        const result = t(key);
+        if (result && result !== key) return result;
+    }
+    // フォールバック用のデフォルト値
+    const fallbacks = {
+        'notificationManager.sale': 'Sales Notifications',
+        'notificationManager.saleDesc': 'When your work is purchased',
+        'notificationManager.translationComplete': 'Translation Complete',
+        'notificationManager.translationCompleteDesc': 'When requested translation is complete',
+        'notificationManager.comment': 'Comment Notifications',
+        'notificationManager.commentDesc': 'When your works receive comments',
+        'notificationManager.feedback': 'Feedback Notifications',
+        'notificationManager.feedbackDesc': 'Ratings and feedback from readers',
+        'notificationManager.ticketReply': 'Support Notifications',
+        'notificationManager.ticketReplyDesc': 'When there is a reply to your inquiry',
+        'notificationManager.system': 'System Notifications',
+        'notificationManager.systemDesc': 'Maintenance and important announcements',
+        'notificationManager.notificationCenter': 'Notification Center',
+        'notificationManager.notificationCenterDesc': 'View and manage unread notifications',
+        'notificationManager.open': 'Open',
+        'notificationManager.inAppNotifications': 'In-App Notifications',
+        'notificationManager.inAppNotificationsDesc': 'Notifications displayed in notification center',
+        'notificationManager.emailNotifications': 'Email Notifications',
+        'notificationManager.emailNotificationsDesc': 'Notifications received via email',
+        'notificationManager.bulkSettings': 'Bulk Settings',
+        'notificationManager.allInAppOn': 'All In-App ON',
+        'notificationManager.allInAppOff': 'All In-App OFF',
+        'notificationManager.allEmailOn': 'All Email ON',
+        'notificationManager.allEmailOff': 'All Email OFF',
+        'notificationManager.saveSettings': 'Save Settings',
+        'notificationManager.settingsNote': 'Settings take effect after saving. Important system notifications may be sent regardless of settings.',
+        'notificationManager.marketing': 'Marketing Emails',
+        'notificationManager.marketingDesc': 'News about features and campaigns',
+        'notificationManager.saved': 'Notification settings saved',
+        'notificationManager.allOnMessage': 'All notifications turned ON',
+        'notificationManager.allOffMessage': 'All notifications turned OFF'
+    };
+    return fallbacks[key] || key;
+}
 
 /**
  * 通知設定パネルを動的に生成
@@ -33,55 +79,55 @@ function initNotificationSettingsPanel() {
         <div class="settings-card" style="background: linear-gradient(135deg, #8b7355 0%, #a08060 100%); color: white;">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
-                    <h3 style="color: white; margin-bottom: 0.5rem;"><i class="fas fa-bell"></i> 通知センター</h3>
-                    <p style="margin: 0; opacity: 0.9;">未読の通知を確認・管理できます</p>
+                    <h3 style="color: white; margin-bottom: 0.5rem;"><i class="fas fa-bell"></i> ${getNotifTranslation('notificationManager.notificationCenter')}</h3>
+                    <p style="margin: 0; opacity: 0.9;">${getNotifTranslation('notificationManager.notificationCenterDesc')}</p>
                 </div>
                 <a href="notifications.html" class="btn btn-light">
-                    <i class="fas fa-external-link-alt me-1"></i> 開く
+                    <i class="fas fa-external-link-alt me-1"></i> ${getNotifTranslation('notificationManager.open')}
                 </a>
             </div>
         </div>
 
         <!-- In-App Notifications -->
         <div class="settings-card">
-            <h3><i class="fas fa-mobile-alt"></i> アプリ内通知</h3>
-            <p class="text-muted mb-3">通知センターに表示される通知の設定です</p>
+            <h3><i class="fas fa-mobile-alt"></i> ${getNotifTranslation('notificationManager.inAppNotifications')}</h3>
+            <p class="text-muted mb-3">${getNotifTranslation('notificationManager.inAppNotificationsDesc')}</p>
             <div id="inAppNotificationsList"></div>
         </div>
         
         <!-- Email Notifications -->
         <div class="settings-card">
-            <h3><i class="fas fa-envelope"></i> メール通知</h3>
-            <p class="text-muted mb-3">メールで受け取る通知の設定です</p>
+            <h3><i class="fas fa-envelope"></i> ${getNotifTranslation('notificationManager.emailNotifications')}</h3>
+            <p class="text-muted mb-3">${getNotifTranslation('notificationManager.emailNotificationsDesc')}</p>
             <div id="emailNotificationsList"></div>
         </div>
         
         <!-- Quick Actions -->
         <div class="settings-card">
-            <h3><i class="fas fa-sliders-h"></i> 一括設定</h3>
+            <h3><i class="fas fa-sliders-h"></i> ${getNotifTranslation('notificationManager.bulkSettings')}</h3>
             <div class="d-flex gap-2 flex-wrap">
                 <button class="btn btn-outline-secondary btn-sm" onclick="setAllNotifications(true, 'in_app')">
-                    <i class="fas fa-check-double me-1"></i> アプリ内すべてON
+                    <i class="fas fa-check-double me-1"></i> ${getNotifTranslation('notificationManager.allInAppOn')}
                 </button>
                 <button class="btn btn-outline-secondary btn-sm" onclick="setAllNotifications(false, 'in_app')">
-                    <i class="fas fa-times me-1"></i> アプリ内すべてOFF
+                    <i class="fas fa-times me-1"></i> ${getNotifTranslation('notificationManager.allInAppOff')}
                 </button>
                 <button class="btn btn-outline-secondary btn-sm" onclick="setAllNotifications(true, 'email')">
-                    <i class="fas fa-envelope me-1"></i> メールすべてON
+                    <i class="fas fa-envelope me-1"></i> ${getNotifTranslation('notificationManager.allEmailOn')}
                 </button>
                 <button class="btn btn-outline-secondary btn-sm" onclick="setAllNotifications(false, 'email')">
-                    <i class="fas fa-envelope-open me-1"></i> メールすべてOFF
+                    <i class="fas fa-envelope-open me-1"></i> ${getNotifTranslation('notificationManager.allEmailOff')}
                 </button>
             </div>
         </div>
         
         <button class="btn btn-primary-custom" onclick="saveAllNotificationSettings()">
-            <i class="fas fa-save me-1"></i> 設定を保存
+            <i class="fas fa-save me-1"></i> ${getNotifTranslation('notificationManager.saveSettings')}
         </button>
         
         <p class="text-muted mt-3 small">
             <i class="fas fa-info-circle me-1"></i>
-            通知設定は保存後に反映されます。重要なシステム通知は設定に関わらず送信される場合があります。
+            ${getNotifTranslation('notificationManager.settingsNote')}
         </p>
     `;
 
@@ -102,8 +148,8 @@ function renderNotificationItems() {
     inAppList.innerHTML = NOTIFICATION_TYPES.map(notif => `
         <div class="notification-item">
             <div class="notification-info">
-                <h4>${notif.label}</h4>
-                <p>${notif.description}</p>
+                <h4>${notif.icon} ${getNotifTranslation(notif.labelKey)}</h4>
+                <p>${getNotifTranslation(notif.descKey)}</p>
             </div>
             <div class="form-check form-switch">
                 <input class="form-check-input notification-pref" type="checkbox" 
@@ -117,8 +163,8 @@ function renderNotificationItems() {
     emailList.innerHTML = NOTIFICATION_TYPES.map(notif => `
         <div class="notification-item">
             <div class="notification-info">
-                <h4>${notif.label}</h4>
-                <p>${notif.description}</p>
+                <h4>${notif.icon} ${getNotifTranslation(notif.labelKey)}</h4>
+                <p>${getNotifTranslation(notif.descKey)}</p>
             </div>
             <div class="form-check form-switch">
                 <input class="form-check-input notification-pref" type="checkbox" 
@@ -132,8 +178,8 @@ function renderNotificationItems() {
     emailList.innerHTML += `
         <div class="notification-item">
             <div class="notification-info">
-                <h4>📣 マーケティングメール</h4>
-                <p>新機能やキャンペーンのお知らせ</p>
+                <h4>📣 ${getNotifTranslation('notificationManager.marketing')}</h4>
+                <p>${getNotifTranslation('notificationManager.marketingDesc')}</p>
             </div>
             <div class="form-check form-switch">
                 <input class="form-check-input notification-pref" type="checkbox" 
