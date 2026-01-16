@@ -523,6 +523,29 @@
     <script src="../js/language-switcher.js"></script>
 
     <script>
+        // 翻訳ヘルパー関数
+        function t(key) {
+            if (typeof translations === 'undefined') {
+                console.warn('Translations not loaded');
+                return key;
+            }
+            const lang = localStorage.getItem('preferredLanguage') || 'en';
+            const langData = translations[lang] || translations['en'];
+            if (!langData) {
+                return key;
+            }
+            const keys = key.split('.');
+            let value = langData;
+            for (const k of keys) {
+                if (value && typeof value === 'object' && k in value) {
+                    value = value[k];
+                } else {
+                    return key;
+                }
+            }
+            return typeof value === 'string' ? value : key;
+        }
+
         const API_BASE = 'http://localhost:3000/api';
         let currentUser = null;
         let backupCodes = [];
@@ -542,21 +565,21 @@
         };
         
         const DEMO_SECURITY_QUESTIONS = [
-            { id: 1, question: '子供の頃のペットの名前は？', order: 1 },
-            { id: 2, question: '初めて買った本のタイトルは？', order: 2 },
-            { id: 3, question: '一番好きな映画は？', order: 3 }
+            { id: 1, questionKey: 'accountSettings.security.question1', order: 1 },
+            { id: 2, questionKey: 'accountSettings.security.question2', order: 2 },
+            { id: 3, questionKey: 'accountSettings.security.question3', order: 3 }
         ];
         
         const DEMO_PURCHASES = [
-            { id: 'p001', work_title: '異世界転生物語 第1巻', amount: 500, purchased_at: '2025-11-15T10:30:00Z', payment_method: 'クレジットカード' },
-            { id: 'p002', work_title: 'プログラミング入門', amount: 1200, purchased_at: '2025-10-22T14:15:00Z', payment_method: 'PayPal' },
-            { id: 'p003', work_title: '短編小説集「夜明け」', amount: 300, purchased_at: '2025-09-05T09:00:00Z', payment_method: 'クレジットカード' }
+            { id: 'p001', work_title: '異世界転生物語 第1巻', amount: 500, purchased_at: '2025-11-15T10:30:00Z', paymentMethodKey: 'creditCard' },
+            { id: 'p002', work_title: 'プログラミング入門', amount: 1200, purchased_at: '2025-10-22T14:15:00Z', paymentMethodKey: 'paypal' },
+            { id: 'p003', work_title: '短編小説集「夜明け」', amount: 300, purchased_at: '2025-09-05T09:00:00Z', paymentMethodKey: 'creditCard' }
         ];
         
         const DEMO_LOGIN_HISTORY = [
-            { date: '2025-12-05 10:30', device: 'Chrome / Windows', location: '東京, 日本' },
-            { date: '2025-12-04 18:45', device: 'Safari / iPhone', location: '東京, 日本' },
-            { date: '2025-12-03 09:15', device: 'Chrome / Windows', location: '大阪, 日本' }
+            { date: '2025-12-05 10:30', device: 'Chrome / Windows', cityKey: 'tokyo', countryKey: 'japan' },
+            { date: '2025-12-04 18:45', device: 'Safari / iPhone', cityKey: 'tokyo', countryKey: 'japan' },
+            { date: '2025-12-03 09:15', device: 'Chrome / Windows', cityKey: 'osaka', countryKey: 'japan' }
         ];
         
         // Initialization
@@ -592,6 +615,32 @@
             setupTabs();
             setupDeleteConfirmation();
             handleHashNavigation();
+            
+            // 言語変更時にセキュリティデータを再読み込み
+            document.addEventListener('languageChanged', function() {
+                if (isDemo) {
+                    loadDemoSecurityData();
+                    loadDemoPurchases();
+                }
+            });
+            
+            // 言語セレクターを直接バインド（フォールバック）
+            document.querySelectorAll('#mobileLanguageSelect, #desktopLanguageSelect').forEach(function(select) {
+                select.addEventListener('change', function(e) {
+                    console.log('Language selector changed to:', this.value);
+                    const lang = this.value;
+                    if (typeof LanguageSwitcher !== 'undefined') {
+                        LanguageSwitcher.changeLanguage(lang);
+                    }
+                    // 動的コンテンツを再描画
+                    setTimeout(function() {
+                        if (isDemo) {
+                            loadDemoSecurityData();
+                            loadDemoPurchases();
+                        }
+                    }, 100);
+                });
+            });
         }
         
         function showLoginRequired() {
@@ -673,46 +722,59 @@
         function loadDemoSecurityData() {
             document.getElementById('backupCodeCount').textContent = '8';
             const container = document.getElementById('securityQuestionsList');
-            container.innerHTML = DEMO_SECURITY_QUESTIONS.map((q, i) => `
+            container.innerHTML = DEMO_SECURITY_QUESTIONS.map((q, i) => {
+                const questionText = t(q.questionKey);
+                return `
                 <div class="security-item">
                     <div class="security-info">
                         <h4>${t('accountSettings.security.question')} ${i + 1}</h4>
-                        <p>${q.question}</p>
+                        <p>${questionText}</p>
                     </div>
                 </div>
-            `).join('');
+            `;
+            }).join('');
             const emailQuestionsContainer = document.getElementById('emailSecurityQuestions');
-            emailQuestionsContainer.innerHTML = DEMO_SECURITY_QUESTIONS.map(q => `
+            emailQuestionsContainer.innerHTML = DEMO_SECURITY_QUESTIONS.map(q => {
+                const questionText = t(q.questionKey);
+                return `
                 <div class="form-group mb-3">
-                    <label>${q.question}</label>
+                    <label>${questionText}</label>
                     <input type="text" class="form-control security-answer" data-question-id="${q.id}" required>
                 </div>
-            `).join('');
+            `;
+            }).join('');
             const loginContainer = document.getElementById('loginHistory');
-            loginContainer.innerHTML = DEMO_LOGIN_HISTORY.map(log => `
+            loginContainer.innerHTML = DEMO_LOGIN_HISTORY.map(log => {
+                const city = t('accountSettings.purchases.locations.' + log.cityKey);
+                const country = t('accountSettings.purchases.locations.' + log.countryKey);
+                return `
                 <div class="security-item">
                     <div class="security-info">
                         <h4>${log.date}</h4>
-                        <p>${log.device} • ${log.location}</p>
+                        <p>${log.device} • ${city}, ${country}</p>
                     </div>
                 </div>
-            `).join('');
+            `;
+            }).join('');
         }
         
         function loadDemoPurchases() {
             const container = document.getElementById('purchasesList');
-            container.innerHTML = DEMO_PURCHASES.map(purchase => `
+            container.innerHTML = DEMO_PURCHASES.map(purchase => {
+                const paymentMethod = t('accountSettings.purchases.paymentMethods.' + purchase.paymentMethodKey);
+                return `
                 <div class="purchase-item">
                     <div class="purchase-info">
                         <h4>${purchase.work_title}</h4>
-                        <p>${new Date(purchase.purchased_at).toLocaleDateString('ja-JP')} • ${purchase.payment_method}</p>
+                        <p>${new Date(purchase.purchased_at).toLocaleDateString('ja-JP')} • ${paymentMethod}</p>
                     </div>
                     <span class="purchase-amount">¥${purchase.amount.toLocaleString()}</span>
                     <button class="btn btn-outline-secondary btn-sm" onclick="downloadReceipt('${purchase.id}')">
-                        <i class="fas fa-download me-1"></i> <span data-i18n="accountSettings.purchases.receipt">領収書</span>
+                        <i class="fas fa-download me-1"></i> ${t('accountSettings.purchases.receipt')}
                     </button>
                 </div>
-            `).join('');
+            `;
+            }).join('');
             if (typeof applyTranslations === 'function') applyTranslations();
         }
         
