@@ -4,276 +4,1958 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Revenue Sharing - Publisher</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="../css/style.css" rel="stylesheet">
+    <link href="../css/style-new.css" rel="stylesheet">
     <style>
+        html, body { overflow-x: hidden; max-width: 100%; }
+        
+        /* Page specific styles */
+        .revenue-hero {
+            background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark, #6B5344) 100%);
+            color: white;
+            padding: var(--spacing-2xl) 0;
+            margin-bottom: var(--spacing-xl);
+        }
+        .revenue-hero h1 { font-size: var(--font-size-2xl); margin-bottom: var(--spacing-sm); }
+        .revenue-hero p { opacity: 0.9; margin-bottom: 0; }
+        
         .revenue-card {
-            transition: transform 0.3s;
-            border: 2px solid #dee2e6;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            text-align: center;
+            transition: all var(--transition-fast);
+            height: 100%;
         }
         .revenue-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
         }
-        .percentage {
-            font-size: 3rem;
-            font-weight: bold;
-            color: #0d6efd;
+        .revenue-card i { font-size: 2.5rem; margin-bottom: var(--spacing-md); }
+        .revenue-card .percentage {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--color-accent);
+            margin: var(--spacing-sm) 0;
         }
-        .comparison-table {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 2rem;
+        .revenue-card .card-title { font-weight: 600; margin-bottom: var(--spacing-xs); }
+        .revenue-card .text-muted { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+        
+        .section-title {
+            font-size: var(--font-size-xl);
+            margin-bottom: var(--spacing-lg);
+            text-align: center;
+        }
+        
+        .bonus-card {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+        }
+        .bonus-card h4 { margin-bottom: var(--spacing-lg); }
+        .bonus-item { margin-bottom: var(--spacing-lg); }
+        .bonus-item:last-child { margin-bottom: 0; }
+        .bonus-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-sm);
+        }
+        .bonus-row strong { color: var(--color-accent); font-weight: 600; }
+        .progress { height: 24px; border-radius: var(--radius-md); background: var(--color-bg-hover); }
+        .progress-bar { 
+            background: var(--color-accent); 
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+        }
+        .progress-bar.bg-success { background: var(--color-success) !important; }
+        .progress-bar.bg-danger { background: var(--color-error) !important; }
+        
+        .tip-box {
+            background: rgba(139, 115, 85, 0.1);
+            border: 1px solid var(--color-accent);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+            margin-top: var(--spacing-lg);
+        }
+        .tip-box i { color: var(--color-accent); }
+        
+        .comparison-section {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+        }
+        .comparison-section .table { margin-bottom: 0; }
+        .comparison-section .table th {
+            background: var(--color-accent);
+            color: white;
+            font-weight: 500;
+        }
+        .comparison-section .table td { vertical-align: middle; }
+        .comparison-section .text-success { color: var(--color-success) !important; font-weight: 600; }
+        
+        .payment-card {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            text-align: center;
+            height: 100%;
+        }
+        .payment-card i { font-size: 2rem; color: var(--color-accent); margin-bottom: var(--spacing-md); }
+        .payment-card h5 { font-weight: 600; margin-bottom: var(--spacing-sm); }
+        .payment-card p { color: var(--color-text-secondary); font-size: var(--font-size-sm); margin-bottom: 0; }
+        
+        .cta-section {
+            text-align: center;
+            padding: var(--spacing-2xl) 0;
+        }
+        .cta-section h2 { margin-bottom: var(--spacing-md); }
+        .cta-section p { color: var(--color-text-secondary); margin-bottom: var(--spacing-lg); }
+        
+        /* Language content visibility */
+        .lang-content { display: none; }
+        .lang-content.active { display: block; }
+        
+        /* RTL Support */
+        [dir="rtl"] .bonus-row { flex-direction: row-reverse; }
+        [dir="rtl"] .table { text-align: right; }
+        
+        /* Font families for specific languages */
+        .lang-content[data-lang="ja"] { font-family: 'Noto Sans JP', sans-serif; }
+        .lang-content[data-lang="zh"] { font-family: 'Noto Sans SC', sans-serif; }
+        .lang-content[data-lang="ko"] { font-family: 'Noto Sans KR', sans-serif; }
+        .lang-content[data-lang="ar"] { font-family: 'Noto Sans Arabic', sans-serif; }
+        
+        @media (max-width: 768px) {
+            .revenue-hero { padding: var(--spacing-xl) 0; }
+            .revenue-hero h1 { font-size: var(--font-size-xl); }
+            .revenue-card .percentage { font-size: 2rem; }
         }
     </style>
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
         <div class="container">
             <a class="navbar-brand" href="../index.html">
                 <i class="fas fa-book-open"></i> Publisher
             </a>
+            <div class="navbar-lang-selector d-lg-none">
+                <select class="language-selector" id="languageSelectorMobile" onchange="changeLanguage(this.value)">
+                    <option value="en">🇬🇧 EN</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="es">🇪🇸 ES</option>
+                    <option value="fr">🇫🇷 FR</option>
+                    <option value="de">🇩🇪 DE</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="ar">🇸🇦 عربي</option>
+                    <option value="pt">🇧🇷 PT</option>
+                </select>
+            </div>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" href="revenue-sharing.html">Revenue Sharing</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="upload.html">Upload Work</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="dashboard.html">Dashboard</a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-globe"></i> <span id="currentLang">EN</span>
+                        <a class="nav-link" href="dashboard.html">
+                            <i class="fas fa-th-large me-1"></i><span id="navDashboard">Dashboard</span>
                         </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item lang-option" href="#" data-lang="en">English</a></li>
-                            <li><a class="dropdown-item lang-option" href="#" data-lang="es">Español</a></li>
-                            <li><a class="dropdown-item lang-option" href="#" data-lang="de">Deutsch</a></li>
-                            <li><a class="dropdown-item lang-option" href="#" data-lang="fr">Français</a></li>
-                            <li><a class="dropdown-item lang-option" href="#" data-lang="ja">日本語</a></li>
-                            <li><a class="dropdown-item lang-option" href="#" data-lang="zh">中文</a></li>
-                        </ul>
                     </li>
                 </ul>
+                <div class="d-flex align-items-center gap-3">
+                    <select class="language-selector d-none d-lg-block" id="languageSelector" onchange="changeLanguage(this.value)">
+                        <option value="en">🇬🇧 EN</option>
+                        <option value="ja">🇯🇵 日本語</option>
+                        <option value="zh">🇨🇳 中文</option>
+                        <option value="es">🇪🇸 ES</option>
+                        <option value="fr">🇫🇷 FR</option>
+                        <option value="de">🇩🇪 DE</option>
+                        <option value="ko">🇰🇷 한국어</option>
+                        <option value="ar">🇸🇦 عربي</option>
+                        <option value="pt">🇧🇷 PT</option>
+                    </select>
+                </div>
             </div>
         </div>
     </nav>
 
-    <!-- Header -->
-    <section class="py-5 bg-primary text-white">
-        <div class="container">
-            <h1 class="display-4">Fair & Transparent Revenue Sharing</h1>
-            <p class="lead">We believe creators should earn what they deserve. Here's our transparent revenue model.</p>
-        </div>
-    </section>
+    <!-- ========== ENGLISH ========== -->
+    <div class="lang-content active" data-lang="en">
+        <section class="revenue-hero">
+            <div class="container">
+                <h1><i class="fas fa-coins me-2"></i>Fair & Transparent Revenue Sharing</h1>
+                <p>We believe creators should earn what they deserve. Here's our transparent revenue model.</p>
+            </div>
+        </section>
 
-    <!-- Standard Distribution -->
-    <section class="py-5">
-        <div class="container">
-            <h2 class="text-center mb-5">Standard Revenue Distribution</h2>
-            <div class="row g-4">
-                <div class="col-md-3">
-                    <div class="card revenue-card h-100 text-center">
-                        <div class="card-body">
-                            <i class="fas fa-pen-fancy fa-3x text-primary mb-3"></i>
+        <main class="container">
+            <section class="mb-5">
+                <h2 class="section-title">Standard Revenue Distribution</h2>
+                <div class="row g-4">
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-pen-fancy text-accent"></i>
                             <h5 class="card-title">Author</h5>
                             <div class="percentage">40%</div>
                             <p class="text-muted">Original creator</p>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card revenue-card h-100 text-center">
-                        <div class="card-body">
-                            <i class="fas fa-language fa-3x text-success mb-3"></i>
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-language text-success"></i>
                             <h5 class="card-title">Translator</h5>
                             <div class="percentage">20%</div>
                             <p class="text-muted">Language expert</p>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card revenue-card h-100 text-center">
-                        <div class="card-body">
-                            <i class="fas fa-edit fa-3x text-info mb-3"></i>
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-edit text-info"></i>
                             <h5 class="card-title">Editor</h5>
                             <div class="percentage">10%</div>
                             <p class="text-muted">Quality assurance</p>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card revenue-card h-100 text-center">
-                        <div class="card-body">
-                            <i class="fas fa-server fa-3x text-warning mb-3"></i>
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-server text-warning"></i>
                             <h5 class="card-title">Platform</h5>
                             <div class="percentage">30%</div>
                             <p class="text-muted">Infrastructure & support</p>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </section>
+            </section>
 
-    <!-- Multi-Role Bonuses -->
-    <section class="py-5 bg-light">
-        <div class="container">
-            <h2 class="text-center mb-5">Maximize Your Earnings</h2>
-            <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    <div class="card shadow">
-                        <div class="card-body p-4">
-                            <h4 class="mb-4">When You Handle Multiple Roles:</h4>
-                            <div class="mb-4">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <span><i class="fas fa-check-circle text-success"></i> Author + Translator</span>
-                                    <strong class="text-primary">60%</strong>
+            <section class="mb-5">
+                <h2 class="section-title">Maximize Your Earnings</h2>
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="bonus-card">
+                            <h4>When You Handle Multiple Roles:</h4>
+                            <div class="bonus-item">
+                                <div class="bonus-row">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>Author + Translator</span>
+                                    <strong>60%</strong>
                                 </div>
-                                <div class="progress mb-3" style="height: 30px;">
-                                    <div class="progress-bar" role="progressbar" style="width: 60%" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100">60%</div>
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: 60%">60%</div>
                                 </div>
                             </div>
-                            <div class="mb-4">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <span><i class="fas fa-check-circle text-success"></i> Author + Editor</span>
-                                    <strong class="text-primary">50%</strong>
+                            <div class="bonus-item">
+                                <div class="bonus-row">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>Author + Editor</span>
+                                    <strong>50%</strong>
                                 </div>
-                                <div class="progress mb-3" style="height: 30px;">
-                                    <div class="progress-bar bg-success" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">50%</div>
-                                </div>
-                            </div>
-                            <div class="mb-4">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <span><i class="fas fa-check-circle text-success"></i> Author + Translator + Editor</span>
-                                    <strong class="text-danger">70%</strong>
-                                </div>
-                                <div class="progress mb-3" style="height: 30px;">
-                                    <div class="progress-bar bg-danger" role="progressbar" style="width: 70%" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100">70%</div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-success" style="width: 50%">50%</div>
                                 </div>
                             </div>
-                            <div class="alert alert-info mt-4">
-                                <i class="fas fa-lightbulb"></i> <strong>Pro Tip:</strong> Use our free AI translation tool and edit the results yourself to maximize your earnings!
+                            <div class="bonus-item">
+                                <div class="bonus-row">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>Author + Translator + Editor</span>
+                                    <strong>70%</strong>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-danger" style="width: 70%">70%</div>
+                                </div>
+                            </div>
+                            <div class="tip-box">
+                                <i class="fas fa-lightbulb me-2"></i>
+                                <strong>Pro Tip:</strong> Use our free AI translation tool and edit the results yourself to maximize your earnings!
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </section>
+            </section>
 
-    <!-- Comparison with Traditional Publishing -->
-    <section class="py-5">
-        <div class="container">
-            <h2 class="text-center mb-5">How We Compare</h2>
-            <div class="comparison-table">
-                <table class="table table-striped table-hover">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Factor</th>
-                            <th>Traditional Publishing</th>
-                            <th>Publisher Platform</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>Author Royalty</strong></td>
-                            <td>10-15% of retail price</td>
-                            <td class="text-success"><strong>40-70%</strong> of revenue</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Advance Payment</strong></td>
-                            <td>$1,000 - $250,000 (with debt risk)</td>
-                            <td class="text-success"><strong>No advance, no debt</strong></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Rights Retention</strong></td>
-                            <td>Often transferred to publisher</td>
-                            <td class="text-success"><strong>You keep all rights</strong></td>
-                        </tr>
-                        <tr>
-                            <td><strong>International Distribution</strong></td>
-                            <td>Requires separate deals</td>
-                            <td class="text-success"><strong>Automatic in 6 languages</strong></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Time to Market</strong></td>
-                            <td>12-24 months</td>
-                            <td class="text-success"><strong>Immediate</strong></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Payment Frequency</strong></td>
-                            <td>Quarterly or semi-annually</td>
-                            <td class="text-success"><strong>Monthly</strong></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </section>
+            <section class="mb-5">
+                <h2 class="section-title">How We Compare</h2>
+                <div class="comparison-section">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Factor</th>
+                                    <th>Traditional Publishing</th>
+                                    <th>Publisher Platform</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Author Royalty</strong></td>
+                                    <td>10-15% of retail price</td>
+                                    <td class="text-success">40-70% of revenue</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Advance Payment</strong></td>
+                                    <td>$1,000 - $250,000 (with debt risk)</td>
+                                    <td class="text-success">No advance, no debt</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Rights Retention</strong></td>
+                                    <td>Often transferred to publisher</td>
+                                    <td class="text-success">You keep all rights</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>International Distribution</strong></td>
+                                    <td>Requires separate deals</td>
+                                    <td class="text-success">Automatic in 9 languages</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Time to Market</strong></td>
+                                    <td>12-24 months</td>
+                                    <td class="text-success">Immediate</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Payment Frequency</strong></td>
+                                    <td>Quarterly or semi-annually</td>
+                                    <td class="text-success">Monthly</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
 
-    <!-- Payment Details -->
-    <section class="py-5 bg-light">
-        <div class="container">
-            <h2 class="text-center mb-5">Payment Details</h2>
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="card h-100">
-                        <div class="card-body text-center">
-                            <i class="fas fa-calendar-alt fa-3x text-primary mb-3"></i>
+            <section class="mb-5">
+                <h2 class="section-title">Payment Details</h2>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="payment-card">
+                            <i class="fas fa-calendar-alt"></i>
                             <h5>Monthly Payments</h5>
                             <p>Receive your earnings every month, not quarterly or annually.</p>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card h-100">
-                        <div class="card-body text-center">
-                            <i class="fas fa-credit-card fa-3x text-success mb-3"></i>
+                    <div class="col-md-4">
+                        <div class="payment-card">
+                            <i class="fas fa-credit-card"></i>
                             <h5>Multiple Payment Options</h5>
                             <p>Stripe Connect supports bank transfers, cards, and international payments.</p>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card h-100">
-                        <div class="card-body text-center">
-                            <i class="fas fa-chart-line fa-3x text-info mb-3"></i>
+                    <div class="col-md-4">
+                        <div class="payment-card">
+                            <i class="fas fa-chart-line"></i>
                             <h5>Real-Time Tracking</h5>
                             <p>Monitor your earnings in real-time through your dashboard.</p>
                         </div>
                     </div>
                 </div>
+            </section>
+
+            <section class="cta-section">
+                <h2>Ready to Earn More?</h2>
+                <p>Join our platform and start maximizing your creative income today.</p>
+                <a href="register-author.html" class="btn btn-custom btn-lg">
+                    <i class="fas fa-user-plus me-2"></i>Register as Author
+                </a>
+            </section>
+        </main>
+
+        <footer class="footer-custom">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-0">&copy; 2025 Publisher. All rights reserved.</p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <a href="terms.html" class="text-muted me-3">Terms</a>
+                        <a href="privacy.html" class="text-muted">Privacy</a>
+                    </div>
+                </div>
             </div>
-        </div>
-    </section>
+        </footer>
+    </div>
 
-    <!-- CTA -->
-    <section class="py-5 text-center">
-        <div class="container">
-            <h2 class="mb-4">Ready to Earn More?</h2>
-            <p class="lead mb-4">Join our platform and start maximizing your creative income today.</p>
-            <a href="register-author.html" class="btn btn-primary btn-lg">Register as Author</a>
-        </div>
-    </section>
+    <!-- ========== JAPANESE ========== -->
+    <div class="lang-content" data-lang="ja">
+        <section class="revenue-hero">
+            <div class="container">
+                <h1><i class="fas fa-coins me-2"></i>公正で透明な収益分配</h1>
+                <p>クリエイターは正当な報酬を得るべきです。私たちの透明な収益モデルをご紹介します。</p>
+            </div>
+        </section>
 
-    <!-- Footer -->
-    <footer class="bg-dark text-white py-4">
-        <div class="container text-center">
-            <p class="mb-0">&copy; 2024 Publisher. All rights reserved.</p>
-        </div>
-    </footer>
+        <main class="container">
+            <section class="mb-5">
+                <h2 class="section-title">標準収益分配</h2>
+                <div class="row g-4">
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-pen-fancy text-accent"></i>
+                            <h5 class="card-title">著者</h5>
+                            <div class="percentage">40%</div>
+                            <p class="text-muted">オリジナルクリエイター</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-language text-success"></i>
+                            <h5 class="card-title">翻訳者</h5>
+                            <div class="percentage">20%</div>
+                            <p class="text-muted">言語の専門家</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-edit text-info"></i>
+                            <h5 class="card-title">編集者</h5>
+                            <div class="percentage">10%</div>
+                            <p class="text-muted">品質保証</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-server text-warning"></i>
+                            <h5 class="card-title">プラットフォーム</h5>
+                            <div class="percentage">30%</div>
+                            <p class="text-muted">インフラとサポート</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-5">
+                <h2 class="section-title">収益を最大化</h2>
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="bonus-card">
+                            <h4>複数の役割を担当する場合：</h4>
+                            <div class="bonus-item">
+                                <div class="bonus-row">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>著者 + 翻訳者</span>
+                                    <strong>60%</strong>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: 60%">60%</div>
+                                </div>
+                            </div>
+                            <div class="bonus-item">
+                                <div class="bonus-row">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>著者 + 編集者</span>
+                                    <strong>50%</strong>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-success" style="width: 50%">50%</div>
+                                </div>
+                            </div>
+                            <div class="bonus-item">
+                                <div class="bonus-row">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>著者 + 翻訳者 + 編集者</span>
+                                    <strong>70%</strong>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-danger" style="width: 70%">70%</div>
+                                </div>
+                            </div>
+                            <div class="tip-box">
+                                <i class="fas fa-lightbulb me-2"></i>
+                                <strong>ヒント：</strong> 無料のAI翻訳ツールを使って、自分で編集することで収益を最大化できます！
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-5">
+                <h2 class="section-title">従来の出版との比較</h2>
+                <div class="comparison-section">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>項目</th>
+                                    <th>従来の出版</th>
+                                    <th>Publisherプラットフォーム</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>著者の印税</strong></td>
+                                    <td>小売価格の10-15%</td>
+                                    <td class="text-success">収益の40-70%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>前払金</strong></td>
+                                    <td>$1,000 - $250,000（債務リスクあり）</td>
+                                    <td class="text-success">前払金なし、債務なし</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>権利保持</strong></td>
+                                    <td>出版社に譲渡されることが多い</td>
+                                    <td class="text-success">すべての権利を保持</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>国際配信</strong></td>
+                                    <td>別途契約が必要</td>
+                                    <td class="text-success">9言語で自動配信</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>市場投入までの時間</strong></td>
+                                    <td>12-24ヶ月</td>
+                                    <td class="text-success">即時</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>支払い頻度</strong></td>
+                                    <td>四半期または半年ごと</td>
+                                    <td class="text-success">毎月</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-5">
+                <h2 class="section-title">支払い詳細</h2>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="payment-card">
+                            <i class="fas fa-calendar-alt"></i>
+                            <h5>毎月支払い</h5>
+                            <p>四半期や年単位ではなく、毎月収益を受け取れます。</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="payment-card">
+                            <i class="fas fa-credit-card"></i>
+                            <h5>複数の支払いオプション</h5>
+                            <p>Stripe Connectで銀行振込、カード、国際送金に対応。</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="payment-card">
+                            <i class="fas fa-chart-line"></i>
+                            <h5>リアルタイム追跡</h5>
+                            <p>ダッシュボードでリアルタイムに収益を確認できます。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="cta-section">
+                <h2>より多く稼ぐ準備はできましたか？</h2>
+                <p>今日からプラットフォームに参加して、クリエイティブな収入を最大化しましょう。</p>
+                <a href="register-author.html" class="btn btn-custom btn-lg">
+                    <i class="fas fa-user-plus me-2"></i>著者として登録
+                </a>
+            </section>
+        </main>
+
+        <footer class="footer-custom">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-0">&copy; 2025 Publisher. All rights reserved.</p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <a href="terms.html" class="text-muted me-3">利用規約</a>
+                        <a href="privacy.html" class="text-muted">プライバシー</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ========== CHINESE ========== -->
+    <div class="lang-content" data-lang="zh">
+        <section class="revenue-hero">
+            <div class="container">
+                <h1><i class="fas fa-coins me-2"></i>公平透明的收益分配</h1>
+                <p>我们相信创作者应该获得应有的报酬。这是我们透明的收益模式。</p>
+            </div>
+        </section>
+
+        <main class="container">
+            <section class="mb-5">
+                <h2 class="section-title">标准收益分配</h2>
+                <div class="row g-4">
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-pen-fancy text-accent"></i>
+                            <h5 class="card-title">作者</h5>
+                            <div class="percentage">40%</div>
+                            <p class="text-muted">原创作者</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-language text-success"></i>
+                            <h5 class="card-title">翻译</h5>
+                            <div class="percentage">20%</div>
+                            <p class="text-muted">语言专家</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-edit text-info"></i>
+                            <h5 class="card-title">编辑</h5>
+                            <div class="percentage">10%</div>
+                            <p class="text-muted">质量保证</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-server text-warning"></i>
+                            <h5 class="card-title">平台</h5>
+                            <div class="percentage">30%</div>
+                            <p class="text-muted">基础设施和支持</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-5">
+                <h2 class="section-title">最大化您的收益</h2>
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="bonus-card">
+                            <h4>当您承担多个角色时：</h4>
+                            <div class="bonus-item">
+                                <div class="bonus-row">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>作者 + 翻译</span>
+                                    <strong>60%</strong>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: 60%">60%</div>
+                                </div>
+                            </div>
+                            <div class="bonus-item">
+                                <div class="bonus-row">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>作者 + 编辑</span>
+                                    <strong>50%</strong>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-success" style="width: 50%">50%</div>
+                                </div>
+                            </div>
+                            <div class="bonus-item">
+                                <div class="bonus-row">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>作者 + 翻译 + 编辑</span>
+                                    <strong>70%</strong>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-danger" style="width: 70%">70%</div>
+                                </div>
+                            </div>
+                            <div class="tip-box">
+                                <i class="fas fa-lightbulb me-2"></i>
+                                <strong>小贴士：</strong> 使用我们免费的AI翻译工具，自己编辑结果，最大化您的收益！
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-5">
+                <h2 class="section-title">与传统出版的比较</h2>
+                <div class="comparison-section">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>项目</th>
+                                    <th>传统出版</th>
+                                    <th>Publisher平台</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>作者版税</strong></td>
+                                    <td>零售价的10-15%</td>
+                                    <td class="text-success">收益的40-70%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>预付款</strong></td>
+                                    <td>$1,000 - $250,000（有债务风险）</td>
+                                    <td class="text-success">无预付款，无债务</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>版权保留</strong></td>
+                                    <td>通常转让给出版商</td>
+                                    <td class="text-success">保留所有权利</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>国际发行</strong></td>
+                                    <td>需要单独协议</td>
+                                    <td class="text-success">9种语言自动发行</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>上市时间</strong></td>
+                                    <td>12-24个月</td>
+                                    <td class="text-success">即时</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>支付频率</strong></td>
+                                    <td>季度或半年</td>
+                                    <td class="text-success">每月</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-5">
+                <h2 class="section-title">支付详情</h2>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="payment-card">
+                            <i class="fas fa-calendar-alt"></i>
+                            <h5>每月支付</h5>
+                            <p>每月收到您的收益，而不是季度或年度。</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="payment-card">
+                            <i class="fas fa-credit-card"></i>
+                            <h5>多种支付方式</h5>
+                            <p>Stripe Connect支持银行转账、信用卡和国际支付。</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="payment-card">
+                            <i class="fas fa-chart-line"></i>
+                            <h5>实时追踪</h5>
+                            <p>通过您的仪表板实时监控收益。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="cta-section">
+                <h2>准备好赚取更多了吗？</h2>
+                <p>今天就加入我们的平台，开始最大化您的创意收入。</p>
+                <a href="register-author.html" class="btn btn-custom btn-lg">
+                    <i class="fas fa-user-plus me-2"></i>注册成为作者
+                </a>
+            </section>
+        </main>
+
+        <footer class="footer-custom">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-0">&copy; 2025 Publisher. 保留所有权利。</p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <a href="terms.html" class="text-muted me-3">条款</a>
+                        <a href="privacy.html" class="text-muted">隐私</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ========== SPANISH ========== -->
+    <div class="lang-content" data-lang="es">
+        <section class="revenue-hero">
+            <div class="container">
+                <h1><i class="fas fa-coins me-2"></i>Distribución de Ingresos Justa y Transparente</h1>
+                <p>Creemos que los creadores deben ganar lo que merecen. Aquí está nuestro modelo de ingresos transparente.</p>
+            </div>
+        </section>
+
+        <main class="container">
+            <section class="mb-5">
+                <h2 class="section-title">Distribución Estándar de Ingresos</h2>
+                <div class="row g-4">
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-pen-fancy text-accent"></i>
+                            <h5 class="card-title">Autor</h5>
+                            <div class="percentage">40%</div>
+                            <p class="text-muted">Creador original</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-language text-success"></i>
+                            <h5 class="card-title">Traductor</h5>
+                            <div class="percentage">20%</div>
+                            <p class="text-muted">Experto en idiomas</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-edit text-info"></i>
+                            <h5 class="card-title">Editor</h5>
+                            <div class="percentage">10%</div>
+                            <p class="text-muted">Control de calidad</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-server text-warning"></i>
+                            <h5 class="card-title">Plataforma</h5>
+                            <div class="percentage">30%</div>
+                            <p class="text-muted">Infraestructura y soporte</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-5">
+                <h2 class="section-title">Maximiza tus Ganancias</h2>
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="bonus-card">
+                            <h4>Cuando asumes múltiples roles:</h4>
+                            <div class="bonus-item">
+                                <div class="bonus-row">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>Autor + Traductor</span>
+                                    <strong>60%</strong>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: 60%">60%</div>
+                                </div>
+                            </div>
+                            <div class="bonus-item">
+                                <div class="bonus-row">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>Autor + Editor</span>
+                                    <strong>50%</strong>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-success" style="width: 50%">50%</div>
+                                </div>
+                            </div>
+                            <div class="bonus-item">
+                                <div class="bonus-row">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>Autor + Traductor + Editor</span>
+                                    <strong>70%</strong>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-danger" style="width: 70%">70%</div>
+                                </div>
+                            </div>
+                            <div class="tip-box">
+                                <i class="fas fa-lightbulb me-2"></i>
+                                <strong>Consejo:</strong> ¡Usa nuestra herramienta de traducción con IA gratuita y edita los resultados tú mismo para maximizar tus ganancias!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-5">
+                <h2 class="section-title">Cómo nos Comparamos</h2>
+                <div class="comparison-section">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Factor</th>
+                                    <th>Publicación Tradicional</th>
+                                    <th>Plataforma Publisher</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Regalías del Autor</strong></td>
+                                    <td>10-15% del precio de venta</td>
+                                    <td class="text-success">40-70% de los ingresos</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Anticipo</strong></td>
+                                    <td>$1,000 - $250,000 (con riesgo de deuda)</td>
+                                    <td class="text-success">Sin anticipo, sin deuda</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Retención de Derechos</strong></td>
+                                    <td>A menudo transferidos al editor</td>
+                                    <td class="text-success">Conservas todos los derechos</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Distribución Internacional</strong></td>
+                                    <td>Requiere acuerdos separados</td>
+                                    <td class="text-success">Automática en 9 idiomas</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Tiempo de Lanzamiento</strong></td>
+                                    <td>12-24 meses</td>
+                                    <td class="text-success">Inmediato</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Frecuencia de Pago</strong></td>
+                                    <td>Trimestral o semestral</td>
+                                    <td class="text-success">Mensual</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-5">
+                <h2 class="section-title">Detalles de Pago</h2>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="payment-card">
+                            <i class="fas fa-calendar-alt"></i>
+                            <h5>Pagos Mensuales</h5>
+                            <p>Recibe tus ganancias cada mes, no trimestral o anualmente.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="payment-card">
+                            <i class="fas fa-credit-card"></i>
+                            <h5>Múltiples Opciones de Pago</h5>
+                            <p>Stripe Connect soporta transferencias bancarias, tarjetas y pagos internacionales.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="payment-card">
+                            <i class="fas fa-chart-line"></i>
+                            <h5>Seguimiento en Tiempo Real</h5>
+                            <p>Monitorea tus ganancias en tiempo real a través de tu panel de control.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="cta-section">
+                <h2>¿Listo para Ganar Más?</h2>
+                <p>Únete a nuestra plataforma y comienza a maximizar tus ingresos creativos hoy.</p>
+                <a href="register-author.html" class="btn btn-custom btn-lg">
+                    <i class="fas fa-user-plus me-2"></i>Registrarse como Autor
+                </a>
+            </section>
+        </main>
+
+        <footer class="footer-custom">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-0">&copy; 2025 Publisher. Todos los derechos reservados.</p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <a href="terms.html" class="text-muted me-3">Términos</a>
+                        <a href="privacy.html" class="text-muted">Privacidad</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ========== FRENCH ========== -->
+    <div class="lang-content" data-lang="fr">
+        <section class="revenue-hero">
+            <div class="container">
+                <h1><i class="fas fa-coins me-2"></i>Partage des Revenus Juste et Transparent</h1>
+                <p>Nous croyons que les créateurs méritent de gagner ce qu'ils méritent. Voici notre modèle de revenus transparent.</p>
+            </div>
+        </section>
+
+        <main class="container">
+            <section class="mb-5">
+                <h2 class="section-title">Distribution Standard des Revenus</h2>
+                <div class="row g-4">
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-pen-fancy text-accent"></i>
+                            <h5 class="card-title">Auteur</h5>
+                            <div class="percentage">40%</div>
+                            <p class="text-muted">Créateur original</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-language text-success"></i>
+                            <h5 class="card-title">Traducteur</h5>
+                            <div class="percentage">20%</div>
+                            <p class="text-muted">Expert linguistique</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-edit text-info"></i>
+                            <h5 class="card-title">Éditeur</h5>
+                            <div class="percentage">10%</div>
+                            <p class="text-muted">Assurance qualité</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-server text-warning"></i>
+                            <h5 class="card-title">Plateforme</h5>
+                            <div class="percentage">30%</div>
+                            <p class="text-muted">Infrastructure et support</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-5">
+                <h2 class="section-title">Maximisez vos Revenus</h2>
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="bonus-card">
+                            <h4>Lorsque vous assumez plusieurs rôles :</h4>
+                            <div class="bonus-item">
+                                <div class="bonus-row">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>Auteur + Traducteur</span>
+                                    <strong>60%</strong>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: 60%">60%</div>
+                                </div>
+                            </div>
+                            <div class="bonus-item">
+                                <div class="bonus-row">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>Auteur + Éditeur</span>
+                                    <strong>50%</strong>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-success" style="width: 50%">50%</div>
+                                </div>
+                            </div>
+                            <div class="bonus-item">
+                                <div class="bonus-row">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>Auteur + Traducteur + Éditeur</span>
+                                    <strong>70%</strong>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-danger" style="width: 70%">70%</div>
+                                </div>
+                            </div>
+                            <div class="tip-box">
+                                <i class="fas fa-lightbulb me-2"></i>
+                                <strong>Astuce :</strong> Utilisez notre outil de traduction IA gratuit et éditez les résultats vous-même pour maximiser vos revenus !
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-5">
+                <h2 class="section-title">Comment nous nous Comparons</h2>
+                <div class="comparison-section">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Facteur</th>
+                                    <th>Édition Traditionnelle</th>
+                                    <th>Plateforme Publisher</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Droits d'auteur</strong></td>
+                                    <td>10-15% du prix de vente</td>
+                                    <td class="text-success">40-70% des revenus</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Avance</strong></td>
+                                    <td>1 000 $ - 250 000 $ (avec risque de dette)</td>
+                                    <td class="text-success">Pas d'avance, pas de dette</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Conservation des droits</strong></td>
+                                    <td>Souvent transférés à l'éditeur</td>
+                                    <td class="text-success">Vous conservez tous les droits</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Distribution internationale</strong></td>
+                                    <td>Nécessite des accords séparés</td>
+                                    <td class="text-success">Automatique en 9 langues</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Délai de mise sur le marché</strong></td>
+                                    <td>12-24 mois</td>
+                                    <td class="text-success">Immédiat</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Fréquence de paiement</strong></td>
+                                    <td>Trimestriel ou semestriel</td>
+                                    <td class="text-success">Mensuel</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-5">
+                <h2 class="section-title">Détails de Paiement</h2>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="payment-card">
+                            <i class="fas fa-calendar-alt"></i>
+                            <h5>Paiements Mensuels</h5>
+                            <p>Recevez vos revenus chaque mois, pas trimestriellement ou annuellement.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="payment-card">
+                            <i class="fas fa-credit-card"></i>
+                            <h5>Options de Paiement Multiples</h5>
+                            <p>Stripe Connect prend en charge les virements bancaires, les cartes et les paiements internationaux.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="payment-card">
+                            <i class="fas fa-chart-line"></i>
+                            <h5>Suivi en Temps Réel</h5>
+                            <p>Suivez vos revenus en temps réel via votre tableau de bord.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="cta-section">
+                <h2>Prêt à Gagner Plus ?</h2>
+                <p>Rejoignez notre plateforme et commencez à maximiser vos revenus créatifs dès aujourd'hui.</p>
+                <a href="register-author.html" class="btn btn-custom btn-lg">
+                    <i class="fas fa-user-plus me-2"></i>S'inscrire en tant qu'Auteur
+                </a>
+            </section>
+        </main>
+
+        <footer class="footer-custom">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-0">&copy; 2025 Publisher. Tous droits réservés.</p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <a href="terms.html" class="text-muted me-3">Conditions</a>
+                        <a href="privacy.html" class="text-muted">Confidentialité</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ========== GERMAN ========== -->
+    <div class="lang-content" data-lang="de">
+        <section class="revenue-hero">
+            <div class="container">
+                <h1><i class="fas fa-coins me-2"></i>Faire und Transparente Einnahmenteilung</h1>
+                <p>Wir glauben, dass Kreative verdienen sollten, was sie verdienen. Hier ist unser transparentes Einnahmenmodell.</p>
+            </div>
+        </section>
+
+        <main class="container">
+            <section class="mb-5">
+                <h2 class="section-title">Standard-Einnahmenverteilung</h2>
+                <div class="row g-4">
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-pen-fancy text-accent"></i>
+                            <h5 class="card-title">Autor</h5>
+                            <div class="percentage">40%</div>
+                            <p class="text-muted">Originalschöpfer</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-language text-success"></i>
+                            <h5 class="card-title">Übersetzer</h5>
+                            <div class="percentage">20%</div>
+                            <p class="text-muted">Sprachexperte</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-edit text-info"></i>
+                            <h5 class="card-title">Lektor</h5>
+                            <div class="percentage">10%</div>
+                            <p class="text-muted">Qualitätssicherung</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-server text-warning"></i>
+                            <h5 class="card-title">Plattform</h5>
+                            <div class="percentage">30%</div>
+                            <p class="text-muted">Infrastruktur und Support</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-5">
+                <h2 class="section-title">Maximieren Sie Ihre Einnahmen</h2>
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="bonus-card">
+                            <h4>Wenn Sie mehrere Rollen übernehmen:</h4>
+                            <div class="bonus-item">
+                                <div class="bonus-row">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>Autor + Übersetzer</span>
+                                    <strong>60%</strong>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: 60%">60%</div>
+                                </div>
+                            </div>
+                            <div class="bonus-item">
+                                <div class="bonus-row">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>Autor + Lektor</span>
+                                    <strong>50%</strong>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-success" style="width: 50%">50%</div>
+                                </div>
+                            </div>
+                            <div class="bonus-item">
+                                <div class="bonus-row">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>Autor + Übersetzer + Lektor</span>
+                                    <strong>70%</strong>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-danger" style="width: 70%">70%</div>
+                                </div>
+                            </div>
+                            <div class="tip-box">
+                                <i class="fas fa-lightbulb me-2"></i>
+                                <strong>Tipp:</strong> Nutzen Sie unser kostenloses KI-Übersetzungstool und bearbeiten Sie die Ergebnisse selbst, um Ihre Einnahmen zu maximieren!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-5">
+                <h2 class="section-title">Wie wir uns Vergleichen</h2>
+                <div class="comparison-section">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Faktor</th>
+                                    <th>Traditionelles Verlagswesen</th>
+                                    <th>Publisher-Plattform</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Autorenhonorar</strong></td>
+                                    <td>10-15% des Verkaufspreises</td>
+                                    <td class="text-success">40-70% der Einnahmen</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Vorschuss</strong></td>
+                                    <td>1.000 $ - 250.000 $ (mit Schuldenrisiko)</td>
+                                    <td class="text-success">Kein Vorschuss, keine Schulden</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Rechtebehalt</strong></td>
+                                    <td>Oft an den Verlag übertragen</td>
+                                    <td class="text-success">Sie behalten alle Rechte</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Internationale Verbreitung</strong></td>
+                                    <td>Erfordert separate Vereinbarungen</td>
+                                    <td class="text-success">Automatisch in 9 Sprachen</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Markteinführungszeit</strong></td>
+                                    <td>12-24 Monate</td>
+                                    <td class="text-success">Sofort</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Zahlungshäufigkeit</strong></td>
+                                    <td>Vierteljährlich oder halbjährlich</td>
+                                    <td class="text-success">Monatlich</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-5">
+                <h2 class="section-title">Zahlungsdetails</h2>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="payment-card">
+                            <i class="fas fa-calendar-alt"></i>
+                            <h5>Monatliche Zahlungen</h5>
+                            <p>Erhalten Sie Ihre Einnahmen jeden Monat, nicht viertel- oder jährlich.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="payment-card">
+                            <i class="fas fa-credit-card"></i>
+                            <h5>Mehrere Zahlungsoptionen</h5>
+                            <p>Stripe Connect unterstützt Banküberweisungen, Karten und internationale Zahlungen.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="payment-card">
+                            <i class="fas fa-chart-line"></i>
+                            <h5>Echtzeit-Tracking</h5>
+                            <p>Überwachen Sie Ihre Einnahmen in Echtzeit über Ihr Dashboard.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="cta-section">
+                <h2>Bereit, mehr zu verdienen?</h2>
+                <p>Treten Sie unserer Plattform bei und beginnen Sie noch heute, Ihre kreativen Einnahmen zu maximieren.</p>
+                <a href="register-author.html" class="btn btn-custom btn-lg">
+                    <i class="fas fa-user-plus me-2"></i>Als Autor registrieren
+                </a>
+            </section>
+        </main>
+
+        <footer class="footer-custom">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-0">&copy; 2025 Publisher. Alle Rechte vorbehalten.</p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <a href="terms.html" class="text-muted me-3">AGB</a>
+                        <a href="privacy.html" class="text-muted">Datenschutz</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ========== KOREAN ========== -->
+    <div class="lang-content" data-lang="ko">
+        <section class="revenue-hero">
+            <div class="container">
+                <h1><i class="fas fa-coins me-2"></i>공정하고 투명한 수익 분배</h1>
+                <p>크리에이터는 마땅한 보상을 받아야 한다고 믿습니다. 여기 우리의 투명한 수익 모델이 있습니다.</p>
+            </div>
+        </section>
+
+        <main class="container">
+            <section class="mb-5">
+                <h2 class="section-title">표준 수익 분배</h2>
+                <div class="row g-4">
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-pen-fancy text-accent"></i>
+                            <h5 class="card-title">저자</h5>
+                            <div class="percentage">40%</div>
+                            <p class="text-muted">오리지널 크리에이터</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-language text-success"></i>
+                            <h5 class="card-title">번역자</h5>
+                            <div class="percentage">20%</div>
+                            <p class="text-muted">언어 전문가</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-edit text-info"></i>
+                            <h5 class="card-title">편집자</h5>
+                            <div class="percentage">10%</div>
+                            <p class="text-muted">품질 보증</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-server text-warning"></i>
+                            <h5 class="card-title">플랫폼</h5>
+                            <div class="percentage">30%</div>
+                            <p class="text-muted">인프라 및 지원</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-5">
+                <h2 class="section-title">수익을 최대화하세요</h2>
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="bonus-card">
+                            <h4>여러 역할을 담당할 때:</h4>
+                            <div class="bonus-item">
+                                <div class="bonus-row">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>저자 + 번역자</span>
+                                    <strong>60%</strong>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: 60%">60%</div>
+                                </div>
+                            </div>
+                            <div class="bonus-item">
+                                <div class="bonus-row">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>저자 + 편집자</span>
+                                    <strong>50%</strong>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-success" style="width: 50%">50%</div>
+                                </div>
+                            </div>
+                            <div class="bonus-item">
+                                <div class="bonus-row">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>저자 + 번역자 + 편집자</span>
+                                    <strong>70%</strong>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-danger" style="width: 70%">70%</div>
+                                </div>
+                            </div>
+                            <div class="tip-box">
+                                <i class="fas fa-lightbulb me-2"></i>
+                                <strong>팁:</strong> 무료 AI 번역 도구를 사용하고 직접 편집하여 수익을 최대화하세요!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-5">
+                <h2 class="section-title">기존 출판과의 비교</h2>
+                <div class="comparison-section">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>항목</th>
+                                    <th>기존 출판</th>
+                                    <th>Publisher 플랫폼</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>저자 인세</strong></td>
+                                    <td>소비자 가격의 10-15%</td>
+                                    <td class="text-success">수익의 40-70%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>선급</strong></td>
+                                    <td>$1,000 - $250,000 (부채 위험 있음)</td>
+                                    <td class="text-success">선급 없음, 부채 없음</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>권리 보유</strong></td>
+                                    <td>출판사에 이전되는 경우가 많음</td>
+                                    <td class="text-success">모든 권리 보유</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>국제 배급</strong></td>
+                                    <td>별도 계약 필요</td>
+                                    <td class="text-success">9개 언어로 자동 배급</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>출시 시간</strong></td>
+                                    <td>12-24개월</td>
+                                    <td class="text-success">즉시</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>지급 빈도</strong></td>
+                                    <td>분기별 또는 반기별</td>
+                                    <td class="text-success">매월</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-5">
+                <h2 class="section-title">결제 세부정보</h2>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="payment-card">
+                            <i class="fas fa-calendar-alt"></i>
+                            <h5>매월 지급</h5>
+                            <p>분기별이나 연간이 아닌 매월 수익을 받으세요.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="payment-card">
+                            <i class="fas fa-credit-card"></i>
+                            <h5>다양한 결제 옵션</h5>
+                            <p>Stripe Connect는 은행 송금, 카드, 국제 결제를 지원합니다.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="payment-card">
+                            <i class="fas fa-chart-line"></i>
+                            <h5>실시간 추적</h5>
+                            <p>대시보드에서 실시간으로 수익을 모니터링하세요.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="cta-section">
+                <h2>더 많이 벌 준비가 되셨나요?</h2>
+                <p>오늘 플랫폼에 가입하고 창의적인 수입을 최대화하세요.</p>
+                <a href="register-author.html" class="btn btn-custom btn-lg">
+                    <i class="fas fa-user-plus me-2"></i>저자로 등록
+                </a>
+            </section>
+        </main>
+
+        <footer class="footer-custom">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-0">&copy; 2025 Publisher. 모든 권리 보유.</p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <a href="terms.html" class="text-muted me-3">이용약관</a>
+                        <a href="privacy.html" class="text-muted">개인정보</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ========== ARABIC (RTL) ========== -->
+    <div class="lang-content" data-lang="ar" dir="rtl">
+        <section class="revenue-hero">
+            <div class="container">
+                <h1><i class="fas fa-coins me-2"></i>توزيع عادل وشفاف للإيرادات</h1>
+                <p>نؤمن بأن المبدعين يجب أن يكسبوا ما يستحقونه. إليك نموذج الإيرادات الشفاف لدينا.</p>
+            </div>
+        </section>
+
+        <main class="container">
+            <section class="mb-5">
+                <h2 class="section-title">التوزيع القياسي للإيرادات</h2>
+                <div class="row g-4">
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-pen-fancy text-accent"></i>
+                            <h5 class="card-title">المؤلف</h5>
+                            <div class="percentage">40%</div>
+                            <p class="text-muted">المبدع الأصلي</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-language text-success"></i>
+                            <h5 class="card-title">المترجم</h5>
+                            <div class="percentage">20%</div>
+                            <p class="text-muted">خبير اللغات</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-edit text-info"></i>
+                            <h5 class="card-title">المحرر</h5>
+                            <div class="percentage">10%</div>
+                            <p class="text-muted">ضمان الجودة</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-server text-warning"></i>
+                            <h5 class="card-title">المنصة</h5>
+                            <div class="percentage">30%</div>
+                            <p class="text-muted">البنية التحتية والدعم</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-5">
+                <h2 class="section-title">عظّم أرباحك</h2>
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="bonus-card">
+                            <h4>عندما تتولى أدوارًا متعددة:</h4>
+                            <div class="bonus-item">
+                                <div class="bonus-row">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>مؤلف + مترجم</span>
+                                    <strong>60%</strong>
+                                </div>
+                                <div class="progress" dir="ltr">
+                                    <div class="progress-bar" style="width: 60%">60%</div>
+                                </div>
+                            </div>
+                            <div class="bonus-item">
+                                <div class="bonus-row">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>مؤلف + محرر</span>
+                                    <strong>50%</strong>
+                                </div>
+                                <div class="progress" dir="ltr">
+                                    <div class="progress-bar bg-success" style="width: 50%">50%</div>
+                                </div>
+                            </div>
+                            <div class="bonus-item">
+                                <div class="bonus-row">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>مؤلف + مترجم + محرر</span>
+                                    <strong>70%</strong>
+                                </div>
+                                <div class="progress" dir="ltr">
+                                    <div class="progress-bar bg-danger" style="width: 70%">70%</div>
+                                </div>
+                            </div>
+                            <div class="tip-box">
+                                <i class="fas fa-lightbulb me-2"></i>
+                                <strong>نصيحة:</strong> استخدم أداة الترجمة بالذكاء الاصطناعي المجانية وقم بتحرير النتائج بنفسك لتعظيم أرباحك!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-5">
+                <h2 class="section-title">مقارنة مع النشر التقليدي</h2>
+                <div class="comparison-section">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>العامل</th>
+                                    <th>النشر التقليدي</th>
+                                    <th>منصة Publisher</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>عوائد المؤلف</strong></td>
+                                    <td>10-15% من سعر التجزئة</td>
+                                    <td class="text-success">40-70% من الإيرادات</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>السلفة</strong></td>
+                                    <td>1,000$ - 250,000$ (مع مخاطر الديون)</td>
+                                    <td class="text-success">بدون سلفة، بدون ديون</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>الاحتفاظ بالحقوق</strong></td>
+                                    <td>غالبًا تُنقل للناشر</td>
+                                    <td class="text-success">تحتفظ بجميع الحقوق</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>التوزيع الدولي</strong></td>
+                                    <td>يتطلب اتفاقيات منفصلة</td>
+                                    <td class="text-success">تلقائي بـ9 لغات</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>وقت الوصول للسوق</strong></td>
+                                    <td>12-24 شهر</td>
+                                    <td class="text-success">فوري</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>تكرار الدفع</strong></td>
+                                    <td>ربع سنوي أو نصف سنوي</td>
+                                    <td class="text-success">شهري</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-5">
+                <h2 class="section-title">تفاصيل الدفع</h2>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="payment-card">
+                            <i class="fas fa-calendar-alt"></i>
+                            <h5>مدفوعات شهرية</h5>
+                            <p>استلم أرباحك كل شهر، وليس ربع سنوي أو سنوي.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="payment-card">
+                            <i class="fas fa-credit-card"></i>
+                            <h5>خيارات دفع متعددة</h5>
+                            <p>Stripe Connect يدعم التحويلات البنكية والبطاقات والمدفوعات الدولية.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="payment-card">
+                            <i class="fas fa-chart-line"></i>
+                            <h5>تتبع فوري</h5>
+                            <p>راقب أرباحك في الوقت الفعلي من خلال لوحة التحكم.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="cta-section">
+                <h2>هل أنت مستعد لكسب المزيد؟</h2>
+                <p>انضم إلى منصتنا وابدأ في تعظيم دخلك الإبداعي اليوم.</p>
+                <a href="register-author.html" class="btn btn-custom btn-lg">
+                    <i class="fas fa-user-plus me-2"></i>سجل كمؤلف
+                </a>
+            </section>
+        </main>
+
+        <footer class="footer-custom">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-0">&copy; 2025 Publisher. جميع الحقوق محفوظة.</p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <a href="terms.html" class="text-muted me-3">الشروط</a>
+                        <a href="privacy.html" class="text-muted">الخصوصية</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ========== PORTUGUESE ========== -->
+    <div class="lang-content" data-lang="pt">
+        <section class="revenue-hero">
+            <div class="container">
+                <h1><i class="fas fa-coins me-2"></i>Distribuição de Receita Justa e Transparente</h1>
+                <p>Acreditamos que os criadores devem ganhar o que merecem. Aqui está nosso modelo de receita transparente.</p>
+            </div>
+        </section>
+
+        <main class="container">
+            <section class="mb-5">
+                <h2 class="section-title">Distribuição Padrão de Receita</h2>
+                <div class="row g-4">
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-pen-fancy text-accent"></i>
+                            <h5 class="card-title">Autor</h5>
+                            <div class="percentage">40%</div>
+                            <p class="text-muted">Criador original</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-language text-success"></i>
+                            <h5 class="card-title">Tradutor</h5>
+                            <div class="percentage">20%</div>
+                            <p class="text-muted">Especialista em idiomas</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-edit text-info"></i>
+                            <h5 class="card-title">Editor</h5>
+                            <div class="percentage">10%</div>
+                            <p class="text-muted">Garantia de qualidade</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="revenue-card">
+                            <i class="fas fa-server text-warning"></i>
+                            <h5 class="card-title">Plataforma</h5>
+                            <div class="percentage">30%</div>
+                            <p class="text-muted">Infraestrutura e suporte</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-5">
+                <h2 class="section-title">Maximize seus Ganhos</h2>
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="bonus-card">
+                            <h4>Quando você assume múltiplos papéis:</h4>
+                            <div class="bonus-item">
+                                <div class="bonus-row">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>Autor + Tradutor</span>
+                                    <strong>60%</strong>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: 60%">60%</div>
+                                </div>
+                            </div>
+                            <div class="bonus-item">
+                                <div class="bonus-row">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>Autor + Editor</span>
+                                    <strong>50%</strong>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-success" style="width: 50%">50%</div>
+                                </div>
+                            </div>
+                            <div class="bonus-item">
+                                <div class="bonus-row">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>Autor + Tradutor + Editor</span>
+                                    <strong>70%</strong>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-danger" style="width: 70%">70%</div>
+                                </div>
+                            </div>
+                            <div class="tip-box">
+                                <i class="fas fa-lightbulb me-2"></i>
+                                <strong>Dica:</strong> Use nossa ferramenta de tradução com IA gratuita e edite os resultados você mesmo para maximizar seus ganhos!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-5">
+                <h2 class="section-title">Como nos Comparamos</h2>
+                <div class="comparison-section">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Fator</th>
+                                    <th>Publicação Tradicional</th>
+                                    <th>Plataforma Publisher</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Royalties do Autor</strong></td>
+                                    <td>10-15% do preço de varejo</td>
+                                    <td class="text-success">40-70% da receita</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Adiantamento</strong></td>
+                                    <td>$1.000 - $250.000 (com risco de dívida)</td>
+                                    <td class="text-success">Sem adiantamento, sem dívida</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Retenção de Direitos</strong></td>
+                                    <td>Frequentemente transferidos para a editora</td>
+                                    <td class="text-success">Você mantém todos os direitos</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Distribuição Internacional</strong></td>
+                                    <td>Requer acordos separados</td>
+                                    <td class="text-success">Automática em 9 idiomas</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Tempo de Lançamento</strong></td>
+                                    <td>12-24 meses</td>
+                                    <td class="text-success">Imediato</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Frequência de Pagamento</strong></td>
+                                    <td>Trimestral ou semestral</td>
+                                    <td class="text-success">Mensal</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-5">
+                <h2 class="section-title">Detalhes de Pagamento</h2>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="payment-card">
+                            <i class="fas fa-calendar-alt"></i>
+                            <h5>Pagamentos Mensais</h5>
+                            <p>Receba seus ganhos todo mês, não trimestralmente ou anualmente.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="payment-card">
+                            <i class="fas fa-credit-card"></i>
+                            <h5>Múltiplas Opções de Pagamento</h5>
+                            <p>Stripe Connect suporta transferências bancárias, cartões e pagamentos internacionais.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="payment-card">
+                            <i class="fas fa-chart-line"></i>
+                            <h5>Rastreamento em Tempo Real</h5>
+                            <p>Monitore seus ganhos em tempo real através do seu painel.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="cta-section">
+                <h2>Pronto para Ganhar Mais?</h2>
+                <p>Junte-se à nossa plataforma e comece a maximizar sua renda criativa hoje.</p>
+                <a href="register-author.html" class="btn btn-custom btn-lg">
+                    <i class="fas fa-user-plus me-2"></i>Registrar como Autor
+                </a>
+            </section>
+        </main>
+
+        <footer class="footer-custom">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-0">&copy; 2025 Publisher. Todos os direitos reservados.</p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <a href="terms.html" class="text-muted me-3">Termos</a>
+                        <a href="privacy.html" class="text-muted">Privacidade</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/translations.js"></script>
-    <script src="../js/language-switcher.js"></script>
+    <script>
+        // Navigation text translations
+        const navTexts = {
+            'en': 'Dashboard',
+            'ja': 'ダッシュボード',
+            'zh': '仪表板',
+            'es': 'Panel',
+            'fr': 'Tableau de bord',
+            'de': 'Dashboard',
+            'ko': '대시보드',
+            'ar': 'لوحة التحكم',
+            'pt': 'Painel'
+        };
+
+        function changeLanguage(lang) {
+            // Update HTML dir attribute for RTL languages
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            document.documentElement.lang = lang;
+            
+            // Hide all language content
+            document.querySelectorAll('.lang-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Show selected language content
+            const selectedContent = document.querySelector(`.lang-content[data-lang="${lang}"]`);
+            if (selectedContent) {
+                selectedContent.classList.add('active');
+            } else {
+                document.querySelector('.lang-content[data-lang="en"]').classList.add('active');
+            }
+            
+            // Update navigation text
+            const navDashboard = document.getElementById('navDashboard');
+            if (navDashboard && navTexts[lang]) {
+                navDashboard.textContent = navTexts[lang];
+            }
+            
+            // Sync both selectors
+            document.getElementById('languageSelector').value = lang;
+            document.getElementById('languageSelectorMobile').value = lang;
+            
+            // Save preference
+            localStorage.setItem('preferredLanguage', lang);
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedLang = localStorage.getItem('preferredLanguage') || 'en';
+            document.getElementById('languageSelector').value = savedLang;
+            document.getElementById('languageSelectorMobile').value = savedLang;
+            changeLanguage(savedLang);
+        });
+    </script>
 </body>
 </html>

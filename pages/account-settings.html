@@ -982,28 +982,321 @@
         }
         
         async function downloadReceipt(purchaseId) {
-            if (isDemo) { showAlert('info', t('accountSettings.demo.notSaved')); return; }
-            showLoading();
+            if (isDemo) {
+                // デモモード: サンプル領収書を表示
+                const lang = localStorage.getItem('preferredLanguage') || 'ja';
+                const sampleReceipt = generateDemoReceipt(purchaseId, lang);
+                const newWindow = window.open('', '_blank');
+                newWindow.document.write(sampleReceipt);
+                newWindow.document.close();
+                return;
+            }
+            
+            // 本番モード: APIから領収書を取得して新しいウィンドウで開く
+            const lang = localStorage.getItem('preferredLanguage') || 'ja';
+            const token = localStorage.getItem('token');
+            const receiptUrl = `${API_BASE}/users/purchases/${purchaseId}/receipt?lang=${lang}`;
+            
+            // 新しいウィンドウで領収書を開く（認証付き）
             try {
-                const token = localStorage.getItem('token');
-                const response = await fetch(`${API_BASE}/users/purchases/${purchaseId}/receipt`, {
+                const response = await fetch(receiptUrl, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (response.ok) {
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `receipt-${purchaseId}.pdf`;
-                    a.click();
-                    window.URL.revokeObjectURL(url);
+                    const html = await response.text();
+                    const newWindow = window.open('', '_blank');
+                    newWindow.document.write(html);
+                    newWindow.document.close();
                 } else {
-                    showAlert('danger', 'Error');
+                    showAlert('danger', t('accountSettings.purchases.receiptError') || '領収書の取得に失敗しました');
                 }
             } catch (error) {
-                showAlert('danger', 'Error');
+                console.error('Receipt error:', error);
+                showAlert('danger', t('accountSettings.purchases.receiptError') || '領収書の取得に失敗しました');
             }
-            hideLoading();
+        }
+        
+        // デモ用領収書生成（9言語対応）
+        function generateDemoReceipt(purchaseId, lang) {
+            const purchase = DEMO_PURCHASES.find(p => p.id === purchaseId) || DEMO_PURCHASES[0];
+            
+            // 9言語の翻訳テキスト
+            const texts = {
+                ja: {
+                    title: '領収書',
+                    receiptNo: '領収書番号',
+                    date: '発行日',
+                    customer: 'お客様名',
+                    product: '商品名',
+                    payment: 'お支払い方法',
+                    total: '合計金額',
+                    thanks: 'ご購入ありがとうございます',
+                    print: '印刷 / PDFとして保存',
+                    type: '電子書籍',
+                    creditCard: 'クレジットカード',
+                    paypal: 'PayPal',
+                    demoUser: '山田 太郎 様',
+                    tagline: '世界中の読者と作家をつなぐ',
+                    fontFamily: "'Noto Sans JP', sans-serif",
+                    direction: 'ltr'
+                },
+                en: {
+                    title: 'Receipt',
+                    receiptNo: 'Receipt No.',
+                    date: 'Date',
+                    customer: 'Customer',
+                    product: 'Product',
+                    payment: 'Payment Method',
+                    total: 'Total',
+                    thanks: 'Thank you for your purchase',
+                    print: 'Print / Save as PDF',
+                    type: 'Digital Content',
+                    creditCard: 'Credit Card',
+                    paypal: 'PayPal',
+                    demoUser: 'John Smith',
+                    tagline: 'Connecting readers and authors worldwide',
+                    fontFamily: "'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif",
+                    direction: 'ltr'
+                },
+                zh: {
+                    title: '收据',
+                    receiptNo: '收据编号',
+                    date: '日期',
+                    customer: '客户名称',
+                    product: '商品名称',
+                    payment: '支付方式',
+                    total: '总金额',
+                    thanks: '感谢您的购买',
+                    print: '打印 / 保存为PDF',
+                    type: '电子书',
+                    creditCard: '信用卡',
+                    paypal: 'PayPal',
+                    demoUser: '张三',
+                    tagline: '连接全球读者与作者',
+                    fontFamily: "'Noto Sans SC', sans-serif",
+                    direction: 'ltr'
+                },
+                es: {
+                    title: 'Recibo',
+                    receiptNo: 'Número de Recibo',
+                    date: 'Fecha',
+                    customer: 'Cliente',
+                    product: 'Producto',
+                    payment: 'Método de Pago',
+                    total: 'Monto Total',
+                    thanks: 'Gracias por su compra',
+                    print: 'Imprimir / Guardar como PDF',
+                    type: 'Libro Digital',
+                    creditCard: 'Tarjeta de Crédito',
+                    paypal: 'PayPal',
+                    demoUser: 'Juan García',
+                    tagline: 'Conectando lectores y autores en todo el mundo',
+                    fontFamily: "'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif",
+                    direction: 'ltr'
+                },
+                fr: {
+                    title: 'Reçu',
+                    receiptNo: 'Numéro de Reçu',
+                    date: 'Date',
+                    customer: 'Client',
+                    product: 'Produit',
+                    payment: 'Mode de Paiement',
+                    total: 'Montant Total',
+                    thanks: 'Merci pour votre achat',
+                    print: 'Imprimer / Enregistrer en PDF',
+                    type: 'Livre Numérique',
+                    creditCard: 'Carte de Crédit',
+                    paypal: 'PayPal',
+                    demoUser: 'Jean Dupont',
+                    tagline: 'Connecter les lecteurs et les auteurs du monde entier',
+                    fontFamily: "'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif",
+                    direction: 'ltr'
+                },
+                de: {
+                    title: 'Quittung',
+                    receiptNo: 'Quittungsnummer',
+                    date: 'Datum',
+                    customer: 'Kunde',
+                    product: 'Produkt',
+                    payment: 'Zahlungsmethode',
+                    total: 'Gesamtbetrag',
+                    thanks: 'Vielen Dank für Ihren Kauf',
+                    print: 'Drucken / Als PDF speichern',
+                    type: 'E-Book',
+                    creditCard: 'Kreditkarte',
+                    paypal: 'PayPal',
+                    demoUser: 'Max Müller',
+                    tagline: 'Leser und Autoren weltweit verbinden',
+                    fontFamily: "'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif",
+                    direction: 'ltr'
+                },
+                ko: {
+                    title: '영수증',
+                    receiptNo: '영수증 번호',
+                    date: '발행일',
+                    customer: '고객명',
+                    product: '상품명',
+                    payment: '결제 방법',
+                    total: '총액',
+                    thanks: '구매해 주셔서 감사합니다',
+                    print: '인쇄 / PDF로 저장',
+                    type: '전자책',
+                    creditCard: '신용카드',
+                    paypal: 'PayPal',
+                    demoUser: '김민수 님',
+                    tagline: '전 세계 독자와 작가를 연결',
+                    fontFamily: "'Noto Sans KR', sans-serif",
+                    direction: 'ltr'
+                },
+                ar: {
+                    title: 'إيصال',
+                    receiptNo: 'رقم الإيصال',
+                    date: 'التاريخ',
+                    customer: 'العميل',
+                    product: 'المنتج',
+                    payment: 'طريقة الدفع',
+                    total: 'المبلغ الإجمالي',
+                    thanks: 'شكراً لشرائك',
+                    print: 'طباعة / حفظ كـ PDF',
+                    type: 'كتاب إلكتروني',
+                    creditCard: 'بطاقة ائتمان',
+                    paypal: 'PayPal',
+                    demoUser: 'أحمد محمد',
+                    tagline: 'ربط القراء والمؤلفين حول العالم',
+                    fontFamily: "'Noto Sans Arabic', sans-serif",
+                    direction: 'rtl'
+                },
+                pt: {
+                    title: 'Recibo',
+                    receiptNo: 'Número do Recibo',
+                    date: 'Data',
+                    customer: 'Cliente',
+                    product: 'Produto',
+                    payment: 'Método de Pagamento',
+                    total: 'Valor Total',
+                    thanks: 'Obrigado pela sua compra',
+                    print: 'Imprimir / Salvar como PDF',
+                    type: 'Livro Digital',
+                    creditCard: 'Cartão de Crédito',
+                    paypal: 'PayPal',
+                    demoUser: 'João Silva',
+                    tagline: 'Conectando leitores e autores em todo o mundo',
+                    fontFamily: "'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif",
+                    direction: 'ltr'
+                }
+            };
+            
+            const t = texts[lang] || texts['ja'];
+            const paymentText = purchase.paymentMethodKey === 'creditCard' ? t.creditCard : t.paypal;
+            
+            // 日付フォーマット（言語別）
+            const localeMap = {
+                ja: 'ja-JP', en: 'en-US', zh: 'zh-CN', es: 'es-ES',
+                fr: 'fr-FR', de: 'de-DE', ko: 'ko-KR', ar: 'ar-SA', pt: 'pt-BR'
+            };
+            const dateStr = new Date(purchase.purchased_at).toLocaleDateString(localeMap[lang] || 'ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
+            
+            // Google Fonts URL（言語別フォント）
+            const fontUrls = {
+                ja: 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap',
+                en: 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap',
+                zh: 'https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap',
+                es: 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap',
+                fr: 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap',
+                de: 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap',
+                ko: 'https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap',
+                ar: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap',
+                pt: 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap'
+            };
+            
+            // RTL対応のスタイル
+            const rtlStyles = t.direction === 'rtl' ? `
+                .info-row { flex-direction: row-reverse; }
+                .info-label { text-align: right; }
+                .info-value { text-align: left; }
+                .total-row { flex-direction: row-reverse; }
+            ` : '';
+            
+            return `<!DOCTYPE html>
+<html lang="${lang}" dir="${t.direction}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${t.title} - Publisher</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="${fontUrls[lang] || fontUrls['ja']}" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: ${t.fontFamily}; background: #f5f5f5; padding: 20px; color: #333; line-height: 1.6; direction: ${t.direction}; }
+        .receipt-container { max-width: 500px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); overflow: hidden; }
+        .receipt-header { background: linear-gradient(135deg, #8B7355 0%, #6B5344 100%); color: white; padding: 30px; text-align: center; }
+        .logo { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+        .receipt-title { font-size: 24px; font-weight: 600; margin-top: 10px; letter-spacing: 2px; }
+        .receipt-body { padding: 30px; }
+        .receipt-number { text-align: center; padding: 15px; background: #f9f7f5; border-radius: 8px; margin-bottom: 25px; }
+        .receipt-number-label { font-size: 12px; color: #888; margin-bottom: 4px; }
+        .receipt-number-value { font-size: 18px; font-weight: 600; color: #8B7355; font-family: 'Consolas', monospace; }
+        .info-section { margin-bottom: 25px; }
+        .info-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { color: #666; font-size: 14px; }
+        .info-value { font-weight: 500; }
+        .product-section { background: #f9f7f5; border-radius: 8px; padding: 20px; margin-bottom: 25px; }
+        .product-label { font-size: 12px; color: #888; margin-bottom: 8px; }
+        .product-name { font-size: 16px; font-weight: 600; }
+        .product-type { font-size: 12px; color: #8B7355; margin-top: 4px; }
+        .total-section { background: linear-gradient(135deg, #8B7355 0%, #6B5344 100%); border-radius: 8px; padding: 20px; color: white; margin-bottom: 25px; }
+        .total-row { display: flex; justify-content: space-between; align-items: center; }
+        .total-label { font-size: 16px; }
+        .total-amount { font-size: 28px; font-weight: 700; }
+        .receipt-footer { text-align: center; padding: 20px 30px 30px; border-top: 1px dashed #ddd; }
+        .thank-you { font-size: 14px; color: #8B7355; margin-bottom: 15px; }
+        .footer-text { font-size: 11px; color: #999; line-height: 1.8; }
+        .print-button { display: block; width: 100%; max-width: 500px; margin: 20px auto; padding: 15px; background: #8B7355; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; font-family: inherit; }
+        .print-button:hover { background: #6B5344; }
+        .demo-badge { background: #667eea; color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; margin-top: 10px; display: inline-block; }
+        ${rtlStyles}
+        @media print { body { background: white; padding: 0; } .receipt-container { box-shadow: none; } .print-button, .demo-badge { display: none; } }
+    </style>
+</head>
+<body>
+    <div class="receipt-container">
+        <div class="receipt-header">
+            <div class="logo">📚 Publisher</div>
+            <div class="receipt-title">${t.title}</div>
+            <div class="demo-badge">DEMO</div>
+        </div>
+        <div class="receipt-body">
+            <div class="receipt-number">
+                <div class="receipt-number-label">${t.receiptNo}</div>
+                <div class="receipt-number-value">RCP-${String(purchase.id).replace('p', '').padStart(8, '0')}</div>
+            </div>
+            <div class="info-section">
+                <div class="info-row"><span class="info-label">${t.date}</span><span class="info-value">${dateStr}</span></div>
+                <div class="info-row"><span class="info-label">${t.customer}</span><span class="info-value">${t.demoUser}</span></div>
+                <div class="info-row"><span class="info-label">${t.payment}</span><span class="info-value">${paymentText}</span></div>
+            </div>
+            <div class="product-section">
+                <div class="product-label">${t.product}</div>
+                <div class="product-name">${purchase.work_title}</div>
+                <div class="product-type">${t.type}</div>
+            </div>
+            <div class="total-section">
+                <div class="total-row">
+                    <span class="total-label">${t.total}</span>
+                    <span class="total-amount">¥${purchase.amount.toLocaleString()}</span>
+                </div>
+            </div>
+        </div>
+        <div class="receipt-footer">
+            <div class="thank-you">${t.thanks}</div>
+            <div class="footer-text">Publisher - ${t.tagline}<br>© 2025 Publisher. All rights reserved.</div>
+        </div>
+    </div>
+    <button class="print-button" onclick="window.print()">${t.print}</button>
+</body>
+</html>`;
         }
         
         // Data Deletion Request (GDPR)

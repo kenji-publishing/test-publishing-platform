@@ -1,6 +1,6 @@
 # Publisher Platform 引き継ぎドキュメント
 
-最終更新: 2026年1月4日
+最終更新: 2026年1月17日
 
 ---
 
@@ -88,273 +88,300 @@ https://github.com/kenji-publishing/test-publishing-platform
 | 12-4e | FAQ内容（質問・回答）のDB多言語対応（33件×9言語） | ✅ |
 | 12-5a | register-translator.html 多言語対応 | ✅ |
 | 12-5b | register-editor.html 多言語対応 | ✅ |
-| 12-5c | support/tickets.html 多言語対応・デザイン統一・デモチケット件名翻訳 | ✅ |
-| 12-6a～12-6i | 残りページの多言語対応（contact, troubleshoot, translators, feedback, browse, upload, reader） | ✅ |
+| 12-5c | support/tickets.html 多言語対応・デザイン統一 | ✅ |
+| 12-6a～12-6i | 残りページの多言語対応 | ✅ |
 | 12-7a | editor.html 多言語対応 | ✅ |
+| 12-7b～12-7d | register-author.html 多言語対応 | ✅ |
+| 12-7e | 4つの登録ページの言語セレクター統一 | ✅ |
+| 12-7f | translations.js 破損からの復旧 | ✅ |
+| 12-7g | manga-viewer.html 多言語対応 | ✅ |
+| 12-7h | manga-translator.html 多言語対応 | ✅ |
+| 12-8a | privacy.html 9言語対応完了 | ✅ |
+| 12-8b | privacy.html メールアドレス削除・リンク修正 | ✅ |
+| 12-8c | account-settings.html データ削除リクエスト機能 | ✅ |
+| 12-8d | translations.js GDPR翻訳キー追加（9言語） | ✅ |
+| 12-8e | translations.js notificationManager翻訳キー追加（9言語） | ✅ |
+| 12-9a | terms.html 9言語対応完了 | ✅ |
+| 12-9b | content-guidelines.html 9言語対応完了 | ✅ |
+| 12-9c | copyright-policy.html 9言語対応完了 | ✅ |
+| 12-9d | revenue-sharing.html 9言語対応・デザイン統一 | ✅ |
+| 12-9e | confirm-delete.html 9言語対応・デザイン統一 | ✅ |
+| 12-10 | 領収書機能（9言語対応） | ✅ |
 
-### 現在進行中
-
-| Phase | 内容 | 状態 |
-|-------|------|:----:|
-| 12-7 | 残りの未対応ページの多言語化（約9ページ） | 🔄 |
-
----
-
-## 5. 今日完了した作業（2026-01-04）
-
-### editor.html 多言語対応
-
-#### 実施内容
-
-1. **9言語対応の言語セレクター追加**
-   - ナビバーに言語セレクターを配置
-   - EN, 日本語, 中文, ES, FR, DE, 한국어, عربي, PT
-
-2. **uiTextオブジェクトで70+の翻訳キーを定義**
-   - ステータス（保存済み、保存中）
-   - エクスポートメニュー
-   - ツールバーボタン（元に戻す、やり直す、太字、斜体など）
-   - 検索と置換パネル
-   - コメントパネル
-   - 画像挿入モーダル
-   - フッター（語数、文字数、ページ数）
-   - アラートメッセージ
-
-3. **ドキュメントタイトルとエディター内テキストの多言語対応**
-   - 「無題のドキュメント」が言語変更時に更新
-   - 「タイトルを入力」と「ここから本文を書き始めてください...」も更新
-   - ユーザーが編集済みの場合は上書きしない仕組み
-
-4. **モバイルレスポンシブ対応**
-   - 900px以下：ナビバー折り返しレイアウト
-   - 480px以下：ボタンテキスト非表示（アイコンのみ）
-   - 言語セレクターのはみ出し問題を修正
-
-#### デバッグ作業
-
-| 問題 | 原因 | 解決方法 |
-|------|------|----------|
-| 言語切り替えが動作しない | JavaScriptの構文エラー（Unexpected end of input） | ファイルを完全に再作成 |
-| ドキュメントタイトルが翻訳されない | updateAllText()に処理がなかった | updateDefaultDocTitle()関数を追加 |
-| モバイルで言語セレクターがはみ出す | レスポンシブCSSがなかった | @media queryを追加 |
+### 🎉 Phase 12 多言語対応 完了！
 
 ---
 
-## 6. 次回の作業（再開方法）
+## 5. 今日の作業状況（2026-01-17）
 
-### 手順1: VSCodeを開く
-`C:\Projects\test-publishing-platform` フォルダを開く
+### 完了した作業
 
-### 手順2: 最新コードを取得
-ターミナルで以下を実行：
-```bash
-cd C:\Projects\test-publishing-platform
-git pull
+#### 1. revenue-sharing.html 9言語対応・デザイン統一 ✅
+- style-new.css ベースのデザインに統一
+- 9言語コンテンツ（収益分配表、計算例、FAQ）
+- 言語セレクター追加、RTL対応（アラビア語）
+- navbar-custom クラス適用
+
+#### 2. confirm-delete.html 9言語対応・デザイン統一 ✅
+- style-new.css ベースのデザインに統一
+- 9言語コンテンツ（削除確認メッセージ、警告、ボタン）
+- 言語セレクター追加、RTL対応（アラビア語）
+- navbar-custom クラス適用
+
+#### 3. 領収書機能（9言語対応）完全実装 ✅
+
+**バックエンド:**
+- `backend/services/receipt-generator.js` - 9言語対応の領収書HTMLジェネレーター
+- `backend/routes/users.js` - `/api/users/purchases/:purchaseId/receipt?lang=xx` エンドポイント
+
+**フロントエンド:**
+- `pages/account-settings.html` - `downloadReceipt()` 関数を9言語対応に更新
+- デモモード用の `generateDemoReceipt()` 関数追加（9言語対応）
+
+**領収書の機能:**
+- 選択中の言語で領収書を発行
+- 新しいウィンドウで表示
+- 「印刷 / PDFとして保存」ボタンでPDF保存可能
+- 言語別フォント対応（日本語: Noto Sans JP、中国語: Noto Sans SC、韓国語: Noto Sans KR、アラビア語: Noto Sans Arabic）
+- アラビア語RTL対応
+
+---
+
+## 6. 次回の作業
+
+### 🟡 優先度: 高 - GitHubにコミット
+
+以下の変更をコミット：
+1. revenue-sharing.html - 9言語対応・デザイン統一版
+2. confirm-delete.html - 9言語対応・デザイン統一版
+3. backend/services/receipt-generator.js - 新規作成（領収書生成サービス）
+4. backend/routes/users.js - 領収書エンドポイント更新
+5. account-settings.html - 領収書機能9言語対応
+
+### 🟢 優先度: 中 - Phase 13 計画
+
+Phase 12（多言語対応）が完了したため、次のフェーズを検討：
+- Phase 13a: 本番環境デプロイ準備
+- Phase 13b: セキュリティ強化
+- Phase 13c: パフォーマンス最適化
+- Phase 13d: 追加機能開発
+
+### 🟢 優先度: 低 - 動作確認
+
+- 全9言語で領収書発行をテスト
+- revenue-sharing.html の全言語表示確認
+- confirm-delete.html の全言語表示確認
+
+---
+
+## 7. 新しいChatでの開始方法
+
+### 方法1: このドキュメントをアップロード
+1. このドキュメント（publisher_handover_updated.md）をClaudeにアップロード
+2. 以下のように指示：
+
+```
+Phase 12が完了しました。
+次のフェーズ（本番環境デプロイ準備など）について相談したいです。
 ```
 
-### 手順3: 次のページの多言語対応を開始
-残り約9ページの中から優先度の高いものから対応
+### 方法2: GitHub MCPを使用
+1. Claude Desktopで新しいチャットを開始
+2. 以下のように指示：
 
-### 推奨する次の作業
-
-| 優先度 | ファイル | 理由 |
-|:------:|----------|------|
-| 高 | register-author.html | 著者登録は主要機能 |
-| 中 | manga-viewer.html | マンガビューアはユーザー向け機能 |
-| 低 | terms.html など | 法的ページは後回しでOK |
-
----
-
-## 7. 多言語対応済みページ一覧
-
-### Phase 12で対応したページ（19ページ+α）
-
-| ファイル | 言語セレクター | 多言語対応 | 状態 |
-|----------|:-------------:|:-------------:|:----:|
-| index.html | ✅ | ✅ | 完了 |
-| pages/login.html | ✅ | ✅ | 完了 |
-| pages/register.html | ✅ | ✅ | 完了 |
-| pages/dashboard.html | ✅ | ✅ | 完了 |
-| pages/notifications.html | ✅ | ✅ | 完了 |
-| pages/browse.html | ✅ | ✅ | 完了 |
-| pages/analytics.html | ✅ | ✅ | 完了 |
-| pages/checkout.html | ✅ | ✅ | 完了 |
-| pages/upload-work.html | ✅ | ✅ | 完了 |
-| pages/payment-success.html | ✅ | ✅ | 完了 |
-| pages/payment-cancel.html | ✅ | ✅ | 完了 |
-| pages/translation-status.html | ✅ | ✅ | 完了 |
-| pages/account-settings.html | ✅ | ✅ | 完了（12/29） |
-| pages/reader.html | ✅ | ✅ | 完了（12/29） |
-| pages/support/faq.html | ✅ | ✅ | 完了（12/29） |
-| pages/register-translator.html | ✅ | ✅ | 完了（1/1） |
-| pages/register-editor.html | ✅ | ✅ | 完了（1/1） |
-| pages/support/tickets.html | ✅ | ✅ | 完了（1/2） |
-| pages/support/contact.html | ✅ | ✅ | 完了（1/3） |
-| pages/support/troubleshoot.html | ✅ | ✅ | 完了（1/3） |
-| pages/translators/index.html | ✅ | ✅ | 完了（1/3） |
-| pages/feedback/index.html | ✅ | ✅ | 完了（1/3） |
-| pages/feedback/report.html | ✅ | ✅ | 完了（1/3） |
-| pages/editor.html | ✅ | ✅ | 完了（1/4） |
-
-### 未対応ページ一覧（残り約9ページ）
-
-| 優先度 | ファイル | 内容 |
-|:------:|----------|------|
-| 高 | register-author.html | 著者登録 |
-| 中 | manga-viewer.html | マンガビューア |
-| 中 | manga-translator.html | マンガ翻訳 |
-| 低 | terms.html | 利用規約 |
-| 低 | privacy.html | プライバシーポリシー |
-| 低 | content-guidelines.html | コンテンツガイドライン |
-| 低 | copyright-policy.html | 著作権ポリシー |
-| 低 | revenue-sharing.html | 収益分配説明 |
-| 低 | confirm-delete.html | 削除確認 |
-
-### 翻訳ファイル
-
-| ファイル | 説明 |
-|----------|------|
-| js/translations.js | 9言語の翻訳データ（UI全般）約109KB |
-| js/language-switcher.js | 言語切り替え機能 |
-| js/faq-data.js | FAQ多言語データ（フォールバック用） |
-
-### 対応言語（9言語）
-
-| コード | 言語 | フラグ |
-|--------|------|--------|
-| en | English | 🇬🇧 |
-| ja | 日本語 | 🇯🇵 |
-| zh | 中文 | 🇨🇳 |
-| es | Español | 🇪🇸 |
-| fr | Français | 🇫🇷 |
-| de | Deutsch | 🇩🇪 |
-| ko | 한국어 | 🇰🇷 |
-| ar | العربية | 🇸🇦 |
-| pt | Português | 🇧🇷 |
+```
+GitHub MCP と Filesystem MCPを使って、
+C:\Projects\test-publishing-platform の
+現在の状態を確認し、次の開発フェーズを提案してください。
+```
 
 ---
 
-## 8. 重要なファイル
+## 8. 多言語対応済みページ一覧
 
-### 多言語対応関連
+### ✅ 全ページ完了
 
-| ファイル | 説明 |
-|----------|------|
-| `js/translations.js` | 全翻訳データ（9言語） |
-| `js/language-switcher.js` | 言語切り替えロジック |
-| `js/faq-data.js` | FAQ多言語データ |
-
-### モバイル最適化関連
-
-| ファイル | 説明 |
-|----------|------|
-| `css/mobile-fixes.css` | モバイル用CSS |
-| `css/style-new.css` | 共通スタイル |
+| ファイル | 状態 |
+|----------|:----:|
+| pages/privacy.html | ✅ 9言語完了 |
+| pages/terms.html | ✅ 9言語完了 |
+| pages/content-guidelines.html | ✅ 9言語完了 |
+| pages/copyright-policy.html | ✅ 9言語完了 |
+| pages/revenue-sharing.html | ✅ 9言語完了 |
+| pages/confirm-delete.html | ✅ 9言語完了 |
+| pages/account-settings.html | ✅ 完了（GDPR含む9言語、領収書9言語） |
 
 ---
 
-## 9. サーバー起動方法
+## 9. 対応言語（9言語）
 
-### 起動手順
-
-1. **PowerShellを開く**
-2. **プロジェクトフォルダに移動**
-   ```
-   cd C:\Projects\test-publishing-platform
-   ```
-3. **サーバーを起動**
-   ```
-   npm start
-   ```
-4. **成功確認** - 以下が表示されればOK：
-   ```
-   Server running on port 3000
-   Frontend server running on port 8000
-   ```
-
-### 停止方法
-PowerShellで `Ctrl + C`
+| コード | 言語 | フラグ | 多言語対応 | 領収書対応 |
+|--------|------|--------|:--------:|:--------:|
+| ja | 日本語 | 🇯🇵 | ✅ | ✅ |
+| en | English | 🇬🇧 | ✅ | ✅ |
+| zh | 中文 | 🇨🇳 | ✅ | ✅ |
+| es | Español | 🇪🇸 | ✅ | ✅ |
+| fr | Français | 🇫🇷 | ✅ | ✅ |
+| de | Deutsch | 🇩🇪 | ✅ | ✅ |
+| ko | 한국어 | 🇰🇷 | ✅ | ✅ |
+| ar | العربية | 🇸🇦 | ✅ | ✅ |
+| pt | Português | 🇧🇷 | ✅ | ✅ |
 
 ---
 
-## 10. GitHubからの更新取得
+## 10. サーバー起動方法
 
 ```powershell
 cd C:\Projects\test-publishing-platform
-git pull
 npm start
 ```
+
+**成功時の表示：**
+```
+Server running on port 3000
+Frontend server running on port 8000
+```
+
+**停止：** `Ctrl + C`
 
 ---
 
 ## 11. 注意事項
 
-### API URLの注意
-- ❌ `/api/...` → 404エラー
-- ✅ `http://localhost:3000/api/...` → 正しい
+### translations.js の編集時の注意
+- ファイルサイズが大きい（約200KB）
+- 構文エラーが発生しやすいので、編集後は必ずF12 Consoleでエラーチェック
+- 破損した場合はGitHubから正常なバージョンをダウンロードして上書き
+
+### 言語セレクターの仕組み
+- `language-selector` クラスを持つselect要素をlanguage-switcher.jsが認識
+- 新しいページに言語セレクターを追加する際は必ずこのクラスを付ける
 
 ### ブラウザキャッシュ
 コード更新後に動作がおかしい場合：`Ctrl + Shift + R`
 
-### translations.js の破損に注意
-- ファイルサイズが大きい（109KB）ため、GitHubへのプッシュ時にまれに破損することがある
-- 破損した場合は `git checkout main~1 -- js/translations.js` で復元可能
+### GitHub API のファイルサイズ制限
+- 大きなファイル（100KB以上）は一度にプッシュできない場合あり
+- 手動でGitHubの編集画面からアップロードする方法を推奨
 
-### プロジェクトフォルダの場所
-- **正しいパス**: `C:\Projects\test-publishing-platform`
-- ❌ `C:\claude\publishing-platform` は存在しない
-
-### editor.html について
-- このファイルは独自の翻訳システム（uiTextオブジェクト）を使用
-- translations.js / language-switcher.js は使用していない
-- ファイルサイズが大きいため、編集時は構文エラーに注意
+### 重複ファイルに注意
+- HTMLファイルが複数の場所に存在する場合、ブラウザが読み込むのは`pages/`フォルダ内のファイル
+- ルートフォルダに同名ファイルがある場合は削除推奨
 
 ---
 
-## 12. 新しいChatでの開始方法
+## 12. GitHubコミット履歴（最新）
 
-1. このドキュメントをClaudeにアップロード
-2. 「register-author.htmlの多言語対応をしたい」と伝える
-3. `git pull` で最新コードを取得
-4. 作業開始
-
----
-
-## 13. 参考リンク
-
-| 項目 | URL |
-|------|-----|
-| GitHubリポジトリ | https://github.com/kenji-publishing/test-publishing-platform |
-| チケット（デモ） | http://localhost:8000/pages/support/tickets.html?demo=true |
-| FAQ | http://localhost:8000/pages/support/faq.html |
-| Reader | http://localhost:8000/pages/reader.html |
-| Editor | http://localhost:8000/pages/editor.html |
-
----
-
-## 14. GitHubコミット履歴
-
-| 日付 | 内容 | コミットSHA |
-|------|------|-------------|
-| 1/3 | reader.html placeholder修正（setAttribute方式） | 7665a26 |
-| 1/3 | reader.html 言語切り替えロジック修正 | 09562967 |
-| 1/4 | editor.html 多言語対応 | （ローカル、未プッシュ） |
+| 日付 | 内容 |
+|------|------|
+| 1/17 | 領収書機能9言語対応（ローカル、未コミット） |
+| 1/17 | confirm-delete.html 9言語対応・デザイン統一（ローカル、未コミット） |
+| 1/17 | revenue-sharing.html 9言語対応・デザイン統一（ローカル、未コミット） |
+| 1/16 | copyright-policy.html 9言語対応版（ローカル、未コミット） |
+| 1/16 | terms.html 9言語対応版（ローカル、未コミット） |
+| 1/16 | account-settings.html（ルート）削除（ローカル、未コミット） |
+| 1/14 | translations.js notificationManager追加（9言語完了、ローカル、未コミット） |
+| 1/14 | translations.js GDPR翻訳キー追加（9言語完了、ローカル、未コミット） |
+| 1/13 | account-settings.html language-selectorクラス追加（ローカル、未コミット） |
+| 1/12 | account-settings.html データ削除リクエスト機能追加 |
+| 1/12 | privacy.html リンク修正（settings.html → account-settings.html） |
+| 1/12 | privacy.html メールアドレス削除、サポート・設定ページリンク追加 |
+| 1/12 | privacy.html 9言語完全版アップロード |
 
 ---
 
-## 15. 次のフェーズ候補
+## 13. 追加した機能の詳細
 
-| オプション | 内容 | 推奨 |
-|-----------|------|:----:|
-| A | register-author.html 多言語対応 | ⭐ |
-| B | manga-viewer.html 多言語対応 | |
-| C | 法的ページ（terms, privacy等）多言語対応 | |
-| D | Phase 13: テスト・品質保証 | |
+### データ削除リクエスト機能（GDPR対応）
 
-**推奨：オプションA（register-author.html）から始める**
-- 著者登録は主要機能であり、ユーザーが頻繁に使用する
-- editor.htmlと同様のパターンで対応可能
+**目的：** メールアドレスを公開せずに、ユーザーが個人データ削除をリクエストできる仕組み
+
+**追加した要素：**
+1. アカウント設定ページの「アカウント削除」タブ内にセクション追加
+2. モーダルダイアログ（削除理由の選択肢付き）
+3. JavaScript関数（APIリクエスト処理）
+4. translations.jsに各言語の翻訳キー（9言語対応完了）
+
+**関連ファイル：**
+- `pages/account-settings.html` - UI部分
+- `js/translations.js` - 多言語テキスト
+- `pages/privacy.html` - この機能へのリンク（セクション10、14）
+
+### 領収書機能（9言語対応）🆕
+
+**目的：** 購入履歴から各言語で領収書を発行できる機能
+
+**追加した要素：**
+1. バックエンドAPI: `GET /api/users/purchases/:purchaseId/receipt?lang=xx`
+2. 領収書HTMLジェネレーター（9言語対応、RTL対応）
+3. フロントエンド: 言語に応じた領収書表示・印刷機能
+4. デモモード対応（ログインなしでもサンプル領収書を表示）
+
+**関連ファイル：**
+- `backend/services/receipt-generator.js` - 領収書生成サービス
+- `backend/routes/users.js` - APIエンドポイント
+- `pages/account-settings.html` - UI部分（購入履歴タブ）
+
+**領収書の内容：**
+- 領収書番号（RCP-XXXXXXXX形式）
+- 発行日
+- お客様名（言語別表記：日本語は「様」、韓国語は「님」など）
+- 商品名
+- お支払い方法（言語別翻訳）
+- 合計金額
 
 ---
 
-最終更新: 2026年1月4日
+## 14. 既知の問題
+
+### 通知タブ・セキュリティ質問の動的コンテンツ
+- 言語切り替え後、動的に生成されるコンテンツ（通知設定、セキュリティ質問）が日本語のまま
+- ページをリロード（F5）しても反映されない
+- 原因: JavaScriptで生成されるコンテンツがapplyTranslations()の対象外
+- 優先度: 低（Phase 12完了、次フェーズで対応検討）
+
+---
+
+## 15. Phase 12-9 進捗詳細
+
+| サブフェーズ | ファイル | 状態 |
+|-------------|----------|:----:|
+| 12-9a | terms.html | ✅ 完了 |
+| 12-9b | content-guidelines.html | ✅ 完了（既存） |
+| 12-9c | copyright-policy.html | ✅ 完了 |
+| 12-9d | revenue-sharing.html | ✅ 完了 |
+| 12-9e | confirm-delete.html | ✅ 完了 |
+| 12-10 | 領収書機能（9言語対応） | ✅ 完了 |
+
+**🎉 Phase 12 多言語対応 100% 完了！**
+
+---
+
+## 16. 領収書機能 詳細仕様
+
+### 対応言語別の表示例
+
+| 言語 | タイトル | お礼メッセージ | 顧客名形式 |
+|------|----------|----------------|------------|
+| 日本語 | 領収書 | ご購入ありがとうございます | 山田 太郎 様 |
+| English | Receipt | Thank you for your purchase | John Smith |
+| 中文 | 收据 | 感谢您的购买 | 张三 |
+| Español | Recibo | Gracias por su compra | Juan García |
+| Français | Reçu | Merci pour votre achat | Jean Dupont |
+| Deutsch | Quittung | Vielen Dank für Ihren Kauf | Max Müller |
+| 한국어 | 영수증 | 구매해 주셔서 감사합니다 | 김민수 님 |
+| العربية | إيصال | شكراً لشرائك | أحمد محمد |
+| Português | Recibo | Obrigado pela sua compra | João Silva |
+
+### 使用方法
+
+1. `http://localhost:8000/pages/account-settings.html?demo=true` にアクセス
+2. 言語セレクターで希望の言語を選択
+3. 「購入履歴」タブをクリック
+4. 「領収書」ボタンをクリック
+5. 新しいウィンドウで領収書が開く
+6. 「印刷 / PDFとして保存」ボタンでPDF保存可能
+
+---
+
+最終更新: 2026年1月17日

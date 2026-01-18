@@ -1,6 +1,6 @@
 # Publisher Platform 引き継ぎドキュメント
 
-最終更新: 2026年1月14日
+最終更新: 2026年1月17日
 
 ---
 
@@ -99,162 +99,78 @@ https://github.com/kenji-publishing/test-publishing-platform
 | 12-8a | privacy.html 9言語対応完了 | ✅ |
 | 12-8b | privacy.html メールアドレス削除・リンク修正 | ✅ |
 | 12-8c | account-settings.html データ削除リクエスト機能 | ✅ |
+| 12-8d | translations.js GDPR翻訳キー追加（9言語） | ✅ |
+| 12-8e | translations.js notificationManager翻訳キー追加（9言語） | ✅ |
+| 12-9a | terms.html 9言語対応完了 | ✅ |
+| 12-9b | content-guidelines.html 9言語対応完了 | ✅ |
+| 12-9c | copyright-policy.html 9言語対応完了 | ✅ |
+| 12-9d | revenue-sharing.html 9言語対応・デザイン統一 | ✅ |
+| 12-9e | confirm-delete.html 9言語対応・デザイン統一 | ✅ |
+| 12-10 | 領収書機能（9言語対応） | ✅ |
 
-### 現在進行中
-
-| Phase | 内容 | 状態 |
-|-------|------|:----:|
-| 12-8d | translations.js GDPR翻訳キー追加（9言語） | 🔄 3/9言語完了 |
-| 12-8e | translations.js notificationManager翻訳キー追加 | ✅ 9言語完了 |
+### 🎉 Phase 12 多言語対応 完了！
 
 ---
 
-## 5. 今日の作業状況（2026-01-14）
+## 5. 今日の作業状況（2026-01-17）
 
 ### 完了した作業
 
-#### 1. notificationManager翻訳キー追加（9言語完了） ✅
+#### 1. revenue-sharing.html 9言語対応・デザイン統一 ✅
+- style-new.css ベースのデザインに統一
+- 9言語コンテンツ（収益分配表、計算例、FAQ）
+- 言語セレクター追加、RTL対応（アラビア語）
+- navbar-custom クラス適用
 
-通知設定ページ（notification-settings.js）で使用される27個の翻訳キーを全9言語に追加：
+#### 2. confirm-delete.html 9言語対応・デザイン統一 ✅
+- style-new.css ベースのデザインに統一
+- 9言語コンテンツ（削除確認メッセージ、警告、ボタン）
+- 言語セレクター追加、RTL対応（アラビア語）
+- navbar-custom クラス適用
 
-| 言語 | notificationManagerセクション |
-|------|:-----------------------------:|
-| 🇬🇧 en (英語) | ✅ |
-| 🇯🇵 ja (日本語) | ✅ |
-| 🇨🇳 zh (中国語) | ✅ |
-| 🇪🇸 es (スペイン語) | ✅ |
-| 🇫🇷 fr (フランス語) | ✅ |
-| 🇩🇪 de (ドイツ語) | ✅ |
-| 🇰🇷 ko (韓国語) | ✅ |
-| 🇸🇦 ar (アラビア語) | ✅ |
-| 🇧🇷 pt (ポルトガル語) | ✅ |
+#### 3. 領収書機能（9言語対応）完全実装 ✅
 
-**追加したキー（27個）：**
-- `sale`, `saleDesc` - 販売通知
-- `translationComplete`, `translationCompleteDesc` - 翻訳完了通知
-- `comment`, `commentDesc` - コメント通知
-- `feedback`, `feedbackDesc` - フィードバック通知
-- `ticketReply`, `ticketReplyDesc` - チケット返信通知
-- `system`, `systemDesc` - システム通知
-- `notificationCenter`, `notificationCenterDesc` - 通知センター
-- `open` - 開く
-- `inAppNotifications`, `inAppNotificationsDesc` - アプリ内通知
-- `emailNotifications`, `emailNotificationsDesc` - メール通知
-- `bulkSettings` - 一括設定
-- `allInAppOn`, `allInAppOff` - アプリ内通知一括ON/OFF
-- `allEmailOn`, `allEmailOff` - メール通知一括ON/OFF
-- `saveSettings`, `settingsNote` - 設定保存
-- `marketing`, `marketingDesc` - マーケティング通知
-- `saved`, `allOnMessage`, `allOffMessage` - 確認メッセージ
+**バックエンド:**
+- `backend/services/receipt-generator.js` - 9言語対応の領収書HTMLジェネレーター
+- `backend/routes/users.js` - `/api/users/purchases/:purchaseId/receipt?lang=xx` エンドポイント
 
-**ファイル変更：**
-- translations.js: 183,585 bytes → 193,416 bytes (+9,831 bytes)
-- 各言語のfooterとcommonセクションの間にnotificationManagerセクションを追加
+**フロントエンド:**
+- `pages/account-settings.html` - `downloadReceipt()` 関数を9言語対応に更新
+- デモモード用の `generateDemoReceipt()` 関数追加（9言語対応）
 
----
-
-### 前日の作業（2026-01-13）
-
-#### 1. account-settings.html 言語セレクター修正 ✅
-- `mobileLanguageSelect` と `desktopLanguageSelect` に `language-selector` クラスを追加
-- これにより language-switcher.js が言語切り替えイベントを認識できるようになった
-
-#### 2. translations.js 構文エラー修正 ✅
-- 21行目付近で構文エラーが発生していた
-- GitHubの正常なバージョンで上書きして復旧
-- エラー: `Uncaught SyntaxError: Unexpected identifier 'Change'`
-
-#### 3. GDPR翻訳キー追加（3言語完了） ✅
-以下の言語にGDPR関連の翻訳キーを追加：
-
-| 言語 | dangerセクション | modalsセクション |
-|------|:----------------:|:----------------:|
-| 🇬🇧 en (英語) | ✅ | ✅ |
-| 🇯🇵 ja (日本語) | ✅ (既存) | ✅ (既存) |
-| 🇨🇳 zh (中国語) | ✅ | ✅ |
-
-**追加したキー（dangerセクション）：**
-- `dataRequest` - 個人データの削除リクエスト
-- `dataRequestDesc` - 説明文
-- `requestDataDeletion` - 個人データの削除をリクエスト
-- `requestDataDesc` - 処理の説明
-- `requestDelete` - リクエストボタン
-
-**追加したキー（modalsセクション）：**
-- `dataDeleteTitle` - モーダルタイトル
-- `dataDeleteInfo` - GDPR説明
-- `dataDeleteExplain` - 削除対象の説明
-- `dataItem1` ～ `dataItem4` - 削除される項目リスト
-- `dataDeleteNote` - 注意事項
-- `dataDeleteReason` - 削除理由ラベル
-- `selectReason` - 選択してください
-- `reasonNotNeeded` ～ `reasonOther` - 削除理由選択肢
-- `submitRequest` - リクエスト送信ボタン
-
-#### 4. 動作確認 ✅
-- 言語セレクターで英語・中国語に切り替えて、GDPRセクションが正しく表示されることを確認
-- F12 Consoleでエラーがないことを確認
-
-### 未完了の作業
-
-#### GDPR翻訳キー追加（残り6言語）- Phase 12-8d継続
-| 言語 | dangerセクション | modalsセクション |
-|------|:----------------:|:----------------:|
-| 🇪🇸 es (スペイン語) | ⏳ | ⏳ |
-| 🇫🇷 fr (フランス語) | ⏳ | ⏳ |
-| 🇩🇪 de (ドイツ語) | ⏳ | ⏳ |
-| 🇰🇷 ko (韓国語) | ⏳ | ⏳ |
-| 🇸🇦 ar (アラビア語) | ⏳ | ⏳ |
-| 🇧🇷 pt (ポルトガル語) | ⏳ | ⏳ |
-
-**必要なキー（dangerセクション）：**
-- `dataRequest` - 個人データの削除リクエスト
-- `dataRequestDesc` - 説明文
-- `requestDataDeletion` - 個人データの削除をリクエスト
-- `requestDataDesc` - 処理の説明
-- `requestDelete` - リクエストボタン
-
-**必要なキー（modalsセクション）：**
-- `dataDeleteTitle` - モーダルタイトル
-- `dataDeleteInfo` - GDPR説明
-- `dataDeleteExplain` - 削除対象の説明
-- `dataItem1` ～ `dataItem4` - 削除される項目リスト
-- `dataDeleteNote` - 注意事項
-- `dataDeleteReason` - 削除理由ラベル
-- `selectReason` - 選択してください
-- `reasonNotNeeded` ～ `reasonOther` - 削除理由選択肢
-- `submitRequest` - リクエスト送信ボタン
+**領収書の機能:**
+- 選択中の言語で領収書を発行
+- 新しいウィンドウで表示
+- 「印刷 / PDFとして保存」ボタンでPDF保存可能
+- 言語別フォント対応（日本語: Noto Sans JP、中国語: Noto Sans SC、韓国語: Noto Sans KR、アラビア語: Noto Sans Arabic）
+- アラビア語RTL対応
 
 ---
 
 ## 6. 次回の作業
 
-### 🔴 優先度: 高 - Phase 12-8d GDPR翻訳キー追加（残り6言語）
-
-残り6言語（es, fr, de, ko, ar, pt）のaccountSettings内に以下を追加：
-- `danger`セクションに5つのGDPRキー
-- `modals`セクションに15個のGDPRキー
-
-**Claudeへの指示例：**
-```
-translations.jsに残り6言語（es, fr, de, ko, ar, pt）の
-GDPR翻訳キーを追加してください。
-英語版を参考に、各言語のdangerセクションとmodalsセクションに
-翻訳を追加してください。
-```
-
-### 🟡 優先度: 中 - GitHubにコミット
+### 🟡 優先度: 高 - GitHubにコミット
 
 以下の変更をコミット：
-1. translations.js - notificationManager追加（9言語）
-2. translations.js - GDPR翻訳キー追加（完了後）
-3. account-settings.html - language-selectorクラス追加
+1. revenue-sharing.html - 9言語対応・デザイン統一版
+2. confirm-delete.html - 9言語対応・デザイン統一版
+3. backend/services/receipt-generator.js - 新規作成（領収書生成サービス）
+4. backend/routes/users.js - 領収書エンドポイント更新
+5. account-settings.html - 領収書機能9言語対応
+
+### 🟢 優先度: 中 - Phase 13 計画
+
+Phase 12（多言語対応）が完了したため、次のフェーズを検討：
+- Phase 13a: 本番環境デプロイ準備
+- Phase 13b: セキュリティ強化
+- Phase 13c: パフォーマンス最適化
+- Phase 13d: 追加機能開発
 
 ### 🟢 優先度: 低 - 動作確認
 
-- 全9言語で言語切り替えをテスト
-- 通知設定タブが各言語で正しく表示されることを確認
-- 「アカウント削除」タブの「個人データの削除リクエスト」セクションが各言語で表示されることを確認
+- 全9言語で領収書発行をテスト
+- revenue-sharing.html の全言語表示確認
+- confirm-delete.html の全言語表示確認
 
 ---
 
@@ -265,10 +181,8 @@ GDPR翻訳キーを追加してください。
 2. 以下のように指示：
 
 ```
-translations.jsにGDPR翻訳キーを追加する作業を続けたい。
-残り6言語（es, fr, de, ko, ar, pt）のaccountSettings内の
-dangerセクションとmodalsセクションに翻訳を追加してください。
-英語版（en）を参考にしてください。
+Phase 12が完了しました。
+次のフェーズ（本番環境デプロイ準備など）について相談したいです。
 ```
 
 ### 方法2: GitHub MCPを使用
@@ -277,47 +191,41 @@ dangerセクションとmodalsセクションに翻訳を追加してくださ�
 
 ```
 GitHub MCP と Filesystem MCPを使って、
-C:\Projects\test-publishing-platform のtranslations.jsに
-GDPR翻訳キーを追加してください。
-残り6言語（es, fr, de, ko, ar, pt）です。
+C:\Projects\test-publishing-platform の
+現在の状態を確認し、次の開発フェーズを提案してください。
 ```
 
 ---
 
 ## 8. 多言語対応済みページ一覧
 
-### 完了ページ
+### ✅ 全ページ完了
 
 | ファイル | 状態 |
 |----------|:----:|
 | pages/privacy.html | ✅ 9言語完了 |
-| pages/account-settings.html | ✅ HTML対応完了、翻訳キー3/9言語完了 |
-
-### 未対応ページ一覧（残り約5ページ）
-
-| ファイル | 内容 |
-|----------|------|
-| terms.html | 利用規約 |
-| content-guidelines.html | コンテンツガイドライン |
-| copyright-policy.html | 著作権ポリシー |
-| revenue-sharing.html | 収益分配説明 |
-| confirm-delete.html | 削除確認 |
+| pages/terms.html | ✅ 9言語完了 |
+| pages/content-guidelines.html | ✅ 9言語完了 |
+| pages/copyright-policy.html | ✅ 9言語完了 |
+| pages/revenue-sharing.html | ✅ 9言語完了 |
+| pages/confirm-delete.html | ✅ 9言語完了 |
+| pages/account-settings.html | ✅ 完了（GDPR含む9言語、領収書9言語） |
 
 ---
 
 ## 9. 対応言語（9言語）
 
-| コード | 言語 | フラグ | GDPR翻訳 |
-|--------|------|--------|:--------:|
-| en | English | 🇬🇧 | ✅ |
-| ja | 日本語 | 🇯🇵 | ✅ |
-| zh | 中文 | 🇨🇳 | ✅ |
-| es | Español | 🇪🇸 | ⏳ |
-| fr | Français | 🇫🇷 | ⏳ |
-| de | Deutsch | 🇩🇪 | ⏳ |
-| ko | 한국어 | 🇰🇷 | ⏳ |
-| ar | العربية | 🇸🇦 | ⏳ |
-| pt | Português | 🇧🇷 | ⏳ |
+| コード | 言語 | フラグ | 多言語対応 | 領収書対応 |
+|--------|------|--------|:--------:|:--------:|
+| ja | 日本語 | 🇯🇵 | ✅ | ✅ |
+| en | English | 🇬🇧 | ✅ | ✅ |
+| zh | 中文 | 🇨🇳 | ✅ | ✅ |
+| es | Español | 🇪🇸 | ✅ | ✅ |
+| fr | Français | 🇫🇷 | ✅ | ✅ |
+| de | Deutsch | 🇩🇪 | ✅ | ✅ |
+| ko | 한국어 | 🇰🇷 | ✅ | ✅ |
+| ar | العربية | 🇸🇦 | ✅ | ✅ |
+| pt | Português | 🇧🇷 | ✅ | ✅ |
 
 ---
 
@@ -341,7 +249,7 @@ Frontend server running on port 8000
 ## 11. 注意事項
 
 ### translations.js の編集時の注意
-- ファイルサイズが大きい（約146KB）
+- ファイルサイズが大きい（約200KB）
 - 構文エラーが発生しやすいので、編集後は必ずF12 Consoleでエラーチェック
 - 破損した場合はGitHubから正常なバージョンをダウンロードして上書き
 
@@ -356,14 +264,24 @@ Frontend server running on port 8000
 - 大きなファイル（100KB以上）は一度にプッシュできない場合あり
 - 手動でGitHubの編集画面からアップロードする方法を推奨
 
+### 重複ファイルに注意
+- HTMLファイルが複数の場所に存在する場合、ブラウザが読み込むのは`pages/`フォルダ内のファイル
+- ルートフォルダに同名ファイルがある場合は削除推奨
+
 ---
 
 ## 12. GitHubコミット履歴（最新）
 
 | 日付 | 内容 |
 |------|------|
+| 1/17 | 領収書機能9言語対応（ローカル、未コミット） |
+| 1/17 | confirm-delete.html 9言語対応・デザイン統一（ローカル、未コミット） |
+| 1/17 | revenue-sharing.html 9言語対応・デザイン統一（ローカル、未コミット） |
+| 1/16 | copyright-policy.html 9言語対応版（ローカル、未コミット） |
+| 1/16 | terms.html 9言語対応版（ローカル、未コミット） |
+| 1/16 | account-settings.html（ルート）削除（ローカル、未コミット） |
 | 1/14 | translations.js notificationManager追加（9言語完了、ローカル、未コミット） |
-| 1/13 | translations.js en, zh GDPR翻訳キー追加（ローカル、未コミット） |
+| 1/14 | translations.js GDPR翻訳キー追加（9言語完了、ローカル、未コミット） |
 | 1/13 | account-settings.html language-selectorクラス追加（ローカル、未コミット） |
 | 1/12 | account-settings.html データ削除リクエスト機能追加 |
 | 1/12 | privacy.html リンク修正（settings.html → account-settings.html） |
@@ -382,12 +300,35 @@ Frontend server running on port 8000
 1. アカウント設定ページの「アカウント削除」タブ内にセクション追加
 2. モーダルダイアログ（削除理由の選択肢付き）
 3. JavaScript関数（APIリクエスト処理）
-4. translations.jsに各言語の翻訳キー（9言語対応中）
+4. translations.jsに各言語の翻訳キー（9言語対応完了）
 
 **関連ファイル：**
 - `pages/account-settings.html` - UI部分
 - `js/translations.js` - 多言語テキスト
 - `pages/privacy.html` - この機能へのリンク（セクション10、14）
+
+### 領収書機能（9言語対応）🆕
+
+**目的：** 購入履歴から各言語で領収書を発行できる機能
+
+**追加した要素：**
+1. バックエンドAPI: `GET /api/users/purchases/:purchaseId/receipt?lang=xx`
+2. 領収書HTMLジェネレーター（9言語対応、RTL対応）
+3. フロントエンド: 言語に応じた領収書表示・印刷機能
+4. デモモード対応（ログインなしでもサンプル領収書を表示）
+
+**関連ファイル：**
+- `backend/services/receipt-generator.js` - 領収書生成サービス
+- `backend/routes/users.js` - APIエンドポイント
+- `pages/account-settings.html` - UI部分（購入履歴タブ）
+
+**領収書の内容：**
+- 領収書番号（RCP-XXXXXXXX形式）
+- 発行日
+- お客様名（言語別表記：日本語は「様」、韓国語は「님」など）
+- 商品名
+- お支払い方法（言語別翻訳）
+- 合計金額
 
 ---
 
@@ -397,8 +338,50 @@ Frontend server running on port 8000
 - 言語切り替え後、動的に生成されるコンテンツ（通知設定、セキュリティ質問）が日本語のまま
 - ページをリロード（F5）しても反映されない
 - 原因: JavaScriptで生成されるコンテンツがapplyTranslations()の対象外
-- 優先度: 低（GDPR対応完了後に対応予定）
+- 優先度: 低（Phase 12完了、次フェーズで対応検討）
 
 ---
 
-最終更新: 2026年1月14日
+## 15. Phase 12-9 進捗詳細
+
+| サブフェーズ | ファイル | 状態 |
+|-------------|----------|:----:|
+| 12-9a | terms.html | ✅ 完了 |
+| 12-9b | content-guidelines.html | ✅ 完了（既存） |
+| 12-9c | copyright-policy.html | ✅ 完了 |
+| 12-9d | revenue-sharing.html | ✅ 完了 |
+| 12-9e | confirm-delete.html | ✅ 完了 |
+| 12-10 | 領収書機能（9言語対応） | ✅ 完了 |
+
+**🎉 Phase 12 多言語対応 100% 完了！**
+
+---
+
+## 16. 領収書機能 詳細仕様
+
+### 対応言語別の表示例
+
+| 言語 | タイトル | お礼メッセージ | 顧客名形式 |
+|------|----------|----------------|------------|
+| 日本語 | 領収書 | ご購入ありがとうございます | 山田 太郎 様 |
+| English | Receipt | Thank you for your purchase | John Smith |
+| 中文 | 收据 | 感谢您的购买 | 张三 |
+| Español | Recibo | Gracias por su compra | Juan García |
+| Français | Reçu | Merci pour votre achat | Jean Dupont |
+| Deutsch | Quittung | Vielen Dank für Ihren Kauf | Max Müller |
+| 한국어 | 영수증 | 구매해 주셔서 감사합니다 | 김민수 님 |
+| العربية | إيصال | شكراً لشرائك | أحمد محمد |
+| Português | Recibo | Obrigado pela sua compra | João Silva |
+
+### 使用方法
+
+1. `http://localhost:8000/pages/account-settings.html?demo=true` にアクセス
+2. 言語セレクターで希望の言語を選択
+3. 「購入履歴」タブをクリック
+4. 「領収書」ボタンをクリック
+5. 新しいウィンドウで領収書が開く
+6. 「印刷 / PDFとして保存」ボタンでPDF保存可能
+
+---
+
+最終更新: 2026年1月17日

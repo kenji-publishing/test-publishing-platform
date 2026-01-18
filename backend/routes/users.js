@@ -179,11 +179,12 @@ router.get('/purchases', authenticate, async (req, res) => {
 
 /**
  * GET /api/users/purchases/:purchaseId/receipt
- * Generate and download receipt PDF
+ * Generate and display receipt HTML (can be printed as PDF by browser)
  */
 router.get('/purchases/:purchaseId/receipt', authenticate, async (req, res) => {
   try {
     const { purchaseId } = req.params;
+    const lang = req.query.lang || 'ja'; // Default to Japanese
     
     // Get purchase details
     const result = await db.query(
@@ -211,71 +212,12 @@ router.get('/purchases/:purchaseId/receipt', authenticate, async (req, res) => {
     
     const purchase = result.rows[0];
     
-    // Generate simple HTML receipt (can be converted to PDF with puppeteer later)
-    const receiptHtml = `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>領収書 - Publisher</title>
-  <style>
-    body { font-family: 'Noto Sans JP', sans-serif; padding: 40px; max-width: 600px; margin: 0 auto; }
-    .header { text-align: center; border-bottom: 2px solid #8B7355; padding-bottom: 20px; margin-bottom: 20px; }
-    .logo { font-size: 24px; font-weight: bold; color: #8B7355; }
-    h1 { font-size: 28px; margin: 10px 0; }
-    .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
-    .total { font-size: 20px; font-weight: bold; background: #f5f5f5; padding: 15px; margin-top: 20px; }
-    .footer { text-align: center; margin-top: 40px; color: #666; font-size: 12px; }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <div class="logo">📚 Publisher</div>
-    <h1>領収書</h1>
-  </div>
-  
-  <div class="info-row">
-    <span>領収書番号:</span>
-    <span>RCP-${purchase.purchase_id}</span>
-  </div>
-  <div class="info-row">
-    <span>発行日:</span>
-    <span>${new Date(purchase.created_at).toLocaleDateString('ja-JP')}</span>
-  </div>
-  <div class="info-row">
-    <span>お客様名:</span>
-    <span>${purchase.first_name || ''} ${purchase.last_name || ''} 様</span>
-  </div>
-  <div class="info-row">
-    <span>商品名:</span>
-    <span>${purchase.work_title || '作品購入'}</span>
-  </div>
-  <div class="info-row">
-    <span>お支払い方法:</span>
-    <span>${purchase.payment_method || 'クレジットカード'}</span>
-  </div>
-  <div class="info-row">
-    <span>取引ID:</span>
-    <span>${purchase.transaction_id || '-'}</span>
-  </div>
-  
-  <div class="total">
-    <div class="info-row" style="border: none;">
-      <span>合計金額:</span>
-      <span>¥${purchase.amount?.toLocaleString() || '0'}</span>
-    </div>
-  </div>
-  
-  <div class="footer">
-    <p>Publisher - 世界中の読者と作家をつなぐ多言語出版プラットフォーム</p>
-    <p>© 2025 Publisher. All rights reserved.</p>
-  </div>
-</body>
-</html>`;
+    // Generate receipt HTML using the receipt generator service
+    const { generateReceiptHTML } = require('../services/receipt-generator');
+    const receiptHtml = generateReceiptHTML(purchase, lang);
 
     // Send as HTML (can be printed as PDF by browser)
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="receipt-${purchaseId}.html"`);
     res.send(receiptHtml);
     
   } catch (error) {

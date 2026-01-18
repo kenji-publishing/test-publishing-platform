@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>アカウント削除の確認 - Publisher</title>
+    <title>Confirm Account Deletion - Publisher</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -20,18 +20,25 @@
     <link rel="stylesheet" href="../css/style-new.css">
     
     <style>
+        html, body { overflow-x: hidden; max-width: 100%; }
+        
         .confirm-container {
-            max-width: 500px;
-            margin: 4rem auto;
-            padding: 0 1rem;
+            max-width: 480px;
+            margin: 0 auto;
+            padding: var(--spacing-2xl) var(--spacing-md);
+            min-height: calc(100vh - 200px);
+            display: flex;
+            align-items: center;
         }
         
         .confirm-card {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            padding: 2.5rem;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
             text-align: center;
+            width: 100%;
+            box-shadow: var(--shadow-sm);
         }
         
         .confirm-icon {
@@ -41,49 +48,54 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 1.5rem;
-            font-size: 2.5rem;
+            margin: 0 auto var(--spacing-lg);
+            font-size: 2rem;
         }
         
         .confirm-icon.warning {
-            background: #fff3cd;
-            color: #856404;
+            background: rgba(212, 168, 83, 0.15);
+            color: var(--color-warning);
         }
         
         .confirm-icon.success {
-            background: #d4edda;
-            color: #155724;
+            background: rgba(93, 156, 89, 0.15);
+            color: var(--color-success);
         }
         
         .confirm-icon.error {
-            background: #f8d7da;
-            color: #721c24;
+            background: rgba(199, 93, 93, 0.15);
+            color: var(--color-error);
         }
         
         .confirm-card h1 {
-            font-family: var(--font-heading);
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
+            font-size: var(--font-size-xl);
+            margin-bottom: var(--spacing-sm);
+            color: var(--color-text);
         }
         
         .confirm-card p {
-            color: var(--color-text-muted);
-            margin-bottom: 1.5rem;
+            color: var(--color-text-secondary);
+            margin-bottom: var(--spacing-lg);
+            line-height: 1.6;
         }
         
         .btn-delete {
-            background: #dc3545;
+            background: var(--color-error);
             color: white;
             border: none;
-            padding: 0.75rem 2rem;
+            padding: 0.75rem 1.5rem;
             font-size: 1rem;
-            border-radius: 8px;
+            border-radius: var(--radius-md);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all var(--transition-fast);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         
         .btn-delete:hover {
-            background: #c82333;
+            background: #a94d4d;
+            color: white;
         }
         
         .btn-delete:disabled {
@@ -92,9 +104,9 @@
         }
         
         .countdown {
-            font-size: 0.9rem;
-            color: var(--color-text-muted);
-            margin-top: 1rem;
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            margin-top: var(--spacing-md);
         }
         
         .loading {
@@ -104,89 +116,677 @@
         .loading.show {
             display: block;
         }
+        
+        .btn-group-custom {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-md);
+            flex-wrap: wrap;
+        }
+        
+        /* Language content visibility */
+        .lang-content { display: none; }
+        .lang-content.active { display: block; }
+        
+        /* Font families for specific languages */
+        .lang-content[data-lang="ja"] { font-family: 'Noto Sans JP', sans-serif; }
+        .lang-content[data-lang="zh"] { font-family: 'Noto Sans SC', sans-serif; }
+        .lang-content[data-lang="ko"] { font-family: 'Noto Sans KR', sans-serif; }
+        .lang-content[data-lang="ar"] { font-family: 'Noto Sans Arabic', sans-serif; }
+        
+        @media (max-width: 576px) {
+            .confirm-container { padding: var(--spacing-lg) var(--spacing-sm); }
+            .confirm-card { padding: var(--spacing-lg); }
+            .confirm-card h1 { font-size: var(--font-size-lg); }
+            .btn-group-custom { flex-direction: column; }
+            .btn-group-custom .btn, .btn-group-custom .btn-delete { width: 100%; }
+        }
     </style>
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-custom">
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
         <div class="container">
             <a class="navbar-brand" href="../index.html">
                 <i class="fas fa-book-open"></i> Publisher
             </a>
+            <div class="navbar-lang-selector d-lg-none">
+                <select class="language-selector" id="languageSelectorMobile" onchange="changeLanguage(this.value)">
+                    <option value="en">🇬🇧 EN</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="es">🇪🇸 ES</option>
+                    <option value="fr">🇫🇷 FR</option>
+                    <option value="de">🇩🇪 DE</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="ar">🇸🇦 عربي</option>
+                    <option value="pt">🇧🇷 PT</option>
+                </select>
+            </div>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto"></ul>
+                <div class="d-flex align-items-center gap-3">
+                    <select class="language-selector d-none d-lg-block" id="languageSelector" onchange="changeLanguage(this.value)">
+                        <option value="en">🇬🇧 EN</option>
+                        <option value="ja">🇯🇵 日本語</option>
+                        <option value="zh">🇨🇳 中文</option>
+                        <option value="es">🇪🇸 ES</option>
+                        <option value="fr">🇫🇷 FR</option>
+                        <option value="de">🇩🇪 DE</option>
+                        <option value="ko">🇰🇷 한국어</option>
+                        <option value="ar">🇸🇦 عربي</option>
+                        <option value="pt">🇧🇷 PT</option>
+                    </select>
+                </div>
+            </div>
         </div>
     </nav>
 
-    <main class="confirm-container">
-        <!-- Confirmation Screen -->
-        <div class="confirm-card" id="confirmScreen">
-            <div class="confirm-icon warning">
-                <i class="fas fa-exclamation-triangle"></i>
-            </div>
-            <h1>アカウント削除の最終確認</h1>
-            <p>この操作は取り消すことができません。<br>本当にアカウントを削除しますか？</p>
-            
-            <div class="d-flex justify-content-center gap-3">
-                <a href="../index.html" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left me-1"></i> キャンセル
-                </a>
-                <button class="btn-delete" id="deleteBtn" onclick="confirmDeletion()">
-                    <i class="fas fa-trash me-1"></i> 削除する
-                </button>
-            </div>
-            
-            <p class="countdown" id="countdown"></p>
-            
-            <div class="loading mt-3" id="loading">
-                <div class="spinner-border text-danger" role="status">
-                    <span class="visually-hidden">Loading...</span>
+    <!-- ========== ENGLISH ========== -->
+    <div class="lang-content active" data-lang="en">
+        <main class="confirm-container">
+            <div class="w-100">
+                <!-- Confirmation Screen -->
+                <div class="confirm-card confirm-screen">
+                    <div class="confirm-icon warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h1>Final Confirmation for Account Deletion</h1>
+                    <p>This action cannot be undone.<br>Are you sure you want to delete your account?</p>
+                    
+                    <div class="btn-group-custom">
+                        <a href="../index.html" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Cancel
+                        </a>
+                        <button class="btn-delete delete-btn" onclick="confirmDeletion()">
+                            <i class="fas fa-trash me-1"></i> Delete
+                        </button>
+                    </div>
+                    
+                    <p class="countdown countdown-text"></p>
+                    
+                    <div class="loading mt-3 loading-indicator">
+                        <div class="spinner-border text-danger" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Deleting...</p>
+                    </div>
                 </div>
-                <p class="mt-2 text-muted">削除中...</p>
+                
+                <!-- Success Screen -->
+                <div class="confirm-card success-screen" style="display: none;">
+                    <div class="confirm-icon success">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <h1>Account Deleted</h1>
+                    <p>Thank you for using our service.</p>
+                    <a href="../index.html" class="btn btn-custom">
+                        <i class="fas fa-home me-1"></i> Return to Home
+                    </a>
+                </div>
+                
+                <!-- Error Screen -->
+                <div class="confirm-card error-screen" style="display: none;">
+                    <div class="confirm-icon error">
+                        <i class="fas fa-times"></i>
+                    </div>
+                    <h1>An Error Occurred</h1>
+                    <p class="error-message">The link is invalid or expired.</p>
+                    <a href="account-settings.html" class="btn btn-outline-secondary">
+                        <i class="fas fa-cog me-1"></i> Return to Settings
+                    </a>
+                </div>
+                
+                <!-- Invalid Token Screen -->
+                <div class="confirm-card invalid-screen" style="display: none;">
+                    <div class="confirm-icon error">
+                        <i class="fas fa-link-slash"></i>
+                    </div>
+                    <h1>Invalid Link</h1>
+                    <p>This link is invalid or expired.<br>Please request account deletion again.</p>
+                    <a href="account-settings.html" class="btn btn-outline-secondary">
+                        <i class="fas fa-cog me-1"></i> Return to Settings
+                    </a>
+                </div>
             </div>
-        </div>
-        
-        <!-- Success Screen -->
-        <div class="confirm-card" id="successScreen" style="display: none;">
-            <div class="confirm-icon success">
-                <i class="fas fa-check"></i>
+        </main>
+    </div>
+
+    <!-- ========== JAPANESE ========== -->
+    <div class="lang-content" data-lang="ja">
+        <main class="confirm-container">
+            <div class="w-100">
+                <div class="confirm-card confirm-screen">
+                    <div class="confirm-icon warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h1>アカウント削除の最終確認</h1>
+                    <p>この操作は取り消すことができません。<br>本当にアカウントを削除しますか？</p>
+                    
+                    <div class="btn-group-custom">
+                        <a href="../index.html" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> キャンセル
+                        </a>
+                        <button class="btn-delete delete-btn" onclick="confirmDeletion()">
+                            <i class="fas fa-trash me-1"></i> 削除する
+                        </button>
+                    </div>
+                    
+                    <p class="countdown countdown-text"></p>
+                    
+                    <div class="loading mt-3 loading-indicator">
+                        <div class="spinner-border text-danger" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 text-muted">削除中...</p>
+                    </div>
+                </div>
+                
+                <div class="confirm-card success-screen" style="display: none;">
+                    <div class="confirm-icon success">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <h1>アカウントが削除されました</h1>
+                    <p>ご利用いただきありがとうございました。</p>
+                    <a href="../index.html" class="btn btn-custom">
+                        <i class="fas fa-home me-1"></i> ホームへ戻る
+                    </a>
+                </div>
+                
+                <div class="confirm-card error-screen" style="display: none;">
+                    <div class="confirm-icon error">
+                        <i class="fas fa-times"></i>
+                    </div>
+                    <h1>エラーが発生しました</h1>
+                    <p class="error-message">リンクが無効か期限切れです。</p>
+                    <a href="account-settings.html" class="btn btn-outline-secondary">
+                        <i class="fas fa-cog me-1"></i> 設定に戻る
+                    </a>
+                </div>
+                
+                <div class="confirm-card invalid-screen" style="display: none;">
+                    <div class="confirm-icon error">
+                        <i class="fas fa-link-slash"></i>
+                    </div>
+                    <h1>無効なリンク</h1>
+                    <p>このリンクは無効または期限切れです。<br>アカウント削除を再度リクエストしてください。</p>
+                    <a href="account-settings.html" class="btn btn-outline-secondary">
+                        <i class="fas fa-cog me-1"></i> 設定に戻る
+                    </a>
+                </div>
             </div>
-            <h1>アカウントが削除されました</h1>
-            <p>ご利用いただきありがとうございました。</p>
-            <a href="../index.html" class="btn btn-primary-custom">
-                <i class="fas fa-home me-1"></i> ホームへ戻る
-            </a>
-        </div>
-        
-        <!-- Error Screen -->
-        <div class="confirm-card" id="errorScreen" style="display: none;">
-            <div class="confirm-icon error">
-                <i class="fas fa-times"></i>
+        </main>
+    </div>
+
+    <!-- ========== CHINESE ========== -->
+    <div class="lang-content" data-lang="zh">
+        <main class="confirm-container">
+            <div class="w-100">
+                <div class="confirm-card confirm-screen">
+                    <div class="confirm-icon warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h1>删除账户的最终确认</h1>
+                    <p>此操作无法撤销。<br>您确定要删除您的账户吗？</p>
+                    
+                    <div class="btn-group-custom">
+                        <a href="../index.html" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> 取消
+                        </a>
+                        <button class="btn-delete delete-btn" onclick="confirmDeletion()">
+                            <i class="fas fa-trash me-1"></i> 删除
+                        </button>
+                    </div>
+                    
+                    <p class="countdown countdown-text"></p>
+                    
+                    <div class="loading mt-3 loading-indicator">
+                        <div class="spinner-border text-danger" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 text-muted">删除中...</p>
+                    </div>
+                </div>
+                
+                <div class="confirm-card success-screen" style="display: none;">
+                    <div class="confirm-icon success">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <h1>账户已删除</h1>
+                    <p>感谢您使用我们的服务。</p>
+                    <a href="../index.html" class="btn btn-custom">
+                        <i class="fas fa-home me-1"></i> 返回首页
+                    </a>
+                </div>
+                
+                <div class="confirm-card error-screen" style="display: none;">
+                    <div class="confirm-icon error">
+                        <i class="fas fa-times"></i>
+                    </div>
+                    <h1>发生错误</h1>
+                    <p class="error-message">链接无效或已过期。</p>
+                    <a href="account-settings.html" class="btn btn-outline-secondary">
+                        <i class="fas fa-cog me-1"></i> 返回设置
+                    </a>
+                </div>
+                
+                <div class="confirm-card invalid-screen" style="display: none;">
+                    <div class="confirm-icon error">
+                        <i class="fas fa-link-slash"></i>
+                    </div>
+                    <h1>无效链接</h1>
+                    <p>此链接无效或已过期。<br>请重新请求删除账户。</p>
+                    <a href="account-settings.html" class="btn btn-outline-secondary">
+                        <i class="fas fa-cog me-1"></i> 返回设置
+                    </a>
+                </div>
             </div>
-            <h1>エラーが発生しました</h1>
-            <p id="errorMessage">リンクが無効か期限切れです。</p>
-            <a href="account-settings.html" class="btn btn-outline-secondary">
-                <i class="fas fa-cog me-1"></i> 設定に戻る
-            </a>
-        </div>
-        
-        <!-- Invalid Token Screen -->
-        <div class="confirm-card" id="invalidScreen" style="display: none;">
-            <div class="confirm-icon error">
-                <i class="fas fa-link-slash"></i>
+        </main>
+    </div>
+
+    <!-- ========== SPANISH ========== -->
+    <div class="lang-content" data-lang="es">
+        <main class="confirm-container">
+            <div class="w-100">
+                <div class="confirm-card confirm-screen">
+                    <div class="confirm-icon warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h1>Confirmación Final de Eliminación</h1>
+                    <p>Esta acción no se puede deshacer.<br>¿Está seguro de que desea eliminar su cuenta?</p>
+                    
+                    <div class="btn-group-custom">
+                        <a href="../index.html" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Cancelar
+                        </a>
+                        <button class="btn-delete delete-btn" onclick="confirmDeletion()">
+                            <i class="fas fa-trash me-1"></i> Eliminar
+                        </button>
+                    </div>
+                    
+                    <p class="countdown countdown-text"></p>
+                    
+                    <div class="loading mt-3 loading-indicator">
+                        <div class="spinner-border text-danger" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Eliminando...</p>
+                    </div>
+                </div>
+                
+                <div class="confirm-card success-screen" style="display: none;">
+                    <div class="confirm-icon success">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <h1>Cuenta Eliminada</h1>
+                    <p>Gracias por usar nuestro servicio.</p>
+                    <a href="../index.html" class="btn btn-custom">
+                        <i class="fas fa-home me-1"></i> Volver al Inicio
+                    </a>
+                </div>
+                
+                <div class="confirm-card error-screen" style="display: none;">
+                    <div class="confirm-icon error">
+                        <i class="fas fa-times"></i>
+                    </div>
+                    <h1>Ocurrió un Error</h1>
+                    <p class="error-message">El enlace es inválido o ha expirado.</p>
+                    <a href="account-settings.html" class="btn btn-outline-secondary">
+                        <i class="fas fa-cog me-1"></i> Volver a Configuración
+                    </a>
+                </div>
+                
+                <div class="confirm-card invalid-screen" style="display: none;">
+                    <div class="confirm-icon error">
+                        <i class="fas fa-link-slash"></i>
+                    </div>
+                    <h1>Enlace Inválido</h1>
+                    <p>Este enlace es inválido o ha expirado.<br>Por favor, solicite la eliminación nuevamente.</p>
+                    <a href="account-settings.html" class="btn btn-outline-secondary">
+                        <i class="fas fa-cog me-1"></i> Volver a Configuración
+                    </a>
+                </div>
             </div>
-            <h1>無効なリンク</h1>
-            <p>このリンクは無効または期限切れです。<br>アカウント削除を再度リクエストしてください。</p>
-            <a href="account-settings.html" class="btn btn-outline-secondary">
-                <i class="fas fa-cog me-1"></i> 設定に戻る
-            </a>
-        </div>
-    </main>
+        </main>
+    </div>
+
+    <!-- ========== FRENCH ========== -->
+    <div class="lang-content" data-lang="fr">
+        <main class="confirm-container">
+            <div class="w-100">
+                <div class="confirm-card confirm-screen">
+                    <div class="confirm-icon warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h1>Confirmation Finale de Suppression</h1>
+                    <p>Cette action est irréversible.<br>Êtes-vous sûr de vouloir supprimer votre compte ?</p>
+                    
+                    <div class="btn-group-custom">
+                        <a href="../index.html" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Annuler
+                        </a>
+                        <button class="btn-delete delete-btn" onclick="confirmDeletion()">
+                            <i class="fas fa-trash me-1"></i> Supprimer
+                        </button>
+                    </div>
+                    
+                    <p class="countdown countdown-text"></p>
+                    
+                    <div class="loading mt-3 loading-indicator">
+                        <div class="spinner-border text-danger" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Suppression...</p>
+                    </div>
+                </div>
+                
+                <div class="confirm-card success-screen" style="display: none;">
+                    <div class="confirm-icon success">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <h1>Compte Supprimé</h1>
+                    <p>Merci d'avoir utilisé notre service.</p>
+                    <a href="../index.html" class="btn btn-custom">
+                        <i class="fas fa-home me-1"></i> Retour à l'Accueil
+                    </a>
+                </div>
+                
+                <div class="confirm-card error-screen" style="display: none;">
+                    <div class="confirm-icon error">
+                        <i class="fas fa-times"></i>
+                    </div>
+                    <h1>Une Erreur s'est Produite</h1>
+                    <p class="error-message">Le lien est invalide ou expiré.</p>
+                    <a href="account-settings.html" class="btn btn-outline-secondary">
+                        <i class="fas fa-cog me-1"></i> Retour aux Paramètres
+                    </a>
+                </div>
+                
+                <div class="confirm-card invalid-screen" style="display: none;">
+                    <div class="confirm-icon error">
+                        <i class="fas fa-link-slash"></i>
+                    </div>
+                    <h1>Lien Invalide</h1>
+                    <p>Ce lien est invalide ou expiré.<br>Veuillez demander la suppression à nouveau.</p>
+                    <a href="account-settings.html" class="btn btn-outline-secondary">
+                        <i class="fas fa-cog me-1"></i> Retour aux Paramètres
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ========== GERMAN ========== -->
+    <div class="lang-content" data-lang="de">
+        <main class="confirm-container">
+            <div class="w-100">
+                <div class="confirm-card confirm-screen">
+                    <div class="confirm-icon warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h1>Endgültige Bestätigung zur Löschung</h1>
+                    <p>Diese Aktion kann nicht rückgängig gemacht werden.<br>Sind Sie sicher, dass Sie Ihr Konto löschen möchten?</p>
+                    
+                    <div class="btn-group-custom">
+                        <a href="../index.html" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Abbrechen
+                        </a>
+                        <button class="btn-delete delete-btn" onclick="confirmDeletion()">
+                            <i class="fas fa-trash me-1"></i> Löschen
+                        </button>
+                    </div>
+                    
+                    <p class="countdown countdown-text"></p>
+                    
+                    <div class="loading mt-3 loading-indicator">
+                        <div class="spinner-border text-danger" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Wird gelöscht...</p>
+                    </div>
+                </div>
+                
+                <div class="confirm-card success-screen" style="display: none;">
+                    <div class="confirm-icon success">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <h1>Konto Gelöscht</h1>
+                    <p>Vielen Dank für die Nutzung unseres Dienstes.</p>
+                    <a href="../index.html" class="btn btn-custom">
+                        <i class="fas fa-home me-1"></i> Zur Startseite
+                    </a>
+                </div>
+                
+                <div class="confirm-card error-screen" style="display: none;">
+                    <div class="confirm-icon error">
+                        <i class="fas fa-times"></i>
+                    </div>
+                    <h1>Ein Fehler ist Aufgetreten</h1>
+                    <p class="error-message">Der Link ist ungültig oder abgelaufen.</p>
+                    <a href="account-settings.html" class="btn btn-outline-secondary">
+                        <i class="fas fa-cog me-1"></i> Zu Einstellungen
+                    </a>
+                </div>
+                
+                <div class="confirm-card invalid-screen" style="display: none;">
+                    <div class="confirm-icon error">
+                        <i class="fas fa-link-slash"></i>
+                    </div>
+                    <h1>Ungültiger Link</h1>
+                    <p>Dieser Link ist ungültig oder abgelaufen.<br>Bitte fordern Sie die Löschung erneut an.</p>
+                    <a href="account-settings.html" class="btn btn-outline-secondary">
+                        <i class="fas fa-cog me-1"></i> Zu Einstellungen
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ========== KOREAN ========== -->
+    <div class="lang-content" data-lang="ko">
+        <main class="confirm-container">
+            <div class="w-100">
+                <div class="confirm-card confirm-screen">
+                    <div class="confirm-icon warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h1>계정 삭제 최종 확인</h1>
+                    <p>이 작업은 취소할 수 없습니다.<br>정말로 계정을 삭제하시겠습니까?</p>
+                    
+                    <div class="btn-group-custom">
+                        <a href="../index.html" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> 취소
+                        </a>
+                        <button class="btn-delete delete-btn" onclick="confirmDeletion()">
+                            <i class="fas fa-trash me-1"></i> 삭제
+                        </button>
+                    </div>
+                    
+                    <p class="countdown countdown-text"></p>
+                    
+                    <div class="loading mt-3 loading-indicator">
+                        <div class="spinner-border text-danger" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 text-muted">삭제 중...</p>
+                    </div>
+                </div>
+                
+                <div class="confirm-card success-screen" style="display: none;">
+                    <div class="confirm-icon success">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <h1>계정이 삭제되었습니다</h1>
+                    <p>서비스를 이용해 주셔서 감사합니다.</p>
+                    <a href="../index.html" class="btn btn-custom">
+                        <i class="fas fa-home me-1"></i> 홈으로 돌아가기
+                    </a>
+                </div>
+                
+                <div class="confirm-card error-screen" style="display: none;">
+                    <div class="confirm-icon error">
+                        <i class="fas fa-times"></i>
+                    </div>
+                    <h1>오류가 발생했습니다</h1>
+                    <p class="error-message">링크가 유효하지 않거나 만료되었습니다.</p>
+                    <a href="account-settings.html" class="btn btn-outline-secondary">
+                        <i class="fas fa-cog me-1"></i> 설정으로 돌아가기
+                    </a>
+                </div>
+                
+                <div class="confirm-card invalid-screen" style="display: none;">
+                    <div class="confirm-icon error">
+                        <i class="fas fa-link-slash"></i>
+                    </div>
+                    <h1>유효하지 않은 링크</h1>
+                    <p>이 링크는 유효하지 않거나 만료되었습니다.<br>계정 삭제를 다시 요청해 주세요.</p>
+                    <a href="account-settings.html" class="btn btn-outline-secondary">
+                        <i class="fas fa-cog me-1"></i> 설정으로 돌아가기
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ========== ARABIC (RTL) ========== -->
+    <div class="lang-content" data-lang="ar" dir="rtl">
+        <main class="confirm-container">
+            <div class="w-100">
+                <div class="confirm-card confirm-screen">
+                    <div class="confirm-icon warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h1>التأكيد النهائي لحذف الحساب</h1>
+                    <p>لا يمكن التراجع عن هذا الإجراء.<br>هل أنت متأكد من رغبتك في حذف حسابك؟</p>
+                    
+                    <div class="btn-group-custom">
+                        <a href="../index.html" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> إلغاء
+                        </a>
+                        <button class="btn-delete delete-btn" onclick="confirmDeletion()">
+                            <i class="fas fa-trash me-1"></i> حذف
+                        </button>
+                    </div>
+                    
+                    <p class="countdown countdown-text"></p>
+                    
+                    <div class="loading mt-3 loading-indicator">
+                        <div class="spinner-border text-danger" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 text-muted">جارٍ الحذف...</p>
+                    </div>
+                </div>
+                
+                <div class="confirm-card success-screen" style="display: none;">
+                    <div class="confirm-icon success">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <h1>تم حذف الحساب</h1>
+                    <p>شكراً لاستخدامك خدمتنا.</p>
+                    <a href="../index.html" class="btn btn-custom">
+                        <i class="fas fa-home me-1"></i> العودة للرئيسية
+                    </a>
+                </div>
+                
+                <div class="confirm-card error-screen" style="display: none;">
+                    <div class="confirm-icon error">
+                        <i class="fas fa-times"></i>
+                    </div>
+                    <h1>حدث خطأ</h1>
+                    <p class="error-message">الرابط غير صالح أو منتهي الصلاحية.</p>
+                    <a href="account-settings.html" class="btn btn-outline-secondary">
+                        <i class="fas fa-cog me-1"></i> العودة للإعدادات
+                    </a>
+                </div>
+                
+                <div class="confirm-card invalid-screen" style="display: none;">
+                    <div class="confirm-icon error">
+                        <i class="fas fa-link-slash"></i>
+                    </div>
+                    <h1>رابط غير صالح</h1>
+                    <p>هذا الرابط غير صالح أو منتهي الصلاحية.<br>يرجى طلب حذف الحساب مرة أخرى.</p>
+                    <a href="account-settings.html" class="btn btn-outline-secondary">
+                        <i class="fas fa-cog me-1"></i> العودة للإعدادات
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ========== PORTUGUESE ========== -->
+    <div class="lang-content" data-lang="pt">
+        <main class="confirm-container">
+            <div class="w-100">
+                <div class="confirm-card confirm-screen">
+                    <div class="confirm-icon warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h1>Confirmação Final para Exclusão</h1>
+                    <p>Esta ação não pode ser desfeita.<br>Tem certeza de que deseja excluir sua conta?</p>
+                    
+                    <div class="btn-group-custom">
+                        <a href="../index.html" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Cancelar
+                        </a>
+                        <button class="btn-delete delete-btn" onclick="confirmDeletion()">
+                            <i class="fas fa-trash me-1"></i> Excluir
+                        </button>
+                    </div>
+                    
+                    <p class="countdown countdown-text"></p>
+                    
+                    <div class="loading mt-3 loading-indicator">
+                        <div class="spinner-border text-danger" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Excluindo...</p>
+                    </div>
+                </div>
+                
+                <div class="confirm-card success-screen" style="display: none;">
+                    <div class="confirm-icon success">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <h1>Conta Excluída</h1>
+                    <p>Obrigado por usar nosso serviço.</p>
+                    <a href="../index.html" class="btn btn-custom">
+                        <i class="fas fa-home me-1"></i> Voltar ao Início
+                    </a>
+                </div>
+                
+                <div class="confirm-card error-screen" style="display: none;">
+                    <div class="confirm-icon error">
+                        <i class="fas fa-times"></i>
+                    </div>
+                    <h1>Ocorreu um Erro</h1>
+                    <p class="error-message">O link é inválido ou expirou.</p>
+                    <a href="account-settings.html" class="btn btn-outline-secondary">
+                        <i class="fas fa-cog me-1"></i> Voltar às Configurações
+                    </a>
+                </div>
+                
+                <div class="confirm-card invalid-screen" style="display: none;">
+                    <div class="confirm-icon error">
+                        <i class="fas fa-link-slash"></i>
+                    </div>
+                    <h1>Link Inválido</h1>
+                    <p>Este link é inválido ou expirou.<br>Por favor, solicite a exclusão novamente.</p>
+                    <a href="account-settings.html" class="btn btn-outline-secondary">
+                        <i class="fas fa-cog me-1"></i> Voltar às Configurações
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
 
     <!-- Footer -->
-    <footer class="footer-custom mt-5">
-        <div class="container">
-            <div class="text-center text-muted">
-                <small>&copy; 2025 Publisher. All rights reserved.</small>
-            </div>
+    <footer class="footer-custom">
+        <div class="container text-center">
+            <p class="mb-0">&copy; 2025 Publisher. All rights reserved.</p>
         </div>
     </footer>
 
@@ -197,38 +797,126 @@
         const API_BASE = 'http://localhost:3000/api';
         let token = null;
         let countdown = 5;
+        let currentLang = 'en';
+        
+        // Countdown text translations
+        const countdownTexts = {
+            'en': (sec) => `Delete button will be enabled in ${sec} seconds...`,
+            'ja': (sec) => `${sec}秒後に削除ボタンが有効になります...`,
+            'zh': (sec) => `${sec}秒后删除按钮将启用...`,
+            'es': (sec) => `El botón se habilitará en ${sec} segundos...`,
+            'fr': (sec) => `Le bouton sera activé dans ${sec} secondes...`,
+            'de': (sec) => `Button wird in ${sec} Sekunden aktiviert...`,
+            'ko': (sec) => `${sec}초 후에 삭제 버튼이 활성화됩니다...`,
+            'ar': (sec) => `سيتم تفعيل الزر في ${sec} ثوانٍ...`,
+            'pt': (sec) => `O botão será habilitado em ${sec} segundos...`
+        };
+        
+        // Error messages translations
+        const errorMessages = {
+            'en': { default: 'Deletion failed', tryAgain: 'An error occurred. Please try again later.' },
+            'ja': { default: '削除に失敗しました', tryAgain: 'エラーが発生しました。後でもう一度お試しください。' },
+            'zh': { default: '删除失败', tryAgain: '发生错误。请稍后重试。' },
+            'es': { default: 'Error al eliminar', tryAgain: 'Ocurrió un error. Inténtelo más tarde.' },
+            'fr': { default: 'Échec de la suppression', tryAgain: 'Une erreur s\'est produite. Réessayez plus tard.' },
+            'de': { default: 'Löschen fehlgeschlagen', tryAgain: 'Ein Fehler ist aufgetreten. Versuchen Sie es später.' },
+            'ko': { default: '삭제 실패', tryAgain: '오류가 발생했습니다. 나중에 다시 시도해 주세요.' },
+            'ar': { default: 'فشل الحذف', tryAgain: 'حدث خطأ. يرجى المحاولة لاحقاً.' },
+            'pt': { default: 'Falha ao excluir', tryAgain: 'Ocorreu um erro. Tente novamente mais tarde.' }
+        };
+        
+        function changeLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            document.documentElement.lang = lang;
+            
+            document.querySelectorAll('.lang-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            const selectedContent = document.querySelector(`.lang-content[data-lang="${lang}"]`);
+            if (selectedContent) {
+                selectedContent.classList.add('active');
+            } else {
+                document.querySelector('.lang-content[data-lang="en"]').classList.add('active');
+            }
+            
+            // Update countdown text if still running
+            if (countdown > 0) {
+                document.querySelectorAll('.countdown-text').forEach(el => {
+                    const elLang = el.closest('.lang-content').dataset.lang;
+                    el.textContent = countdownTexts[elLang](countdown);
+                });
+            }
+            
+            // Sync selectors
+            document.getElementById('languageSelector').value = lang;
+            document.getElementById('languageSelectorMobile').value = lang;
+            
+            localStorage.setItem('preferredLanguage', lang);
+        }
+        
+        function showScreenAllLangs(screenType) {
+            document.querySelectorAll('.lang-content').forEach(langContent => {
+                langContent.querySelector('.confirm-screen').style.display = 'none';
+                langContent.querySelector('.success-screen').style.display = 'none';
+                langContent.querySelector('.error-screen').style.display = 'none';
+                langContent.querySelector('.invalid-screen').style.display = 'none';
+                langContent.querySelector(`.${screenType}-screen`).style.display = 'block';
+            });
+        }
         
         document.addEventListener('DOMContentLoaded', function() {
+            const savedLang = localStorage.getItem('preferredLanguage') || 'en';
+            document.getElementById('languageSelector').value = savedLang;
+            document.getElementById('languageSelectorMobile').value = savedLang;
+            changeLanguage(savedLang);
+            currentLang = savedLang;
+            
             const params = new URLSearchParams(window.location.search);
             token = params.get('token');
             
             if (!token) {
-                showScreen('invalidScreen');
+                showScreenAllLangs('invalid');
                 return;
             }
             
-            // Enable button after countdown
-            const deleteBtn = document.getElementById('deleteBtn');
-            deleteBtn.disabled = true;
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.disabled = true;
+            });
             
-            const countdownEl = document.getElementById('countdown');
             const interval = setInterval(() => {
                 countdown--;
                 if (countdown > 0) {
-                    countdownEl.textContent = `${countdown}秒後に削除ボタンが有効になります...`;
+                    document.querySelectorAll('.countdown-text').forEach(el => {
+                        const lang = el.closest('.lang-content').dataset.lang;
+                        el.textContent = countdownTexts[lang](countdown);
+                    });
                 } else {
                     clearInterval(interval);
-                    deleteBtn.disabled = false;
-                    countdownEl.textContent = '';
+                    document.querySelectorAll('.delete-btn').forEach(btn => {
+                        btn.disabled = false;
+                    });
+                    document.querySelectorAll('.countdown-text').forEach(el => {
+                        el.textContent = '';
+                    });
                 }
             }, 1000);
-            countdownEl.textContent = `${countdown}秒後に削除ボタンが有効になります...`;
+            
+            document.querySelectorAll('.countdown-text').forEach(el => {
+                const lang = el.closest('.lang-content').dataset.lang;
+                el.textContent = countdownTexts[lang](countdown);
+            });
         });
         
         async function confirmDeletion() {
-            const deleteBtn = document.getElementById('deleteBtn');
-            deleteBtn.disabled = true;
-            document.getElementById('loading').classList.add('show');
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.disabled = true;
+            });
+            
+            document.querySelectorAll('.loading-indicator').forEach(el => {
+                el.classList.add('show');
+            });
             
             try {
                 const response = await fetch(`${API_BASE}/users/confirm-delete`, {
@@ -240,26 +928,23 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    // Clear any stored auth
                     localStorage.removeItem('authToken');
-                    showScreen('successScreen');
+                    showScreenAllLangs('success');
                 } else {
-                    document.getElementById('errorMessage').textContent = result.error || '削除に失敗しました';
-                    showScreen('errorScreen');
+                    document.querySelectorAll('.error-message').forEach(el => {
+                        const lang = el.closest('.lang-content').dataset.lang;
+                        el.textContent = result.error || errorMessages[lang].default;
+                    });
+                    showScreenAllLangs('error');
                 }
             } catch (error) {
                 console.error('Deletion error:', error);
-                document.getElementById('errorMessage').textContent = 'エラーが発生しました。後でもう一度お試しください。';
-                showScreen('errorScreen');
+                document.querySelectorAll('.error-message').forEach(el => {
+                    const lang = el.closest('.lang-content').dataset.lang;
+                    el.textContent = errorMessages[lang].tryAgain;
+                });
+                showScreenAllLangs('error');
             }
-        }
-        
-        function showScreen(screenId) {
-            document.getElementById('confirmScreen').style.display = 'none';
-            document.getElementById('successScreen').style.display = 'none';
-            document.getElementById('errorScreen').style.display = 'none';
-            document.getElementById('invalidScreen').style.display = 'none';
-            document.getElementById(screenId).style.display = 'block';
         }
     </script>
 </body>

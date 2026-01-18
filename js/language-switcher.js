@@ -303,4 +303,23 @@
         LanguageSwitcher.loadLanguage(lang);
     };
 
+    /**
+     * 翻訳ヘルパー関数
+     * 翻訳キーから翻訳テキストを取得
+     * @param {string} key - ドット区切りの翻訳キー (例: 'accountSettings.purchases.receipt')
+     * @returns {string} 翻訳テキスト、見つからない場合はキーをそのまま返す
+     */
+    window.t = function(key) {
+        if (typeof translations === 'undefined') {
+            console.warn('Translations not loaded');
+            return key;
+        }
+        const lang = LanguageSwitcher.getCurrentLanguage() || 'en';
+        const langData = translations[lang] || translations['en'];
+        if (!langData) {
+            return key;
+        }
+        return LanguageSwitcher.getNestedValue(langData, key) || key;
+    };
+
 })();
