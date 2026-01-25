@@ -416,6 +416,19 @@
                 viewsChart.data.datasets[1].label = t('analytics.readers');
                 viewsChart.update();
             }
+            
+            // 動的コンテンツの再描画（エラー状態・空状態のテーブル）
+            const topWorksBody = document.getElementById('topWorksBody');
+            if (topWorksBody) {
+                // エラー状態の場合は再描画
+                if (topWorksBody.querySelector('.fa-exclamation-circle')) {
+                    showEmptyState();
+                }
+                // 空の状態の場合も再描画
+                if (topWorksBody.querySelector('.fa-inbox')) {
+                    topWorksBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4"><i class="fas fa-inbox fa-2x mb-2 d-block"></i>${t('analytics.noData')}</td></tr>`;
+                }
+            }
         });
 
         // 初期化
