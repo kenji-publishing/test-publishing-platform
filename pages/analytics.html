@@ -13,7 +13,6 @@
     <link rel="stylesheet" href="../css/style-new.css">
     <link rel="stylesheet" href="../css/mobile-fixes.css">
     <style>
-        .language-selector{position:fixed;top:80px;right:20px;z-index:1000}.language-selector select{padding:8px 12px;border:1px solid var(--color-border);border-radius:var(--radius-md);background:var(--color-bg-card);font-size:var(--font-size-sm);cursor:pointer}
         .analytics-hero{background:linear-gradient(135deg,var(--color-accent),var(--color-accent-light));color:white;padding:2rem 0}.analytics-hero h1{font-family:var(--font-heading);font-size:1.75rem;margin-bottom:0.5rem}
         .period-selector{background:white;border-radius:12px;padding:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.1);margin-bottom:1.5rem}
         .period-btn{padding:0.5rem 1rem;border:1px solid var(--color-border);background:white;border-radius:8px;cursor:pointer;transition:all 0.2s;font-size:0.9rem}.period-btn:hover{border-color:var(--color-accent)}.period-btn.active{background:var(--color-accent);color:white;border-color:var(--color-accent)}
@@ -28,18 +27,27 @@
         .top-works-table{width:100%}.top-works-table th{font-weight:500;color:var(--color-text-muted);font-size:0.85rem;padding:0.75rem;border-bottom:2px solid var(--color-border)}.top-works-table td{padding:0.75rem;border-bottom:1px solid var(--color-border);vertical-align:middle}.top-works-table tr:hover{background:var(--color-cream)}
         .work-rank{width:28px;height:28px;border-radius:50%;background:var(--color-accent);color:white;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:0.85rem}.work-rank.rank-1{background:#f59e0b}.work-rank.rank-2{background:#6b7280}.work-rank.rank-3{background:#b45309}
         .loading-spinner{width:40px;height:40px;border:3px solid var(--color-border);border-top-color:var(--color-accent);border-radius:50%;animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
-        @media(max-width:576px){.language-selector{top:70px;right:10px}}
     </style>
 </head>
 <body>
-    <div class="language-selector">
-        <select id="languageSelect" onchange="changeLanguage(this.value)">
-            <option value="en">🇬🇧 English</option><option value="ja">🇯🇵 日本語</option><option value="zh">🇨🇳 中文</option><option value="es">🇪🇸 Español</option><option value="fr">🇫🇷 Français</option><option value="de">🇩🇪 Deutsch</option><option value="ko">🇰🇷 한국어</option><option value="ar">🇸🇦 العربية</option><option value="pt">🇧🇷 Português</option>
-        </select>
-    </div>
-    <nav class="navbar navbar-expand-lg navbar-custom">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
         <div class="container">
             <a class="navbar-brand" href="../index.html"><i class="fas fa-book-open"></i> Publisher</a>
+            <!-- Mobile Language Selector -->
+            <div class="d-lg-none me-2">
+                <select id="mobileLanguageSelect" class="form-select form-select-sm language-selector" style="width: auto; min-width: 100px;">
+                    <option value="en">🇬🇧 English</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                    <option value="pt">🇧🇷 Português</option>
+                </select>
+            </div>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
@@ -48,6 +56,20 @@
                     <li class="nav-item"><a class="nav-link" href="dashboard.html" data-i18n="nav.dashboard">Dashboard</a></li>
                 </ul>
                 <ul class="navbar-nav">
+                    <!-- Desktop Language Selector -->
+                    <li class="nav-item d-none d-lg-block me-3">
+                        <select id="desktopLanguageSelect" class="form-select form-select-sm language-selector" style="width: auto;">
+                            <option value="en">🇬🇧 English</option>
+                            <option value="ja">🇯🇵 日本語</option>
+                            <option value="zh">🇨🇳 中文</option>
+                            <option value="es">🇪🇸 Español</option>
+                            <option value="fr">🇫🇷 Français</option>
+                            <option value="de">🇩🇪 Deutsch</option>
+                            <option value="ko">🇰🇷 한국어</option>
+                            <option value="ar">🇸🇦 العربية</option>
+                            <option value="pt">🇧🇷 Português</option>
+                        </select>
+                    </li>
                     <li class="nav-item"><a class="nav-link position-relative" href="notifications.html"><i class="fas fa-bell"></i><span id="notificationBadge" class="position-absolute badge rounded-pill bg-danger" style="font-size:0.55rem;display:none;top:0;right:0;">0</span></a></li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="fas fa-user-circle me-1"></i><span id="userDisplayName">User</span></a>
@@ -61,12 +83,14 @@
             </div>
         </div>
     </nav>
+
     <section class="analytics-hero">
         <div class="container">
             <h1><i class="fas fa-chart-line me-2"></i><span data-i18n="analytics.title">Analytics</span></h1>
             <p class="mb-0 opacity-75" data-i18n="analytics.subtitle">Track your performance and growth</p>
         </div>
     </section>
+
     <main class="container py-4">
         <div class="period-selector d-flex align-items-center justify-content-between flex-wrap gap-2">
             <div class="d-flex align-items-center gap-2">
@@ -77,6 +101,7 @@
             </div>
             <div class="text-muted small"><i class="fas fa-sync-alt me-1"></i><span data-i18n="analytics.lastUpdate">Last update</span>: <span id="lastUpdated">--</span></div>
         </div>
+
         <div class="row g-3 mb-4" id="statsCards">
             <div class="col-md-6 col-lg-3">
                 <div class="stat-card">
@@ -111,6 +136,7 @@
                 </div>
             </div>
         </div>
+
         <div class="row g-4 mb-4">
             <div class="col-lg-8">
                 <div class="chart-card">
@@ -130,6 +156,7 @@
                 </div>
             </div>
         </div>
+
         <div class="chart-card">
             <h3><i class="fas fa-trophy"></i> <span data-i18n="analytics.topWorks">Top Works</span></h3>
             <div class="table-responsive">
@@ -150,6 +177,7 @@
             </div>
         </div>
     </main>
+
     <footer class="footer-custom mt-5">
         <div class="container">
             <div class="d-flex flex-wrap justify-content-between align-items-center">
@@ -162,26 +190,54 @@
             </div>
         </div>
     </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/translations.js"></script>
+    
+    <!-- 言語ファイル（9言語） -->
+    <script src="../js/lang/ja.js"></script>
+    <script src="../js/lang/en.js"></script>
+    <script src="../js/lang/zh.js"></script>
+    <script src="../js/lang/es.js"></script>
+    <script src="../js/lang/fr.js"></script>
+    <script src="../js/lang/de.js"></script>
+    <script src="../js/lang/ko.js"></script>
+    <script src="../js/lang/ar.js"></script>
+    <script src="../js/lang/pt.js"></script>
+    <!-- 翻訳ベース（共通関数） -->
+    <script src="../js/lang/translations-base.js"></script>
+    <!-- 言語切替機能 -->
     <script src="../js/language-switcher.js"></script>
     <script src="../js/header-notification.js"></script>
+
     <script>
-        let currentPeriod=30,viewsChart=null;
+        let currentPeriod = 30;
+        let viewsChart = null;
         
-        // i18n helper
+        // 翻訳ヘルパー関数（正しいlocalStorageキーを使用）
         function t(key) {
-            const lang = localStorage.getItem('publisher_language') || 'en';
+            if (typeof translations === 'undefined') {
+                console.warn('Translations not loaded');
+                return key;
+            }
+            const lang = localStorage.getItem('preferredLanguage') || 'en';
+            const langData = translations[lang] || translations['en'];
+            if (!langData) {
+                return key;
+            }
             const keys = key.split('.');
-            let value = translations[lang];
+            let value = langData;
             for (const k of keys) {
-                if (value && value[k] !== undefined) {
+                if (value && typeof value === 'object' && k in value) {
                     value = value[k];
                 } else {
+                    // フォールバック: 英語で試す
                     value = translations['en'];
                     for (const k2 of keys) {
-                        if (value && value[k2] !== undefined) value = value[k2];
-                        else return key;
+                        if (value && typeof value === 'object' && k2 in value) {
+                            value = value[k2];
+                        } else {
+                            return key;
+                        }
                     }
                     break;
                 }
@@ -189,20 +245,185 @@
             return typeof value === 'string' ? value : key;
         }
 
-        function checkAuth(){const tok=localStorage.getItem('token'),u=localStorage.getItem('user');if(!tok||!u){window.location.href='login.html';return null}const d=JSON.parse(u);document.getElementById('userDisplayName').textContent=d.display_name||d.email;return{token:tok,user:d}}
-        function logout(){localStorage.removeItem('token');localStorage.removeItem('user');window.location.href='login.html'}
-        async function fetchAnalytics(){const{token}=checkAuth();if(!token)return;try{const r=await fetch(`http://localhost:3000/api/analytics/author/overview?period=${currentPeriod}`,{headers:{'Authorization':`Bearer ${token}`}});if(!r.ok)throw new Error('Failed');const d=await r.json();if(d.success){updateStats(d.overview);updateChart(d.trend);updateTopWorks(d.topWorks);updateLastUpdated()}}catch(e){console.error(e);showEmptyState()}}
-        function updateStats(o){document.getElementById('statViews').textContent=formatNumber(o.views.value);updateChangeIndicator('statViewsChange',o.views.change);document.getElementById('statReaders').textContent=formatNumber(o.readers.value);updateChangeIndicator('statReadersChange',o.readers.change);document.getElementById('statTime').textContent=o.readingTime.formatted;document.getElementById('statRevenue').textContent='$'+formatNumber(o.revenue.value);updateChangeIndicator('statRevenueChange',o.revenue.change);document.getElementById('engLikes').textContent=formatNumber(o.engagement.likes);document.getElementById('engComments').textContent=formatNumber(o.engagement.comments);document.getElementById('engBookmarks').textContent=formatNumber(o.engagement.bookmarks);document.getElementById('engDownloads').textContent=formatNumber(o.engagement.downloads)}
-        function updateChangeIndicator(id,c){const e=document.getElementById(id),v=parseFloat(c);if(v>0){e.className='stat-change positive';e.innerHTML=`<i class="fas fa-arrow-up"></i> ${v}%`}else if(v<0){e.className='stat-change negative';e.innerHTML=`<i class="fas fa-arrow-down"></i> ${Math.abs(v)}%`}else{e.className='stat-change neutral';e.innerHTML=`<i class="fas fa-minus"></i> 0%`}}
-        function updateChart(trendData){const ctx=document.getElementById('viewsChart').getContext('2d');if(viewsChart)viewsChart.destroy();viewsChart=new Chart(ctx,{type:'line',data:{labels:trendData.map(d=>formatDate(d.date)),datasets:[{label:t('analytics.views'),data:trendData.map(d=>d.views),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.1)',fill:true,tension:0.3},{label:t('analytics.readers'),data:trendData.map(d=>d.readers),borderColor:'#10b981',backgroundColor:'transparent',borderDash:[5,5],tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',align:'end'}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.05)'}}},interaction:{intersect:false,mode:'index'}}})}
-        function updateTopWorks(w){const b=document.getElementById('topWorksBody');if(!w||!w.length){b.innerHTML=`<tr><td colspan="5" class="text-center text-muted py-4"><i class="fas fa-inbox fa-2x mb-2 d-block"></i>${t('analytics.noData')}</td></tr>`;return}b.innerHTML=w.map((x,i)=>`<tr><td><span class="work-rank ${i<3?'rank-'+(i+1):''}">${i+1}</span></td><td><a href="work-detail.html?id=${x.id}" class="text-decoration-none">${escapeHtml(x.title)}</a></td><td class="text-end">${formatNumber(x.views)}</td><td class="text-end">${formatNumber(x.readers)}</td><td class="text-end">$${formatNumber(x.revenue)}</td></tr>`).join('')}
-        function updateLastUpdated(){document.getElementById('lastUpdated').textContent=new Date().toLocaleTimeString()}
-        function showEmptyState(){document.getElementById('topWorksBody').innerHTML=`<tr><td colspan="5" class="text-center text-muted py-4"><i class="fas fa-exclamation-circle fa-2x mb-2 d-block"></i>${t('analytics.loadFailed')}</td></tr>`}
-        function formatNumber(n){if(n==null)return'0';return Number(n).toLocaleString()}
-        function formatDate(d){const x=new Date(d);return`${x.getMonth()+1}/${x.getDate()}`}
-        function escapeHtml(txt){const d=document.createElement('div');d.textContent=txt;return d.innerHTML}
-        document.querySelectorAll('.period-btn').forEach(b=>{b.addEventListener('click',function(){document.querySelectorAll('.period-btn').forEach(x=>x.classList.remove('active'));this.classList.add('active');currentPeriod=parseInt(this.dataset.period);fetchAnalytics()})});
-        document.addEventListener('DOMContentLoaded',function(){if(checkAuth())fetchAnalytics()});
+        function checkAuth() {
+            const tok = localStorage.getItem('token');
+            const u = localStorage.getItem('user');
+            if (!tok || !u) {
+                window.location.href = 'login.html';
+                return null;
+            }
+            const d = JSON.parse(u);
+            document.getElementById('userDisplayName').textContent = d.display_name || d.email;
+            return { token: tok, user: d };
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+
+        async function fetchAnalytics() {
+            const auth = checkAuth();
+            if (!auth) return;
+            
+            try {
+                const r = await fetch(`http://localhost:3000/api/analytics/author/overview?period=${currentPeriod}`, {
+                    headers: { 'Authorization': `Bearer ${auth.token}` }
+                });
+                if (!r.ok) throw new Error('Failed');
+                const d = await r.json();
+                if (d.success) {
+                    updateStats(d.overview);
+                    updateChart(d.trend);
+                    updateTopWorks(d.topWorks);
+                    updateLastUpdated();
+                }
+            } catch (e) {
+                console.error(e);
+                showEmptyState();
+            }
+        }
+
+        function updateStats(o) {
+            document.getElementById('statViews').textContent = formatNumber(o.views.value);
+            updateChangeIndicator('statViewsChange', o.views.change);
+            document.getElementById('statReaders').textContent = formatNumber(o.readers.value);
+            updateChangeIndicator('statReadersChange', o.readers.change);
+            document.getElementById('statTime').textContent = o.readingTime.formatted;
+            document.getElementById('statRevenue').textContent = '$' + formatNumber(o.revenue.value);
+            updateChangeIndicator('statRevenueChange', o.revenue.change);
+            document.getElementById('engLikes').textContent = formatNumber(o.engagement.likes);
+            document.getElementById('engComments').textContent = formatNumber(o.engagement.comments);
+            document.getElementById('engBookmarks').textContent = formatNumber(o.engagement.bookmarks);
+            document.getElementById('engDownloads').textContent = formatNumber(o.engagement.downloads);
+        }
+
+        function updateChangeIndicator(id, c) {
+            const e = document.getElementById(id);
+            const v = parseFloat(c);
+            if (v > 0) {
+                e.className = 'stat-change positive';
+                e.innerHTML = `<i class="fas fa-arrow-up"></i> ${v}%`;
+            } else if (v < 0) {
+                e.className = 'stat-change negative';
+                e.innerHTML = `<i class="fas fa-arrow-down"></i> ${Math.abs(v)}%`;
+            } else {
+                e.className = 'stat-change neutral';
+                e.innerHTML = `<i class="fas fa-minus"></i> 0%`;
+            }
+        }
+
+        function updateChart(trendData) {
+            const ctx = document.getElementById('viewsChart').getContext('2d');
+            if (viewsChart) viewsChart.destroy();
+            viewsChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: trendData.map(d => formatDate(d.date)),
+                    datasets: [{
+                        label: t('analytics.views'),
+                        data: trendData.map(d => d.views),
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59,130,246,0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }, {
+                        label: t('analytics.readers'),
+                        data: trendData.map(d => d.readers),
+                        borderColor: '#10b981',
+                        backgroundColor: 'transparent',
+                        borderDash: [5, 5],
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top', align: 'end' } },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }
+                    },
+                    interaction: { intersect: false, mode: 'index' }
+                }
+            });
+        }
+
+        function updateTopWorks(w) {
+            const b = document.getElementById('topWorksBody');
+            if (!w || !w.length) {
+                b.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4"><i class="fas fa-inbox fa-2x mb-2 d-block"></i>${t('analytics.noData')}</td></tr>`;
+                return;
+            }
+            b.innerHTML = w.map((x, i) => `
+                <tr>
+                    <td><span class="work-rank ${i < 3 ? 'rank-' + (i + 1) : ''}">${i + 1}</span></td>
+                    <td><a href="work-detail.html?id=${x.id}" class="text-decoration-none">${escapeHtml(x.title)}</a></td>
+                    <td class="text-end">${formatNumber(x.views)}</td>
+                    <td class="text-end">${formatNumber(x.readers)}</td>
+                    <td class="text-end">$${formatNumber(x.revenue)}</td>
+                </tr>
+            `).join('');
+        }
+
+        function updateLastUpdated() {
+            document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
+        }
+
+        function showEmptyState() {
+            document.getElementById('topWorksBody').innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">
+                        <i class="fas fa-exclamation-circle fa-2x mb-2 d-block"></i>
+                        ${t('analytics.loadFailed')}
+                    </td>
+                </tr>
+            `;
+        }
+
+        function formatNumber(n) {
+            if (n == null) return '0';
+            return Number(n).toLocaleString();
+        }
+
+        function formatDate(d) {
+            const x = new Date(d);
+            return `${x.getMonth() + 1}/${x.getDate()}`;
+        }
+
+        function escapeHtml(txt) {
+            const d = document.createElement('div');
+            d.textContent = txt;
+            return d.innerHTML;
+        }
+
+        // 期間ボタンイベント
+        document.querySelectorAll('.period-btn').forEach(b => {
+            b.addEventListener('click', function() {
+                document.querySelectorAll('.period-btn').forEach(x => x.classList.remove('active'));
+                this.classList.add('active');
+                currentPeriod = parseInt(this.dataset.period);
+                fetchAnalytics();
+            });
+        });
+
+        // 言語変更時にページを再描画
+        document.addEventListener('languageChanged', function() {
+            // 翻訳適用後にチャートを再描画
+            if (viewsChart) {
+                viewsChart.data.datasets[0].label = t('analytics.views');
+                viewsChart.data.datasets[1].label = t('analytics.readers');
+                viewsChart.update();
+            }
+        });
+
+        // 初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            if (checkAuth()) {
+                fetchAnalytics();
+            }
+        });
     </script>
 </body>
 </html>
