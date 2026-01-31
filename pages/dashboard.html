@@ -19,20 +19,252 @@
     <link href="../css/mobile-fixes.css" rel="stylesheet">
     
     <style>
-        /* Language Selector */
-        .language-selector {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            z-index: 1000;
+        :root {
+            --color-bg: #FAF8F5;
+            --color-bg-card: #FFFFFF;
+            --color-accent: #8B7355;
+            --color-text: #2D2A26;
+            --color-text-secondary: #6B6560;
+            --color-border: #E8E4E0;
+            --color-success: #5D9C59;
+            --color-warning: #D4A853;
+            --color-error: #C75D5D;
         }
-        .language-selector select {
-            padding: 8px 12px;
+        
+        /* 言語セレクター - ナビバー内用 */
+        .navbar-lang-selector {
+            display: flex;
+            align-items: center;
+            margin-right: 0.5rem;
+        }
+        
+        @media (max-width: 991.98px) {
+            .navbar-lang-selector {
+                order: 1;
+            }
+            .navbar-toggler {
+                order: 2;
+            }
+        }
+        
+        /* User Dropdown Menu */
+        .user-dropdown {
+            position: relative;
+        }
+        
+        .user-dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: transparent;
             border: 1px solid var(--color-border);
-            border-radius: var(--radius-md);
-            background: var(--color-bg-card);
-            font-size: var(--font-size-sm);
+            border-radius: 25px;
+            padding: 0.4rem 0.75rem;
             cursor: pointer;
+            color: var(--color-text);
+            transition: all 0.2s;
+        }
+        
+        .user-dropdown-toggle:hover {
+            border-color: var(--color-accent);
+            background: rgba(139, 115, 85, 0.05);
+        }
+        
+        .user-dropdown-toggle i:first-child {
+            font-size: 1.25rem;
+            color: var(--color-accent);
+        }
+        
+        .user-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .user-chevron {
+            font-size: 0.7rem;
+            color: var(--color-text-secondary);
+            transition: transform 0.2s;
+        }
+        
+        .user-dropdown.open .user-chevron {
+            transform: rotate(180deg);
+        }
+        
+        .user-menu {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            right: 0;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            min-width: 240px;
+            z-index: 1001;
+            display: none;
+            overflow: hidden;
+        }
+        
+        .user-menu.show {
+            display: block;
+        }
+        
+        .user-menu-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--color-bg);
+        }
+        
+        .user-avatar {
+            font-size: 2.5rem;
+            color: var(--color-accent);
+        }
+        
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .user-display-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .user-email {
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .user-menu-divider {
+            height: 1px;
+            background: var(--color-border);
+        }
+        
+        .user-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--color-text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+        
+        .user-menu-item:hover {
+            background: var(--color-bg);
+            color: var(--color-accent);
+        }
+        
+        .user-menu-item i {
+            width: 20px;
+            text-align: center;
+            color: var(--color-text-secondary);
+        }
+        
+        .user-menu-item:hover i {
+            color: var(--color-accent);
+        }
+        
+        .logout-btn {
+            color: var(--color-error);
+        }
+        
+        .logout-btn i {
+            color: var(--color-error);
+        }
+        
+        .logout-btn:hover {
+            background: rgba(199, 93, 93, 0.1);
+            color: var(--color-error);
+        }
+        
+        /* User Dropdown - Mobile adjustments */
+        @media (max-width: 991.98px) {
+            .user-dropdown {
+                order: 3;
+                margin-left: 0.5rem;
+            }
+            
+            .user-dropdown-toggle {
+                padding: 0.3rem;
+                border-radius: 50%;
+                width: 38px;
+                height: 38px;
+                justify-content: center;
+            }
+            
+            .user-menu {
+                position: fixed;
+                top: 56px;
+                right: 10px;
+                left: auto;
+                min-width: 260px;
+                max-width: calc(100vw - 20px);
+                z-index: 9999;
+            }
+            
+            /* ハンバーガーメニューの高さ制限とスクロール制御 */
+            .navbar-collapse {
+                max-height: 70vh;
+                overflow-y: auto;
+                overscroll-behavior: contain;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .navbar-collapse.show,
+            .navbar-collapse.collapsing {
+                position: fixed;
+                top: 56px;
+                left: 0;
+                right: 0;
+                background: #FFFFFF;
+                border-bottom: 1px solid var(--color-border);
+                box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+                z-index: 1045;
+                padding: 0.5rem 1rem;
+            }
+            
+            body.menu-open {
+                overflow: hidden;
+            }
+            
+            /* オーバーレイはnavbarとメニューの下に表示（メニュー以外を暗くする） */
+            .navbar-overlay {
+                display: none;
+                position: fixed;
+                top: 56px;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 1040;
+                pointer-events: auto;
+            }
+            
+            .navbar-overlay.show {
+                display: block;
+            }
+            
+            /* navbarは最前面に */
+            .navbar-custom {
+                z-index: 1050 !important;
+            }
         }
 
         .dashboard-container { padding: var(--spacing-xl) 0; }
@@ -94,27 +326,38 @@
         .usage-header h3 { font-size: var(--font-size-base); margin: 0; }
         .usage-count { font-family: var(--font-heading); font-size: var(--font-size-3xl); font-weight: 700; color: var(--color-accent); }
         .usage-label { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+        
+        /* Empty State Styles */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--color-text-secondary);
+        }
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--color-border);
+            margin-bottom: 1rem;
+        }
+        .empty-state h4 {
+            color: var(--color-text-primary);
+            margin-bottom: 0.5rem;
+        }
+        .empty-state p {
+            margin-bottom: 1rem;
+        }
+        .empty-state .btn {
+            margin-top: 0.5rem;
+        }
+        
         @media (max-width: 992px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .quick-actions { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 768px) { .translation-item { flex-wrap: wrap; gap: 0.5rem; } .translation-item .translation-info { flex: 1; min-width: calc(100% - 60px); } .translation-item .status-badge { margin-left: auto; } }
-        @media (max-width: 576px) { .stats-grid { grid-template-columns: 1fr 1fr; gap: 0.5rem; } .stat-card { padding: var(--spacing-md); } .stat-card .stat-icon { width: 36px; height: 36px; margin-bottom: var(--spacing-sm); } .stat-card .stat-value { font-size: var(--font-size-lg); } .stat-card .stat-label { font-size: var(--font-size-xs); } .stat-card .stat-change { display: none; } .quick-actions { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; } .action-card { padding: var(--spacing-md); } .action-card i { font-size: 1.5rem; } .welcome-banner { text-align: center; padding: var(--spacing-lg); } .welcome-banner h1 { font-size: var(--font-size-lg); } .welcome-banner .d-flex { flex-direction: column; gap: var(--spacing-md); } .work-item { flex-wrap: wrap; } .work-item .work-cover { width: 50px; height: 65px; } .work-item .work-info { flex: 1; min-width: calc(100% - 70px); } .work-item .work-title { white-space: normal; font-size: var(--font-size-sm); } .work-item .work-stats { width: 100%; text-align: left; margin-top: var(--spacing-sm); padding-top: var(--spacing-sm); border-top: 1px solid var(--color-border); display: flex; justify-content: space-between; } .section-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; } .section-header h2 { font-size: var(--font-size-base); } .usage-card { padding: var(--spacing-md); } .usage-count { font-size: var(--font-size-2xl); } .language-selector { top: 70px; right: 10px; } }
+        @media (max-width: 576px) { .stats-grid { grid-template-columns: 1fr 1fr; gap: 0.5rem; } .stat-card { padding: var(--spacing-md); } .stat-card .stat-icon { width: 36px; height: 36px; margin-bottom: var(--spacing-sm); } .stat-card .stat-value { font-size: var(--font-size-lg); } .stat-card .stat-label { font-size: var(--font-size-xs); } .stat-card .stat-change { display: none; } .quick-actions { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; } .action-card { padding: var(--spacing-md); } .action-card i { font-size: 1.5rem; } .welcome-banner { text-align: center; padding: var(--spacing-lg); } .welcome-banner h1 { font-size: var(--font-size-lg); } .welcome-banner .d-flex { flex-direction: column; gap: var(--spacing-md); } .work-item { flex-wrap: wrap; } .work-item .work-cover { width: 50px; height: 65px; } .work-item .work-info { flex: 1; min-width: calc(100% - 70px); } .work-item .work-title { white-space: normal; font-size: var(--font-size-sm); } .work-item .work-stats { width: 100%; text-align: left; margin-top: var(--spacing-sm); padding-top: var(--spacing-sm); border-top: 1px solid var(--color-border); display: flex; justify-content: space-between; } .section-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; } .section-header h2 { font-size: var(--font-size-base); } .usage-card { padding: var(--spacing-md); } .usage-count { font-size: var(--font-size-2xl); } }
     </style>
 </head>
 <body>
-    <!-- Language Selector -->
-    <div class="language-selector">
-        <select id="languageSelect" onchange="changeLanguage(this.value)">
-            <option value="en">🇬🇧 English</option>
-            <option value="ja">🇯🇵 日本語</option>
-            <option value="zh">🇨🇳 中文</option>
-            <option value="es">🇪🇸 Español</option>
-            <option value="fr">🇫🇷 Français</option>
-            <option value="de">🇩🇪 Deutsch</option>
-            <option value="ko">🇰🇷 한국어</option>
-            <option value="ar">🇸🇦 العربية</option>
-            <option value="pt">🇧🇷 Português</option>
-        </select>
-    </div>
-
+    <!-- Navbar Overlay -->
+    <div class="navbar-overlay d-lg-none" id="navbarOverlay"></div>
+    
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
         <div class="container">
@@ -123,12 +366,60 @@
                 Publisher
             </a>
             
+            <!-- Language Selector (モバイル用 - ハンバーガーメニュー横) -->
+            <div class="navbar-lang-selector d-lg-none">
+                <select class="language-selector" id="languageSelectorMobile">
+                    <option value="en">🇬🇧 EN</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="es">🇪🇸 ES</option>
+                    <option value="fr">🇫🇷 FR</option>
+                    <option value="de">🇩🇪 DE</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="ar">🇸🇦 عربي</option>
+                    <option value="pt">🇧🇷 PT</option>
+                </select>
+            </div>
+            
+            <!-- User Dropdown (outside collapse) -->
+            <div class="user-dropdown" id="userDropdown">
+                <button type="button" class="user-dropdown-toggle" id="userDropdownBtn" onclick="toggleUserDropdown(event)">
+                    <i class="fas fa-user-circle"></i>
+                    <span class="user-name d-none d-lg-inline" id="userName">User</span>
+                    <i class="fas fa-chevron-down user-chevron d-none d-lg-inline"></i>
+                </button>
+                <div class="user-menu" id="userMenu">
+                    <div class="user-menu-header">
+                        <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
+                        <div class="user-info">
+                            <div class="user-display-name" id="userDisplayName">User</div>
+                            <div class="user-email" id="userEmail">user@example.com</div>
+                        </div>
+                    </div>
+                    <div class="user-menu-divider"></div>
+                    <a href="profile.html" class="user-menu-item">
+                        <i class="fas fa-user"></i>
+                        <span id="menuProfile" data-i18n="nav.profile">Profile</span>
+                    </a>
+                    <a href="account-settings.html" class="user-menu-item">
+                        <i class="fas fa-cog"></i>
+                        <span id="menuAccountSettings" data-i18n="nav.accountSettings">Account Settings</span>
+                    </a>
+                    <div class="user-menu-divider"></div>
+                    <button class="user-menu-item logout-btn" onclick="handleLogout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span id="menuLogout" data-i18n="nav.logout">Log Out</span>
+                    </button>
+                </div>
+            </div>
+            
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
+                <!-- PC Navigation -->
+                <ul class="navbar-nav me-auto d-none d-lg-flex">
                     <li class="nav-item">
                         <a class="nav-link active" href="dashboard.html">
                             <i class="fas fa-th-large me-1"></i> <span data-i18n="nav.dashboard">Dashboard</span>
@@ -149,26 +440,112 @@
                             <i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span>
                         </a>
                     </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-language me-1"></i> <span data-i18n="nav.translationTools">Translation Tools</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="manga-translator.html"><i class="fas fa-image me-2"></i><span data-i18n="nav.mangaTranslator">Manga Translator</span></a></li>
+                            <li><a class="dropdown-item" href="translation-status.html"><i class="fas fa-tasks me-2"></i><span data-i18n="nav.translationStatus">Translation Status</span></a></li>
+                            <li><a class="dropdown-item" href="translators/index.html"><i class="fas fa-users me-2"></i><span data-i18n="nav.findTranslators">Find Translators</span></a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-headset me-1"></i> <span data-i18n="nav.support">Support</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="support/faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
+                            <li><a class="dropdown-item" href="support/troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
+                            <li><a class="dropdown-item" href="support/contact.html"><i class="fas fa-envelope me-2"></i><span data-i18n="nav.contact">Contact</span></a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <!-- Mobile Hamburger Menu -->
+                <ul class="navbar-nav d-lg-none">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="dashboard.html">
+                            <i class="fas fa-th-large me-2"></i> <span data-i18n="nav.dashboard">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="my-works.html">
+                            <i class="fas fa-book me-2"></i> <span data-i18n="dashboard.myWorks">My Works</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="earnings.html">
+                            <i class="fas fa-coins me-2"></i> <span data-i18n="dashboard.earnings">Earnings</span>
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="browse.html">
+                            <i class="fas fa-compass me-2"></i> <span data-i18n="nav.browse">Browse</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="upload.html">
+                            <i class="fas fa-upload me-2"></i> <span data-i18n="nav.upload">Upload</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="collapse" href="#translationToolsMenu" role="button">
+                            <i class="fas fa-language me-2"></i> <span data-i18n="nav.translationTools">Translation Tools</span>
+                            <i class="fas fa-chevron-down ms-auto small"></i>
+                        </a>
+                        <div class="collapse ps-4" id="translationToolsMenu">
+                            <a class="nav-link" href="manga-translator.html">
+                                <i class="fas fa-image me-2"></i> <span data-i18n="nav.mangaTranslator">Manga Translator</span>
+                            </a>
+                            <a class="nav-link" href="translation-status.html">
+                                <i class="fas fa-tasks me-2"></i> <span data-i18n="nav.translationStatus">Translation Status</span>
+                            </a>
+                            <a class="nav-link" href="translators/index.html">
+                                <i class="fas fa-users me-2"></i> <span data-i18n="nav.findTranslators">Find Translators</span>
+                            </a>
+                        </div>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="support/faq.html">
+                            <i class="fas fa-question-circle me-2"></i> <span data-i18n="support.faq.title">FAQ</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="support/contact.html">
+                            <i class="fas fa-envelope me-2"></i> <span data-i18n="nav.contact">Contact</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="support/tickets.html">
+                            <i class="fas fa-ticket-alt me-2"></i> <span data-i18n="support.tickets.title">My Tickets</span>
+                        </a>
+                    </li>
                 </ul>
                 
                 <div class="d-flex align-items-center gap-3">
-                    <a href="notifications.html" class="btn btn-soft-custom position-relative">
-                        <i class="fas fa-bell"></i>
+                    <!-- Notification Bell (PC) -->
+                    <a href="notifications.html" class="btn btn-link position-relative d-none d-lg-block" title="Notifications">
+                        <i class="fas fa-bell fs-5"></i>
                         <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; display: none;">0</span>
                     </a>
                     
-                    <div class="dropdown">
-                        <button class="btn btn-soft-custom dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user-circle me-1"></i>
-                            <span id="userName">User</span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="profile.html"><i class="fas fa-user me-2"></i><span data-i18n="nav.settings">Profile</span></a></li>
-                            <li><a class="dropdown-item" href="account-settings.html"><i class="fas fa-cog me-2"></i><span data-i18n="nav.settings">Settings</span></a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i><span data-i18n="nav.logout">Sign Out</span></a></li>
-                        </ul>
-                    </div>
+                    <!-- Language Selector (デスクトップ用) -->
+                    <select class="language-selector d-none d-lg-block" id="languageSelector">
+                        <option value="en">🇬🇧 EN</option>
+                        <option value="ja">🇯🇵 日本語</option>
+                        <option value="zh">🇨🇳 中文</option>
+                        <option value="es">🇪🇸 ES</option>
+                        <option value="fr">🇫🇷 FR</option>
+                        <option value="de">🇩🇪 DE</option>
+                        <option value="ko">🇰🇷 한국어</option>
+                        <option value="ar">🇸🇦 عربي</option>
+                        <option value="pt">🇧🇷 PT</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -184,37 +561,37 @@
                         <h1><span data-i18n="dashboard.welcome">Welcome back</span>, <span id="welcomeName">Creator</span>! 👋</h1>
                         <p data-i18n="dashboard.subtitle">Here's what's happening with your works today.</p>
                     </div>
-                    <a href="upload-work.html" class="btn btn-lg mt-3 mt-md-0">
+                    <a href="upload.html" class="btn btn-lg mt-3 mt-md-0">
                         <i class="fas fa-plus me-2"></i><span data-i18n="dashboard.uploadNew">Upload New Work</span>
                     </a>
                 </div>
             </div>
 
             <!-- Stats Grid -->
-            <div class="stats-grid fade-in">
+            <div class="stats-grid fade-in" id="statsGrid">
                 <div class="stat-card">
                     <div class="stat-icon earnings"><i class="fas fa-dollar-sign fa-lg"></i></div>
-                    <div class="stat-value">$1,234.56</div>
+                    <div class="stat-value" id="statEarnings">$0.00</div>
                     <div class="stat-label" data-i18n="dashboard.totalRevenue">Total Earnings</div>
-                    <div class="stat-change positive"><i class="fas fa-arrow-up"></i> +12.5% <span data-i18n="dashboard.thisMonth">this month</span></div>
+                    <div class="stat-change positive" id="statEarningsChange"><i class="fas fa-minus"></i> --</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon works"><i class="fas fa-book fa-lg"></i></div>
-                    <div class="stat-value">12</div>
+                    <div class="stat-value" id="statWorks">0</div>
                     <div class="stat-label" data-i18n="dashboard.totalWorks">Published Works</div>
-                    <div class="stat-change positive"><i class="fas fa-arrow-up"></i> +2 <span data-i18n="dashboard.thisMonth">this month</span></div>
+                    <div class="stat-change positive" id="statWorksChange"><i class="fas fa-minus"></i> --</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon views"><i class="fas fa-eye fa-lg"></i></div>
-                    <div class="stat-value">8,432</div>
+                    <div class="stat-value" id="statViews">0</div>
                     <div class="stat-label" data-i18n="dashboard.totalViews">Total Views</div>
-                    <div class="stat-change positive"><i class="fas fa-arrow-up"></i> +24.3% <span data-i18n="dashboard.thisMonth">this month</span></div>
+                    <div class="stat-change positive" id="statViewsChange"><i class="fas fa-minus"></i> --</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon translations"><i class="fas fa-language fa-lg"></i></div>
-                    <div class="stat-value">48</div>
-                    <div class="stat-label" data-i18n="dashboard.translations">Translations</div>
-                    <div class="stat-change positive"><i class="fas fa-arrow-up"></i> +8 <span data-i18n="dashboard.thisMonth">this month</span></div>
+                    <div class="stat-value" id="statTranslations">0</div>
+                    <div class="stat-label" data-i18n="dashboard.totalTranslations">Translations</div>
+                    <div class="stat-change positive" id="statTranslationsChange"><i class="fas fa-minus"></i> --</div>
                 </div>
             </div>
 
@@ -227,39 +604,19 @@
                             <h2><i class="fas fa-clock me-2 text-accent"></i><span data-i18n="dashboard.recentActivity">Recent Works</span></h2>
                             <a href="my-works.html" class="btn btn-soft-custom btn-sm" data-i18n="dashboard.viewAll">View All</a>
                         </div>
-                        <div class="section-body">
-                            <div class="work-item">
-                                <div class="work-cover"><i class="fas fa-book"></i></div>
-                                <div class="work-info">
-                                    <div class="work-title">The Adventure of Magic Academy</div>
-                                    <div class="work-meta"><span class="badge badge-soft me-2">Fiction</span>Translated to 5 languages</div>
-                                </div>
-                                <div class="work-stats">
-                                    <div class="work-earnings">$234.50</div>
-                                    <div class="work-views">1,234 views</div>
-                                </div>
+                        <div class="section-body" id="recentWorksBody">
+                            <!-- Empty State (shown when no works) -->
+                            <div class="empty-state" id="emptyWorksState">
+                                <i class="fas fa-book-open d-block"></i>
+                                <h4 id="emptyWorksTitle">No works yet</h4>
+                                <p id="emptyWorksDesc">Start by uploading your first work to share with the world.</p>
+                                <a href="upload.html" class="btn btn-accent">
+                                    <i class="fas fa-plus me-2"></i><span id="emptyWorksBtn">Upload Your First Work</span>
+                                </a>
                             </div>
-                            <div class="work-item">
-                                <div class="work-cover"><i class="fas fa-book"></i></div>
-                                <div class="work-info">
-                                    <div class="work-title">Whispers of Tomorrow</div>
-                                    <div class="work-meta"><span class="badge badge-soft me-2">Romance</span>Translated to 3 languages</div>
-                                </div>
-                                <div class="work-stats">
-                                    <div class="work-earnings">$156.00</div>
-                                    <div class="work-views">892 views</div>
-                                </div>
-                            </div>
-                            <div class="work-item">
-                                <div class="work-cover"><i class="fas fa-book"></i></div>
-                                <div class="work-info">
-                                    <div class="work-title">Digital Dreams: A Cyberpunk Story</div>
-                                    <div class="work-meta"><span class="badge badge-soft me-2">Sci-Fi</span>Translated to 7 languages</div>
-                                </div>
-                                <div class="work-stats">
-                                    <div class="work-earnings">$89.25</div>
-                                    <div class="work-views">567 views</div>
-                                </div>
+                            <!-- Works List (hidden when empty) -->
+                            <div id="worksList" style="display: none;">
+                                <!-- Works will be loaded dynamically -->
                             </div>
                         </div>
                     </div>
@@ -270,30 +627,16 @@
                             <h2><i class="fas fa-language me-2 text-accent"></i><span data-i18n="dashboard.recentTranslations">Recent Translations</span></h2>
                             <a href="translation-status.html" class="btn btn-soft-custom btn-sm" data-i18n="dashboard.viewAll">View All</a>
                         </div>
-                        <div class="section-body">
-                            <div class="translation-item">
-                                <div class="lang-flag">🇬🇧</div>
-                                <div class="translation-info">
-                                    <div class="translation-title">The Adventure of Magic Academy → English</div>
-                                    <div class="translation-progress">Completed 2 hours ago</div>
-                                </div>
-                                <span class="status-badge completed"><i class="fas fa-check me-1"></i>Completed</span>
+                        <div class="section-body" id="recentTranslationsBody">
+                            <!-- Empty State (shown when no translations) -->
+                            <div class="empty-state" id="emptyTranslationsState">
+                                <i class="fas fa-language d-block"></i>
+                                <h4 id="emptyTranslationsTitle">No translations yet</h4>
+                                <p id="emptyTranslationsDesc">Upload a work first, then you can translate it to reach a global audience.</p>
                             </div>
-                            <div class="translation-item">
-                                <div class="lang-flag">🇪🇸</div>
-                                <div class="translation-info">
-                                    <div class="translation-title">Whispers of Tomorrow → Spanish</div>
-                                    <div class="translation-progress">65% complete • 3 min remaining</div>
-                                </div>
-                                <span class="status-badge in-progress"><i class="fas fa-spinner fa-spin me-1"></i>In Progress</span>
-                            </div>
-                            <div class="translation-item">
-                                <div class="lang-flag">🇰🇷</div>
-                                <div class="translation-info">
-                                    <div class="translation-title">Digital Dreams → Korean</div>
-                                    <div class="translation-progress">Waiting in queue • Position 2</div>
-                                </div>
-                                <span class="status-badge pending"><i class="fas fa-clock me-1"></i>Pending</span>
+                            <!-- Translations List (hidden when empty) -->
+                            <div id="translationsList" style="display: none;">
+                                <!-- Translations will be loaded dynamically -->
                             </div>
                         </div>
                     </div>
@@ -304,41 +647,41 @@
                     <!-- AI Translation Usage -->
                     <div class="usage-card fade-in mb-4">
                         <div class="usage-header">
-                            <h3><i class="fas fa-robot me-2 text-accent"></i>AI Translation</h3>
-                            <span class="badge badge-accent">Free Tier</span>
+                            <h3><i class="fas fa-robot me-2 text-accent"></i><span data-i18n="dashboard.aiTranslation.title">AI Translation</span></h3>
+                            <span class="badge badge-accent" data-i18n="dashboard.aiTranslation.freeTier">Free Tier</span>
                         </div>
                         <div class="text-center my-4">
-                            <div class="usage-count">3 / 5</div>
-                            <div class="usage-label">Works translated this month</div>
+                            <div class="usage-count" id="aiUsageCount">0 / 5</div>
+                            <div class="usage-label" data-i18n="dashboard.aiTranslation.worksTranslated">Works translated this month</div>
                         </div>
                         <div class="progress-custom mb-3">
-                            <div class="progress-bar" style="width: 60%"></div>
+                            <div class="progress-bar" id="aiUsageBar" style="width: 0%"></div>
                         </div>
-                        <p class="text-center mb-0" style="font-size: var(--font-size-sm); color: var(--color-text-secondary);">2 free translations remaining</p>
+                        <p class="text-center mb-0" style="font-size: var(--font-size-sm); color: var(--color-text-secondary);" id="aiUsageRemaining" data-i18n="dashboard.aiTranslation.freeRemaining">5 free translations remaining</p>
                     </div>
 
                     <!-- Quick Actions -->
-                    <h3 class="mb-3" style="font-size: var(--font-size-lg);" data-i18n="dashboard.quickActionsTitle">Quick Actions</h3>
+                    <h3 class="mb-3" style="font-size: var(--font-size-lg);" data-i18n="dashboard.quickActions">Quick Actions</h3>
                     <div class="quick-actions fade-in">
                         <a href="editor.html" class="action-card">
                             <i class="fas fa-edit d-block"></i>
-                            <div class="action-title" data-i18n="dashboard.quickActions.create">Create</div>
-                            <div class="action-desc" data-i18n="dashboard.quickActions.newWork">New work</div>
+                            <div class="action-title" data-i18n="dashboard.actions.create">Create</div>
+                            <div class="action-desc" data-i18n="dashboard.actions.newWork">New work</div>
                         </a>
                         <a href="upload.html" class="action-card">
                             <i class="fas fa-upload d-block"></i>
-                            <div class="action-title" data-i18n="dashboard.quickActions.upload">Upload</div>
-                            <div class="action-desc" data-i18n="dashboard.quickActions.fileUpload">File upload</div>
+                            <div class="action-title" data-i18n="dashboard.actions.upload">Upload</div>
+                            <div class="action-desc" data-i18n="dashboard.actions.fileUpload">File upload</div>
                         </a>
                         <a href="manga-translator.html" class="action-card">
                             <i class="fas fa-language d-block"></i>
-                            <div class="action-title" data-i18n="dashboard.quickActions.manga">Manga</div>
-                            <div class="action-desc" data-i18n="dashboard.quickActions.translator">Translator</div>
+                            <div class="action-title" data-i18n="dashboard.actions.manga">Manga</div>
+                            <div class="action-desc" data-i18n="dashboard.actions.translator">Translator</div>
                         </a>
                         <a href="reader.html" class="action-card">
                             <i class="fas fa-book-reader d-block"></i>
-                            <div class="action-title" data-i18n="dashboard.quickActions.reader">Reader</div>
-                            <div class="action-desc" data-i18n="dashboard.quickActions.preview">Preview</div>
+                            <div class="action-title" data-i18n="dashboard.actions.reader">Reader</div>
+                            <div class="action-desc" data-i18n="dashboard.actions.preview">Preview</div>
                         </a>
                     </div>                
                 </div>
@@ -361,23 +704,417 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/translations.js"></script>
+    <!-- 言語ファイル（9言語） -->
+    <script src="../js/lang/ja.js"></script>
+    <script src="../js/lang/en.js"></script>
+    <script src="../js/lang/zh.js"></script>
+    <script src="../js/lang/es.js"></script>
+    <script src="../js/lang/fr.js"></script>
+    <script src="../js/lang/de.js"></script>
+    <script src="../js/lang/ko.js"></script>
+    <script src="../js/lang/ar.js"></script>
+    <script src="../js/lang/pt.js"></script>
+    <!-- 翻訳ベース（共通関数） -->
+    <script src="../js/lang/translations-base.js"></script>
+    <!-- 言語切替機能 -->
     <script src="../js/language-switcher.js"></script>
     <script src="../js/notification-badge.js"></script>
+    
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
-            const token = localStorage.getItem('token');
-            if (user.firstName) {
-                document.getElementById('userName').textContent = user.firstName;
-                document.getElementById('welcomeName').textContent = user.firstName;
+        // 多言語対応テキスト
+        const uiText = {
+            profile: {
+                en: 'Profile',
+                ja: 'プロフィール',
+                zh: '个人资料',
+                es: 'Perfil',
+                fr: 'Profil',
+                de: 'Profil',
+                ko: '프로필',
+                ar: 'الملف الشخصي',
+                pt: 'Perfil'
+            },
+            accountSettings: {
+                en: 'Account Settings',
+                ja: 'アカウント設定',
+                zh: '账户设置',
+                es: 'Configuración de cuenta',
+                fr: 'Paramètres du compte',
+                de: 'Kontoeinstellungen',
+                ko: '계정 설정',
+                ar: 'إعدادات الحساب',
+                pt: 'Configurações da conta'
+            },
+            logout: {
+                en: 'Log Out',
+                ja: 'ログアウト',
+                zh: '退出登录',
+                es: 'Cerrar sesión',
+                fr: 'Déconnexion',
+                de: 'Abmelden',
+                ko: '로그아웃',
+                ar: 'تسجيل الخروج',
+                pt: 'Sair'
+            },
+            emptyWorksTitle: {
+                en: 'No works yet',
+                ja: 'まだ作品がありません',
+                zh: '暂无作品',
+                es: 'Aún no hay obras',
+                fr: 'Pas encore d\'œuvres',
+                de: 'Noch keine Werke',
+                ko: '아직 작품이 없습니다',
+                ar: 'لا توجد أعمال بعد',
+                pt: 'Ainda não há obras'
+            },
+            emptyWorksDesc: {
+                en: 'Start by uploading your first work to share with the world.',
+                ja: '最初の作品をアップロードして、世界中の読者に届けましょう。',
+                zh: '上传您的第一部作品，与全世界分享。',
+                es: 'Comienza subiendo tu primera obra para compartir con el mundo.',
+                fr: 'Commencez par télécharger votre première œuvre à partager avec le monde.',
+                de: 'Beginnen Sie damit, Ihr erstes Werk hochzuladen und mit der Welt zu teilen.',
+                ko: '첫 번째 작품을 업로드하여 전 세계와 공유하세요.',
+                ar: 'ابدأ بتحميل عملك الأول لمشاركته مع العالم.',
+                pt: 'Comece enviando seu primeiro trabalho para compartilhar com o mundo.'
+            },
+            emptyWorksBtn: {
+                en: 'Upload Your First Work',
+                ja: '最初の作品をアップロード',
+                zh: '上传您的第一部作品',
+                es: 'Sube tu primera obra',
+                fr: 'Téléchargez votre première œuvre',
+                de: 'Laden Sie Ihr erstes Werk hoch',
+                ko: '첫 번째 작품 업로드',
+                ar: 'حمّل عملك الأول',
+                pt: 'Envie seu primeiro trabalho'
+            },
+            emptyTranslationsTitle: {
+                en: 'No translations yet',
+                ja: 'まだ翻訳がありません',
+                zh: '暂无翻译',
+                es: 'Aún no hay traducciones',
+                fr: 'Pas encore de traductions',
+                de: 'Noch keine Übersetzungen',
+                ko: '아직 번역이 없습니다',
+                ar: 'لا توجد ترجمات بعد',
+                pt: 'Ainda não há traduções'
+            },
+            emptyTranslationsDesc: {
+                en: 'Upload a work first, then you can translate it to reach a global audience.',
+                ja: 'まず作品をアップロードしてから、翻訳して世界中の読者に届けましょう。',
+                zh: '先上传作品，然后翻译以触达全球读者。',
+                es: 'Sube una obra primero, luego puedes traducirla para llegar a una audiencia global.',
+                fr: 'Téléchargez d\'abord une œuvre, puis traduisez-la pour atteindre un public mondial.',
+                de: 'Laden Sie zuerst ein Werk hoch, dann können Sie es übersetzen, um ein globales Publikum zu erreichen.',
+                ko: '먼저 작품을 업로드한 다음 번역하여 전 세계 독자에게 도달하세요.',
+                ar: 'حمّل عملاً أولاً، ثم يمكنك ترجمته للوصول إلى جمهور عالمي.',
+                pt: 'Envie um trabalho primeiro, depois você pode traduzi-lo para alcançar um público global.'
+            },
+            freeRemaining: {
+                en: '{count} free translations remaining',
+                ja: '無料翻訳残り{count}回',
+                zh: '剩余{count}次免费翻译',
+                es: '{count} traducciones gratuitas restantes',
+                fr: '{count} traductions gratuites restantes',
+                de: '{count} kostenlose Übersetzungen übrig',
+                ko: '무료 번역 {count}회 남음',
+                ar: 'متبقي {count} ترجمات مجانية',
+                pt: '{count} traduções gratuitas restantes'
+            },
+            logOutConfirm: {
+                en: 'Are you sure you want to log out?',
+                ja: 'ログアウトしますか？',
+                zh: '确定要退出登录吗？',
+                es: '¿Estás seguro de que quieres cerrar sesión?',
+                fr: 'Êtes-vous sûr de vouloir vous déconnecter?',
+                de: 'Sind Sie sicher, dass Sie sich abmelden möchten?',
+                ko: '로그아웃 하시겠습니까?',
+                ar: 'هل أنت متأكد أنك تريد تسجيل الخروج؟',
+                pt: 'Tem certeza que deseja sair?'
             }
-        });
-        function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = 'login.html';
+        };
+        
+        // Get current language
+        function getCurrentLanguage() {
+            return localStorage.getItem('preferredLanguage') || 'en';
         }
+        
+        // Get localized text
+        function getL(obj) {
+            const lang = getCurrentLanguage();
+            return obj[lang] || obj.en || '';
+        }
+        
+        // Toggle user dropdown
+        function toggleUserDropdown(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const dropdown = document.getElementById('userDropdown');
+            const dropdownMenu = document.getElementById('userMenu');
+            
+            dropdown.classList.toggle('open');
+            dropdownMenu.classList.toggle('show');
+            
+            if (dropdownMenu.classList.contains('show')) {
+                if (typeof LanguageSwitcher !== 'undefined') {
+                    LanguageSwitcher.loadLanguage(LanguageSwitcher.getCurrentLanguage());
+                }
+            }
+        }
+        
+        // Handle logout
+        function handleLogout() {
+            if (confirm(getL(uiText.logOutConfirm))) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
+            }
+        }
+        
+        // Sync language selectors
+        function syncLanguageSelectors() {
+            const desktopSelector = document.getElementById('languageSelector');
+            const mobileSelector = document.getElementById('languageSelectorMobile');
+            
+            if (desktopSelector && mobileSelector) {
+                const savedLang = localStorage.getItem('preferredLanguage') || 'en';
+                desktopSelector.value = savedLang;
+                mobileSelector.value = savedLang;
+                
+                mobileSelector.addEventListener('change', function() {
+                    desktopSelector.value = this.value;
+                    if (typeof LanguageSwitcher !== 'undefined') {
+                        LanguageSwitcher.changeLanguage(this.value);
+                    }
+                    updateUIText();
+                });
+                
+                desktopSelector.addEventListener('change', function() {
+                    mobileSelector.value = this.value;
+                    if (typeof LanguageSwitcher !== 'undefined') {
+                        LanguageSwitcher.changeLanguage(this.value);
+                    }
+                    updateUIText();
+                });
+            }
+        }
+        
+        // Update UI text based on current language
+        function updateUIText() {
+            const lang = getCurrentLanguage();
+            
+            // Update user menu items
+            const menuProfile = document.getElementById('menuProfile');
+            const menuAccountSettings = document.getElementById('menuAccountSettings');
+            const menuLogout = document.getElementById('menuLogout');
+            
+            if (menuProfile) menuProfile.textContent = getL(uiText.profile);
+            if (menuAccountSettings) menuAccountSettings.textContent = getL(uiText.accountSettings);
+            if (menuLogout) menuLogout.textContent = getL(uiText.logout);
+            
+            // Update empty state texts
+            const emptyWorksTitle = document.getElementById('emptyWorksTitle');
+            const emptyWorksDesc = document.getElementById('emptyWorksDesc');
+            const emptyWorksBtn = document.getElementById('emptyWorksBtn');
+            const emptyTranslationsTitle = document.getElementById('emptyTranslationsTitle');
+            const emptyTranslationsDesc = document.getElementById('emptyTranslationsDesc');
+            
+            if (emptyWorksTitle) emptyWorksTitle.textContent = getL(uiText.emptyWorksTitle);
+            if (emptyWorksDesc) emptyWorksDesc.textContent = getL(uiText.emptyWorksDesc);
+            if (emptyWorksBtn) emptyWorksBtn.textContent = getL(uiText.emptyWorksBtn);
+            if (emptyTranslationsTitle) emptyTranslationsTitle.textContent = getL(uiText.emptyTranslationsTitle);
+            if (emptyTranslationsDesc) emptyTranslationsDesc.textContent = getL(uiText.emptyTranslationsDesc);
+        }
+        
+        // Load user info
+        function loadUserInfo() {
+            const userStr = localStorage.getItem('user');
+            const token = localStorage.getItem('token');
+            
+            if (userStr && token) {
+                try {
+                    const user = JSON.parse(userStr);
+                    const displayName = user.display_name || user.firstName || user.email || 'User';
+                    
+                    document.getElementById('userName').textContent = displayName;
+                    document.getElementById('welcomeName').textContent = displayName;
+                    document.getElementById('userDisplayName').textContent = displayName;
+                    document.getElementById('userEmail').textContent = user.email || '';
+                } catch (e) {
+                    console.error('Error parsing user data:', e);
+                }
+            }
+        }
+        
+        // Load dashboard data (demo - replace with API calls)
+        function loadDashboardData() {
+            // This is demo mode - in production, this would fetch from API
+            const isDemo = new URLSearchParams(window.location.search).has('demo');
+            
+            if (isDemo) {
+                // Show demo data
+                document.getElementById('statEarnings').textContent = '$1,234.56';
+                document.getElementById('statWorks').textContent = '12';
+                document.getElementById('statViews').textContent = '8,456';
+                document.getElementById('statTranslations').textContent = '28';
+                
+                document.getElementById('statEarningsChange').innerHTML = '<i class="fas fa-arrow-up"></i> +12.5% this month';
+                document.getElementById('statWorksChange').innerHTML = '<i class="fas fa-arrow-up"></i> +2 this month';
+                document.getElementById('statViewsChange').innerHTML = '<i class="fas fa-arrow-up"></i> +15.2% this month';
+                document.getElementById('statTranslationsChange').innerHTML = '<i class="fas fa-arrow-up"></i> +8 this month';
+                
+                // Show demo works
+                document.getElementById('emptyWorksState').style.display = 'none';
+                document.getElementById('worksList').style.display = 'block';
+                document.getElementById('worksList').innerHTML = `
+                    <div class="work-item">
+                        <div class="work-cover"><i class="fas fa-book"></i></div>
+                        <div class="work-info">
+                            <div class="work-title">The Adventure of Magic Academy</div>
+                            <div class="work-meta"><span class="badge badge-soft me-2">Fiction</span>Translated to 5 languages</div>
+                        </div>
+                        <div class="work-stats">
+                            <div class="work-earnings">$234.50</div>
+                            <div class="work-views">1,234 views</div>
+                        </div>
+                    </div>
+                    <div class="work-item">
+                        <div class="work-cover"><i class="fas fa-book"></i></div>
+                        <div class="work-info">
+                            <div class="work-title">Whispers of Tomorrow</div>
+                            <div class="work-meta"><span class="badge badge-soft me-2">Romance</span>Translated to 3 languages</div>
+                        </div>
+                        <div class="work-stats">
+                            <div class="work-earnings">$156.00</div>
+                            <div class="work-views">892 views</div>
+                        </div>
+                    </div>
+                    <div class="work-item">
+                        <div class="work-cover"><i class="fas fa-book"></i></div>
+                        <div class="work-info">
+                            <div class="work-title">Digital Dreams: A Cyberpunk Story</div>
+                            <div class="work-meta"><span class="badge badge-soft me-2">Sci-Fi</span>Translated to 7 languages</div>
+                        </div>
+                        <div class="work-stats">
+                            <div class="work-earnings">$89.25</div>
+                            <div class="work-views">567 views</div>
+                        </div>
+                    </div>
+                `;
+                
+                // Show demo translations
+                document.getElementById('emptyTranslationsState').style.display = 'none';
+                document.getElementById('translationsList').style.display = 'block';
+                document.getElementById('translationsList').innerHTML = `
+                    <div class="translation-item">
+                        <div class="lang-flag">🇬🇧</div>
+                        <div class="translation-info">
+                            <div class="translation-title">The Adventure of Magic Academy → English</div>
+                            <div class="translation-progress">Completed 2 hours ago</div>
+                        </div>
+                        <span class="status-badge completed"><i class="fas fa-check me-1"></i>Completed</span>
+                    </div>
+                    <div class="translation-item">
+                        <div class="lang-flag">🇪🇸</div>
+                        <div class="translation-info">
+                            <div class="translation-title">Whispers of Tomorrow → Spanish</div>
+                            <div class="translation-progress">65% complete • 3 min remaining</div>
+                        </div>
+                        <span class="status-badge in-progress"><i class="fas fa-spinner fa-spin me-1"></i>In Progress</span>
+                    </div>
+                    <div class="translation-item">
+                        <div class="lang-flag">🇰🇷</div>
+                        <div class="translation-info">
+                            <div class="translation-title">Digital Dreams → Korean</div>
+                            <div class="translation-progress">Waiting in queue • Position 2</div>
+                        </div>
+                        <span class="status-badge pending"><i class="fas fa-clock me-1"></i>Pending</span>
+                    </div>
+                `;
+                
+                // Update AI usage
+                document.getElementById('aiUsageCount').textContent = '3 / 5';
+                document.getElementById('aiUsageBar').style.width = '60%';
+                document.getElementById('aiUsageRemaining').textContent = getL(uiText.freeRemaining).replace('{count}', '2');
+            } else {
+                // Empty state - no data
+                document.getElementById('emptyWorksState').style.display = 'block';
+                document.getElementById('worksList').style.display = 'none';
+                document.getElementById('emptyTranslationsState').style.display = 'block';
+                document.getElementById('translationsList').style.display = 'none';
+                
+                // Update AI usage for empty state
+                document.getElementById('aiUsageCount').textContent = '0 / 5';
+                document.getElementById('aiUsageBar').style.width = '0%';
+                document.getElementById('aiUsageRemaining').textContent = getL(uiText.freeRemaining).replace('{count}', '5');
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sync language selectors
+            syncLanguageSelectors();
+            
+            // Update UI text
+            updateUIText();
+            
+            // Also update after LanguageSwitcher initializes
+            setTimeout(function() {
+                updateUIText();
+            }, 100);
+            
+            // Load user info
+            loadUserInfo();
+            
+            // Load dashboard data
+            loadDashboardData();
+            
+            // Close user menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.user-dropdown')) {
+                    const dropdown = document.getElementById('userDropdown');
+                    const dropdownMenu = document.getElementById('userMenu');
+                    if (dropdown) dropdown.classList.remove('open');
+                    if (dropdownMenu) dropdownMenu.classList.remove('show');
+                }
+            });
+            
+            // Navbar overlay control
+            const navbarCollapse = document.getElementById('navbarNav');
+            const navbarOverlay = document.getElementById('navbarOverlay');
+            
+            if (navbarCollapse) {
+                navbarCollapse.addEventListener('show.bs.collapse', function() {
+                    document.body.classList.add('menu-open');
+                    if (navbarOverlay) navbarOverlay.classList.add('show');
+                });
+                
+                navbarCollapse.addEventListener('hide.bs.collapse', function() {
+                    document.body.classList.remove('menu-open');
+                    if (navbarOverlay) navbarOverlay.classList.remove('show');
+                });
+            }
+            
+            if (navbarOverlay) {
+                navbarOverlay.addEventListener('click', function() {
+                    const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                    if (bsCollapse) {
+                        bsCollapse.hide();
+                    }
+                });
+            }
+            
+            // Listen for language change events
+            document.addEventListener('languageChanged', function(e) {
+                const lang = e.detail?.language || e.detail?.lang;
+                if (lang) {
+                    updateUIText();
+                    loadDashboardData(); // Reload to update dynamic text
+                }
+            });
+        });
     </script>
 </body>
 </html>

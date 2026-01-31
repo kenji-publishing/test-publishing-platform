@@ -35,69 +35,6 @@
             }
         }
         
-        /* PC Navbar - 横並び維持（日本語・中国語・韓国語対応） */
-        @media (min-width: 992px) {
-            .navbar-nav {
-                flex-wrap: nowrap !important;
-                flex-direction: row !important;
-            }
-            .navbar-nav .nav-item {
-                white-space: nowrap !important;
-            }
-            .navbar-nav .nav-link {
-                white-space: nowrap !important;
-                padding: 0.5rem 0.6rem !important;
-                font-size: 0.9rem;
-            }
-            .navbar-collapse .d-flex {
-                flex-wrap: nowrap !important;
-            }
-            .dropdown-menu {
-                white-space: nowrap;
-            }
-            /* Guest buttons - 横並び維持 */
-            .navbar-buttons-guest {
-                display: flex !important;
-                flex-wrap: nowrap !important;
-                gap: 0.5rem;
-            }
-            .navbar-buttons-guest .btn {
-                white-space: nowrap !important;
-                flex-shrink: 0;
-            }
-        }
-        
-        /* Auth visibility control */
-        .auth-only {
-            display: none !important;
-        }
-        
-        .guest-only {
-            display: block;
-        }
-        
-        body.logged-in .auth-only {
-            display: block !important;
-        }
-        
-        body.logged-in .auth-only.nav-item {
-            display: list-item !important;
-        }
-        
-        body.logged-in .auth-only.dropdown {
-            display: block !important;
-        }
-        
-        body.logged-in .guest-only {
-            display: none !important;
-        }
-        
-        @media (min-width: 992px) {
-            body.logged-in .navbar-buttons-guest {
-                display: none !important;
-            }
-        }
-        
         /* User Dropdown Menu */
         .user-dropdown {
             position: relative;
@@ -245,22 +182,6 @@
             color: var(--color-error);
         }
         
-        /* Navbar Overlay - 常に定義 */
-        .navbar-overlay {
-            display: none;
-            position: fixed;
-            top: 56px;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1040;
-        }
-        
-        .navbar-overlay.show {
-            display: block;
-        }
-        
         /* User Dropdown - Mobile adjustments */
         @media (max-width: 991.98px) {
             .user-dropdown {
@@ -311,16 +232,30 @@
                 overflow: hidden;
             }
             
+            .navbar-overlay {
+                display: none;
+                position: fixed;
+                top: 56px;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 1040;
+            }
+            
+            .navbar-overlay.show {
+                display: block;
+            }
+            
             .navbar-custom {
                 z-index: 1050 !important;
-                background: #FFFFFF !important;
             }
         }
     </style>
 </head>
 <body>
     <!-- Navbar Overlay -->
-    <div class="navbar-overlay" id="navbarOverlay"></div>
+    <div class="navbar-overlay d-lg-none" id="navbarOverlay"></div>
     
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
@@ -346,7 +281,7 @@
             </div>
             
             <!-- User Dropdown (auth-only, outside collapse) -->
-            <div class="user-dropdown auth-only" id="userDropdown">
+            <div class="user-dropdown auth-only" id="userDropdown" style="display: none;">
                 <button type="button" class="user-dropdown-toggle" id="userDropdownBtn" onclick="toggleUserDropdown(event)">
                     <i class="fas fa-user-circle"></i>
                     <span class="user-name d-none d-lg-inline" id="userName">User</span>
@@ -363,16 +298,16 @@
                     <div class="user-menu-divider"></div>
                     <a href="pages/dashboard.html" class="user-menu-item">
                         <i class="fas fa-th-large"></i>
-                        <span id="menuDashboard">Dashboard</span>
+                        <span id="menuDashboard" data-i18n="nav.dashboard">Dashboard</span>
                     </a>
                     <a href="pages/account-settings.html" class="user-menu-item">
                         <i class="fas fa-cog"></i>
-                        <span id="menuAccountSettings">Account Settings</span>
+                        <span id="menuAccountSettings" data-i18n="nav.accountSettings">Account Settings</span>
                     </a>
                     <div class="user-menu-divider"></div>
                     <button class="user-menu-item logout-btn" onclick="handleLogout()">
                         <i class="fas fa-sign-out-alt"></i>
-                        <span id="menuLogout">Log Out</span>
+                        <span id="menuLogout" data-i18n="nav.logout">Log Out</span>
                     </button>
                 </div>
             </div>
@@ -400,32 +335,32 @@
                         </a>
                     </li>
                     <!-- Auth: Library -->
-                    <li class="nav-item auth-only">
+                    <li class="nav-item auth-only" style="display: none;">
                         <a class="nav-link" href="pages/library.html">
-                            <i class="fas fa-book-reader me-1"></i> <span id="navLibraryPC">Library</span>
+                            <i class="fas fa-book-reader me-1"></i> <span data-i18n="nav.library">Library</span>
                         </a>
                     </li>
                     <!-- Auth: Dashboard -->
-                    <li class="nav-item auth-only">
+                    <li class="nav-item auth-only" style="display: none;">
                         <a class="nav-link" href="pages/dashboard.html">
-                            <i class="fas fa-th-large me-1"></i> <span id="navDashboardPC">Dashboard</span>
+                            <i class="fas fa-th-large me-1"></i> <span data-i18n="nav.dashboard">Dashboard</span>
                         </a>
                     </li>
                     <!-- Auth: Upload -->
-                    <li class="nav-item auth-only">
+                    <li class="nav-item auth-only" style="display: none;">
                         <a class="nav-link" href="pages/upload.html">
                             <i class="fas fa-upload me-1"></i> <span data-i18n="nav.upload">Upload</span>
                         </a>
                     </li>
                     <!-- Auth: Translation Tools Dropdown -->
-                    <li class="nav-item dropdown auth-only">
+                    <li class="nav-item dropdown auth-only" style="display: none;">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-language me-1"></i> <span id="navTranslationToolsPC">Translation Tools</span>
+                            <i class="fas fa-language me-1"></i> <span data-i18n="nav.translationTools">Translation Tools</span>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="pages/manga-translator.html"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorPC">Manga Translator</span></a></li>
-                            <li><a class="dropdown-item" href="pages/translation-status.html"><i class="fas fa-tasks me-2"></i><span id="navTranslationStatusPC">Translation Status</span></a></li>
-                            <li><a class="dropdown-item" href="pages/translators/index.html"><i class="fas fa-users me-2"></i><span id="navFindTranslatorsPC">Find Translators</span></a></li>
+                            <li><a class="dropdown-item" href="pages/manga-translator.html"><i class="fas fa-image me-2"></i><span data-i18n="nav.mangaTranslator">Manga Translator</span></a></li>
+                            <li><a class="dropdown-item" href="pages/translation-status.html"><i class="fas fa-tasks me-2"></i><span data-i18n="nav.translationStatus">Translation Status</span></a></li>
+                            <li><a class="dropdown-item" href="pages/translators/index.html"><i class="fas fa-users me-2"></i><span data-i18n="nav.findTranslators">Find Translators</span></a></li>
                         </ul>
                     </li>
                     <!-- Support Dropdown -->
@@ -436,9 +371,9 @@
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="pages/support/faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
                             <li><a class="dropdown-item" href="pages/support/troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
-                            <li><a class="dropdown-item" href="pages/support/contact.html"><i class="fas fa-envelope me-2"></i><span id="navContactPC">Contact</span></a></li>
-                            <li class="auth-only"><hr class="dropdown-divider"></li>
-                            <li class="auth-only"><a class="dropdown-item" href="pages/support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
+                            <li><a class="dropdown-item" href="pages/support/contact.html"><i class="fas fa-envelope me-2"></i><span data-i18n="nav.contact">Contact</span></a></li>
+                            <li class="auth-only" style="display: none;"><hr class="dropdown-divider"></li>
+                            <li class="auth-only" style="display: none;"><a class="dropdown-item" href="pages/support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
                         </ul>
                     </li>
                 </ul>
@@ -461,39 +396,39 @@
                         </a>
                     </li>
                     <!-- Auth: Library -->
-                    <li class="nav-item auth-only">
+                    <li class="nav-item auth-only" style="display: none;">
                         <a class="nav-link" href="pages/library.html">
-                            <i class="fas fa-book-reader me-2"></i> <span id="navLibraryMobile">Library</span>
+                            <i class="fas fa-book-reader me-2"></i> <span data-i18n="nav.library">Library</span>
                         </a>
                     </li>
-                    <li class="auth-only"><hr class="dropdown-divider"></li>
+                    <li class="auth-only" style="display: none;"><hr class="dropdown-divider"></li>
                     <!-- Auth: Dashboard -->
-                    <li class="nav-item auth-only">
+                    <li class="nav-item auth-only" style="display: none;">
                         <a class="nav-link" href="pages/dashboard.html">
-                            <i class="fas fa-th-large me-2"></i> <span id="navDashboardMobile">Dashboard</span>
+                            <i class="fas fa-th-large me-2"></i> <span data-i18n="nav.dashboard">Dashboard</span>
                         </a>
                     </li>
                     <!-- Auth: Upload -->
-                    <li class="nav-item auth-only">
+                    <li class="nav-item auth-only" style="display: none;">
                         <a class="nav-link" href="pages/upload.html">
                             <i class="fas fa-upload me-2"></i> <span data-i18n="nav.upload">Upload</span>
                         </a>
                     </li>
                     <!-- Auth: Translation Tools -->
-                    <li class="nav-item auth-only">
+                    <li class="nav-item auth-only" style="display: none;">
                         <a class="nav-link" data-bs-toggle="collapse" href="#translationToolsMenu" role="button">
-                            <i class="fas fa-language me-2"></i> <span id="navTranslationToolsMobile">Translation Tools</span>
+                            <i class="fas fa-language me-2"></i> <span data-i18n="nav.translationTools">Translation Tools</span>
                             <i class="fas fa-chevron-down ms-auto small"></i>
                         </a>
                         <div class="collapse ps-4" id="translationToolsMenu">
                             <a class="nav-link" href="pages/manga-translator.html">
-                                <i class="fas fa-image me-2"></i> <span id="navMangaTranslatorMobile">Manga Translator</span>
+                                <i class="fas fa-image me-2"></i> <span data-i18n="nav.mangaTranslator">Manga Translator</span>
                             </a>
                             <a class="nav-link" href="pages/translation-status.html">
-                                <i class="fas fa-tasks me-2"></i> <span id="navTranslationStatusMobile">Translation Status</span>
+                                <i class="fas fa-tasks me-2"></i> <span data-i18n="nav.translationStatus">Translation Status</span>
                             </a>
                             <a class="nav-link" href="pages/translators/index.html">
-                                <i class="fas fa-users me-2"></i> <span id="navFindTranslatorsMobile">Find Translators</span>
+                                <i class="fas fa-users me-2"></i> <span data-i18n="nav.findTranslators">Find Translators</span>
                             </a>
                         </div>
                     </li>
@@ -511,11 +446,11 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="pages/support/contact.html">
-                            <i class="fas fa-envelope me-2"></i> <span id="navContactMobile">Contact</span>
+                            <i class="fas fa-envelope me-2"></i> <span data-i18n="nav.contact">Contact</span>
                         </a>
                     </li>
                     <!-- Auth: My Tickets -->
-                    <li class="nav-item auth-only">
+                    <li class="nav-item auth-only" style="display: none;">
                         <a class="nav-link" href="pages/support/tickets.html">
                             <i class="fas fa-ticket-alt me-2"></i> <span data-i18n="support.tickets.title">My Tickets</span>
                         </a>
@@ -549,8 +484,8 @@
                         <option value="pt">🇧🇷 PT</option>
                     </select>
                     
-                    <!-- Guest: Sign In / Get Started buttons (PC only) -->
-                    <div class="navbar-buttons-guest guest-only d-none d-lg-flex">
+                    <!-- Guest: Sign In / Get Started buttons -->
+                    <div class="guest-only d-none d-lg-flex gap-2">
                         <a href="pages/login.html" class="btn btn-soft-custom">
                             <span data-i18n="nav.login">Sign In</span>
                         </a>
@@ -578,7 +513,7 @@
                 <a href="pages/register-author.html" class="btn btn-outline-custom btn-lg guest-only">
                     <i class="fas fa-pen-fancy me-2"></i><span data-i18n="home.hero.startWriting">Start Writing</span>
                 </a>
-                <a href="pages/upload.html" class="btn btn-outline-custom btn-lg auth-only">
+                <a href="pages/upload.html" class="btn btn-outline-custom btn-lg auth-only" style="display: none;">
                     <i class="fas fa-upload me-2"></i><span data-i18n="nav.upload">Upload Work</span>
                 </a>
             </div>
@@ -802,8 +737,8 @@
                     <a href="pages/register-author.html" class="btn btn-primary-custom guest-only">
                         <i class="fas fa-rocket me-2"></i><span data-i18n="home.forCreators.button">Start Creating</span>
                     </a>
-                    <a href="pages/dashboard.html" class="btn btn-primary-custom auth-only">
-                        <i class="fas fa-th-large me-2"></i><span id="ctaDashboard">Go to Dashboard</span>
+                    <a href="pages/dashboard.html" class="btn btn-primary-custom auth-only" style="display: none;">
+                        <i class="fas fa-th-large me-2"></i><span data-i18n="nav.dashboard">Go to Dashboard</span>
                     </a>
                 </div>
                 <div class="col-lg-6">
@@ -862,8 +797,8 @@
                 <a href="pages/register.html" class="btn btn-primary-custom btn-lg guest-only">
                     <span data-i18n="home.cta.createAccount">Create Free Account</span>
                 </a>
-                <a href="pages/dashboard.html" class="btn btn-primary-custom btn-lg auth-only">
-                    <span id="ctaDashboard2">Go to Dashboard</span>
+                <a href="pages/dashboard.html" class="btn btn-primary-custom btn-lg auth-only" style="display: none;">
+                    <span data-i18n="nav.dashboard">Go to Dashboard</span>
                 </a>
                 <a href="pages/browse.html" class="btn btn-outline-custom btn-lg">
                     <span data-i18n="home.cta.browseWorks">Browse Works</span>
@@ -934,183 +869,101 @@
     <script src="js/translations.js"></script>
     <script src="js/language-switcher.js"></script>
     <script>
-        // 多言語対応テキスト（9言語）
-        const uiText = {
-            translationTools: {
-                en: 'Translation Tools', ja: '翻訳ツール', zh: '翻译工具',
-                es: 'Herramientas de traducción', fr: 'Outils de traduction', de: 'Übersetzungstools',
-                ko: '번역 도구', ar: 'أدوات الترجمة', pt: 'Ferramentas de tradução'
-            },
-            mangaTranslator: {
-                en: 'Manga Translator', ja: 'マンガ翻訳', zh: '漫画翻译',
-                es: 'Traductor de Manga', fr: 'Traducteur de Manga', de: 'Manga-Übersetzer',
-                ko: '만화 번역기', ar: 'مترجم المانجا', pt: 'Tradutor de Mangá'
-            },
-            translationStatus: {
-                en: 'Translation Status', ja: '翻訳状況', zh: '翻译状态',
-                es: 'Estado de traducción', fr: 'Statut de traduction', de: 'Übersetzungsstatus',
-                ko: '번역 상태', ar: 'حالة الترجمة', pt: 'Status da tradução'
-            },
-            findTranslators: {
-                en: 'Find Translators', ja: '翻訳者を探す', zh: '寻找翻译',
-                es: 'Buscar traductores', fr: 'Trouver des traducteurs', de: 'Übersetzer finden',
-                ko: '번역가 찾기', ar: 'البحث عن مترجمين', pt: 'Encontrar tradutores'
-            },
-            contact: {
-                en: 'Contact', ja: 'お問い合わせ', zh: '联系我们',
-                es: 'Contacto', fr: 'Contact', de: 'Kontakt',
-                ko: '문의', ar: 'اتصل بنا', pt: 'Contato'
-            },
-            library: {
-                en: 'Library', ja: 'ライブラリ', zh: '书库',
-                es: 'Biblioteca', fr: 'Bibliothèque', de: 'Bibliothek',
-                ko: '라이브러리', ar: 'المكتبة', pt: 'Biblioteca'
-            },
-            dashboard: {
-                en: 'Dashboard', ja: 'ダッシュボード', zh: '控制台',
-                es: 'Panel', fr: 'Tableau de bord', de: 'Dashboard',
-                ko: '대시보드', ar: 'لوحة التحكم', pt: 'Painel'
-            },
-            goToDashboard: {
-                en: 'Go to Dashboard', ja: 'ダッシュボードへ', zh: '前往控制台',
-                es: 'Ir al Panel', fr: 'Aller au tableau de bord', de: 'Zum Dashboard',
-                ko: '대시보드로 이동', ar: 'الذهاب إلى لوحة التحكم', pt: 'Ir para o Painel'
-            },
-            accountSettings: {
-                en: 'Account Settings', ja: 'アカウント設定', zh: '账户设置',
-                es: 'Configuración de cuenta', fr: 'Paramètres du compte', de: 'Kontoeinstellungen',
-                ko: '계정 설정', ar: 'إعدادات الحساب', pt: 'Configurações da conta'
-            },
-            logout: {
-                en: 'Log Out', ja: 'ログアウト', zh: '退出登录',
-                es: 'Cerrar sesión', fr: 'Déconnexion', de: 'Abmelden',
-                ko: '로그아웃', ar: 'تسجيل الخروج', pt: 'Sair'
-            },
-            logOutConfirm: {
-                en: 'Are you sure you want to log out?', ja: 'ログアウトしますか？', zh: '确定要退出登录吗？',
-                es: '¿Estás seguro de que quieres cerrar sesión?', fr: 'Êtes-vous sûr de vouloir vous déconnecter?', de: 'Sind Sie sicher, dass Sie sich abmelden möchten?',
-                ko: '로그아웃 하시겠습니까?', ar: 'هل أنت متأكد أنك تريد تسجيل الخروج؟', pt: 'Tem certeza que deseja sair?'
-            }
-        };
-        
-        function getCurrentLanguage() {
-            return localStorage.getItem('preferredLanguage') || 'en';
-        }
-        
-        function getL(obj) {
-            const lang = getCurrentLanguage();
-            return obj[lang] || obj.en || '';
-        }
-        
-        function updateUIText() {
-            // User menu
-            const menuDashboard = document.getElementById('menuDashboard');
-            const menuAccountSettings = document.getElementById('menuAccountSettings');
-            const menuLogout = document.getElementById('menuLogout');
-            if (menuDashboard) menuDashboard.textContent = getL(uiText.dashboard);
-            if (menuAccountSettings) menuAccountSettings.textContent = getL(uiText.accountSettings);
-            if (menuLogout) menuLogout.textContent = getL(uiText.logout);
-            
-            // PC nav
-            const els = {
-                navLibraryPC: uiText.library,
-                navDashboardPC: uiText.dashboard,
-                navTranslationToolsPC: uiText.translationTools,
-                navMangaTranslatorPC: uiText.mangaTranslator,
-                navTranslationStatusPC: uiText.translationStatus,
-                navFindTranslatorsPC: uiText.findTranslators,
-                navContactPC: uiText.contact,
-                navLibraryMobile: uiText.library,
-                navDashboardMobile: uiText.dashboard,
-                navTranslationToolsMobile: uiText.translationTools,
-                navMangaTranslatorMobile: uiText.mangaTranslator,
-                navTranslationStatusMobile: uiText.translationStatus,
-                navFindTranslatorsMobile: uiText.findTranslators,
-                navContactMobile: uiText.contact,
-                ctaDashboard: uiText.goToDashboard,
-                ctaDashboard2: uiText.goToDashboard
-            };
-            Object.keys(els).forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.textContent = getL(els[id]);
-            });
-        }
-        
+        // Toggle user dropdown
         function toggleUserDropdown(e) {
             e.preventDefault();
             e.stopPropagation();
+            
             const dropdown = document.getElementById('userDropdown');
             const dropdownMenu = document.getElementById('userMenu');
+            
             dropdown.classList.toggle('open');
             dropdownMenu.classList.toggle('show');
         }
         
+        // Handle logout
         function handleLogout() {
-            if (confirm(getL(uiText.logOutConfirm))) {
+            if (confirm('ログアウトしますか？ / Are you sure you want to log out?')) {
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
                 window.location.reload();
             }
         }
         
+        // Load user info and update auth state
         function loadUserInfo() {
             const userStr = localStorage.getItem('user');
             const token = localStorage.getItem('token');
-            const isLoggedIn = !!(userStr && token);
             
-            console.log('Auth check:', { token: !!token, user: !!userStr, isLoggedIn });
-            
-            if (isLoggedIn) {
+            if (userStr && token) {
                 try {
                     const user = JSON.parse(userStr);
                     const displayName = user.display_name || user.firstName || user.email || 'User';
                     
-                    document.getElementById('userName').textContent = displayName;
-                    document.getElementById('userDisplayName').textContent = displayName;
-                    document.getElementById('userEmail').textContent = user.email || '';
+                    const userNameEl = document.getElementById('userName');
+                    const userDisplayNameEl = document.getElementById('userDisplayName');
+                    const userEmailEl = document.getElementById('userEmail');
                     
-                    // Add logged-in class to body
-                    document.body.classList.add('logged-in');
-                    console.log('Logged in as:', displayName);
+                    if (userNameEl) userNameEl.textContent = displayName;
+                    if (userDisplayNameEl) userDisplayNameEl.textContent = displayName;
+                    if (userEmailEl) userEmailEl.textContent = user.email || '';
+                    
+                    // Show auth-only elements, hide guest-only elements
+                    document.querySelectorAll('.auth-only').forEach(el => {
+                        el.style.display = '';
+                    });
+                    document.querySelectorAll('.guest-only').forEach(el => {
+                        el.style.display = 'none';
+                    });
                 } catch (e) {
-                    console.error('Error parsing user:', e);
-                    document.body.classList.remove('logged-in');
+                    console.error('Error parsing user data:', e);
+                    showGuestState();
                 }
             } else {
-                document.body.classList.remove('logged-in');
-                console.log('Guest mode');
+                showGuestState();
             }
         }
         
+        function showGuestState() {
+            // Show guest-only elements, hide auth-only elements
+            document.querySelectorAll('.guest-only').forEach(el => {
+                el.style.display = '';
+            });
+            document.querySelectorAll('.auth-only').forEach(el => {
+                el.style.display = 'none';
+            });
+        }
+        
+        // モバイル用言語セレクターの同期
         document.addEventListener('DOMContentLoaded', function() {
-            // Sync language selectors
             const desktopSelector = document.getElementById('languageSelector');
             const mobileSelector = document.getElementById('languageSelectorMobile');
             
+            // 両方のセレクターを同期
             if (desktopSelector && mobileSelector) {
+                // 初期値を同期
                 const savedLang = localStorage.getItem('preferredLanguage') || 'en';
                 desktopSelector.value = savedLang;
                 mobileSelector.value = savedLang;
                 
+                // モバイル用セレクターの変更イベント
                 mobileSelector.addEventListener('change', function() {
                     desktopSelector.value = this.value;
-                    if (typeof changeLanguage === 'function') changeLanguage(this.value);
-                    updateUIText();
+                    if (typeof changeLanguage === 'function') {
+                        changeLanguage(this.value);
+                    }
                 });
                 
+                // デスクトップ用セレクターの変更イベント
                 desktopSelector.addEventListener('change', function() {
                     mobileSelector.value = this.value;
-                    updateUIText();
                 });
             }
             
-            updateUIText();
-            setTimeout(updateUIText, 100);
-            
-            // Load auth state
+            // Load user info and update auth state
             loadUserInfo();
             
-            // Close dropdown on outside click
+            // Close user menu when clicking outside
             document.addEventListener('click', function(e) {
                 if (!e.target.closest('.user-dropdown')) {
                     const dropdown = document.getElementById('userDropdown');
@@ -1139,13 +992,11 @@
             if (navbarOverlay) {
                 navbarOverlay.addEventListener('click', function() {
                     const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
-                    if (bsCollapse) bsCollapse.hide();
+                    if (bsCollapse) {
+                        bsCollapse.hide();
+                    }
                 });
             }
-            
-            document.addEventListener('languageChanged', function() {
-                updateUIText();
-            });
         });
     </script>
 </body>

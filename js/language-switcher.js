@@ -277,15 +277,125 @@
     };
 
     // =====================================================
+    // ナビバーヘルパー（メニュー外クリックで閉じる）
+    // =====================================================
+    const NavbarHelper = {
+        /**
+         * 初期化
+         */
+        init: function() {
+            this.bindOutsideClick();
+            this.addOverlay();
+            console.log('NavbarHelper initialized');
+        },
+
+        /**
+         * オーバーレイを追加（モバイル用）
+         */
+        addOverlay: function() {
+            // 既にオーバーレイがあれば追加しない
+            if (document.querySelector('.navbar-overlay')) return;
+
+            const overlay = document.createElement('div');
+            overlay.className = 'navbar-overlay';
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.3);
+                z-index: 1000;
+                display: none;
+                opacity: 0;
+                transition: opacity 0.2s ease;
+            `;
+            document.body.appendChild(overlay);
+
+            // オーバーレイクリックでメニューを閉じる
+            overlay.addEventListener('click', () => {
+                this.closeNavbar();
+            });
+
+            // Bootstrapのcollapseイベントを監視
+            const navbarCollapse = document.querySelector('.navbar-collapse');
+            if (navbarCollapse) {
+                // メニューが開いたとき
+                navbarCollapse.addEventListener('show.bs.collapse', () => {
+                    overlay.style.display = 'block';
+                    // 少し遅らせてopacityを変更（トランジション用）
+                    setTimeout(() => {
+                        overlay.style.opacity = '1';
+                    }, 10);
+                });
+
+                // メニューが閉じたとき
+                navbarCollapse.addEventListener('hide.bs.collapse', () => {
+                    overlay.style.opacity = '0';
+                    setTimeout(() => {
+                        overlay.style.display = 'none';
+                    }, 200);
+                });
+            }
+        },
+
+        /**
+         * メニュー外クリックでナビバーを閉じる
+         */
+        bindOutsideClick: function() {
+            const self = this;
+
+            document.addEventListener('click', function(event) {
+                const navbarCollapse = document.querySelector('.navbar-collapse');
+                const navbarToggler = document.querySelector('.navbar-toggler');
+                const navbar = document.querySelector('.navbar');
+
+                // ナビバーがない、または開いていない場合は何もしない
+                if (!navbarCollapse || !navbarCollapse.classList.contains('show')) {
+                    return;
+                }
+
+                // クリックがナビバー内かトグラー内かチェック
+                const isInsideNavbar = navbar && navbar.contains(event.target);
+                const isToggler = navbarToggler && navbarToggler.contains(event.target);
+
+                // ナビバー外をクリックした場合、メニューを閉じる
+                if (!isInsideNavbar && !isToggler) {
+                    self.closeNavbar();
+                }
+            });
+        },
+
+        /**
+         * ナビバーを閉じる
+         */
+        closeNavbar: function() {
+            const navbarCollapse = document.querySelector('.navbar-collapse');
+            if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+                // Bootstrap 5のCollapseインスタンスを取得して閉じる
+                const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                if (bsCollapse) {
+                    bsCollapse.hide();
+                } else {
+                    // インスタンスがない場合は新しく作成して閉じる
+                    new bootstrap.Collapse(navbarCollapse, { toggle: false }).hide();
+                }
+            }
+        }
+    };
+
+    // =====================================================
     // 自動初期化
     // =====================================================
     function autoInit() {
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => {
                 LanguageSwitcher.init();
+                NavbarHelper.init();
             });
         } else {
             LanguageSwitcher.init();
+            NavbarHelper.init();
         }
     }
 

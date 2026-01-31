@@ -1,0 +1,766 @@
+<!--
+================================================================================
+PUBLISHER - NAVBAR PATTERN C TEMPLATE
+================================================================================
+
+【使用方法】
+1. このテンプレートを対象ページにコピー
+2. 下記の「要調整箇所」を修正
+3. 元のNavbar部分を削除して置き換え
+
+【要調整箇所】★マークで検索
+
+★PATH★ - ページ階層に応じてパスを変更
+  - ルート (index.html): css/, js/, pages/
+  - pages/ 階層: ../css/, ../js/, 
+  - pages/support/ 階層: ../../css/, ../../js/, ../../
+
+★ACTIVE★ - 現在のページに該当するリンクに class="nav-link active" を設定
+
+【認証状態による表示切替】
+自動で処理されます（変更不要）
+- auth-only: ログイン時のみ表示
+- guest-only: ログアウト時のみ表示
+
+【対応言語】9言語
+EN, JA, ZH, ES, FR, DE, KO, AR, PT
+
+================================================================================
+-->
+
+<!-- ★PATH★ HEAD内に追加するCSS（既存のstyle-new.css等の後に配置） -->
+<style>
+    /* ========== Mobile Language Selector ========== */
+    .navbar-lang-selector {
+        display: flex;
+        align-items: center;
+        margin-right: 0.5rem;
+    }
+    
+    @media (max-width: 991.98px) {
+        .navbar-lang-selector {
+            order: 1;
+        }
+        .navbar-toggler {
+            order: 2;
+        }
+    }
+    
+    /* ========== PC Navbar - 横並び維持 ========== */
+    @media (min-width: 992px) {
+        .navbar-nav {
+            flex-wrap: nowrap !important;
+            flex-direction: row !important;
+        }
+        .navbar-nav .nav-item {
+            white-space: nowrap !important;
+        }
+        .navbar-nav .nav-link {
+            white-space: nowrap !important;
+            padding: 0.5rem 0.6rem !important;
+            font-size: 0.9rem;
+        }
+        .navbar-collapse .d-flex {
+            flex-wrap: nowrap !important;
+        }
+        .dropdown-menu {
+            white-space: nowrap;
+        }
+        .navbar-buttons-guest {
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            gap: 0.5rem;
+        }
+        .navbar-buttons-guest .btn {
+            white-space: nowrap !important;
+            flex-shrink: 0;
+        }
+    }
+    
+    /* ========== Auth Visibility Control ========== */
+    .auth-only {
+        display: none !important;
+    }
+    .guest-only {
+        display: block;
+    }
+    body.logged-in .auth-only {
+        display: block !important;
+    }
+    body.logged-in .auth-only.nav-item {
+        display: list-item !important;
+    }
+    body.logged-in .auth-only.dropdown {
+        display: block !important;
+    }
+    body.logged-in .guest-only {
+        display: none !important;
+    }
+    @media (min-width: 992px) {
+        body.logged-in .navbar-buttons-guest {
+            display: none !important;
+        }
+    }
+    
+    /* ========== User Dropdown Menu ========== */
+    .user-dropdown {
+        position: relative;
+    }
+    .user-dropdown-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: transparent;
+        border: 1px solid var(--color-border);
+        border-radius: 25px;
+        padding: 0.4rem 0.75rem;
+        cursor: pointer;
+        color: var(--color-text);
+        transition: all 0.2s;
+    }
+    .user-dropdown-toggle:hover {
+        border-color: var(--color-accent);
+        background: rgba(139, 115, 85, 0.05);
+    }
+    .user-dropdown-toggle i:first-child {
+        font-size: 1.25rem;
+        color: var(--color-accent);
+    }
+    .user-name {
+        font-weight: 500;
+        font-size: 0.9rem;
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .user-chevron {
+        font-size: 0.7rem;
+        color: var(--color-text-secondary);
+        transition: transform 0.2s;
+    }
+    .user-dropdown.open .user-chevron {
+        transform: rotate(180deg);
+    }
+    .user-menu {
+        position: absolute;
+        top: calc(100% + 0.5rem);
+        right: 0;
+        background: var(--color-bg-card);
+        border: 1px solid var(--color-border);
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        min-width: 240px;
+        z-index: 1001;
+        display: none;
+        overflow: hidden;
+    }
+    .user-menu.show {
+        display: block;
+    }
+    .user-menu-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: var(--color-bg-main);
+    }
+    .user-avatar {
+        font-size: 2.5rem;
+        color: var(--color-accent);
+    }
+    .user-info {
+        flex: 1;
+        min-width: 0;
+    }
+    .user-display-name {
+        font-weight: 600;
+        font-size: 0.95rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .user-email {
+        font-size: 0.8rem;
+        color: var(--color-text-secondary);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .user-menu-divider {
+        height: 1px;
+        background: var(--color-border);
+    }
+    .user-menu-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        color: var(--color-text);
+        text-decoration: none;
+        font-size: 0.9rem;
+        cursor: pointer;
+        border: none;
+        background: transparent;
+        width: 100%;
+        text-align: left;
+    }
+    .user-menu-item:hover {
+        background: var(--color-bg-hover);
+        color: var(--color-accent);
+    }
+    .user-menu-item i {
+        width: 20px;
+        text-align: center;
+        color: var(--color-text-secondary);
+    }
+    .user-menu-item:hover i {
+        color: var(--color-accent);
+    }
+    .logout-btn {
+        color: var(--color-error);
+    }
+    .logout-btn i {
+        color: var(--color-error);
+    }
+    .logout-btn:hover {
+        background: rgba(199, 93, 93, 0.1);
+        color: var(--color-error);
+    }
+    
+    /* ========== Navbar Overlay ========== */
+    .navbar-overlay {
+        display: none;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1040;
+    }
+    .navbar-overlay.show {
+        display: block;
+    }
+    
+    /* ========== Mobile Adjustments ========== */
+    @media (max-width: 991.98px) {
+        .user-dropdown {
+            order: 3;
+            margin-left: 0.5rem;
+        }
+        .user-dropdown-toggle {
+            padding: 0.3rem;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            justify-content: center;
+        }
+        .user-menu {
+            position: fixed;
+            top: 56px;
+            right: 10px;
+            left: auto;
+            min-width: 260px;
+            max-width: calc(100vw - 20px);
+            z-index: 9999;
+        }
+        .navbar-collapse {
+            max-height: 70vh;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+        }
+        .navbar-collapse.show,
+        .navbar-collapse.collapsing {
+            position: fixed;
+            top: 56px;
+            left: 0;
+            right: 0;
+            background: #FFFFFF;
+            border-bottom: 1px solid var(--color-border);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            z-index: 1045;
+            padding: 0.5rem 1rem;
+        }
+        body.menu-open {
+            overflow: hidden;
+        }
+        .navbar-custom {
+            z-index: 1050 !important;
+            background: #FFFFFF !important;
+        }
+    }
+</style>
+
+
+<!-- ========== NAVBAR HTML START ========== -->
+
+<!-- Navbar Overlay -->
+<div class="navbar-overlay" id="navbarOverlay"></div>
+
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+    <div class="container">
+        <!-- ★PATH★ ブランドリンク -->
+        <a class="navbar-brand" href="index.html">
+            <i class="fas fa-book-open"></i>
+            Publisher
+        </a>
+        
+        <!-- Language Selector Mobile -->
+        <div class="navbar-lang-selector d-lg-none">
+            <select class="language-selector" id="languageSelectorMobile">
+                <option value="en">🇬🇧 EN</option>
+                <option value="ja">🇯🇵 日本語</option>
+                <option value="zh">🇨🇳 中文</option>
+                <option value="es">🇪🇸 ES</option>
+                <option value="fr">🇫🇷 FR</option>
+                <option value="de">🇩🇪 DE</option>
+                <option value="ko">🇰🇷 한국어</option>
+                <option value="ar">🇸🇦 عربي</option>
+                <option value="pt">🇧🇷 PT</option>
+            </select>
+        </div>
+        
+        <!-- User Dropdown (auth-only) -->
+        <div class="user-dropdown auth-only" id="userDropdown">
+            <button type="button" class="user-dropdown-toggle" id="userDropdownBtn" onclick="toggleUserDropdown(event)">
+                <i class="fas fa-user-circle"></i>
+                <span class="user-name d-none d-lg-inline" id="userName">User</span>
+                <i class="fas fa-chevron-down user-chevron d-none d-lg-inline"></i>
+            </button>
+            <div class="user-menu" id="userMenu">
+                <div class="user-menu-header">
+                    <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
+                    <div class="user-info">
+                        <div class="user-display-name" id="userDisplayName">User</div>
+                        <div class="user-email" id="userEmail">user@example.com</div>
+                    </div>
+                </div>
+                <div class="user-menu-divider"></div>
+                <!-- ★PATH★ -->
+                <a href="pages/dashboard.html" class="user-menu-item">
+                    <i class="fas fa-th-large"></i>
+                    <span id="menuDashboard">Dashboard</span>
+                </a>
+                <!-- ★PATH★ -->
+                <a href="pages/account-settings.html" class="user-menu-item">
+                    <i class="fas fa-cog"></i>
+                    <span id="menuAccountSettings">Account Settings</span>
+                </a>
+                <div class="user-menu-divider"></div>
+                <button class="user-menu-item logout-btn" onclick="handleLogout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span id="menuLogout">Log Out</span>
+                </button>
+            </div>
+        </div>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <!-- ========== PC Navigation ========== -->
+            <ul class="navbar-nav me-auto d-none d-lg-flex">
+                <!-- ★ACTIVE★ ★PATH★ -->
+                <li class="nav-item">
+                    <a class="nav-link" href="index.html">
+                        <i class="fas fa-home me-1"></i> <span data-i18n="nav.home">Home</span>
+                    </a>
+                </li>
+                <!-- ★ACTIVE★ ★PATH★ -->
+                <li class="nav-item">
+                    <a class="nav-link" href="pages/browse.html">
+                        <i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span>
+                    </a>
+                </li>
+                <!-- ★ACTIVE★ ★PATH★ -->
+                <li class="nav-item">
+                    <a class="nav-link" href="pages/genres.html">
+                        <i class="fas fa-layer-group me-1"></i> <span data-i18n="nav.genres">Genres</span>
+                    </a>
+                </li>
+                <!-- Auth: Library ★PATH★ -->
+                <li class="nav-item auth-only">
+                    <a class="nav-link" href="pages/library.html">
+                        <i class="fas fa-book-reader me-1"></i> <span id="navLibraryPC">Library</span>
+                    </a>
+                </li>
+                <!-- Auth: Dashboard ★PATH★ -->
+                <li class="nav-item auth-only">
+                    <a class="nav-link" href="pages/dashboard.html">
+                        <i class="fas fa-th-large me-1"></i> <span id="navDashboardPC">Dashboard</span>
+                    </a>
+                </li>
+                <!-- Auth: Upload ★PATH★ -->
+                <li class="nav-item auth-only">
+                    <a class="nav-link" href="pages/upload.html">
+                        <i class="fas fa-upload me-1"></i> <span data-i18n="nav.upload">Upload</span>
+                    </a>
+                </li>
+                <!-- Auth: Translation Tools ★PATH★ -->
+                <li class="nav-item dropdown auth-only">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-language me-1"></i> <span id="navTranslationToolsPC">Translation Tools</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="pages/manga-translator.html"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorPC">Manga Translator</span></a></li>
+                        <li><a class="dropdown-item" href="pages/translation-status.html"><i class="fas fa-tasks me-2"></i><span id="navTranslationStatusPC">Translation Status</span></a></li>
+                        <li><a class="dropdown-item" href="pages/translators/index.html"><i class="fas fa-users me-2"></i><span id="navFindTranslatorsPC">Find Translators</span></a></li>
+                    </ul>
+                </li>
+                <!-- Support Dropdown ★PATH★ -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-headset me-1"></i> <span data-i18n="nav.support">Support</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="pages/support/faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
+                        <li><a class="dropdown-item" href="pages/support/troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
+                        <li><a class="dropdown-item" href="pages/support/contact.html"><i class="fas fa-envelope me-2"></i><span id="navContactPC">Contact</span></a></li>
+                        <li class="auth-only"><hr class="dropdown-divider"></li>
+                        <li class="auth-only"><a class="dropdown-item" href="pages/support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
+                    </ul>
+                </li>
+            </ul>
+            
+            <!-- ========== Mobile Navigation ========== -->
+            <ul class="navbar-nav d-lg-none">
+                <!-- ★ACTIVE★ ★PATH★ -->
+                <li class="nav-item">
+                    <a class="nav-link" href="index.html">
+                        <i class="fas fa-home me-2"></i> <span data-i18n="nav.home">Home</span>
+                    </a>
+                </li>
+                <!-- ★ACTIVE★ ★PATH★ -->
+                <li class="nav-item">
+                    <a class="nav-link" href="pages/browse.html">
+                        <i class="fas fa-compass me-2"></i> <span data-i18n="nav.browse">Browse</span>
+                    </a>
+                </li>
+                <!-- ★ACTIVE★ ★PATH★ -->
+                <li class="nav-item">
+                    <a class="nav-link" href="pages/genres.html">
+                        <i class="fas fa-layer-group me-2"></i> <span data-i18n="nav.genres">Genres</span>
+                    </a>
+                </li>
+                <!-- Auth: Library ★PATH★ -->
+                <li class="nav-item auth-only">
+                    <a class="nav-link" href="pages/library.html">
+                        <i class="fas fa-book-reader me-2"></i> <span id="navLibraryMobile">Library</span>
+                    </a>
+                </li>
+                <li class="auth-only"><hr class="dropdown-divider"></li>
+                <!-- Auth: Dashboard ★PATH★ -->
+                <li class="nav-item auth-only">
+                    <a class="nav-link" href="pages/dashboard.html">
+                        <i class="fas fa-th-large me-2"></i> <span id="navDashboardMobile">Dashboard</span>
+                    </a>
+                </li>
+                <!-- Auth: Upload ★PATH★ -->
+                <li class="nav-item auth-only">
+                    <a class="nav-link" href="pages/upload.html">
+                        <i class="fas fa-upload me-2"></i> <span data-i18n="nav.upload">Upload</span>
+                    </a>
+                </li>
+                <!-- Auth: Translation Tools ★PATH★ -->
+                <li class="nav-item auth-only">
+                    <a class="nav-link" data-bs-toggle="collapse" href="#translationToolsMenu" role="button">
+                        <i class="fas fa-language me-2"></i> <span id="navTranslationToolsMobile">Translation Tools</span>
+                        <i class="fas fa-chevron-down ms-auto small"></i>
+                    </a>
+                    <div class="collapse ps-4" id="translationToolsMenu">
+                        <a class="nav-link" href="pages/manga-translator.html">
+                            <i class="fas fa-image me-2"></i> <span id="navMangaTranslatorMobile">Manga Translator</span>
+                        </a>
+                        <a class="nav-link" href="pages/translation-status.html">
+                            <i class="fas fa-tasks me-2"></i> <span id="navTranslationStatusMobile">Translation Status</span>
+                        </a>
+                        <a class="nav-link" href="pages/translators/index.html">
+                            <i class="fas fa-users me-2"></i> <span id="navFindTranslatorsMobile">Find Translators</span>
+                        </a>
+                    </div>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <!-- Support ★PATH★ -->
+                <li class="nav-item">
+                    <a class="nav-link" href="pages/support/faq.html">
+                        <i class="fas fa-question-circle me-2"></i> <span data-i18n="support.faq.title">FAQ</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="pages/support/troubleshoot.html">
+                        <i class="fas fa-tools me-2"></i> <span data-i18n="support.troubleshoot.title">Troubleshooting</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="pages/support/contact.html">
+                        <i class="fas fa-envelope me-2"></i> <span id="navContactMobile">Contact</span>
+                    </a>
+                </li>
+                <!-- Auth: My Tickets ★PATH★ -->
+                <li class="nav-item auth-only">
+                    <a class="nav-link" href="pages/support/tickets.html">
+                        <i class="fas fa-ticket-alt me-2"></i> <span data-i18n="support.tickets.title">My Tickets</span>
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <!-- Guest: Sign In ★PATH★ -->
+                <li class="nav-item guest-only">
+                    <a class="nav-link" href="pages/login.html">
+                        <i class="fas fa-sign-in-alt me-2"></i> <span data-i18n="nav.login">Sign In</span>
+                    </a>
+                </li>
+                <!-- Guest: Register ★PATH★ -->
+                <li class="nav-item guest-only">
+                    <a class="nav-link" href="pages/register.html">
+                        <i class="fas fa-user-plus me-2"></i> <span data-i18n="nav.getStarted">Get Started</span>
+                    </a>
+                </li>
+            </ul>
+            
+            <div class="d-flex align-items-center gap-3">
+                <!-- Language Selector Desktop -->
+                <select class="language-selector d-none d-lg-block" id="languageSelector">
+                    <option value="en">🇬🇧 EN</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="es">🇪🇸 ES</option>
+                    <option value="fr">🇫🇷 FR</option>
+                    <option value="de">🇩🇪 DE</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="ar">🇸🇦 عربي</option>
+                    <option value="pt">🇧🇷 PT</option>
+                </select>
+                
+                <!-- Guest Buttons (PC) ★PATH★ -->
+                <div class="navbar-buttons-guest guest-only d-none d-lg-flex">
+                    <a href="pages/login.html" class="btn btn-soft-custom">
+                        <span data-i18n="nav.login">Sign In</span>
+                    </a>
+                    <a href="pages/register.html" class="btn btn-primary-custom">
+                        <span data-i18n="nav.getStarted">Get Started</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- ========== NAVBAR HTML END ========== -->
+
+
+<!-- ★PATH★ </body>の直前に配置するJavaScript -->
+<script>
+    // ========== 多言語対応テキスト（9言語）==========
+    const uiText = {
+        translationTools: {
+            en: 'Translation Tools', ja: '翻訳ツール', zh: '翻译工具',
+            es: 'Herramientas de traducción', fr: 'Outils de traduction', de: 'Übersetzungstools',
+            ko: '번역 도구', ar: 'أدوات الترجمة', pt: 'Ferramentas de tradução'
+        },
+        mangaTranslator: {
+            en: 'Manga Translator', ja: 'マンガ翻訳', zh: '漫画翻译',
+            es: 'Traductor de Manga', fr: 'Traducteur de Manga', de: 'Manga-Übersetzer',
+            ko: '만화 번역기', ar: 'مترجم المانجا', pt: 'Tradutor de Mangá'
+        },
+        translationStatus: {
+            en: 'Translation Status', ja: '翻訳状況', zh: '翻译状态',
+            es: 'Estado de traducción', fr: 'Statut de traduction', de: 'Übersetzungsstatus',
+            ko: '번역 상태', ar: 'حالة الترجمة', pt: 'Status da tradução'
+        },
+        findTranslators: {
+            en: 'Find Translators', ja: '翻訳者を探す', zh: '寻找翻译',
+            es: 'Buscar traductores', fr: 'Trouver des traducteurs', de: 'Übersetzer finden',
+            ko: '번역가 찾기', ar: 'البحث عن مترجمين', pt: 'Encontrar tradutores'
+        },
+        contact: {
+            en: 'Contact', ja: 'お問い合わせ', zh: '联系我们',
+            es: 'Contacto', fr: 'Contact', de: 'Kontakt',
+            ko: '문의', ar: 'اتصل بنا', pt: 'Contato'
+        },
+        library: {
+            en: 'Library', ja: 'ライブラリ', zh: '书库',
+            es: 'Biblioteca', fr: 'Bibliothèque', de: 'Bibliothek',
+            ko: '라이브러리', ar: 'المكتبة', pt: 'Biblioteca'
+        },
+        dashboard: {
+            en: 'Dashboard', ja: 'ダッシュボード', zh: '控制台',
+            es: 'Panel', fr: 'Tableau de bord', de: 'Dashboard',
+            ko: '대시보드', ar: 'لوحة التحكم', pt: 'Painel'
+        },
+        accountSettings: {
+            en: 'Account Settings', ja: 'アカウント設定', zh: '账户设置',
+            es: 'Configuración de cuenta', fr: 'Paramètres du compte', de: 'Kontoeinstellungen',
+            ko: '계정 설정', ar: 'إعدادات الحساب', pt: 'Configurações da conta'
+        },
+        logout: {
+            en: 'Log Out', ja: 'ログアウト', zh: '退出登录',
+            es: 'Cerrar sesión', fr: 'Déconnexion', de: 'Abmelden',
+            ko: '로그아웃', ar: 'تسجيل الخروج', pt: 'Sair'
+        },
+        logOutConfirm: {
+            en: 'Are you sure you want to log out?', ja: 'ログアウトしますか？', zh: '确定要退出登录吗？',
+            es: '¿Estás seguro de que quieres cerrar sesión?', fr: 'Êtes-vous sûr de vouloir vous déconnecter?', de: 'Sind Sie sicher, dass Sie sich abmelden möchten?',
+            ko: '로그아웃 하시겠습니까?', ar: 'هل أنت متأكد أنك تريد تسجيل الخروج؟', pt: 'Tem certeza que deseja sair?'
+        }
+    };
+    
+    function getCurrentLanguage() {
+        return localStorage.getItem('preferredLanguage') || 'en';
+    }
+    
+    function getL(obj) {
+        const lang = getCurrentLanguage();
+        return obj[lang] || obj.en || '';
+    }
+    
+    function updateUIText() {
+        const menuDashboard = document.getElementById('menuDashboard');
+        const menuAccountSettings = document.getElementById('menuAccountSettings');
+        const menuLogout = document.getElementById('menuLogout');
+        if (menuDashboard) menuDashboard.textContent = getL(uiText.dashboard);
+        if (menuAccountSettings) menuAccountSettings.textContent = getL(uiText.accountSettings);
+        if (menuLogout) menuLogout.textContent = getL(uiText.logout);
+        
+        const els = {
+            navLibraryPC: uiText.library, navDashboardPC: uiText.dashboard,
+            navTranslationToolsPC: uiText.translationTools, navMangaTranslatorPC: uiText.mangaTranslator,
+            navTranslationStatusPC: uiText.translationStatus, navFindTranslatorsPC: uiText.findTranslators,
+            navContactPC: uiText.contact, navLibraryMobile: uiText.library, navDashboardMobile: uiText.dashboard,
+            navTranslationToolsMobile: uiText.translationTools, navMangaTranslatorMobile: uiText.mangaTranslator,
+            navTranslationStatusMobile: uiText.translationStatus, navFindTranslatorsMobile: uiText.findTranslators,
+            navContactMobile: uiText.contact
+        };
+        Object.keys(els).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = getL(els[id]);
+        });
+    }
+    
+    function toggleUserDropdown(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const dropdown = document.getElementById('userDropdown');
+        const dropdownMenu = document.getElementById('userMenu');
+        dropdown.classList.toggle('open');
+        dropdownMenu.classList.toggle('show');
+    }
+    
+    function handleLogout() {
+        if (confirm(getL(uiText.logOutConfirm))) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.reload();
+        }
+    }
+    
+    function loadUserInfo() {
+        const userStr = localStorage.getItem('user');
+        const token = localStorage.getItem('token');
+        const isLoggedIn = !!(userStr && token);
+        
+        if (isLoggedIn) {
+            try {
+                const user = JSON.parse(userStr);
+                const displayName = user.display_name || user.firstName || user.email || 'User';
+                const userNameEl = document.getElementById('userName');
+                const userDisplayNameEl = document.getElementById('userDisplayName');
+                const userEmailEl = document.getElementById('userEmail');
+                if (userNameEl) userNameEl.textContent = displayName;
+                if (userDisplayNameEl) userDisplayNameEl.textContent = displayName;
+                if (userEmailEl) userEmailEl.textContent = user.email || '';
+                document.body.classList.add('logged-in');
+            } catch (e) {
+                document.body.classList.remove('logged-in');
+            }
+        } else {
+            document.body.classList.remove('logged-in');
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const desktopSelector = document.getElementById('languageSelector');
+        const mobileSelector = document.getElementById('languageSelectorMobile');
+        
+        if (desktopSelector && mobileSelector) {
+            const savedLang = localStorage.getItem('preferredLanguage') || 'en';
+            desktopSelector.value = savedLang;
+            mobileSelector.value = savedLang;
+            
+            mobileSelector.addEventListener('change', function() {
+                desktopSelector.value = this.value;
+                if (typeof changeLanguage === 'function') changeLanguage(this.value);
+                updateUIText();
+            });
+            
+            desktopSelector.addEventListener('change', function() {
+                mobileSelector.value = this.value;
+                updateUIText();
+            });
+        }
+        
+        updateUIText();
+        setTimeout(updateUIText, 100);
+        loadUserInfo();
+        
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.user-dropdown')) {
+                const dropdown = document.getElementById('userDropdown');
+                const dropdownMenu = document.getElementById('userMenu');
+                if (dropdown) dropdown.classList.remove('open');
+                if (dropdownMenu) dropdownMenu.classList.remove('show');
+            }
+        });
+        
+        const navbarCollapse = document.getElementById('navbarNav');
+        const navbarOverlay = document.getElementById('navbarOverlay');
+        
+        if (navbarCollapse) {
+            navbarCollapse.addEventListener('show.bs.collapse', function() {
+                document.body.classList.add('menu-open');
+                if (navbarOverlay) navbarOverlay.classList.add('show');
+            });
+            navbarCollapse.addEventListener('hide.bs.collapse', function() {
+                document.body.classList.remove('menu-open');
+                if (navbarOverlay) navbarOverlay.classList.remove('show');
+            });
+        }
+        
+        if (navbarOverlay) {
+            navbarOverlay.addEventListener('click', function() {
+                const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                if (bsCollapse) bsCollapse.hide();
+            });
+        }
+        
+        document.addEventListener('languageChanged', function() {
+            updateUIText();
+        });
+    });
+</script>
+
+<!--
+================================================================================
+パス早見表
+================================================================================
+
+【ルート階層】index.html
+  - CSS/JS: css/, js/
+  - ページリンク: pages/xxx.html
+  - ブランド: index.html
+
+【pages/ 階層】dashboard.html, browse.html など
+  - CSS/JS: ../css/, ../js/
+  - ページリンク: xxx.html (同階層), support/xxx.html
+  - ブランド: ../index.html
+
+【pages/support/ 階層】tickets.html, faq.html など
+  - CSS/JS: ../../css/, ../../js/
+  - ページリンク: ../xxx.html, xxx.html (同階層)
+  - ブランド: ../../index.html
+
+================================================================================
+-->

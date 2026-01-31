@@ -268,10 +268,68 @@
         @media (max-width: 768px) {
             .reader-content { padding: 1rem; }
             .work-title { display: none; }
+            .toolbar-left .back-link:first-child .work-title { display: none; } /* Hide Publisher text on mobile */
+            #backLinkText { display: none; } /* Hide Library text on mobile */
             .btn-toolbar span { display: none; }
             .toolbar-center { gap: 0.25rem; }
             .page-info { font-size: 0.75rem; }
             .lang-selector-reader { font-size: 0.7rem; padding: 0.25rem 0.4rem; }
+            
+            /* Hide desktop buttons, show mobile menu */
+            .desktop-only { display: none !important; }
+            .mobile-only { display: block !important; }
+            
+            .toolbar-left { gap: 0.25rem !important; }
+            .toolbar-left span[style*="color: var(--reader-border)"] { display: none; } /* Hide divider */
+        }
+        
+        /* Mobile Menu Dropdown */
+        .mobile-only { display: none; }
+        
+        .mobile-menu-dropdown {
+            position: relative;
+        }
+        
+        .mobile-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--reader-bg);
+            border: 1px solid var(--reader-border);
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            min-width: 180px;
+            z-index: 1002;
+            display: none;
+            overflow: hidden;
+        }
+        
+        .mobile-menu.show {
+            display: block;
+        }
+        
+        .mobile-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: none;
+            background: transparent;
+            color: var(--reader-text);
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-align: left;
+        }
+        
+        .mobile-menu-item:hover {
+            background: rgba(139, 115, 85, 0.1);
+        }
+        
+        .mobile-menu-item i {
+            width: 20px;
+            text-align: center;
+            color: var(--reader-accent);
         }
 
         @media (max-width: 480px) {
@@ -294,9 +352,15 @@
 
     <div class="reader-toolbar">
         <div class="toolbar-left">
-            <a href="dashboard.html" class="back-link" id="backLink" title="Back to Dashboard">
+            <!-- Publisher Logo -->
+            <a href="../index.html" class="back-link" style="font-weight: 700; color: var(--reader-accent);">
+                <i class="fas fa-book-open"></i>
+                <span class="work-title" style="max-width: none;">Publisher</span>
+            </a>
+            <span style="color: var(--reader-border); margin: 0 0.25rem;">|</span>
+            <a href="library.html" class="back-link" id="backLink" title="Back to Library">
                 <i class="fas fa-arrow-left"></i>
-                <span id="backLinkText">Dashboard</span>
+                <span id="backLinkText">Library</span>
             </a>
             <span class="work-title" id="workTitle">Sample Story</span>
         </div>
@@ -312,10 +376,33 @@
                 <option value="en">EN</option><option value="ja">日本語</option><option value="zh">中文</option><option value="es">ES</option><option value="fr">FR</option><option value="de">DE</option><option value="ko">한국어</option><option value="ar">عربي</option><option value="pt">PT</option>
             </select>
             <a href="notifications.html" class="btn-toolbar position-relative" title="Notifications" id="notificationBellContainer"><i class="fas fa-bell"></i><span id="notificationBadge" class="position-absolute badge rounded-pill bg-danger" style="font-size: 0.55rem; display: none; top: -2px; right: -6px; padding: 2px 5px;">0</span></a>
-            <button class="btn-toolbar" onclick="toggleSearch()" id="btnSearch" title="Search"><i class="fas fa-search"></i></button>
-            <button class="btn-toolbar" onclick="toggleBookmarks()" id="btnBookmarks" title="Bookmarks"><i class="fas fa-bookmark"></i></button>
-            <button class="btn-toolbar" onclick="addBookmark()" id="btnAddBookmark" title="Add Bookmark"><i class="fas fa-plus"></i></button>
-            <button class="btn-toolbar" onclick="toggleSettings()" id="btnSettings" title="Settings"><i class="fas fa-cog"></i></button>
+            
+            <!-- Desktop: Show all buttons -->
+            <button class="btn-toolbar desktop-only" onclick="toggleSearch()" id="btnSearch" title="Search"><i class="fas fa-search"></i></button>
+            <button class="btn-toolbar desktop-only" onclick="toggleBookmarks()" id="btnBookmarks" title="Bookmarks"><i class="fas fa-bookmark"></i></button>
+            <button class="btn-toolbar desktop-only" onclick="addBookmark()" id="btnAddBookmark" title="Add Bookmark"><i class="fas fa-plus"></i></button>
+            <button class="btn-toolbar desktop-only" onclick="toggleSettings()" id="btnSettings" title="Settings"><i class="fas fa-cog"></i></button>
+            
+            <!-- Mobile: Show dropdown menu -->
+            <div class="mobile-menu-dropdown mobile-only">
+                <button class="btn-toolbar" onclick="toggleMobileMenu()" id="btnMobileMenu" title="Menu">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+                <div class="mobile-menu" id="mobileMenu">
+                    <button class="mobile-menu-item" onclick="toggleSearch(); toggleMobileMenu();">
+                        <i class="fas fa-search"></i> <span id="mobileSearchText">Search</span>
+                    </button>
+                    <button class="mobile-menu-item" onclick="toggleBookmarks(); toggleMobileMenu();">
+                        <i class="fas fa-bookmark"></i> <span id="mobileBookmarksText">Bookmarks</span>
+                    </button>
+                    <button class="mobile-menu-item" onclick="addBookmark(); toggleMobileMenu();">
+                        <i class="fas fa-plus"></i> <span id="mobileAddBookmarkText">Add Bookmark</span>
+                    </button>
+                    <button class="mobile-menu-item" onclick="toggleSettings(); toggleMobileMenu();">
+                        <i class="fas fa-cog"></i> <span id="mobileSettingsText">Settings</span>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -442,6 +529,7 @@
         const uiText = {
             touchHint: { en: 'Swipe left/right to turn pages • Long press to highlight', ja: '左右スワイプでページ移動 • 長押しでハイライト', zh: '左右滑动翻页 • 长按高亮', es: 'Desliza para cambiar página • Mantén presionado para resaltar', fr: 'Glissez pour tourner les pages • Appui long pour surligner', de: 'Wischen zum Blättern • Lange drücken zum Markieren', ko: '좌우 스와이프로 페이지 이동 • 길게 눌러 하이라이트', ar: 'اسحب لتغيير الصفحة • اضغط مطولاً للتمييز', pt: 'Deslize para virar páginas • Pressione para destacar' },
             backToDashboard: { en: 'Dashboard', ja: 'ダッシュボード', zh: '仪表板', es: 'Panel', fr: 'Tableau de bord', de: 'Dashboard', ko: '대시보드', ar: 'لوحة التحكم', pt: 'Painel' },
+            backToLibrary: { en: 'Library', ja: 'ライブラリ', zh: '书库', es: 'Biblioteca', fr: 'Bibliothèque', de: 'Bibliothek', ko: '라이브러리', ar: 'المكتبة', pt: 'Biblioteca' },
             previous: { en: 'Previous', ja: '前へ', zh: '上一页', es: 'Anterior', fr: 'Précédent', de: 'Zurück', ko: '이전', ar: 'السابق', pt: 'Anterior' },
             next: { en: 'Next', ja: '次へ', zh: '下一页', es: 'Siguiente', fr: 'Suivant', de: 'Weiter', ko: '다음', ar: 'التالي', pt: 'Próximo' },
             search: { en: 'Search', ja: '検索', zh: '搜索', es: 'Buscar', fr: 'Rechercher', de: 'Suchen', ko: '검색', ar: 'بحث', pt: 'Buscar' },
@@ -497,6 +585,52 @@
 
         function updateAllText() {
             document.title = getL(uiText.notes) + ' - Publisher';
+            
+            // Update back link
+            document.getElementById('backLinkText').textContent = getL(uiText.backToLibrary);
+            document.getElementById('backLink').title = getL(uiText.backToLibrary);
+            
+            // Update touch hint
+            document.getElementById('touchHintText').textContent = getL(uiText.touchHint);
+            
+            // Update toolbar buttons titles
+            document.getElementById('btnPrev').title = getL(uiText.previous);
+            document.getElementById('btnNext').title = getL(uiText.next);
+            document.getElementById('btnSearch').title = getL(uiText.search);
+            document.getElementById('btnBookmarks').title = getL(uiText.bookmarks);
+            document.getElementById('btnAddBookmark').title = getL(uiText.addBookmark);
+            document.getElementById('btnSettings').title = getL(uiText.settings);
+            
+            // Update settings panel labels
+            document.getElementById('labelTextSize').textContent = getL(uiText.textSize);
+            document.getElementById('labelTheme').textContent = getL(uiText.theme);
+            document.getElementById('themeLight').textContent = getL(uiText.light);
+            document.getElementById('themeDark').textContent = getL(uiText.dark);
+            document.getElementById('themeSepia').textContent = getL(uiText.sepia);
+            document.getElementById('labelDirection').textContent = getL(uiText.direction);
+            document.getElementById('dirHorizontal').textContent = getL(uiText.horizontal);
+            document.getElementById('dirVertical').textContent = getL(uiText.vertical);
+            document.getElementById('dirRtl').textContent = getL(uiText.rtl);
+            
+            // Update bookmarks panel
+            document.getElementById('bookmarksTitle').textContent = getL(uiText.bookmarks);
+            
+            // Update notes section
+            document.getElementById('notesTitle').textContent = getL(uiText.notes);
+            
+            // Update highlight toolbar titles
+            document.getElementById('hlYellow').title = getL(uiText.yellow);
+            document.getElementById('hlGreen').title = getL(uiText.green);
+            document.getElementById('hlBlue').title = getL(uiText.blue);
+            document.getElementById('hlPink').title = getL(uiText.pink);
+            document.getElementById('hlRemove').title = getL(uiText.remove);
+            document.getElementById('hlReport').title = getL(uiText.reportIssue);
+            
+            // Update mobile menu text
+            document.getElementById('mobileSearchText').textContent = getL(uiText.search);
+            document.getElementById('mobileBookmarksText').textContent = getL(uiText.bookmarks);
+            document.getElementById('mobileAddBookmarkText').textContent = getL(uiText.addBookmark);
+            document.getElementById('mobileSettingsText').textContent = getL(uiText.settings);
             
             // Update placeholders directly
             document.getElementById('noteInput').placeholder = getL(uiText.addNotePlaceholder);
@@ -667,6 +801,11 @@
                 }
             }
             document.getElementById('highlightToolbar').classList.remove('show');
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('show');
         }
 
         function toggleSettings() {
@@ -841,6 +980,7 @@
             if (!e.target.closest('.settings-panel, [onclick*="toggleSettings"]')) document.getElementById('settingsPanel').classList.remove('show');
             if (!e.target.closest('.bookmarks-panel, [onclick*="toggleBookmarks"]')) document.getElementById('bookmarksPanel').classList.remove('show');
             if (!e.target.closest('.search-panel, [onclick*="toggleSearch"]')) document.getElementById('searchPanel').classList.remove('show');
+            if (!e.target.closest('.mobile-menu-dropdown')) document.getElementById('mobileMenu').classList.remove('show');
         });
     </script>
     <!-- Notification Badge -->

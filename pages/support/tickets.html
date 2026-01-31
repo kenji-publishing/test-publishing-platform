@@ -20,6 +20,23 @@
     <link href="../../css/mobile-fixes.css" rel="stylesheet">
     
     <style>
+        :root {
+            --color-bg: #FAF8F5;
+            --color-bg-card: #FFFFFF;
+            --color-accent: #8B7355;
+            --color-text: #2D2A26;
+            --color-text-secondary: #6B6560;
+            --color-border: #E8E4E0;
+            --color-success: #5D9C59;
+            --color-warning: #D4A853;
+            --color-error: #C75D5D;
+        }
+        
+        /* Navbar */
+        .navbar-custom {
+            z-index: 1050;
+        }
+        
         /* モバイルで言語セレクターを常に表示 */
         .navbar-lang-selector {
             display: flex;
@@ -34,6 +51,258 @@
             .navbar-toggler {
                 order: 2;
             }
+        }
+        
+        /* User Dropdown Menu */
+        .user-dropdown {
+            position: relative;
+        }
+        
+        .user-dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: transparent;
+            border: 1px solid var(--color-border);
+            border-radius: 25px;
+            padding: 0.4rem 0.75rem;
+            cursor: pointer;
+            color: var(--color-text);
+            transition: all 0.2s;
+        }
+        
+        .user-dropdown-toggle:hover {
+            border-color: var(--color-accent);
+            background: rgba(139, 115, 85, 0.05);
+        }
+        
+        .user-dropdown-toggle i:first-child {
+            font-size: 1.25rem;
+            color: var(--color-accent);
+        }
+        
+        .user-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .user-chevron {
+            font-size: 0.7rem;
+            color: var(--color-text-secondary);
+            transition: transform 0.2s;
+        }
+        
+        .user-dropdown.open .user-chevron {
+            transform: rotate(180deg);
+        }
+        
+        .user-menu {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            right: 0;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            min-width: 240px;
+            z-index: 1001;
+            display: none;
+            overflow: hidden;
+        }
+        
+        .user-menu.show {
+            display: block;
+        }
+        
+        .user-menu-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--color-bg);
+        }
+        
+        .user-avatar {
+            font-size: 2.5rem;
+            color: var(--color-accent);
+        }
+        
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .user-display-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .user-email {
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .user-menu-divider {
+            height: 1px;
+            background: var(--color-border);
+        }
+        
+        .user-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--color-text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+        
+        .user-menu-item:hover {
+            background: var(--color-bg);
+            color: var(--color-accent);
+        }
+        
+        .user-menu-item i {
+            width: 20px;
+            text-align: center;
+            color: var(--color-text-secondary);
+        }
+        
+        .user-menu-item:hover i {
+            color: var(--color-accent);
+        }
+        
+        .logout-btn {
+            color: var(--color-error);
+        }
+        
+        .logout-btn i {
+            color: var(--color-error);
+        }
+        
+        .logout-btn:hover {
+            background: rgba(199, 93, 93, 0.1);
+            color: var(--color-error);
+        }
+        
+        /* User Dropdown - Mobile adjustments */
+        @media (max-width: 991.98px) {
+            .user-dropdown {
+                order: 3;
+                margin-left: 0.5rem;
+            }
+            
+            .user-dropdown-toggle {
+                padding: 0.3rem;
+                border-radius: 50%;
+                width: 38px;
+                height: 38px;
+                justify-content: center;
+            }
+            
+            .user-menu {
+                position: fixed;
+                top: 56px;
+                right: 10px;
+                left: auto;
+                min-width: 260px;
+                max-width: calc(100vw - 20px);
+                z-index: 9999;
+            }
+            
+            /* ハンバーガーメニューの高さ制限とスクロール制御 */
+            .navbar-collapse {
+                max-height: 70vh;
+                overflow-y: auto;
+                overscroll-behavior: contain;
+                -webkit-overflow-scrolling: touch;
+                touch-action: pan-y;
+            }
+            
+            /* メニューが開いている時はfixed表示 */
+            .navbar-collapse.show,
+            .navbar-collapse.collapsing {
+                position: fixed;
+                top: 56px;
+                left: 0;
+                right: 0;
+                background: var(--color-bg-card);
+                border-bottom: 1px solid var(--color-border);
+                box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+                z-index: 1040;
+                padding: 0.5rem 1rem;
+            }
+            
+            .navbar-collapse::-webkit-scrollbar {
+                width: 6px;
+            }
+            
+            .navbar-collapse::-webkit-scrollbar-track {
+                background: var(--color-bg);
+            }
+            
+            .navbar-collapse::-webkit-scrollbar-thumb {
+                background: var(--color-border);
+                border-radius: 3px;
+            }
+            
+            /* メニューが開いている時にbodyのスクロールを無効化 */
+            body.menu-open {
+                overflow: hidden;
+            }
+            
+            /* メニュー背景オーバーレイ */
+            .navbar-overlay {
+                display: none;
+                position: fixed;
+                top: 56px;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 1030;
+            }
+            
+            .navbar-overlay.show {
+                display: block;
+            }
+        }
+                left: auto;
+                min-width: 260px;
+                max-width: calc(100vw - 20px);
+                z-index: 9999;
+            }
+        }
+        
+        /* Navbar Overlay for mobile menu */
+        .navbar-overlay {
+            display: none;
+            position: fixed;
+            top: 56px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1040;
+        }
+        
+        .navbar-overlay.show {
+            display: block;
         }
         
         .ticket-card {
@@ -148,6 +417,9 @@
     </style>
 </head>
 <body>
+    <!-- Navbar Overlay (for closing mobile menu) -->
+    <div class="navbar-overlay d-lg-none" id="navbarOverlay"></div>
+    
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
         <div class="container">
@@ -171,31 +443,193 @@
                 </select>
             </div>
             
+            <!-- User Dropdown (auth-only) -->
+            <div class="user-dropdown auth-only" id="userDropdown" style="display: none;">
+                <button type="button" class="user-dropdown-toggle" id="userDropdownBtn" onclick="toggleUserDropdown(event)">
+                    <i class="fas fa-user-circle"></i>
+                    <span class="user-name d-none d-lg-inline" id="userName">User</span>
+                    <i class="fas fa-chevron-down user-chevron d-none d-lg-inline"></i>
+                </button>
+                <div class="user-menu" id="userMenu">
+                    <div class="user-menu-header">
+                        <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
+                        <div class="user-info">
+                            <div class="user-display-name" id="userDisplayName">Demo User</div>
+                            <div class="user-email" id="userEmail">user@example.com</div>
+                        </div>
+                    </div>
+                    <div class="user-menu-divider"></div>
+                    <a href="../account-settings.html" class="user-menu-item">
+                        <i class="fas fa-cog"></i>
+                        <span data-i18n="nav.accountSettings">Account Settings</span>
+                    </a>
+                    <a href="../dashboard.html" class="user-menu-item">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span data-i18n="nav.creatorDashboard">Creator Dashboard</span>
+                    </a>
+                    <div class="user-menu-divider"></div>
+                    <button class="user-menu-item logout-btn" onclick="handleLogout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span data-i18n="nav.logout">Log Out</span>
+                    </button>
+                </div>
+            </div>
+            
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
+                <!-- PC Navigation -->
+                <ul class="navbar-nav me-auto d-none d-lg-flex">
+                    <!-- Browse: 共通 -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="../browse.html">
+                            <i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span>
+                        </a>
+                    </li>
+                    <!-- Auth: Library -->
+                    <li class="nav-item auth-only" style="display: none;">
+                        <a class="nav-link" href="../library.html">
+                            <i class="fas fa-book-reader me-1"></i> <span data-i18n="nav.library">Library</span>
+                        </a>
+                    </li>
+                    <!-- Auth: Dashboard -->
+                    <li class="nav-item auth-only" style="display: none;">
+                        <a class="nav-link" href="../dashboard.html">
+                            <i class="fas fa-th-large me-1"></i> <span data-i18n="nav.dashboard">Dashboard</span>
+                        </a>
+                    </li>
+                    <!-- Auth: Upload -->
+                    <li class="nav-item auth-only" style="display: none;">
+                        <a class="nav-link" href="../upload.html">
+                            <i class="fas fa-upload me-1"></i> <span data-i18n="nav.upload">Upload</span>
+                        </a>
+                    </li>
+                    <!-- Auth: Translation Tools Dropdown -->
+                    <li class="nav-item dropdown auth-only" style="display: none;">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-language me-1"></i> <span data-i18n="nav.translationTools">Translation Tools</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="../manga-translator.html"><i class="fas fa-image me-2"></i><span data-i18n="nav.mangaTranslator">Manga Translator</span></a></li>
+                            <li><a class="dropdown-item" href="../translation-status.html"><i class="fas fa-tasks me-2"></i><span data-i18n="nav.translationStatus">Translation Status</span></a></li>
+                            <li><a class="dropdown-item" href="../translators/index.html"><i class="fas fa-users me-2"></i><span data-i18n="nav.findTranslators">Find Translators</span></a></li>
+                        </ul>
+                    </li>
+                    <!-- Support Dropdown: 共通（ただしMy Ticketsはauth-only） -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-headset me-1"></i> <span data-i18n="nav.support">Support</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
+                            <li><a class="dropdown-item" href="troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
+                            <li><a class="dropdown-item" href="contact.html"><i class="fas fa-envelope me-2"></i><span data-i18n="nav.contact">Contact</span></a></li>
+                            <li class="auth-only" style="display: none;"><hr class="dropdown-divider"></li>
+                            <li class="auth-only" style="display: none;"><a class="dropdown-item active" href="tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
+                        </ul>
+                    </li>
+                    <!-- Home: 共通 -->
                     <li class="nav-item">
                         <a class="nav-link" href="../../index.html">
                             <i class="fas fa-home me-1"></i> <span data-i18n="nav.home">Home</span>
                         </a>
                     </li>
+                </ul>
+                
+                <!-- Mobile Hamburger Menu -->
+                <ul class="navbar-nav d-lg-none">
+                    <!-- Browse: 共通 -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="../browse.html">
+                            <i class="fas fa-compass me-2"></i> <span data-i18n="nav.browse">Browse</span>
+                        </a>
+                    </li>
+                    <!-- Auth: Library -->
+                    <li class="nav-item auth-only" style="display: none;">
+                        <a class="nav-link" href="../library.html">
+                            <i class="fas fa-book-reader me-2"></i> <span data-i18n="nav.library">Library</span>
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <!-- Auth: Dashboard -->
+                    <li class="nav-item auth-only" style="display: none;">
+                        <a class="nav-link" href="../dashboard.html">
+                            <i class="fas fa-th-large me-2"></i> <span data-i18n="nav.dashboard">Dashboard</span>
+                        </a>
+                    </li>
+                    <!-- Auth: Upload -->
+                    <li class="nav-item auth-only" style="display: none;">
+                        <a class="nav-link" href="../upload.html">
+                            <i class="fas fa-upload me-2"></i> <span data-i18n="nav.upload">Upload</span>
+                        </a>
+                    </li>
+                    <!-- Auth: Translation Tools Submenu -->
+                    <li class="nav-item auth-only" style="display: none;">
+                        <a class="nav-link" data-bs-toggle="collapse" href="#translationToolsMenu" role="button">
+                            <i class="fas fa-language me-2"></i> <span data-i18n="nav.translationTools">Translation Tools</span>
+                            <i class="fas fa-chevron-down ms-auto small"></i>
+                        </a>
+                        <div class="collapse ps-4" id="translationToolsMenu">
+                            <a class="nav-link" href="../manga-translator.html">
+                                <i class="fas fa-image me-2"></i> <span data-i18n="nav.mangaTranslator">Manga Translator</span>
+                            </a>
+                            <a class="nav-link" href="../translation-status.html">
+                                <i class="fas fa-tasks me-2"></i> <span data-i18n="nav.translationStatus">Translation Status</span>
+                            </a>
+                            <a class="nav-link" href="../translators/index.html">
+                                <i class="fas fa-users me-2"></i> <span data-i18n="nav.findTranslators">Find Translators</span>
+                            </a>
+                        </div>
+                    </li>
+                    <!-- Auth: Divider -->
+                    <li class="auth-only" style="display: none;"><hr class="dropdown-divider"></li>
+                    <!-- Support Section: 共通 -->
                     <li class="nav-item">
                         <a class="nav-link" href="faq.html">
-                            <i class="fas fa-question-circle me-1"></i> <span data-i18n="support.faq.title">FAQ</span>
+                            <i class="fas fa-question-circle me-2"></i> <span data-i18n="support.faq.title">FAQ</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="troubleshoot.html">
+                            <i class="fas fa-tools me-2"></i> <span data-i18n="support.troubleshoot.title">Troubleshooting</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="contact.html">
-                            <i class="fas fa-envelope me-1"></i> <span data-i18n="support.contact.title">Contact Us</span>
+                            <i class="fas fa-envelope me-2"></i> <span data-i18n="nav.contact">Contact</span>
+                        </a>
+                    </li>
+                    <!-- Auth: My Tickets -->
+                    <li class="nav-item auth-only" style="display: none;">
+                        <a class="nav-link active" href="tickets.html">
+                            <i class="fas fa-ticket-alt me-2"></i> <span data-i18n="support.tickets.title">My Tickets</span>
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <!-- Home: 共通 -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="../../index.html">
+                            <i class="fas fa-home me-2"></i> <span data-i18n="nav.home">Home</span>
+                        </a>
+                    </li>
+                    <!-- Guest: Sign In -->
+                    <li class="nav-item guest-only">
+                        <a class="nav-link" href="../login.html">
+                            <i class="fas fa-sign-in-alt me-2"></i> <span data-i18n="nav.login">Sign In</span>
                         </a>
                     </li>
                 </ul>
                 
                 <div class="d-flex align-items-center gap-3">
-                    <!-- Language Selector (デスクトップ用) -->
+                    <!-- Notification Bell (PC, auth-only) -->
+                    <a href="../notifications.html" class="btn btn-link position-relative d-none d-lg-block auth-only" id="notificationBell" title="Notifications" style="display: none;">
+                        <i class="fas fa-bell fs-5"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">3</span>
+                    </a>
+                    
+                    <!-- Language Selector (Desktop) -->
                     <select class="language-selector d-none d-lg-block" id="languageSelector">
                         <option value="en">🇬🇧 EN</option>
                         <option value="ja">🇯🇵 日本語</option>
@@ -208,9 +642,9 @@
                         <option value="pt">🇧🇷 PT</option>
                     </select>
                     
-                    <!-- Auth Nav -->
-                    <div id="authNav">
-                        <a href="../login.html" class="btn btn-soft-custom">
+                    <!-- Auth Nav (Guest: Sign In button) -->
+                    <div id="authNav" class="guest-only">
+                        <a href="../login.html" class="btn btn-soft-custom d-none d-lg-inline-flex">
                             <i class="fas fa-sign-in-alt me-1"></i> <span data-i18n="nav.login">Sign In</span>
                         </a>
                     </div>
@@ -240,20 +674,20 @@
                     <div class="col-md-4">
                         <label class="form-label small text-muted" data-i18n="support.tickets.status">Status</label>
                         <select class="form-select" id="statusFilter">
-                            <option value="all" data-i18n="common.all">All</option>
-                            <option value="open" data-i18n="support.tickets.statuses.open">Open</option>
-                            <option value="in_progress" data-i18n="support.tickets.statuses.inProgress">In Progress</option>
-                            <option value="waiting_user" data-i18n="support.tickets.statuses.waitingUser">Waiting for Reply</option>
-                            <option value="waiting_admin" data-i18n="support.tickets.statuses.waitingAdmin">Waiting for Support</option>
-                            <option value="resolved" data-i18n="support.tickets.statuses.resolved">Resolved</option>
-                            <option value="closed" data-i18n="support.tickets.statuses.closed">Closed</option>
+                            <option value="all">All</option>
+                            <option value="open">Open</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="waiting_user">Waiting for Reply</option>
+                            <option value="waiting_admin">Waiting for Support</option>
+                            <option value="resolved">Resolved</option>
+                            <option value="closed">Closed</option>
                         </select>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label small text-muted">&nbsp;</label>
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="unreadOnly">
-                            <label class="form-check-label" for="unreadOnly" data-i18n="support.tickets.unreadOnly">
+                            <label class="form-check-label" for="unreadOnly">
                                 Only with unread messages
                             </label>
                         </div>
@@ -350,100 +784,418 @@
     </footer>
 
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../../js/translations.js"></script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../js/lang/ja.js"></script>
+    <script src="../../js/lang/en.js"></script>
+    <script src="../../js/lang/zh.js"></script>
+    <script src="../../js/lang/es.js"></script>
+    <script src="../../js/lang/fr.js"></script>
+    <script src="../../js/lang/de.js"></script>
+    <script src="../../js/lang/ko.js"></script>
+    <script src="../../js/lang/ar.js"></script>
+    <script src="../../js/lang/pt.js"></script>
+    <script src="../../js/lang/translations-base.js"></script>
     <script src="../../js/language-switcher.js"></script>
+    
     <script>
-        const API_BASE = 'http://localhost:3000/api';
-        let tickets = [];
+        // 多言語対応テキスト（9言語）
+        const uiText = {
+            menuAccountSettings: {
+                en: 'Account Settings',
+                ja: 'アカウント設定',
+                zh: '账户设置',
+                es: 'Configuración de cuenta',
+                fr: 'Paramètres du compte',
+                de: 'Kontoeinstellungen',
+                ko: '계정 설정',
+                ar: 'إعدادات الحساب',
+                pt: 'Configurações da conta'
+            },
+            menuDashboard: {
+                en: 'Creator Dashboard',
+                ja: 'クリエイターダッシュボード',
+                zh: '创作者控制台',
+                es: 'Panel de creador',
+                fr: 'Tableau de bord créateur',
+                de: 'Creator Dashboard',
+                ko: '크리에이터 대시보드',
+                ar: 'لوحة تحكم المبدع',
+                pt: 'Painel do criador'
+            },
+            menuLogout: {
+                en: 'Log Out',
+                ja: 'ログアウト',
+                zh: '退出登录',
+                es: 'Cerrar sesión',
+                fr: 'Déconnexion',
+                de: 'Abmelden',
+                ko: '로그아웃',
+                ar: 'تسجيل الخروج',
+                pt: 'Sair'
+            },
+            logOutConfirm: {
+                en: 'Are you sure you want to log out?',
+                ja: 'ログアウトしますか？',
+                zh: '确定要退出登录吗？',
+                es: '¿Estás seguro de que quieres cerrar sesión?',
+                fr: 'Êtes-vous sûr de vouloir vous déconnecter?',
+                de: 'Sind Sie sicher, dass Sie sich abmelden möchten?',
+                ko: '로그아웃 하시겠습니까?',
+                ar: 'هل أنت متأكد أنك تريد تسجيل الخروج؟',
+                pt: 'Tem certeza que deseja sair?'
+            },
+            navBrowse: {
+                en: 'Browse',
+                ja: '作品を探す',
+                zh: '浏览',
+                es: 'Explorar',
+                fr: 'Parcourir',
+                de: 'Durchsuchen',
+                ko: '찾아보기',
+                ar: 'تصفح',
+                pt: 'Explorar'
+            },
+            navLibrary: {
+                en: 'Library',
+                ja: 'ライブラリ',
+                zh: '书库',
+                es: 'Biblioteca',
+                fr: 'Bibliothèque',
+                de: 'Bibliothek',
+                ko: '라이브러리',
+                ar: 'المكتبة',
+                pt: 'Biblioteca'
+            },
+            navDashboard: {
+                en: 'Dashboard',
+                ja: 'ダッシュボード',
+                zh: '控制台',
+                es: 'Panel',
+                fr: 'Tableau de bord',
+                de: 'Dashboard',
+                ko: '대시보드',
+                ar: 'لوحة التحكم',
+                pt: 'Painel'
+            },
+            // ページ固有の翻訳
+            pageTitle: {
+                en: 'Support Tickets',
+                ja: 'サポートチケット',
+                zh: '支持工单',
+                es: 'Tickets de Soporte',
+                fr: 'Tickets de Support',
+                de: 'Support-Tickets',
+                ko: '지원 티켓',
+                ar: 'تذاكر الدعم',
+                pt: 'Tickets de Suporte'
+            },
+            newTicket: {
+                en: 'New Ticket',
+                ja: '新規チケット',
+                zh: '新建工单',
+                es: 'Nuevo Ticket',
+                fr: 'Nouveau Ticket',
+                de: 'Neues Ticket',
+                ko: '새 티켓',
+                ar: 'تذكرة جديدة',
+                pt: 'Novo Ticket'
+            },
+            statusLabel: {
+                en: 'Status',
+                ja: 'ステータス',
+                zh: '状态',
+                es: 'Estado',
+                fr: 'Statut',
+                de: 'Status',
+                ko: '상태',
+                ar: 'الحالة',
+                pt: 'Status'
+            },
+            filterAll: {
+                en: 'All',
+                ja: 'すべて',
+                zh: '全部',
+                es: 'Todos',
+                fr: 'Tous',
+                de: 'Alle',
+                ko: '전체',
+                ar: 'الكل',
+                pt: 'Todos'
+            },
+            statusOpen: {
+                en: 'Open',
+                ja: 'オープン',
+                zh: '待处理',
+                es: 'Abierto',
+                fr: 'Ouvert',
+                de: 'Offen',
+                ko: '열림',
+                ar: 'مفتوح',
+                pt: 'Aberto'
+            },
+            statusInProgress: {
+                en: 'In Progress',
+                ja: '対応中',
+                zh: '处理中',
+                es: 'En Progreso',
+                fr: 'En Cours',
+                de: 'In Bearbeitung',
+                ko: '진행 중',
+                ar: 'قيد التنفيذ',
+                pt: 'Em Progresso'
+            },
+            statusWaitingUser: {
+                en: 'Waiting for Reply',
+                ja: '返信待ち',
+                zh: '等待回复',
+                es: 'Esperando Respuesta',
+                fr: 'En Attente de Réponse',
+                de: 'Warte auf Antwort',
+                ko: '답변 대기',
+                ar: 'في انتظار الرد',
+                pt: 'Aguardando Resposta'
+            },
+            statusWaitingAdmin: {
+                en: 'Waiting for Support',
+                ja: 'サポート待ち',
+                zh: '等待客服',
+                es: 'Esperando Soporte',
+                fr: 'En Attente du Support',
+                de: 'Warte auf Support',
+                ko: '지원 대기',
+                ar: 'في انتظار الدعم',
+                pt: 'Aguardando Suporte'
+            },
+            statusResolved: {
+                en: 'Resolved',
+                ja: '解決済み',
+                zh: '已解决',
+                es: 'Resuelto',
+                fr: 'Résolu',
+                de: 'Gelöst',
+                ko: '해결됨',
+                ar: 'تم الحل',
+                pt: 'Resolvido'
+            },
+            statusClosed: {
+                en: 'Closed',
+                ja: 'クローズ',
+                zh: '已关闭',
+                es: 'Cerrado',
+                fr: 'Fermé',
+                de: 'Geschlossen',
+                ko: '종료됨',
+                ar: 'مغلق',
+                pt: 'Fechado'
+            },
+            unreadOnly: {
+                en: 'Only with unread messages',
+                ja: '未読メッセージのみ',
+                zh: '仅显示未读消息',
+                es: 'Solo con mensajes no leídos',
+                fr: 'Seulement avec messages non lus',
+                de: 'Nur mit ungelesenen Nachrichten',
+                ko: '읽지 않은 메시지만',
+                ar: 'فقط الرسائل غير المقروءة',
+                pt: 'Apenas com mensagens não lidas'
+            },
+            noTickets: {
+                en: 'No tickets found',
+                ja: 'チケットがありません',
+                zh: '没有找到工单',
+                es: 'No se encontraron tickets',
+                fr: 'Aucun ticket trouvé',
+                de: 'Keine Tickets gefunden',
+                ko: '티켓이 없습니다',
+                ar: 'لم يتم العثور على تذاكر',
+                pt: 'Nenhum ticket encontrado'
+            },
+            noTicketsDesc: {
+                en: 'If you have questions or requests, please feel free to contact us',
+                ja: 'ご質問やご要望がございましたら、お気軽にお問い合わせください',
+                zh: '如有问题或需求，请随时联系我们',
+                es: 'Si tiene preguntas o solicitudes, no dude en contactarnos',
+                fr: "Si vous avez des questions ou des demandes, n'hésitez pas à nous contacter",
+                de: 'Wenn Sie Fragen oder Wünsche haben, kontaktieren Sie uns bitte',
+                ko: '질문이나 요청이 있으시면 언제든지 문의해 주세요',
+                ar: 'إذا كانت لديك أسئلة أو طلبات، فلا تتردد في الاتصال بنا',
+                pt: 'Se você tiver perguntas ou solicitações, não hesite em nos contatar'
+            },
+            contactUs: {
+                en: 'Contact Us',
+                ja: 'お問い合わせ',
+                zh: '联系我们',
+                es: 'Contáctenos',
+                fr: 'Contactez-nous',
+                de: 'Kontaktieren Sie uns',
+                ko: '문의하기',
+                ar: 'اتصل بنا',
+                pt: 'Fale Conosco'
+            },
+            faq: {
+                en: 'FAQ',
+                ja: 'よくある質問',
+                zh: '常见问题',
+                es: 'Preguntas Frecuentes',
+                fr: 'FAQ',
+                de: 'FAQ',
+                ko: '자주 묻는 질문',
+                ar: 'الأسئلة الشائعة',
+                pt: 'Perguntas Frequentes'
+            },
+            troubleshooting: {
+                en: 'Troubleshooting',
+                ja: 'トラブルシューティング',
+                zh: '故障排除',
+                es: 'Solución de Problemas',
+                fr: 'Dépannage',
+                de: 'Fehlerbehebung',
+                ko: '문제 해결',
+                ar: 'استكشاف الأخطاء وإصلاحها',
+                pt: 'Solução de Problemas'
+            },
+            terms: {
+                en: 'Terms',
+                ja: '利用規約',
+                zh: '服务条款',
+                es: 'Términos',
+                fr: 'Conditions',
+                de: 'Nutzungsbedingungen',
+                ko: '이용약관',
+                ar: 'الشروط',
+                pt: 'Termos'
+            },
+            privacy: {
+                en: 'Privacy',
+                ja: 'プライバシー',
+                zh: '隐私政策',
+                es: 'Privacidad',
+                fr: 'Confidentialité',
+                de: 'Datenschutz',
+                ko: '개인정보',
+                ar: 'الخصوصية',
+                pt: 'Privacidade'
+            },
+            loading: {
+                en: 'Loading...',
+                ja: '読み込み中...',
+                zh: '加载中...',
+                es: 'Cargando...',
+                fr: 'Chargement...',
+                de: 'Wird geladen...',
+                ko: '로딩 중...',
+                ar: 'جاري التحميل...',
+                pt: 'Carregando...'
+            },
+            reply: {
+                en: 'Reply',
+                ja: '返信',
+                zh: '回复',
+                es: 'Responder',
+                fr: 'Répondre',
+                de: 'Antworten',
+                ko: '답장',
+                ar: 'رد',
+                pt: 'Responder'
+            },
+            replyPlaceholder: {
+                en: 'Enter your reply',
+                ja: '返信を入力してください',
+                zh: '请输入您的回复',
+                es: 'Ingrese su respuesta',
+                fr: 'Entrez votre réponse',
+                de: 'Geben Sie Ihre Antwort ein',
+                ko: '답변을 입력하세요',
+                ar: 'أدخل ردك',
+                pt: 'Digite sua resposta'
+            },
+            send: {
+                en: 'Send',
+                ja: '送信',
+                zh: '发送',
+                es: 'Enviar',
+                fr: 'Envoyer',
+                de: 'Senden',
+                ko: '보내기',
+                ar: 'إرسال',
+                pt: 'Enviar'
+            },
+            ratingQuestion: {
+                en: 'How was our support?',
+                ja: 'サポートはいかがでしたか？',
+                zh: '我们的支持服务如何？',
+                es: '¿Cómo fue nuestro soporte?',
+                fr: 'Comment était notre support?',
+                de: 'Wie war unser Support?',
+                ko: '저희 지원 서비스는 어떠셨나요?',
+                ar: 'كيف كان دعمنا؟',
+                pt: 'Como foi nosso suporte?'
+            },
+            commentOptional: {
+                en: 'Comment (optional)',
+                ja: 'コメント（任意）',
+                zh: '评论（可选）',
+                es: 'Comentario (opcional)',
+                fr: 'Commentaire (optionnel)',
+                de: 'Kommentar (optional)',
+                ko: '코멘트 (선택사항)',
+                ar: 'تعليق (اختياري)',
+                pt: 'Comentário (opcional)'
+            },
+            submitRating: {
+                en: 'Submit Rating',
+                ja: '評価を送信',
+                zh: '提交评分',
+                es: 'Enviar Calificación',
+                fr: "Soumettre l'évaluation",
+                de: 'Bewertung abgeben',
+                ko: '평가 제출',
+                ar: 'إرسال التقييم',
+                pt: 'Enviar Avaliação'
+            }
+        };
+        
+        // API settings
+        const API_BASE = '/api';
         let currentTicket = null;
         let selectedRating = 0;
-        
-        // デモモード判定
-        const isDemo = new URLSearchParams(window.location.search).get('demo') === 'true';
+        let isDemo = false;
+        let currentLang = localStorage.getItem('preferredLanguage') || 'en';
 
-        // Get translated status labels
-        function getStatusLabels() {
-            return {
-                'open': t('support.tickets.statuses.open'),
-                'in_progress': t('support.tickets.statuses.inProgress'),
-                'waiting_user': t('support.tickets.statuses.waitingUser'),
-                'waiting_admin': t('support.tickets.statuses.waitingAdmin'),
-                'resolved': t('support.tickets.statuses.resolved'),
-                'closed': t('support.tickets.statuses.closed')
-            };
+        // Get current language helper
+        function getCurrentLanguage() {
+            return localStorage.getItem('preferredLanguage') || 'en';
         }
         
-        function getCategoryLabels() {
-            return {
-                'account': t('support.tickets.categories.account'),
-                'payment': t('support.tickets.categories.payment'),
-                'translation': t('support.tickets.categories.translation'),
-                'technical': t('support.tickets.categories.technical'),
-                'copyright': t('support.tickets.categories.copyright'),
-                'other': t('support.tickets.categories.other')
-            };
-        }
-        
-        // デモ用チケットデータ（subjectKeyを使用して翻訳キーを保存）
-        const DEMO_TICKETS_DATA = [
-            {
-                id: 1,
-                ticket_number: 'TKT-20241201-0001',
-                subjectKey: 'translationQuality',
-                category: 'translation',
-                status: 'in_progress',
-                unread_count: 1,
-                created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-                last_message_at: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString()
-            },
-            {
-                id: 2,
-                ticket_number: 'TKT-20241128-0002',
-                subjectKey: 'paymentChange',
-                category: 'payment',
-                status: 'resolved',
-                unread_count: 0,
-                created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-                last_message_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
-            },
-            {
-                id: 3,
-                ticket_number: 'TKT-20241125-0003',
-                subjectKey: 'accountSettings',
-                category: 'technical',
-                status: 'closed',
-                unread_count: 0,
-                created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-                last_message_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
-            }
-        ];
-
-        // デモチケットを翻訳されたsubjectで返す
-        function getDemoTickets() {
-            return DEMO_TICKETS_DATA.map(ticket => ({
-                ...ticket,
-                subject: t(`support.tickets.demo.${ticket.subjectKey}`)
-            }));
+        // Get localized text helper
+        function getL(obj) {
+            const lang = getCurrentLanguage();
+            return obj[lang] || obj.en || '';
         }
 
-        // デモメッセージを翻訳キーから取得
-        function getDemoMessages(ticket) {
-            return [
-                { 
-                    sender_type: 'user', 
-                    message: t('support.tickets.demo.userMessage'), 
-                    created_at: ticket.created_at 
-                },
-                { 
-                    sender_type: 'admin', 
-                    message: t('support.tickets.demo.adminMessage'), 
-                    created_at: new Date(Date.parse(ticket.created_at) + 60 * 60 * 1000).toISOString() 
+        /**
+         * Toggle user dropdown menu (called from onclick)
+         */
+        function toggleUserDropdown(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const dropdown = document.getElementById('userDropdown');
+            const dropdownMenu = document.getElementById('userMenu');
+            
+            dropdown.classList.toggle('open');
+            dropdownMenu.classList.toggle('show');
+            
+            if (dropdownMenu.classList.contains('show')) {
+                if (typeof LanguageSwitcher !== 'undefined') {
+                    LanguageSwitcher.loadLanguage(LanguageSwitcher.getCurrentLanguage());
                 }
-            ];
+            }
         }
-
-        // モバイルとデスクトップのセレクターを同期
+        
+        /**
+         * Sync language selectors and setup event listeners
+         */
         function syncLanguageSelectors() {
             const desktopSelector = document.getElementById('languageSelector');
             const mobileSelector = document.getElementById('languageSelectorMobile');
@@ -455,184 +1207,375 @@
                 
                 mobileSelector.addEventListener('change', function() {
                     desktopSelector.value = this.value;
+                    if (typeof LanguageSwitcher !== 'undefined') {
+                        LanguageSwitcher.changeLanguage(this.value);
+                    }
+                    currentLang = this.value;
+                    updateUIText();
+                    loadTickets();
                 });
                 
                 desktopSelector.addEventListener('change', function() {
                     mobileSelector.value = this.value;
+                    if (typeof LanguageSwitcher !== 'undefined') {
+                        LanguageSwitcher.changeLanguage(this.value);
+                    }
+                    currentLang = this.value;
+                    updateUIText();
+                    loadTickets();
                 });
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            checkAuth();
-            setupFilters();
-            setupModal();
-            syncLanguageSelectors();
-        });
-
-        // Re-load tickets when language changes (to get new translations for demo mode)
-        document.addEventListener('languageChanged', function(e) {
-            const lang = e.detail.language || e.detail.lang;
-            if (lang) {
-                const desktopSelector = document.getElementById('languageSelector');
-                const mobileSelector = document.getElementById('languageSelectorMobile');
-                if (desktopSelector) desktopSelector.value = lang;
-                if (mobileSelector) mobileSelector.value = lang;
-            }
-            // For demo mode, reload tickets to get fresh translations
-            if (isDemo) {
-                tickets = getDemoTickets();
-            }
-            renderTickets();
-        });
-
-        async function checkAuth() {
-            // デモモードの場合はログインチェックをスキップ
-            if (isDemo) {
-                updateAuthNav({ display_name: 'Demo User', email: 'demo@example.com' });
-                loadTickets();
-                return;
-            }
+        // Handle language change - update UI text and sync selectors
+        function handleLanguageChange(lang) {
+            // Save to localStorage
+            localStorage.setItem('preferredLanguage', lang);
+            currentLang = lang;
             
-            try {
-                const response = await fetch(`${API_BASE}/auth/me`, { credentials: 'include' });
-                if (!response.ok) {
-                    window.location.href = '../login.html?redirect=/pages/support/tickets.html';
-                    return;
-                }
-                const data = await response.json();
-                updateAuthNav(data.user);
-                loadTickets();
-            } catch (error) {
-                console.error('Auth error:', error);
-                window.location.href = '../login.html?redirect=/pages/support/tickets.html';
+            // Sync both selectors
+            const langSelector = document.getElementById('languageSelector');
+            const langSelectorMobile = document.getElementById('languageSelectorMobile');
+            if (langSelector) langSelector.value = lang;
+            if (langSelectorMobile) langSelectorMobile.value = lang;
+            
+            // Update UI text (menu items)
+            updateUIText();
+            
+            // Reload tickets with new language
+            loadTickets();
+            
+            // Call LanguageSwitcher if available
+            if (typeof LanguageSwitcher !== 'undefined') {
+                LanguageSwitcher.changeLanguage(lang);
             }
         }
 
-        function updateAuthNav(user) {
-            const authNav = document.getElementById('authNav');
-            authNav.innerHTML = `
-                <div class="dropdown">
-                    <button class="btn btn-soft-custom dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-user-circle me-1"></i> ${user.display_name || user.email}
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="../dashboard.html"><i class="fas fa-th-large me-2"></i><span data-i18n="nav.dashboard">Dashboard</span></a></li>
-                        <li><a class="dropdown-item active" href="tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">Support Tickets</span></a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i><span data-i18n="nav.logout">Sign Out</span></a></li>
-                    </ul>
-                </div>
-            `;
-        }
-
-        async function loadTickets() {
-            // デモモードの場合
-            if (isDemo) {
-                document.getElementById('loading').style.display = 'none';
-                tickets = getDemoTickets();
-                
-                const status = document.getElementById('statusFilter').value;
-                if (status !== 'all') {
-                    tickets = tickets.filter(t => t.status === status);
-                }
-                if (document.getElementById('unreadOnly').checked) {
-                    tickets = tickets.filter(t => t.unread_count > 0);
-                }
-                renderTickets();
-                return;
-            }
-            
+        // Translate function
+        function t(key) {
             try {
-                const status = document.getElementById('statusFilter').value;
-                let url = `${API_BASE}/support/tickets`;
-                if (status !== 'all') url += `?status=${status}`;
-
-                const response = await fetch(url, { credentials: 'include' });
-                const data = await response.json();
-
-                document.getElementById('loading').style.display = 'none';
-
-                if (data.success) {
-                    tickets = data.tickets;
-                    if (document.getElementById('unreadOnly').checked) {
-                        tickets = tickets.filter(t => t.unread_count > 0);
+                const keys = key.split('.');
+                let value = window.translations || {};
+                for (const k of keys) {
+                    if (value && typeof value === 'object' && k in value) {
+                        value = value[k];
+                    } else {
+                        return key;
                     }
-                    renderTickets();
-                } else {
-                    alert(data.error || t('support.tickets.loadError'));
                 }
-            } catch (error) {
-                console.error('Ticket load error:', error);
-                document.getElementById('loading').style.display = 'none';
-                alert(t('support.tickets.loadError'));
+                return typeof value === 'string' ? value : key;
+            } catch (e) {
+                return key;
             }
         }
 
-        function renderTickets() {
-            const container = document.getElementById('ticketList');
-            const emptyState = document.getElementById('emptyState');
-            const statusLabels = getStatusLabels();
-            const categoryLabels = getCategoryLabels();
+        // Status labels - use uiText for translations
+        function getStatusLabels() {
+            return {
+                open: getL(uiText.statusOpen),
+                in_progress: getL(uiText.statusInProgress),
+                waiting_user: getL(uiText.statusWaitingUser),
+                waiting_admin: getL(uiText.statusWaitingAdmin),
+                resolved: getL(uiText.statusResolved),
+                closed: getL(uiText.statusClosed)
+            };
+        }
 
-            if (tickets.length === 0) {
-                container.innerHTML = '';
-                emptyState.style.display = 'block';
+        // Update UI text based on current language
+        function updateUIText() {
+            const lang = getCurrentLanguage();
+            console.log('updateUIText called, lang:', lang);
+            console.log('uiText.statusWaitingUser:', uiText.statusWaitingUser);
+            console.log('getL(uiText.statusWaitingUser):', getL(uiText.statusWaitingUser));
+            
+            // Update user menu items
+            const menuAccountSettings = document.getElementById('menuAccountSettings');
+            const menuDashboard = document.getElementById('menuDashboard');
+            const menuLogout = document.getElementById('menuLogout');
+            
+            if (menuAccountSettings) menuAccountSettings.textContent = getL(uiText.menuAccountSettings);
+            if (menuDashboard) menuDashboard.textContent = getL(uiText.menuDashboard);
+            if (menuLogout) menuLogout.textContent = getL(uiText.menuLogout);
+            
+            // Update nav items
+            const navBrowse = document.getElementById('navBrowse');
+            const navLibrary = document.getElementById('navLibrary');
+            const navDashboardNav = document.getElementById('navDashboard');
+            
+            if (navBrowse) {
+                const span = navBrowse.querySelector('span');
+                if (span) span.textContent = getL(uiText.navBrowse);
+            }
+            if (navLibrary) {
+                const span = navLibrary.querySelector('span');
+                if (span) span.textContent = getL(uiText.navLibrary);
+            }
+            if (navDashboardNav) {
+                const span = navDashboardNav.querySelector('span');
+                if (span) span.textContent = getL(uiText.navDashboard);
+            }
+            
+            // Update page title
+            document.title = getL(uiText.pageTitle) + ' - Publisher';
+            const pageTitleSpan = document.querySelector('.page-header h2 span');
+            if (pageTitleSpan) pageTitleSpan.textContent = getL(uiText.pageTitle);
+            
+            // Update New Ticket button
+            const newTicketBtn = document.querySelector('.page-header .btn span');
+            if (newTicketBtn) newTicketBtn.textContent = getL(uiText.newTicket);
+            
+            // Update Status label
+            const statusLabel = document.querySelector('label[data-i18n="support.tickets.status"]');
+            if (statusLabel) statusLabel.textContent = getL(uiText.statusLabel);
+            
+            // Update status filter options
+            const statusFilter = document.getElementById('statusFilter');
+            if (statusFilter && statusFilter.options) {
+                console.log('Updating status filter options, language:', lang);
+                const options = statusFilter.options;
+                const statusTexts = [
+                    getL(uiText.filterAll),
+                    getL(uiText.statusOpen),
+                    getL(uiText.statusInProgress),
+                    getL(uiText.statusWaitingUser),
+                    getL(uiText.statusWaitingAdmin),
+                    getL(uiText.statusResolved),
+                    getL(uiText.statusClosed)
+                ];
+                console.log('Status texts:', statusTexts);
+                for (let i = 0; i < options.length && i < statusTexts.length; i++) {
+                    if (statusTexts[i]) {
+                        options[i].text = statusTexts[i];
+                    }
+                }
+            }
+            
+            // Update unread only checkbox label
+            const unreadLabel = document.querySelector('label[for="unreadOnly"]');
+            if (unreadLabel) unreadLabel.textContent = getL(uiText.unreadOnly);
+            
+            // Update empty state
+            const noTicketsTitle = document.querySelector('#emptyState h4');
+            const noTicketsDesc = document.querySelector('#emptyState p');
+            const contactUsBtn = document.querySelector('#emptyState .btn span');
+            if (noTicketsTitle) noTicketsTitle.textContent = getL(uiText.noTickets);
+            if (noTicketsDesc) noTicketsDesc.textContent = getL(uiText.noTicketsDesc);
+            if (contactUsBtn) contactUsBtn.textContent = getL(uiText.contactUs);
+            
+            // Update FAQ link in nav
+            const faqNavSpan = document.querySelector('.nav-link.active span');
+            if (faqNavSpan) faqNavSpan.textContent = getL(uiText.faq);
+            
+            // Update footer links
+            const footerLinks = document.querySelectorAll('.footer-custom a');
+            footerLinks.forEach(link => {
+                const i18nKey = link.getAttribute('data-i18n');
+                if (i18nKey === 'support.faq.title') link.textContent = getL(uiText.faq);
+                if (i18nKey === 'support.troubleshoot.title') link.textContent = getL(uiText.troubleshooting);
+                if (i18nKey === 'footer.terms') link.textContent = getL(uiText.terms);
+                if (i18nKey === 'footer.privacy') link.textContent = getL(uiText.privacy);
+            });
+            
+            // Update modal elements
+            const replyTitle = document.querySelector('#replyForm h6 span');
+            const replyTextarea = document.getElementById('replyMessage');
+            const sendBtn = document.querySelector('#sendReplyBtn span');
+            const ratingQuestion = document.querySelector('#ratingForm h6');
+            const commentTextarea = document.getElementById('ratingComment');
+            const submitRatingBtn = document.querySelector('#submitRatingBtn span');
+            
+            if (replyTitle) replyTitle.textContent = getL(uiText.reply);
+            if (replyTextarea) replyTextarea.placeholder = getL(uiText.replyPlaceholder);
+            if (sendBtn) sendBtn.textContent = getL(uiText.send);
+            if (ratingQuestion) ratingQuestion.textContent = getL(uiText.ratingQuestion);
+            if (commentTextarea) commentTextarea.placeholder = getL(uiText.commentOptional);
+            if (submitRatingBtn) submitRatingBtn.textContent = getL(uiText.submitRating);
+            
+            console.log('UI text updated for language:', lang);
+        }
+        
+        function handleLogout() {
+            if (confirm(getL(uiText.logOutConfirm))) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '../login.html';
+            }
+        }
+        
+        function loadUserInfo() {
+            const userStr = localStorage.getItem('user');
+            const token = localStorage.getItem('token');
+            
+            if (userStr && token) {
+                try {
+                    const user = JSON.parse(userStr);
+                    document.getElementById('userName').textContent = user.display_name || user.email || 'User';
+                    document.getElementById('userDisplayName').textContent = user.display_name || 'User';
+                    document.getElementById('userEmail').textContent = user.email || '';
+                    
+                    // Show auth-only elements, hide guest-only elements
+                    document.querySelectorAll('.auth-only').forEach(el => {
+                        el.style.display = '';
+                        el.classList.remove('d-none');
+                    });
+                    document.querySelectorAll('.guest-only').forEach(el => {
+                        el.style.display = 'none';
+                    });
+                } catch (e) {
+                    console.error('Error parsing user data:', e);
+                    showGuestState();
+                }
+            } else {
+                showGuestState();
+            }
+        }
+        
+        function showGuestState() {
+            // Show guest-only elements, hide auth-only elements
+            document.querySelectorAll('.guest-only').forEach(el => {
+                el.style.display = '';
+                el.classList.remove('d-none');
+            });
+            document.querySelectorAll('.auth-only').forEach(el => {
+                el.style.display = 'none';
+            });
+        }
+
+        // Demo data
+        const demoTickets = [
+            {
+                id: 1,
+                ticket_number: 'TKT-20240115-0001',
+                subject: 'Payment not received',
+                category: 'payment',
+                priority: 'high',
+                status: 'in_progress',
+                created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+                updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+                unread_count: 1
+            },
+            {
+                id: 2,
+                ticket_number: 'TKT-20240112-0002',
+                subject: 'How to change username?',
+                category: 'account',
+                priority: 'normal',
+                status: 'resolved',
+                created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+                updated_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+                unread_count: 0
+            },
+            {
+                id: 3,
+                ticket_number: 'TKT-20240110-0003',
+                subject: 'Translation quality issue',
+                category: 'translation',
+                priority: 'normal',
+                status: 'waiting_user',
+                created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+                updated_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+                unread_count: 2
+            }
+        ];
+
+        const demoMessages = {
+            1: [
+                { id: 1, sender_type: 'user', message: 'I made a withdrawal request 5 days ago, but the money hasn\'t arrived yet. My bank account is correct.', created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() },
+                { id: 2, sender_type: 'admin', message: 'Thank you for contacting us. We\'ll look into your payment status. Could you please provide your bank name and last 4 digits of account number for verification?', created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
+                { id: 3, sender_type: 'user', message: 'Sure, it\'s ABC Bank, account ending in 1234.', created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000 + 3600000).toISOString() },
+                { id: 4, sender_type: 'admin', message: 'Thank you. We have confirmed your payment was processed. It may take 2-3 business days to reflect in your account. Please check again tomorrow.', created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() }
+            ],
+            2: [
+                { id: 1, sender_type: 'user', message: 'How can I change my username? I can\'t find the option.', created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString() },
+                { id: 2, sender_type: 'admin', message: 'You can change your username from Account Settings > Profile. Click Edit next to your username to change it.', created_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString() },
+                { id: 3, sender_type: 'user', message: 'Found it! Thank you!', created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
+                { id: 4, sender_type: 'system', message: 'This ticket has been resolved.', created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() }
+            ],
+            3: [
+                { id: 1, sender_type: 'user', message: 'The Japanese to English translation of my work has some grammar errors.', created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString() },
+                { id: 2, sender_type: 'admin', message: 'We apologize for the inconvenience. Could you please specify which chapter and which sentences have issues?', created_at: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000).toISOString() },
+                { id: 3, sender_type: 'admin', message: 'We are waiting for your response to proceed with the correction.', created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() }
+            ]
+        };
+
+        // Load tickets
+        async function loadTickets() {
+            const ticketList = document.getElementById('ticketList');
+            const emptyState = document.getElementById('emptyState');
+            const loading = document.getElementById('loading');
+            const statusFilter = document.getElementById('statusFilter').value;
+            const unreadOnly = document.getElementById('unreadOnly').checked;
+
+            if (isDemo) {
+                setTimeout(() => {
+                    loading.style.display = 'none';
+                    let filtered = [...demoTickets];
+                    if (statusFilter !== 'all') filtered = filtered.filter(t => t.status === statusFilter);
+                    if (unreadOnly) filtered = filtered.filter(t => t.unread_count > 0);
+
+                    if (filtered.length === 0) {
+                        emptyState.style.display = 'block';
+                        ticketList.innerHTML = '';
+                        return;
+                    }
+                    emptyState.style.display = 'none';
+                    renderTickets(filtered);
+                }, 500);
                 return;
             }
 
-            emptyState.style.display = 'none';
-            container.innerHTML = tickets.map(ticket => `
+            try {
+                const response = await fetch(`${API_BASE}/support/tickets?status=${statusFilter}&unread=${unreadOnly}`, { credentials: 'include' });
+                const data = await response.json();
+                loading.style.display = 'none';
+
+                if (data.success && data.tickets.length > 0) {
+                    emptyState.style.display = 'none';
+                    renderTickets(data.tickets);
+                } else {
+                    emptyState.style.display = 'block';
+                    ticketList.innerHTML = '';
+                }
+            } catch (error) {
+                console.error('Load tickets error:', error);
+                loading.style.display = 'none';
+                emptyState.style.display = 'block';
+            }
+        }
+
+        function renderTickets(tickets) {
+            const ticketList = document.getElementById('ticketList');
+            const statusLabels = getStatusLabels();
+            const priorityLabels = { urgent: t('support.tickets.priorities.urgent'), high: t('support.tickets.priorities.high'), normal: t('support.tickets.priorities.normal'), low: t('support.tickets.priorities.low') };
+
+            ticketList.innerHTML = tickets.map(ticket => `
                 <div class="card ticket-card ${ticket.unread_count > 0 ? 'has-unread' : ''}" onclick="openTicket(${ticket.id})">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
-                                <span class="ticket-number">${ticket.ticket_number}</span>
-                                <span class="badge bg-light text-dark ms-2">${categoryLabels[ticket.category] || ticket.category}</span>
-                                ${ticket.unread_count > 0 ? `<span class="badge bg-danger ms-2">${ticket.unread_count} ${t('support.tickets.unread')}</span>` : ''}
+                                <h6 class="mb-1">${ticket.subject}</h6>
+                                <small class="ticket-number">${ticket.ticket_number}</small>
                             </div>
                             <span class="status-badge status-${ticket.status}">${statusLabels[ticket.status] || ticket.status}</span>
                         </div>
-                        <h5 class="mt-2 mb-1">${escapeHtml(ticket.subject)}</h5>
-                        <p class="text-muted small mb-0">
-                            ${formatDate(ticket.created_at)}
-                            ${ticket.last_message_at !== ticket.created_at ? ` · ${t('support.tickets.lastUpdate')}: ${formatDate(ticket.last_message_at)}` : ''}
-                        </p>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <small class="text-muted">
+                                <i class="far fa-clock me-1"></i>${formatDate(ticket.updated_at)}
+                                ${ticket.unread_count > 0 ? `<span class="badge bg-danger ms-2">${ticket.unread_count} ${t('support.tickets.unread')}</span>` : ''}
+                            </small>
+                            <small class="priority-${ticket.priority}">${priorityLabels[ticket.priority] || ticket.priority}</small>
+                        </div>
                     </div>
                 </div>
             `).join('');
         }
 
-        function setupFilters() {
-            document.getElementById('statusFilter').addEventListener('change', loadTickets);
-            document.getElementById('unreadOnly').addEventListener('change', loadTickets);
-        }
-
-        function setupModal() {
-            document.getElementById('sendReplyBtn').addEventListener('click', sendReply);
-            document.querySelectorAll('#ratingStars .bi-star-fill').forEach(star => {
-                star.addEventListener('click', function() {
-                    selectedRating = parseInt(this.dataset.rating);
-                    updateRatingStars();
-                });
-                star.addEventListener('mouseover', function() { highlightStars(parseInt(this.dataset.rating)); });
-                star.addEventListener('mouseout', function() { updateRatingStars(); });
-            });
-            document.getElementById('submitRatingBtn').addEventListener('click', submitRating);
-        }
-
         async function openTicket(ticketId) {
-            const statusLabels = getStatusLabels();
-            
-            // デモモードの場合
             if (isDemo) {
-                const demoTickets = getDemoTickets();
                 const ticket = demoTickets.find(t => t.id === ticketId);
                 if (ticket) {
-                    // 翻訳キーからデモメッセージを取得
-                    const demoMessages = getDemoMessages(ticket);
                     currentTicket = ticket;
-                    showTicketModal(ticket, demoMessages);
+                    showTicketModal(ticket, demoMessages[ticketId] || []);
                 }
                 return;
             }
@@ -816,14 +1759,124 @@
             return new Date(dateStr).toLocaleString(locale, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
         }
 
-        async function logout() {
-            try {
-                await fetch(`${API_BASE}/auth/logout`, { method: 'POST', credentials: 'include' });
-                window.location.href = '../login.html';
-            } catch (error) {
-                console.error('Logout error:', error);
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOMContentLoaded fired');
+            
+            // Check demo mode
+            isDemo = new URLSearchParams(window.location.search).has('demo');
+            
+            // Sync language selectors
+            syncLanguageSelectors();
+            
+            // Update UI text immediately
+            console.log('Calling updateUIText, currentLang:', currentLang);
+            updateUIText();
+            
+            // Also update after LanguageSwitcher initializes (multiple attempts)
+            setTimeout(function() {
+                console.log('setTimeout 100ms - calling updateUIText');
+                updateUIText();
+            }, 100);
+            
+            setTimeout(function() {
+                console.log('setTimeout 300ms - calling updateUIText');
+                updateUIText();
+            }, 300);
+            
+            // Load user info (handles auth-only/guest-only visibility)
+            loadUserInfo();
+            
+            // Load tickets
+            loadTickets();
+            
+            // Filter event listeners
+            document.getElementById('statusFilter').addEventListener('change', loadTickets);
+            document.getElementById('unreadOnly').addEventListener('change', loadTickets);
+            
+            // Rating stars event listeners
+            document.querySelectorAll('#ratingStars .bi-star-fill').forEach(star => {
+                star.addEventListener('click', function() {
+                    selectedRating = parseInt(this.dataset.rating);
+                    updateRatingStars();
+                });
+                star.addEventListener('mouseover', function() {
+                    highlightStars(parseInt(this.dataset.rating));
+                });
+                star.addEventListener('mouseout', function() {
+                    updateRatingStars();
+                });
+            });
+            
+            // Reply button event listener
+            document.getElementById('sendReplyBtn').addEventListener('click', sendReply);
+            document.getElementById('submitRatingBtn').addEventListener('click', submitRating);
+            
+            // Close user menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.user-dropdown')) {
+                    const dropdown = document.getElementById('userDropdown');
+                    const dropdownMenu = document.getElementById('userMenu');
+                    if (dropdown) dropdown.classList.remove('open');
+                    if (dropdownMenu) dropdownMenu.classList.remove('show');
+                }
+            });
+            
+            // Navbar overlay control for mobile hamburger menu
+            const navbarCollapse = document.getElementById('navbarNav');
+            const navbarOverlay = document.getElementById('navbarOverlay');
+            
+            if (navbarCollapse) {
+                // Menu open - add overlay and disable body scroll
+                navbarCollapse.addEventListener('show.bs.collapse', function() {
+                    document.body.classList.add('menu-open');
+                    if (navbarOverlay) navbarOverlay.classList.add('show');
+                });
+                
+                // Menu close - remove overlay and enable body scroll
+                navbarCollapse.addEventListener('hide.bs.collapse', function() {
+                    document.body.classList.remove('menu-open');
+                    if (navbarOverlay) navbarOverlay.classList.remove('show');
+                });
             }
-        }
+            
+            if (navbarOverlay) {
+                // Click overlay to close menu
+                navbarOverlay.addEventListener('click', function() {
+                    const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                    if (bsCollapse) {
+                        bsCollapse.hide();
+                    }
+                });
+            }
+            
+            // Listen for language change events (from language-switcher.js)
+            document.addEventListener('languageChanged', function(e) {
+                const lang = e.detail?.language || e.detail?.lang;
+                if (lang) {
+                    currentLang = lang;
+                    const langSelector = document.getElementById('languageSelector');
+                    const langSelectorMobile = document.getElementById('languageSelectorMobile');
+                    if (langSelector) langSelector.value = lang;
+                    if (langSelectorMobile) langSelectorMobile.value = lang;
+                    updateUIText();
+                    loadTickets();
+                }
+            });
+            
+            // Also listen for storage changes (in case language is changed in another tab)
+            window.addEventListener('storage', function(e) {
+                if (e.key === 'preferredLanguage') {
+                    currentLang = e.newValue || 'en';
+                    const langSelector = document.getElementById('languageSelector');
+                    const langSelectorMobile = document.getElementById('languageSelectorMobile');
+                    if (langSelector) langSelector.value = currentLang;
+                    if (langSelectorMobile) langSelectorMobile.value = currentLang;
+                    updateUIText();
+                    loadTickets();
+                }
+            });
+        });
     </script>
     <script src="../../js/header-notification.js"></script>
 </body>

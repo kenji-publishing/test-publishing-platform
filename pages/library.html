@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library - Publisher</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --color-bg: #FAF8F5;
+            --color-bg-card: #FFFFFF;
+            --color-accent: #8B7355;
+            --color-text: #2D2A26;
+            --color-text-secondary: #6B6560;
+            --color-border: #E8E4E0;
+            --color-success: #5D9C59;
+            --color-warning: #D4A853;
+            --color-error: #C75D5D;
+        }
+        
+        * { box-sizing: border-box; }
+        
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Navbar */
+        .navbar {
+            background: var(--color-bg-card);
+            border-bottom: 1px solid var(--color-border);
+            padding: 0.75rem 1rem;
+            z-index: 1050;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--color-accent) !important;
+            text-decoration: none;
+            font-size: 1.25rem;
+        }
+        
+        .nav-link {
+            color: var(--color-text) !important;
+            font-weight: 500;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: var(--color-accent) !important;
+        }
+        
+        .lang-selector {
+            padding: 0.3rem 0.5rem;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            background: transparent;
+        }
+        
+        /* Main Content */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .page-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--color-text);
+            margin: 0;
+        }
+        
+        /* Tabs */
+        .library-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--color-border);
+            padding-bottom: 0;
+            overflow-x: auto;
+        }
+        
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 0.75rem 1.25rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            position: relative;
+            white-space: nowrap;
+        }
+        
+        .tab-btn:hover {
+            color: var(--color-accent);
+        }
+        
+        .tab-btn.active {
+            color: var(--color-accent);
+        }
+        
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--color-accent);
+        }
+        
+        .tab-count {
+            background: var(--color-bg);
+            padding: 0.15rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            margin-left: 0.5rem;
+        }
+        
+        /* Book Grid */
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .book-card {
+            background: var(--color-bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+        
+        .book-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+        
+        .book-cover {
+            width: 100%;
+            aspect-ratio: 2/3;
+            background: linear-gradient(135deg, var(--color-accent) 0%, #A68B6A 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .book-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .book-cover-placeholder {
+            color: white;
+            font-size: 3rem;
+            opacity: 0.5;
+        }
+        
+        .reading-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .reading-progress-bar {
+            height: 100%;
+            background: var(--color-success);
+        }
+        
+        .book-info {
+            padding: 1rem;
+        }
+        
+        .book-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .book-author {
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .book-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            color: var(--color-text-secondary);
+        }
+        
+        .book-status {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .status-reading { color: var(--color-accent); }
+        .status-completed { color: var(--color-success); }
+        .status-new { color: var(--color-warning); }
+        
+        .book-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .book-action-btn {
+            background: transparent;
+            border: none;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            padding: 0.25rem;
+            font-size: 0.9rem;
+        }
+        
+        .book-action-btn:hover {
+            color: var(--color-accent);
+        }
+        
+        .book-action-btn.favorited {
+            color: var(--color-warning);
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--color-text-secondary);
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+        
+        .empty-state h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: var(--color-text);
+        }
+        
+        .btn-primary {
+            background: var(--color-accent);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+        
+        .btn-primary:hover {
+            background: #7A6548;
+            color: white;
+        }
+        
+        /* Search & Filter */
+        .search-filter-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .search-input-wrapper {
+            flex: 1;
+            min-width: 200px;
+            position: relative;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background: var(--color-bg-card);
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--color-accent);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--color-text-secondary);
+        }
+        
+        .filter-select {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background: var(--color-bg-card);
+            cursor: pointer;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .books-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 1rem;
+            }
+            
+            .library-tabs {
+                gap: 0;
+            }
+            
+            .tab-btn {
+                padding: 0.6rem 0.75rem;
+                font-size: 0.85rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .books-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        /* User Dropdown Menu */
+        .user-dropdown {
+            position: relative;
+        }
+        
+        .user-dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: transparent;
+            border: 1px solid var(--color-border);
+            border-radius: 25px;
+            padding: 0.4rem 0.75rem;
+            cursor: pointer;
+            color: var(--color-text);
+            transition: all 0.2s;
+        }
+        
+        .user-dropdown-toggle:hover {
+            border-color: var(--color-accent);
+            background: rgba(139, 115, 85, 0.05);
+        }
+        
+        .user-dropdown-toggle i:first-child {
+            font-size: 1.25rem;
+            color: var(--color-accent);
+        }
+        
+        .user-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .user-chevron {
+            font-size: 0.7rem;
+            color: var(--color-text-secondary);
+            transition: transform 0.2s;
+        }
+        
+        .user-dropdown.open .user-chevron {
+            transform: rotate(180deg);
+        }
+        
+        .user-menu {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            right: 0;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            min-width: 240px;
+            z-index: 1001;
+            display: none;
+            overflow: hidden;
+        }
+        
+        .user-menu.show {
+            display: block;
+        }
+        
+        .user-menu-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--color-bg);
+        }
+        
+        .user-avatar {
+            font-size: 2.5rem;
+            color: var(--color-accent);
+        }
+        
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .user-display-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .user-email {
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .user-menu-divider {
+            height: 1px;
+            background: var(--color-border);
+        }
+        
+        .user-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--color-text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+        
+        .user-menu-item:hover {
+            background: var(--color-bg);
+            color: var(--color-accent);
+        }
+        
+        .user-menu-item i {
+            width: 20px;
+            text-align: center;
+            color: var(--color-text-secondary);
+        }
+        
+        .user-menu-item:hover i {
+            color: var(--color-accent);
+        }
+        
+        .logout-btn {
+            color: var(--color-error);
+        }
+        
+        .logout-btn i {
+            color: var(--color-error);
+        }
+        
+        .logout-btn:hover {
+            background: rgba(199, 93, 93, 0.1);
+            color: var(--color-error);
+        }
+        
+        /* User Dropdown - Mobile adjustments */
+        @media (max-width: 991.98px) {
+            .user-dropdown {
+                order: 3;
+                margin-left: 0.5rem;
+            }
+            
+            .user-dropdown-toggle {
+                padding: 0.3rem;
+                border-radius: 50%;
+                width: 38px;
+                height: 38px;
+                justify-content: center;
+            }
+            
+            .user-menu {
+                position: fixed;
+                top: 56px;
+                right: 10px;
+                left: auto;
+                min-width: 260px;
+                max-width: calc(100vw - 20px);
+                z-index: 9999;
+            }
+        }
+        
+        /* Navbar Overlay for mobile menu */
+        .navbar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1040;
+        }
+        
+        .navbar-overlay.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar Overlay (for closing mobile menu) -->
+    <div class="navbar-overlay" id="navbarOverlay"></div>
+    
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="../index.html">
+                <i class="fas fa-book-open me-2"></i>Publisher
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <!-- Mobile Language Selector -->
+            <select class="lang-selector d-lg-none" id="langSelectorMobile" onchange="changeLanguage(this.value)">
+                <option value="en">EN</option>
+                <option value="ja">日本語</option>
+                <option value="zh">中文</option>
+                <option value="es">ES</option>
+                <option value="fr">FR</option>
+                <option value="de">DE</option>
+                <option value="ko">한국어</option>
+                <option value="ar">عربي</option>
+                <option value="pt">PT</option>
+            </select>
+            
+            <!-- User Dropdown - OUTSIDE collapse, works on all screen sizes -->
+            <div class="user-dropdown" id="userDropdown">
+                <button type="button" class="user-dropdown-toggle" id="userDropdownBtn">
+                    <i class="fas fa-user-circle"></i>
+                    <span class="user-name d-none d-lg-inline" id="userName">User</span>
+                    <i class="fas fa-chevron-down user-chevron d-none d-lg-inline"></i>
+                </button>
+                <div class="user-menu" id="userMenu">
+                    <div class="user-menu-header">
+                        <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
+                        <div class="user-info">
+                            <div class="user-display-name" id="userDisplayName">Demo User</div>
+                            <div class="user-email" id="userEmail">demo@publisher.local</div>
+                        </div>
+                    </div>
+                    <div class="user-menu-divider"></div>
+                    <a href="account-settings.html" class="user-menu-item">
+                        <i class="fas fa-cog"></i>
+                        <span id="menuAccountSettings">Account Settings</span>
+                    </a>
+                    <a href="dashboard.html" class="user-menu-item">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span id="menuDashboard">Creator Dashboard</span>
+                    </a>
+                    <div class="user-menu-divider"></div>
+                    <button class="user-menu-item logout-btn" onclick="handleLogout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span id="menuLogout">Log Out</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="browse.html" id="navBrowse">Browse</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="library.html" id="navLibrary">Library</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="dashboard.html" id="navDashboard">Dashboard</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center gap-3">
+                    <select class="lang-selector d-none d-lg-block" id="langSelector" onchange="changeLanguage(this.value)">
+                        <option value="en">EN</option>
+                        <option value="ja">日本語</option>
+                        <option value="zh">中文</option>
+                        <option value="es">ES</option>
+                        <option value="fr">FR</option>
+                        <option value="de">DE</option>
+                        <option value="ko">한국어</option>
+                        <option value="ar">عربي</option>
+                        <option value="pt">PT</option>
+                    </select>
+                    <a href="notifications.html" class="nav-link position-relative d-none d-lg-block" id="notificationBellContainer">
+                        <i class="fas fa-bell"></i>
+                        <span id="notificationBadge" class="position-absolute badge rounded-pill bg-danger" style="font-size: 0.55rem; display: none; top: 0; right: -5px; padding: 2px 5px;">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title"><i class="fas fa-book-reader me-2"></i><span id="pageTitle">My Library</span></h1>
+        </div>
+        
+        <!-- Search & Filter -->
+        <div class="search-filter-bar">
+            <div class="search-input-wrapper">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" id="searchInput" placeholder="Search your library..." oninput="filterBooks()">
+            </div>
+            <select class="filter-select" id="sortSelect" onchange="sortBooks()">
+                <option value="recent" id="sortRecent">Recently Read</option>
+                <option value="title" id="sortTitle">Title A-Z</option>
+                <option value="author" id="sortAuthor">Author A-Z</option>
+                <option value="added" id="sortAdded">Date Added</option>
+            </select>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="library-tabs">
+            <button class="tab-btn active" onclick="showTab('all')" id="tabAll">
+                <i class="fas fa-book me-1"></i><span id="tabAllText">All</span>
+                <span class="tab-count" id="countAll">0</span>
+            </button>
+            <button class="tab-btn" onclick="showTab('reading')" id="tabReading">
+                <i class="fas fa-bookmark me-1"></i><span id="tabReadingText">Reading</span>
+                <span class="tab-count" id="countReading">0</span>
+            </button>
+            <button class="tab-btn" onclick="showTab('completed')" id="tabCompleted">
+                <i class="fas fa-check-circle me-1"></i><span id="tabCompletedText">Completed</span>
+                <span class="tab-count" id="countCompleted">0</span>
+            </button>
+            <button class="tab-btn" onclick="showTab('favorites')" id="tabFavorites">
+                <i class="fas fa-heart me-1"></i><span id="tabFavoritesText">Favorites</span>
+                <span class="tab-count" id="countFavorites">0</span>
+            </button>
+            <button class="tab-btn" onclick="showTab('wishlist')" id="tabWishlist">
+                <i class="fas fa-star me-1"></i><span id="tabWishlistText">Wishlist</span>
+                <span class="tab-count" id="countWishlist">0</span>
+            </button>
+        </div>
+        
+        <!-- Books Grid -->
+        <div class="books-grid" id="booksGrid">
+            <!-- Books will be rendered here -->
+        </div>
+        
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <i class="fas fa-books"></i>
+            <h3 id="emptyTitle">No books yet</h3>
+            <p id="emptyText">Start exploring and add books to your library</p>
+            <a href="browse.html" class="btn-primary" id="emptyBtn">
+                <i class="fas fa-search me-2"></i><span id="emptyBtnText">Browse Books</span>
+            </a>
+        </div>
+    </div>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // UI Text for 9 languages
+        const uiText = {
+            myLibrary: { en: 'My Library', ja: 'マイライブラリ', zh: '我的书库', es: 'Mi Biblioteca', fr: 'Ma Bibliothèque', de: 'Meine Bibliothek', ko: '내 라이브러리', ar: 'مكتبتي', pt: 'Minha Biblioteca' },
+            browse: { en: 'Browse', ja: '探す', zh: '浏览', es: 'Explorar', fr: 'Parcourir', de: 'Durchsuchen', ko: '둘러보기', ar: 'تصفح', pt: 'Explorar' },
+            library: { en: 'Library', ja: 'ライブラリ', zh: '书库', es: 'Biblioteca', fr: 'Bibliothèque', de: 'Bibliothek', ko: '라이브러리', ar: 'المكتبة', pt: 'Biblioteca' },
+            dashboard: { en: 'Dashboard', ja: 'ダッシュボード', zh: '仪表板', es: 'Panel', fr: 'Tableau de bord', de: 'Dashboard', ko: '대시보드', ar: 'لوحة التحكم', pt: 'Painel' },
+            searchLibrary: { en: 'Search your library...', ja: 'ライブラリを検索...', zh: '搜索书库...', es: 'Buscar en tu biblioteca...', fr: 'Rechercher dans votre bibliothèque...', de: 'Bibliothek durchsuchen...', ko: '라이브러리 검색...', ar: 'ابحث في مكتبتك...', pt: 'Pesquisar na biblioteca...' },
+            recentlyRead: { en: 'Recently Read', ja: '最近読んだ', zh: '最近阅读', es: 'Leído recientemente', fr: 'Lu récemment', de: 'Zuletzt gelesen', ko: '최근 읽은', ar: 'قرأت مؤخراً', pt: 'Lidos recentemente' },
+            titleAZ: { en: 'Title A-Z', ja: 'タイトル順', zh: '标题 A-Z', es: 'Título A-Z', fr: 'Titre A-Z', de: 'Titel A-Z', ko: '제목 A-Z', ar: 'العنوان أ-ي', pt: 'Título A-Z' },
+            authorAZ: { en: 'Author A-Z', ja: '著者順', zh: '作者 A-Z', es: 'Autor A-Z', fr: 'Auteur A-Z', de: 'Autor A-Z', ko: '저자 A-Z', ar: 'المؤلف أ-ي', pt: 'Autor A-Z' },
+            dateAdded: { en: 'Date Added', ja: '追加日順', zh: '添加日期', es: 'Fecha añadida', fr: 'Date d\'ajout', de: 'Hinzugefügt am', ko: '추가된 날짜', ar: 'تاريخ الإضافة', pt: 'Data de adição' },
+            all: { en: 'All', ja: 'すべて', zh: '全部', es: 'Todo', fr: 'Tout', de: 'Alle', ko: '전체', ar: 'الكل', pt: 'Todos' },
+            reading: { en: 'Reading', ja: '読書中', zh: '正在阅读', es: 'Leyendo', fr: 'En cours', de: 'Am Lesen', ko: '읽는 중', ar: 'قيد القراءة', pt: 'Lendo' },
+            completed: { en: 'Completed', ja: '読了', zh: '已完成', es: 'Completado', fr: 'Terminé', de: 'Abgeschlossen', ko: '완료', ar: 'مكتمل', pt: 'Concluído' },
+            favorites: { en: 'Favorites', ja: 'お気に入り', zh: '收藏', es: 'Favoritos', fr: 'Favoris', de: 'Favoriten', ko: '즐겨찾기', ar: 'المفضلة', pt: 'Favoritos' },
+            wishlist: { en: 'Wishlist', ja: 'ウィッシュリスト', zh: '心愿单', es: 'Lista de deseos', fr: 'Liste de souhaits', de: 'Wunschliste', ko: '위시리스트', ar: 'قائمة الرغبات', pt: 'Lista de desejos' },
+            continueReading: { en: 'Continue Reading', ja: '続きを読む', zh: '继续阅读', es: 'Continuar leyendo', fr: 'Continuer la lecture', de: 'Weiterlesen', ko: '계속 읽기', ar: 'متابعة القراءة', pt: 'Continuar lendo' },
+            startReading: { en: 'Start Reading', ja: '読み始める', zh: '开始阅读', es: 'Empezar a leer', fr: 'Commencer à lire', de: 'Lesen starten', ko: '읽기 시작', ar: 'ابدأ القراءة', pt: 'Começar a ler' },
+            noBooksYet: { en: 'No books yet', ja: 'まだ本がありません', zh: '还没有书', es: 'Aún no hay libros', fr: 'Pas encore de livres', de: 'Noch keine Bücher', ko: '아직 책이 없습니다', ar: 'لا توجد كتب بعد', pt: 'Nenhum livro ainda' },
+            startExploring: { en: 'Start exploring and add books to your library', ja: '探索を始めてライブラリに本を追加しましょう', zh: '开始探索并将书籍添加到书库', es: 'Empieza a explorar y añade libros a tu biblioteca', fr: 'Commencez à explorer et ajoutez des livres à votre bibliothèque', de: 'Beginnen Sie zu erkunden und fügen Sie Bücher zu Ihrer Bibliothek hinzu', ko: '탐색을 시작하고 라이브러리에 책을 추가하세요', ar: 'ابدأ الاستكشاف وأضف الكتب إلى مكتبتك', pt: 'Comece a explorar e adicione livros à sua biblioteca' },
+            browseBooks: { en: 'Browse Books', ja: '本を探す', zh: '浏览书籍', es: 'Explorar libros', fr: 'Parcourir les livres', de: 'Bücher durchsuchen', ko: '책 둘러보기', ar: 'تصفح الكتب', pt: 'Explorar livros' },
+            progress: { en: '{percent}% complete', ja: '{percent}% 完了', zh: '已完成 {percent}%', es: '{percent}% completado', fr: '{percent}% terminé', de: '{percent}% fertig', ko: '{percent}% 완료', ar: 'مكتمل {percent}%', pt: '{percent}% concluído' },
+            addToFavorites: { en: 'Add to Favorites', ja: 'お気に入りに追加', zh: '添加到收藏', es: 'Añadir a favoritos', fr: 'Ajouter aux favoris', de: 'Zu Favoriten hinzufügen', ko: '즐겨찾기에 추가', ar: 'أضف إلى المفضلة', pt: 'Adicionar aos favoritos' },
+            removeFromFavorites: { en: 'Remove from Favorites', ja: 'お気に入りから削除', zh: '从收藏中移除', es: 'Eliminar de favoritos', fr: 'Retirer des favoris', de: 'Aus Favoriten entfernen', ko: '즐겨찾기에서 삭제', ar: 'إزالة من المفضلة', pt: 'Remover dos favoritos' },
+            accountSettings: { en: 'Account Settings', ja: 'アカウント設定', zh: '账户设置', es: 'Configuración de cuenta', fr: 'Paramètres du compte', de: 'Kontoeinstellungen', ko: '계정 설정', ar: 'إعدادات الحساب', pt: 'Configurações da conta' },
+            creatorDashboard: { en: 'Creator Dashboard', ja: 'クリエイターダッシュボード', zh: '创作者面板', es: 'Panel de creador', fr: 'Tableau de bord créateur', de: 'Creator Dashboard', ko: '크리에이터 대시보드', ar: 'لوحة تحكم المبدع', pt: 'Painel do criador' },
+            logOut: { en: 'Log Out', ja: 'ログアウト', zh: '退出登录', es: 'Cerrar sesión', fr: 'Déconnexion', de: 'Abmelden', ko: '로그아웃', ar: 'تسجيل الخروج', pt: 'Sair' },
+            logOutConfirm: { en: 'Are you sure you want to log out?', ja: 'ログアウトしますか？', zh: '确定要退出登录吗？', es: '¿Seguro que quieres cerrar sesión?', fr: 'Voulez-vous vraiment vous déconnecter?', de: 'Möchten Sie sich wirklich abmelden?', ko: '로그아웃 하시겠습니까?', ar: 'هل أنت متأكد أنك تريد تسجيل الخروج؟', pt: 'Tem certeza que deseja sair?' }
+        };
+        
+        let currentLang = localStorage.getItem('preferredLanguage') || 'en';
+        let currentTab = 'all';
+        
+        // Demo books data
+        let books = [
+            { id: 1, title: 'The Midnight Garden', author: 'Sarah Chen', cover: null, status: 'reading', progress: 45, favorite: true, wishlist: false, lastRead: '2026-01-25', addedAt: '2026-01-10' },
+            { id: 2, title: '星の旅人', author: '田中太郎', cover: null, status: 'reading', progress: 72, favorite: false, wishlist: false, lastRead: '2026-01-24', addedAt: '2026-01-05' },
+            { id: 3, title: 'Digital Dreams', author: 'Alex Kim', cover: null, status: 'completed', progress: 100, favorite: true, wishlist: false, lastRead: '2026-01-20', addedAt: '2025-12-15' },
+            { id: 4, title: 'The Last Algorithm', author: 'Maria Garcia', cover: null, status: 'new', progress: 0, favorite: false, wishlist: false, lastRead: null, addedAt: '2026-01-22' },
+            { id: 5, title: '月夜の物語', author: '鈴木花子', cover: null, status: 'completed', progress: 100, favorite: false, wishlist: false, lastRead: '2026-01-15', addedAt: '2025-11-20' },
+            { id: 6, title: 'Ocean of Stars', author: 'James Wilson', cover: null, status: 'wishlist', progress: 0, favorite: false, wishlist: true, lastRead: null, addedAt: '2026-01-23' }
+        ];
+        
+        function getL(obj, replacements = {}) {
+            if (!obj) return '';
+            let text = obj[currentLang] || obj['en'] || '';
+            Object.keys(replacements).forEach(key => {
+                text = text.replace(`{${key}}`, replacements[key]);
+            });
+            return text;
+        }
+        
+        function changeLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('preferredLanguage', lang);
+            document.getElementById('langSelector').value = lang;
+            document.getElementById('langSelectorMobile').value = lang;
+            updateAllText();
+        }
+        
+        function updateAllText() {
+            document.title = getL(uiText.myLibrary) + ' - Publisher';
+            document.getElementById('pageTitle').textContent = getL(uiText.myLibrary);
+            document.getElementById('navBrowse').textContent = getL(uiText.browse);
+            document.getElementById('navLibrary').textContent = getL(uiText.library);
+            document.getElementById('navDashboard').textContent = getL(uiText.dashboard);
+            document.getElementById('searchInput').placeholder = getL(uiText.searchLibrary);
+            document.getElementById('sortRecent').textContent = getL(uiText.recentlyRead);
+            document.getElementById('sortTitle').textContent = getL(uiText.titleAZ);
+            document.getElementById('sortAuthor').textContent = getL(uiText.authorAZ);
+            document.getElementById('sortAdded').textContent = getL(uiText.dateAdded);
+            document.getElementById('tabAllText').textContent = getL(uiText.all);
+            document.getElementById('tabReadingText').textContent = getL(uiText.reading);
+            document.getElementById('tabCompletedText').textContent = getL(uiText.completed);
+            document.getElementById('tabFavoritesText').textContent = getL(uiText.favorites);
+            document.getElementById('tabWishlistText').textContent = getL(uiText.wishlist);
+            document.getElementById('emptyTitle').textContent = getL(uiText.noBooksYet);
+            document.getElementById('emptyText').textContent = getL(uiText.startExploring);
+            document.getElementById('emptyBtnText').textContent = getL(uiText.browseBooks);
+            
+            // Update user menu
+            document.getElementById('menuAccountSettings').textContent = getL(uiText.accountSettings);
+            document.getElementById('menuDashboard').textContent = getL(uiText.creatorDashboard);
+            document.getElementById('menuLogout').textContent = getL(uiText.logOut);
+            
+            renderBooks();
+        }
+        
+        function showTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+            renderBooks();
+        }
+        
+        function filterBooks() {
+            renderBooks();
+        }
+        
+        function sortBooks() {
+            renderBooks();
+        }
+        
+        function getFilteredBooks() {
+            let filtered = [...books];
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+            
+            // Filter by tab
+            if (currentTab === 'reading') {
+                filtered = filtered.filter(b => b.status === 'reading');
+            } else if (currentTab === 'completed') {
+                filtered = filtered.filter(b => b.status === 'completed');
+            } else if (currentTab === 'favorites') {
+                filtered = filtered.filter(b => b.favorite);
+            } else if (currentTab === 'wishlist') {
+                filtered = filtered.filter(b => b.wishlist);
+            }
+            
+            // Filter by search
+            if (searchQuery) {
+                filtered = filtered.filter(b => 
+                    b.title.toLowerCase().includes(searchQuery) ||
+                    b.author.toLowerCase().includes(searchQuery)
+                );
+            }
+            
+            // Sort
+            const sortBy = document.getElementById('sortSelect').value;
+            if (sortBy === 'title') {
+                filtered.sort((a, b) => a.title.localeCompare(b.title));
+            } else if (sortBy === 'author') {
+                filtered.sort((a, b) => a.author.localeCompare(b.author));
+            } else if (sortBy === 'added') {
+                filtered.sort((a, b) => new Date(b.addedAt) - new Date(a.addedAt));
+            } else { // recent
+                filtered.sort((a, b) => {
+                    if (!a.lastRead) return 1;
+                    if (!b.lastRead) return -1;
+                    return new Date(b.lastRead) - new Date(a.lastRead);
+                });
+            }
+            
+            return filtered;
+        }
+        
+        function renderBooks() {
+            const grid = document.getElementById('booksGrid');
+            const emptyState = document.getElementById('emptyState');
+            const filtered = getFilteredBooks();
+            
+            // Update counts
+            document.getElementById('countAll').textContent = books.filter(b => !b.wishlist).length;
+            document.getElementById('countReading').textContent = books.filter(b => b.status === 'reading').length;
+            document.getElementById('countCompleted').textContent = books.filter(b => b.status === 'completed').length;
+            document.getElementById('countFavorites').textContent = books.filter(b => b.favorite).length;
+            document.getElementById('countWishlist').textContent = books.filter(b => b.wishlist).length;
+            
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            
+            grid.innerHTML = filtered.map(book => `
+                <div class="book-card" onclick="openBook(${book.id})">
+                    <div class="book-cover">
+                        ${book.cover 
+                            ? `<img src="${book.cover}" alt="${book.title}">`
+                            : `<i class="fas fa-book book-cover-placeholder"></i>`
+                        }
+                        ${book.progress > 0 && book.progress < 100 ? `
+                            <div class="reading-progress">
+                                <div class="reading-progress-bar" style="width: ${book.progress}%"></div>
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="book-info">
+                        <div class="book-title">${book.title}</div>
+                        <div class="book-author">${book.author}</div>
+                        <div class="book-meta">
+                            <span class="book-status ${book.status === 'reading' ? 'status-reading' : book.status === 'completed' ? 'status-completed' : 'status-new'}">
+                                ${book.status === 'reading' 
+                                    ? `<i class="fas fa-bookmark"></i> ${book.progress}%`
+                                    : book.status === 'completed'
+                                    ? `<i class="fas fa-check-circle"></i> ${getL(uiText.completed)}`
+                                    : `<i class="fas fa-plus-circle"></i> ${book.wishlist ? getL(uiText.wishlist) : 'New'}`
+                                }
+                            </span>
+                            <div class="book-actions" onclick="event.stopPropagation()">
+                                <button class="book-action-btn ${book.favorite ? 'favorited' : ''}" 
+                                        onclick="toggleFavorite(${book.id})" 
+                                        title="${book.favorite ? getL(uiText.removeFromFavorites) : getL(uiText.addToFavorites)}">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function openBook(id) {
+            const book = books.find(b => b.id === id);
+            if (book) {
+                window.location.href = `reader.html?workId=${id}&title=${encodeURIComponent(book.title)}`;
+            }
+        }
+        
+        function toggleFavorite(id) {
+            const book = books.find(b => b.id === id);
+            if (book) {
+                book.favorite = !book.favorite;
+                renderBooks();
+            }
+        }
+        
+        function toggleUserMenu() {
+            const dropdown = document.querySelector('.user-dropdown');
+            const menu = document.getElementById('userMenu');
+            const isOpen = menu.classList.contains('show');
+            
+            if (isOpen) {
+                dropdown.classList.remove('open');
+                menu.classList.remove('show');
+            } else {
+                dropdown.classList.add('open');
+                menu.classList.add('show');
+            }
+        }
+        
+        function closeUserMenu() {
+            const dropdown = document.querySelector('.user-dropdown');
+            const menu = document.getElementById('userMenu');
+            if (dropdown) dropdown.classList.remove('open');
+            if (menu) menu.classList.remove('show');
+        }
+        
+        function handleLogout() {
+            if (confirm(getL(uiText.logOutConfirm))) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '../index.html';
+            }
+        }
+        
+        function loadUserInfo() {
+            const userStr = localStorage.getItem('user');
+            if (userStr) {
+                try {
+                    const user = JSON.parse(userStr);
+                    document.getElementById('userName').textContent = user.display_name || user.email || 'User';
+                    document.getElementById('userDisplayName').textContent = user.display_name || 'User';
+                    document.getElementById('userEmail').textContent = user.email || '';
+                } catch (e) {
+                    console.error('Error parsing user data:', e);
+                }
+            }
+        }
+        
+        // Close user menu when clicking outside
+        document.addEventListener('click', function(e) {
+            // Don't close if clicking inside dropdown
+            if (e.target.closest('.user-dropdown')) {
+                return;
+            }
+            // Close the menu
+            closeUserMenu();
+        });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('langSelector').value = currentLang;
+            document.getElementById('langSelectorMobile').value = currentLang;
+            updateAllText();
+            loadUserInfo();
+            renderBooks();
+            
+            // Add click event listener for user dropdown button
+            const userDropdownBtn = document.getElementById('userDropdownBtn');
+            if (userDropdownBtn) {
+                userDropdownBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleUserMenu();
+                });
+            }
+            
+            // Navbar overlay control for mobile hamburger menu
+            const navbarCollapse = document.getElementById('navbarNav');
+            const navbarOverlay = document.getElementById('navbarOverlay');
+            
+            if (navbarCollapse && navbarOverlay) {
+                // Show overlay when menu opens
+                navbarCollapse.addEventListener('shown.bs.collapse', function() {
+                    navbarOverlay.classList.add('show');
+                });
+                
+                // Hide overlay when menu closes
+                navbarCollapse.addEventListener('hidden.bs.collapse', function() {
+                    navbarOverlay.classList.remove('show');
+                });
+                
+                // Click overlay to close menu
+                navbarOverlay.addEventListener('click', function() {
+                    const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                    if (bsCollapse) {
+                        bsCollapse.hide();
+                    }
+                    navbarOverlay.classList.remove('show');
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+    
