@@ -1,6 +1,6 @@
 # Publisher Platform 引き継ぎドキュメント
 
-最終更新: 2026年1月30日
+最終更新: 2026年2月2日
 
 ---
 
@@ -30,9 +30,9 @@
 ## 2. 環境情報
 
 ### ファイルパス
-```
+\`\`\`
 C:\Projects\test-publishing-platform
-```
+\`\`\`
 
 ### サーバーURL
 
@@ -83,77 +83,131 @@ https://github.com/kenji-publishing/test-publishing-platform
 
 ---
 
-## 5. 今日の作業状況（2026-01-30）
+## 5. 今日の作業状況（2026-02-02）
 
-### 🔧 faq.html のナビバー・メニュー修正（完了）
+### ✅ Support 4ページ「Get Started」ボタン統一 - 完了
 
-contact.htmlを参考に、faq.htmlに以下の5つの項目を適用：
+Support 4ページすべてにPattern C方式を適用し、「Sign In」+「Get Started」ボタンを統一しました。
 
-| 項目 | 内容 | 状態 |
-|------|------|:----:|
-| ナビバー構造 | パターンCに合ったメニュー項目 | ✅ 完了 |
-| ハンバーガーメニュー | モバイル時の展開メニュー内容 | ✅ 完了 |
-| 言語セレクター位置 | PC/モバイルで適切な位置に配置 | ✅ 完了 |
-| ユーザードロップダウン | アカウントマークとメニュー表示 | ✅ 完了 |
-| 翻訳機能 | 言語切替で全要素が翻訳される | ✅ 完了 |
+| ページ | 状態 | 備考 |
+|--------|:----:|------|
+| contact.html | ✅ 完了 | Pattern C適用済み（前回完了） |
+| faq.html | ✅ 完了 | Pattern C方式に変更、ボタン追加 |
+| tickets.html | ✅ 完了 | Pattern C方式に変更、ボタン追加 |
+| troubleshoot.html | ✅ 完了 | Pattern C方式に変更、ボタン追加、翻訳修正 |
 
-### 追加修正
+### 🔧 各ページの修正内容
 
-| 問題 | 対応内容 | 状態 |
-|------|----------|:----:|
-| Browseが2つ表示 | PC/モバイルでBrowseを1つに統合 | ✅ 完了 |
-| PC/モバイルメニュー不一致 | PC画面のナビバーとハンバーガーメニューを統一 | ✅ 完了 |
-| モバイルメニュースクロール | position: fixed + max-height: 70vh で対応済み | ✅ 完了 |
+#### 共通の修正項目（faq, tickets, troubleshoot）
 
-### PC画面（ログアウト時）の表示項目
-```
-Browse | Support▼（FAQ, Troubleshooting, Contact） | Home | Sign In
-```
+1. **Get Startedボタン追加**
+   - PC: \`navbar-buttons-guest\`内に「Sign In」+「Get Started」の2ボタン
+   - モバイル: ハンバーガーメニュー内に両ボタン
 
-### PC画面（ログイン時）の表示項目
-```
-Browse | Library | Dashboard | Upload | Translation Tools▼ | Support▼ | Home | [ユーザーアイコン]
-```
+2. **Pattern C方式に統一**
+   - 認証制御: \`body.logged-in\`クラスによるCSS制御
+   - 旧方式（JSでインラインスタイル操作）から移行
 
-**修正ファイル:** `pages/support/faq.html`（ローカル保存済み）
+3. **Auth Visibility CSS追加**
+   \`\`\`css
+   .auth-only { display: none !important; }
+   .guest-only { display: block; }
+   .guest-only.nav-item { display: list-item; }
+   body.logged-in .auth-only { display: block !important; }
+   body.logged-in .guest-only { display: none !important; }
+   \`\`\`
+
+4. **PC Navbar横並びCSS追加**
+   - メニュー項目の折り返し防止
+   - \`white-space: nowrap\`、\`flex-wrap: nowrap\`
+
+5. **sticky-top対応**
+   - \`html, body { overflow-x: hidden; }\` → \`body { overflow-x: hidden; }\`
+   - \`html\`から除去することでsticky-topが正常に機能
+
+6. **z-index階層修正**
+   - \`.navbar-custom\`: 1050（最上位）
+   - \`.navbar-collapse\`: 1045（メニュー）
+   - \`.navbar-overlay\`: 1040（背景オーバーレイ）
+
+7. **auth-only要素のインラインスタイル削除**
+   - \`style="display: none;"\` → CSSで制御
+
+#### troubleshoot.html 固有の修正
+
+1. **翻訳問題修正**
+   - 問題: 「Select Issue」「Details」「Solution」等が言語切替で英語のまま
+   - 原因: \`languageChanged\`イベントで\`updateUIText()\`が呼ばれていなかった
+   - 修正: イベントリスナーに\`updateUIText()\`を追加
+
+2. **オーバーレイ配置修正**
+   - \`navbar-overlay\`を\`<body>\`直下に移動
+   - CSSをメディアクエリ外に移動
+
+### 🧪 ログイン確認用Consoleコード
+
+**ログイン状態にする:**
+\`\`\`javascript
+localStorage.setItem('token', 'test-token');
+localStorage.setItem('user', JSON.stringify({display_name: 'Test User', email: 'test@publisher.local'}));
+location.reload();
+\`\`\`
+
+**ログアウト状態に戻す:**
+\`\`\`javascript
+localStorage.removeItem('token');
+localStorage.removeItem('user');
+location.reload();
+\`\`\`
 
 ---
 
-## 5-2. 前回の作業状況（2026-01-28）
+## 5-2. 前回の作業状況（2026-02-01）
 
-### 🔧 tickets.html の修正（完了）
+### 🔧 login.html パターンC適用（完了）
 
-| 問題 | 内容 | 状態 |
-|------|------|:----:|
-| アカウントマークがない | library.htmlと同様のユーザーメニューを追加 | ✅ 修正済 |
-| PC表示 | ナビバー右側にユーザーアイコン＋名前＋ドロップダウン | ✅ 修正済 |
-| モバイル表示 | 丸いユーザーアイコンボタンを追加 | ✅ 修正済 |
-| ハンバーガーメニュー | library.htmlと統一（Browse/Library/Dashboard/FAQ） | ✅ 修正済 |
-| 多言語対応 | メニュー項目も9言語対応 | ✅ 修正済 |
-| オーバーレイ問題 | ナビバーの下から（top: 56px） | ✅ 修正済 |
+login.htmlにPattern C（未ログイン向け）のナビバーを適用完了。
 
-**修正ファイル:** `pages/support/tickets.html`
+### 🔧 contact.html 修正
 
-### 📋 ナビバー・メニュー設計書の作成
-
-全48ページを5つのパターン＋シンプル版に分類した設計書を作成しました。
-
-**作成ファイル:** `navbar-menu-design-v2.md`
+1. 翻訳ファイル参照を修正（\`translations.js\` → \`js/lang/*.js\`）
+2. Pattern Cナビバー適用
+3. Get Startedボタン追加
 
 ---
 
-## 6. 次回の作業（2026-01-31）
+## 5-3. 前々回の作業状況（2026-01-31）
 
-### 🎯 残りのサポートページに5項目＋統一を適用
+### 🔧 GitHubとの同期を完了
 
-faq.htmlと同様に、以下のページを修正：
+長期間GitHubにアクセスできなかったため、ローカルの変更がGitHubに反映されていませんでした。
+コンフリクト（競合）を解決し、ローカルの変更をGitHubにプッシュしました。
+
+---
+
+## 6. 次回の作業（2026-02-03以降）
+
+### 🎯 パターンD（未ログイン）の残りページを修正
 
 | ページ | パターン | 状態 |
 |--------|:--------:|:----:|
-| contact.html | C | 📋 参考元（完了済み） |
-| faq.html | C | ✅ 完了 |
-| tickets.html | C | 📋 要確認 |
-| troubleshoot.html | C | 📋 予定 |
+| register.html | D | 📋 予定 |
+| terms.html | D | 📋 予定 |
+| privacy.html | D | 📋 予定 |
+| content-guidelines.html | D | 📋 予定 |
+| copyright-policy.html | D | 📋 予定 |
+| revenue-sharing.html | D | 📋 予定 |
+
+### 🎯 パターンA（読者向け）ページを修正
+
+| ページ | パターン | 状態 |
+|--------|:--------:|:----:|
+| browse.html | A | 📋 予定 |
+| checkout.html | A | 📋 予定 |
+| notifications.html | A | 📋 予定 |
+| account-settings.html | A | 📋 予定 |
+| feedback/index.html | A | 📋 予定 |
+| feedback/report.html | A | 📋 予定 |
 
 ### 🎯 各ページで確認する7項目
 
@@ -164,13 +218,6 @@ faq.htmlと同様に、以下のページを修正：
 5. **翻訳機能** - 言語切替で全要素が翻訳されるか
 6. **PC/モバイル統一** - PC画面とハンバーガーメニューの項目を統一
 7. **モバイルスクロール** - ハンバーガーメニューがスクロール可能か
-
-### 🎯 その後、メニュー設計に基づいて各ページを更新
-
-優先順位：
-1. **dashboard.html** → パターンBの基準を作成
-2. **index.html** → パターンDの基準を作成
-3. **browse.html** → パターンA適用
 
 ---
 
@@ -187,99 +234,51 @@ faq.htmlと同様に、以下のページを修正：
 | **E** | 管理画面 | 4 | Admin専用 |
 | **S** | シンプル版 | 6 | 読書・編集に集中（最小限メニュー） |
 
-### パターンA: 読者向け
-
-**対象:** browse, library, checkout, notifications, account-settings, feedback/*
-
-```
-ナビバー: [Logo] | Browse | Library | [🔔] | [🌐] | [👤▼]
-
-ハンバーガー:
-├ Browse / Library
-├ Upload Work / Dashboard  ← クリエイターへの入口
-├ Feedback  ← 翻訳問題報告
-└ FAQ / Contact
-
-ユーザーメニュー:
-├ Account Settings
-├ Creator Dashboard
-└ Log Out
-```
-
-### パターンB: クリエイター向け
-
-**対象:** dashboard, upload, upload-work, analytics, manga-translator, translation-status, translators/*, register-*
-
-```
-ナビバー: [Logo] | Dashboard | My Works | Analytics | [🔔] | [🌐] | [👤▼]
-
-ハンバーガー:
-├ Dashboard / My Works / Analytics / Upload
-├ Translation Tools (Manga Translator, Translation Status, Find Translators)
-├ Browse / Library  ← 読者機能への入口
-└ FAQ / Contact
-
-ユーザーメニュー:
-├ Account Settings
-├ My Library
-└ Log Out
-```
-
-### パターンC: サポートページ
+### パターンC: サポートページ（本日完了）
 
 **対象:** faq, contact, tickets, troubleshoot
 
-```
+\`\`\`
 ナビバー: [Logo] | Browse | Library | Dashboard | [🔔] | [🌐] | [👤▼]
+Guest時: [Logo] | Browse | ... | [🌐] | [Sign In] [Get Started]
 
 ハンバーガー:
 ├ Browse / Library  ← パターンAへ
 ├ Dashboard / Upload  ← パターンBへ
 ├ FAQ / Contact / My Tickets / Troubleshooting
-└ Home
-```
-
-### パターンD: 未ログイン
-
-**対象:** index, login, register, terms, privacy, content-guidelines, copyright-policy, revenue-sharing
-
-```
-ナビバー: [Logo] | Browse | Features | About | [🌐] | [Sign In] [Sign Up]
-
-ハンバーガー:
-├ Browse / Features / About
-├ FAQ / Contact  ← サポートへのアクセス
-├ Terms / Privacy
-└ Sign In / Sign Up
-```
-
-### パターンE: 管理画面
-
-**対象:** admin/*
-
-```
-ナビバー: [Logo] [ADMIN] | Dashboard | Users | Content | Support | [🌐] | [👤▼]
-```
-
-### パターンS: シンプル版
-
-**対象:** reader, manga-viewer, editor, payment-success, payment-cancel, confirm-delete
-
-```
-ナビバー: [← 戻る] | [タイトル] | [🌐] | [👤]
-```
-- フルスクリーン表示を優先
-- メニュー項目は最小限
+├ Home
+└ Sign In / Get Started (Guest時)
+\`\`\`
 
 ---
 
 ## 8. ページ別パターン割り当て（全48ページ）
 
+### サポートページ（パターンC）- 4ページ ✅ 完了
+| ページ | 状態 |
+|--------|:----:|
+| contact.html | ✅ 完了 |
+| faq.html | ✅ 完了 |
+| tickets.html | ✅ 完了 |
+| troubleshoot.html | ✅ 完了 |
+
+### 未ログイン（パターンD）- 8ページ
+| ページ | 状態 |
+|--------|:----:|
+| index.html | ✅ 完了 |
+| login.html | ✅ 完了 |
+| register.html | 📋 予定 |
+| terms.html | 📋 予定 |
+| privacy.html | 📋 予定 |
+| content-guidelines.html | 📋 予定 |
+| copyright-policy.html | 📋 予定 |
+| revenue-sharing.html | 📋 予定 |
+
 ### 読者向け（パターンA）- 7ページ
 | ページ | 状態 |
 |--------|:----:|
 | library.html | ✅ 完了 |
-| browse.html | 🔜 次回 |
+| browse.html | 📋 予定 |
 | checkout.html | 📋 予定 |
 | notifications.html | 📋 予定 |
 | account-settings.html | 📋 予定 |
@@ -289,7 +288,7 @@ faq.htmlと同様に、以下のページを修正：
 ### クリエイター向け（パターンB）- 12ページ
 | ページ | 状態 |
 |--------|:----:|
-| dashboard.html | 🔜 次回 |
+| dashboard.html | ✅ 完了 |
 | upload.html | ✅ 完了 |
 | upload-work.html | 📋 予定 |
 | analytics.html | 📋 予定 |
@@ -301,26 +300,6 @@ faq.htmlと同様に、以下のページを修正：
 | register-editor.html | 📋 予定 |
 | register-translator.html | 📋 予定 |
 | editor.html | 📋 予定（パターンS） |
-
-### サポートページ（パターンC）- 4ページ
-| ページ | 状態 |
-|--------|:----:|
-| contact.html | ✅ 完了（参考元） |
-| faq.html | ✅ 完了 |
-| tickets.html | 📋 要確認 |
-| troubleshoot.html | 📋 予定 |
-
-### 未ログイン（パターンD）- 8ページ
-| ページ | 状態 |
-|--------|:----:|
-| index.html | 🔜 次回 |
-| login.html | 📋 予定 |
-| register.html | 📋 予定 |
-| terms.html | 📋 予定 |
-| privacy.html | 📋 予定 |
-| content-guidelines.html | 📋 予定 |
-| copyright-policy.html | 📋 予定 |
-| revenue-sharing.html | 📋 予定 |
 
 ### 管理画面（パターンE）- 4ページ
 | ページ | 状態 |
@@ -348,29 +327,41 @@ faq.htmlと同様に、以下のページを修正：
 |--------|:---------------:|:---------------:|:----:|
 | library.html | ✅ | ✅ | ✅ 完了 |
 | upload.html | ✅ | ✅ | ✅ 完了 |
-| contact.html | ✅ | ✅ | ✅ 完了（参考元） |
+| contact.html | ✅ | ✅ | ✅ 完了 |
 | faq.html | ✅ | ✅ | ✅ 完了 |
-| tickets.html | ✅ | ✅ | 📋 要確認 |
+| tickets.html | ✅ | ✅ | ✅ 完了 |
+| troubleshoot.html | ✅ | ✅ | ✅ 完了 |
+| dashboard.html | ✅ | ✅ | ✅ 完了 |
+| index.html | ✅ | ✅ | ✅ 完了 |
+| login.html | ✅ | ✅ | ✅ 完了 |
 | その他ページ | ❌ | - | 📋 要対応 |
 
 ---
 
-## 10. 今日作成・修正したファイル一覧（2026-01-30）
+## 10. 今日作成・修正したファイル一覧（2026-02-02）
 
 | ファイル | 状態 | 保存先 |
 |----------|:----:|--------|
-| faq.html | 修正完了 | `C:\Projects\test-publishing-platform\pages\support\faq.html` |
+| faq.html | 修正完了 | \`C:\Projects\test-publishing-platform\pages\support\faq.html\` |
+| tickets.html | 修正完了 | \`C:\Projects\test-publishing-platform\pages\support\tickets.html\` |
+| troubleshoot.html | 修正完了 | \`C:\Projects\test-publishing-platform\pages\support\troubleshoot.html\` |
 | publisher_handover_updated.md | 更新 | ダウンロード |
-| navbar-menu-design-v2.md | 更新 | ダウンロード |
 
-### 前回（2026-01-28）
+### 前回（2026-02-01）
 
 | ファイル | 状態 | 保存先 |
 |----------|:----:|--------|
-| tickets.html | 修正済み | `C:\Projects\test-publishing-platform\pages\support\tickets.html` |
-| navbar-menu-design-v2.md | 新規作成 | ダウンロード済み |
+| login.html | 修正完了 | \`C:\Projects\test-publishing-platform\pages\login.html\` |
+| contact.html | 修正完了 | \`C:\Projects\test-publishing-platform\pages\support\contact.html\` |
 
-**注意:** ローカル保存のみ。GitHubへのプッシュは未実施。
+### 前々回（2026-01-31）
+
+| ファイル | 状態 | 保存先 |
+|----------|:----:|--------|
+| dashboard.html | 修正完了 | \`C:\Projects\test-publishing-platform\pages\dashboard.html\` |
+| tickets.html | 修正完了 | \`C:\Projects\test-publishing-platform\pages\support\tickets.html\` |
+| troubleshoot.html | 修正完了 | \`C:\Projects\test-publishing-platform\pages\support\troubleshoot.html\` |
+| index.html | 修正完了 | \`C:\Projects\test-publishing-platform\index.html\` |
 
 ---
 
@@ -392,18 +383,18 @@ faq.htmlと同様に、以下のページを修正：
 
 ## 12. サーバー起動方法
 
-```powershell
+\`\`\`powershell
 cd C:\Projects\test-publishing-platform
 npm start
-```
+\`\`\`
 
 **成功時の表示：**
-```
+\`\`\`
 Server running on port 3000
 Frontend server running on port 8000
-```
+\`\`\`
 
-**停止：** `Ctrl + C`
+**停止：** \`Ctrl + C\`
 
 ---
 
@@ -411,38 +402,81 @@ Frontend server running on port 8000
 
 ### デモモード対応ページ
 
-以下のページはURLに `?demo=true` を付けるとダミーデータで表示できます：
+以下のページはURLに \`?demo=true\` を付けるとダミーデータで表示できます：
 - account-settings.html
 - tickets.html
 - その他多数
 
 ### ブラウザキャッシュ
-コード更新後に動作がおかしい場合：`Ctrl + Shift + R`
+コード更新後に動作がおかしい場合：\`Ctrl + Shift + R\`
 
 ### Consoleエラーについて
-`file:///` プロトコルでページを開くとCORSエラーが出ます。
-必ず `http://localhost:8000` でアクセスしてください。
+\`file:///\` プロトコルでページを開くとCORSエラーが出ます。
+必ず \`http://localhost:8000\` でアクセスしてください。
 
 ---
 
 ## 14. 注意事項
 
+### Pattern C方式の認証制御（Support 4ページで統一済み）
+
+\`\`\`javascript
+// ログイン判定
+const token = localStorage.getItem('token');
+const userStr = localStorage.getItem('user');
+
+if (token && userStr) {
+    document.body.classList.add('logged-in');
+} else {
+    document.body.classList.remove('logged-in');
+}
+\`\`\`
+
+\`\`\`css
+/* CSSで表示/非表示を制御 */
+.auth-only { display: none !important; }
+body.logged-in .auth-only { display: block !important; }
+body.logged-in .guest-only { display: none !important; }
+\`\`\`
+
+### z-index階層ルール
+
+ナビバー関連のz-index階層：
+
+| 要素 | z-index | 用途 |
+|------|---------|------|
+| \`.navbar-custom\` | 1050 | ナビバー本体（最上位） |
+| \`.navbar-collapse\` | 1045 | ドロップダウンメニュー |
+| \`.navbar-overlay\` | 1040 | 背景オーバーレイ |
+
+### sticky-top対応
+
+\`position: sticky\`を正常に機能させるため、\`overflow\`設定に注意：
+
+\`\`\`css
+/* ❌ NG - sticky-topが効かない */
+html, body { overflow-x: hidden; }
+
+/* ✅ OK - sticky-topが正常に動作 */
+body { overflow-x: hidden; }
+\`\`\`
+
 ### translations.js の分割について
 - 元のtranslations.js（約250KB）は9つの言語別ファイルに分割済み
-- 分割ファイルは `js/lang/` ディレクトリに配置
+- 分割ファイルは \`js/lang/\` ディレクトリに配置
 - HTMLファイルの移行が完了したら、古いtranslations.jsは削除予定
 
 ### 言語セレクターの配置ルール
 - **デスクトップ**: ナビバー右側（通知ベルやユーザーメニューの横）
-- **モバイル**: ハンバーガーメニューの横（`d-lg-none`クラス）
-- クラス名は `language-selector` を使用
+- **モバイル**: ハンバーガーメニューの横（\`d-lg-none\`クラス）
+- クラス名は \`language-selector\` を使用
 
 ### ナビバーの標準パターン
 すべてのページで以下を確認：
-- `sticky-top` クラスがあること（スクロール時に上部固定）
+- \`sticky-top\` クラスがあること（スクロール時に上部固定）
 - 9言語セレクターがナビバー内にあること
 - ユーザーメニューがcollapseの外にあること（モバイルで常に表示）
-- オーバーレイは `top: 56px`（ナビバーの下から）
+- オーバーレイは \`top: 56px\`（ナビバーの下から）
 
 ### GitHub API のファイルサイズ制限
 - 大きなファイル（100KB以上）は一度にプッシュできない場合あり
@@ -465,22 +499,22 @@ Frontend server running on port 8000
 
 ## 16. 既知の問題
 
+### Claudeへのファイルアップロードサイズ制限
+- 大きなHTMLファイル（約65KB以上）はアップロード時に切断される可能性がある
+- 対策: 修正後のファイルを適用する前に、必ずファイル末尾（\`</html>\`の存在）を確認する
+
 ### 通知タブ・セキュリティ質問の動的コンテンツ
 - 言語切り替え後、動的に生成されるコンテンツが切り替わらない場合がある
 - 原因: JavaScriptで生成されるコンテンツがapplyTranslations()の対象外
 - 対処: ページをリロード（F5）
 - 優先度: 低（次フェーズで対応検討）
-- **注**: analytics.htmlでは `languageChanged` イベントで動的コンテンツも再描画するよう修正済み
-
-### tickets.html 要確認（2026-01-28発生、1/30時点で未確認）
-- 状況: アカウントマーク追加後の動作確認が未完了
-- 対処: 次回セッションで確認予定
+- **注**: analytics.html、troubleshoot.htmlでは \`languageChanged\` イベントで動的コンテンツも再描画するよう修正済み
 
 ---
 
 ## 17. ローカルに保存済み言語ファイル
 
-**パス:** `C:\Projects\test-publishing-platform\js\lang\`
+**パス:** \`C:\Projects\test-publishing-platform\js\lang\\\`
 
 | 言語 | ファイル | サイズ | 状態 |
 |------|---------|--------|:----:|
@@ -529,11 +563,11 @@ Frontend server running on port 8000
 |---|--------|:------------:|:--------------:|:----:|:----:|
 | 1 | index.html | ✅ | ✅ | ✅ | ✅ 完了 |
 | 2 | login.html | ✅ | ✅ | ✅ | ✅ 完了 |
-| 3 | register.html | ✅ | ✅ | ✅ | ✅ 完了 |
+| 3 | register.html | ✅ | ✅ | ✅ | 📋 予定 |
 | 4 | upload.html | ✅ | ✅ | ✅ | ✅ 完了 |
 | 5 | contact.html | ✅ | ✅ | ✅ | ✅ 完了 |
 | 6 | faq.html | ✅ | ✅ | ✅ | ✅ 完了 |
-| 7 | tickets.html | ✅ | ✅ | ✅ | 📋 要確認 |
+| 7 | tickets.html | ✅ | ✅ | ✅ | ✅ 完了 |
 | 8 | troubleshoot.html | ✅ | ✅ | ✅ | ✅ 完了 |
 | 9 | dashboard.html | ✅ | ✅ | ✅ | ✅ 完了 |
 | 10 | browse.html | ✅ | ✅ | ✅ | ✅ 完了 |
@@ -551,8 +585,8 @@ Frontend server running on port 8000
 
 1. **reader.html / manga-viewer.html** に読了後のレビュー投稿機能を追加（推奨）
 2. **library.html** で購入済み作品にレビューアイコンを追加
-3. 新規ページ `pages/review.html` を作成
+3. 新規ページ \`pages/review.html\` を作成
 
 ---
 
-最終更新: 2026年1月30日
+最終更新: 2026年2月2日

@@ -35,6 +35,77 @@
             }
         }
         
+        /* ========== PC Navbar - 横並び維持 ========== */
+        @media (min-width: 992px) {
+            .navbar-nav {
+                flex-wrap: nowrap !important;
+                flex-direction: row !important;
+            }
+            .navbar-nav .nav-item {
+                white-space: nowrap !important;
+            }
+            .navbar-nav .nav-link {
+                white-space: nowrap !important;
+                padding: 0.5rem 0.6rem !important;
+                font-size: 0.9rem;
+            }
+            .navbar-collapse .d-flex {
+                flex-wrap: nowrap !important;
+            }
+            .dropdown-menu {
+                white-space: nowrap;
+            }
+        }
+
+        /* PC Navbar - Guest Buttons */
+        .navbar-buttons-guest {
+            display: none !important;
+        }
+        @media (min-width: 992px) {
+            .navbar-buttons-guest {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                gap: 0.5rem;
+            }
+            .navbar-buttons-guest .btn {
+                white-space: nowrap !important;
+                flex-shrink: 0;
+            }
+        }
+
+        /* ========== Auth Visibility Control ========== */
+        .auth-only {
+            display: none !important;
+        }
+        .guest-only {
+            display: block;
+        }
+        .guest-only.nav-item {
+            display: list-item;
+        }
+        body.logged-in .auth-only {
+            display: block !important;
+        }
+        body.logged-in .auth-only.nav-item {
+            display: list-item !important;
+        }
+        body.logged-in .auth-only.dropdown {
+            display: block !important;
+        }
+        body.logged-in .guest-only {
+            display: none !important;
+        }
+        @media (min-width: 992px) {
+            body.logged-in .navbar-buttons-guest {
+                display: none !important;
+            }
+        }
+
+        /* ========== Mobile overflow prevention ========== */
+        body {
+            overflow-x: hidden;
+        }
+
         /* User Dropdown Menu */
         .user-dropdown {
             position: relative;
@@ -225,8 +296,13 @@
                 background: var(--color-bg-card);
                 border-bottom: 1px solid var(--color-border);
                 box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-                z-index: 1040;
+                z-index: 1045;
                 padding: 0.5rem 1rem;
+            }
+            
+            /* ナビバーをオーバーレイより上に */
+            .navbar-custom {
+                z-index: 1050 !important;
             }
             
             .navbar-collapse::-webkit-scrollbar {
@@ -333,7 +409,7 @@
             </div>
             
             <!-- User Dropdown (auth-only) -->
-            <div class="user-dropdown auth-only" id="userDropdown" style="display: none;">
+            <div class="user-dropdown auth-only" id="userDropdown">
                 <button type="button" class="user-dropdown-toggle" id="userDropdownBtn">
                     <i class="fas fa-user-circle"></i>
                     <span class="user-name d-none d-lg-inline" id="userName">User</span>
@@ -344,7 +420,7 @@
                         <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
                         <div class="user-info">
                             <div class="user-display-name" id="userDisplayName">Demo User</div>
-                            <div class="user-email" id="userEmail">demo@example.com</div>
+                            <div class="user-email" id="userEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="9efafbf3f1defbe6fff3eef2fbb0fdf1f3">[email&#160;protected]</a></div>
                         </div>
                     </div>
                     <div class="user-menu-divider"></div>
@@ -381,25 +457,25 @@
                         </a>
                     </li>
                     <!-- Auth: Library -->
-                    <li class="nav-item auth-only" style="display: none;">
+                    <li class="nav-item auth-only">
                         <a class="nav-link" href="../library.html">
                             <i class="fas fa-book-reader me-1"></i> <span data-i18n="nav.library">Library</span>
                         </a>
                     </li>
                     <!-- Auth: Dashboard -->
-                    <li class="nav-item auth-only" style="display: none;">
+                    <li class="nav-item auth-only">
                         <a class="nav-link" href="../dashboard.html">
                             <i class="fas fa-th-large me-1"></i> <span data-i18n="nav.dashboard">Dashboard</span>
                         </a>
                     </li>
                     <!-- Auth: Upload -->
-                    <li class="nav-item auth-only" style="display: none;">
+                    <li class="nav-item auth-only">
                         <a class="nav-link" href="../upload.html">
                             <i class="fas fa-upload me-1"></i> <span data-i18n="nav.upload">Upload</span>
                         </a>
                     </li>
                     <!-- Auth: Translation Tools Dropdown -->
-                    <li class="nav-item dropdown auth-only" style="display: none;">
+                    <li class="nav-item dropdown auth-only">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="fas fa-language me-1"></i> <span data-i18n="nav.translationTools">Translation Tools</span>
                         </a>
@@ -418,8 +494,8 @@
                             <li><a class="dropdown-item active" href="faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
                             <li><a class="dropdown-item" href="troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
                             <li><a class="dropdown-item" href="contact.html"><i class="fas fa-envelope me-2"></i><span data-i18n="nav.contact">Contact</span></a></li>
-                            <li class="auth-only" style="display: none;"><hr class="dropdown-divider"></li>
-                            <li class="auth-only" style="display: none;"><a class="dropdown-item" href="tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
+                            <li class="auth-only"><hr class="dropdown-divider"></li>
+                            <li class="auth-only"><a class="dropdown-item" href="tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
                         </ul>
                     </li>
                     <!-- Home: 共通 -->
@@ -439,26 +515,26 @@
                         </a>
                     </li>
                     <!-- Auth: Library -->
-                    <li class="nav-item auth-only" style="display: none;">
+                    <li class="nav-item auth-only">
                         <a class="nav-link" href="../library.html">
                             <i class="fas fa-book-reader me-2"></i> <span data-i18n="nav.library">Library</span>
                         </a>
                     </li>
                     <li><hr class="dropdown-divider"></li>
                     <!-- Auth: Dashboard -->
-                    <li class="nav-item auth-only" style="display: none;">
+                    <li class="nav-item auth-only">
                         <a class="nav-link" href="../dashboard.html">
                             <i class="fas fa-th-large me-2"></i> <span data-i18n="nav.dashboard">Dashboard</span>
                         </a>
                     </li>
                     <!-- Auth: Upload -->
-                    <li class="nav-item auth-only" style="display: none;">
+                    <li class="nav-item auth-only">
                         <a class="nav-link" href="../upload.html">
                             <i class="fas fa-upload me-2"></i> <span data-i18n="nav.upload">Upload</span>
                         </a>
                     </li>
                     <!-- Auth: Translation Tools Submenu -->
-                    <li class="nav-item auth-only" style="display: none;">
+                    <li class="nav-item auth-only">
                         <a class="nav-link" data-bs-toggle="collapse" href="#translationToolsMenu" role="button">
                             <i class="fas fa-language me-2"></i> <span data-i18n="nav.translationTools">Translation Tools</span>
                             <i class="fas fa-chevron-down ms-auto small"></i>
@@ -476,7 +552,7 @@
                         </div>
                     </li>
                     <!-- Auth: Divider -->
-                    <li class="auth-only" style="display: none;"><hr class="dropdown-divider"></li>
+                    <li class="auth-only"><hr class="dropdown-divider"></li>
                     <!-- Support Section: 共通 -->
                     <li class="nav-item">
                         <a class="nav-link active" href="faq.html">
@@ -494,7 +570,7 @@
                         </a>
                     </li>
                     <!-- Auth: My Tickets -->
-                    <li class="nav-item auth-only" style="display: none;">
+                    <li class="nav-item auth-only">
                         <a class="nav-link" href="tickets.html">
                             <i class="fas fa-ticket-alt me-2"></i> <span data-i18n="support.tickets.title">My Tickets</span>
                         </a>
@@ -512,11 +588,17 @@
                             <i class="fas fa-sign-in-alt me-2"></i> <span data-i18n="nav.login">Sign In</span>
                         </a>
                     </li>
+                    <!-- Guest: Get Started -->
+                    <li class="nav-item guest-only">
+                        <a class="nav-link" href="../register.html">
+                            <i class="fas fa-user-plus me-2"></i> <span data-i18n="nav.getStarted">Get Started</span>
+                        </a>
+                    </li>
                 </ul>
                 
                 <div class="d-flex align-items-center gap-3">
                     <!-- Notification Bell (PC, auth-only) -->
-                    <a href="../notifications.html" class="btn btn-link position-relative d-none d-lg-block auth-only" id="notificationBell" title="Notifications" style="display: none;">
+                    <a href="../notifications.html" class="btn btn-link position-relative d-none d-lg-block auth-only" id="notificationBell" title="Notifications">
                         <i class="fas fa-bell fs-5"></i>
                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">3</span>
                     </a>
@@ -534,10 +616,13 @@
                         <option value="pt">🇧🇷 PT</option>
                     </select>
                     
-                    <!-- Auth Nav (Guest: Sign In button) -->
-                    <div id="authNav" class="guest-only">
-                        <a href="../login.html" class="btn btn-soft-custom d-none d-lg-inline-flex">
-                            <i class="fas fa-sign-in-alt me-1"></i> <span data-i18n="nav.login">Sign In</span>
+                    <!-- Guest Buttons (PC) -->
+                    <div class="navbar-buttons-guest guest-only">
+                        <a href="../login.html" class="btn btn-soft-custom">
+                            <span data-i18n="nav.login">Sign In</span>
+                        </a>
+                        <a href="../register.html" class="btn btn-primary-custom">
+                            <span data-i18n="nav.getStarted">Get Started</span>
                         </a>
                     </div>
                 </div>
@@ -615,7 +700,7 @@
     </footer>
 
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../../js/lang/ja.js"></script>
     <script src="../../js/lang/en.js"></script>
     <script src="../../js/lang/zh.js"></script>
@@ -767,63 +852,56 @@
         async function checkAuth() {
             try {
                 const token = localStorage.getItem('token');
-                if (!token) {
-                    // Not logged in - show guest elements
-                    document.querySelectorAll('.guest-only').forEach(el => {
-                        el.style.display = '';
-                        el.classList.remove('d-none');
-                    });
-                    document.querySelectorAll('.auth-only').forEach(el => {
-                        el.style.display = 'none';
-                    });
+                const userStr = localStorage.getItem('user');
+                
+                if (!token || !userStr) {
+                    // Not logged in
+                    document.body.classList.remove('logged-in');
+                    isLoggedIn = false;
                     return;
                 }
                 
-                const response = await fetch(`${API_BASE}/auth/me`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
+                // Try to validate with server, but fall back to localStorage if server unavailable
+                try {
+                    const response = await fetch(`${API_BASE}/auth/me`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        isLoggedIn = true;
+                        document.body.classList.add('logged-in');
+                        
+                        // Update user info in dropdown
+                        document.getElementById('userName').textContent = data.user.display_name || data.user.email || 'User';
+                        document.getElementById('userDisplayName').textContent = data.user.display_name || 'User';
+                        document.getElementById('userEmail').textContent = data.user.email || '';
+                        
+                        // Setup user dropdown toggle
+                        setupUserDropdown();
+                    } else {
+                        // Token invalid
+                        document.body.classList.remove('logged-in');
+                        isLoggedIn = false;
                     }
-                });
-                if (response.ok) {
-                    const data = await response.json();
+                } catch (fetchError) {
+                    // Server unavailable - use localStorage data
+                    console.log('Server unavailable, using localStorage');
+                    const user = JSON.parse(userStr);
                     isLoggedIn = true;
+                    document.body.classList.add('logged-in');
                     
-                    // Show auth-only elements, hide guest-only elements
-                    document.querySelectorAll('.auth-only').forEach(el => {
-                        el.style.display = '';
-                        el.classList.remove('d-none');
-                    });
-                    document.querySelectorAll('.guest-only').forEach(el => {
-                        el.style.display = 'none';
-                    });
+                    document.getElementById('userName').textContent = user.display_name || user.email || 'User';
+                    document.getElementById('userDisplayName').textContent = user.display_name || 'User';
+                    document.getElementById('userEmail').textContent = user.email || '';
                     
-                    // Update user info in dropdown
-                    document.getElementById('userName').textContent = data.user.display_name || data.user.email || 'User';
-                    document.getElementById('userDisplayName').textContent = data.user.display_name || 'User';
-                    document.getElementById('userEmail').textContent = data.user.email || '';
-                    
-                    // Setup user dropdown toggle
                     setupUserDropdown();
-                } else {
-                    // Not logged in - ensure guest elements visible
-                    document.querySelectorAll('.guest-only').forEach(el => {
-                        el.style.display = '';
-                        el.classList.remove('d-none');
-                    });
-                    document.querySelectorAll('.auth-only').forEach(el => {
-                        el.style.display = 'none';
-                    });
                 }
             } catch (error) {
-                console.log('Not logged in');
-                // Ensure guest elements visible on error
-                document.querySelectorAll('.guest-only').forEach(el => {
-                    el.style.display = '';
-                    el.classList.remove('d-none');
-                });
-                document.querySelectorAll('.auth-only').forEach(el => {
-                    el.style.display = 'none';
-                });
+                console.log('Auth check error:', error);
+                document.body.classList.remove('logged-in');
+                isLoggedIn = false;
             }
         }
         

@@ -298,45 +298,45 @@ Settings（設定）
 
 ## 5. ページ別パターン一覧（実装用）
 
-| # | ページ | パス | パターン | 優先度 |
-|---|--------|------|:--------:|:------:|
-| 1 | library.html | pages/ | A | ✅完了 |
-| 2 | tickets.html | pages/support/ | C | 📋要確認 |
-| 3 | contact.html | pages/support/ | C | ✅完了 |
-| 4 | faq.html | pages/support/ | C | ✅完了 |
-| 5 | browse.html | pages/ | A | 🔴高 |
-| 6 | dashboard.html | pages/ | B | 🔴高 |
-| 7 | index.html | / | D | 🔴高 |
-| 8 | notifications.html | pages/ | A | 🟡中 |
-| 9 | account-settings.html | pages/ | A | 🟡中 |
-| 10 | checkout.html | pages/ | A | 🟡中 |
-| 11 | upload.html | pages/ | B | 🟡中 |
-| 12 | analytics.html | pages/ | B | 🟡中 |
-| 13 | troubleshoot.html | pages/support/ | C | 🟡中 |
-| 14 | login.html | pages/ | D | 🟡中 |
-| 15 | register.html | pages/ | D | 🟡中 |
-| 16 | feedback/index.html | pages/feedback/ | A | 🟢低 |
-| 17 | feedback/report.html | pages/feedback/ | A | 🟢低 |
-| 18 | manga-translator.html | pages/ | B | 🟢低 |
-| 19 | translation-status.html | pages/ | B | 🟢低 |
-| 20 | translators/index.html | pages/translators/ | B | 🟢低 |
-| 21 | translators/register.html | pages/translators/ | B | 🟢低 |
-| 22 | upload-work.html | pages/ | B | 🟢低 |
-| 23 | register-author.html | pages/ | B | 🟢低 |
-| 24 | register-editor.html | pages/ | B | 🟢低 |
-| 25 | register-translator.html | pages/ | B | 🟢低 |
-| 26 | reader.html | pages/ | S | 🟢低 |
-| 27 | manga-viewer.html | pages/ | S | 🟢低 |
-| 28 | editor.html | pages/ | S | 🟢低 |
-| 29 | payment-success.html | pages/ | S | 🟢低 |
-| 30 | payment-cancel.html | pages/ | S | 🟢低 |
-| 31 | confirm-delete.html | pages/ | S | 🟢低 |
-| 32 | terms.html | pages/ | D | 🟢低 |
-| 33 | privacy.html | pages/ | D | 🟢低 |
-| 34 | content-guidelines.html | pages/ | D | 🟢低 |
-| 35 | copyright-policy.html | pages/ | D | 🟢低 |
-| 36 | revenue-sharing.html | pages/ | D | 🟢低 |
-| 37-40 | admin/* | pages/admin/ | E | 🔵別途 |
+| # | ページ | パス | パターン | 優先度 | 状態 |
+|---|--------|------|:--------:|:------:|:----:|
+| 1 | library.html | pages/ | A | ✅完了 | ✅ |
+| 2 | tickets.html | pages/support/ | C | ✅完了 | ✅ |
+| 3 | contact.html | pages/support/ | C | ✅完了 | ✅ |
+| 4 | faq.html | pages/support/ | C | ✅完了 | ✅ |
+| 5 | troubleshoot.html | pages/support/ | C | ✅完了 | ✅ |
+| 6 | dashboard.html | pages/ | B | ✅完了 | ✅ |
+| 7 | index.html | / | D | ✅完了 | ✅ |
+| 8 | browse.html | pages/ | A | 🔴高 | 📋 |
+| 9 | login.html | pages/ | D | 🔴高 | 📋 次回開始 |
+| 10 | register.html | pages/ | D | 🔴高 | 📋 |
+| 11 | notifications.html | pages/ | A | 🟡中 | 📋 |
+| 12 | account-settings.html | pages/ | A | 🟡中 | 📋 |
+| 13 | checkout.html | pages/ | A | 🟡中 | 📋 |
+| 14 | upload.html | pages/ | B | 🟡中 | ✅ |
+| 15 | analytics.html | pages/ | B | 🟡中 | 📋 |
+| 16 | terms.html | pages/ | D | 🟡中 | 📋 |
+| 17 | privacy.html | pages/ | D | 🟡中 | 📋 |
+| 18 | feedback/index.html | pages/feedback/ | A | 🟢低 | 📋 |
+| 19 | feedback/report.html | pages/feedback/ | A | 🟢低 | 📋 |
+| 20 | manga-translator.html | pages/ | B | 🟢低 | 📋 |
+| 21 | translation-status.html | pages/ | B | 🟢低 | 📋 |
+| 22 | translators/index.html | pages/translators/ | B | 🟢低 | 📋 |
+| 23 | translators/register.html | pages/translators/ | B | 🟢低 | 📋 |
+| 24 | upload-work.html | pages/ | B | 🟢低 | 📋 |
+| 25 | register-author.html | pages/ | B | 🟢低 | 📋 |
+| 26 | register-editor.html | pages/ | B | 🟢低 | 📋 |
+| 27 | register-translator.html | pages/ | B | 🟢低 | 📋 |
+| 28 | content-guidelines.html | pages/ | D | 🟢低 | 📋 |
+| 29 | copyright-policy.html | pages/ | D | 🟢低 | 📋 |
+| 30 | revenue-sharing.html | pages/ | D | 🟢低 | 📋 |
+| 31 | reader.html | pages/ | S | 🟢低 | 📋 |
+| 32 | manga-viewer.html | pages/ | S | 🟢低 | 📋 |
+| 33 | editor.html | pages/ | S | 🟢低 | 📋 |
+| 34 | payment-success.html | pages/ | S | 🟢低 | 📋 |
+| 35 | payment-cancel.html | pages/ | S | 🟢低 | 📋 |
+| 36 | confirm-delete.html | pages/ | S | 🟢低 | 📋 |
+| 37-40 | admin/* | pages/admin/ | E | 🔵別途 | 📋 |
 
 ---
 
@@ -570,29 +570,63 @@ simulateLogout();
 
 ## 9. 実装の進め方
 
-### Step 1: 基準パターンを確立
+### Step 1: 基準パターンを確立 ✅ 完了
 1. ✅ library.html（パターンA完成）
 2. ✅ contact.html（パターンC完成 - 参考元）
 3. ✅ faq.html（パターンC完成）
-4. 📋 tickets.html（パターンC - 要確認）
-5. 🔜 dashboard.html（パターンB基準）
-6. 🔜 index.html（パターンD基準）
+4. ✅ tickets.html（パターンC完成）
+5. ✅ troubleshoot.html（パターンC完成）
+6. ✅ dashboard.html（パターンB完成）
+7. ✅ index.html（パターンD完成）
 
-### Step 2: 高優先度ページを実装
-7. browse.html（パターンA）
-8. notifications.html（パターンA）
-9. account-settings.html（パターンA）
+### Step 2: 残りのパターンDページを実装 📋 次回から
+8. 📋 login.html（パターンD）← **次回開始**
+9. 📋 register.html（パターンD）
+10. 📋 terms.html（パターンD）
+11. 📋 privacy.html（パターンD）
+12. 📋 content-guidelines.html（パターンD）
+13. 📋 copyright-policy.html（パターンD）
+14. 📋 revenue-sharing.html（パターンD）
 
-### Step 3: クリエイター向けページ
-10. upload.html（パターンB）
-11. analytics.html（パターンB）
+### Step 3: 高優先度ページを実装
+15. browse.html（パターンA）
+16. notifications.html（パターンA）
+17. account-settings.html（パターンA）
 
-### Step 4: サポートページ
-12. troubleshoot.html（パターンC）
+### Step 4: クリエイター向けページ
+18. analytics.html（パターンB）
 
 ### Step 5: 残りのページ
-13. その他全ページ
+19. その他全ページ
 
 ---
 
-最終更新: 2026年1月30日
+## 10. 完了サマリー（2026-01-31時点）
+
+### パターン別完了状況
+
+| パターン | 対象数 | 完了数 | 進捗 |
+|:--------:|:------:|:------:|:----:|
+| A（読者向け） | 7 | 1 | 14% |
+| B（クリエイター向け） | 12 | 2 | 17% |
+| C（サポート） | 4 | 4 | **100%** ✅ |
+| D（未ログイン） | 8 | 1 | 13% |
+| E（管理画面） | 4 | 0 | 0% |
+| S（シンプル版） | 6 | 0 | 0% |
+
+### 完了ページ一覧（9ページ）
+
+| # | ページ | パターン | 完了日 |
+|---|--------|:--------:|--------|
+| 1 | library.html | A | 以前完了 |
+| 2 | upload.html | B | 以前完了 |
+| 3 | contact.html | C | 以前完了 |
+| 4 | faq.html | C | 2026-01-30 |
+| 5 | tickets.html | C | 2026-01-31 |
+| 6 | troubleshoot.html | C | 2026-01-31 |
+| 7 | dashboard.html | B | 2026-01-31 |
+| 8 | index.html | D | 2026-01-31 |
+
+---
+
+最終更新: 2026年1月31日

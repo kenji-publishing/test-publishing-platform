@@ -18,6 +18,111 @@
     <link href="../css/style-new.css" rel="stylesheet">
     <link href="../css/mobile-fixes.css" rel="stylesheet">
     
+    <!-- Pattern C Navbar Styles -->
+    <style>
+        /* ========== Navbar Custom ========== */
+        .navbar-custom {
+            background-color: var(--color-bg-card, #fff);
+            border-bottom: 1px solid var(--color-border, #e0d6c8);
+        }
+        .navbar-custom .navbar-brand {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            color: var(--color-accent);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .navbar-custom .navbar-brand i {
+            font-size: 1.5rem;
+        }
+        .navbar-custom .nav-link {
+            color: var(--color-text-primary);
+        }
+        .navbar-custom .nav-link:hover,
+        .navbar-custom .nav-link.active {
+            color: var(--color-accent);
+        }
+        
+        /* ========== Mobile Language Selector ========== */
+        .navbar-lang-selector {
+            display: flex;
+            align-items: center;
+            margin-right: 0.5rem;
+        }
+        
+        @media (max-width: 991.98px) {
+            .navbar-lang-selector {
+                order: 1;
+            }
+            .navbar-toggler {
+                order: 2;
+            }
+        }
+        
+        /* ========== PC Navbar - 横並び維持 ========== */
+        @media (min-width: 992px) {
+            .navbar-nav {
+                flex-wrap: nowrap !important;
+                flex-direction: row !important;
+            }
+            .navbar-nav .nav-item {
+                white-space: nowrap !important;
+            }
+            .navbar-nav .nav-link {
+                white-space: nowrap !important;
+                padding: 0.5rem 0.6rem !important;
+                font-size: 0.9rem;
+            }
+            .navbar-collapse .d-flex {
+                flex-wrap: nowrap !important;
+            }
+        }
+        
+        /* ========== Navbar Overlay ========== */
+        .navbar-overlay {
+            display: none;
+            position: fixed;
+            top: 56px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1019;
+        }
+        .navbar-overlay.show {
+            display: block;
+        }
+        body.menu-open {
+            overflow: hidden;
+        }
+        
+        /* ========== Mobile Menu ========== */
+        @media (max-width: 991.98px) {
+            .navbar-collapse {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: var(--color-bg-card, #fff);
+                border-bottom: 1px solid var(--color-border, #ddd);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                max-height: calc(100vh - 56px);
+                overflow-y: auto;
+            }
+            .navbar-collapse .navbar-nav {
+                padding: 1rem;
+            }
+            .navbar-collapse .d-flex {
+                padding: 0 1rem 1rem;
+            }
+            .navbar-custom {
+                z-index: 1050 !important;
+                background: #FFFFFF !important;
+            }
+        }
+    </style>
+    
     <style>
         .register-container {
             min-height: 100vh;
@@ -25,6 +130,7 @@
             align-items: center;
             justify-content: center;
             padding: var(--spacing-xl) var(--spacing-md);
+            padding-top: calc(56px + var(--spacing-xl));
         }
 
         .register-card {
@@ -225,6 +331,7 @@
         .social-buttons {
             display: flex;
             gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
         }
 
         .btn-social {
@@ -236,23 +343,22 @@
             padding: var(--spacing-sm) var(--spacing-md);
             border: 1px solid var(--color-border);
             border-radius: var(--radius-md);
-            background: var(--color-bg-card);
+            background-color: var(--color-bg-card);
             color: var(--color-text-primary);
-            font-size: var(--font-size-sm);
-            font-weight: 500;
-            transition: all var(--transition-fast);
             text-decoration: none;
+            font-weight: 500;
+            font-size: var(--font-size-sm);
+            transition: all var(--transition-fast);
         }
 
         .btn-social:hover {
-            background-color: var(--color-bg-hover);
             border-color: var(--color-accent);
-            color: var(--color-text-primary);
+            color: var(--color-accent);
+            background-color: var(--color-bg-hover);
         }
 
         .login-link {
             text-align: center;
-            margin-top: var(--spacing-lg);
             font-size: var(--font-size-sm);
             color: var(--color-text-secondary);
         }
@@ -260,13 +366,18 @@
         .login-link a {
             color: var(--color-accent);
             font-weight: 500;
+            text-decoration: none;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
         }
 
         .password-strength {
-            margin-top: var(--spacing-xs);
             height: 4px;
             background-color: var(--color-border);
-            border-radius: var(--radius-full);
+            border-radius: 2px;
+            margin-top: var(--spacing-xs);
             overflow: hidden;
         }
 
@@ -276,81 +387,118 @@
             transition: all var(--transition-fast);
         }
 
-        .strength-weak { width: 33%; background-color: var(--color-error); }
-        .strength-medium { width: 66%; background-color: var(--color-warning); }
-        .strength-strong { width: 100%; background-color: var(--color-success); }
-
-        .language-selector-mini {
-            position: fixed;
-            top: var(--spacing-md);
-            right: var(--spacing-md);
-            z-index: 1000;
+        .password-strength-bar.strength-weak {
+            width: 33%;
+            background-color: var(--color-error);
         }
 
-        .language-selector-mini select {
-            padding: 8px 12px;
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-md);
-            background: var(--color-bg-card);
-            font-size: var(--font-size-sm);
-            cursor: pointer;
-            box-shadow: var(--shadow-sm);
+        .password-strength-bar.strength-medium {
+            width: 66%;
+            background-color: var(--color-warning);
         }
 
-        .language-selector-mini select:focus {
-            outline: none;
-            border-color: var(--color-accent);
+        .password-strength-bar.strength-strong {
+            width: 100%;
+            background-color: var(--color-success);
         }
 
         @media (max-width: 576px) {
             .register-card {
-                padding: var(--spacing-xl);
-                border-radius: var(--radius-lg);
+                padding: var(--spacing-lg);
             }
 
             .role-selector {
                 flex-direction: column;
             }
-
-            .social-buttons {
-                flex-direction: column;
-            }
-
-            .language-selector-mini {
-                top: 10px;
-                right: 10px;
-            }
-
-            .language-selector-mini select {
-                padding: 6px 10px;
-                font-size: 12px;
-            }
-        }
-
-        /* スワイプナビゲーション対応 */
-        html, body {
-            overscroll-behavior-x: auto;
         }
     </style>
 </head>
 <body>
-    <!-- Language Selector -->
-    <div class="language-selector-mini">
-        <select class="language-selector" id="languageSelector">
-            <option value="en">🇬🇧 English</option>
-            <option value="ja">🇯🇵 日本語</option>
-            <option value="zh">🇨🇳 中文</option>
-            <option value="es">🇪🇸 Español</option>
-            <option value="fr">🇫🇷 Français</option>
-            <option value="de">🇩🇪 Deutsch</option>
-            <option value="ko">🇰🇷 한국어</option>
-            <option value="ar">🇸🇦 العربية</option>
-            <option value="pt">🇧🇷 Português</option>
-        </select>
+
+<!-- ========== NAVBAR (Register Page - Simplified) ========== -->
+<nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+    <div class="container">
+        <!-- Brand -->
+        <a class="navbar-brand" href="../index.html">
+            <i class="fas fa-book-open"></i>
+            Publisher
+        </a>
+        
+        <!-- Language Selector Mobile -->
+        <div class="navbar-lang-selector d-lg-none">
+            <select class="language-selector" id="languageSelectorMobile">
+                <option value="en">🇬🇧 EN</option>
+                <option value="ja">🇯🇵 日本語</option>
+                <option value="zh">🇨🇳 中文</option>
+                <option value="es">🇪🇸 ES</option>
+                <option value="fr">🇫🇷 FR</option>
+                <option value="de">🇩🇪 DE</option>
+                <option value="ko">🇰🇷 한국어</option>
+                <option value="ar">🇸🇦 عربي</option>
+                <option value="pt">🇧🇷 PT</option>
+            </select>
+        </div>
+        
+        <!-- Hamburger -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <!-- Navbar Content -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <!-- Browse -->
+                <li class="nav-item">
+                    <a class="nav-link" href="browse.html" data-i18n="nav.browse">Browse</a>
+                </li>
+                
+                <!-- FAQ (ACTIVE) -->
+                <li class="nav-item">
+                    <a class="nav-link active" href="support/faq.html" data-i18n="nav.faq">FAQ</a>
+                </li>
+                
+                <!-- Contact -->
+                <li class="nav-item">
+                    <a class="nav-link" href="contact.html" data-i18n="nav.contact">Contact</a>
+                </li>
+            </ul>
+            
+            <!-- Right Side -->
+            <div class="d-flex align-items-center gap-3">
+                <!-- Mobile Auth Buttons -->
+                <div class="d-lg-none py-3 border-top mt-2">
+                    <div class="d-grid gap-2">
+                        <a href="login.html" class="btn btn-outline-secondary" data-i18n="nav.login">Sign In</a>
+                    </div>
+                </div>
+                
+                <!-- PC Language Selector -->
+                <select class="form-select form-select-sm d-none d-lg-block" id="languageSelector" style="width: auto;">
+                    <option value="en">🇬🇧 EN</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="es">🇪🇸 ES</option>
+                    <option value="fr">🇫🇷 FR</option>
+                    <option value="de">🇩🇪 DE</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="ar">🇸🇦 عربي</option>
+                    <option value="pt">🇧🇷 PT</option>
+                </select>
+                
+                <!-- Sign In Button (PC) -->
+                <a href="login.html" class="btn btn-soft-custom d-none d-lg-inline-block">
+                    <span data-i18n="nav.login">Sign In</span>
+                </a>
+            </div>
+        </div>
     </div>
+</nav>
+<!-- Mobile Overlay -->
+<div class="navbar-overlay" id="navbarOverlay"></div>
+<!-- ========== NAVBAR END ========== -->
 
     <div class="register-container">
-        <div class="register-card fade-in">
+        <div class="register-card">
             <!-- Header -->
             <div class="register-header">
                 <a href="../index.html" class="logo">
@@ -380,36 +528,21 @@
                 </div>
             </div>
 
-            <!-- Register Form -->
             <form id="registerForm">
                 <input type="hidden" id="selectedRole" value="reader">
-                
-                <!-- Name Row -->
+
+                <!-- Name Fields -->
                 <div class="row">
                     <div class="col-6">
                         <div class="form-group">
                             <label class="form-label" for="firstName" data-i18n="register.firstName">First Name</label>
-                            <input 
-                                type="text" 
-                                class="form-control" 
-                                id="firstName" 
-                                data-i18n-placeholder="register.firstNamePlaceholder"
-                                placeholder="First name"
-                                required
-                            >
+                            <input type="text" class="form-control" id="firstName" data-i18n-placeholder="register.firstNamePlaceholder" placeholder="First name" required>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="form-group">
                             <label class="form-label" for="lastName" data-i18n="register.lastName">Last Name</label>
-                            <input 
-                                type="text" 
-                                class="form-control" 
-                                id="lastName" 
-                                data-i18n-placeholder="register.lastNamePlaceholder"
-                                placeholder="Last name"
-                                required
-                            >
+                            <input type="text" class="form-control" id="lastName" data-i18n-placeholder="register.lastNamePlaceholder" placeholder="Last name" required>
                         </div>
                     </div>
                 </div>
@@ -526,22 +659,65 @@
     <script src="../js/lang/translations-base.js"></script>
     <!-- 言語切替機能 -->
     <script src="../js/language-switcher.js"></script>
+    
+    <!-- Navbar Script (Simplified) -->
     <script>
-        // Language switching
         document.addEventListener('DOMContentLoaded', function() {
-            const currentLang = localStorage.getItem('preferredLanguage') || 'en';
-            const langSelector = document.getElementById('languageSelector');
-            const prefLangSelector = document.getElementById('preferredLanguage');
+            // Language Selector Sync
+            const desktopSelector = document.getElementById('languageSelector');
+            const mobileSelector = document.getElementById('languageSelectorMobile');
             
-            if (langSelector) {
-                langSelector.value = currentLang;
-                langSelector.addEventListener('change', function() {
+            if (desktopSelector && mobileSelector) {
+                const savedLang = localStorage.getItem('preferredLanguage') || 'en';
+                desktopSelector.value = savedLang;
+                mobileSelector.value = savedLang;
+                
+                mobileSelector.addEventListener('change', function() {
+                    desktopSelector.value = this.value;
+                    localStorage.setItem('preferredLanguage', this.value);
+                    if (typeof LanguageSwitcher !== 'undefined') {
+                        LanguageSwitcher.changeLanguage(this.value);
+                    }
+                });
+                
+                desktopSelector.addEventListener('change', function() {
+                    mobileSelector.value = this.value;
                     localStorage.setItem('preferredLanguage', this.value);
                     if (typeof LanguageSwitcher !== 'undefined') {
                         LanguageSwitcher.changeLanguage(this.value);
                     }
                 });
             }
+            
+            // Mobile Menu Overlay
+            const navbarCollapse = document.getElementById('navbarNav');
+            const navbarOverlay = document.getElementById('navbarOverlay');
+            
+            if (navbarCollapse) {
+                navbarCollapse.addEventListener('show.bs.collapse', function() {
+                    document.body.classList.add('menu-open');
+                    if (navbarOverlay) navbarOverlay.classList.add('show');
+                });
+                navbarCollapse.addEventListener('hide.bs.collapse', function() {
+                    document.body.classList.remove('menu-open');
+                    if (navbarOverlay) navbarOverlay.classList.remove('show');
+                });
+            }
+            
+            if (navbarOverlay) {
+                navbarOverlay.addEventListener('click', function() {
+                    const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                    if (bsCollapse) bsCollapse.hide();
+                });
+            }
+        });
+    </script>
+    
+    <script>
+        // Preferred Language Selector Sync
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentLang = localStorage.getItem('preferredLanguage') || 'en';
+            const prefLangSelector = document.getElementById('preferredLanguage');
             
             if (prefLangSelector) {
                 prefLangSelector.value = currentLang;

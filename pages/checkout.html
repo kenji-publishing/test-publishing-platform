@@ -8,39 +8,487 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="../css/style-new.css" rel="stylesheet">
     <link href="../css/mobile-fixes.css" rel="stylesheet">
+    <!-- Pattern C Navbar Styles -->
     <style>
-        .navbar-lang-selector { display: flex; align-items: center; margin-right: 0.5rem; }
-        @media (max-width: 991.98px) { .navbar-lang-selector { order: 1; } .navbar-toggler { order: 2; } }
-        .language-selector { padding: 6px 10px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-bg-card); font-size: var(--font-size-sm); cursor: pointer; }
+        /* ========== Mobile Language Selector ========== */
+        .navbar-lang-selector {
+            display: flex;
+            align-items: center;
+            margin-right: 0.5rem;
+        }
+        
+        @media (max-width: 991.98px) {
+            .navbar-lang-selector {
+                order: 1;
+            }
+            .navbar-toggler {
+                order: 2;
+            }
+        }
+        
+        /* ========== PC Navbar - 横並び維持 ========== */
+        @media (min-width: 992px) {
+            .navbar-nav {
+                flex-wrap: nowrap !important;
+                flex-direction: row !important;
+            }
+            .navbar-nav .nav-item {
+                white-space: nowrap !important;
+            }
+            .navbar-nav .nav-link {
+                white-space: nowrap !important;
+                padding: 0.5rem 0.6rem !important;
+                font-size: 0.9rem;
+            }
+            .navbar-collapse .d-flex {
+                flex-wrap: nowrap !important;
+            }
+            .dropdown-menu {
+                white-space: nowrap;
+            }
+            .navbar-buttons-guest {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                gap: 0.5rem;
+            }
+            .navbar-buttons-guest .btn {
+                white-space: nowrap !important;
+                flex-shrink: 0;
+            }
+        }
+        
+        /* ========== Auth Visibility Control ========== */
+        .auth-only {
+            display: none !important;
+        }
+        .guest-only {
+            display: block;
+        }
+        body.logged-in .auth-only {
+            display: block !important;
+        }
+        body.logged-in .auth-only.nav-item {
+            display: list-item !important;
+        }
+        body.logged-in .auth-only.dropdown {
+            display: block !important;
+        }
+        body.logged-in .guest-only {
+            display: none !important;
+        }
+        @media (min-width: 992px) {
+            body.logged-in .navbar-buttons-guest {
+                display: none !important;
+            }
+        }
+        
+        /* ========== User Dropdown Menu ========== */
+        .user-dropdown {
+            position: relative;
+        }
+        .user-dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: transparent;
+            border: 1px solid var(--color-border);
+            border-radius: 25px;
+            padding: 0.4rem 0.75rem;
+            cursor: pointer;
+            color: var(--color-text);
+            transition: all 0.2s;
+        }
+        .user-dropdown-toggle:hover {
+            border-color: var(--color-accent);
+            background: rgba(139, 115, 85, 0.05);
+        }
+        .user-dropdown-toggle i:first-child {
+            font-size: 1.25rem;
+            color: var(--color-accent);
+        }
+        .user-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-chevron {
+            font-size: 0.7rem;
+            color: var(--color-text-secondary);
+            transition: transform 0.2s;
+        }
+        .user-dropdown.open .user-chevron {
+            transform: rotate(180deg);
+        }
+        .user-menu {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            right: 0;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            min-width: 240px;
+            z-index: 1055;
+            display: none;
+            overflow: hidden;
+        }
+        .user-menu.show {
+            display: block;
+        }
+        .user-menu-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--color-bg-main);
+        }
+        .user-avatar {
+            font-size: 2.5rem;
+            color: var(--color-accent);
+        }
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .user-display-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-email {
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-menu-divider {
+            height: 1px;
+            background: var(--color-border);
+        }
+        .user-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--color-text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+        .user-menu-item:hover {
+            background: var(--color-bg-hover);
+            color: var(--color-accent);
+        }
+        .user-menu-item i {
+            width: 20px;
+            text-align: center;
+            color: var(--color-text-secondary);
+        }
+        .user-menu-item:hover i {
+            color: var(--color-accent);
+        }
+        .logout-btn {
+            color: var(--color-error);
+        }
+        .logout-btn i {
+            color: var(--color-error);
+        }
+        .logout-btn:hover {
+            background: rgba(199, 93, 93, 0.1);
+            color: var(--color-error);
+        }
+        
+        /* ========== Navbar Overlay ========== */
+        .navbar-overlay {
+            display: none;
+            position: fixed;
+            top: 56px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1030;
+        }
+        .navbar-overlay.show {
+            display: block;
+        }
+        body.menu-open {
+            overflow: hidden;
+        }
+        
+        /* ========== Mobile Menu ========== */
+        @media (max-width: 991.98px) {
+            .navbar-collapse {
+                max-height: 70vh;
+                overflow-y: auto;
+                overscroll-behavior: contain;
+            }
+            .navbar-collapse.show,
+            .navbar-collapse.collapsing {
+                position: fixed;
+                top: 56px;
+                left: 0;
+                right: 0;
+                background: var(--color-bg-card);
+                border-bottom: 1px solid var(--color-border);
+                box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+                z-index: 1045;
+                padding: 0.5rem 1rem;
+            }
+            .navbar-custom {
+                z-index: 1050 !important;
+            }
+        }
+    </style>
+    
+    <!-- Checkout Page Styles -->
+    <style>
         .payment-method-card{cursor:pointer;transition:all 0.3s;border:2px solid #dee2e6}.payment-method-card:hover{border-color:#0d6efd;transform:translateY(-3px);box-shadow:0 5px 15px rgba(0,0,0,0.1)}.payment-method-card.selected{border-color:#0d6efd;background-color:#f0f7ff}
         .payment-icon{font-size:3rem}.stripe-icon{color:#635bff}.paypal-icon{color:#003087}
         .order-summary{background:#f8f9fa;border-radius:10px}
+        
+        /* ========== Z-index Fix: ドロップダウンをOrder Summaryより上に ========== */
+        /* Navbar全体を最上位に */
+        .navbar-custom {
+            z-index: 1050 !important;
+        }
+        /* Navbarのドロップダウンメニュー */
+        .navbar .dropdown-menu {
+            z-index: 1060 !important;
+        }
+        /* Order Summaryのsticky-topを低く */
+        .order-summary.sticky-top {
+            z-index: 1000 !important;
+            position: sticky !important;
+        }
+        /* コンテンツエリア全体をNavbarより下に */
+        .container.py-5 {
+            position: relative;
+            z-index: 1;
+        }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
-        <div class="container">
-            <a class="navbar-brand" href="../index.html"><i class="fas fa-book-open"></i> Publisher</a>
-            <div class="navbar-lang-selector d-lg-none">
-                <select class="language-selector" id="languageSelectorMobile">
-                    <option value="en">🇬🇧 EN</option><option value="ja">🇯🇵 日本語</option><option value="zh">🇨🇳 中文</option><option value="es">🇪🇸 ES</option><option value="fr">🇫🇷 FR</option><option value="de">🇩🇪 DE</option><option value="ko">🇰🇷 한국어</option><option value="ar">🇸🇦 عربي</option><option value="pt">🇧🇷 PT</option>
-                </select>
+<!-- ========== NAVBAR PATTERN C (pages/ 階層) ========== -->
+<nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+    <div class="container">
+        <!-- Brand -->
+        <a class="navbar-brand" href="../index.html">
+            <i class="fas fa-book-open"></i>
+            Publisher
+        </a>
+        
+        <!-- Language Selector Mobile -->
+        <div class="navbar-lang-selector d-lg-none">
+            <select class="language-selector" id="languageSelectorMobile">
+                <option value="en">🇬🇧 EN</option>
+                <option value="ja">🇯🇵 日本語</option>
+                <option value="zh">🇨🇳 中文</option>
+                <option value="es">🇪🇸 ES</option>
+                <option value="fr">🇫🇷 FR</option>
+                <option value="de">🇩🇪 DE</option>
+                <option value="ko">🇰🇷 한국어</option>
+                <option value="ar">🇸🇦 عربي</option>
+                <option value="pt">🇧🇷 PT</option>
+            </select>
+        </div>
+        
+        <!-- User Dropdown (auth-only) -->
+        <div class="user-dropdown auth-only" id="userDropdown">
+            <button type="button" class="user-dropdown-toggle" id="userDropdownBtn" onclick="toggleUserDropdown(event)">
+                <i class="fas fa-user-circle"></i>
+                <span class="user-name d-none d-lg-inline" id="userName">User</span>
+                <i class="fas fa-chevron-down user-chevron d-none d-lg-inline"></i>
+            </button>
+            <div class="user-menu" id="userMenu">
+                <div class="user-menu-header">
+                    <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
+                    <div class="user-info">
+                        <div class="user-display-name" id="userDisplayName">User</div>
+                        <div class="user-email" id="userEmail">user@example.com</div>
+                    </div>
+                </div>
+                <div class="user-menu-divider"></div>
+                <a href="dashboard.html" class="user-menu-item">
+                    <i class="fas fa-th-large"></i>
+                    <span id="menuDashboard">Dashboard</span>
+                </a>
+                <a href="account-settings.html" class="user-menu-item">
+                    <i class="fas fa-cog"></i>
+                    <span id="menuAccountSettings">Account Settings</span>
+                </a>
+                <div class="user-menu-divider"></div>
+                <button class="user-menu-item logout-btn" onclick="handleLogout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span id="menuLogout">Log Out</span>
+                </button>
             </div>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link" href="../index.html" data-i18n="nav.home">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="browse.html" data-i18n="nav.browse">Browse</a></li>
-                    <li class="nav-item"><a class="nav-link" href="dashboard.html" data-i18n="nav.dashboard">Dashboard</a></li>
-                </ul>
-                <div class="d-flex align-items-center">
-                    <select class="language-selector d-none d-lg-block" id="languageSelector">
-                        <option value="en">🇬🇧 EN</option><option value="ja">🇯🇵 日本語</option><option value="zh">🇨🇳 中文</option><option value="es">🇪🇸 ES</option><option value="fr">🇫🇷 FR</option><option value="de">🇩🇪 DE</option><option value="ko">🇰🇷 한국어</option><option value="ar">🇸🇦 عربي</option><option value="pt">🇧🇷 PT</option>
-                    </select>
+        </div>
+        
+        <!-- Hamburger -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <!-- Navbar Overlay -->
+        <div class="navbar-overlay d-lg-none" id="navbarOverlay"></div>
+        
+        <!-- Navbar Content -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <!-- PC Navigation -->
+            <ul class="navbar-nav me-auto d-none d-lg-flex">
+                <!-- Browse: 共通 -->
+                <li class="nav-item">
+                    <a class="nav-link" href="browse.html">
+                        <i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span>
+                    </a>
+                </li>
+                <!-- Auth: Library -->
+                <li class="nav-item auth-only">
+                    <a class="nav-link" href="library.html">
+                        <i class="fas fa-book-reader me-1"></i> <span id="navLibraryPC">Library</span>
+                    </a>
+                </li>
+                <!-- Auth: Dashboard -->
+                <li class="nav-item auth-only">
+                    <a class="nav-link" href="dashboard.html">
+                        <i class="fas fa-th-large me-1"></i> <span id="navDashboardPC">Dashboard</span>
+                    </a>
+                </li>
+                <!-- Auth: Upload -->
+                <li class="nav-item auth-only">
+                    <a class="nav-link" href="upload.html">
+                        <i class="fas fa-upload me-1"></i> <span data-i18n="nav.upload">Upload</span>
+                    </a>
+                </li>
+                <!-- Auth: Translation Tools Dropdown -->
+                <li class="nav-item dropdown auth-only">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-language me-1"></i> <span id="navTranslationToolsPC">Translation Tools</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="manga-translator.html"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorPC">Manga Translator</span></a></li>
+                        <li><a class="dropdown-item" href="translation-status.html"><i class="fas fa-tasks me-2"></i><span id="navTranslationStatusPC">Translation Status</span></a></li>
+                        <li><a class="dropdown-item" href="translators/index.html"><i class="fas fa-users me-2"></i><span id="navFindTranslatorsPC">Find Translators</span></a></li>
+                    </ul>
+                </li>
+                <!-- Support Dropdown: 共通 -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-headset me-1"></i> <span data-i18n="nav.support">Support</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item active" href="support/faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
+                        <li><a class="dropdown-item" href="support/troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
+                        <li><a class="dropdown-item" href="support/contact.html"><i class="fas fa-envelope me-2"></i><span id="navContactPC">Contact</span></a></li>
+                        <li class="auth-only"><hr class="dropdown-divider"></li>
+                        <li class="auth-only"><a class="dropdown-item" href="support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
+                    </ul>
+                </li>
+            </ul>
+            
+            <!-- Mobile Navigation -->
+            <ul class="navbar-nav d-lg-none">
+                <!-- Browse -->
+                <li class="nav-item">
+                    <a class="nav-link" href="browse.html">
+                        <i class="fas fa-compass me-2"></i><span data-i18n="nav.browse">Browse</span>
+                    </a>
+                </li>
+                <!-- Auth: Library -->
+                <li class="nav-item auth-only">
+                    <a class="nav-link" href="library.html">
+                        <i class="fas fa-book-reader me-2"></i><span id="navLibraryMobile">Library</span>
+                    </a>
+                </li>
+                <!-- Auth: Dashboard -->
+                <li class="nav-item auth-only">
+                    <a class="nav-link" href="dashboard.html">
+                        <i class="fas fa-th-large me-2"></i><span id="navDashboardMobile">Dashboard</span>
+                    </a>
+                </li>
+                <!-- Auth: Upload -->
+                <li class="nav-item auth-only">
+                    <a class="nav-link" href="upload.html">
+                        <i class="fas fa-upload me-2"></i><span data-i18n="nav.upload">Upload</span>
+                    </a>
+                </li>
+                <!-- Auth: Translation Tools -->
+                <li class="nav-item dropdown auth-only">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                        <i class="fas fa-language me-2"></i><span id="navTranslationToolsMobile">Translation Tools</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="manga-translator.html"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorMobile">Manga Translator</span></a></li>
+                        <li><a class="dropdown-item" href="translation-status.html"><i class="fas fa-tasks me-2"></i><span id="navTranslationStatusMobile">Translation Status</span></a></li>
+                        <li><a class="dropdown-item" href="translators/index.html"><i class="fas fa-users me-2"></i><span id="navFindTranslatorsMobile">Find Translators</span></a></li>
+                    </ul>
+                </li>
+                <!-- Support -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" data-bs-toggle="dropdown">
+                        <i class="fas fa-headset me-2"></i><span data-i18n="nav.support">Support</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item active" href="support/faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
+                        <li><a class="dropdown-item" href="support/troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
+                        <li><a class="dropdown-item" href="support/contact.html"><i class="fas fa-envelope me-2"></i><span id="navContactMobile">Contact</span></a></li>
+                        <li class="auth-only"><hr class="dropdown-divider"></li>
+                        <li class="auth-only"><a class="dropdown-item" href="support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
+                    </ul>
+                </li>
+                <!-- Guest: Mobile Auth Buttons -->
+                <li class="nav-item guest-only border-top mt-2 pt-2">
+                    <a class="nav-link" href="login.html">
+                        <i class="fas fa-sign-in-alt me-2"></i><span data-i18n="nav.login">Sign In</span>
+                    </a>
+                </li>
+                <li class="nav-item guest-only">
+                    <a class="nav-link text-accent fw-bold" href="register.html">
+                        <i class="fas fa-user-plus me-2"></i><span data-i18n="nav.getStarted">Get Started</span>
+                    </a>
+                </li>
+            </ul>
+            
+            <!-- Right Side (PC) -->
+            <div class="d-none d-lg-flex align-items-center gap-3">
+                <!-- Language Selector PC -->
+                <select class="language-selector" id="languageSelector">
+                    <option value="en">🇬🇧 EN</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="es">🇪🇸 ES</option>
+                    <option value="fr">🇫🇷 FR</option>
+                    <option value="de">🇩🇪 DE</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="ar">🇸🇦 عربي</option>
+                    <option value="pt">🇧🇷 PT</option>
+                </select>
+                
+                <!-- Guest Buttons (PC) -->
+                <div class="navbar-buttons-guest guest-only d-none d-lg-flex">
+                    <a href="login.html" class="btn btn-soft-custom">
+                        <span data-i18n="nav.login">Sign In</span>
+                    </a>
+                    <a href="register.html" class="btn btn-primary-custom">
+                        <span data-i18n="nav.getStarted">Get Started</span>
+                    </a>
                 </div>
             </div>
         </div>
-    </nav>
+    </div>
+</nav>
+<!-- ========== NAVBAR PATTERN C END ========== -->
 
     <div class="container py-5">
         <div class="row">
@@ -127,14 +575,348 @@
     <script src="../js/lang/pt.js"></script>
     <script src="../js/lang/translations-base.js"></script>
     <script src="../js/language-switcher.js"></script>
+    
+    <!-- Pattern C Navbar Script -->
     <script>
+        // ========== 多言語対応テキスト（9言語）==========
+        const navText = {
+            translationTools: {
+                en: 'Translation Tools', ja: '翻訳ツール', zh: '翻译工具',
+                es: 'Herramientas de traducción', fr: 'Outils de traduction', de: 'Übersetzungstools',
+                ko: '번역 도구', ar: 'أدوات الترجمة', pt: 'Ferramentas de tradução'
+            },
+            mangaTranslator: {
+                en: 'Manga Translator', ja: 'マンガ翻訳', zh: '漫画翻译',
+                es: 'Traductor de Manga', fr: 'Traducteur de Manga', de: 'Manga-Übersetzer',
+                ko: '만화 번역기', ar: 'مترجم المانجا', pt: 'Tradutor de Mangá'
+            },
+            translationStatus: {
+                en: 'Translation Status', ja: '翻訳状況', zh: '翻译状态',
+                es: 'Estado de traducción', fr: 'Statut de traduction', de: 'Übersetzungsstatus',
+                ko: '번역 상태', ar: 'حالة الترجمة', pt: 'Status da tradução'
+            },
+            findTranslators: {
+                en: 'Find Translators', ja: '翻訳者を探す', zh: '寻找翻译',
+                es: 'Buscar traductores', fr: 'Trouver des traducteurs', de: 'Übersetzer finden',
+                ko: '번역가 찾기', ar: 'البحث عن مترجمين', pt: 'Encontrar tradutores'
+            },
+            contact: {
+                en: 'Contact', ja: 'お問い合わせ', zh: '联系我们',
+                es: 'Contacto', fr: 'Contact', de: 'Kontakt',
+                ko: '문의', ar: 'اتصل بنا', pt: 'Contato'
+            },
+            library: {
+                en: 'Library', ja: 'ライブラリ', zh: '书库',
+                es: 'Biblioteca', fr: 'Bibliothèque', de: 'Bibliothek',
+                ko: '라이브러리', ar: 'المكتبة', pt: 'Biblioteca'
+            },
+            dashboard: {
+                en: 'Dashboard', ja: 'ダッシュボード', zh: '控制台',
+                es: 'Panel', fr: 'Tableau de bord', de: 'Dashboard',
+                ko: '대시보드', ar: 'لوحة التحكم', pt: 'Painel'
+            },
+            accountSettings: {
+                en: 'Account Settings', ja: 'アカウント設定', zh: '账户设置',
+                es: 'Configuración de cuenta', fr: 'Paramètres du compte', de: 'Kontoeinstellungen',
+                ko: '계정 설정', ar: 'إعدادات الحساب', pt: 'Configurações da conta'
+            },
+            logout: {
+                en: 'Log Out', ja: 'ログアウト', zh: '退出登录',
+                es: 'Cerrar sesión', fr: 'Déconnexion', de: 'Abmelden',
+                ko: '로그아웃', ar: 'تسجيل الخروج', pt: 'Sair'
+            },
+            logOutConfirm: {
+                en: 'Are you sure you want to log out?', ja: 'ログアウトしますか？', zh: '确定要退出登录吗？',
+                es: '¿Estás seguro de que quieres cerrar sesión?', fr: 'Êtes-vous sûr de vouloir vous déconnecter?', de: 'Sind Sie sicher, dass Sie sich abmelden möchten?',
+                ko: '로그아웃 하시겠습니까?', ar: 'هل أنت متأكد أنك تريد تسجيل الخروج؟', pt: 'Tem certeza que deseja sair?'
+            }
+        };
+        
+        function getNavL(obj) {
+            const lang = localStorage.getItem('preferredLanguage') || 'en';
+            return obj[lang] || obj.en || '';
+        }
+        
+        function updateNavUIText() {
+            const menuDashboard = document.getElementById('menuDashboard');
+            const menuAccountSettings = document.getElementById('menuAccountSettings');
+            const menuLogout = document.getElementById('menuLogout');
+            if (menuDashboard) menuDashboard.textContent = getNavL(navText.dashboard);
+            if (menuAccountSettings) menuAccountSettings.textContent = getNavL(navText.accountSettings);
+            if (menuLogout) menuLogout.textContent = getNavL(navText.logout);
+            
+            const els = {
+                navLibraryPC: navText.library, navDashboardPC: navText.dashboard,
+                navTranslationToolsPC: navText.translationTools, navMangaTranslatorPC: navText.mangaTranslator,
+                navTranslationStatusPC: navText.translationStatus, navFindTranslatorsPC: navText.findTranslators,
+                navContactPC: navText.contact, navLibraryMobile: navText.library, navDashboardMobile: navText.dashboard,
+                navTranslationToolsMobile: navText.translationTools, navMangaTranslatorMobile: navText.mangaTranslator,
+                navTranslationStatusMobile: navText.translationStatus, navFindTranslatorsMobile: navText.findTranslators,
+                navContactMobile: navText.contact
+            };
+            Object.keys(els).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = getNavL(els[id]);
+            });
+        }
+        
+        function toggleUserDropdown(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const dropdown = document.getElementById('userDropdown');
+            const dropdownMenu = document.getElementById('userMenu');
+            dropdown.classList.toggle('open');
+            dropdownMenu.classList.toggle('show');
+        }
+        
+        function handleLogout() {
+            if (confirm(getNavL(navText.logOutConfirm))) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
+            }
+        }
+        
+        function loadUserInfo() {
+            const userStr = localStorage.getItem('user');
+            const token = localStorage.getItem('token');
+            const isLoggedIn = !!(userStr && token);
+            
+            if (isLoggedIn) {
+                try {
+                    const user = JSON.parse(userStr);
+                    const displayName = user.display_name || user.firstName || user.email || 'User';
+                    const userNameEl = document.getElementById('userName');
+                    const userDisplayNameEl = document.getElementById('userDisplayName');
+                    const userEmailEl = document.getElementById('userEmail');
+                    if (userNameEl) userNameEl.textContent = displayName;
+                    if (userDisplayNameEl) userDisplayNameEl.textContent = displayName;
+                    if (userEmailEl) userEmailEl.textContent = user.email || '';
+                    document.body.classList.add('logged-in');
+                } catch (e) {
+                    document.body.classList.remove('logged-in');
+                }
+            } else {
+                document.body.classList.remove('logged-in');
+            }
+        }
+        
+        // Navbar initialization
+        (function() {
+            document.addEventListener('DOMContentLoaded', function() {
+                updateNavUIText();
+                loadUserInfo();
+                
+                // User dropdown close on outside click
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('.user-dropdown')) {
+                        const dropdown = document.getElementById('userDropdown');
+                        const dropdownMenu = document.getElementById('userMenu');
+                        if (dropdown) dropdown.classList.remove('open');
+                        if (dropdownMenu) dropdownMenu.classList.remove('show');
+                    }
+                });
+                
+                // Mobile overlay
+                const navbarCollapse = document.getElementById('navbarNav');
+                const navbarOverlay = document.getElementById('navbarOverlay');
+                
+                if (navbarCollapse) {
+                    navbarCollapse.addEventListener('show.bs.collapse', function() {
+                        document.body.classList.add('menu-open');
+                        if (navbarOverlay) navbarOverlay.classList.add('show');
+                    });
+                    navbarCollapse.addEventListener('hide.bs.collapse', function() {
+                        document.body.classList.remove('menu-open');
+                        if (navbarOverlay) navbarOverlay.classList.remove('show');
+                    });
+                }
+                
+                if (navbarOverlay) {
+                    navbarOverlay.addEventListener('click', function() {
+                        const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                        if (bsCollapse) bsCollapse.hide();
+                    });
+                }
+            });
+            
+            document.addEventListener('languageChanged', function() {
+                updateNavUIText();
+            });
+        })();
+    </script>
+    
+    <!-- Checkout Page Script -->
+    <script>
+        // ========== Checkout Page 翻訳テキスト（9言語）==========
+        const checkoutText = {
+            title: { en: 'Checkout', ja: 'お支払い', zh: '结账', es: 'Pago', fr: 'Paiement', de: 'Kasse', ko: '결제', ar: 'الدفع', pt: 'Pagamento' },
+            yourOrder: { en: 'Your Order', ja: 'ご注文内容', zh: '您的订单', es: 'Tu pedido', fr: 'Votre commande', de: 'Ihre Bestellung', ko: '주문 내역', ar: 'طلبك', pt: 'Seu pedido' },
+            paymentMethod: { en: 'Payment Method', ja: 'お支払い方法', zh: '支付方式', es: 'Método de pago', fr: 'Mode de paiement', de: 'Zahlungsmethode', ko: '결제 방법', ar: 'طريقة الدفع', pt: 'Método de pagamento' },
+            creditCard: { en: 'Credit / Debit Card', ja: 'クレジット/デビットカード', zh: '信用卡/借记卡', es: 'Tarjeta de crédito/débito', fr: 'Carte de crédit/débit', de: 'Kredit-/Debitkarte', ko: '신용/체크카드', ar: 'بطاقة ائتمان/خصم', pt: 'Cartão de crédito/débito' },
+            securePayment: { en: 'Secure Payment', ja: '安全な決済', zh: '安全支付', es: 'Pago seguro', fr: 'Paiement sécurisé', de: 'Sichere Zahlung', ko: '안전한 결제', ar: 'دفع آمن', pt: 'Pagamento seguro' },
+            paypal: { en: 'PayPal', ja: 'PayPal', zh: 'PayPal', es: 'PayPal', fr: 'PayPal', de: 'PayPal', ko: 'PayPal', ar: 'PayPal', pt: 'PayPal' },
+            paySecurely: { en: 'Pay securely with PayPal', ja: 'PayPalで安全に支払う', zh: '使用PayPal安全支付', es: 'Paga de forma segura con PayPal', fr: 'Payez en toute sécurité avec PayPal', de: 'Sicher bezahlen mit PayPal', ko: 'PayPal로 안전하게 결제', ar: 'ادفع بأمان مع PayPal', pt: 'Pague com segurança pelo PayPal' },
+            encryptedSecure: { en: 'Your payment information is encrypted and secure.', ja: 'お支払い情報は暗号化され安全に保護されています。', zh: '您的付款信息已加密并安全。', es: 'Su información de pago está encriptada y segura.', fr: 'Vos informations de paiement sont cryptées et sécurisées.', de: 'Ihre Zahlungsinformationen sind verschlüsselt und sicher.', ko: '결제 정보는 암호화되어 안전하게 보호됩니다.', ar: 'معلومات الدفع الخاصة بك مشفرة وآمنة.', pt: 'Suas informações de pagamento estão criptografadas e seguras.' },
+            orderSummary: { en: 'Order Summary', ja: '注文概要', zh: '订单摘要', es: 'Resumen del pedido', fr: 'Récapitulatif de la commande', de: 'Bestellübersicht', ko: '주문 요약', ar: 'ملخص الطلب', pt: 'Resumo do pedido' },
+            subtotal: { en: 'Subtotal', ja: '小計', zh: '小计', es: 'Subtotal', fr: 'Sous-total', de: 'Zwischensumme', ko: '소계', ar: 'المجموع الفرعي', pt: 'Subtotal' },
+            tax: { en: 'Tax', ja: '税金', zh: '税', es: 'Impuesto', fr: 'Taxe', de: 'Steuer', ko: '세금', ar: 'الضريبة', pt: 'Imposto' },
+            total: { en: 'Total', ja: '合計', zh: '总计', es: 'Total', fr: 'Total', de: 'Gesamt', ko: '합계', ar: 'المجموع', pt: 'Total' },
+            revenueDistribution: { en: 'Revenue Distribution:', ja: '収益配分:', zh: '收入分配:', es: 'Distribución de ingresos:', fr: 'Répartition des revenus:', de: 'Einnahmenverteilung:', ko: '수익 배분:', ar: 'توزيع الإيرادات:', pt: 'Distribuição de receita:' },
+            author: { en: 'Author', ja: '著者', zh: '作者', es: 'Autor', fr: 'Auteur', de: 'Autor', ko: '저자', ar: 'المؤلف', pt: 'Autor' },
+            translator: { en: 'Translator', ja: '翻訳者', zh: '译者', es: 'Traductor', fr: 'Traducteur', de: 'Übersetzer', ko: '번역가', ar: 'المترجم', pt: 'Tradutor' },
+            editor: { en: 'Editor', ja: '編集者', zh: '编辑', es: 'Editor', fr: 'Éditeur', de: 'Redakteur', ko: '편집자', ar: 'المحرر', pt: 'Editor' },
+            selectPaymentMethod: { en: 'Select Payment Method', ja: '支払い方法を選択', zh: '选择支付方式', es: 'Seleccionar método de pago', fr: 'Sélectionner le mode de paiement', de: 'Zahlungsmethode auswählen', ko: '결제 방법 선택', ar: 'اختر طريقة الدفع', pt: 'Selecione o método de pagamento' },
+            agreeTerms: { en: 'By purchasing, you agree to our', ja: '購入することで、利用規約に同意したものとみなされます', zh: '购买即表示您同意我们的', es: 'Al comprar, aceptas nuestros', fr: 'En achetant, vous acceptez nos', de: 'Mit dem Kauf stimmen Sie unseren', ko: '구매 시 다음에 동의하게 됩니다', ar: 'بالشراء، أنت توافق على', pt: 'Ao comprar, você concorda com nossos' },
+            footerHelp: { en: 'Help', ja: 'ヘルプ', zh: '帮助', es: 'Ayuda', fr: 'Aide', de: 'Hilfe', ko: '도움말', ar: 'مساعدة', pt: 'Ajuda' },
+            footerTerms: { en: 'Terms', ja: '利用規約', zh: '条款', es: 'Términos', fr: 'Conditions', de: 'Bedingungen', ko: '약관', ar: 'الشروط', pt: 'Termos' },
+            footerPrivacy: { en: 'Privacy', ja: 'プライバシー', zh: '隐私', es: 'Privacidad', fr: 'Confidentialité', de: 'Datenschutz', ko: '개인정보', ar: 'الخصوصية', pt: 'Privacidade' },
+            by: { en: 'by', ja: '著者:', zh: '作者:', es: 'por', fr: 'par', de: 'von', ko: '저자:', ar: 'بواسطة', pt: 'por' }
+        };
+        
+        function getCheckoutL(key) {
+            const lang = localStorage.getItem('preferredLanguage') || 'en';
+            const obj = checkoutText[key];
+            return obj ? (obj[lang] || obj.en || '') : '';
+        }
+        
+        function updateCheckoutText() {
+            const lang = localStorage.getItem('preferredLanguage') || 'en';
+            
+            // data-i18n属性を持つ要素を手動で更新
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                let text = '';
+                
+                // checkout.* のキーを処理
+                if (key.startsWith('checkout.')) {
+                    const subKey = key.replace('checkout.', '');
+                    text = getCheckoutL(subKey);
+                }
+                // footer.* のキーを処理
+                else if (key.startsWith('footer.')) {
+                    const subKey = 'footer' + key.replace('footer.', '').charAt(0).toUpperCase() + key.replace('footer.', '').slice(1);
+                    text = getCheckoutL(subKey);
+                }
+                
+                if (text) {
+                    el.textContent = text;
+                }
+            });
+            
+            // タイトルを更新
+            document.title = getCheckoutL('title') + ' - Publisher';
+        }
+        
+        // 言語セレクター同期
+        function syncLanguageSelectors() {
+            const desktopSelector = document.getElementById('languageSelector');
+            const mobileSelector = document.getElementById('languageSelectorMobile');
+            const savedLang = localStorage.getItem('preferredLanguage') || 'en';
+            
+            if (desktopSelector) desktopSelector.value = savedLang;
+            if (mobileSelector) mobileSelector.value = savedLang;
+            
+            // セレクター変更時に翻訳を更新
+            if (mobileSelector) {
+                mobileSelector.addEventListener('change', function() {
+                    if (desktopSelector) desktopSelector.value = this.value;
+                    localStorage.setItem('preferredLanguage', this.value);
+                    updateCheckoutText();
+                    if (workData) {
+                        document.getElementById('workAuthor').textContent = getCheckoutL('by') + ' ' + workData.author;
+                    }
+                });
+            }
+            if (desktopSelector) {
+                desktopSelector.addEventListener('change', function() {
+                    if (mobileSelector) mobileSelector.value = this.value;
+                    localStorage.setItem('preferredLanguage', this.value);
+                    updateCheckoutText();
+                    if (workData) {
+                        document.getElementById('workAuthor').textContent = getCheckoutL('by') + ' ' + workData.author;
+                    }
+                });
+            }
+        }
+        
         let selectedMethod=null,workData=null;
         const urlParams=new URLSearchParams(window.location.search);
         const workId=urlParams.get('workId');
-        async function loadWorkDetails(){workData={id:workId||'sample-123',title:'Midnight Stories',author:'J.A. Writer',genre:'Fiction',price:9.99};document.getElementById('workTitle').textContent=workData.title;document.getElementById('workAuthor').textContent='by '+workData.author;document.getElementById('workGenre').textContent=workData.genre;document.getElementById('subtotal').textContent='$'+workData.price.toFixed(2);document.getElementById('total').textContent='$'+workData.price.toFixed(2)}
-        function selectPaymentMethod(method){selectedMethod=method;document.querySelectorAll('.payment-method-card').forEach(c=>c.classList.remove('selected'));document.getElementById('stripeCheck').style.display='none';document.getElementById('paypalCheck').style.display='none';if(method==='stripe'){document.getElementById('stripeMethod').classList.add('selected');document.getElementById('stripeCheck').style.display='block';document.getElementById('payButton').innerHTML='<i class="fas fa-credit-card me-2"></i>Pay with Card'}else if(method==='paypal'){document.getElementById('paypalMethod').classList.add('selected');document.getElementById('paypalCheck').style.display='block';document.getElementById('payButton').innerHTML='<i class="fab fa-paypal me-2"></i>Pay with PayPal'}document.getElementById('payButton').disabled=false}
-        async function processPayment(){const btn=document.getElementById('payButton');btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin me-2"></i>Processing...';try{if(selectedMethod==='stripe'){const r=await fetch('http://localhost:3000/api/payments/create-checkout-session',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('token')},body:JSON.stringify({workId:workData.id})});const d=await r.json();if(d.url){window.location.href=d.url}else{throw new Error(d.error||'Payment failed')}}else if(selectedMethod==='paypal'){alert('PayPal integration coming soon!');btn.disabled=false;btn.innerHTML='<i class="fab fa-paypal me-2"></i>Pay with PayPal'}}catch(e){console.error(e);alert('Payment failed: '+e.message);btn.disabled=false;btn.innerHTML=selectedMethod==='stripe'?'<i class="fas fa-credit-card me-2"></i>Pay with Card':'<i class="fab fa-paypal me-2"></i>Pay with PayPal'}}
-        loadWorkDetails();
+        
+        async function loadWorkDetails(){
+            workData={id:workId||'sample-123',title:'Midnight Stories',author:'J.A. Writer',genre:'Fiction',price:9.99};
+            document.getElementById('workTitle').textContent=workData.title;
+            document.getElementById('workAuthor').textContent=getCheckoutL('by')+' '+workData.author;
+            document.getElementById('workGenre').textContent=workData.genre;
+            document.getElementById('subtotal').textContent='$'+workData.price.toFixed(2);
+            document.getElementById('total').textContent='$'+workData.price.toFixed(2);
+        }
+        
+        function selectPaymentMethod(method){
+            selectedMethod=method;
+            document.querySelectorAll('.payment-method-card').forEach(c=>c.classList.remove('selected'));
+            document.getElementById('stripeCheck').style.display='none';
+            document.getElementById('paypalCheck').style.display='none';
+            if(method==='stripe'){
+                document.getElementById('stripeMethod').classList.add('selected');
+                document.getElementById('stripeCheck').style.display='block';
+                document.getElementById('payButton').innerHTML='<i class="fas fa-credit-card me-2"></i>Pay with Card';
+            }else if(method==='paypal'){
+                document.getElementById('paypalMethod').classList.add('selected');
+                document.getElementById('paypalCheck').style.display='block';
+                document.getElementById('payButton').innerHTML='<i class="fab fa-paypal me-2"></i>Pay with PayPal';
+            }
+            document.getElementById('payButton').disabled=false;
+        }
+        
+        async function processPayment(){
+            const btn=document.getElementById('payButton');
+            btn.disabled=true;
+            btn.innerHTML='<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+            try{
+                if(selectedMethod==='stripe'){
+                    const r=await fetch('http://localhost:3000/api/payments/create-checkout-session',{
+                        method:'POST',
+                        headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('token')},
+                        body:JSON.stringify({workId:workData.id})
+                    });
+                    const d=await r.json();
+                    if(d.url){window.location.href=d.url}
+                    else{throw new Error(d.error||'Payment failed')}
+                }else if(selectedMethod==='paypal'){
+                    alert('PayPal integration coming soon!');
+                    btn.disabled=false;
+                    btn.innerHTML='<i class="fab fa-paypal me-2"></i>Pay with PayPal';
+                }
+            }catch(e){
+                console.error(e);
+                alert('Payment failed: '+e.message);
+                btn.disabled=false;
+                btn.innerHTML=selectedMethod==='stripe'?'<i class="fas fa-credit-card me-2"></i>Pay with Card':'<i class="fab fa-paypal me-2"></i>Pay with PayPal';
+            }
+        }
+        
+        // 初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            syncLanguageSelectors();
+            loadWorkDetails();
+            
+            // 即時実行
+            updateCheckoutText();
+            
+            // language-switcher.jsの後に確実に実行するため遅延実行
+            setTimeout(updateCheckoutText, 100);
+            setTimeout(updateCheckoutText, 300);
+        });
+        
+        // 言語変更時に再翻訳
+        document.addEventListener('languageChanged', function() {
+            updateCheckoutText();
+            if (workData) {
+                document.getElementById('workAuthor').textContent = getCheckoutL('by') + ' ' + workData.author;
+            }
+        });
     </script>
 </body>
 </html>

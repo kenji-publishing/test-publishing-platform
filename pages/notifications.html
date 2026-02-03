@@ -12,10 +12,251 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="../css/style-new.css" rel="stylesheet">
     <link href="../css/mobile-fixes.css" rel="stylesheet">
+    <!-- Pattern C Navbar Styles -->
     <style>
-        .navbar-lang-selector { display: flex; align-items: center; margin-right: 0.5rem; }
-        @media (max-width: 991.98px) { .navbar-lang-selector { order: 1; } .navbar-toggler { order: 2; } }
-        .language-selector { padding: 6px 10px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-bg-card); font-size: var(--font-size-sm); cursor: pointer; }
+        /* ========== Mobile Language Selector ========== */
+        .navbar-lang-selector {
+            display: flex;
+            align-items: center;
+            margin-right: 0.5rem;
+        }
+        
+        @media (max-width: 991.98px) {
+            .navbar-lang-selector {
+                order: 1;
+            }
+            .navbar-toggler {
+                order: 2;
+            }
+        }
+        
+        /* ========== PC Navbar - 横並び維持 ========== */
+        @media (min-width: 992px) {
+            .navbar-nav {
+                flex-wrap: nowrap !important;
+                flex-direction: row !important;
+            }
+            .navbar-nav .nav-item {
+                white-space: nowrap !important;
+            }
+            .navbar-nav .nav-link {
+                white-space: nowrap !important;
+                padding: 0.5rem 0.6rem !important;
+                font-size: 0.9rem;
+            }
+            .navbar-collapse .d-flex {
+                flex-wrap: nowrap !important;
+            }
+            .dropdown-menu {
+                white-space: nowrap;
+            }
+            .navbar-buttons-guest {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                gap: 0.5rem;
+            }
+            .navbar-buttons-guest .btn {
+                white-space: nowrap !important;
+                flex-shrink: 0;
+            }
+        }
+        
+        /* ========== Auth Visibility Control ========== */
+        .auth-only {
+            display: none !important;
+        }
+        .guest-only {
+            display: block;
+        }
+        body.logged-in .auth-only {
+            display: block !important;
+        }
+        body.logged-in .auth-only.nav-item {
+            display: list-item !important;
+        }
+        body.logged-in .auth-only.dropdown {
+            display: block !important;
+        }
+        body.logged-in .guest-only {
+            display: none !important;
+        }
+        @media (min-width: 992px) {
+            body.logged-in .navbar-buttons-guest {
+                display: none !important;
+            }
+        }
+        
+        /* ========== User Dropdown Menu ========== */
+        .user-dropdown {
+            position: relative;
+        }
+        .user-dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: transparent;
+            border: 1px solid var(--color-border);
+            border-radius: 25px;
+            padding: 0.4rem 0.75rem;
+            cursor: pointer;
+            color: var(--color-text);
+            transition: all 0.2s;
+        }
+        .user-dropdown-toggle:hover {
+            border-color: var(--color-accent);
+            background: rgba(139, 115, 85, 0.05);
+        }
+        .user-dropdown-toggle i:first-child {
+            font-size: 1.25rem;
+            color: var(--color-accent);
+        }
+        .user-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-chevron {
+            font-size: 0.7rem;
+            color: var(--color-text-secondary);
+            transition: transform 0.2s;
+        }
+        .user-dropdown.open .user-chevron {
+            transform: rotate(180deg);
+        }
+        .user-menu {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            right: 0;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            min-width: 240px;
+            z-index: 1055;
+            display: none;
+            overflow: hidden;
+        }
+        .user-menu.show {
+            display: block;
+        }
+        .user-menu-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--color-bg-main);
+        }
+        .user-avatar {
+            font-size: 2.5rem;
+            color: var(--color-accent);
+        }
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .user-display-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-email {
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-menu-divider {
+            height: 1px;
+            background: var(--color-border);
+        }
+        .user-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--color-text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+        .user-menu-item:hover {
+            background: var(--color-bg-hover);
+            color: var(--color-accent);
+        }
+        .user-menu-item i {
+            width: 20px;
+            text-align: center;
+            color: var(--color-text-secondary);
+        }
+        .user-menu-item:hover i {
+            color: var(--color-accent);
+        }
+        .logout-btn {
+            color: var(--color-error);
+        }
+        .logout-btn i {
+            color: var(--color-error);
+        }
+        .logout-btn:hover {
+            background: rgba(199, 93, 93, 0.1);
+            color: var(--color-error);
+        }
+        
+        /* ========== Navbar Overlay ========== */
+        .navbar-overlay {
+            display: none;
+            position: fixed;
+            top: 56px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1030;
+        }
+        .navbar-overlay.show {
+            display: block;
+        }
+        body.menu-open {
+            overflow: hidden;
+        }
+        
+        /* ========== Mobile Menu ========== */
+        @media (max-width: 991.98px) {
+            .navbar-collapse {
+                max-height: 70vh;
+                overflow-y: auto;
+                overscroll-behavior: contain;
+            }
+            .navbar-collapse.show,
+            .navbar-collapse.collapsing {
+                position: fixed;
+                top: 56px;
+                left: 0;
+                right: 0;
+                background: var(--color-bg-card);
+                border-bottom: 1px solid var(--color-border);
+                box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+                z-index: 1045;
+                padding: 0.5rem 1rem;
+            }
+            .navbar-custom {
+                z-index: 1050 !important;
+            }
+        }
+    </style>
+    
+    <!-- Notifications Page Styles -->
+    <style>
         .notification-container { padding: var(--spacing-xl) 0; min-height: calc(100vh - 200px); }
         .page-header { margin-bottom: var(--spacing-xl); }
         .page-header h1 { font-size: var(--font-size-2xl); margin-bottom: var(--spacing-xs); }
@@ -56,40 +297,237 @@
         .stat-mini .stat-label { font-size: var(--font-size-xs); color: var(--color-text-secondary); }
         @media (max-width: 768px) { .notification-actions .btn { opacity: 1; } .stats-row { grid-template-columns: repeat(2, 1fr); } }
     </style>
+    
+    <!-- ログインチェック（ページ表示前にリダイレクト） -->
+    <script>
+        (function() {
+            // デモモードの場合はスキップ
+            var isDemo = new URLSearchParams(window.location.search).get('demo') === 'true';
+            if (isDemo) return;
+            
+            // 未ログインならログインページへリダイレクト
+            var token = localStorage.getItem('token');
+            var user = localStorage.getItem('user');
+            
+            if (!token || !user) {
+                // リダイレクト先を保存（ログイン後に戻れるように）
+                sessionStorage.setItem('redirectAfterLogin', window.location.href);
+                window.location.replace('login.html');
+            }
+        })();
+    </script>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
-        <div class="container">
-            <a class="navbar-brand" href="../index.html"><i class="fas fa-book-open"></i> Publisher</a>
-            <div class="navbar-lang-selector d-lg-none">
-                <select class="language-selector" id="languageSelectorMobile">
-                    <option value="en">🇬🇧 EN</option><option value="ja">🇯🇵 日本語</option><option value="zh">🇨🇳 中文</option><option value="es">🇪🇸 ES</option><option value="fr">🇫🇷 FR</option><option value="de">🇩🇪 DE</option><option value="ko">🇰🇷 한국어</option><option value="ar">🇸🇦 عربي</option><option value="pt">🇧🇷 PT</option>
-                </select>
-            </div>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link" href="dashboard.html"><i class="fas fa-th-large me-1"></i> <span data-i18n="nav.dashboard">Dashboard</span></a></li>
-                    <li class="nav-item"><a class="nav-link" href="my-works.html"><i class="fas fa-book me-1"></i> <span data-i18n="dashboard.myWorks">My Works</span></a></li>
-                    <li class="nav-item"><a class="nav-link" href="earnings.html"><i class="fas fa-coins me-1"></i> <span data-i18n="dashboard.earnings">Earnings</span></a></li>
-                </ul>
-                <div class="d-flex align-items-center gap-3">
-                    <select class="language-selector d-none d-lg-block" id="languageSelector">
-                        <option value="en">🇬🇧 EN</option><option value="ja">🇯🇵 日本語</option><option value="zh">🇨🇳 中文</option><option value="es">🇪🇸 ES</option><option value="fr">🇫🇷 FR</option><option value="de">🇩🇪 DE</option><option value="ko">🇰🇷 한국어</option><option value="ar">🇸🇦 عربي</option><option value="pt">🇧🇷 PT</option>
-                    </select>
-                    <a href="notifications.html" class="btn btn-soft-custom position-relative active"><i class="fas fa-bell"></i><span id="navUnreadBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; display: none;">0</span></a>
-                    <div class="dropdown">
-                        <button class="btn btn-soft-custom dropdown-toggle" type="button" data-bs-toggle="dropdown"><i class="fas fa-user-circle me-1"></i><span id="userName">User</span></button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="account-settings.html"><i class="fas fa-cog me-2"></i><span data-i18n="nav.settings">Settings</span></a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i><span data-i18n="nav.logout">Logout</span></a></li>
-                        </ul>
+<!-- ========== NAVBAR PATTERN C (pages/ 階層) ========== -->
+<nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+    <div class="container">
+        <!-- Brand -->
+        <a class="navbar-brand" href="../index.html">
+            <i class="fas fa-book-open"></i>
+            Publisher
+        </a>
+        
+        <!-- Language Selector Mobile -->
+        <div class="navbar-lang-selector d-lg-none">
+            <select class="language-selector" id="languageSelectorMobile">
+                <option value="en">🇬🇧 EN</option>
+                <option value="ja">🇯🇵 日本語</option>
+                <option value="zh">🇨🇳 中文</option>
+                <option value="es">🇪🇸 ES</option>
+                <option value="fr">🇫🇷 FR</option>
+                <option value="de">🇩🇪 DE</option>
+                <option value="ko">🇰🇷 한국어</option>
+                <option value="ar">🇸🇦 عربي</option>
+                <option value="pt">🇧🇷 PT</option>
+            </select>
+        </div>
+        
+        <!-- User Dropdown (auth-only) -->
+        <div class="user-dropdown auth-only" id="userDropdown">
+            <button type="button" class="user-dropdown-toggle" id="userDropdownBtn" onclick="toggleUserDropdown(event)">
+                <i class="fas fa-user-circle"></i>
+                <span class="user-name d-none d-lg-inline" id="userName">User</span>
+                <i class="fas fa-chevron-down user-chevron d-none d-lg-inline"></i>
+            </button>
+            <div class="user-menu" id="userMenu">
+                <div class="user-menu-header">
+                    <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
+                    <div class="user-info">
+                        <div class="user-display-name" id="userDisplayName">User</div>
+                        <div class="user-email" id="userEmail">user@example.com</div>
                     </div>
+                </div>
+                <div class="user-menu-divider"></div>
+                <a href="dashboard.html" class="user-menu-item">
+                    <i class="fas fa-th-large"></i>
+                    <span id="menuDashboard">Dashboard</span>
+                </a>
+                <a href="account-settings.html" class="user-menu-item">
+                    <i class="fas fa-cog"></i>
+                    <span id="menuAccountSettings">Account Settings</span>
+                </a>
+                <div class="user-menu-divider"></div>
+                <button class="user-menu-item logout-btn" onclick="handleLogout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span id="menuLogout">Log Out</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Hamburger -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <!-- Navbar Overlay -->
+        <div class="navbar-overlay d-lg-none" id="navbarOverlay"></div>
+        
+        <!-- Navbar Content -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <!-- PC Navigation -->
+            <ul class="navbar-nav me-auto d-none d-lg-flex">
+                <!-- Browse: 共通 -->
+                <li class="nav-item">
+                    <a class="nav-link" href="browse.html">
+                        <i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span>
+                    </a>
+                </li>
+                <!-- Auth: Library -->
+                <li class="nav-item auth-only">
+                    <a class="nav-link" href="library.html">
+                        <i class="fas fa-book-reader me-1"></i> <span id="navLibraryPC">Library</span>
+                    </a>
+                </li>
+                <!-- Auth: Dashboard -->
+                <li class="nav-item auth-only">
+                    <a class="nav-link" href="dashboard.html">
+                        <i class="fas fa-th-large me-1"></i> <span id="navDashboardPC">Dashboard</span>
+                    </a>
+                </li>
+                <!-- Auth: Upload -->
+                <li class="nav-item auth-only">
+                    <a class="nav-link" href="upload.html">
+                        <i class="fas fa-upload me-1"></i> <span data-i18n="nav.upload">Upload</span>
+                    </a>
+                </li>
+                <!-- Auth: Translation Tools Dropdown -->
+                <li class="nav-item dropdown auth-only">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-language me-1"></i> <span id="navTranslationToolsPC">Translation Tools</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="manga-translator.html"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorPC">Manga Translator</span></a></li>
+                        <li><a class="dropdown-item" href="translation-status.html"><i class="fas fa-tasks me-2"></i><span id="navTranslationStatusPC">Translation Status</span></a></li>
+                        <li><a class="dropdown-item" href="translators/index.html"><i class="fas fa-users me-2"></i><span id="navFindTranslatorsPC">Find Translators</span></a></li>
+                    </ul>
+                </li>
+                <!-- Support Dropdown: 共通 -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-headset me-1"></i> <span data-i18n="nav.support">Support</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item active" href="support/faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
+                        <li><a class="dropdown-item" href="support/troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
+                        <li><a class="dropdown-item" href="support/contact.html"><i class="fas fa-envelope me-2"></i><span id="navContactPC">Contact</span></a></li>
+                        <li class="auth-only"><hr class="dropdown-divider"></li>
+                        <li class="auth-only"><a class="dropdown-item" href="support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
+                    </ul>
+                </li>
+            </ul>
+            
+            <!-- Mobile Navigation -->
+            <ul class="navbar-nav d-lg-none">
+                <!-- Browse -->
+                <li class="nav-item">
+                    <a class="nav-link" href="browse.html">
+                        <i class="fas fa-compass me-2"></i><span data-i18n="nav.browse">Browse</span>
+                    </a>
+                </li>
+                <!-- Auth: Library -->
+                <li class="nav-item auth-only">
+                    <a class="nav-link" href="library.html">
+                        <i class="fas fa-book-reader me-2"></i><span id="navLibraryMobile">Library</span>
+                    </a>
+                </li>
+                <!-- Auth: Dashboard -->
+                <li class="nav-item auth-only">
+                    <a class="nav-link" href="dashboard.html">
+                        <i class="fas fa-th-large me-2"></i><span id="navDashboardMobile">Dashboard</span>
+                    </a>
+                </li>
+                <!-- Auth: Upload -->
+                <li class="nav-item auth-only">
+                    <a class="nav-link" href="upload.html">
+                        <i class="fas fa-upload me-2"></i><span data-i18n="nav.upload">Upload</span>
+                    </a>
+                </li>
+                <!-- Auth: Translation Tools -->
+                <li class="nav-item dropdown auth-only">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                        <i class="fas fa-language me-2"></i><span id="navTranslationToolsMobile">Translation Tools</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="manga-translator.html"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorMobile">Manga Translator</span></a></li>
+                        <li><a class="dropdown-item" href="translation-status.html"><i class="fas fa-tasks me-2"></i><span id="navTranslationStatusMobile">Translation Status</span></a></li>
+                        <li><a class="dropdown-item" href="translators/index.html"><i class="fas fa-users me-2"></i><span id="navFindTranslatorsMobile">Find Translators</span></a></li>
+                    </ul>
+                </li>
+                <!-- Support -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" data-bs-toggle="dropdown">
+                        <i class="fas fa-headset me-2"></i><span data-i18n="nav.support">Support</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item active" href="support/faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
+                        <li><a class="dropdown-item" href="support/troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
+                        <li><a class="dropdown-item" href="support/contact.html"><i class="fas fa-envelope me-2"></i><span id="navContactMobile">Contact</span></a></li>
+                        <li class="auth-only"><hr class="dropdown-divider"></li>
+                        <li class="auth-only"><a class="dropdown-item" href="support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
+                    </ul>
+                </li>
+                <!-- Guest: Mobile Auth Buttons -->
+                <li class="nav-item guest-only border-top mt-2 pt-2">
+                    <a class="nav-link" href="login.html">
+                        <i class="fas fa-sign-in-alt me-2"></i><span data-i18n="nav.login">Sign In</span>
+                    </a>
+                </li>
+                <li class="nav-item guest-only">
+                    <a class="nav-link text-accent fw-bold" href="register.html">
+                        <i class="fas fa-user-plus me-2"></i><span data-i18n="nav.getStarted">Get Started</span>
+                    </a>
+                </li>
+            </ul>
+            
+            <!-- Right Side (PC) -->
+            <div class="d-none d-lg-flex align-items-center gap-3">
+                <!-- Language Selector PC -->
+                <select class="language-selector" id="languageSelector">
+                    <option value="en">🇬🇧 EN</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="es">🇪🇸 ES</option>
+                    <option value="fr">🇫🇷 FR</option>
+                    <option value="de">🇩🇪 DE</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="ar">🇸🇦 عربي</option>
+                    <option value="pt">🇧🇷 PT</option>
+                </select>
+                
+                <!-- Guest Buttons (PC) -->
+                <div class="navbar-buttons-guest guest-only d-none d-lg-flex">
+                    <a href="login.html" class="btn btn-soft-custom">
+                        <span data-i18n="nav.login">Sign In</span>
+                    </a>
+                    <a href="register.html" class="btn btn-primary-custom">
+                        <span data-i18n="nav.getStarted">Get Started</span>
+                    </a>
                 </div>
             </div>
         </div>
-    </nav>
+    </div>
+</nav>
+<!-- ========== NAVBAR PATTERN C END ========== -->
     <main class="notification-container">
         <div class="container">
             <div class="page-header">
@@ -169,24 +607,431 @@
     <script src="../js/lang/translations-base.js"></script>
     <!-- 言語切替機能 -->
     <script src="../js/language-switcher.js"></script>
+    
+    <!-- Pattern C Navbar Script -->
     <script>
+        // ========== 多言語対応テキスト（9言語）==========
+        const navText = {
+            translationTools: {
+                en: 'Translation Tools', ja: '翻訳ツール', zh: '翻译工具',
+                es: 'Herramientas de traducción', fr: 'Outils de traduction', de: 'Übersetzungstools',
+                ko: '번역 도구', ar: 'أدوات الترجمة', pt: 'Ferramentas de tradução'
+            },
+            mangaTranslator: {
+                en: 'Manga Translator', ja: 'マンガ翻訳', zh: '漫画翻译',
+                es: 'Traductor de Manga', fr: 'Traducteur de Manga', de: 'Manga-Übersetzer',
+                ko: '만화 번역기', ar: 'مترجم المانجا', pt: 'Tradutor de Mangá'
+            },
+            translationStatus: {
+                en: 'Translation Status', ja: '翻訳状況', zh: '翻译状态',
+                es: 'Estado de traducción', fr: 'Statut de traduction', de: 'Übersetzungsstatus',
+                ko: '번역 상태', ar: 'حالة الترجمة', pt: 'Status da tradução'
+            },
+            findTranslators: {
+                en: 'Find Translators', ja: '翻訳者を探す', zh: '寻找翻译',
+                es: 'Buscar traductores', fr: 'Trouver des traducteurs', de: 'Übersetzer finden',
+                ko: '번역가 찾기', ar: 'البحث عن مترجمين', pt: 'Encontrar tradutores'
+            },
+            contact: {
+                en: 'Contact', ja: 'お問い合わせ', zh: '联系我们',
+                es: 'Contacto', fr: 'Contact', de: 'Kontakt',
+                ko: '문의', ar: 'اتصل بنا', pt: 'Contato'
+            },
+            library: {
+                en: 'Library', ja: 'ライブラリ', zh: '书库',
+                es: 'Biblioteca', fr: 'Bibliothèque', de: 'Bibliothek',
+                ko: '라이브러리', ar: 'المكتبة', pt: 'Biblioteca'
+            },
+            dashboard: {
+                en: 'Dashboard', ja: 'ダッシュボード', zh: '控制台',
+                es: 'Panel', fr: 'Tableau de bord', de: 'Dashboard',
+                ko: '대시보드', ar: 'لوحة التحكم', pt: 'Painel'
+            },
+            accountSettings: {
+                en: 'Account Settings', ja: 'アカウント設定', zh: '账户设置',
+                es: 'Configuración de cuenta', fr: 'Paramètres du compte', de: 'Kontoeinstellungen',
+                ko: '계정 설정', ar: 'إعدادات الحساب', pt: 'Configurações da conta'
+            },
+            logout: {
+                en: 'Log Out', ja: 'ログアウト', zh: '退出登录',
+                es: 'Cerrar sesión', fr: 'Déconnexion', de: 'Abmelden',
+                ko: '로그아웃', ar: 'تسجيل الخروج', pt: 'Sair'
+            },
+            logOutConfirm: {
+                en: 'Are you sure you want to log out?', ja: 'ログアウトしますか？', zh: '确定要退出登录吗？',
+                es: '¿Estás seguro de que quieres cerrar sesión?', fr: 'Êtes-vous sûr de vouloir vous déconnecter?', de: 'Sind Sie sicher, dass Sie sich abmelden möchten?',
+                ko: '로그아웃 하시겠습니까?', ar: 'هل أنت متأكد أنك تريد تسجيل الخروج؟', pt: 'Tem certeza que deseja sair?'
+            }
+        };
+        
+        function getNavL(obj) {
+            const lang = localStorage.getItem('preferredLanguage') || 'en';
+            return obj[lang] || obj.en || '';
+        }
+        
+        function updateNavUIText() {
+            const menuDashboard = document.getElementById('menuDashboard');
+            const menuAccountSettings = document.getElementById('menuAccountSettings');
+            const menuLogout = document.getElementById('menuLogout');
+            if (menuDashboard) menuDashboard.textContent = getNavL(navText.dashboard);
+            if (menuAccountSettings) menuAccountSettings.textContent = getNavL(navText.accountSettings);
+            if (menuLogout) menuLogout.textContent = getNavL(navText.logout);
+            
+            const els = {
+                navLibraryPC: navText.library, navDashboardPC: navText.dashboard,
+                navTranslationToolsPC: navText.translationTools, navMangaTranslatorPC: navText.mangaTranslator,
+                navTranslationStatusPC: navText.translationStatus, navFindTranslatorsPC: navText.findTranslators,
+                navContactPC: navText.contact, navLibraryMobile: navText.library, navDashboardMobile: navText.dashboard,
+                navTranslationToolsMobile: navText.translationTools, navMangaTranslatorMobile: navText.mangaTranslator,
+                navTranslationStatusMobile: navText.translationStatus, navFindTranslatorsMobile: navText.findTranslators,
+                navContactMobile: navText.contact
+            };
+            Object.keys(els).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = getNavL(els[id]);
+            });
+        }
+        
+        function toggleUserDropdown(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const dropdown = document.getElementById('userDropdown');
+            const dropdownMenu = document.getElementById('userMenu');
+            dropdown.classList.toggle('open');
+            dropdownMenu.classList.toggle('show');
+        }
+        
+        function handleLogout() {
+            if (confirm(getNavL(navText.logOutConfirm))) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
+            }
+        }
+        
+        function loadUserInfo() {
+            const userStr = localStorage.getItem('user');
+            const token = localStorage.getItem('token');
+            const isLoggedIn = !!(userStr && token);
+            
+            if (isLoggedIn) {
+                try {
+                    const user = JSON.parse(userStr);
+                    const displayName = user.display_name || user.firstName || user.email || 'User';
+                    const userNameEl = document.getElementById('userName');
+                    const userDisplayNameEl = document.getElementById('userDisplayName');
+                    const userEmailEl = document.getElementById('userEmail');
+                    if (userNameEl) userNameEl.textContent = displayName;
+                    if (userDisplayNameEl) userDisplayNameEl.textContent = displayName;
+                    if (userEmailEl) userEmailEl.textContent = user.email || '';
+                    document.body.classList.add('logged-in');
+                } catch (e) {
+                    document.body.classList.remove('logged-in');
+                }
+            } else {
+                document.body.classList.remove('logged-in');
+            }
+        }
+        
+        // Navbar initialization
+        (function() {
+            document.addEventListener('DOMContentLoaded', function() {
+                updateNavUIText();
+                loadUserInfo();
+                
+                // User dropdown close on outside click
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('.user-dropdown')) {
+                        const dropdown = document.getElementById('userDropdown');
+                        const dropdownMenu = document.getElementById('userMenu');
+                        if (dropdown) dropdown.classList.remove('open');
+                        if (dropdownMenu) dropdownMenu.classList.remove('show');
+                    }
+                });
+                
+                // Mobile overlay
+                const navbarCollapse = document.getElementById('navbarNav');
+                const navbarOverlay = document.getElementById('navbarOverlay');
+                
+                if (navbarCollapse) {
+                    navbarCollapse.addEventListener('show.bs.collapse', function() {
+                        document.body.classList.add('menu-open');
+                        if (navbarOverlay) navbarOverlay.classList.add('show');
+                    });
+                    navbarCollapse.addEventListener('hide.bs.collapse', function() {
+                        document.body.classList.remove('menu-open');
+                        if (navbarOverlay) navbarOverlay.classList.remove('show');
+                    });
+                }
+                
+                if (navbarOverlay) {
+                    navbarOverlay.addEventListener('click', function() {
+                        const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                        if (bsCollapse) bsCollapse.hide();
+                    });
+                }
+            });
+            
+            document.addEventListener('languageChanged', function() {
+                updateNavUIText();
+            });
+        })();
+    </script>
+    
+    <!-- Notifications Page Script -->
+    <script>
+        // ========== ページ固有の翻訳テキスト ==========
+        const pageText = {
+            loginRequired: {
+                en: 'Login required', ja: 'ログインが必要です', zh: '需要登录',
+                es: 'Inicio de sesión requerido', fr: 'Connexion requise', de: 'Anmeldung erforderlich',
+                ko: '로그인이 필요합니다', ar: 'تسجيل الدخول مطلوب', pt: 'Login necessário'
+            },
+            login: {
+                en: 'Login', ja: 'ログイン', zh: '登录',
+                es: 'Iniciar sesión', fr: 'Connexion', de: 'Anmelden',
+                ko: '로그인', ar: 'تسجيل الدخول', pt: 'Entrar'
+            },
+            loadError: {
+                en: 'Load Error', ja: '読み込みエラー', zh: '加载错误',
+                es: 'Error de carga', fr: 'Erreur de chargement', de: 'Ladefehler',
+                ko: '로드 오류', ar: 'خطأ في التحميل', pt: 'Erro ao carregar'
+            },
+            retry: {
+                en: 'Retry', ja: '再試行', zh: '重试',
+                es: 'Reintentar', fr: 'Réessayer', de: 'Wiederholen',
+                ko: '다시 시도', ar: 'إعادة المحاولة', pt: 'Tentar novamente'
+            },
+            noNotifications: {
+                en: 'No notifications', ja: '通知はありません', zh: '没有通知',
+                es: 'Sin notificaciones', fr: 'Aucune notification', de: 'Keine Benachrichtigungen',
+                ko: '알림 없음', ar: 'لا توجد إشعارات', pt: 'Sem notificações'
+            }
+        };
+        
+        // ========== 通知タイプごとの翻訳テンプレート（9言語）==========
+        const notificationTemplates = {
+            sale: {
+                title: {
+                    en: 'Work purchased! 💰', ja: '作品が購入されました！ 💰', zh: '作品已售出！ 💰',
+                    es: '¡Obra vendida! 💰', fr: 'Œuvre achetée ! 💰', de: 'Werk gekauft! 💰',
+                    ko: '작품이 판매되었습니다! 💰', ar: 'تم شراء العمل! 💰', pt: 'Obra vendida! 💰'
+                },
+                message: {
+                    en: '{work} was purchased. You earned {amount}.',
+                    ja: '「{work}」が購入されました。{amount}を獲得しました。',
+                    zh: '《{work}》已售出。您获得了{amount}。',
+                    es: '{work} fue comprado. Ganaste {amount}.',
+                    fr: '{work} a été acheté. Vous avez gagné {amount}.',
+                    de: '{work} wurde gekauft. Sie haben {amount} verdient.',
+                    ko: '「{work}」이(가) 판매되었습니다. {amount}를 획득했습니다.',
+                    ar: 'تم شراء {work}. لقد ربحت {amount}.',
+                    pt: '{work} foi comprado. Você ganhou {amount}.'
+                }
+            },
+            translation_complete: {
+                title: {
+                    en: 'Translation completed', ja: '翻訳が完了しました', zh: '翻译已完成',
+                    es: 'Traducción completada', fr: 'Traduction terminée', de: 'Übersetzung abgeschlossen',
+                    ko: '번역이 완료되었습니다', ar: 'اكتملت الترجمة', pt: 'Tradução concluída'
+                },
+                message: {
+                    en: '{language} translation of "{work}" is complete.',
+                    ja: '「{work}」の{language}翻訳が完了しました。',
+                    zh: '《{work}》的{language}翻译已完成。',
+                    es: 'La traducción al {language} de "{work}" está completa.',
+                    fr: 'La traduction en {language} de « {work} » est terminée.',
+                    de: 'Die {language} Übersetzung von „{work}" ist fertig.',
+                    ko: '「{work}」의 {language} 번역이 완료되었습니다.',
+                    ar: 'اكتملت ترجمة "{work}" إلى {language}.',
+                    pt: 'A tradução para {language} de "{work}" está concluída.'
+                }
+            },
+            feedback: {
+                title: {
+                    en: 'Reader feedback ⭐', ja: '読者からのフィードバック ⭐', zh: '读者反馈 ⭐',
+                    es: 'Comentario del lector ⭐', fr: 'Retour du lecteur ⭐', de: 'Leser-Feedback ⭐',
+                    ko: '독자 피드백 ⭐', ar: 'تعليق القارئ ⭐', pt: 'Feedback do leitor ⭐'
+                },
+                message: {
+                    en: '"{work}" received a {rating}-star rating!',
+                    ja: '「{work}」が{rating}つ星の評価を受けました！',
+                    zh: '《{work}》获得了{rating}星评价！',
+                    es: '¡"{work}" recibió una calificación de {rating} estrellas!',
+                    fr: '« {work} » a reçu une note de {rating} étoiles !',
+                    de: '„{work}" hat eine {rating}-Sterne-Bewertung erhalten!',
+                    ko: '「{work}」이(가) {rating}점 평가를 받았습니다!',
+                    ar: 'حصل "{work}" على تقييم {rating} نجوم!',
+                    pt: '"{work}" recebeu uma avaliação de {rating} estrelas!'
+                }
+            },
+            comment: {
+                title: {
+                    en: 'New comment', ja: '新しいコメント', zh: '新评论',
+                    es: 'Nuevo comentario', fr: 'Nouveau commentaire', de: 'Neuer Kommentar',
+                    ko: '새 댓글', ar: 'تعليق جديد', pt: 'Novo comentário'
+                },
+                message: {
+                    en: 'New comment on "{work}".',
+                    ja: '「{work}」に新しいコメントがあります。',
+                    zh: '《{work}》有新评论。',
+                    es: 'Nuevo comentario en "{work}".',
+                    fr: 'Nouveau commentaire sur « {work} ».',
+                    de: 'Neuer Kommentar zu „{work}".',
+                    ko: '「{work}」에 새 댓글이 달렸습니다.',
+                    ar: 'تعليق جديد على "{work}".',
+                    pt: 'Novo comentário em "{work}".'
+                }
+            },
+            system: {
+                title: {
+                    en: 'Welcome to Publisher! 🎉', ja: 'Publisherへようこそ！ 🎉', zh: '欢迎来到Publisher！ 🎉',
+                    es: '¡Bienvenido a Publisher! 🎉', fr: 'Bienvenue sur Publisher ! 🎉', de: 'Willkommen bei Publisher! 🎉',
+                    ko: 'Publisher에 오신 것을 환영합니다! 🎉', ar: 'مرحبًا بك في Publisher! 🎉', pt: 'Bem-vindo ao Publisher! 🎉'
+                },
+                message: {
+                    en: 'Your account is ready. Start exploring!',
+                    ja: 'アカウントの準備ができました。さあ、始めましょう！',
+                    zh: '您的账户已准备就绪。开始探索吧！',
+                    es: 'Tu cuenta está lista. ¡Empieza a explorar!',
+                    fr: 'Votre compte est prêt. Commencez à explorer !',
+                    de: 'Ihr Konto ist bereit. Fangen Sie an zu erkunden!',
+                    ko: '계정이 준비되었습니다. 탐색을 시작하세요!',
+                    ar: 'حسابك جاهز. ابدأ الاستكشاف!',
+                    pt: 'Sua conta está pronta. Comece a explorar!'
+                }
+            }
+        };
+        
+        // ========== 通知タイプラベル（9言語）==========
+        const typeLabels = {
+            sale: { en: '💰 Sale', ja: '💰 販売', zh: '💰 销售', es: '💰 Venta', fr: '💰 Vente', de: '💰 Verkauf', ko: '💰 판매', ar: '💰 بيع', pt: '💰 Venda' },
+            translation_complete: { en: '🌐 Translation', ja: '🌐 翻訳', zh: '🌐 翻译', es: '🌐 Traducción', fr: '🌐 Traduction', de: '🌐 Übersetzung', ko: '🌐 번역', ar: '🌐 ترجمة', pt: '🌐 Tradução' },
+            comment: { en: '💬 Comment', ja: '💬 コメント', zh: '💬 评论', es: '💬 Comentario', fr: '💬 Commentaire', de: '💬 Kommentar', ko: '💬 댓글', ar: '💬 تعليق', pt: '💬 Comentário' },
+            feedback: { en: '⭐ Feedback', ja: '⭐ フィードバック', zh: '⭐ 反馈', es: '⭐ Feedback', fr: '⭐ Retour', de: '⭐ Feedback', ko: '⭐ 피드백', ar: '⭐ تعليق', pt: '⭐ Feedback' },
+            system: { en: '🔔 System', ja: '🔔 システム', zh: '🔔 系统', es: '🔔 Sistema', fr: '🔔 Système', de: '🔔 System', ko: '🔔 시스템', ar: '🔔 نظام', pt: '🔔 Sistema' }
+        };
+        
+        // ========== 時間表示の翻訳（9言語）==========
+        const timeText = {
+            justNow: { en: 'Just now', ja: 'たった今', zh: '刚刚', es: 'Ahora mismo', fr: "À l'instant", de: 'Gerade eben', ko: '방금', ar: 'الآن', pt: 'Agora mesmo' },
+            minutesAgo: { en: '{n}m ago', ja: '{n}分前', zh: '{n}分钟前', es: 'Hace {n}m', fr: 'Il y a {n}m', de: 'Vor {n}m', ko: '{n}분 전', ar: 'منذ {n} دقيقة', pt: 'Há {n}m' },
+            hoursAgo: { en: '{n}h ago', ja: '{n}時間前', zh: '{n}小时前', es: 'Hace {n}h', fr: 'Il y a {n}h', de: 'Vor {n}h', ko: '{n}시간 전', ar: 'منذ {n} ساعة', pt: 'Há {n}h' },
+            daysAgo: { en: '{n}d ago', ja: '{n}日前', zh: '{n}天前', es: 'Hace {n}d', fr: 'Il y a {n}j', de: 'Vor {n}T', ko: '{n}일 전', ar: 'منذ {n} يوم', pt: 'Há {n}d' }
+        };
+        
+        function getPageL(key) {
+            // 言語設定を取得（フォールバック: en）
+            let lang = 'en';
+            try {
+                lang = localStorage.getItem('preferredLanguage') || 'en';
+            } catch (e) {
+                lang = 'en';
+            }
+            
+            const obj = pageText[key];
+            if (!obj) return key; // キーが見つからない場合はキー名を返す
+            return obj[lang] || obj.en || key;
+        }
+        
+        // 通知テンプレートから翻訳を取得
+        function getNotificationText(type, field, params = {}) {
+            const lang = localStorage.getItem('preferredLanguage') || 'en';
+            const template = notificationTemplates[type];
+            if (!template || !template[field]) return '';
+            
+            let text = template[field][lang] || template[field].en || '';
+            
+            // パラメータを置換
+            Object.keys(params).forEach(key => {
+                text = text.replace(new RegExp(`\\{${key}\\}`, 'g'), params[key]);
+            });
+            
+            return text;
+        }
+        
+        // タイプラベルを取得
+        function getTypeLabel(type) {
+            const lang = localStorage.getItem('preferredLanguage') || 'en';
+            const label = typeLabels[type];
+            return label ? (label[lang] || label.en || type) : type;
+        }
+        
+        // 時間表示を翻訳
+        function formatTimeAgo(dateString) {
+            const lang = localStorage.getItem('preferredLanguage') || 'en';
+            const diff = new Date() - new Date(dateString);
+            const m = Math.floor(diff / 60000);
+            const h = Math.floor(diff / 3600000);
+            const d = Math.floor(diff / 86400000);
+            
+            if (m < 1) return timeText.justNow[lang] || timeText.justNow.en;
+            if (m < 60) return (timeText.minutesAgo[lang] || timeText.minutesAgo.en).replace('{n}', m);
+            if (h < 24) return (timeText.hoursAgo[lang] || timeText.hoursAgo.en).replace('{n}', h);
+            if (d < 7) return (timeText.daysAgo[lang] || timeText.daysAgo.en).replace('{n}', d);
+            return new Date(dateString).toLocaleDateString();
+        }
+        
         const API_BASE = 'http://localhost:3000/api/notifications';
         let currentPage = 1, totalPages = 1, currentFilter = { type: '', unreadOnly: false };
         let isDemo = new URLSearchParams(window.location.search).get('demo') === 'true';
+        
+        // デモ通知データ（パラメータ形式）
         const DEMO_NOTIFICATIONS = [
-            { notification_id: '1', notification_type: 'sale', title: 'Work purchased! 💰', message: 'Magic Academy Adventure was purchased. You earned $9.80.', icon: 'fa-dollar-sign', icon_color: 'success', is_read: false, created_at: new Date(Date.now() - 30*60*1000).toISOString() },
-            { notification_id: '2', notification_type: 'translation_complete', title: 'Translation completed', message: 'English translation is complete.', icon: 'fa-language', icon_color: 'info', is_read: false, created_at: new Date(Date.now() - 2*60*60*1000).toISOString() },
-            { notification_id: '3', notification_type: 'feedback', title: 'Reader feedback ⭐', message: 'Received a 5-star rating!', icon: 'fa-star', icon_color: 'warning', is_read: false, created_at: new Date(Date.now() - 5*60*60*1000).toISOString() },
-            { notification_id: '4', notification_type: 'comment', title: 'New comment', message: 'New comment on Digital Dreams.', icon: 'fa-comment', icon_color: 'primary', is_read: true, created_at: new Date(Date.now() - 24*60*60*1000).toISOString() },
-            { notification_id: '5', notification_type: 'system', title: 'Welcome to Publisher! 🎉', message: 'Your account is ready.', icon: 'fa-rocket', icon_color: 'primary', is_read: true, created_at: new Date(Date.now() - 7*24*60*60*1000).toISOString() }
+            { notification_id: '1', notification_type: 'sale', params: { work: 'Magic Academy Adventure', amount: '$9.80' }, icon: 'fa-dollar-sign', icon_color: 'success', is_read: false, created_at: new Date(Date.now() - 30*60*1000).toISOString() },
+            { notification_id: '2', notification_type: 'translation_complete', params: { work: 'Digital Dreams', language: 'English' }, icon: 'fa-language', icon_color: 'info', is_read: false, created_at: new Date(Date.now() - 2*60*60*1000).toISOString() },
+            { notification_id: '3', notification_type: 'feedback', params: { work: 'Starlight Symphony', rating: '5' }, icon: 'fa-star', icon_color: 'warning', is_read: false, created_at: new Date(Date.now() - 5*60*60*1000).toISOString() },
+            { notification_id: '4', notification_type: 'comment', params: { work: 'Digital Dreams' }, icon: 'fa-comment', icon_color: 'primary', is_read: true, created_at: new Date(Date.now() - 24*60*60*1000).toISOString() },
+            { notification_id: '5', notification_type: 'system', params: {}, icon: 'fa-rocket', icon_color: 'primary', is_read: true, created_at: new Date(Date.now() - 7*24*60*60*1000).toISOString() }
         ];
-        document.addEventListener('DOMContentLoaded', function() { initUser(); loadNotifications(); setupEventListeners(); loadUnreadCount(); });
-        function initUser() { const user = JSON.parse(localStorage.getItem('user') || '{}'); if (user.firstName) document.getElementById('userName').textContent = user.firstName; }
+        
+        // 初期化（遅延実行で言語設定の読み込みを待つ）
+        document.addEventListener('DOMContentLoaded', function() { 
+            setupEventListeners(); 
+            loadUnreadCount();
+            
+            // 言語設定が確実に読み込まれてから実行
+            setTimeout(function() {
+                loadNotifications();
+            }, 100);
+        });
+        
+        // 言語変更時に再読み込み
+        document.addEventListener('languageChanged', function() {
+            loadNotifications();
+        });
+        
+        // 言語セレクター変更時も再読み込み
+        (function() {
+            const setupLangReload = function() {
+                const desktopSelector = document.getElementById('languageSelector');
+                const mobileSelector = document.getElementById('languageSelectorMobile');
+                
+                if (desktopSelector) {
+                    desktopSelector.addEventListener('change', function() {
+                        setTimeout(loadNotifications, 50);
+                    });
+                }
+                if (mobileSelector) {
+                    mobileSelector.addEventListener('change', function() {
+                        setTimeout(loadNotifications, 50);
+                    });
+                }
+            };
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', setupLangReload);
+            } else {
+                setupLangReload();
+            }
+        })();
+        
+        // initUser関数はPattern CのloadUserInfo()と統合
         async function loadNotifications() {
             const listContainer = document.getElementById('notificationList');
             if (isDemo) { renderNotifications(filterDemoData()); updateStats(); return; }
             const token = localStorage.getItem('token');
-            if (!token) { listContainer.innerHTML = '<div class="empty-state"><i class="fas fa-lock"></i><h3>Login required</h3><a href="login.html" class="btn btn-custom mt-3">Login</a></div>'; return; }
+            if (!token) { listContainer.innerHTML = `<div class="empty-state"><i class="fas fa-lock"></i><h3>${getPageL('loginRequired')}</h3><a href="login.html" class="btn btn-custom mt-3">${getPageL('login')}</a></div>`; return; }
             try {
                 const params = new URLSearchParams({ page: currentPage, limit: 20 });
                 if (currentFilter.type) params.append('type', currentFilter.type);
@@ -195,19 +1040,56 @@
                 if (!response.ok) throw new Error('Failed');
                 const data = await response.json();
                 if (data.success) { renderNotifications(data.notifications); updatePagination(data.pagination); }
-            } catch (error) { listContainer.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><h3>Load Error</h3><button class="btn btn-custom mt-3" onclick="loadNotifications()">Retry</button></div>'; }
+            } catch (error) { listContainer.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-circle"></i><h3>${getPageL('loadError')}</h3><button class="btn btn-custom mt-3" onclick="loadNotifications()">${getPageL('retry')}</button></div>`; }
         }
         function filterDemoData() { let f = [...DEMO_NOTIFICATIONS]; if (currentFilter.type) f = f.filter(n => n.notification_type === currentFilter.type); if (currentFilter.unreadOnly) f = f.filter(n => !n.is_read); return f; }
         function renderNotifications(notifications) {
             const listContainer = document.getElementById('notificationList');
-            if (!notifications || notifications.length === 0) { listContainer.innerHTML = '<div class="empty-state"><i class="fas fa-bell-slash"></i><h3>No notifications</h3></div>'; return; }
-            listContainer.innerHTML = notifications.map(n => `<div class="notification-item ${n.is_read ? '' : 'unread'}" data-id="${n.notification_id}" onclick="handleNotificationClick('${n.notification_id}')"><div class="notification-icon ${n.icon_color || 'primary'}"><i class="fas ${n.icon || 'fa-bell'} fa-lg"></i></div><div class="notification-content"><div class="notification-title">${n.title} ${!n.is_read ? '<span class="badge bg-accent">NEW</span>' : ''}</div><div class="notification-message">${n.message}</div><div class="notification-meta"><span class="type-badge ${n.notification_type}">${getTypeLabel(n.notification_type)}</span><span><i class="fas fa-clock me-1"></i>${formatTimeAgo(n.created_at)}</span></div></div><div class="notification-actions">${!n.is_read ? `<button class="btn btn-sm btn-outline-custom" onclick="event.stopPropagation(); markAsRead('${n.notification_id}')"><i class="fas fa-check"></i></button>` : ''}<button class="btn btn-sm btn-outline-danger" onclick="event.stopPropagation(); deleteNotification('${n.notification_id}')"><i class="fas fa-trash"></i></button></div></div>`).join('');
+            if (!notifications || notifications.length === 0) { 
+                listContainer.innerHTML = `<div class="empty-state"><i class="fas fa-bell-slash"></i><h3>${getPageL('noNotifications')}</h3></div>`; 
+                return; 
+            }
+            
+            listContainer.innerHTML = notifications.map(n => {
+                // テンプレートから翻訳を取得（paramsがあればテンプレート使用、なければ直接値を使用）
+                const title = n.params ? getNotificationText(n.notification_type, 'title', n.params) : (n.title || '');
+                const message = n.params ? getNotificationText(n.notification_type, 'message', n.params) : (n.message || '');
+                
+                return `<div class="notification-item ${n.is_read ? '' : 'unread'}" data-id="${n.notification_id}" onclick="handleNotificationClick('${n.notification_id}')">
+                    <div class="notification-icon ${n.icon_color || 'primary'}">
+                        <i class="fas ${n.icon || 'fa-bell'} fa-lg"></i>
+                    </div>
+                    <div class="notification-content">
+                        <div class="notification-title">${title} ${!n.is_read ? '<span class="badge bg-accent">NEW</span>' : ''}</div>
+                        <div class="notification-message">${message}</div>
+                        <div class="notification-meta">
+                            <span class="type-badge ${n.notification_type}">${getTypeLabel(n.notification_type)}</span>
+                            <span><i class="fas fa-clock me-1"></i>${formatTimeAgo(n.created_at)}</span>
+                        </div>
+                    </div>
+                    <div class="notification-actions">
+                        ${!n.is_read ? `<button class="btn btn-sm btn-outline-custom" onclick="event.stopPropagation(); markAsRead('${n.notification_id}')"><i class="fas fa-check"></i></button>` : ''}
+                        <button class="btn btn-sm btn-outline-danger" onclick="event.stopPropagation(); deleteNotification('${n.notification_id}')"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>`;
+            }).join('');
         }
-        function getTypeLabel(type) { const labels = { 'sale': '💰 Sale', 'translation_complete': '🌐 Translation', 'comment': '💬 Comment', 'feedback': '⭐ Feedback', 'system': '🔔 System' }; return labels[type] || type; }
-        function formatTimeAgo(dateString) { const diff = new Date() - new Date(dateString); const m = Math.floor(diff/60000), h = Math.floor(diff/3600000), d = Math.floor(diff/86400000); if (m < 1) return 'Just now'; if (m < 60) return `${m}m ago`; if (h < 24) return `${h}h ago`; if (d < 7) return `${d}d ago`; return new Date(dateString).toLocaleDateString(); }
+        // getTypeLabel と formatTimeAgo は上部で定義済み（テンプレートシステム使用）
         function updateStats() { document.getElementById('totalCount').textContent = DEMO_NOTIFICATIONS.length; document.getElementById('unreadCount').textContent = DEMO_NOTIFICATIONS.filter(n => !n.is_read).length; document.getElementById('todayCount').textContent = DEMO_NOTIFICATIONS.filter(n => new Date(n.created_at).toDateString() === new Date().toDateString()).length; document.getElementById('weekCount').textContent = DEMO_NOTIFICATIONS.filter(n => new Date(n.created_at) >= new Date(Date.now() - 7*24*60*60*1000)).length; }
         async function loadUnreadCount() { if (isDemo) { updateUnreadBadge(DEMO_NOTIFICATIONS.filter(n => !n.is_read).length); return; } const token = localStorage.getItem('token'); if (!token) return; try { const r = await fetch(`${API_BASE}/unread-count`, { headers: { 'Authorization': `Bearer ${token}` } }); if (r.ok) { const d = await r.json(); updateUnreadBadge(d.count); } } catch (e) {} }
-        function updateUnreadBadge(count) { const b = document.getElementById('navUnreadBadge'); if (count > 0) { b.textContent = count > 99 ? '99+' : count; b.style.display = 'inline-block'; } else { b.style.display = 'none'; } const u = document.getElementById('unreadCount'); if (u) u.textContent = count; }
+        function updateUnreadBadge(count) { 
+            const b = document.getElementById('navUnreadBadge'); 
+            if (b) {
+                if (count > 0) { 
+                    b.textContent = count > 99 ? '99+' : count; 
+                    b.style.display = 'inline-block'; 
+                } else { 
+                    b.style.display = 'none'; 
+                }
+            }
+            const u = document.getElementById('unreadCount'); 
+            if (u) u.textContent = count; 
+        }
         function handleNotificationClick(id) { markAsRead(id); }
         async function markAsRead(id) { if (isDemo) { const n = DEMO_NOTIFICATIONS.find(n => n.notification_id === id); if (n) n.is_read = true; loadNotifications(); loadUnreadCount(); return; } const token = localStorage.getItem('token'); if (!token) return; try { await fetch(`${API_BASE}/${id}/read`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` } }); loadNotifications(); loadUnreadCount(); } catch (e) {} }
         async function markAllAsRead() { if (isDemo) { DEMO_NOTIFICATIONS.forEach(n => n.is_read = true); loadNotifications(); loadUnreadCount(); showToast('All marked as read'); return; } const token = localStorage.getItem('token'); if (!token) return; try { await fetch(`${API_BASE}/read-all`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` } }); loadNotifications(); loadUnreadCount(); showToast('All marked as read'); } catch (e) {} }
@@ -217,7 +1099,7 @@
         function goToPage(d) { if (d === 'prev' && currentPage > 1) currentPage--; else if (d === 'next' && currentPage < totalPages) currentPage++; loadNotifications(); }
         function setupEventListeners() { document.getElementById('typeFilter').addEventListener('change', (e) => { currentFilter.type = e.target.value; currentPage = 1; loadNotifications(); }); document.getElementById('unreadOnly').addEventListener('change', (e) => { currentFilter.unreadOnly = e.target.checked; currentPage = 1; loadNotifications(); }); document.getElementById('markAllReadBtn').addEventListener('click', markAllAsRead); document.getElementById('clearReadBtn').addEventListener('click', () => clearNotifications(true)); document.getElementById('clearAllBtn').addEventListener('click', () => clearNotifications(false)); document.getElementById('prevPageBtn').addEventListener('click', () => goToPage('prev')); document.getElementById('nextPageBtn').addEventListener('click', () => goToPage('next')); }
         function showToast(message) { const t = document.createElement('div'); t.className = 'position-fixed bottom-0 end-0 p-3'; t.style.zIndex = '9999'; t.innerHTML = `<div class="toast show"><div class="toast-body"><i class="fas fa-check-circle text-success me-2"></i>${message}</div></div>`; document.body.appendChild(t); setTimeout(() => t.remove(), 3000); }
-        function logout() { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = 'login.html'; }
+        // logout関数はPattern CのhandleLogout()を使用
     </script>
 </body>
 </html>
