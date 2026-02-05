@@ -21,6 +21,11 @@
     <link rel="stylesheet" href="../css/mobile-fixes.css">
 
     <style>
+        /* ===== Navbar Overlay ===== */
+        .navbar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1040; }
+        .navbar-overlay.show { display: block; }
+        body.menu-open { overflow: hidden; }
+
         /* ===== Editor Layout ===== */
         body {
             overflow-x: hidden;
@@ -126,39 +131,15 @@
             background: #fff;
         }
 
-        .save-status {
-            font-size: 0.8rem;
-            color: #6c757d;
-            white-space: nowrap;
-        }
-
-        .save-status i {
-            margin-right: 4px;
-        }
-
-        .save-status.saved {
-            color: #28a745;
-        }
-
-        .save-status.saving {
-            color: #ffc107;
-        }
-
-        .save-status.error {
-            color: #dc3545;
-        }
+        .save-status { font-size: 0.8rem; color: #6c757d; white-space: nowrap; }
+        .save-status i { margin-right: 4px; }
+        .save-status.saved { color: #28a745; }
+        .save-status.saving { color: #ffc107; }
+        .save-status.error { color: #dc3545; }
 
         /* ===== Main Editor Area ===== */
-        .editor-main {
-            display: flex;
-            flex: 1;
-        }
-
-        .editor-content-area {
-            flex: 1;
-            padding: 2rem;
-            max-width: 100%;
-        }
+        .editor-main { display: flex; flex: 1; }
+        .editor-content-area { flex: 1; padding: 2rem; max-width: 100%; }
 
         .editor-paper {
             max-width: 800px;
@@ -188,200 +169,66 @@
         }
 
         /* ===== Comment Panel ===== */
-        .comment-panel {
-            width: 300px;
-            background: #fff;
-            border-left: 1px solid #dee2e6;
-            display: none;
-            flex-direction: column;
-        }
-
-        .comment-panel.open {
-            display: flex;
-        }
-
-        .comment-header {
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid #dee2e6;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .comment-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 0.75rem;
-        }
-
-        .comment-item {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 0.75rem;
-            margin-bottom: 0.5rem;
-            font-size: 0.85rem;
-        }
-
-        .comment-item .comment-author {
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-            color: #8B7355;
-        }
-
-        .comment-item .comment-time {
-            font-size: 0.75rem;
-            color: #999;
-        }
-
-        .comment-input-area {
-            padding: 0.75rem;
-            border-top: 1px solid #dee2e6;
-        }
-
-        .comment-input-area textarea {
-            width: 100%;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            padding: 0.5rem;
-            font-size: 0.85rem;
-            resize: vertical;
-            min-height: 60px;
-        }
-
-        .comment-input-area button {
-            margin-top: 0.5rem;
-            width: 100%;
-        }
+        .comment-panel { width: 300px; background: #fff; border-left: 1px solid #dee2e6; display: none; flex-direction: column; }
+        .comment-panel.open { display: flex; }
+        .comment-header { padding: 0.75rem 1rem; border-bottom: 1px solid #dee2e6; display: flex; align-items: center; justify-content: space-between; font-weight: 600; font-size: 0.9rem; }
+        .comment-list { flex: 1; overflow-y: auto; padding: 0.75rem; }
+        .comment-item { background: #f8f9fa; border-radius: 8px; padding: 0.75rem; margin-bottom: 0.5rem; font-size: 0.85rem; }
+        .comment-item .comment-author { font-weight: 600; margin-bottom: 0.25rem; color: #8B7355; }
+        .comment-item .comment-time { font-size: 0.75rem; color: #999; }
+        .comment-input-area { padding: 0.75rem; border-top: 1px solid #dee2e6; }
+        .comment-input-area textarea { width: 100%; border: 1px solid #dee2e6; border-radius: 6px; padding: 0.5rem; font-size: 0.85rem; resize: vertical; min-height: 60px; }
+        .comment-input-area button { margin-top: 0.5rem; width: 100%; }
 
         /* ===== Search & Replace Panel ===== */
-        .search-panel {
-            display: none;
-            position: fixed;
-            top: 100px;
-            right: 20px;
-            width: 340px;
-            background: #fff;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-            z-index: 1035;
-            padding: 1rem;
-        }
-
-        .search-panel.open {
-            display: block;
-        }
-
-        .search-panel .search-row {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .search-panel input {
-            flex: 1;
-            padding: 0.4rem 0.5rem;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            font-size: 0.85rem;
-        }
-
-        .search-panel .search-info {
-            font-size: 0.8rem;
-            color: #6c757d;
-            margin-bottom: 0.5rem;
-        }
+        .search-panel { display: none; position: fixed; top: 100px; right: 20px; width: 340px; background: #fff; border: 1px solid #dee2e6; border-radius: 8px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12); z-index: 1035; padding: 1rem; }
+        .search-panel.open { display: block; }
+        .search-panel .search-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+        .search-panel input { flex: 1; padding: 0.4rem 0.5rem; border: 1px solid #dee2e6; border-radius: 4px; font-size: 0.85rem; }
+        .search-panel .search-info { font-size: 0.8rem; color: #6c757d; margin-bottom: 0.5rem; }
 
         /* ===== Image Insert Modal ===== */
-        .image-modal-preview {
-            max-width: 100%;
-            max-height: 200px;
-            border-radius: 8px;
-            border: 1px solid #dee2e6;
-            display: none;
-            margin-top: 0.5rem;
-        }
+        .image-modal-preview { max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid #dee2e6; display: none; margin-top: 0.5rem; }
 
         /* ===== Editor Footer ===== */
-        .editor-footer {
-            background: #fff;
-            border-top: 1px solid #dee2e6;
-            padding: 0.4rem 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.8rem;
-            color: #6c757d;
-        }
-
-        .footer-stats {
-            display: flex;
-            gap: 1.5rem;
-        }
+        .editor-footer { background: #fff; border-top: 1px solid #dee2e6; padding: 0.4rem 1rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: #6c757d; }
+        .footer-stats { display: flex; gap: 1.5rem; }
 
         /* ===== Responsive ===== */
         @media (max-width: 991.98px) {
-            .comment-panel {
-                position: fixed;
-                top: 56px;
-                right: 0;
-                bottom: 0;
-                z-index: 1038;
-                box-shadow: -4px 0 16px rgba(0, 0, 0, 0.1);
-            }
-            .editor-paper {
-                padding: 1.5rem 1rem;
-            }
-            .toolbar-group {
-                padding: 0 0.2rem;
-            }
+            .comment-panel { position: fixed; top: 56px; right: 0; bottom: 0; z-index: 1038; box-shadow: -4px 0 16px rgba(0, 0, 0, 0.1); }
+            .editor-paper { padding: 1.5rem 1rem; }
+            .toolbar-group { padding: 0 0.2rem; }
         }
 
         @media (max-width: 575.98px) {
-            .secondary-toolbar {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .title-input {
-                min-width: auto;
-            }
-            .comment-panel {
-                width: 100%;
-            }
+            .secondary-toolbar { flex-direction: column; align-items: stretch; }
+            .title-input { min-width: auto; }
+            .comment-panel { width: 100%; }
         }
 
-        /* ===== Autosave indicator ===== */
-        @keyframes pulse-save {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .save-status.saving i {
-            animation: pulse-save 1s infinite;
-        }
+        @keyframes pulse-save { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .save-status.saving i { animation: pulse-save 1s infinite; }
     </style>
 </head>
 <body>
-    <!-- ===== PATTERN C NAVBAR (from account-settings.html) ===== -->
+    <!-- ===== PATTERN C NAVBAR (matching account-settings.html) ===== -->
     <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
-        <div class="container-fluid">
+        <div class="container">
             <a class="navbar-brand" href="../index.html">
                 <i class="fas fa-book-open"></i> Publisher
             </a>
-            <!-- Mobile Language Selector -->
             <div class="d-lg-none me-2">
                 <select id="mobileLanguageSelect" class="form-select form-select-sm language-selector" style="width: auto; min-width: 100px;">
-                    <option value="en">🇬🇧 English</option>
-                    <option value="ja">🇯🇵 日本語</option>
-                    <option value="zh">🇨🇳 中文</option>
-                    <option value="es">🇪🇸 Español</option>
-                    <option value="fr">🇫🇷 Français</option>
-                    <option value="de">🇩🇪 Deutsch</option>
-                    <option value="ko">🇰🇷 한국어</option>
-                    <option value="ar">🇸🇦 العربية</option>
-                    <option value="pt">🇧🇷 Português</option>
+                    <option value="en">&#127468;&#127463; English</option>
+                    <option value="ja">&#127471;&#127477; &#26085;&#26412;&#35486;</option>
+                    <option value="zh">&#127464;&#127475; &#20013;&#25991;</option>
+                    <option value="es">&#127466;&#127480; Espa&#241;ol</option>
+                    <option value="fr">&#127467;&#127479; Fran&#231;ais</option>
+                    <option value="de">&#127465;&#127466; Deutsch</option>
+                    <option value="ko">&#127472;&#127479; &#54620;&#44397;&#50612;</option>
+                    <option value="ar">&#127480;&#127462; &#1575;&#1604;&#1593;&#1585;&#1576;&#1610;&#1577;</option>
+                    <option value="pt">&#127463;&#127479; Portugu&#234;s</option>
                 </select>
             </div>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -389,30 +236,33 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link" href="dashboard.html" data-i18n="nav.dashboard">ダッシュボード</a></li>
+                    <li class="nav-item"><a class="nav-link" href="../index.html" data-i18n="nav.home">&#12507;&#12540;&#12512;</a></li>
+                    <li class="nav-item"><a class="nav-link" href="dashboard.html" data-i18n="nav.dashboard">&#12480;&#12483;&#12471;&#12517;&#12508;&#12540;&#12489;</a></li>
                 </ul>
                 <ul class="navbar-nav">
-                    <!-- Desktop Language Selector -->
                     <li class="nav-item d-none d-lg-block me-3">
                         <select id="desktopLanguageSelect" class="form-select form-select-sm language-selector" style="width: auto;">
-                            <option value="en">🇬🇧 English</option>
-                            <option value="ja">🇯🇵 日本語</option>
-                            <option value="zh">🇨🇳 中文</option>
-                            <option value="es">🇪🇸 Español</option>
-                            <option value="fr">🇫🇷 Français</option>
-                            <option value="de">🇩🇪 Deutsch</option>
-                            <option value="ko">🇰🇷 한국어</option>
-                            <option value="ar">🇸🇦 العربية</option>
-                            <option value="pt">🇧🇷 Português</option>
+                            <option value="en">&#127468;&#127463; English</option>
+                            <option value="ja">&#127471;&#127477; &#26085;&#26412;&#35486;</option>
+                            <option value="zh">&#127464;&#127475; &#20013;&#25991;</option>
+                            <option value="es">&#127466;&#127480; Espa&#241;ol</option>
+                            <option value="fr">&#127467;&#127479; Fran&#231;ais</option>
+                            <option value="de">&#127465;&#127466; Deutsch</option>
+                            <option value="ko">&#127472;&#127479; &#54620;&#44397;&#50612;</option>
+                            <option value="ar">&#127480;&#127462; &#1575;&#1604;&#1593;&#1585;&#1576;&#1610;&#1577;</option>
+                            <option value="pt">&#127463;&#127479; Portugu&#234;s</option>
                         </select>
                     </li>
                 </ul>
                 <ul class="navbar-nav" id="authNav">
-                    <li class="nav-item"><a class="nav-link" href="login.html" data-i18n="nav.login">ログイン</a></li>
+                    <li class="nav-item"><a class="nav-link" href="login.html" data-i18n="nav.login">&#12525;&#12464;&#12452;&#12531;</a></li>
                 </ul>
             </div>
         </div>
     </nav>
+
+    <!-- Mobile Nav Overlay -->
+    <div class="navbar-overlay" id="navbarOverlay"></div>
 
     <!-- ===== EDITOR TOOLBAR ===== -->
     <div class="editor-toolbar" id="editorToolbar">
@@ -506,12 +356,12 @@
             <div class="comment-list" id="commentList">
                 <div class="comment-item">
                     <div class="comment-author">Editor</div>
-                    <div class="comment-text" id="sampleComment1">Great opening paragraph! Consider adding more detail to the setting description.</div>
+                    <div class="comment-text" id="sampleComment1">Great opening paragraph!</div>
                     <div class="comment-time">2 hours ago</div>
                 </div>
                 <div class="comment-item">
                     <div class="comment-author">Translator</div>
-                    <div class="comment-text" id="sampleComment2">This section may be difficult to translate. Could you simplify the metaphor?</div>
+                    <div class="comment-text" id="sampleComment2">This section may be difficult to translate.</div>
                     <div class="comment-time">1 day ago</div>
                 </div>
             </div>
@@ -601,6 +451,8 @@
     <script src="../js/lang/ko.js"></script>
     <script src="../js/lang/ar.js"></script>
     <script src="../js/lang/pt.js"></script>
+    <!-- Editor translations (adds editor section to window.translations) -->
+    <script src="../js/lang/editor-translations.js"></script>
     <!-- Translation base -->
     <script src="../js/lang/translations-base.js"></script>
     <!-- Language switcher -->
@@ -608,34 +460,35 @@
 
     <script>
     /* =========================================================
-       EDITOR UI TEXT - 9 Languages
+       EDITOR UI TEXT - 9 Languages (inline fallback)
+       Uses Unicode escapes to prevent encoding issues
        ========================================================= */
     var editorUiText = {
         ja: {
-            title: 'エディター - Publisher',
-            untitled: '無題',
-            placeholder: 'ここに物語を書き始めてください...',
-            paragraph: '段落', h1: '見出し1', h2: '見出し2', h3: '見出し3',
-            saved: '保存済み', saving: '保存中...', unsaved: '未保存',
-            exportBtn: 'エクスポート', publishBtn: '公開',
-            searchReplace: '検索と置換', searchPlaceholder: '検索...',
-            replacePlaceholder: '置換...', replaceBtn: '置換',
-            noResults: '見つかりません', foundResults: '件見つかりました',
-            comments: 'コメント', addComment: 'コメント追加',
-            commentPlaceholder: 'コメントを追加...',
-            sampleComment1: '冒頭の段落がとても良いです！情景描写をもう少し詳しく書くと良いかもしれません。',
-            sampleComment2: 'この部分は翻訳が難しそうです。比喩をもう少しシンプルにできますか？',
-            characters: '文字数', words: '単語数', pages: 'ページ数',
-            lastEdit: '最終編集: たった今',
-            insertImage: '画像を挿入', imageUrl: '画像URL',
-            imageAlt: '代替テキスト', cancel: 'キャンセル', insert: '挿入',
-            exportTitle: 'エクスポート',
-            linkPrompt: 'URLを入力してください:', publishConfirm: '公開してもよろしいですか？',
-            publishSuccess: '公開しました！', publishDemoMsg: 'デモモード: 公開は無効です'
+            title: '\u30A8\u30C7\u30A3\u30BF\u30FC - Publisher', untitled: '\u7121\u984C',
+            placeholder: '\u3053\u3053\u306B\u7269\u8A9E\u3092\u66F8\u304D\u59CB\u3081\u3066\u304F\u3060\u3055\u3044...',
+            paragraph: '\u6BB5\u843D', h1: '\u898B\u51FA\u30571', h2: '\u898B\u51FA\u30572', h3: '\u898B\u51FA\u30573',
+            saved: '\u4FDD\u5B58\u6E08\u307F', saving: '\u4FDD\u5B58\u4E2D...', unsaved: '\u672A\u4FDD\u5B58',
+            exportBtn: '\u30A8\u30AF\u30B9\u30DD\u30FC\u30C8', publishBtn: '\u516C\u958B',
+            searchReplace: '\u691C\u7D22\u3068\u7F6E\u63DB', searchPlaceholder: '\u691C\u7D22...',
+            replacePlaceholder: '\u7F6E\u63DB...', replaceBtn: '\u7F6E\u63DB',
+            noResults: '\u898B\u3064\u304B\u308A\u307E\u305B\u3093', foundResults: '\u4EF6\u898B\u3064\u304B\u308A\u307E\u3057\u305F',
+            comments: '\u30B3\u30E1\u30F3\u30C8', addComment: '\u30B3\u30E1\u30F3\u30C8\u8FFD\u52A0',
+            commentPlaceholder: '\u30B3\u30E1\u30F3\u30C8\u3092\u8FFD\u52A0...',
+            sampleComment1: '\u5192\u982D\u306E\u6BB5\u843D\u304C\u3068\u3066\u3082\u826F\u3044\u3067\u3059\uFF01',
+            sampleComment2: '\u3053\u306E\u90E8\u5206\u306F\u7FFB\u8A33\u304C\u96E3\u3057\u305D\u3046\u3067\u3059\u3002',
+            characters: '\u6587\u5B57\u6570', words: '\u5358\u8A9E\u6570', pages: '\u30DA\u30FC\u30B8\u6570',
+            lastEdit: '\u6700\u7D42\u7DE8\u96C6: \u305F\u3063\u305F\u4ECA',
+            insertImage: '\u753B\u50CF\u3092\u633F\u5165', imageUrl: '\u753B\u50CFURL',
+            imageAlt: '\u4EE3\u66FF\u30C6\u30AD\u30B9\u30C8', cancel: '\u30AD\u30E3\u30F3\u30BB\u30EB', insert: '\u633F\u5165',
+            exportTitle: '\u30A8\u30AF\u30B9\u30DD\u30FC\u30C8',
+            linkPrompt: 'URL\u3092\u5165\u529B\u3057\u3066\u304F\u3060\u3055\u3044:',
+            publishConfirm: '\u516C\u958B\u3057\u3066\u3082\u3088\u308D\u3057\u3044\u3067\u3059\u304B\uFF1F',
+            publishSuccess: '\u516C\u958B\u3057\u307E\u3057\u305F\uFF01',
+            publishDemoMsg: '\u30C7\u30E2\u30E2\u30FC\u30C9: \u516C\u958B\u306F\u7121\u52B9\u3067\u3059'
         },
         en: {
-            title: 'Editor - Publisher',
-            untitled: 'Untitled',
+            title: 'Editor - Publisher', untitled: 'Untitled',
             placeholder: 'Start writing your story...',
             paragraph: 'Paragraph', h1: 'Heading 1', h2: 'Heading 2', h3: 'Heading 3',
             saved: 'Saved', saving: 'Saving...', unsaved: 'Unsaved',
@@ -645,120 +498,164 @@
             noResults: 'No results', foundResults: 'results found',
             comments: 'Comments', addComment: 'Add Comment',
             commentPlaceholder: 'Add a comment...',
-            sampleComment1: 'Great opening paragraph! Consider adding more detail to the setting description.',
-            sampleComment2: 'This section may be difficult to translate. Could you simplify the metaphor?',
+            sampleComment1: 'Great opening paragraph!',
+            sampleComment2: 'This section may be difficult to translate.',
             characters: 'Characters', words: 'Words', pages: 'Pages',
             lastEdit: 'Last edit: just now',
             insertImage: 'Insert Image', imageUrl: 'Image URL',
             imageAlt: 'Alt Text', cancel: 'Cancel', insert: 'Insert',
-            exportTitle: 'Export',
-            linkPrompt: 'Enter URL:', publishConfirm: 'Are you sure you want to publish?',
+            exportTitle: 'Export', linkPrompt: 'Enter URL:',
+            publishConfirm: 'Are you sure you want to publish?',
             publishSuccess: 'Published!', publishDemoMsg: 'Demo mode: Publishing is disabled'
         },
         zh: {
-            title: '编辑器 - Publisher', untitled: '无标题',
-            placeholder: '在这里开始写作...', paragraph: '段落', h1: '标题1', h2: '标题2', h3: '标题3',
-            saved: '已保存', saving: '保存中...', unsaved: '未保存',
-            exportBtn: '导出', publishBtn: '发布',
-            searchReplace: '搜索和替换', searchPlaceholder: '搜索...', replacePlaceholder: '替换...', replaceBtn: '替换',
-            noResults: '无结果', foundResults: '个结果',
-            comments: '评论', addComment: '添加评论', commentPlaceholder: '添加评论...',
-            sampleComment1: '开头段落写得很好！可以考虑增加更多场景描写。',
-            sampleComment2: '这部分可能难以翻译。能否简化这个比喻？',
-            characters: '字符', words: '词数', pages: '页数', lastEdit: '最后编辑：刚刚',
-            insertImage: '插入图片', imageUrl: '图片URL', imageAlt: '替代文字', cancel: '取消', insert: '插入',
-            exportTitle: '导出', linkPrompt: '请输入URL：', publishConfirm: '确定要发布吗？',
-            publishSuccess: '已发布！', publishDemoMsg: '演示模式：发布已禁用'
+            title: '\u7F16\u8F91\u5668 - Publisher', untitled: '\u65E0\u6807\u9898',
+            placeholder: '\u5728\u8FD9\u91CC\u5F00\u59CB\u5199\u4F5C...', paragraph: '\u6BB5\u843D',
+            h1: '\u6807\u98981', h2: '\u6807\u98982', h3: '\u6807\u98983',
+            saved: '\u5DF2\u4FDD\u5B58', saving: '\u4FDD\u5B58\u4E2D...', unsaved: '\u672A\u4FDD\u5B58',
+            exportBtn: '\u5BFC\u51FA', publishBtn: '\u53D1\u5E03',
+            searchReplace: '\u641C\u7D22\u548C\u66FF\u6362', searchPlaceholder: '\u641C\u7D22...',
+            replacePlaceholder: '\u66FF\u6362...', replaceBtn: '\u66FF\u6362',
+            noResults: '\u65E0\u7ED3\u679C', foundResults: '\u4E2A\u7ED3\u679C',
+            comments: '\u8BC4\u8BBA', addComment: '\u6DFB\u52A0\u8BC4\u8BBA',
+            commentPlaceholder: '\u6DFB\u52A0\u8BC4\u8BBA...',
+            sampleComment1: '\u5F00\u5934\u6BB5\u843D\u5199\u5F97\u5F88\u597D\uFF01',
+            sampleComment2: '\u8FD9\u90E8\u5206\u53EF\u80FD\u96BE\u4EE5\u7FFB\u8BD1\u3002',
+            characters: '\u5B57\u7B26', words: '\u8BCD\u6570', pages: '\u9875\u6570',
+            lastEdit: '\u6700\u540E\u7F16\u8F91\uFF1A\u521A\u521A',
+            insertImage: '\u63D2\u5165\u56FE\u7247', imageUrl: '\u56FE\u7247URL',
+            imageAlt: '\u66FF\u4EE3\u6587\u5B57', cancel: '\u53D6\u6D88', insert: '\u63D2\u5165',
+            exportTitle: '\u5BFC\u51FA', linkPrompt: '\u8BF7\u8F93\u5165URL\uFF1A',
+            publishConfirm: '\u786E\u5B9A\u8981\u53D1\u5E03\u5417\uFF1F',
+            publishSuccess: '\u5DF2\u53D1\u5E03\uFF01', publishDemoMsg: '\u6F14\u793A\u6A21\u5F0F\uFF1A\u53D1\u5E03\u5DF2\u7981\u7528'
         },
         es: {
-            title: 'Editor - Publisher', untitled: 'Sin título',
-            placeholder: 'Comienza a escribir tu historia...', paragraph: 'Párrafo', h1: 'Encabezado 1', h2: 'Encabezado 2', h3: 'Encabezado 3',
+            title: 'Editor - Publisher', untitled: 'Sin t\u00EDtulo',
+            placeholder: 'Comienza a escribir tu historia...',
+            paragraph: 'P\u00E1rrafo', h1: 'Encabezado 1', h2: 'Encabezado 2', h3: 'Encabezado 3',
             saved: 'Guardado', saving: 'Guardando...', unsaved: 'Sin guardar',
             exportBtn: 'Exportar', publishBtn: 'Publicar',
-            searchReplace: 'Buscar y Reemplazar', searchPlaceholder: 'Buscar...', replacePlaceholder: 'Reemplazar...', replaceBtn: 'Reemplazar',
+            searchReplace: 'Buscar y Reemplazar', searchPlaceholder: 'Buscar...',
+            replacePlaceholder: 'Reemplazar...', replaceBtn: 'Reemplazar',
             noResults: 'Sin resultados', foundResults: 'resultados encontrados',
-            comments: 'Comentarios', addComment: 'Agregar Comentario', commentPlaceholder: 'Agregar un comentario...',
-            sampleComment1: '¡Gran párrafo de apertura! Considera agregar más detalles a la descripción del escenario.',
-            sampleComment2: 'Esta sección puede ser difícil de traducir. ¿Podrías simplificar la metáfora?',
-            characters: 'Caracteres', words: 'Palabras', pages: 'Páginas', lastEdit: 'Última edición: ahora mismo',
-            insertImage: 'Insertar Imagen', imageUrl: 'URL de la imagen', imageAlt: 'Texto alternativo', cancel: 'Cancelar', insert: 'Insertar',
-            exportTitle: 'Exportar', linkPrompt: 'Ingrese la URL:', publishConfirm: '¿Estás seguro de que deseas publicar?',
-            publishSuccess: '¡Publicado!', publishDemoMsg: 'Modo demo: La publicación está deshabilitada'
+            comments: 'Comentarios', addComment: 'Agregar Comentario',
+            commentPlaceholder: 'Agregar un comentario...',
+            sampleComment1: '\u00A1Gran p\u00E1rrafo de apertura!',
+            sampleComment2: 'Esta secci\u00F3n puede ser dif\u00EDcil de traducir.',
+            characters: 'Caracteres', words: 'Palabras', pages: 'P\u00E1ginas',
+            lastEdit: '\u00DAltima edici\u00F3n: ahora mismo',
+            insertImage: 'Insertar Imagen', imageUrl: 'URL de la imagen',
+            imageAlt: 'Texto alternativo', cancel: 'Cancelar', insert: 'Insertar',
+            exportTitle: 'Exportar', linkPrompt: 'Ingrese la URL:',
+            publishConfirm: '\u00BFEst\u00E1s seguro de que deseas publicar?',
+            publishSuccess: '\u00A1Publicado!', publishDemoMsg: 'Modo demo: La publicaci\u00F3n est\u00E1 deshabilitada'
         },
         fr: {
-            title: 'Éditeur - Publisher', untitled: 'Sans titre',
-            placeholder: 'Commencez à écrire votre histoire...', paragraph: 'Paragraphe', h1: 'Titre 1', h2: 'Titre 2', h3: 'Titre 3',
-            saved: 'Enregistré', saving: 'Enregistrement...', unsaved: 'Non enregistré',
+            title: '\u00C9diteur - Publisher', untitled: 'Sans titre',
+            placeholder: 'Commencez \u00E0 \u00E9crire votre histoire...',
+            paragraph: 'Paragraphe', h1: 'Titre 1', h2: 'Titre 2', h3: 'Titre 3',
+            saved: 'Enregistr\u00E9', saving: 'Enregistrement...', unsaved: 'Non enregistr\u00E9',
             exportBtn: 'Exporter', publishBtn: 'Publier',
-            searchReplace: 'Rechercher et Remplacer', searchPlaceholder: 'Rechercher...', replacePlaceholder: 'Remplacer...', replaceBtn: 'Remplacer',
-            noResults: 'Aucun résultat', foundResults: 'résultats trouvés',
-            comments: 'Commentaires', addComment: 'Ajouter un Commentaire', commentPlaceholder: 'Ajouter un commentaire...',
-            sampleComment1: "Excellent paragraphe d'ouverture ! Envisagez d'ajouter plus de détails.",
-            sampleComment2: 'Cette section peut être difficile à traduire. Pourriez-vous simplifier la métaphore ?',
-            characters: 'Caractères', words: 'Mots', pages: 'Pages', lastEdit: "Dernière modification : à l'instant",
-            insertImage: 'Insérer une Image', imageUrl: "URL de l'image", imageAlt: 'Texte alternatif', cancel: 'Annuler', insert: 'Insérer',
-            exportTitle: 'Exporter', linkPrompt: "Entrez l'URL :", publishConfirm: 'Êtes-vous sûr de vouloir publier ?',
-            publishSuccess: 'Publié !', publishDemoMsg: 'Mode démo : La publication est désactivée'
+            searchReplace: 'Rechercher et Remplacer', searchPlaceholder: 'Rechercher...',
+            replacePlaceholder: 'Remplacer...', replaceBtn: 'Remplacer',
+            noResults: 'Aucun r\u00E9sultat', foundResults: 'r\u00E9sultats trouv\u00E9s',
+            comments: 'Commentaires', addComment: 'Ajouter un Commentaire',
+            commentPlaceholder: 'Ajouter un commentaire...',
+            sampleComment1: 'Excellent paragraphe d\'ouverture !',
+            sampleComment2: 'Cette section peut \u00EAtre difficile \u00E0 traduire.',
+            characters: 'Caract\u00E8res', words: 'Mots', pages: 'Pages',
+            lastEdit: 'Derni\u00E8re modification : \u00E0 l\'instant',
+            insertImage: 'Ins\u00E9rer une Image', imageUrl: 'URL de l\'image',
+            imageAlt: 'Texte alternatif', cancel: 'Annuler', insert: 'Ins\u00E9rer',
+            exportTitle: 'Exporter', linkPrompt: 'Entrez l\'URL :',
+            publishConfirm: '\u00CAtes-vous s\u00FBr de vouloir publier ?',
+            publishSuccess: 'Publi\u00E9 !', publishDemoMsg: 'Mode d\u00E9mo : La publication est d\u00E9sactiv\u00E9e'
         },
         de: {
             title: 'Editor - Publisher', untitled: 'Ohne Titel',
-            placeholder: 'Beginnen Sie hier Ihre Geschichte...', paragraph: 'Absatz', h1: 'Überschrift 1', h2: 'Überschrift 2', h3: 'Überschrift 3',
+            placeholder: 'Beginnen Sie hier Ihre Geschichte...',
+            paragraph: 'Absatz', h1: '\u00DCberschrift 1', h2: '\u00DCberschrift 2', h3: '\u00DCberschrift 3',
             saved: 'Gespeichert', saving: 'Speichern...', unsaved: 'Nicht gespeichert',
-            exportBtn: 'Exportieren', publishBtn: 'Veröffentlichen',
-            searchReplace: 'Suchen und Ersetzen', searchPlaceholder: 'Suchen...', replacePlaceholder: 'Ersetzen...', replaceBtn: 'Ersetzen',
+            exportBtn: 'Exportieren', publishBtn: 'Ver\u00F6ffentlichen',
+            searchReplace: 'Suchen und Ersetzen', searchPlaceholder: 'Suchen...',
+            replacePlaceholder: 'Ersetzen...', replaceBtn: 'Ersetzen',
             noResults: 'Keine Ergebnisse', foundResults: 'Ergebnisse gefunden',
-            comments: 'Kommentare', addComment: 'Kommentar hinzufügen', commentPlaceholder: 'Kommentar hinzufügen...',
-            sampleComment1: 'Toller Eröffnungsabsatz! Erwägen Sie, mehr Details hinzuzufügen.',
-            sampleComment2: 'Dieser Abschnitt könnte schwer zu übersetzen sein. Könnten Sie die Metapher vereinfachen?',
-            characters: 'Zeichen', words: 'Wörter', pages: 'Seiten', lastEdit: 'Letzte Bearbeitung: gerade eben',
-            insertImage: 'Bild einfügen', imageUrl: 'Bild-URL', imageAlt: 'Alternativtext', cancel: 'Abbrechen', insert: 'Einfügen',
-            exportTitle: 'Exportieren', linkPrompt: 'URL eingeben:', publishConfirm: 'Möchten Sie wirklich veröffentlichen?',
-            publishSuccess: 'Veröffentlicht!', publishDemoMsg: 'Demomodus: Veröffentlichung ist deaktiviert'
+            comments: 'Kommentare', addComment: 'Kommentar hinzuf\u00FCgen',
+            commentPlaceholder: 'Kommentar hinzuf\u00FCgen...',
+            sampleComment1: 'Toller Er\u00F6ffnungsabsatz!',
+            sampleComment2: 'Dieser Abschnitt k\u00F6nnte schwer zu \u00FCbersetzen sein.',
+            characters: 'Zeichen', words: 'W\u00F6rter', pages: 'Seiten',
+            lastEdit: 'Letzte Bearbeitung: gerade eben',
+            insertImage: 'Bild einf\u00FCgen', imageUrl: 'Bild-URL',
+            imageAlt: 'Alternativtext', cancel: 'Abbrechen', insert: 'Einf\u00FCgen',
+            exportTitle: 'Exportieren', linkPrompt: 'URL eingeben:',
+            publishConfirm: 'M\u00F6chten Sie wirklich ver\u00F6ffentlichen?',
+            publishSuccess: 'Ver\u00F6ffentlicht!', publishDemoMsg: 'Demomodus: Ver\u00F6ffentlichung ist deaktiviert'
         },
         ko: {
-            title: '에디터 - Publisher', untitled: '제목 없음',
-            placeholder: '여기에 이야기를 작성하세요...', paragraph: '단락', h1: '제목 1', h2: '제목 2', h3: '제목 3',
-            saved: '저장됨', saving: '저장 중...', unsaved: '저장되지 않음',
-            exportBtn: '내보내기', publishBtn: '게시',
-            searchReplace: '찾기 및 바꾸기', searchPlaceholder: '찾기...', replacePlaceholder: '바꾸기...', replaceBtn: '바꾸기',
-            noResults: '결과 없음', foundResults: '개 결과',
-            comments: '댓글', addComment: '댓글 추가', commentPlaceholder: '댓글을 추가하세요...',
-            sampleComment1: '훌륭한 서두입니다! 장면 묘사를 좀 더 자세히 추가해 보세요.',
-            sampleComment2: '이 부분은 번역하기 어려울 수 있습니다. 은유를 간단하게 할 수 있을까요?',
-            characters: '글자 수', words: '단어 수', pages: '페이지 수', lastEdit: '마지막 편집: 방금',
-            insertImage: '이미지 삽입', imageUrl: '이미지 URL', imageAlt: '대체 텍스트', cancel: '취소', insert: '삽입',
-            exportTitle: '내보내기', linkPrompt: 'URL을 입력하세요:', publishConfirm: '게시하시겠습니까?',
-            publishSuccess: '게시되었습니다!', publishDemoMsg: '데모 모드: 게시가 비활성화되었습니다'
+            title: '\uC5D0\uB514\uD130 - Publisher', untitled: '\uC81C\uBAA9 \uC5C6\uC74C',
+            placeholder: '\uC5EC\uAE30\uC5D0 \uC774\uC57C\uAE30\uB97C \uC791\uC131\uD558\uC138\uC694...',
+            paragraph: '\uB2E8\uB77D', h1: '\uC81C\uBAA9 1', h2: '\uC81C\uBAA9 2', h3: '\uC81C\uBAA9 3',
+            saved: '\uC800\uC7A5\uB428', saving: '\uC800\uC7A5 \uC911...', unsaved: '\uC800\uC7A5\uB418\uC9C0 \uC54A\uC74C',
+            exportBtn: '\uB0B4\uBCF4\uB0B4\uAE30', publishBtn: '\uAC8C\uC2DC',
+            searchReplace: '\uCC3E\uAE30 \uBC0F \uBC14\uAFB8\uAE30', searchPlaceholder: '\uCC3E\uAE30...',
+            replacePlaceholder: '\uBC14\uAFB8\uAE30...', replaceBtn: '\uBC14\uAFB8\uAE30',
+            noResults: '\uACB0\uACFC \uC5C6\uC74C', foundResults: '\uAC1C \uACB0\uACFC',
+            comments: '\uB313\uAE00', addComment: '\uB313\uAE00 \uCD94\uAC00',
+            commentPlaceholder: '\uB313\uAE00\uC744 \uCD94\uAC00\uD558\uC138\uC694...',
+            sampleComment1: '\uD6CC\uB96D\uD55C \uC11C\uB450\uC785\uB2C8\uB2E4!',
+            sampleComment2: '\uC774 \uBD80\uBD84\uC740 \uBC88\uC5ED\uD558\uAE30 \uC5B4\uB824\uC6B8 \uC218 \uC788\uC2B5\uB2C8\uB2E4.',
+            characters: '\uAE00\uC790 \uC218', words: '\uB2E8\uC5B4 \uC218', pages: '\uD398\uC774\uC9C0 \uC218',
+            lastEdit: '\uB9C8\uC9C0\uB9C9 \uD3B8\uC9D1: \uBC29\uAE08',
+            insertImage: '\uC774\uBBF8\uC9C0 \uC0BD\uC785', imageUrl: '\uC774\uBBF8\uC9C0 URL',
+            imageAlt: '\uB300\uCCB4 \uD14D\uC2A4\uD2B8', cancel: '\uCDE8\uC18C', insert: '\uC0BD\uC785',
+            exportTitle: '\uB0B4\uBCF4\uB0B4\uAE30', linkPrompt: 'URL\uC744 \uC785\uB825\uD558\uC138\uC694:',
+            publishConfirm: '\uAC8C\uC2DC\uD558\uC2DC\uACA0\uC2B5\uB2C8\uAE4C?',
+            publishSuccess: '\uAC8C\uC2DC\uB418\uC5C8\uC2B5\uB2C8\uB2E4!',
+            publishDemoMsg: '\uB370\uBAA8 \uBAA8\uB4DC: \uAC8C\uC2DC\uAC00 \uBE44\uD65C\uC131\uD654\uB418\uC5C8\uC2B5\uB2C8\uB2E4'
         },
         ar: {
-            title: 'المحرر - Publisher', untitled: 'بدون عنوان',
-            placeholder: 'ابدأ كتابة قصتك هنا...', paragraph: 'فقرة', h1: 'عنوان 1', h2: 'عنوان 2', h3: 'عنوان 3',
-            saved: 'تم الحفظ', saving: 'جارٍ الحفظ...', unsaved: 'غير محفوظ',
-            exportBtn: 'تصدير', publishBtn: 'نشر',
-            searchReplace: 'بحث واستبدال', searchPlaceholder: 'بحث...', replacePlaceholder: 'استبدال...', replaceBtn: 'استبدال',
-            noResults: 'لا توجد نتائج', foundResults: 'نتائج',
-            comments: 'التعليقات', addComment: 'إضافة تعليق', commentPlaceholder: 'أضف تعليقاً...',
-            sampleComment1: 'فقرة افتتاحية رائعة! فكر في إضافة المزيد من التفاصيل.',
-            sampleComment2: 'قد يكون هذا القسم صعب الترجمة. هل يمكنك تبسيط الاستعارة؟',
-            characters: 'الأحرف', words: 'الكلمات', pages: 'الصفحات', lastEdit: 'آخر تعديل: الآن',
-            insertImage: 'إدراج صورة', imageUrl: 'رابط الصورة', imageAlt: 'النص البديل', cancel: 'إلغاء', insert: 'إدراج',
-            exportTitle: 'تصدير', linkPrompt: 'أدخل الرابط:', publishConfirm: 'هل أنت متأكد من النشر؟',
-            publishSuccess: 'تم النشر!', publishDemoMsg: 'الوضع التجريبي: النشر معطل'
+            title: '\u0627\u0644\u0645\u062D\u0631\u0631 - Publisher', untitled: '\u0628\u062F\u0648\u0646 \u0639\u0646\u0648\u0627\u0646',
+            placeholder: '\u0627\u0628\u062F\u0623 \u0643\u062A\u0627\u0628\u0629 \u0642\u0635\u062A\u0643 \u0647\u0646\u0627...',
+            paragraph: '\u0641\u0642\u0631\u0629', h1: '\u0639\u0646\u0648\u0627\u0646 1', h2: '\u0639\u0646\u0648\u0627\u0646 2', h3: '\u0639\u0646\u0648\u0627\u0646 3',
+            saved: '\u062A\u0645 \u0627\u0644\u062D\u0641\u0638', saving: '\u062C\u0627\u0631\u064D \u0627\u0644\u062D\u0641\u0638...', unsaved: '\u063A\u064A\u0631 \u0645\u062D\u0641\u0648\u0638',
+            exportBtn: '\u062A\u0635\u062F\u064A\u0631', publishBtn: '\u0646\u0634\u0631',
+            searchReplace: '\u0628\u062D\u062B \u0648\u0627\u0633\u062A\u0628\u062F\u0627\u0644', searchPlaceholder: '\u0628\u062D\u062B...',
+            replacePlaceholder: '\u0627\u0633\u062A\u0628\u062F\u0627\u0644...', replaceBtn: '\u0627\u0633\u062A\u0628\u062F\u0627\u0644',
+            noResults: '\u0644\u0627 \u062A\u0648\u062C\u062F \u0646\u062A\u0627\u0626\u062C', foundResults: '\u0646\u062A\u0627\u0626\u062C',
+            comments: '\u0627\u0644\u062A\u0639\u0644\u064A\u0642\u0627\u062A', addComment: '\u0625\u0636\u0627\u0641\u0629 \u062A\u0639\u0644\u064A\u0642',
+            commentPlaceholder: '\u0623\u0636\u0641 \u062A\u0639\u0644\u064A\u0642\u0627\u064B...',
+            sampleComment1: '\u0641\u0642\u0631\u0629 \u0627\u0641\u062A\u062A\u0627\u062D\u064A\u0629 \u0631\u0627\u0626\u0639\u0629!',
+            sampleComment2: '\u0642\u062F \u064A\u0643\u0648\u0646 \u0647\u0630\u0627 \u0627\u0644\u0642\u0633\u0645 \u0635\u0639\u0628 \u0627\u0644\u062A\u0631\u062C\u0645\u0629.',
+            characters: '\u0627\u0644\u0623\u062D\u0631\u0641', words: '\u0627\u0644\u0643\u0644\u0645\u0627\u062A', pages: '\u0627\u0644\u0635\u0641\u062D\u0627\u062A',
+            lastEdit: '\u0622\u062E\u0631 \u062A\u0639\u062F\u064A\u0644: \u0627\u0644\u0622\u0646',
+            insertImage: '\u0625\u062F\u0631\u0627\u062C \u0635\u0648\u0631\u0629', imageUrl: '\u0631\u0627\u0628\u0637 \u0627\u0644\u0635\u0648\u0631\u0629',
+            imageAlt: '\u0627\u0644\u0646\u0635 \u0627\u0644\u0628\u062F\u064A\u0644', cancel: '\u0625\u0644\u063A\u0627\u0621', insert: '\u0625\u062F\u0631\u0627\u062C',
+            exportTitle: '\u062A\u0635\u062F\u064A\u0631', linkPrompt: '\u0623\u062F\u062E\u0644 \u0627\u0644\u0631\u0627\u0628\u0637:',
+            publishConfirm: '\u0647\u0644 \u0623\u0646\u062A \u0645\u062A\u0623\u0643\u062F \u0645\u0646 \u0627\u0644\u0646\u0634\u0631\u061F',
+            publishSuccess: '\u062A\u0645 \u0627\u0644\u0646\u0634\u0631!',
+            publishDemoMsg: '\u0627\u0644\u0648\u0636\u0639 \u0627\u0644\u062A\u062C\u0631\u064A\u0628\u064A: \u0627\u0644\u0646\u0634\u0631 \u0645\u0639\u0637\u0644'
         },
         pt: {
-            title: 'Editor - Publisher', untitled: 'Sem título',
-            placeholder: 'Comece a escrever sua história...', paragraph: 'Parágrafo', h1: 'Título 1', h2: 'Título 2', h3: 'Título 3',
-            saved: 'Salvo', saving: 'Salvando...', unsaved: 'Não salvo',
+            title: 'Editor - Publisher', untitled: 'Sem t\u00EDtulo',
+            placeholder: 'Comece a escrever sua hist\u00F3ria...',
+            paragraph: 'Par\u00E1grafo', h1: 'T\u00EDtulo 1', h2: 'T\u00EDtulo 2', h3: 'T\u00EDtulo 3',
+            saved: 'Salvo', saving: 'Salvando...', unsaved: 'N\u00E3o salvo',
             exportBtn: 'Exportar', publishBtn: 'Publicar',
-            searchReplace: 'Pesquisar e Substituir', searchPlaceholder: 'Pesquisar...', replacePlaceholder: 'Substituir...', replaceBtn: 'Substituir',
+            searchReplace: 'Pesquisar e Substituir', searchPlaceholder: 'Pesquisar...',
+            replacePlaceholder: 'Substituir...', replaceBtn: 'Substituir',
             noResults: 'Sem resultados', foundResults: 'resultados encontrados',
-            comments: 'Comentários', addComment: 'Adicionar Comentário', commentPlaceholder: 'Adicionar um comentário...',
-            sampleComment1: 'Ótimo parágrafo de abertura! Considere adicionar mais detalhes ao cenário.',
-            sampleComment2: 'Esta seção pode ser difícil de traduzir. Poderia simplificar a metáfora?',
-            characters: 'Caracteres', words: 'Palavras', pages: 'Páginas', lastEdit: 'Última edição: agora mesmo',
-            insertImage: 'Inserir Imagem', imageUrl: 'URL da imagem', imageAlt: 'Texto alternativo', cancel: 'Cancelar', insert: 'Inserir',
-            exportTitle: 'Exportar', linkPrompt: 'Digite a URL:', publishConfirm: 'Tem certeza de que deseja publicar?',
-            publishSuccess: 'Publicado!', publishDemoMsg: 'Modo demo: A publicação está desativada'
+            comments: 'Coment\u00E1rios', addComment: 'Adicionar Coment\u00E1rio',
+            commentPlaceholder: 'Adicionar um coment\u00E1rio...',
+            sampleComment1: '\u00D3timo par\u00E1grafo de abertura!',
+            sampleComment2: 'Esta se\u00E7\u00E3o pode ser dif\u00EDcil de traduzir.',
+            characters: 'Caracteres', words: 'Palavras', pages: 'P\u00E1ginas',
+            lastEdit: '\u00DAltima edi\u00E7\u00E3o: agora mesmo',
+            insertImage: 'Inserir Imagem', imageUrl: 'URL da imagem',
+            imageAlt: 'Texto alternativo', cancel: 'Cancelar', insert: 'Inserir',
+            exportTitle: 'Exportar', linkPrompt: 'Digite a URL:',
+            publishConfirm: 'Tem certeza de que deseja publicar?',
+            publishSuccess: 'Publicado!', publishDemoMsg: 'Modo demo: A publica\u00E7\u00E3o est\u00E1 desativada'
         }
     };
 
@@ -781,73 +678,53 @@
         var titleInput = document.getElementById('workTitle');
         if (titleInput && !titleInput.value) titleInput.placeholder = getL('untitled');
         var optP = document.getElementById('opt-paragraph');
-        var optH1 = document.getElementById('opt-h1');
-        var optH2 = document.getElementById('opt-h2');
-        var optH3 = document.getElementById('opt-h3');
         if (optP) optP.textContent = getL('paragraph');
+        var optH1 = document.getElementById('opt-h1');
         if (optH1) optH1.textContent = getL('h1');
+        var optH2 = document.getElementById('opt-h2');
         if (optH2) optH2.textContent = getL('h2');
+        var optH3 = document.getElementById('opt-h3');
         if (optH3) optH3.textContent = getL('h3');
         updateSaveStatusText();
         var btnExport = document.querySelector('#btnExport span');
         var btnPublish = document.querySelector('#btnPublish span');
         if (btnExport) btnExport.textContent = getL('exportBtn');
         if (btnPublish) btnPublish.textContent = getL('publishBtn');
-        var el = document.getElementById('searchTitle');
-        if (el) el.textContent = getL('searchReplace');
-        el = document.getElementById('searchInput');
-        if (el) el.placeholder = getL('searchPlaceholder');
-        el = document.getElementById('replaceInput');
-        if (el) el.placeholder = getL('replacePlaceholder');
-        el = document.getElementById('btnReplace');
-        if (el) el.textContent = getL('replaceBtn');
-        el = document.getElementById('commentTitle');
-        if (el) el.textContent = getL('comments');
-        el = document.getElementById('newComment');
-        if (el) el.placeholder = getL('commentPlaceholder');
+        var el;
+        el = document.getElementById('searchTitle'); if (el) el.textContent = getL('searchReplace');
+        el = document.getElementById('searchInput'); if (el) el.placeholder = getL('searchPlaceholder');
+        el = document.getElementById('replaceInput'); if (el) el.placeholder = getL('replacePlaceholder');
+        el = document.getElementById('btnReplace'); if (el) el.textContent = getL('replaceBtn');
+        el = document.getElementById('commentTitle'); if (el) el.textContent = getL('comments');
+        el = document.getElementById('newComment'); if (el) el.placeholder = getL('commentPlaceholder');
         var addBtn = document.querySelector('#btnAddComment span');
         if (addBtn) addBtn.textContent = getL('addComment');
-        el = document.getElementById('sampleComment1');
-        if (el) el.textContent = getL('sampleComment1');
-        el = document.getElementById('sampleComment2');
-        if (el) el.textContent = getL('sampleComment2');
-        el = document.getElementById('labelChars');
-        if (el) el.textContent = getL('characters');
-        el = document.getElementById('labelWords');
-        if (el) el.textContent = getL('words');
-        el = document.getElementById('labelPages');
-        if (el) el.textContent = getL('pages');
-        el = document.getElementById('labelLastEdit');
-        if (el) el.textContent = getL('lastEdit');
-        el = document.getElementById('imageModalTitle');
-        if (el) el.textContent = getL('insertImage');
-        el = document.getElementById('imageUrlLabel');
-        if (el) el.textContent = getL('imageUrl');
-        el = document.getElementById('imageAltLabel');
-        if (el) el.textContent = getL('imageAlt');
-        el = document.getElementById('btnImageCancel');
-        if (el) el.textContent = getL('cancel');
+        el = document.getElementById('sampleComment1'); if (el) el.textContent = getL('sampleComment1');
+        el = document.getElementById('sampleComment2'); if (el) el.textContent = getL('sampleComment2');
+        el = document.getElementById('labelChars'); if (el) el.textContent = getL('characters');
+        el = document.getElementById('labelWords'); if (el) el.textContent = getL('words');
+        el = document.getElementById('labelPages'); if (el) el.textContent = getL('pages');
+        el = document.getElementById('labelLastEdit'); if (el) el.textContent = getL('lastEdit');
+        el = document.getElementById('imageModalTitle'); if (el) el.textContent = getL('insertImage');
+        el = document.getElementById('imageUrlLabel'); if (el) el.textContent = getL('imageUrl');
+        el = document.getElementById('imageAltLabel'); if (el) el.textContent = getL('imageAlt');
+        el = document.getElementById('btnImageCancel'); if (el) el.textContent = getL('cancel');
         el = document.getElementById('btnImageInsert');
         if (el) el.innerHTML = '<i class="fas fa-plus me-1"></i> ' + getL('insert');
-        el = document.getElementById('exportModalTitle');
-        if (el) el.textContent = getL('exportTitle');
+        el = document.getElementById('exportModalTitle'); if (el) el.textContent = getL('exportTitle');
     }
 
     function updateSaveStatusText() {
         var statusEl = document.getElementById('saveStatus');
         var textEl = document.getElementById('saveStatusText');
         if (!statusEl || !textEl) return;
-        if (statusEl.classList.contains('saved')) {
-            textEl.textContent = getL('saved');
-        } else if (statusEl.classList.contains('saving')) {
-            textEl.textContent = getL('saving');
-        } else {
-            textEl.textContent = getL('unsaved');
-        }
+        if (statusEl.classList.contains('saved')) textEl.textContent = getL('saved');
+        else if (statusEl.classList.contains('saving')) textEl.textContent = getL('saving');
+        else textEl.textContent = getL('unsaved');
     }
 
     /* =========================================================
-       AUTH NAV
+       AUTH NAV (Pattern C - matching account-settings.html)
        ========================================================= */
     function getNavText(key) {
         if (typeof translations === 'undefined') return null;
@@ -858,9 +735,7 @@
         for (var i = 0; i < keys.length; i++) {
             if (value && typeof value === 'object' && keys[i] in value) {
                 value = value[keys[i]];
-            } else {
-                return null;
-            }
+            } else { return null; }
         }
         return typeof value === 'string' ? value : null;
     }
@@ -884,18 +759,13 @@
                     '<li><a class="dropdown-item" href="account-settings.html"><i class="fas fa-cog me-2"></i><span data-i18n="nav.settings">' + (getNavText('nav.settings') || 'Settings') + '</span></a></li>' +
                     '<li><hr class="dropdown-divider"></li>' +
                     '<li><a class="dropdown-item" href="#" onclick="logout(); return false;"><i class="fas fa-sign-out-alt me-2"></i><span data-i18n="nav.logout">' + (getNavText('nav.logout') || 'Logout') + '</span></a></li>' +
-                    '</ul>' +
-                    '</li>';
+                    '</ul></li>';
                 document.body.classList.add('logged-in');
-            } catch (e) {
-                console.error('Failed to parse user data:', e);
-            }
+            } catch (e) { console.error('Failed to parse user data:', e); }
         } else {
             document.body.classList.remove('logged-in');
         }
-        if (typeof applyTranslations === 'function') {
-            applyTranslations();
-        }
+        if (typeof applyTranslations === 'function') applyTranslations();
     }
 
     function logout() {
@@ -912,15 +782,8 @@
         document.getElementById('editorArea').focus();
         onContentChange();
     }
-
-    function insertLink() {
-        var url = prompt(getL('linkPrompt'), 'https://');
-        if (url) { execCmd('createLink', url); }
-    }
-
-    function insertBlockquote() {
-        execCmd('formatBlock', 'blockquote');
-    }
+    function insertLink() { var url = prompt(getL('linkPrompt'), 'https://'); if (url) execCmd('createLink', url); }
+    function insertBlockquote() { execCmd('formatBlock', 'blockquote'); }
 
     /* =========================================================
        IMAGE INSERT
@@ -931,7 +794,6 @@
         document.getElementById('imagePreview').style.display = 'none';
         new bootstrap.Modal(document.getElementById('imageModal')).show();
     }
-
     function insertImage() {
         var url = document.getElementById('imageUrlInput').value;
         var alt = document.getElementById('imageAltInput').value || '';
@@ -949,26 +811,17 @@
     function toggleSearchPanel() {
         var panel = document.getElementById('searchPanel');
         panel.classList.toggle('open');
-        if (panel.classList.contains('open')) {
-            document.getElementById('searchInput').focus();
-        }
+        if (panel.classList.contains('open')) document.getElementById('searchInput').focus();
     }
-
     function findText() {
         var query = document.getElementById('searchInput').value;
         var infoEl = document.getElementById('searchInfo');
         if (!query) { infoEl.textContent = ''; return; }
         var content = document.getElementById('editorArea').innerText;
-        var regex = new RegExp(query, 'gi');
-        var matches = content.match(regex);
-        if (matches) {
-            infoEl.textContent = matches.length + ' ' + getL('foundResults');
-            window.find(query);
-        } else {
-            infoEl.textContent = getL('noResults');
-        }
+        var matches = content.match(new RegExp(query, 'gi'));
+        if (matches) { infoEl.textContent = matches.length + ' ' + getL('foundResults'); window.find(query); }
+        else { infoEl.textContent = getL('noResults'); }
     }
-
     function replaceText() {
         var search = document.getElementById('searchInput').value;
         var replace = document.getElementById('replaceInput').value;
@@ -981,10 +834,7 @@
     /* =========================================================
        COMMENT PANEL
        ========================================================= */
-    function toggleCommentPanel() {
-        document.getElementById('commentPanel').classList.toggle('open');
-    }
-
+    function toggleCommentPanel() { document.getElementById('commentPanel').classList.toggle('open'); }
     function addComment() {
         var textarea = document.getElementById('newComment');
         var text = textarea.value.trim();
@@ -992,10 +842,8 @@
         var list = document.getElementById('commentList');
         var item = document.createElement('div');
         item.className = 'comment-item';
-        item.innerHTML =
-            '<div class="comment-author">You</div>' +
-            '<div class="comment-text">' + text.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>' +
-            '<div class="comment-time">' + getL('lastEdit') + '</div>';
+        item.innerHTML = '<div class="comment-author">You</div><div class="comment-text">' +
+            text.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div><div class="comment-time">' + getL('lastEdit') + '</div>';
         list.appendChild(item);
         textarea.value = '';
         list.scrollTop = list.scrollHeight;
@@ -1004,10 +852,7 @@
     /* =========================================================
        EXPORT
        ========================================================= */
-    function exportWork() {
-        new bootstrap.Modal(document.getElementById('exportModal')).show();
-    }
-
+    function exportWork() { new bootstrap.Modal(document.getElementById('exportModal')).show(); }
     function doExport(format) {
         var title = document.getElementById('workTitle').value || getL('untitled');
         var content = document.getElementById('editorArea');
@@ -1045,7 +890,7 @@
     function publishWork() {
         var isDemo = new URLSearchParams(window.location.search).get('demo') === 'true';
         if (isDemo) { alert(getL('publishDemoMsg')); return; }
-        if (confirm(getL('publishConfirm'))) { alert(getL('publishSuccess')); }
+        if (confirm(getL('publishConfirm'))) alert(getL('publishSuccess'));
     }
 
     /* =========================================================
@@ -1059,7 +904,6 @@
         clearTimeout(autoSaveTimer);
         autoSaveTimer = setTimeout(autoSave, 2000);
     }
-
     function updateCounts() {
         var text = document.getElementById('editorArea').innerText || '';
         var chars = text.length;
@@ -1069,7 +913,6 @@
         document.getElementById('wordCount').textContent = words.toLocaleString();
         document.getElementById('pageCount').textContent = pages;
     }
-
     function autoSave() {
         var statusEl = document.getElementById('saveStatus');
         statusEl.className = 'save-status saving';
@@ -1126,13 +969,8 @@
         document.querySelectorAll('#mobileLanguageSelect, #desktopLanguageSelect').forEach(function(select) {
             select.addEventListener('change', function() {
                 currentLang = this.value;
-                if (typeof LanguageSwitcher !== 'undefined') {
-                    LanguageSwitcher.changeLanguage(this.value);
-                }
-                setTimeout(function() {
-                    applyEditorTranslations();
-                    updateAuthNav();
-                }, 100);
+                if (typeof LanguageSwitcher !== 'undefined') LanguageSwitcher.changeLanguage(this.value);
+                setTimeout(function() { applyEditorTranslations(); updateAuthNav(); }, 100);
             });
         });
 
@@ -1142,9 +980,27 @@
             if (this.value) { preview.src = this.value; preview.style.display = 'block'; }
             else { preview.style.display = 'none'; }
         });
-        document.getElementById('imagePreview').addEventListener('error', function() {
-            this.style.display = 'none';
-        });
+        document.getElementById('imagePreview').addEventListener('error', function() { this.style.display = 'none'; });
+
+        // Mobile navbar overlay
+        var navbarNav = document.getElementById('navbarNav');
+        var navbarOverlay = document.getElementById('navbarOverlay');
+        if (navbarNav) {
+            navbarNav.addEventListener('show.bs.collapse', function() {
+                document.body.classList.add('menu-open');
+                if (navbarOverlay) navbarOverlay.classList.add('show');
+            });
+            navbarNav.addEventListener('hide.bs.collapse', function() {
+                document.body.classList.remove('menu-open');
+                if (navbarOverlay) navbarOverlay.classList.remove('show');
+            });
+        }
+        if (navbarOverlay) {
+            navbarOverlay.addEventListener('click', function() {
+                var bsCollapse = bootstrap.Collapse.getInstance(navbarNav);
+                if (bsCollapse) bsCollapse.hide();
+            });
+        }
     });
     </script>
 </body>
