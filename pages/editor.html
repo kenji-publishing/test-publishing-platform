@@ -1,23 +1,1151 @@
-<br><!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editor - Publisher</title>
-    
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Bootstrap & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&amp;family=Noto+Serif+JP:wght@400;600;700&amp;display=swap" rel="stylesheet">
+
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <!-- Platform CSS -->
     <link rel="stylesheet" href="../css/style-new.css">
     <link rel="stylesheet" href="../css/mobile-fixes.css">
+
+    <style>
+        /* ===== Editor Layout ===== */
+        body {
+            overflow-x: hidden;
+            background: #f8f9fa;
+        }
+
+        .editor-wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 56px);
+        }
+
+        /* ===== Editor Toolbar ===== */
+        .editor-toolbar {
+            position: sticky;
+            top: 56px;
+            z-index: 1030;
+            background: #fff;
+            border-bottom: 1px solid #dee2e6;
+            padding: 0.4rem 1rem;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+        }
+
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            padding: 0 0.4rem;
+            border-right: 1px solid #e0e0e0;
+        }
+
+        .toolbar-group:last-child {
+            border-right: none;
+        }
+
+        .toolbar-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #555;
+            font-size: 0.85rem;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .toolbar-btn:hover {
+            background: #e9ecef;
+            color: #333;
+        }
+
+        .toolbar-btn.active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .toolbar-select {
+            height: 32px;
+            font-size: 0.8rem;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 0 0.5rem;
+            background: #fff;
+            cursor: pointer;
+        }
+
+        /* ===== Secondary Toolbar ===== */
+        .secondary-toolbar {
+            position: sticky;
+            top: 100px;
+            z-index: 1029;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            padding: 0.5rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .title-input {
+            flex: 1;
+            min-width: 200px;
+            border: 1px solid transparent;
+            background: transparent;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .title-input:focus {
+            border-color: #8B7355;
+            background: #fff;
+        }
+
+        .save-status {
+            font-size: 0.8rem;
+            color: #6c757d;
+            white-space: nowrap;
+        }
+
+        .save-status i {
+            margin-right: 4px;
+        }
+
+        .save-status.saved {
+            color: #28a745;
+        }
+
+        .save-status.saving {
+            color: #ffc107;
+        }
+
+        .save-status.error {
+            color: #dc3545;
+        }
+
+        /* ===== Main Editor Area ===== */
+        .editor-main {
+            display: flex;
+            flex: 1;
+        }
+
+        .editor-content-area {
+            flex: 1;
+            padding: 2rem;
+            max-width: 100%;
+        }
+
+        .editor-paper {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 3rem 2.5rem;
+            min-height: 600px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+            outline: none;
+            font-family: 'Noto Serif JP', serif;
+            font-size: 1.05rem;
+            line-height: 1.8;
+            color: #333;
+        }
+
+        .editor-paper:focus {
+            border-color: #8B7355;
+            box-shadow: 0 0 0 2px rgba(139, 115, 85, 0.15);
+        }
+
+        .editor-paper:empty::before {
+            content: attr(data-placeholder);
+            color: #adb5bd;
+            pointer-events: none;
+        }
+
+        /* ===== Comment Panel ===== */
+        .comment-panel {
+            width: 300px;
+            background: #fff;
+            border-left: 1px solid #dee2e6;
+            display: none;
+            flex-direction: column;
+        }
+
+        .comment-panel.open {
+            display: flex;
+        }
+
+        .comment-header {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .comment-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.75rem;
+        }
+
+        .comment-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .comment-item .comment-author {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: #8B7355;
+        }
+
+        .comment-item .comment-time {
+            font-size: 0.75rem;
+            color: #999;
+        }
+
+        .comment-input-area {
+            padding: 0.75rem;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .comment-input-area textarea {
+            width: 100%;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 0.5rem;
+            font-size: 0.85rem;
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .comment-input-area button {
+            margin-top: 0.5rem;
+            width: 100%;
+        }
+
+        /* ===== Search & Replace Panel ===== */
+        .search-panel {
+            display: none;
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            width: 340px;
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+            z-index: 1035;
+            padding: 1rem;
+        }
+
+        .search-panel.open {
+            display: block;
+        }
+
+        .search-panel .search-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .search-panel input {
+            flex: 1;
+            padding: 0.4rem 0.5rem;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        .search-panel .search-info {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+        }
+
+        /* ===== Image Insert Modal ===== */
+        .image-modal-preview {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            display: none;
+            margin-top: 0.5rem;
+        }
+
+        /* ===== Editor Footer ===== */
+        .editor-footer {
+            background: #fff;
+            border-top: 1px solid #dee2e6;
+            padding: 0.4rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+        .footer-stats {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 991.98px) {
+            .comment-panel {
+                position: fixed;
+                top: 56px;
+                right: 0;
+                bottom: 0;
+                z-index: 1038;
+                box-shadow: -4px 0 16px rgba(0, 0, 0, 0.1);
+            }
+            .editor-paper {
+                padding: 1.5rem 1rem;
+            }
+            .toolbar-group {
+                padding: 0 0.2rem;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .secondary-toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .title-input {
+                min-width: auto;
+            }
+            .comment-panel {
+                width: 100%;
+            }
+        }
+
+        /* ===== Autosave indicator ===== */
+        @keyframes pulse-save {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .save-status.saving i {
+            animation: pulse-save 1s infinite;
+        }
+    </style>
 </head>
 <body>
+    <!-- ===== PATTERN C NAVBAR (from account-settings.html) ===== -->
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="../index.html">
+                <i class="fas fa-book-open"></i> Publisher
+            </a>
+            <!-- Mobile Language Selector -->
+            <div class="d-lg-none me-2">
+                <select id="mobileLanguageSelect" class="form-select form-select-sm language-selector" style="width: auto; min-width: 100px;">
+                    <option value="en">🇬🇧 English</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                    <option value="pt">🇧🇷 Português</option>
+                </select>
+            </div>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="dashboard.html" data-i18n="nav.dashboard">ダッシュボード</a></li>
+                </ul>
+                <ul class="navbar-nav">
+                    <!-- Desktop Language Selector -->
+                    <li class="nav-item d-none d-lg-block me-3">
+                        <select id="desktopLanguageSelect" class="form-select form-select-sm language-selector" style="width: auto;">
+                            <option value="en">🇬🇧 English</option>
+                            <option value="ja">🇯🇵 日本語</option>
+                            <option value="zh">🇨🇳 中文</option>
+                            <option value="es">🇪🇸 Español</option>
+                            <option value="fr">🇫🇷 Français</option>
+                            <option value="de">🇩🇪 Deutsch</option>
+                            <option value="ko">🇰🇷 한국어</option>
+                            <option value="ar">🇸🇦 العربية</option>
+                            <option value="pt">🇧🇷 Português</option>
+                        </select>
+                    </li>
+                </ul>
+                <ul class="navbar-nav" id="authNav">
+                    <li class="nav-item"><a class="nav-link" href="login.html" data-i18n="nav.login">ログイン</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== EDITOR TOOLBAR ===== -->
+    <div class="editor-toolbar" id="editorToolbar">
+        <div class="toolbar-group">
+            <select class="toolbar-select" id="headingSelect" title="Heading">
+                <option value="p" id="opt-paragraph">Paragraph</option>
+                <option value="h1" id="opt-h1">Heading 1</option>
+                <option value="h2" id="opt-h2">Heading 2</option>
+                <option value="h3" id="opt-h3">Heading 3</option>
+            </select>
+        </div>
+        <div class="toolbar-group">
+            <button class="toolbar-btn" onclick="execCmd('bold')" title="Bold"><i class="fas fa-bold"></i></button>
+            <button class="toolbar-btn" onclick="execCmd('italic')" title="Italic"><i class="fas fa-italic"></i></button>
+            <button class="toolbar-btn" onclick="execCmd('underline')" title="Underline"><i class="fas fa-underline"></i></button>
+            <button class="toolbar-btn" onclick="execCmd('strikeThrough')" title="Strikethrough"><i class="fas fa-strikethrough"></i></button>
+        </div>
+        <div class="toolbar-group">
+            <button class="toolbar-btn" onclick="execCmd('justifyLeft')" title="Align Left"><i class="fas fa-align-left"></i></button>
+            <button class="toolbar-btn" onclick="execCmd('justifyCenter')" title="Align Center"><i class="fas fa-align-center"></i></button>
+            <button class="toolbar-btn" onclick="execCmd('justifyRight')" title="Align Right"><i class="fas fa-align-right"></i></button>
+        </div>
+        <div class="toolbar-group">
+            <button class="toolbar-btn" onclick="execCmd('insertUnorderedList')" title="Bullet List"><i class="fas fa-list-ul"></i></button>
+            <button class="toolbar-btn" onclick="execCmd('insertOrderedList')" title="Numbered List"><i class="fas fa-list-ol"></i></button>
+            <button class="toolbar-btn" onclick="execCmd('outdent')" title="Outdent"><i class="fas fa-outdent"></i></button>
+            <button class="toolbar-btn" onclick="execCmd('indent')" title="Indent"><i class="fas fa-indent"></i></button>
+        </div>
+        <div class="toolbar-group">
+            <button class="toolbar-btn" onclick="insertLink()" title="Insert Link"><i class="fas fa-link"></i></button>
+            <button class="toolbar-btn" onclick="openImageModal()" title="Insert Image"><i class="fas fa-image"></i></button>
+            <button class="toolbar-btn" onclick="execCmd('insertHorizontalRule')" title="Horizontal Rule"><i class="fas fa-minus"></i></button>
+            <button class="toolbar-btn" onclick="insertBlockquote()" title="Blockquote"><i class="fas fa-quote-right"></i></button>
+        </div>
+        <div class="toolbar-group">
+            <button class="toolbar-btn" onclick="execCmd('undo')" title="Undo"><i class="fas fa-undo"></i></button>
+            <button class="toolbar-btn" onclick="execCmd('redo')" title="Redo"><i class="fas fa-redo"></i></button>
+        </div>
+        <div class="toolbar-group">
+            <button class="toolbar-btn" onclick="toggleSearchPanel()" title="Search"><i class="fas fa-search"></i></button>
+            <button class="toolbar-btn" onclick="toggleCommentPanel()" title="Comments"><i class="fas fa-comment-dots"></i></button>
+        </div>
+    </div>
+
+    <!-- ===== SECONDARY TOOLBAR ===== -->
+    <div class="secondary-toolbar" id="secondaryToolbar">
+        <input type="text" class="title-input" id="workTitle" placeholder="Untitled" value="">
+        <span class="save-status saved" id="saveStatus">
+            <i class="fas fa-check-circle"></i> <span id="saveStatusText">Saved</span>
+        </span>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary btn-sm" onclick="exportWork()" id="btnExport">
+                <i class="fas fa-file-export me-1"></i><span>Export</span>
+            </button>
+            <button class="btn btn-primary-custom btn-sm" onclick="publishWork()" id="btnPublish">
+                <i class="fas fa-paper-plane me-1"></i><span>Publish</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== SEARCH & REPLACE PANEL ===== -->
+    <div class="search-panel" id="searchPanel">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <strong id="searchTitle">Search &amp; Replace</strong>
+            <button class="toolbar-btn" onclick="toggleSearchPanel()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="search-row">
+            <input type="text" id="searchInput" placeholder="Search...">
+            <button class="btn btn-outline-secondary btn-sm" onclick="findText()"><i class="fas fa-search"></i></button>
+        </div>
+        <div class="search-row">
+            <input type="text" id="replaceInput" placeholder="Replace...">
+            <button class="btn btn-outline-secondary btn-sm" onclick="replaceText()" id="btnReplace">Replace</button>
+        </div>
+        <div class="search-info" id="searchInfo"></div>
+    </div>
+
+    <!-- ===== MAIN EDITOR AREA ===== -->
+    <div class="editor-main">
+        <div class="editor-content-area">
+            <div class="editor-paper" id="editorArea" contenteditable="true" data-placeholder="Start writing your story..." spellcheck="true">
+            </div>
+        </div>
+
+        <!-- Comment Panel -->
+        <div class="comment-panel" id="commentPanel">
+            <div class="comment-header">
+                <span id="commentTitle">Comments</span>
+                <button class="toolbar-btn" onclick="toggleCommentPanel()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="comment-list" id="commentList">
+                <div class="comment-item">
+                    <div class="comment-author">Editor</div>
+                    <div class="comment-text" id="sampleComment1">Great opening paragraph! Consider adding more detail to the setting description.</div>
+                    <div class="comment-time">2 hours ago</div>
+                </div>
+                <div class="comment-item">
+                    <div class="comment-author">Translator</div>
+                    <div class="comment-text" id="sampleComment2">This section may be difficult to translate. Could you simplify the metaphor?</div>
+                    <div class="comment-time">1 day ago</div>
+                </div>
+            </div>
+            <div class="comment-input-area">
+                <textarea id="newComment" placeholder="Add a comment..."></textarea>
+                <button class="btn btn-primary-custom btn-sm" onclick="addComment()" id="btnAddComment">
+                    <i class="fas fa-plus me-1"></i><span>Add Comment</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== EDITOR FOOTER ===== -->
+    <div class="editor-footer" id="editorFooter">
+        <div class="footer-stats">
+            <span><span id="labelChars">Characters</span>: <strong id="charCount">0</strong></span>
+            <span><span id="labelWords">Words</span>: <strong id="wordCount">0</strong></span>
+            <span><span id="labelPages">Pages</span>: <strong id="pageCount">0</strong></span>
+        </div>
+        <span id="labelLastEdit">Last edit: just now</span>
+    </div>
+
+    <!-- ===== IMAGE INSERT MODAL ===== -->
+    <div class="modal fade" id="imageModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-image me-2"></i><span id="imageModalTitle">Insert Image</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label" id="imageUrlLabel">Image URL</label>
+                        <input type="url" class="form-control" id="imageUrlInput" placeholder="https://example.com/image.jpg">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" id="imageAltLabel">Alt Text</label>
+                        <input type="text" class="form-control" id="imageAltInput" placeholder="Description of the image">
+                    </div>
+                    <img class="image-modal-preview" id="imagePreview" alt="Preview">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnImageCancel">Cancel</button>
+                    <button type="button" class="btn btn-primary-custom" onclick="insertImage()" id="btnImageInsert">
+                        <i class="fas fa-plus me-1"></i> Insert
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== EXPORT MODAL ===== -->
+    <div class="modal fade" id="exportModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-file-export me-2"></i><span id="exportModalTitle">Export</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="list-group">
+                        <button class="list-group-item list-group-item-action" onclick="doExport('html')">
+                            <i class="fas fa-code me-2"></i> HTML
+                        </button>
+                        <button class="list-group-item list-group-item-action" onclick="doExport('txt')">
+                            <i class="fas fa-file-alt me-2"></i> Plain Text
+                        </button>
+                        <button class="list-group-item list-group-item-action" onclick="doExport('md')">
+                            <i class="fab fa-markdown me-2"></i> Markdown
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Language files (9 languages) -->
+    <script src="../js/lang/ja.js"></script>
+    <script src="../js/lang/en.js"></script>
+    <script src="../js/lang/zh.js"></script>
+    <script src="../js/lang/es.js"></script>
+    <script src="../js/lang/fr.js"></script>
+    <script src="../js/lang/de.js"></script>
+    <script src="../js/lang/ko.js"></script>
+    <script src="../js/lang/ar.js"></script>
+    <script src="../js/lang/pt.js"></script>
+    <!-- Translation base -->
+    <script src="../js/lang/translations-base.js"></script>
+    <!-- Language switcher -->
+    <script src="../js/language-switcher.js"></script>
+
+    <script>
+    /* =========================================================
+       EDITOR UI TEXT - 9 Languages
+       ========================================================= */
+    var editorUiText = {
+        ja: {
+            title: 'エディター - Publisher',
+            untitled: '無題',
+            placeholder: 'ここに物語を書き始めてください...',
+            paragraph: '段落', h1: '見出し1', h2: '見出し2', h3: '見出し3',
+            saved: '保存済み', saving: '保存中...', unsaved: '未保存',
+            exportBtn: 'エクスポート', publishBtn: '公開',
+            searchReplace: '検索と置換', searchPlaceholder: '検索...',
+            replacePlaceholder: '置換...', replaceBtn: '置換',
+            noResults: '見つかりません', foundResults: '件見つかりました',
+            comments: 'コメント', addComment: 'コメント追加',
+            commentPlaceholder: 'コメントを追加...',
+            sampleComment1: '冒頭の段落がとても良いです！情景描写をもう少し詳しく書くと良いかもしれません。',
+            sampleComment2: 'この部分は翻訳が難しそうです。比喩をもう少しシンプルにできますか？',
+            characters: '文字数', words: '単語数', pages: 'ページ数',
+            lastEdit: '最終編集: たった今',
+            insertImage: '画像を挿入', imageUrl: '画像URL',
+            imageAlt: '代替テキスト', cancel: 'キャンセル', insert: '挿入',
+            exportTitle: 'エクスポート',
+            linkPrompt: 'URLを入力してください:', publishConfirm: '公開してもよろしいですか？',
+            publishSuccess: '公開しました！', publishDemoMsg: 'デモモード: 公開は無効です'
+        },
+        en: {
+            title: 'Editor - Publisher',
+            untitled: 'Untitled',
+            placeholder: 'Start writing your story...',
+            paragraph: 'Paragraph', h1: 'Heading 1', h2: 'Heading 2', h3: 'Heading 3',
+            saved: 'Saved', saving: 'Saving...', unsaved: 'Unsaved',
+            exportBtn: 'Export', publishBtn: 'Publish',
+            searchReplace: 'Search & Replace', searchPlaceholder: 'Search...',
+            replacePlaceholder: 'Replace...', replaceBtn: 'Replace',
+            noResults: 'No results', foundResults: 'results found',
+            comments: 'Comments', addComment: 'Add Comment',
+            commentPlaceholder: 'Add a comment...',
+            sampleComment1: 'Great opening paragraph! Consider adding more detail to the setting description.',
+            sampleComment2: 'This section may be difficult to translate. Could you simplify the metaphor?',
+            characters: 'Characters', words: 'Words', pages: 'Pages',
+            lastEdit: 'Last edit: just now',
+            insertImage: 'Insert Image', imageUrl: 'Image URL',
+            imageAlt: 'Alt Text', cancel: 'Cancel', insert: 'Insert',
+            exportTitle: 'Export',
+            linkPrompt: 'Enter URL:', publishConfirm: 'Are you sure you want to publish?',
+            publishSuccess: 'Published!', publishDemoMsg: 'Demo mode: Publishing is disabled'
+        },
+        zh: {
+            title: '编辑器 - Publisher', untitled: '无标题',
+            placeholder: '在这里开始写作...', paragraph: '段落', h1: '标题1', h2: '标题2', h3: '标题3',
+            saved: '已保存', saving: '保存中...', unsaved: '未保存',
+            exportBtn: '导出', publishBtn: '发布',
+            searchReplace: '搜索和替换', searchPlaceholder: '搜索...', replacePlaceholder: '替换...', replaceBtn: '替换',
+            noResults: '无结果', foundResults: '个结果',
+            comments: '评论', addComment: '添加评论', commentPlaceholder: '添加评论...',
+            sampleComment1: '开头段落写得很好！可以考虑增加更多场景描写。',
+            sampleComment2: '这部分可能难以翻译。能否简化这个比喻？',
+            characters: '字符', words: '词数', pages: '页数', lastEdit: '最后编辑：刚刚',
+            insertImage: '插入图片', imageUrl: '图片URL', imageAlt: '替代文字', cancel: '取消', insert: '插入',
+            exportTitle: '导出', linkPrompt: '请输入URL：', publishConfirm: '确定要发布吗？',
+            publishSuccess: '已发布！', publishDemoMsg: '演示模式：发布已禁用'
+        },
+        es: {
+            title: 'Editor - Publisher', untitled: 'Sin título',
+            placeholder: 'Comienza a escribir tu historia...', paragraph: 'Párrafo', h1: 'Encabezado 1', h2: 'Encabezado 2', h3: 'Encabezado 3',
+            saved: 'Guardado', saving: 'Guardando...', unsaved: 'Sin guardar',
+            exportBtn: 'Exportar', publishBtn: 'Publicar',
+            searchReplace: 'Buscar y Reemplazar', searchPlaceholder: 'Buscar...', replacePlaceholder: 'Reemplazar...', replaceBtn: 'Reemplazar',
+            noResults: 'Sin resultados', foundResults: 'resultados encontrados',
+            comments: 'Comentarios', addComment: 'Agregar Comentario', commentPlaceholder: 'Agregar un comentario...',
+            sampleComment1: '¡Gran párrafo de apertura! Considera agregar más detalles a la descripción del escenario.',
+            sampleComment2: 'Esta sección puede ser difícil de traducir. ¿Podrías simplificar la metáfora?',
+            characters: 'Caracteres', words: 'Palabras', pages: 'Páginas', lastEdit: 'Última edición: ahora mismo',
+            insertImage: 'Insertar Imagen', imageUrl: 'URL de la imagen', imageAlt: 'Texto alternativo', cancel: 'Cancelar', insert: 'Insertar',
+            exportTitle: 'Exportar', linkPrompt: 'Ingrese la URL:', publishConfirm: '¿Estás seguro de que deseas publicar?',
+            publishSuccess: '¡Publicado!', publishDemoMsg: 'Modo demo: La publicación está deshabilitada'
+        },
+        fr: {
+            title: 'Éditeur - Publisher', untitled: 'Sans titre',
+            placeholder: 'Commencez à écrire votre histoire...', paragraph: 'Paragraphe', h1: 'Titre 1', h2: 'Titre 2', h3: 'Titre 3',
+            saved: 'Enregistré', saving: 'Enregistrement...', unsaved: 'Non enregistré',
+            exportBtn: 'Exporter', publishBtn: 'Publier',
+            searchReplace: 'Rechercher et Remplacer', searchPlaceholder: 'Rechercher...', replacePlaceholder: 'Remplacer...', replaceBtn: 'Remplacer',
+            noResults: 'Aucun résultat', foundResults: 'résultats trouvés',
+            comments: 'Commentaires', addComment: 'Ajouter un Commentaire', commentPlaceholder: 'Ajouter un commentaire...',
+            sampleComment1: "Excellent paragraphe d'ouverture ! Envisagez d'ajouter plus de détails.",
+            sampleComment2: 'Cette section peut être difficile à traduire. Pourriez-vous simplifier la métaphore ?',
+            characters: 'Caractères', words: 'Mots', pages: 'Pages', lastEdit: "Dernière modification : à l'instant",
+            insertImage: 'Insérer une Image', imageUrl: "URL de l'image", imageAlt: 'Texte alternatif', cancel: 'Annuler', insert: 'Insérer',
+            exportTitle: 'Exporter', linkPrompt: "Entrez l'URL :", publishConfirm: 'Êtes-vous sûr de vouloir publier ?',
+            publishSuccess: 'Publié !', publishDemoMsg: 'Mode démo : La publication est désactivée'
+        },
+        de: {
+            title: 'Editor - Publisher', untitled: 'Ohne Titel',
+            placeholder: 'Beginnen Sie hier Ihre Geschichte...', paragraph: 'Absatz', h1: 'Überschrift 1', h2: 'Überschrift 2', h3: 'Überschrift 3',
+            saved: 'Gespeichert', saving: 'Speichern...', unsaved: 'Nicht gespeichert',
+            exportBtn: 'Exportieren', publishBtn: 'Veröffentlichen',
+            searchReplace: 'Suchen und Ersetzen', searchPlaceholder: 'Suchen...', replacePlaceholder: 'Ersetzen...', replaceBtn: 'Ersetzen',
+            noResults: 'Keine Ergebnisse', foundResults: 'Ergebnisse gefunden',
+            comments: 'Kommentare', addComment: 'Kommentar hinzufügen', commentPlaceholder: 'Kommentar hinzufügen...',
+            sampleComment1: 'Toller Eröffnungsabsatz! Erwägen Sie, mehr Details hinzuzufügen.',
+            sampleComment2: 'Dieser Abschnitt könnte schwer zu übersetzen sein. Könnten Sie die Metapher vereinfachen?',
+            characters: 'Zeichen', words: 'Wörter', pages: 'Seiten', lastEdit: 'Letzte Bearbeitung: gerade eben',
+            insertImage: 'Bild einfügen', imageUrl: 'Bild-URL', imageAlt: 'Alternativtext', cancel: 'Abbrechen', insert: 'Einfügen',
+            exportTitle: 'Exportieren', linkPrompt: 'URL eingeben:', publishConfirm: 'Möchten Sie wirklich veröffentlichen?',
+            publishSuccess: 'Veröffentlicht!', publishDemoMsg: 'Demomodus: Veröffentlichung ist deaktiviert'
+        },
+        ko: {
+            title: '에디터 - Publisher', untitled: '제목 없음',
+            placeholder: '여기에 이야기를 작성하세요...', paragraph: '단락', h1: '제목 1', h2: '제목 2', h3: '제목 3',
+            saved: '저장됨', saving: '저장 중...', unsaved: '저장되지 않음',
+            exportBtn: '내보내기', publishBtn: '게시',
+            searchReplace: '찾기 및 바꾸기', searchPlaceholder: '찾기...', replacePlaceholder: '바꾸기...', replaceBtn: '바꾸기',
+            noResults: '결과 없음', foundResults: '개 결과',
+            comments: '댓글', addComment: '댓글 추가', commentPlaceholder: '댓글을 추가하세요...',
+            sampleComment1: '훌륭한 서두입니다! 장면 묘사를 좀 더 자세히 추가해 보세요.',
+            sampleComment2: '이 부분은 번역하기 어려울 수 있습니다. 은유를 간단하게 할 수 있을까요?',
+            characters: '글자 수', words: '단어 수', pages: '페이지 수', lastEdit: '마지막 편집: 방금',
+            insertImage: '이미지 삽입', imageUrl: '이미지 URL', imageAlt: '대체 텍스트', cancel: '취소', insert: '삽입',
+            exportTitle: '내보내기', linkPrompt: 'URL을 입력하세요:', publishConfirm: '게시하시겠습니까?',
+            publishSuccess: '게시되었습니다!', publishDemoMsg: '데모 모드: 게시가 비활성화되었습니다'
+        },
+        ar: {
+            title: 'المحرر - Publisher', untitled: 'بدون عنوان',
+            placeholder: 'ابدأ كتابة قصتك هنا...', paragraph: 'فقرة', h1: 'عنوان 1', h2: 'عنوان 2', h3: 'عنوان 3',
+            saved: 'تم الحفظ', saving: 'جارٍ الحفظ...', unsaved: 'غير محفوظ',
+            exportBtn: 'تصدير', publishBtn: 'نشر',
+            searchReplace: 'بحث واستبدال', searchPlaceholder: 'بحث...', replacePlaceholder: 'استبدال...', replaceBtn: 'استبدال',
+            noResults: 'لا توجد نتائج', foundResults: 'نتائج',
+            comments: 'التعليقات', addComment: 'إضافة تعليق', commentPlaceholder: 'أضف تعليقاً...',
+            sampleComment1: 'فقرة افتتاحية رائعة! فكر في إضافة المزيد من التفاصيل.',
+            sampleComment2: 'قد يكون هذا القسم صعب الترجمة. هل يمكنك تبسيط الاستعارة؟',
+            characters: 'الأحرف', words: 'الكلمات', pages: 'الصفحات', lastEdit: 'آخر تعديل: الآن',
+            insertImage: 'إدراج صورة', imageUrl: 'رابط الصورة', imageAlt: 'النص البديل', cancel: 'إلغاء', insert: 'إدراج',
+            exportTitle: 'تصدير', linkPrompt: 'أدخل الرابط:', publishConfirm: 'هل أنت متأكد من النشر؟',
+            publishSuccess: 'تم النشر!', publishDemoMsg: 'الوضع التجريبي: النشر معطل'
+        },
+        pt: {
+            title: 'Editor - Publisher', untitled: 'Sem título',
+            placeholder: 'Comece a escrever sua história...', paragraph: 'Parágrafo', h1: 'Título 1', h2: 'Título 2', h3: 'Título 3',
+            saved: 'Salvo', saving: 'Salvando...', unsaved: 'Não salvo',
+            exportBtn: 'Exportar', publishBtn: 'Publicar',
+            searchReplace: 'Pesquisar e Substituir', searchPlaceholder: 'Pesquisar...', replacePlaceholder: 'Substituir...', replaceBtn: 'Substituir',
+            noResults: 'Sem resultados', foundResults: 'resultados encontrados',
+            comments: 'Comentários', addComment: 'Adicionar Comentário', commentPlaceholder: 'Adicionar um comentário...',
+            sampleComment1: 'Ótimo parágrafo de abertura! Considere adicionar mais detalhes ao cenário.',
+            sampleComment2: 'Esta seção pode ser difícil de traduzir. Poderia simplificar a metáfora?',
+            characters: 'Caracteres', words: 'Palavras', pages: 'Páginas', lastEdit: 'Última edição: agora mesmo',
+            insertImage: 'Inserir Imagem', imageUrl: 'URL da imagem', imageAlt: 'Texto alternativo', cancel: 'Cancelar', insert: 'Inserir',
+            exportTitle: 'Exportar', linkPrompt: 'Digite a URL:', publishConfirm: 'Tem certeza de que deseja publicar?',
+            publishSuccess: 'Publicado!', publishDemoMsg: 'Modo demo: A publicação está desativada'
+        }
+    };
+
+    /* =========================================================
+       EDITOR CORE
+       ========================================================= */
+    var currentLang = localStorage.getItem('preferredLanguage') || 'en';
+    var autoSaveTimer = null;
+
+    function getL(key) {
+        var langData = editorUiText[currentLang] || editorUiText['en'];
+        return langData[key] || editorUiText['en'][key] || key;
+    }
+
+    function applyEditorTranslations() {
+        currentLang = localStorage.getItem('preferredLanguage') || 'en';
+        document.title = getL('title');
+        var paper = document.getElementById('editorArea');
+        if (paper) paper.setAttribute('data-placeholder', getL('placeholder'));
+        var titleInput = document.getElementById('workTitle');
+        if (titleInput && !titleInput.value) titleInput.placeholder = getL('untitled');
+        var optP = document.getElementById('opt-paragraph');
+        var optH1 = document.getElementById('opt-h1');
+        var optH2 = document.getElementById('opt-h2');
+        var optH3 = document.getElementById('opt-h3');
+        if (optP) optP.textContent = getL('paragraph');
+        if (optH1) optH1.textContent = getL('h1');
+        if (optH2) optH2.textContent = getL('h2');
+        if (optH3) optH3.textContent = getL('h3');
+        updateSaveStatusText();
+        var btnExport = document.querySelector('#btnExport span');
+        var btnPublish = document.querySelector('#btnPublish span');
+        if (btnExport) btnExport.textContent = getL('exportBtn');
+        if (btnPublish) btnPublish.textContent = getL('publishBtn');
+        var el = document.getElementById('searchTitle');
+        if (el) el.textContent = getL('searchReplace');
+        el = document.getElementById('searchInput');
+        if (el) el.placeholder = getL('searchPlaceholder');
+        el = document.getElementById('replaceInput');
+        if (el) el.placeholder = getL('replacePlaceholder');
+        el = document.getElementById('btnReplace');
+        if (el) el.textContent = getL('replaceBtn');
+        el = document.getElementById('commentTitle');
+        if (el) el.textContent = getL('comments');
+        el = document.getElementById('newComment');
+        if (el) el.placeholder = getL('commentPlaceholder');
+        var addBtn = document.querySelector('#btnAddComment span');
+        if (addBtn) addBtn.textContent = getL('addComment');
+        el = document.getElementById('sampleComment1');
+        if (el) el.textContent = getL('sampleComment1');
+        el = document.getElementById('sampleComment2');
+        if (el) el.textContent = getL('sampleComment2');
+        el = document.getElementById('labelChars');
+        if (el) el.textContent = getL('characters');
+        el = document.getElementById('labelWords');
+        if (el) el.textContent = getL('words');
+        el = document.getElementById('labelPages');
+        if (el) el.textContent = getL('pages');
+        el = document.getElementById('labelLastEdit');
+        if (el) el.textContent = getL('lastEdit');
+        el = document.getElementById('imageModalTitle');
+        if (el) el.textContent = getL('insertImage');
+        el = document.getElementById('imageUrlLabel');
+        if (el) el.textContent = getL('imageUrl');
+        el = document.getElementById('imageAltLabel');
+        if (el) el.textContent = getL('imageAlt');
+        el = document.getElementById('btnImageCancel');
+        if (el) el.textContent = getL('cancel');
+        el = document.getElementById('btnImageInsert');
+        if (el) el.innerHTML = '<i class="fas fa-plus me-1"></i> ' + getL('insert');
+        el = document.getElementById('exportModalTitle');
+        if (el) el.textContent = getL('exportTitle');
+    }
+
+    function updateSaveStatusText() {
+        var statusEl = document.getElementById('saveStatus');
+        var textEl = document.getElementById('saveStatusText');
+        if (!statusEl || !textEl) return;
+        if (statusEl.classList.contains('saved')) {
+            textEl.textContent = getL('saved');
+        } else if (statusEl.classList.contains('saving')) {
+            textEl.textContent = getL('saving');
+        } else {
+            textEl.textContent = getL('unsaved');
+        }
+    }
+
+    /* =========================================================
+       AUTH NAV
+       ========================================================= */
+    function getNavText(key) {
+        if (typeof translations === 'undefined') return null;
+        var langData = translations[currentLang] || translations['en'];
+        if (!langData) return null;
+        var keys = key.split('.');
+        var value = langData;
+        for (var i = 0; i < keys.length; i++) {
+            if (value && typeof value === 'object' && keys[i] in value) {
+                value = value[keys[i]];
+            } else {
+                return null;
+            }
+        }
+        return typeof value === 'string' ? value : null;
+    }
+
+    function updateAuthNav() {
+        var token = localStorage.getItem('token');
+        var userStr = localStorage.getItem('user');
+        var authNav = document.getElementById('authNav');
+        if (!authNav) return;
+        if (token && userStr) {
+            try {
+                var user = JSON.parse(userStr);
+                var displayName = user.display_name || user.displayName || user.firstName || user.email || 'User';
+                authNav.innerHTML =
+                    '<li class="nav-item dropdown">' +
+                    '<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">' +
+                    '<i class="fas fa-user-circle me-1"></i>' + displayName +
+                    '</a>' +
+                    '<ul class="dropdown-menu dropdown-menu-end">' +
+                    '<li><a class="dropdown-item" href="dashboard.html"><i class="fas fa-th-large me-2"></i><span data-i18n="nav.dashboard">' + (getNavText('nav.dashboard') || 'Dashboard') + '</span></a></li>' +
+                    '<li><a class="dropdown-item" href="account-settings.html"><i class="fas fa-cog me-2"></i><span data-i18n="nav.settings">' + (getNavText('nav.settings') || 'Settings') + '</span></a></li>' +
+                    '<li><hr class="dropdown-divider"></li>' +
+                    '<li><a class="dropdown-item" href="#" onclick="logout(); return false;"><i class="fas fa-sign-out-alt me-2"></i><span data-i18n="nav.logout">' + (getNavText('nav.logout') || 'Logout') + '</span></a></li>' +
+                    '</ul>' +
+                    '</li>';
+                document.body.classList.add('logged-in');
+            } catch (e) {
+                console.error('Failed to parse user data:', e);
+            }
+        } else {
+            document.body.classList.remove('logged-in');
+        }
+        if (typeof applyTranslations === 'function') {
+            applyTranslations();
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = 'login.html';
+    }
+
+    /* =========================================================
+       EDITOR COMMANDS
+       ========================================================= */
+    function execCmd(command, value) {
+        document.execCommand(command, false, value || null);
+        document.getElementById('editorArea').focus();
+        onContentChange();
+    }
+
+    function insertLink() {
+        var url = prompt(getL('linkPrompt'), 'https://');
+        if (url) { execCmd('createLink', url); }
+    }
+
+    function insertBlockquote() {
+        execCmd('formatBlock', 'blockquote');
+    }
+
+    /* =========================================================
+       IMAGE INSERT
+       ========================================================= */
+    function openImageModal() {
+        document.getElementById('imageUrlInput').value = '';
+        document.getElementById('imageAltInput').value = '';
+        document.getElementById('imagePreview').style.display = 'none';
+        new bootstrap.Modal(document.getElementById('imageModal')).show();
+    }
+
+    function insertImage() {
+        var url = document.getElementById('imageUrlInput').value;
+        var alt = document.getElementById('imageAltInput').value || '';
+        if (url) {
+            document.getElementById('editorArea').focus();
+            document.execCommand('insertHTML', false, '<img src="' + url + '" alt="' + alt + '" style="max-width: 100%; border-radius: 8px; margin: 1rem 0;">');
+            bootstrap.Modal.getInstance(document.getElementById('imageModal')).hide();
+            onContentChange();
+        }
+    }
+
+    /* =========================================================
+       SEARCH & REPLACE
+       ========================================================= */
+    function toggleSearchPanel() {
+        var panel = document.getElementById('searchPanel');
+        panel.classList.toggle('open');
+        if (panel.classList.contains('open')) {
+            document.getElementById('searchInput').focus();
+        }
+    }
+
+    function findText() {
+        var query = document.getElementById('searchInput').value;
+        var infoEl = document.getElementById('searchInfo');
+        if (!query) { infoEl.textContent = ''; return; }
+        var content = document.getElementById('editorArea').innerText;
+        var regex = new RegExp(query, 'gi');
+        var matches = content.match(regex);
+        if (matches) {
+            infoEl.textContent = matches.length + ' ' + getL('foundResults');
+            window.find(query);
+        } else {
+            infoEl.textContent = getL('noResults');
+        }
+    }
+
+    function replaceText() {
+        var search = document.getElementById('searchInput').value;
+        var replace = document.getElementById('replaceInput').value;
+        if (!search) return;
+        var editor = document.getElementById('editorArea');
+        editor.innerHTML = editor.innerHTML.split(search).join(replace);
+        onContentChange();
+    }
+
+    /* =========================================================
+       COMMENT PANEL
+       ========================================================= */
+    function toggleCommentPanel() {
+        document.getElementById('commentPanel').classList.toggle('open');
+    }
+
+    function addComment() {
+        var textarea = document.getElementById('newComment');
+        var text = textarea.value.trim();
+        if (!text) return;
+        var list = document.getElementById('commentList');
+        var item = document.createElement('div');
+        item.className = 'comment-item';
+        item.innerHTML =
+            '<div class="comment-author">You</div>' +
+            '<div class="comment-text">' + text.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>' +
+            '<div class="comment-time">' + getL('lastEdit') + '</div>';
+        list.appendChild(item);
+        textarea.value = '';
+        list.scrollTop = list.scrollHeight;
+    }
+
+    /* =========================================================
+       EXPORT
+       ========================================================= */
+    function exportWork() {
+        new bootstrap.Modal(document.getElementById('exportModal')).show();
+    }
+
+    function doExport(format) {
+        var title = document.getElementById('workTitle').value || getL('untitled');
+        var content = document.getElementById('editorArea');
+        var data, mimeType, ext;
+        if (format === 'html') {
+            data = '<!DOCTYPE html>\n<html><head><meta charset="UTF-8"><title>' + title + '</title></head><body>\n' + content.innerHTML + '\n</body></html>';
+            mimeType = 'text/html'; ext = '.html';
+        } else if (format === 'txt') {
+            data = content.innerText; mimeType = 'text/plain'; ext = '.txt';
+        } else {
+            data = content.innerHTML
+                .replace(/<h1[^>]*>(.*?)<\/h1>/gi, '# $1\n\n')
+                .replace(/<h2[^>]*>(.*?)<\/h2>/gi, '## $1\n\n')
+                .replace(/<h3[^>]*>(.*?)<\/h3>/gi, '### $1\n\n')
+                .replace(/<strong[^>]*>(.*?)<\/strong>/gi, '**$1**')
+                .replace(/<b[^>]*>(.*?)<\/b>/gi, '**$1**')
+                .replace(/<em[^>]*>(.*?)<\/em>/gi, '*$1*')
+                .replace(/<br\s*\/?>/gi, '\n')
+                .replace(/<p[^>]*>(.*?)<\/p>/gi, '$1\n\n')
+                .replace(/<[^>]+>/g, '').replace(/\n{3,}/g, '\n\n').trim();
+            mimeType = 'text/markdown'; ext = '.md';
+        }
+        var blob = new Blob([data], { type: mimeType });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = title + ext;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        bootstrap.Modal.getInstance(document.getElementById('exportModal')).hide();
+    }
+
+    /* =========================================================
+       PUBLISH
+       ========================================================= */
+    function publishWork() {
+        var isDemo = new URLSearchParams(window.location.search).get('demo') === 'true';
+        if (isDemo) { alert(getL('publishDemoMsg')); return; }
+        if (confirm(getL('publishConfirm'))) { alert(getL('publishSuccess')); }
+    }
+
+    /* =========================================================
+       CONTENT TRACKING
+       ========================================================= */
+    function onContentChange() {
+        updateCounts();
+        var statusEl = document.getElementById('saveStatus');
+        statusEl.className = 'save-status';
+        statusEl.innerHTML = '<i class="fas fa-circle"></i> <span id="saveStatusText">' + getL('unsaved') + '</span>';
+        clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(autoSave, 2000);
+    }
+
+    function updateCounts() {
+        var text = document.getElementById('editorArea').innerText || '';
+        var chars = text.length;
+        var words = text.trim() ? text.trim().split(/\s+/).length : 0;
+        var pages = Math.max(1, Math.ceil(chars / 1800));
+        document.getElementById('charCount').textContent = chars.toLocaleString();
+        document.getElementById('wordCount').textContent = words.toLocaleString();
+        document.getElementById('pageCount').textContent = pages;
+    }
+
+    function autoSave() {
+        var statusEl = document.getElementById('saveStatus');
+        statusEl.className = 'save-status saving';
+        statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span id="saveStatusText">' + getL('saving') + '</span>';
+        setTimeout(function() {
+            statusEl.className = 'save-status saved';
+            statusEl.innerHTML = '<i class="fas fa-check-circle"></i> <span id="saveStatusText">' + getL('saved') + '</span>';
+            try {
+                localStorage.setItem('editor_draft_title', document.getElementById('workTitle').value);
+                localStorage.setItem('editor_draft_content', document.getElementById('editorArea').innerHTML);
+            } catch (e) { /* ignore */ }
+        }, 500);
+    }
+
+    /* =========================================================
+       KEYBOARD SHORTCUTS
+       ========================================================= */
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && !e.shiftKey) {
+            if (e.key.toLowerCase() === 's') { e.preventDefault(); autoSave(); }
+            if (e.key.toLowerCase() === 'f') { e.preventDefault(); toggleSearchPanel(); }
+        }
+    });
+
+    /* =========================================================
+       INITIALIZATION
+       ========================================================= */
+    document.addEventListener('DOMContentLoaded', function() {
+        updateAuthNav();
+        applyEditorTranslations();
+
+        // Load draft
+        var savedTitle = localStorage.getItem('editor_draft_title');
+        var savedContent = localStorage.getItem('editor_draft_content');
+        if (savedTitle) document.getElementById('workTitle').value = savedTitle;
+        if (savedContent) document.getElementById('editorArea').innerHTML = savedContent;
+        updateCounts();
+
+        // Content change listener
+        document.getElementById('editorArea').addEventListener('input', onContentChange);
+
+        // Heading select
+        document.getElementById('headingSelect').addEventListener('change', function() {
+            execCmd('formatBlock', this.value === 'p' ? 'p' : this.value);
+        });
+
+        // Language change event from language-switcher.js
+        document.addEventListener('languageChanged', function() {
+            applyEditorTranslations();
+            updateAuthNav();
+        });
+
+        // Fallback: bind language selectors directly
+        document.querySelectorAll('#mobileLanguageSelect, #desktopLanguageSelect').forEach(function(select) {
+            select.addEventListener('change', function() {
+                currentLang = this.value;
+                if (typeof LanguageSwitcher !== 'undefined') {
+                    LanguageSwitcher.changeLanguage(this.value);
+                }
+                setTimeout(function() {
+                    applyEditorTranslations();
+                    updateAuthNav();
+                }, 100);
+            });
+        });
+
+        // Image URL preview
+        document.getElementById('imageUrlInput').addEventListener('input', function() {
+            var preview = document.getElementById('imagePreview');
+            if (this.value) { preview.src = this.value; preview.style.display = 'block'; }
+            else { preview.style.display = 'none'; }
+        });
+        document.getElementById('imagePreview').addEventListener('error', function() {
+            this.style.display = 'none';
+        });
+    });
+    </script>
 </body>
 </html>
