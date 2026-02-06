@@ -18,193 +18,178 @@
 
     <!-- Platform CSS -->
     <link rel="stylesheet" href="../css/style-new.css">
-    <link rel="stylesheet" href="../css/mobile-fixes.css">
 
     <style>
-        /* ===== Navbar Overlay ===== */
-        .navbar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1040; }
+        /* ========== Mobile Language Selector ========== */
+        .navbar-lang-selector {
+            display: flex;
+            align-items: center;
+            margin-right: 0.5rem;
+        }
+        @media (max-width: 991.98px) {
+            .navbar-lang-selector { order: 1; }
+            .navbar-toggler { order: 2; }
+        }
+
+        /* ========== PC Navbar ========== */
+        @media (min-width: 992px) {
+            .navbar-nav { flex-wrap: nowrap !important; flex-direction: row !important; }
+            .navbar-nav .nav-item { white-space: nowrap !important; }
+            .navbar-nav .nav-link { white-space: nowrap !important; padding: 0.5rem 0.6rem !important; font-size: 0.9rem; }
+            .navbar-collapse .d-flex { flex-wrap: nowrap !important; }
+            .dropdown-menu { white-space: nowrap; }
+            .navbar-buttons-guest { display: flex !important; flex-wrap: nowrap !important; gap: 0.5rem; }
+            .navbar-buttons-guest .btn { white-space: nowrap !important; flex-shrink: 0; }
+        }
+
+        /* ========== Auth Visibility Control ========== */
+        .auth-only { display: none !important; }
+        .guest-only { display: block; }
+        body.logged-in .auth-only { display: block !important; }
+        body.logged-in .auth-only.nav-item { display: list-item !important; }
+        body.logged-in .auth-only.dropdown { display: block !important; }
+        body.logged-in .guest-only { display: none !important; }
+        @media (min-width: 992px) {
+            body.logged-in .navbar-buttons-guest { display: none !important; }
+        }
+
+        /* ========== User Dropdown Menu ========== */
+        .user-dropdown { position: relative; }
+        .user-dropdown-toggle {
+            display: flex; align-items: center; gap: 0.5rem;
+            background: transparent; border: 1px solid var(--color-border);
+            border-radius: 25px; padding: 0.4rem 0.75rem;
+            cursor: pointer; color: var(--color-text); transition: all 0.2s;
+        }
+        .user-dropdown-toggle:hover { border-color: var(--color-accent); background: rgba(139, 115, 85, 0.05); }
+        .user-dropdown-toggle i:first-child { font-size: 1.25rem; color: var(--color-accent); }
+        .user-name { font-weight: 500; font-size: 0.9rem; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .user-chevron { font-size: 0.7rem; color: var(--color-text-secondary); transition: transform 0.2s; }
+        .user-dropdown.open .user-chevron { transform: rotate(180deg); }
+        .user-menu {
+            position: absolute; top: calc(100% + 0.5rem); right: 0;
+            background: var(--color-bg-card); border: 1px solid var(--color-border);
+            border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            min-width: 240px; z-index: 1001; display: none; overflow: hidden;
+        }
+        .user-menu.show { display: block; }
+        .user-menu-header { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; background: var(--color-bg-main); }
+        .user-avatar { font-size: 2.5rem; color: var(--color-accent); }
+        .user-info { flex: 1; min-width: 0; }
+        .user-display-name { font-weight: 600; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .user-email { font-size: 0.8rem; color: var(--color-text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .user-menu-divider { height: 1px; background: var(--color-border); }
+        .user-menu-item {
+            display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem;
+            color: var(--color-text); text-decoration: none; font-size: 0.9rem;
+            cursor: pointer; border: none; background: transparent; width: 100%; text-align: left;
+        }
+        .user-menu-item:hover { background: var(--color-bg-hover); color: var(--color-accent); }
+        .user-menu-item i { width: 20px; text-align: center; color: var(--color-text-secondary); }
+        .user-menu-item:hover i { color: var(--color-accent); }
+        .logout-btn { color: var(--color-error); }
+        .logout-btn i { color: var(--color-error); }
+        .logout-btn:hover { background: rgba(199, 93, 93, 0.1); color: var(--color-error); }
+
+        /* ========== Navbar Overlay ========== */
+        .navbar-overlay {
+            display: none; position: fixed; top: 56px; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.5); z-index: 1040;
+        }
         .navbar-overlay.show { display: block; }
-        body.menu-open { overflow: hidden; }
 
-        /* ===== Editor Layout ===== */
-        body {
-            overflow-x: hidden;
-            background: #f8f9fa;
+        /* ========== Mobile Adjustments ========== */
+        @media (max-width: 991.98px) {
+            .user-dropdown { order: 3; margin-left: 0.5rem; }
+            .user-dropdown-toggle { padding: 0.3rem; border-radius: 50%; width: 38px; height: 38px; justify-content: center; }
+            .user-menu { position: fixed; top: 56px; right: 10px; left: auto; min-width: 260px; max-width: calc(100vw - 20px); z-index: 9999; }
+            .navbar-collapse { max-height: 70vh; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+            .navbar-collapse.show, .navbar-collapse.collapsing {
+                position: fixed; top: 56px; left: 0; right: 0; background: #FFFFFF;
+                border-bottom: 1px solid var(--color-border); box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+                z-index: 1045; padding: 0.5rem 1rem;
+            }
+            body.menu-open { overflow: hidden; }
+            .navbar-custom { z-index: 1050 !important; background: #FFFFFF !important; }
         }
 
-        .editor-wrapper {
-            display: flex;
-            flex-direction: column;
-            min-height: calc(100vh - 56px);
+        /* ========================================================
+           EDITOR STYLES
+           ======================================================== */
+        /* ===== Editor Mobile Responsive ===== */
+        @media (max-width: 991.98px) {
+            .editor-content-area { padding: 1rem 0.5rem; }
+            .editor-paper { padding: 1.5rem 1rem; max-width: 100%; word-wrap: break-word; }
+            .editor-toolbar { padding: 0.4rem 0.25rem; }
+            .secondary-toolbar { padding: 0.5rem 0.5rem; }
+            .editor-footer { padding: 0.4rem 0.5rem; }
+            .editor-main { max-width: 100%; }
         }
+        /* Ensure navbar stays above overlay */
+        .navbar-custom { z-index: 1050; }
 
-        /* ===== Editor Toolbar ===== */
         .editor-toolbar {
-            position: sticky;
-            top: 56px;
-            z-index: 1030;
-            background: #fff;
-            border-bottom: 1px solid #dee2e6;
-            padding: 0.4rem 1rem;
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 0.25rem;
+            position: sticky; top: 56px; z-index: 1030; background: #fff;
+            border-bottom: 1px solid #dee2e6; padding: 0.4rem 1rem;
+            display: flex; align-items: center; flex-wrap: wrap; gap: 0.25rem;
+            max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
         }
-
         .toolbar-group {
-            display: flex;
-            align-items: center;
-            gap: 2px;
-            padding: 0 0.4rem;
-            border-right: 1px solid #e0e0e0;
+            display: flex; align-items: center; gap: 2px;
+            padding: 0 0.4rem; border-right: 1px solid #e0e0e0;
         }
-
-        .toolbar-group:last-child {
-            border-right: none;
-        }
-
+        .toolbar-group:last-child { border-right: none; }
         .toolbar-btn {
-            width: 32px;
-            height: 32px;
-            border: none;
-            background: none;
-            border-radius: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #555;
-            font-size: 0.85rem;
-            transition: background 0.15s, color 0.15s;
+            width: 32px; height: 32px; border: none; background: none; border-radius: 4px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            color: #555; font-size: 0.85rem; transition: background 0.15s, color 0.15s;
         }
-
-        .toolbar-btn:hover {
-            background: #e9ecef;
-            color: #333;
-        }
-
-        .toolbar-btn.active {
-            background: #d4edda;
-            color: #155724;
-        }
-
+        .toolbar-btn:hover { background: #e9ecef; color: #333; }
+        .toolbar-btn.active { background: #d4edda; color: #155724; }
         .toolbar-select {
-            height: 32px;
-            font-size: 0.8rem;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            padding: 0 0.5rem;
-            background: #fff;
-            cursor: pointer;
+            height: 32px; font-size: 0.8rem; border: 1px solid #dee2e6;
+            border-radius: 4px; padding: 0 0.5rem; background: #fff; cursor: pointer;
         }
 
-        /* ===== Secondary Toolbar ===== */
         .secondary-toolbar {
-            position: sticky;
-            top: 100px;
-            z-index: 1029;
-            background: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
-            padding: 0.5rem 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            flex-wrap: wrap;
+            position: sticky; top: 100px; z-index: 1029; background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6; padding: 0.5rem 1rem;
+            display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+            overflow: hidden; max-width: 100%; box-sizing: border-box;
         }
-
         .title-input {
-            flex: 1;
-            min-width: 200px;
-            border: 1px solid transparent;
-            background: transparent;
-            font-size: 1rem;
-            font-weight: 600;
-            padding: 0.3rem 0.5rem;
-            border-radius: 4px;
-            outline: none;
-            transition: border-color 0.2s;
+            flex: 1; min-width: 0; border: 1px solid transparent; background: transparent;
+            font-size: 1rem; font-weight: 600; padding: 0.3rem 0.5rem; border-radius: 4px;
+            outline: none; transition: border-color 0.2s;
         }
-
-        .title-input:focus {
-            border-color: #8B7355;
-            background: #fff;
-        }
-
+        .title-input:focus { border-color: #8B7355; background: #fff; }
         .save-status { font-size: 0.8rem; color: #6c757d; white-space: nowrap; }
         .save-status i { margin-right: 4px; }
         .save-status.saved { color: #28a745; }
         .save-status.saving { color: #ffc107; }
         .save-status.error { color: #dc3545; }
 
-        /* ===== Main Editor Area ===== */
-        .editor-main { display: flex; flex: 1; }
-        .editor-content-area { flex: 1; padding: 2rem; max-width: 100%; }
-
+        .editor-main { display: flex; flex: 1; max-width: 100%; overflow: hidden; }
+        .editor-content-area { flex: 1; padding: 2rem; max-width: 100%; min-width: 0; }
         .editor-paper {
-            max-width: 800px;
-            margin: 0 auto;
-            background: #fff;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 3rem 2.5rem;
-            min-height: 600px;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-            outline: none;
-            font-family: 'Noto Serif JP', serif;
-            font-size: 1.05rem;
-            line-height: 1.8;
-            color: #333;
+            max-width: 800px; margin: 0 auto; background: #fff; border: 1px solid #dee2e6;
+            border-radius: 8px; padding: 3rem 2.5rem; min-height: 600px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06); outline: none;
+            font-family: 'Noto Serif JP', serif; font-size: 1.05rem; line-height: 1.8; color: #333;
         }
+        .editor-paper:focus { border-color: #8B7355; box-shadow: 0 0 0 2px rgba(139, 115, 85, 0.15); }
+        .editor-paper:empty::before { content: attr(data-placeholder); color: #adb5bd; pointer-events: none; }
 
-        .editor-paper:focus {
-            border-color: #8B7355;
-            box-shadow: 0 0 0 2px rgba(139, 115, 85, 0.15);
-        }
+        .editor-footer { background: #fff; border-top: 1px solid #dee2e6; padding: 0.4rem 1rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: #6c757d; overflow: hidden; }
+        .footer-stats { display: flex; gap: 1.5rem; flex-wrap: wrap; }
 
-        .editor-paper:empty::before {
-            content: attr(data-placeholder);
-            color: #adb5bd;
-            pointer-events: none;
-        }
-
-        /* ===== Comment Panel ===== */
-        .comment-panel { width: 300px; background: #fff; border-left: 1px solid #dee2e6; display: none; flex-direction: column; }
-        .comment-panel.open { display: flex; }
-        .comment-header { padding: 0.75rem 1rem; border-bottom: 1px solid #dee2e6; display: flex; align-items: center; justify-content: space-between; font-weight: 600; font-size: 0.9rem; }
-        .comment-list { flex: 1; overflow-y: auto; padding: 0.75rem; }
-        .comment-item { background: #f8f9fa; border-radius: 8px; padding: 0.75rem; margin-bottom: 0.5rem; font-size: 0.85rem; }
-        .comment-item .comment-author { font-weight: 600; margin-bottom: 0.25rem; color: #8B7355; }
-        .comment-item .comment-time { font-size: 0.75rem; color: #999; }
-        .comment-input-area { padding: 0.75rem; border-top: 1px solid #dee2e6; }
-        .comment-input-area textarea { width: 100%; border: 1px solid #dee2e6; border-radius: 6px; padding: 0.5rem; font-size: 0.85rem; resize: vertical; min-height: 60px; }
-        .comment-input-area button { margin-top: 0.5rem; width: 100%; }
-
-        /* ===== Search and Replace Panel ===== */
-        .search-panel { display: none; position: fixed; top: 100px; right: 20px; width: 340px; background: #fff; border: 1px solid #dee2e6; border-radius: 8px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12); z-index: 1035; padding: 1rem; }
-        .search-panel.open { display: block; }
-        .search-panel .search-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
-        .search-panel input { flex: 1; padding: 0.4rem 0.5rem; border: 1px solid #dee2e6; border-radius: 4px; font-size: 0.85rem; }
-        .search-panel .search-info { font-size: 0.8rem; color: #6c757d; margin-bottom: 0.5rem; }
-
-        /* ===== Image Insert Modal ===== */
-        .image-modal-preview { max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid #dee2e6; display: none; margin-top: 0.5rem; }
-
-        /* ===== Editor Footer ===== */
-        .editor-footer { background: #fff; border-top: 1px solid #dee2e6; padding: 0.4rem 1rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: #6c757d; }
-        .footer-stats { display: flex; gap: 1.5rem; }
-
-        /* ===== Responsive ===== */
         @media (max-width: 991.98px) {
-            .comment-panel { position: fixed; top: 56px; right: 0; bottom: 0; z-index: 1038; box-shadow: -4px 0 16px rgba(0, 0, 0, 0.1); }
             .editor-paper { padding: 1.5rem 1rem; }
             .toolbar-group { padding: 0 0.2rem; }
         }
-
         @media (max-width: 575.98px) {
             .secondary-toolbar { flex-direction: column; align-items: stretch; }
             .title-input { min-width: auto; }
-            .comment-panel { width: 100%; }
         }
 
         @keyframes pulse-save { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
@@ -212,62 +197,151 @@
     </style>
 </head>
 <body>
-    <!-- ===== PATTERN C NAVBAR (matching account-settings.html) ===== -->
+    <!-- ========== NAVBAR OVERLAY ========== -->
+    <div class="navbar-overlay" id="navbarOverlay"></div>
+
+    <!-- ========== PATTERN C NAVBAR (pages/ hierarchy) ========== -->
     <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
         <div class="container">
             <a class="navbar-brand" href="../index.html">
                 <i class="fas fa-book-open"></i> Publisher
             </a>
-            <div class="d-lg-none me-2">
-                <select id="mobileLanguageSelect" class="form-select form-select-sm language-selector" style="width: auto; min-width: 100px;">
-                    <option value="en">&#127468;&#127463; English</option>
+
+            <!-- Language Selector Mobile -->
+            <div class="navbar-lang-selector d-lg-none">
+                <select class="language-selector" id="languageSelectorMobile">
+                    <option value="en">&#127468;&#127463; EN</option>
                     <option value="ja">&#127471;&#127477; &#26085;&#26412;&#35486;</option>
                     <option value="zh">&#127464;&#127475; &#20013;&#25991;</option>
-                    <option value="es">&#127466;&#127480; Espa&#241;ol</option>
-                    <option value="fr">&#127467;&#127479; Fran&#231;ais</option>
-                    <option value="de">&#127465;&#127466; Deutsch</option>
+                    <option value="es">&#127466;&#127480; ES</option>
+                    <option value="fr">&#127467;&#127479; FR</option>
+                    <option value="de">&#127465;&#127466; DE</option>
                     <option value="ko">&#127472;&#127479; &#54620;&#44397;&#50612;</option>
-                    <option value="ar">&#127480;&#127462; &#1575;&#1604;&#1593;&#1585;&#1576;&#1610;&#1577;</option>
-                    <option value="pt">&#127463;&#127479; Portugu&#234;s</option>
+                    <option value="ar">&#127480;&#127462; &#1593;&#1585;&#1576;&#1610;</option>
+                    <option value="pt">&#127463;&#127479; PT</option>
                 </select>
             </div>
+
+            <!-- User Dropdown (auth-only) -->
+            <div class="user-dropdown auth-only" id="userDropdown">
+                <button type="button" class="user-dropdown-toggle" id="userDropdownBtn" onclick="toggleUserDropdown(event)">
+                    <i class="fas fa-user-circle"></i>
+                    <span class="user-name d-none d-lg-inline" id="userName">User</span>
+                    <i class="fas fa-chevron-down user-chevron d-none d-lg-inline"></i>
+                </button>
+                <div class="user-menu" id="userMenu">
+                    <div class="user-menu-header">
+                        <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
+                        <div class="user-info">
+                            <div class="user-display-name" id="userDisplayName">User</div>
+                            <div class="user-email" id="userEmail">user@example.com</div>
+                        </div>
+                    </div>
+                    <div class="user-menu-divider"></div>
+                    <a href="dashboard.html" class="user-menu-item">
+                        <i class="fas fa-th-large"></i>
+                        <span id="menuDashboard">Dashboard</span>
+                    </a>
+                    <a href="account-settings.html" class="user-menu-item">
+                        <i class="fas fa-cog"></i>
+                        <span id="menuAccountSettings">Account Settings</span>
+                    </a>
+                    <div class="user-menu-divider"></div>
+                    <button class="user-menu-item logout-btn" onclick="handleLogout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span id="menuLogout">Log Out</span>
+                    </button>
+                </div>
+            </div>
+
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link" href="../index.html" data-i18n="nav.home">&#12507;&#12540;&#12512;</a></li>
-                    <li class="nav-item"><a class="nav-link" href="dashboard.html" data-i18n="nav.dashboard">&#12480;&#12483;&#12471;&#12517;&#12508;&#12540;&#12489;</a></li>
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item d-none d-lg-block me-3">
-                        <select id="desktopLanguageSelect" class="form-select form-select-sm language-selector" style="width: auto;">
-                            <option value="en">&#127468;&#127463; English</option>
-                            <option value="ja">&#127471;&#127477; &#26085;&#26412;&#35486;</option>
-                            <option value="zh">&#127464;&#127475; &#20013;&#25991;</option>
-                            <option value="es">&#127466;&#127480; Espa&#241;ol</option>
-                            <option value="fr">&#127467;&#127479; Fran&#231;ais</option>
-                            <option value="de">&#127465;&#127466; Deutsch</option>
-                            <option value="ko">&#127472;&#127479; &#54620;&#44397;&#50612;</option>
-                            <option value="ar">&#127480;&#127462; &#1575;&#1604;&#1593;&#1585;&#1576;&#1610;&#1577;</option>
-                            <option value="pt">&#127463;&#127479; Portugu&#234;s</option>
-                        </select>
+                <!-- PC Navigation -->
+                <ul class="navbar-nav me-auto d-none d-lg-flex">
+                    <li class="nav-item"><a class="nav-link" href="../index.html"><i class="fas fa-home me-1"></i> <span data-i18n="nav.home">Home</span></a></li>
+                    <li class="nav-item"><a class="nav-link" href="browse.html"><i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span></a></li>
+                    <li class="nav-item"><a class="nav-link" href="genres.html"><i class="fas fa-layer-group me-1"></i> <span data-i18n="nav.genres">Genres</span></a></li>
+                    <li class="nav-item auth-only"><a class="nav-link" href="library.html"><i class="fas fa-book-reader me-1"></i> <span id="navLibraryPC">Library</span></a></li>
+                    <li class="nav-item auth-only"><a class="nav-link" href="dashboard.html"><i class="fas fa-th-large me-1"></i> <span id="navDashboardPC">Dashboard</span></a></li>
+                    <li class="nav-item auth-only"><a class="nav-link" href="upload.html"><i class="fas fa-upload me-1"></i> <span data-i18n="nav.upload">Upload</span></a></li>
+                    <li class="nav-item dropdown auth-only">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"><i class="fas fa-language me-1"></i> <span id="navTranslationToolsPC">Translation Tools</span></a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="manga-translator.html"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorPC">Manga Translator</span></a></li>
+                            <li><a class="dropdown-item" href="translation-status.html"><i class="fas fa-tasks me-2"></i><span id="navTranslationStatusPC">Translation Status</span></a></li>
+                            <li><a class="dropdown-item" href="translators/index.html"><i class="fas fa-users me-2"></i><span id="navFindTranslatorsPC">Find Translators</span></a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"><i class="fas fa-headset me-1"></i> <span data-i18n="nav.support">Support</span></a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="support/faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
+                            <li><a class="dropdown-item" href="support/troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
+                            <li><a class="dropdown-item" href="support/contact.html"><i class="fas fa-envelope me-2"></i><span id="navContactPC">Contact</span></a></li>
+                            <li class="auth-only"><hr class="dropdown-divider"></li>
+                            <li class="auth-only"><a class="dropdown-item" href="support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
+                        </ul>
                     </li>
                 </ul>
-                <ul class="navbar-nav" id="authNav">
-                    <li class="nav-item"><a class="nav-link" href="login.html" data-i18n="nav.login">&#12525;&#12464;&#12452;&#12531;</a></li>
+
+                <!-- Mobile Navigation -->
+                <ul class="navbar-nav d-lg-none">
+                    <li class="nav-item"><a class="nav-link" href="../index.html"><i class="fas fa-home me-2"></i> <span data-i18n="nav.home">Home</span></a></li>
+                    <li class="nav-item"><a class="nav-link" href="browse.html"><i class="fas fa-compass me-2"></i> <span data-i18n="nav.browse">Browse</span></a></li>
+                    <li class="nav-item"><a class="nav-link" href="genres.html"><i class="fas fa-layer-group me-2"></i> <span data-i18n="nav.genres">Genres</span></a></li>
+                    <li class="nav-item auth-only"><a class="nav-link" href="library.html"><i class="fas fa-book-reader me-2"></i> <span id="navLibraryMobile">Library</span></a></li>
+                    <li class="auth-only"><hr class="dropdown-divider"></li>
+                    <li class="nav-item auth-only"><a class="nav-link" href="dashboard.html"><i class="fas fa-th-large me-2"></i> <span id="navDashboardMobile">Dashboard</span></a></li>
+                    <li class="nav-item auth-only"><a class="nav-link" href="upload.html"><i class="fas fa-upload me-2"></i> <span data-i18n="nav.upload">Upload</span></a></li>
+                    <li class="nav-item auth-only">
+                        <a class="nav-link" data-bs-toggle="collapse" href="#translationToolsMenu" role="button">
+                            <i class="fas fa-language me-2"></i> <span id="navTranslationToolsMobile">Translation Tools</span>
+                            <i class="fas fa-chevron-down ms-auto small"></i>
+                        </a>
+                        <div class="collapse ps-4" id="translationToolsMenu">
+                            <a class="nav-link" href="manga-translator.html"><i class="fas fa-image me-2"></i> <span id="navMangaTranslatorMobile">Manga Translator</span></a>
+                            <a class="nav-link" href="translation-status.html"><i class="fas fa-tasks me-2"></i> <span id="navTranslationStatusMobile">Translation Status</span></a>
+                            <a class="nav-link" href="translators/index.html"><i class="fas fa-users me-2"></i> <span id="navFindTranslatorsMobile">Find Translators</span></a>
+                        </div>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li class="nav-item"><a class="nav-link" href="support/faq.html"><i class="fas fa-question-circle me-2"></i> <span data-i18n="support.faq.title">FAQ</span></a></li>
+                    <li class="nav-item"><a class="nav-link" href="support/troubleshoot.html"><i class="fas fa-tools me-2"></i> <span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
+                    <li class="nav-item"><a class="nav-link" href="support/contact.html"><i class="fas fa-envelope me-2"></i> <span id="navContactMobile">Contact</span></a></li>
+                    <li class="nav-item auth-only"><a class="nav-link" href="support/tickets.html"><i class="fas fa-ticket-alt me-2"></i> <span data-i18n="support.tickets.title">My Tickets</span></a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li class="nav-item guest-only"><a class="nav-link" href="login.html"><i class="fas fa-sign-in-alt me-2"></i> <span data-i18n="nav.login">Sign In</span></a></li>
+                    <li class="nav-item guest-only"><a class="nav-link" href="register.html"><i class="fas fa-user-plus me-2"></i> <span data-i18n="nav.getStarted">Get Started</span></a></li>
                 </ul>
+
+                <div class="d-flex align-items-center gap-3">
+                    <select class="language-selector d-none d-lg-block" id="languageSelector">
+                        <option value="en">&#127468;&#127463; EN</option>
+                        <option value="ja">&#127471;&#127477; &#26085;&#26412;&#35486;</option>
+                        <option value="zh">&#127464;&#127475; &#20013;&#25991;</option>
+                        <option value="es">&#127466;&#127480; ES</option>
+                        <option value="fr">&#127467;&#127479; FR</option>
+                        <option value="de">&#127465;&#127466; DE</option>
+                        <option value="ko">&#127472;&#127479; &#54620;&#44397;&#50612;</option>
+                        <option value="ar">&#127480;&#127462; &#1593;&#1585;&#1576;&#1610;</option>
+                        <option value="pt">&#127463;&#127479; PT</option>
+                    </select>
+                    <div class="navbar-buttons-guest guest-only d-none d-lg-flex">
+                        <a href="login.html" class="btn btn-soft-custom"><span data-i18n="nav.login">Sign In</span></a>
+                        <a href="register.html" class="btn btn-primary-custom"><span data-i18n="nav.getStarted">Get Started</span></a>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
 
-    <!-- Mobile Nav Overlay -->
-    <div class="navbar-overlay" id="navbarOverlay"></div>
-
-    <!-- ===== EDITOR TOOLBAR ===== -->
+    <!-- ========== EDITOR TOOLBAR (onclick direct binding) ========== -->
     <div class="editor-toolbar" id="editorToolbar">
         <div class="toolbar-group">
-            <select class="toolbar-select" id="headingSelect" title="Heading">
+            <select class="toolbar-select" id="headingSelect" title="Heading" onchange="execCmd('formatBlock', this.value)">
                 <option value="p" id="opt-paragraph">Paragraph</option>
                 <option value="h1" id="opt-h1">Heading 1</option>
                 <option value="h2" id="opt-h2">Heading 2</option>
@@ -292,89 +366,35 @@
             <button class="toolbar-btn" onclick="execCmd('indent')" title="Indent"><i class="fas fa-indent"></i></button>
         </div>
         <div class="toolbar-group">
-            <button class="toolbar-btn" onclick="insertLink()" title="Insert Link"><i class="fas fa-link"></i></button>
-            <button class="toolbar-btn" onclick="openImageModal()" title="Insert Image"><i class="fas fa-image"></i></button>
             <button class="toolbar-btn" onclick="execCmd('insertHorizontalRule')" title="Horizontal Rule"><i class="fas fa-minus"></i></button>
-            <button class="toolbar-btn" onclick="insertBlockquote()" title="Blockquote"><i class="fas fa-quote-right"></i></button>
+            <button class="toolbar-btn" onclick="execCmd('formatBlock', 'blockquote')" title="Blockquote"><i class="fas fa-quote-right"></i></button>
         </div>
         <div class="toolbar-group">
             <button class="toolbar-btn" onclick="execCmd('undo')" title="Undo"><i class="fas fa-undo"></i></button>
             <button class="toolbar-btn" onclick="execCmd('redo')" title="Redo"><i class="fas fa-redo"></i></button>
         </div>
-        <div class="toolbar-group">
-            <button class="toolbar-btn" onclick="toggleSearchPanel()" title="Search"><i class="fas fa-search"></i></button>
-            <button class="toolbar-btn" onclick="toggleCommentPanel()" title="Comments"><i class="fas fa-comment-dots"></i></button>
-        </div>
     </div>
 
-    <!-- ===== SECONDARY TOOLBAR ===== -->
+    <!-- ========== SECONDARY TOOLBAR ========== -->
     <div class="secondary-toolbar" id="secondaryToolbar">
         <input type="text" class="title-input" id="workTitle" placeholder="Untitled" value="">
         <span class="save-status saved" id="saveStatus">
             <i class="fas fa-check-circle"></i> <span id="saveStatusText">Saved</span>
         </span>
         <div class="d-flex gap-2">
-            <button class="btn btn-outline-secondary btn-sm" onclick="exportWork()" id="btnExport">
-                <i class="fas fa-file-export me-1"></i><span>Export</span>
-            </button>
-            <button class="btn btn-primary-custom btn-sm" onclick="publishWork()" id="btnPublish">
-                <i class="fas fa-paper-plane me-1"></i><span>Publish</span>
-            </button>
+            <button class="btn btn-outline-secondary btn-sm" onclick="doExportTXT()" id="btnExport"><i class="fas fa-file-export me-1"></i><span>Export</span></button>
+            <button class="btn btn-primary-custom btn-sm" onclick="doPublish()" id="btnPublish"><i class="fas fa-paper-plane me-1"></i><span>Publish</span></button>
         </div>
     </div>
 
-    <!-- ===== SEARCH and REPLACE PANEL ===== -->
-    <div class="search-panel" id="searchPanel">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <strong id="searchTitle">Search &amp; Replace</strong>
-            <button class="toolbar-btn" onclick="toggleSearchPanel()"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="search-row">
-            <input type="text" id="searchInput" placeholder="Search...">
-            <button class="btn btn-outline-secondary btn-sm" onclick="findText()"><i class="fas fa-search"></i></button>
-        </div>
-        <div class="search-row">
-            <input type="text" id="replaceInput" placeholder="Replace...">
-            <button class="btn btn-outline-secondary btn-sm" onclick="replaceText()" id="btnReplace">Replace</button>
-        </div>
-        <div class="search-info" id="searchInfo"></div>
-    </div>
-
-    <!-- ===== MAIN EDITOR AREA ===== -->
+    <!-- ========== MAIN EDITOR AREA ========== -->
     <div class="editor-main">
         <div class="editor-content-area">
-            <div class="editor-paper" id="editorArea" contenteditable="true" data-placeholder="Start writing your story..." spellcheck="true">
-            </div>
-        </div>
-
-        <!-- Comment Panel -->
-        <div class="comment-panel" id="commentPanel">
-            <div class="comment-header">
-                <span id="commentTitle">Comments</span>
-                <button class="toolbar-btn" onclick="toggleCommentPanel()"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="comment-list" id="commentList">
-                <div class="comment-item">
-                    <div class="comment-author">Editor</div>
-                    <div class="comment-text" id="sampleComment1">Great opening paragraph!</div>
-                    <div class="comment-time">2 hours ago</div>
-                </div>
-                <div class="comment-item">
-                    <div class="comment-author">Translator</div>
-                    <div class="comment-text" id="sampleComment2">This section may be difficult to translate.</div>
-                    <div class="comment-time">1 day ago</div>
-                </div>
-            </div>
-            <div class="comment-input-area">
-                <textarea id="newComment" placeholder="Add a comment..."></textarea>
-                <button class="btn btn-primary-custom btn-sm" onclick="addComment()" id="btnAddComment">
-                    <i class="fas fa-plus me-1"></i><span>Add Comment</span>
-                </button>
-            </div>
+            <div class="editor-paper" id="editorArea" contenteditable="true" data-placeholder="Start writing your story..." spellcheck="true" oninput="countWords(); showUnsaved();"></div>
         </div>
     </div>
 
-    <!-- ===== EDITOR FOOTER ===== -->
+    <!-- ========== EDITOR FOOTER ========== -->
     <div class="editor-footer" id="editorFooter">
         <div class="footer-stats">
             <span><span id="labelChars">Characters</span>: <strong id="charCount">0</strong></span>
@@ -384,64 +404,8 @@
         <span id="labelLastEdit">Last edit: just now</span>
     </div>
 
-    <!-- ===== IMAGE INSERT MODAL ===== -->
-    <div class="modal fade" id="imageModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-image me-2"></i><span id="imageModalTitle">Insert Image</span></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label" id="imageUrlLabel">Image URL</label>
-                        <input type="url" class="form-control" id="imageUrlInput" placeholder="https://example.com/image.jpg">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label" id="imageAltLabel">Alt Text</label>
-                        <input type="text" class="form-control" id="imageAltInput" placeholder="Description of the image">
-                    </div>
-                    <img class="image-modal-preview" id="imagePreview" alt="Preview">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnImageCancel">Cancel</button>
-                    <button type="button" class="btn btn-primary-custom" onclick="insertImage()" id="btnImageInsert">
-                        <i class="fas fa-plus me-1"></i> Insert
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===== EXPORT MODAL ===== -->
-    <div class="modal fade" id="exportModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-file-export me-2"></i><span id="exportModalTitle">Export</span></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="list-group">
-                        <button class="list-group-item list-group-item-action" onclick="doExport('html')">
-                            <i class="fas fa-code me-2"></i> HTML
-                        </button>
-                        <button class="list-group-item list-group-item-action" onclick="doExport('txt')">
-                            <i class="fas fa-file-alt me-2"></i> Plain Text
-                        </button>
-                        <button class="list-group-item list-group-item-action" onclick="doExport('md')">
-                            <i class="fab fa-markdown me-2"></i> Markdown
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bootstrap JS -->
+    <!-- ========== EXTERNAL SCRIPTS ========== -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Language files (9 languages) -->
     <script src="../js/lang/ja.js"></script>
     <script src="../js/lang/en.js"></script>
     <script src="../js/lang/zh.js"></script>
@@ -451,364 +415,273 @@
     <script src="../js/lang/ko.js"></script>
     <script src="../js/lang/ar.js"></script>
     <script src="../js/lang/pt.js"></script>
-    <!-- Editor translations (adds editor section to window.translations) -->
     <script src="../js/lang/editor-translations.js"></script>
-    <!-- Translation base -->
     <script src="../js/lang/translations-base.js"></script>
-    <!-- Language switcher -->
     <script src="../js/language-switcher.js"></script>
 
+    <!-- ========== NAVBAR SCRIPT (Pattern C) ========== -->
     <script>
-    /* =========================================================
-       EDITOR CORE
-       Reads translations from editor-translations.js (external file)
-       No inline Unicode escapes - prevents encoding issues
-       ========================================================= */
-    var currentLang = localStorage.getItem('preferredLanguage') || 'en';
-    var autoSaveTimer = null;
+    var navUiText = {
+        translationTools: { en: 'Translation Tools', ja: '\u7FFB\u8A33\u30C4\u30FC\u30EB', zh: '\u7FFB\u8BD1\u5DE5\u5177', es: 'Herramientas de traducci\u00F3n', fr: 'Outils de traduction', de: '\u00DCbersetzungstools', ko: '\uBC88\uC5ED \uB3C4\uAD6C', ar: '\u0623\u062F\u0648\u0627\u062A \u0627\u0644\u062A\u0631\u062C\u0645\u0629', pt: 'Ferramentas de tradu\u00E7\u00E3o' },
+        mangaTranslator: { en: 'Manga Translator', ja: '\u30DE\u30F3\u30AC\u7FFB\u8A33', zh: '\u6F2B\u753B\u7FFB\u8BD1', es: 'Traductor de Manga', fr: 'Traducteur de Manga', de: 'Manga-\u00DCbersetzer', ko: '\uB9CC\uD654 \uBC88\uC5ED\uAE30', ar: '\u0645\u062A\u0631\u062C\u0645 \u0627\u0644\u0645\u0627\u0646\u062C\u0627', pt: 'Tradutor de Mang\u00E1' },
+        translationStatus: { en: 'Translation Status', ja: '\u7FFB\u8A33\u72B6\u6CC1', zh: '\u7FFB\u8BD1\u72B6\u6001', es: 'Estado de traducci\u00F3n', fr: 'Statut de traduction', de: '\u00DCbersetzungsstatus', ko: '\uBC88\uC5ED \uC0C1\uD0DC', ar: '\u062D\u0627\u0644\u0629 \u0627\u0644\u062A\u0631\u062C\u0645\u0629', pt: 'Status da tradu\u00E7\u00E3o' },
+        findTranslators: { en: 'Find Translators', ja: '\u7FFB\u8A33\u8005\u3092\u63A2\u3059', zh: '\u5BFB\u627E\u7FFB\u8BD1', es: 'Buscar traductores', fr: 'Trouver des traducteurs', de: '\u00DCbersetzer finden', ko: '\uBC88\uC5ED\uAC00 \uCC3E\uAE30', ar: '\u0627\u0644\u0628\u062D\u062B \u0639\u0646 \u0645\u062A\u0631\u062C\u0645\u064A\u0646', pt: 'Encontrar tradutores' },
+        contact: { en: 'Contact', ja: '\u304A\u554F\u3044\u5408\u308F\u305B', zh: '\u8054\u7CFB\u6211\u4EEC', es: 'Contacto', fr: 'Contact', de: 'Kontakt', ko: '\uBB38\uC758', ar: '\u0627\u062A\u0635\u0644 \u0628\u0646\u0627', pt: 'Contato' },
+        library: { en: 'Library', ja: '\u30E9\u30A4\u30D6\u30E9\u30EA', zh: '\u4E66\u5E93', es: 'Biblioteca', fr: 'Biblioth\u00E8que', de: 'Bibliothek', ko: '\uB77C\uC774\uBE0C\uB7EC\uB9AC', ar: '\u0627\u0644\u0645\u0643\u062A\u0628\u0629', pt: 'Biblioteca' },
+        dashboard: { en: 'Dashboard', ja: '\u30C0\u30C3\u30B7\u30E5\u30DC\u30FC\u30C9', zh: '\u63A7\u5236\u53F0', es: 'Panel', fr: 'Tableau de bord', de: 'Dashboard', ko: '\uB300\uC2DC\uBCF4\uB4DC', ar: '\u0644\u0648\u062D\u0629 \u0627\u0644\u062A\u062D\u0643\u0645', pt: 'Painel' },
+        accountSettings: { en: 'Account Settings', ja: '\u30A2\u30AB\u30A6\u30F3\u30C8\u8A2D\u5B9A', zh: '\u8D26\u6237\u8BBE\u7F6E', es: 'Configuraci\u00F3n de cuenta', fr: 'Param\u00E8tres du compte', de: 'Kontoeinstellungen', ko: '\uACC4\uC815 \uC124\uC815', ar: '\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u062D\u0633\u0627\u0628', pt: 'Configura\u00E7\u00F5es da conta' },
+        logout: { en: 'Log Out', ja: '\u30ED\u30B0\u30A2\u30A6\u30C8', zh: '\u9000\u51FA\u767B\u5F55', es: 'Cerrar sesi\u00F3n', fr: 'D\u00E9connexion', de: 'Abmelden', ko: '\uB85C\uADF8\uC544\uC6C3', ar: '\u062A\u0633\u062C\u064A\u0644 \u0627\u0644\u062E\u0631\u0648\u062C', pt: 'Sair' },
+        logOutConfirm: { en: 'Are you sure you want to log out?', ja: '\u30ED\u30B0\u30A2\u30A6\u30C8\u3057\u307E\u3059\u304B\uFF1F', zh: '\u786E\u5B9A\u8981\u9000\u51FA\u767B\u5F55\u5417\uFF1F', es: '\u00BFEst\u00E1s seguro?', fr: '\u00CAtes-vous s\u00FBr?', de: 'Sind Sie sicher?', ko: '\uB85C\uADF8\uC544\uC6C3 \uD558\uC2DC\uACA0\uC2B5\uB2C8\uAE4C?', ar: '\u0647\u0644 \u0623\u0646\u062A \u0645\u062A\u0623\u0643\u062F\u061F', pt: 'Tem certeza?' }
+    };
 
-    function getL(key) {
-        if (typeof translations !== 'undefined') {
-            var langData = translations[currentLang] && translations[currentLang].editor;
-            var enData = translations['en'] && translations['en'].editor;
-            if (langData && langData[key]) return langData[key];
-            if (enData && enData[key]) return enData[key];
+    function getCurrentLanguage() { return localStorage.getItem('preferredLanguage') || 'en'; }
+    function getNavL(obj) { var lang = getCurrentLanguage(); return obj[lang] || obj.en || ''; }
+
+    function updateNavUIText() {
+        var md = document.getElementById('menuDashboard');
+        var ma = document.getElementById('menuAccountSettings');
+        var ml = document.getElementById('menuLogout');
+        if (md) md.textContent = getNavL(navUiText.dashboard);
+        if (ma) ma.textContent = getNavL(navUiText.accountSettings);
+        if (ml) ml.textContent = getNavL(navUiText.logout);
+        var map = {
+            navLibraryPC: 'library', navDashboardPC: 'dashboard',
+            navTranslationToolsPC: 'translationTools', navMangaTranslatorPC: 'mangaTranslator',
+            navTranslationStatusPC: 'translationStatus', navFindTranslatorsPC: 'findTranslators',
+            navContactPC: 'contact', navLibraryMobile: 'library', navDashboardMobile: 'dashboard',
+            navTranslationToolsMobile: 'translationTools', navMangaTranslatorMobile: 'mangaTranslator',
+            navTranslationStatusMobile: 'translationStatus', navFindTranslatorsMobile: 'findTranslators',
+            navContactMobile: 'contact'
+        };
+        var ids = Object.keys(map);
+        for (var i = 0; i < ids.length; i++) {
+            var el = document.getElementById(ids[i]);
+            if (el) el.textContent = getNavL(navUiText[map[ids[i]]]);
         }
-        return key;
     }
 
-    function applyEditorTranslations() {
-        currentLang = localStorage.getItem('preferredLanguage') || 'en';
-        document.title = getL('title');
-        var paper = document.getElementById('editorArea');
-        if (paper) paper.setAttribute('data-placeholder', getL('placeholder'));
-        var titleInput = document.getElementById('workTitle');
-        if (titleInput && !titleInput.value) titleInput.placeholder = getL('untitled');
-        var optP = document.getElementById('opt-paragraph');
-        if (optP) optP.textContent = getL('paragraph');
-        var optH1 = document.getElementById('opt-h1');
-        if (optH1) optH1.textContent = getL('h1');
-        var optH2 = document.getElementById('opt-h2');
-        if (optH2) optH2.textContent = getL('h2');
-        var optH3 = document.getElementById('opt-h3');
-        if (optH3) optH3.textContent = getL('h3');
-        updateSaveStatusText();
-        var btnExport = document.querySelector('#btnExport span');
-        var btnPublish = document.querySelector('#btnPublish span');
-        if (btnExport) btnExport.textContent = getL('exportBtn');
-        if (btnPublish) btnPublish.textContent = getL('publishBtn');
-        var el;
-        el = document.getElementById('searchTitle'); if (el) el.textContent = getL('searchReplace');
-        el = document.getElementById('searchInput'); if (el) el.placeholder = getL('searchPlaceholder');
-        el = document.getElementById('replaceInput'); if (el) el.placeholder = getL('replacePlaceholder');
-        el = document.getElementById('btnReplace'); if (el) el.textContent = getL('replaceBtn');
-        el = document.getElementById('commentTitle'); if (el) el.textContent = getL('comments');
-        el = document.getElementById('newComment'); if (el) el.placeholder = getL('commentPlaceholder');
-        var addBtn = document.querySelector('#btnAddComment span');
-        if (addBtn) addBtn.textContent = getL('addComment');
-        el = document.getElementById('sampleComment1'); if (el) el.textContent = getL('sampleComment1');
-        el = document.getElementById('sampleComment2'); if (el) el.textContent = getL('sampleComment2');
-        el = document.getElementById('labelChars'); if (el) el.textContent = getL('characters');
-        el = document.getElementById('labelWords'); if (el) el.textContent = getL('words');
-        el = document.getElementById('labelPages'); if (el) el.textContent = getL('pages');
-        el = document.getElementById('labelLastEdit'); if (el) el.textContent = getL('lastEdit');
-        el = document.getElementById('imageModalTitle'); if (el) el.textContent = getL('insertImage');
-        el = document.getElementById('imageUrlLabel'); if (el) el.textContent = getL('imageUrl');
-        el = document.getElementById('imageAltLabel'); if (el) el.textContent = getL('imageAlt');
-        el = document.getElementById('btnImageCancel'); if (el) el.textContent = getL('cancel');
-        el = document.getElementById('btnImageInsert');
-        if (el) el.innerHTML = '<i class="fas fa-plus me-1"></i> ' + getL('insert');
-        el = document.getElementById('exportModalTitle'); if (el) el.textContent = getL('exportTitle');
+    function toggleUserDropdown(e) {
+        e.preventDefault(); e.stopPropagation();
+        document.getElementById('userDropdown').classList.toggle('open');
+        document.getElementById('userMenu').classList.toggle('show');
     }
 
-    function updateSaveStatusText() {
-        var statusEl = document.getElementById('saveStatus');
-        var textEl = document.getElementById('saveStatusText');
-        if (!statusEl || !textEl) return;
-        if (statusEl.classList.contains('saved')) textEl.textContent = getL('saved');
-        else if (statusEl.classList.contains('saving')) textEl.textContent = getL('saving');
-        else textEl.textContent = getL('unsaved');
-    }
-
-    /* =========================================================
-       AUTH NAV (Pattern C - matching account-settings.html)
-       ========================================================= */
-    function getNavText(key) {
-        if (typeof translations === 'undefined') return null;
-        var langData = translations[currentLang] || translations['en'];
-        if (!langData) return null;
-        var keys = key.split('.');
-        var value = langData;
-        for (var i = 0; i < keys.length; i++) {
-            if (value && typeof value === 'object' && keys[i] in value) {
-                value = value[keys[i]];
-            } else { return null; }
+    function handleLogout() {
+        if (confirm(getNavL(navUiText.logOutConfirm))) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.reload();
         }
-        return typeof value === 'string' ? value : null;
     }
 
-    function updateAuthNav() {
-        var token = localStorage.getItem('token');
+    function loadUserInfo() {
         var userStr = localStorage.getItem('user');
-        var authNav = document.getElementById('authNav');
-        if (!authNav) return;
-        if (token && userStr) {
+        var token = localStorage.getItem('token');
+        if (userStr && token) {
             try {
                 var user = JSON.parse(userStr);
-                var displayName = user.display_name || user.displayName || user.firstName || user.email || 'User';
-                authNav.innerHTML =
-                    '<li class="nav-item dropdown">' +
-                    '<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">' +
-                    '<i class="fas fa-user-circle me-1"></i>' + displayName +
-                    '</a>' +
-                    '<ul class="dropdown-menu dropdown-menu-end">' +
-                    '<li><a class="dropdown-item" href="dashboard.html"><i class="fas fa-th-large me-2"></i><span data-i18n="nav.dashboard">' + (getNavText('nav.dashboard') || 'Dashboard') + '</span></a></li>' +
-                    '<li><a class="dropdown-item" href="account-settings.html"><i class="fas fa-cog me-2"></i><span data-i18n="nav.settings">' + (getNavText('nav.settings') || 'Settings') + '</span></a></li>' +
-                    '<li><hr class="dropdown-divider"></li>' +
-                    '<li><a class="dropdown-item" href="#" onclick="logout(); return false;"><i class="fas fa-sign-out-alt me-2"></i><span data-i18n="nav.logout">' + (getNavText('nav.logout') || 'Logout') + '</span></a></li>' +
-                    '</ul></li>';
+                var dn = user.display_name || user.firstName || user.email || 'User';
+                var n = document.getElementById('userName');
+                var d = document.getElementById('userDisplayName');
+                var em = document.getElementById('userEmail');
+                if (n) n.textContent = dn;
+                if (d) d.textContent = dn;
+                if (em) em.textContent = user.email || '';
                 document.body.classList.add('logged-in');
-            } catch (e) { console.error('Failed to parse user data:', e); }
-        } else {
-            document.body.classList.remove('logged-in');
-        }
-        if (typeof applyTranslations === 'function') applyTranslations();
+            } catch (e) { document.body.classList.remove('logged-in'); }
+        } else { document.body.classList.remove('logged-in'); }
     }
 
-    function logout() {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = 'login.html';
-    }
-
-    /* =========================================================
-       EDITOR COMMANDS
-       ========================================================= */
-    function execCmd(command, value) {
-        document.execCommand(command, false, value || null);
-        document.getElementById('editorArea').focus();
-        onContentChange();
-    }
-    function insertLink() { var url = prompt(getL('linkPrompt'), 'https://'); if (url) execCmd('createLink', url); }
-    function insertBlockquote() { execCmd('formatBlock', 'blockquote'); }
-
-    /* =========================================================
-       IMAGE INSERT
-       ========================================================= */
-    function openImageModal() {
-        document.getElementById('imageUrlInput').value = '';
-        document.getElementById('imageAltInput').value = '';
-        document.getElementById('imagePreview').style.display = 'none';
-        new bootstrap.Modal(document.getElementById('imageModal')).show();
-    }
-    function insertImage() {
-        var url = document.getElementById('imageUrlInput').value;
-        var alt = document.getElementById('imageAltInput').value || '';
-        if (url) {
-            document.getElementById('editorArea').focus();
-            document.execCommand('insertHTML', false, '<img src="' + url + '" alt="' + alt + '" style="max-width: 100%; border-radius: 8px; margin: 1rem 0;">');
-            bootstrap.Modal.getInstance(document.getElementById('imageModal')).hide();
-            onContentChange();
-        }
-    }
-
-    /* =========================================================
-       SEARCH and REPLACE
-       ========================================================= */
-    function toggleSearchPanel() {
-        var panel = document.getElementById('searchPanel');
-        panel.classList.toggle('open');
-        if (panel.classList.contains('open')) document.getElementById('searchInput').focus();
-    }
-    function findText() {
-        var query = document.getElementById('searchInput').value;
-        var infoEl = document.getElementById('searchInfo');
-        if (!query) { infoEl.textContent = ''; return; }
-        var content = document.getElementById('editorArea').innerText;
-        var matches = content.match(new RegExp(query, 'gi'));
-        if (matches) { infoEl.textContent = matches.length + ' ' + getL('foundResults'); window.find(query); }
-        else { infoEl.textContent = getL('noResults'); }
-    }
-    function replaceText() {
-        var search = document.getElementById('searchInput').value;
-        var replace = document.getElementById('replaceInput').value;
-        if (!search) return;
-        var editor = document.getElementById('editorArea');
-        editor.innerHTML = editor.innerHTML.split(search).join(replace);
-        onContentChange();
-    }
-
-    /* =========================================================
-       COMMENT PANEL
-       ========================================================= */
-    function toggleCommentPanel() { document.getElementById('commentPanel').classList.toggle('open'); }
-    function addComment() {
-        var textarea = document.getElementById('newComment');
-        var text = textarea.value.trim();
-        if (!text) return;
-        var list = document.getElementById('commentList');
-        var item = document.createElement('div');
-        item.className = 'comment-item';
-        item.innerHTML = '<div class="comment-author">You</div><div class="comment-text">' +
-            text.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div><div class="comment-time">' + getL('lastEdit') + '</div>';
-        list.appendChild(item);
-        textarea.value = '';
-        list.scrollTop = list.scrollHeight;
-    }
-
-    /* =========================================================
-       EXPORT
-       ========================================================= */
-    function exportWork() { new bootstrap.Modal(document.getElementById('exportModal')).show(); }
-    function doExport(format) {
-        var title = document.getElementById('workTitle').value || getL('untitled');
-        var content = document.getElementById('editorArea');
-        var data, mimeType, ext;
-        if (format === 'html') {
-            data = '<!DOCTYPE html>\n<html><head><meta charset="UTF-8"><title>' + title + '</title></head><body>\n' + content.innerHTML + '\n</body></html>';
-            mimeType = 'text/html'; ext = '.html';
-        } else if (format === 'txt') {
-            data = content.innerText; mimeType = 'text/plain'; ext = '.txt';
-        } else {
-            data = content.innerHTML
-                .replace(/<h1[^>]*>(.*?)<\/h1>/gi, '# $1\n\n')
-                .replace(/<h2[^>]*>(.*?)<\/h2>/gi, '## $1\n\n')
-                .replace(/<h3[^>]*>(.*?)<\/h3>/gi, '### $1\n\n')
-                .replace(/<strong[^>]*>(.*?)<\/strong>/gi, '**$1**')
-                .replace(/<b[^>]*>(.*?)<\/b>/gi, '**$1**')
-                .replace(/<em[^>]*>(.*?)<\/em>/gi, '*$1*')
-                .replace(/<br\s*\/?>/gi, '\n')
-                .replace(/<p[^>]*>(.*?)<\/p>/gi, '$1\n\n')
-                .replace(/<[^>]+>/g, '').replace(/\n{3,}/g, '\n\n').trim();
-            mimeType = 'text/markdown'; ext = '.md';
-        }
-        var blob = new Blob([data], { type: mimeType });
-        var a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = title + ext;
-        a.click();
-        URL.revokeObjectURL(a.href);
-        bootstrap.Modal.getInstance(document.getElementById('exportModal')).hide();
-    }
-
-    /* =========================================================
-       PUBLISH
-       ========================================================= */
-    function publishWork() {
-        var isDemo = new URLSearchParams(window.location.search).get('demo') === 'true';
-        if (isDemo) { alert(getL('publishDemoMsg')); return; }
-        if (confirm(getL('publishConfirm'))) alert(getL('publishSuccess'));
-    }
-
-    /* =========================================================
-       CONTENT TRACKING
-       ========================================================= */
-    function onContentChange() {
-        updateCounts();
-        var statusEl = document.getElementById('saveStatus');
-        statusEl.className = 'save-status';
-        statusEl.innerHTML = '<i class="fas fa-circle"></i> <span id="saveStatusText">' + getL('unsaved') + '</span>';
-        clearTimeout(autoSaveTimer);
-        autoSaveTimer = setTimeout(autoSave, 2000);
-    }
-    function updateCounts() {
-        var text = document.getElementById('editorArea').innerText || '';
-        var chars = text.length;
-        var words = text.trim() ? text.trim().split(/\s+/).length : 0;
-        var pages = Math.max(1, Math.ceil(chars / 1800));
-        document.getElementById('charCount').textContent = chars.toLocaleString();
-        document.getElementById('wordCount').textContent = words.toLocaleString();
-        document.getElementById('pageCount').textContent = pages;
-    }
-    function autoSave() {
-        var statusEl = document.getElementById('saveStatus');
-        statusEl.className = 'save-status saving';
-        statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span id="saveStatusText">' + getL('saving') + '</span>';
-        setTimeout(function() {
-            statusEl.className = 'save-status saved';
-            statusEl.innerHTML = '<i class="fas fa-check-circle"></i> <span id="saveStatusText">' + getL('saved') + '</span>';
-            try {
-                localStorage.setItem('editor_draft_title', document.getElementById('workTitle').value);
-                localStorage.setItem('editor_draft_content', document.getElementById('editorArea').innerHTML);
-            } catch (e) { /* ignore */ }
-        }, 500);
-    }
-
-    /* =========================================================
-       KEYBOARD SHORTCUTS
-       ========================================================= */
-    document.addEventListener('keydown', function(e) {
-        if ((e.ctrlKey || e.metaKey) && !e.shiftKey) {
-            if (e.key.toLowerCase() === 's') { e.preventDefault(); autoSave(); }
-            if (e.key.toLowerCase() === 'f') { e.preventDefault(); toggleSearchPanel(); }
-        }
-    });
-
-    /* =========================================================
-       INITIALIZATION
-       ========================================================= */
     document.addEventListener('DOMContentLoaded', function() {
-        updateAuthNav();
-        applyEditorTranslations();
-
-        // Load draft
-        var savedTitle = localStorage.getItem('editor_draft_title');
-        var savedContent = localStorage.getItem('editor_draft_content');
-        if (savedTitle) document.getElementById('workTitle').value = savedTitle;
-        if (savedContent) document.getElementById('editorArea').innerHTML = savedContent;
-        updateCounts();
-
-        // Content change listener
-        document.getElementById('editorArea').addEventListener('input', onContentChange);
-
-        // Heading select
-        document.getElementById('headingSelect').addEventListener('change', function() {
-            execCmd('formatBlock', this.value === 'p' ? 'p' : this.value);
-        });
-
-        // Language change event from language-switcher.js
-        document.addEventListener('languageChanged', function() {
-            applyEditorTranslations();
-            updateAuthNav();
-        });
-
-        // Fallback: bind language selectors directly
-        document.querySelectorAll('#mobileLanguageSelect, #desktopLanguageSelect').forEach(function(select) {
-            select.addEventListener('change', function() {
-                currentLang = this.value;
-                if (typeof LanguageSwitcher !== 'undefined') LanguageSwitcher.changeLanguage(this.value);
-                setTimeout(function() { applyEditorTranslations(); updateAuthNav(); }, 100);
-            });
-        });
-
-        // Image URL preview
-        document.getElementById('imageUrlInput').addEventListener('input', function() {
-            var preview = document.getElementById('imagePreview');
-            if (this.value) { preview.src = this.value; preview.style.display = 'block'; }
-            else { preview.style.display = 'none'; }
-        });
-        document.getElementById('imagePreview').addEventListener('error', function() { this.style.display = 'none'; });
-
-        // Mobile navbar overlay
-        var navbarNav = document.getElementById('navbarNav');
-        var navbarOverlay = document.getElementById('navbarOverlay');
-        if (navbarNav) {
-            navbarNav.addEventListener('show.bs.collapse', function() {
-                document.body.classList.add('menu-open');
-                if (navbarOverlay) navbarOverlay.classList.add('show');
-            });
-            navbarNav.addEventListener('hide.bs.collapse', function() {
-                document.body.classList.remove('menu-open');
-                if (navbarOverlay) navbarOverlay.classList.remove('show');
-            });
+        var ds = document.getElementById('languageSelector');
+        var ms = document.getElementById('languageSelectorMobile');
+        if (ds && ms) {
+            var saved = localStorage.getItem('preferredLanguage') || 'en';
+            ds.value = saved; ms.value = saved;
         }
-        if (navbarOverlay) {
-            navbarOverlay.addEventListener('click', function() {
-                var bsCollapse = bootstrap.Collapse.getInstance(navbarNav);
-                if (bsCollapse) bsCollapse.hide();
-            });
+        updateNavUIText();
+        loadUserInfo();
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.user-dropdown')) {
+                var dd = document.getElementById('userDropdown');
+                var dm = document.getElementById('userMenu');
+                if (dd) dd.classList.remove('open');
+                if (dm) dm.classList.remove('show');
+            }
+        });
+        var nc = document.getElementById('navbarNav');
+        var no = document.getElementById('navbarOverlay');
+        if (nc) {
+            nc.addEventListener('show.bs.collapse', function() { document.body.classList.add('menu-open'); if (no) no.classList.add('show'); });
+            nc.addEventListener('hide.bs.collapse', function() { document.body.classList.remove('menu-open'); if (no) no.classList.remove('show'); });
         }
+        if (no) { no.addEventListener('click', function() { var bc = bootstrap.Collapse.getInstance(nc); if (bc) bc.hide(); }); }
+        document.addEventListener('languageChanged', function() { updateNavUIText(); });
     });
     </script>
+
+    <!-- ========== STEP 2: EDITOR TRANSLATION SYSTEM ========== -->
+    <script>
+    /* ===== Editor UI Text (9 languages, minimal) ===== */
+    var editorText = {
+        paragraph:      { en: 'Paragraph', ja: '\u6BB5\u843D', zh: '\u6BB5\u843D', es: 'P\u00E1rrafo', fr: 'Paragraphe', de: 'Absatz', ko: '\uB2E8\uB77D', ar: '\u0641\u0642\u0631\u0629', pt: 'Par\u00E1grafo' },
+        h1:             { en: 'Heading 1', ja: '\u898B\u51FA\u30571', zh: '\u6807\u98981', es: 'Encabezado 1', fr: 'Titre 1', de: '\u00DCberschrift 1', ko: '\uC81C\uBAA9 1', ar: '\u0639\u0646\u0648\u0627\u0646 1', pt: 'T\u00EDtulo 1' },
+        h2:             { en: 'Heading 2', ja: '\u898B\u51FA\u30572', zh: '\u6807\u98982', es: 'Encabezado 2', fr: 'Titre 2', de: '\u00DCberschrift 2', ko: '\uC81C\uBAA9 2', ar: '\u0639\u0646\u0648\u0627\u0646 2', pt: 'T\u00EDtulo 2' },
+        h3:             { en: 'Heading 3', ja: '\u898B\u51FA\u30573', zh: '\u6807\u98983', es: 'Encabezado 3', fr: 'Titre 3', de: '\u00DCberschrift 3', ko: '\uC81C\uBAA9 3', ar: '\u0639\u0646\u0648\u0627\u0646 3', pt: 'T\u00EDtulo 3' },
+        untitled:       { en: 'Untitled', ja: '\u7121\u984C', zh: '\u65E0\u6807\u9898', es: 'Sin t\u00EDtulo', fr: 'Sans titre', de: 'Ohne Titel', ko: '\uC81C\uBAA9 \uC5C6\uC74C', ar: '\u0628\u062F\u0648\u0646 \u0639\u0646\u0648\u0627\u0646', pt: 'Sem t\u00EDtulo' },
+        placeholder:    { en: 'Start writing your story...', ja: '\u3053\u3053\u306B\u7269\u8A9E\u3092\u66F8\u304D\u59CB\u3081\u3066\u304F\u3060\u3055\u3044...', zh: '\u5728\u8FD9\u91CC\u5F00\u59CB\u5199\u4F5C...', es: 'Comienza a escribir tu historia...', fr: 'Commencez \u00E0 \u00E9crire votre histoire...', de: 'Beginnen Sie Ihre Geschichte zu schreiben...', ko: '\uC5EC\uAE30\uC5D0 \uC774\uC57C\uAE30\uB97C \uC791\uC131\uD558\uC138\uC694...', ar: '\u0627\u0628\u062F\u0623 \u0628\u0643\u062A\u0627\u0628\u0629 \u0642\u0635\u062A\u0643 \u0647\u0646\u0627...', pt: 'Comece a escrever sua hist\u00F3ria...' },
+        saved:          { en: 'Saved', ja: '\u4FDD\u5B58\u6E08\u307F', zh: '\u5DF2\u4FDD\u5B58', es: 'Guardado', fr: 'Enregistr\u00E9', de: 'Gespeichert', ko: '\uC800\uC7A5\uB428', ar: '\u062A\u0645 \u0627\u0644\u062D\u0641\u0638', pt: 'Salvo' },
+        saving:         { en: 'Saving...', ja: '\u4FDD\u5B58\u4E2D...', zh: '\u4FDD\u5B58\u4E2D...', es: 'Guardando...', fr: 'Enregistrement...', de: 'Speichern...', ko: '\uC800\uC7A5 \uC911...', ar: '\u062C\u0627\u0631\u064D \u0627\u0644\u062D\u0641\u0638...', pt: 'Salvando...' },
+        unsaved:        { en: 'Unsaved', ja: '\u672A\u4FDD\u5B58', zh: '\u672A\u4FDD\u5B58', es: 'Sin guardar', fr: 'Non enregistr\u00E9', de: 'Nicht gespeichert', ko: '\uC800\uC7A5\uB418\uC9C0 \uC54A\uC74C', ar: '\u063A\u064A\u0631 \u0645\u062D\u0641\u0648\u0638', pt: 'N\u00E3o salvo' },
+        exportBtn:      { en: 'Export', ja: '\u30A8\u30AF\u30B9\u30DD\u30FC\u30C8', zh: '\u5BFC\u51FA', es: 'Exportar', fr: 'Exporter', de: 'Exportieren', ko: '\uB0B4\uBCF4\uB0B4\uAE30', ar: '\u062A\u0635\u062F\u064A\u0631', pt: 'Exportar' },
+        publishBtn:     { en: 'Publish', ja: '\u516C\u958B', zh: '\u53D1\u5E03', es: 'Publicar', fr: 'Publier', de: 'Ver\u00F6ffentlichen', ko: '\uAC8C\uC2DC', ar: '\u0646\u0634\u0631', pt: 'Publicar' },
+        publishConfirm: { en: 'Are you sure you want to publish?', ja: '\u516C\u958B\u3057\u3066\u3082\u3088\u308D\u3057\u3044\u3067\u3059\u304B\uFF1F', zh: '\u786E\u5B9A\u8981\u53D1\u5E03\u5417\uFF1F', es: '\u00BFEst\u00E1 seguro de publicar?', fr: '\u00CAtes-vous s\u00FBr de vouloir publier ?', de: 'Sind Sie sicher?', ko: '\uAC8C\uC2DC\uD558\uC2DC\uACA0\uC2B5\uB2C8\uAE4C?', ar: '\u0647\u0644 \u0623\u0646\u062A \u0645\u062A\u0623\u0643\u062F \u0645\u0646 \u0627\u0644\u0646\u0634\u0631\u061F', pt: 'Tem certeza que deseja publicar?' },
+        publishDemo:    { en: 'Demo mode: Publishing is disabled', ja: '\u30C7\u30E2\u30E2\u30FC\u30C9: \u516C\u958B\u306F\u7121\u52B9\u3067\u3059', zh: '\u6F14\u793A\u6A21\u5F0F\uFF1A\u53D1\u5E03\u5DF2\u7981\u7528', es: 'Modo demo: Publicaci\u00F3n deshabilitada', fr: 'Mode d\u00E9mo: Publication d\u00E9sactiv\u00E9e', de: 'Demo-Modus: deaktiviert', ko: '\uB370\uBAA8 \uBAA8\uB4DC: \uAC8C\uC2DC \uBE44\uD65C\uC131\uD654', ar: '\u0627\u0644\u0648\u0636\u0639 \u0627\u0644\u062A\u062C\u0631\u064A\u0628\u064A: \u0627\u0644\u0646\u0634\u0631 \u0645\u0639\u0637\u0644', pt: 'Modo demo: Publica\u00E7\u00E3o desativada' },
+        characters:     { en: 'Characters', ja: '\u6587\u5B57\u6570', zh: '\u5B57\u7B26', es: 'Caracteres', fr: 'Caract\u00E8res', de: 'Zeichen', ko: '\uAE00\uC790 \uC218', ar: '\u0627\u0644\u0623\u062D\u0631\u0641', pt: 'Caracteres' },
+        words:          { en: 'Words', ja: '\u5358\u8A9E\u6570', zh: '\u8BCD\u6570', es: 'Palabras', fr: 'Mots', de: 'W\u00F6rter', ko: '\uB2E8\uC5B4 \uC218', ar: '\u0627\u0644\u0643\u0644\u0645\u0627\u062A', pt: 'Palavras' },
+        pages:          { en: 'Pages', ja: '\u30DA\u30FC\u30B8\u6570', zh: '\u9875\u6570', es: 'P\u00E1ginas', fr: 'Pages', de: 'Seiten', ko: '\uD398\uC774\uC9C0 \uC218', ar: '\u0627\u0644\u0635\u0641\u062D\u0627\u062A', pt: 'P\u00E1ginas' },
+        lastEdit:       { en: 'Last edit: just now', ja: '\u6700\u7D42\u7DE8\u96C6: \u305F\u3063\u305F\u4ECA', zh: '\u6700\u540E\u7F16\u8F91\uFF1A\u521A\u521A', es: '\u00DAltima edici\u00F3n: ahora', fr: 'Derni\u00E8re modification: maintenant', de: 'Letzte Bearbeitung: gerade eben', ko: '\uB9C8\uC9C0\uB9C9 \uD3B8\uC9D1: \uBC29\uAE08', ar: '\u0622\u062E\u0631 \u062A\u0639\u062F\u064A\u0644: \u0627\u0644\u0622\u0646', pt: '\u00DAltima edi\u00E7\u00E3o: agora' },
+        editorTitle:    { en: 'Editor - Publisher', ja: '\u30A8\u30C7\u30A3\u30BF\u30FC - Publisher', zh: '\u7F16\u8F91\u5668 - Publisher', es: 'Editor - Publisher', fr: '\u00C9diteur - Publisher', de: 'Editor - Publisher', ko: '\uC5D0\uB514\uD130 - Publisher', ar: '\u0627\u0644\u0645\u062D\u0631\u0631 - Publisher', pt: 'Editor - Publisher' }
+    };
+
+    /* ===== getL: Get Localized text ===== */
+    function getL(obj) {
+        var lang = getCurrentLanguage();
+        return (obj && obj[lang]) || (obj && obj.en) || '';
+    }
+
+    /* ===== Apply Editor Translations ===== */
+    function applyEditorTranslations() {
+        var s = function(id, obj) { var el = document.getElementById(id); if (el) el.textContent = getL(obj); };
+
+        document.title = getL(editorText.editorTitle);
+        s('opt-paragraph', editorText.paragraph);
+        s('opt-h1', editorText.h1);
+        s('opt-h2', editorText.h2);
+        s('opt-h3', editorText.h3);
+        var expSpan = document.querySelector('#btnExport span');
+        if (expSpan) expSpan.textContent = getL(editorText.exportBtn);
+        var pubSpan = document.querySelector('#btnPublish span');
+        if (pubSpan) pubSpan.textContent = getL(editorText.publishBtn);
+        var ea = document.getElementById('editorArea');
+        if (ea) ea.setAttribute('data-placeholder', getL(editorText.placeholder));
+        s('labelChars', editorText.characters);
+        s('labelWords', editorText.words);
+        s('labelPages', editorText.pages);
+        s('labelLastEdit', editorText.lastEdit);
+    }
+
+    /* ===== changeLanguage: called by navbar selectors ===== */
+    function changeLanguage(lang) {
+        localStorage.setItem('preferredLanguage', lang);
+        document.documentElement.lang = lang;
+        applyEditorTranslations();
+        updateNavUIText();
+        document.dispatchEvent(new CustomEvent('languageChanged', { detail: { language: lang } }));
+    }
+
+    /* ===== Hook into DOMContentLoaded ===== */
+    (function() {
+        document.addEventListener('DOMContentLoaded', function() {
+            applyEditorTranslations();
+            var ds = document.getElementById('languageSelector');
+            var ms = document.getElementById('languageSelectorMobile');
+            if (ds) ds.addEventListener('change', function() { changeLanguage(this.value); if (ms) ms.value = this.value; });
+            if (ms) ms.addEventListener('change', function() { changeLanguage(this.value); if (ds) ds.value = this.value; });
+        });
+    })();
+    </script>
+
+    <!-- ========== STEP 3: MINIMAL EDITOR (all functions called by HTML onclick) ========== -->
+    <script>
+    /* Editor command - called by toolbar onclick */
+    function execCmd(cmd, val) {
+        document.execCommand(cmd, false, val || null);
+        document.getElementById('editorArea').focus();
+        countWords();
+        showUnsaved();
+    }
+
+    /* Word count - no regex, pure char-code loop */
+    function countWords() {
+        var area = document.getElementById('editorArea');
+        if (!area) return;
+        var text = area.innerText || '';
+        var chars = text.length;
+        var trimmed = text.trim();
+        var words = 0;
+        if (trimmed.length > 0) {
+            var inWord = false;
+            for (var i = 0; i < trimmed.length; i++) {
+                var ch = trimmed.charCodeAt(i);
+                var isSpace = (ch === 32 || ch === 10 || ch === 13 || ch === 9);
+                if (!isSpace && !inWord) { words++; inWord = true; }
+                if (isSpace) { inWord = false; }
+            }
+        }
+        var pages = Math.max(1, Math.ceil(words / 250));
+        var cc = document.getElementById('charCount');
+        var wc = document.getElementById('wordCount');
+        var pc = document.getElementById('pageCount');
+        if (cc) cc.textContent = chars;
+        if (wc) wc.textContent = words;
+        if (pc) pc.textContent = pages;
+    }
+
+    /* Save status */
+    var _saveTimer = null;
+    function showUnsaved() {
+        var st = document.getElementById('saveStatus');
+        var tx = document.getElementById('saveStatusText');
+        if (!st || !tx) return;
+        st.className = 'save-status';
+        tx.textContent = getL(editorText.unsaved);
+        st.querySelector('i').className = 'fas fa-exclamation-circle';
+        clearTimeout(_saveTimer);
+        _saveTimer = setTimeout(doAutoSave, 2000);
+    }
+    function doAutoSave() {
+        var st = document.getElementById('saveStatus');
+        var tx = document.getElementById('saveStatusText');
+        if (!st || !tx) return;
+        st.className = 'save-status saving';
+        tx.textContent = getL(editorText.saving);
+        st.querySelector('i').className = 'fas fa-spinner fa-spin';
+        setTimeout(function() {
+            st.className = 'save-status saved';
+            tx.textContent = getL(editorText.saved);
+            st.querySelector('i').className = 'fas fa-check-circle';
+        }, 600);
+    }
+
+    /* Export as plain text - called by Export button onclick */
+    function doExportTXT() {
+        var title = document.getElementById('workTitle').value || getL(editorText.untitled);
+        var area = document.getElementById('editorArea');
+        var NL = String.fromCharCode(10);
+        var text = title + NL + NL + (area ? area.innerText : '');
+        var blob = new Blob([text], { type: 'text/plain' });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = title + '.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+    }
+
+    /* Publish - called by Publish button onclick */
+    function doPublish() {
+        if (confirm(getL(editorText.publishConfirm))) {
+            alert(getL(editorText.publishDemo));
+        }
+    }
+
+    /* Initial word count on page load */
+    document.addEventListener('DOMContentLoaded', function() {
+        countWords();
+    });
+    </script>
+
 </body>
 </html>
