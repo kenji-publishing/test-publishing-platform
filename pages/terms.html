@@ -23,9 +23,8 @@
     <!-- 翻訳ベース（共通関数） -->
     <script src="../js/lang/translations-base.js"></script>
     <style>
-        html, body { overflow-x: hidden; max-width: 100%; }
-        .language-selector { position: fixed; top: 70px; right: 15px; z-index: 1050; }
-        .language-selector select { padding: 8px 12px; border: 1px solid #ccc; border-radius: 8px; background: #ffffff; font-size: 14px; cursor: pointer; max-width: 140px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        html { overflow-x: clip; max-width: 100%; }
+        body { overflow-x: clip; max-width: 100%; padding-top: 56px; }
         .terms-container { padding: var(--spacing-xl) 0; max-width: 900px; margin: 0 auto; }
         .terms-header { text-align: center; margin-bottom: var(--spacing-2xl); padding-bottom: var(--spacing-xl); border-bottom: 1px solid var(--color-border); }
         .terms-header h1 { font-size: var(--font-size-3xl); margin-bottom: var(--spacing-md); }
@@ -52,39 +51,528 @@
         [dir="rtl"] .highlight-important, [dir="rtl"] .highlight-warning { border-left: none; border-right: 4px solid var(--color-accent); }
         [dir="rtl"] .highlight-warning { border-right-color: var(--color-warning); }
         [dir="rtl"] .revenue-table th, [dir="rtl"] .revenue-table td { text-align: right; }
-        [dir="rtl"] .language-selector { right: auto; left: 15px; }
         [dir="rtl"] .toc ul { columns: 1; }
         .lang-content[data-lang="ar"] { font-family: 'Noto Sans Arabic', sans-serif; }
         @media (max-width: 768px) {
             .toc ul { columns: 1; }
-            .language-selector { top: 60px; right: 10px; }
-            .language-selector select { padding: 5px 8px; font-size: 12px; max-width: 110px; }
             .revenue-table { font-size: 12px; }
             .revenue-table th, .revenue-table td { padding: 6px 4px; }
-            [dir="rtl"] .language-selector { left: 10px; right: auto; }
+        }
+    </style>
+    <!-- Pattern C Navbar CSS -->
+    <style>
+        /* ========== Mobile Language Selector ========== */
+        .navbar-lang-selector {
+            display: flex;
+            align-items: center;
+            margin-right: 0.5rem;
+        }
+        
+        @media (max-width: 991.98px) {
+            .navbar-lang-selector {
+                order: 1;
+            }
+            .navbar-toggler {
+                order: 2;
+            }
+        }
+        
+        /* ========== PC Navbar - 横並び維持 ========== */
+        @media (min-width: 992px) {
+            .navbar-nav {
+                flex-wrap: nowrap !important;
+                flex-direction: row !important;
+            }
+            .navbar-nav .nav-item {
+                white-space: nowrap !important;
+            }
+            .navbar-nav .nav-link {
+                white-space: nowrap !important;
+                padding: 0.5rem 0.6rem !important;
+                font-size: 0.9rem;
+            }
+            .navbar-collapse .d-flex {
+                flex-wrap: nowrap !important;
+            }
+            .dropdown-menu {
+                white-space: nowrap;
+            }
+            .navbar-buttons-guest {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                gap: 0.5rem;
+            }
+            .navbar-buttons-guest .btn {
+                white-space: nowrap !important;
+                flex-shrink: 0;
+            }
+        }
+        
+        /* ========== Auth Visibility Control ========== */
+        .auth-only {
+            display: none !important;
+        }
+        .guest-only {
+            display: block;
+        }
+        body.logged-in .auth-only {
+            display: block !important;
+        }
+        body.logged-in .auth-only.nav-item {
+            display: list-item !important;
+        }
+        body.logged-in .auth-only.dropdown {
+            display: block !important;
+        }
+        body.logged-in .guest-only {
+            display: none !important;
+        }
+        @media (min-width: 992px) {
+            body.logged-in .navbar-buttons-guest {
+                display: none !important;
+            }
+        }
+        
+        /* ========== User Dropdown Menu ========== */
+        .user-dropdown {
+            position: relative;
+        }
+        .user-dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: transparent;
+            border: 1px solid var(--color-border);
+            border-radius: 25px;
+            padding: 0.4rem 0.75rem;
+            cursor: pointer;
+            color: var(--color-text);
+            transition: all 0.2s;
+        }
+        .user-dropdown-toggle:hover {
+            border-color: var(--color-accent);
+            background: rgba(139, 115, 85, 0.05);
+        }
+        .user-dropdown-toggle i:first-child {
+            font-size: 1.25rem;
+            color: var(--color-accent);
+        }
+        .user-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-chevron {
+            font-size: 0.7rem;
+            color: var(--color-text-secondary);
+            transition: transform 0.2s;
+        }
+        .user-dropdown.open .user-chevron {
+            transform: rotate(180deg);
+        }
+        .user-menu {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            right: 0;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            min-width: 240px;
+            z-index: 1001;
+            display: none;
+            overflow: hidden;
+        }
+        .user-menu.show {
+            display: block;
+        }
+        .user-menu-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--color-bg-main);
+        }
+        .user-avatar {
+            font-size: 2.5rem;
+            color: var(--color-accent);
+        }
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .user-display-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-email {
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-menu-divider {
+            height: 1px;
+            background: var(--color-border);
+        }
+        .user-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--color-text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+        .user-menu-item:hover {
+            background: var(--color-bg-hover);
+            color: var(--color-accent);
+        }
+        .user-menu-item i {
+            width: 20px;
+            text-align: center;
+            color: var(--color-text-secondary);
+        }
+        .user-menu-item:hover i {
+            color: var(--color-accent);
+        }
+        .logout-btn {
+            color: var(--color-error);
+        }
+        .logout-btn i {
+            color: var(--color-error);
+        }
+        .logout-btn:hover {
+            background: rgba(199, 93, 93, 0.1);
+            color: var(--color-error);
+        }
+        
+        /* ========== Navbar Overlay ========== */
+        .navbar-overlay {
+            display: none;
+            position: fixed;
+            top: 56px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1040;
+        }
+        .navbar-overlay.show {
+            display: block;
+        }
+        
+        /* ========== Mobile Adjustments ========== */
+        @media (max-width: 991.98px) {
+            .user-dropdown {
+                order: 3;
+                margin-left: 0.5rem;
+            }
+            .user-dropdown-toggle {
+                padding: 0.3rem;
+                border-radius: 50%;
+                width: 38px;
+                height: 38px;
+                justify-content: center;
+            }
+            .user-menu {
+                position: fixed;
+                top: 56px;
+                right: 10px;
+                left: auto;
+                min-width: 260px;
+                max-width: calc(100vw - 20px);
+                z-index: 9999;
+            }
+            .navbar-collapse {
+                max-height: 70vh;
+                overflow-y: auto;
+                overscroll-behavior: contain;
+                -webkit-overflow-scrolling: touch;
+            }
+            .navbar-collapse.show,
+            .navbar-collapse.collapsing {
+                position: fixed;
+                top: 56px;
+                left: 0;
+                right: 0;
+                background: #FFFFFF;
+                border-bottom: 1px solid var(--color-border);
+                box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+                z-index: 1045;
+                padding: 0.5rem 1rem;
+            }
+            body.menu-open {
+                overflow: hidden;
+            }
+            .navbar-custom {
+                z-index: 1050 !important;
+                background: #FFFFFF !important;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="language-selector">
-        <select id="languageSelect" onchange="changeLanguage(this.value)">
-            <option value="en">🇬🇧 English</option>
-            <option value="ja">🇯🇵 日本語</option>
-            <option value="zh">🇨🇳 中文</option>
-            <option value="es">🇪🇸 Español</option>
-            <option value="fr">🇫🇷 Français</option>
-            <option value="de">🇩🇪 Deutsch</option>
-            <option value="ko">🇰🇷 한국어</option>
-            <option value="ar">🇸🇦 العربية</option>
-            <option value="pt">🇧🇷 Português</option>
-        </select>
-    </div>
-    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+    <!-- ========== NAVBAR HTML START ========== -->
+
+    <!-- Navbar Overlay -->
+    <div class="navbar-overlay" id="navbarOverlay"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="../index.html"><i class="fas fa-book-open"></i> Publisher</a>
-            <a href="dashboard.html" class="btn btn-soft-custom btn-sm"><i class="fas fa-arrow-left me-1"></i><span data-i18n="legal.backToHome">Back to Home</span></a>
+            <!-- ブランドリンク -->
+            <a class="navbar-brand" href="../index.html">
+                <i class="fas fa-book-open"></i>
+                Publisher
+            </a>
+            
+            <!-- Language Selector Mobile -->
+            <div class="navbar-lang-selector d-lg-none">
+                <select class="language-selector" id="languageSelectorMobile">
+                    <option value="en">🇬🇧 EN</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="es">🇪🇸 ES</option>
+                    <option value="fr">🇫🇷 FR</option>
+                    <option value="de">🇩🇪 DE</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="ar">🇸🇦 عربي</option>
+                    <option value="pt">🇧🇷 PT</option>
+                </select>
+            </div>
+            
+            <!-- User Dropdown (auth-only) -->
+            <div class="user-dropdown auth-only" id="userDropdown">
+                <button type="button" class="user-dropdown-toggle" id="userDropdownBtn" onclick="toggleUserDropdown(event)">
+                    <i class="fas fa-user-circle"></i>
+                    <span class="user-name d-none d-lg-inline" id="userName">User</span>
+                    <i class="fas fa-chevron-down user-chevron d-none d-lg-inline"></i>
+                </button>
+                <div class="user-menu" id="userMenu">
+                    <div class="user-menu-header">
+                        <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
+                        <div class="user-info">
+                            <div class="user-display-name" id="userDisplayName">User</div>
+                            <div class="user-email" id="userEmail">user@example.com</div>
+                        </div>
+                    </div>
+                    <div class="user-menu-divider"></div>
+                    <a href="dashboard.html" class="user-menu-item">
+                        <i class="fas fa-th-large"></i>
+                        <span id="menuDashboard">Dashboard</span>
+                    </a>
+                    <a href="account-settings.html" class="user-menu-item">
+                        <i class="fas fa-cog"></i>
+                        <span id="menuAccountSettings">Account Settings</span>
+                    </a>
+                    <div class="user-menu-divider"></div>
+                    <button class="user-menu-item logout-btn" onclick="handleLogout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span id="menuLogout">Log Out</span>
+                    </button>
+                </div>
+            </div>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <!-- ========== PC Navigation ========== -->
+                <ul class="navbar-nav me-auto d-none d-lg-flex">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../index.html">
+                            <i class="fas fa-home me-1"></i> <span data-i18n="nav.home">Home</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="browse.html">
+                            <i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="genres.html">
+                            <i class="fas fa-layer-group me-1"></i> <span data-i18n="nav.genres">Genres</span>
+                        </a>
+                    </li>
+                    <!-- Auth: Library -->
+                    <li class="nav-item auth-only">
+                        <a class="nav-link" href="library.html">
+                            <i class="fas fa-book-reader me-1"></i> <span id="navLibraryPC">Library</span>
+                        </a>
+                    </li>
+                    <!-- Auth: Dashboard -->
+                    <li class="nav-item auth-only">
+                        <a class="nav-link" href="dashboard.html">
+                            <i class="fas fa-th-large me-1"></i> <span id="navDashboardPC">Dashboard</span>
+                        </a>
+                    </li>
+                    <!-- Auth: Upload -->
+                    <li class="nav-item auth-only">
+                        <a class="nav-link" href="upload.html">
+                            <i class="fas fa-upload me-1"></i> <span data-i18n="nav.upload">Upload</span>
+                        </a>
+                    </li>
+                    <!-- Auth: Translation Tools -->
+                    <li class="nav-item dropdown auth-only">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-language me-1"></i> <span id="navTranslationToolsPC">Translation Tools</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="manga-translator.html"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorPC">Manga Translator</span></a></li>
+                            <li><a class="dropdown-item" href="translation-status.html"><i class="fas fa-tasks me-2"></i><span id="navTranslationStatusPC">Translation Status</span></a></li>
+                            <li><a class="dropdown-item" href="translators/index.html"><i class="fas fa-users me-2"></i><span id="navFindTranslatorsPC">Find Translators</span></a></li>
+                        </ul>
+                    </li>
+                    <!-- Support Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-headset me-1"></i> <span data-i18n="nav.support">Support</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="support/faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
+                            <li><a class="dropdown-item" href="support/troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
+                            <li><a class="dropdown-item" href="support/contact.html"><i class="fas fa-envelope me-2"></i><span id="navContactPC">Contact</span></a></li>
+                            <li class="auth-only"><hr class="dropdown-divider"></li>
+                            <li class="auth-only"><a class="dropdown-item" href="support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <!-- ========== Mobile Navigation ========== -->
+                <ul class="navbar-nav d-lg-none">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../index.html">
+                            <i class="fas fa-home me-2"></i> <span data-i18n="nav.home">Home</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="browse.html">
+                            <i class="fas fa-compass me-2"></i> <span data-i18n="nav.browse">Browse</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="genres.html">
+                            <i class="fas fa-layer-group me-2"></i> <span data-i18n="nav.genres">Genres</span>
+                        </a>
+                    </li>
+                    <!-- Auth: Library -->
+                    <li class="nav-item auth-only">
+                        <a class="nav-link" href="library.html">
+                            <i class="fas fa-book-reader me-2"></i> <span id="navLibraryMobile">Library</span>
+                        </a>
+                    </li>
+                    <li class="auth-only"><hr class="dropdown-divider"></li>
+                    <!-- Auth: Dashboard -->
+                    <li class="nav-item auth-only">
+                        <a class="nav-link" href="dashboard.html">
+                            <i class="fas fa-th-large me-2"></i> <span id="navDashboardMobile">Dashboard</span>
+                        </a>
+                    </li>
+                    <!-- Auth: Upload -->
+                    <li class="nav-item auth-only">
+                        <a class="nav-link" href="upload.html">
+                            <i class="fas fa-upload me-2"></i> <span data-i18n="nav.upload">Upload</span>
+                        </a>
+                    </li>
+                    <!-- Auth: Translation Tools -->
+                    <li class="nav-item auth-only">
+                        <a class="nav-link" data-bs-toggle="collapse" href="#translationToolsMenu" role="button">
+                            <i class="fas fa-language me-2"></i> <span id="navTranslationToolsMobile">Translation Tools</span>
+                            <i class="fas fa-chevron-down ms-auto small"></i>
+                        </a>
+                        <div class="collapse ps-4" id="translationToolsMenu">
+                            <a class="nav-link" href="manga-translator.html">
+                                <i class="fas fa-image me-2"></i> <span id="navMangaTranslatorMobile">Manga Translator</span>
+                            </a>
+                            <a class="nav-link" href="translation-status.html">
+                                <i class="fas fa-tasks me-2"></i> <span id="navTranslationStatusMobile">Translation Status</span>
+                            </a>
+                            <a class="nav-link" href="translators/index.html">
+                                <i class="fas fa-users me-2"></i> <span id="navFindTranslatorsMobile">Find Translators</span>
+                            </a>
+                        </div>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <!-- Support -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="support/faq.html">
+                            <i class="fas fa-question-circle me-2"></i> <span data-i18n="support.faq.title">FAQ</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="support/troubleshoot.html">
+                            <i class="fas fa-tools me-2"></i> <span data-i18n="support.troubleshoot.title">Troubleshooting</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="support/contact.html">
+                            <i class="fas fa-envelope me-2"></i> <span id="navContactMobile">Contact</span>
+                        </a>
+                    </li>
+                    <!-- Auth: My Tickets -->
+                    <li class="nav-item auth-only">
+                        <a class="nav-link" href="support/tickets.html">
+                            <i class="fas fa-ticket-alt me-2"></i> <span data-i18n="support.tickets.title">My Tickets</span>
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <!-- Guest: Sign In -->
+                    <li class="nav-item guest-only">
+                        <a class="nav-link" href="login.html">
+                            <i class="fas fa-sign-in-alt me-2"></i> <span data-i18n="nav.login">Sign In</span>
+                        </a>
+                    </li>
+                    <!-- Guest: Register -->
+                    <li class="nav-item guest-only">
+                        <a class="nav-link" href="register.html">
+                            <i class="fas fa-user-plus me-2"></i> <span data-i18n="nav.getStarted">Get Started</span>
+                        </a>
+                    </li>
+                </ul>
+                
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Language Selector Desktop -->
+                    <select class="language-selector d-none d-lg-block" id="languageSelector">
+                        <option value="en">🇬🇧 EN</option>
+                        <option value="ja">🇯🇵 日本語</option>
+                        <option value="zh">🇨🇳 中文</option>
+                        <option value="es">🇪🇸 ES</option>
+                        <option value="fr">🇫🇷 FR</option>
+                        <option value="de">🇩🇪 DE</option>
+                        <option value="ko">🇰🇷 한국어</option>
+                        <option value="ar">🇸🇦 عربي</option>
+                        <option value="pt">🇧🇷 PT</option>
+                    </select>
+                    
+                    <!-- Guest Buttons (PC) -->
+                    <div class="navbar-buttons-guest guest-only d-none d-lg-flex">
+                        <a href="login.html" class="btn btn-soft-custom">
+                            <span data-i18n="nav.login">Sign In</span>
+                        </a>
+                        <a href="register.html" class="btn btn-primary-custom">
+                            <span data-i18n="nav.getStarted">Get Started</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </nav>
+
+    <!-- ========== NAVBAR HTML END ========== -->
     <main class="terms-container">
         <div class="container">
             <div class="terms-header">
@@ -94,7 +582,7 @@
 
             <!-- ENGLISH -->
             <div class="lang-content" data-lang="en">
-                <div class="toc"><h3><i class="fas fa-list me-2"></i>Contents</h3><ul><li><a href="#en-acceptance">1. Acceptance of Terms</a></li><li><a href="#en-definitions">2. Definitions</a></li><li><a href="#en-account">3. Account</a></li><li><a href="#en-content">4. Content</a></li><li><a href="#en-copyright">5. Copyright</a></li><li><a href="#en-ai-content">6. AI-Generated Content</a></li><li><a href="#en-revenue">7. Revenue Share</a></li><li><a href="#en-payment">8. Payment</a></li><li><a href="#en-prohibited">9. Prohibited Activities</a></li><li><a href="#en-moderation">10. Content Moderation</a></li><li><a href="#en-termination">11. Account Termination</a></li><li><a href="#en-disclaimer">12. Disclaimer</a></li><li><a href="#en-privacy">13. Privacy</a></li><li><a href="#en-changes">14. Changes to Terms</a></li><li><a href="#en-governing">15. Governing Law</a></li><li><a href="#en-contact">16. Contact</a></li></ul></div>
+                <div class="toc"><h3><i class="fas fa-list me-2"></i>Contents</h3><ul><li><a href="#en-acceptance">1. Acceptance of Terms</a></li><li><a href="#en-definitions">2. Definitions</a></li><li><a href="#en-account">3. Account</a></li><li><a href="#en-content">4. Content</a></li><li><a href="#en-copyright">5. Copyright</a></li><li><a href="#en-ai-content">6. AI-Generated Content</a></li><li><a href="#en-revenue">7. Revenue Share</a></li><li><a href="#en-payment">8. Payouts to Creators</a></li><li><a href="#en-prohibited">9. Prohibited Activities</a></li><li><a href="#en-moderation">10. Content Moderation</a></li><li><a href="#en-termination">11. Account Termination</a></li><li><a href="#en-disclaimer">12. Disclaimer</a></li><li><a href="#en-privacy">13. Privacy</a></li><li><a href="#en-changes">14. Changes to Terms</a></li><li><a href="#en-governing">15. Governing Law</a></li><li><a href="#en-contact">16. Contact</a></li></ul></div>
                 <div class="section-card" id="en-acceptance"><h2>1. Acceptance of Terms</h2><p>Please read these Terms and Conditions ("Terms") carefully before using Publisher ("Service"). By accessing or using the Service, you agree to be bound by these Terms. If you do not agree to these terms, please do not use the Service.</p><div class="highlight-box highlight-important"><strong>Important:</strong><br>Users under 18 must have parental consent to use this Service.</div></div>
                 <div class="section-card" id="en-definitions"><h2>2. Definitions</h2><ul><li><strong>"User"</strong>: An individual or entity registered and using the Service</li><li><strong>"Author"</strong>: A user who posts original works</li><li><strong>"Translator"</strong>: A user who handles translation of works</li><li><strong>"Editor"</strong>: A user who handles editing of works</li><li><strong>"Reader"</strong>: A user who views or purchases works</li><li><strong>"Work"</strong>: Text, images, and other content posted to the Service</li><li><strong>"Platform"</strong>: The Publisher operator</li></ul></div>
                 <div class="section-card" id="en-account"><h2>3. Account</h2><h3>3.1 Account Registration</h3><p>Registration is required to use certain features of the Service. Please provide accurate and current information when registering.</p><h3>3.2 Account Responsibility</h3><ul><li>You are responsible for maintaining the security of your account</li><li>Sharing your account with third parties is prohibited</li><li>Please contact us immediately if you discover unauthorized access</li><li>You are responsible for all activities conducted through your account</li></ul><h3>3.3 Account Types</h3><ul><li><strong>Reader Account</strong>: Can view and purchase works</li><li><strong>Author Account</strong>: Can post and sell works</li><li><strong>Translator Account</strong>: Can participate in translation work</li></ul></div>
@@ -102,21 +590,21 @@
                 <div class="section-card" id="en-copyright"><h2>5. Copyright</h2><div class="highlight-box highlight-warning"><strong>Important:</strong><br>Publisher only accepts original works. Please see our <a href="copyright-policy.html">Copyright Policy</a> for details.</div><h3>5.1 Prohibited Content</h3><ul><li>Copies or plagiarism of others' works</li><li>Derivative works, fan fiction</li><li>Works copyrighted by other publishers</li><li>Unauthorized translations</li><li>Unauthorized use of copyrighted materials</li></ul><h3>5.2 Copyright Infringement Response</h3><p>If copyright infringement is confirmed, the work will be removed and a strike will be issued. Three strikes result in account suspension.</p></div>
                 <div class="section-card" id="en-ai-content"><h2>6. AI-Generated Content</h2><h3>6.1 Permitted Conditions</h3><ul><li>Must be clearly labeled as "AI Work" or "AI-Generated"</li><li>Must specify the AI tool used</li><li>Commercial use must be permitted by the AI tool's terms of service</li></ul><h3>6.2 Prohibited AI Content</h3><ul><li>Works that hide their AI-generated nature</li><li>Works generated by AI tools that prohibit commercial use</li><li>Works that use AI to imitate others' styles</li></ul></div>
                 <div class="section-card" id="en-revenue"><h2>7. Revenue Share</h2><h3>7.1 Basic Distribution</h3><p>Work sales are distributed as follows:</p><table class="revenue-table"><thead><tr><th>Role</th><th>Share</th></tr></thead><tbody><tr><td>Author (Base)</td><td>40%</td></tr><tr><td>Translator</td><td>20%</td></tr><tr><td>Editor</td><td>10%</td></tr><tr><td>Platform</td><td>30%</td></tr></tbody></table><h3>7.2 Distribution When Combining Roles</h3><table class="revenue-table"><thead><tr><th>Scenario</th><th>Author</th><th>Translator</th><th>Editor</th><th>Platform</th></tr></thead><tbody><tr><td>Native language, Author only</td><td>70%</td><td>-</td><td>-</td><td>30%</td></tr><tr><td>Native language, Author + Editor</td><td>60%</td><td>-</td><td>10%</td><td>30%</td></tr><tr><td>Translation, Author + Translator</td><td>50%</td><td>20%</td><td>-</td><td>30%</td></tr><tr><td>Translation, All parties</td><td>40%</td><td>20%</td><td>10%</td><td>30%</td></tr></tbody></table><h3>7.3 Collaboration Agreement</h3><p>When translators or editors participate, all parties must sign a digital consent form. Changes to distribution require consent from all parties.</p></div>
-                <div class="section-card" id="en-payment"><h2>8. Payment</h2><h3>8.1 Payment Schedule</h3><ul><li>Revenue is calculated monthly</li><li>Payments are processed by the end of the following month</li><li>Minimum payment amount is $10 USD</li><li>Amounts below the minimum are carried over to the next month</li></ul><h3>8.2 Payment Methods</h3><ul><li>PayPal</li><li>Bank transfer (supported regions only)</li><li>Stripe (supported regions only)</li></ul><h3>8.3 Taxes</h3><p>Users are responsible for reporting and paying taxes on received revenue. You may be required to submit appropriate tax documents as needed.</p></div>
+                <div class="section-card" id="en-payment"><h2>8. Payouts to Creators</h2><h3>8.1 Payout Schedule</h3><ul><li>Revenue is calculated monthly</li><li>Payouts are processed by the end of the following month</li><li>Minimum payout amount is $10 USD</li><li>Amounts below the minimum are carried over to the next month</li></ul><h3>8.2 Payout Method</h3><ul><li>Stripe (via Stripe Connect)</li></ul><h3>8.3 Taxes</h3><p>Users are responsible for reporting and paying taxes on received revenue. You may be required to submit appropriate tax documents as needed.</p></div>
                 <div class="section-card" id="en-prohibited"><h2>9. Prohibited Activities</h2><p>The following activities are prohibited:</p><ul><li>Registering an account with false information</li><li>Impersonating others</li><li>Posting content that infringes copyright</li><li>Posting illegal, harmful, threatening, or abusive content</li><li>Distributing malware or viruses</li><li>Compromising the security of the Service</li><li>Spam or harassment</li><li>Unauthorized access using automated tools</li><li>Manipulating revenue fraudulently</li><li>Creating multiple accounts to circumvent terms</li></ul></div>
                 <div class="section-card" id="en-moderation"><h2>10. Content Moderation</h2><h3>10.1 Automated Review</h3><p>Posted content is screened by an AI-powered automated review system. If harmful content is detected, it is flagged for human review.</p><h3>10.2 Human Review</h3><p>Human moderators review content in the following cases:</p><ul><li>When AI detects suspicious content</li><li>When reported by users</li><li>When there is a copyright infringement claim</li></ul><h3>10.3 Removal and Restoration</h3><p>If content is removed as a result of review, an appeal can be filed within 10 business days. See <a href="content-guidelines.html">Content Guidelines</a> for details.</p></div>
                 <div class="section-card" id="en-termination"><h2>11. Account Termination</h2><h3>11.1 User Cancellation</h3><p>Users can cancel their account at any time. After cancellation, unpaid revenue will be paid according to the normal schedule.</p><h3>11.2 Platform Suspension</h3><p>Accounts may be suspended in the following cases:</p><ul><li>Serious violation of these Terms</li><li>Accumulation of 3 strikes</li><li>Detection of fraudulent activity</li><li>Response to legal requests</li></ul><h3>11.3 Revenue Upon Suspension</h3><p>If an account is suspended due to Terms violation, unpaid revenue is held for 90 days and processed based on the result of any appeal.</p></div>
-                <div class="section-card" id="en-disclaimer"><h2>12. Disclaimer</h2><h3>12.1 Service Provision</h3><p>The Service is provided "as is." The Platform is not responsible for service interruptions, errors, or data loss.</p><h3>12.2 User Content</h3><p>The Platform is not responsible for the accuracy, legality, or appropriateness of content posted by users.</p><h3>12.3 Limitation of Liability</h3><p>To the maximum extent permitted by law, the Platform is not liable for indirect, incidental, special, or consequential damages.</p></div>
+                <div class="section-card" id="en-disclaimer"><h2>12. Disclaimer</h2><h3>12.1 Service Provision</h3><p>The Platform strives to provide a reliable service but does not guarantee uninterrupted, error-free, or loss-free operation. The Platform is not responsible for service interruptions, errors, or data loss except where caused by the Platform's negligence.</p><h3>12.2 User Content</h3><p>The Platform is not responsible for the accuracy, legality, or appropriateness of content posted by users.</p><h3>12.3 Limitation of Liability</h3><p>To the maximum extent permitted by law, the Platform is not liable for indirect, incidental, special, or consequential damages.</p><div class="highlight-box highlight-important"><strong>Your Statutory Rights:</strong><br>Nothing in these Terms affects your statutory rights under the Consumer Rights Act 2015 or any other applicable consumer protection legislation. If you are a consumer, you have legal rights that cannot be excluded or limited by these Terms.</div></div>
                 <div class="section-card" id="en-privacy"><h2>13. Privacy</h2><p>Please see our <a href="privacy.html">Privacy Policy</a> for information about how we handle your personal information.</p><p>By using this Service, you agree to the collection and use of data as described in the Privacy Policy.</p></div>
                 <div class="section-card" id="en-changes"><h2>14. Changes to Terms</h2><p>The Platform reserves the right to modify these Terms at any time. We will notify you of significant changes via email or within the Service.</p><p>By continuing to use the Service after changes are made, you agree to the modified Terms.</p></div>
-                <div class="section-card" id="en-governing"><h2>15. Governing Law</h2><p>These Terms shall be governed by and construed in accordance with the laws of Japan. Any disputes arising from these Terms shall be subject to the exclusive jurisdiction of the Tokyo District Court.</p></div>
+                <div class="section-card" id="en-governing"><h2>15. Governing Law</h2><p>These Terms shall be governed by and construed in accordance with the laws of England and Wales. Any disputes arising from these Terms shall be subject to the exclusive jurisdiction of the courts of England and Wales.</p></div>
                 <div class="section-card" id="en-contact"><h2>16. Contact</h2><p>For inquiries regarding these Terms, please use our support page:</p><div class="text-center my-4"><a href="support/contact.html" class="btn btn-primary"><i class="fas fa-headset me-2"></i>Contact Support</a></div><p class="text-muted small">You can also check our <a href="support/faq.html">FAQ</a> or use the <a href="support/troubleshoot.html">Troubleshooting Guide</a> for quick answers.</p></div>
                 <div class="section-card"><div class="highlight-box highlight-important"><h3 class="mb-3">Confirmation of Agreement</h3><p class="mb-0">By using this Service, you confirm that you have read, understood, and agree to be bound by these Terms and Conditions, <a href="privacy.html">Privacy Policy</a>, <a href="content-guidelines.html">Content Guidelines</a>, and <a href="copyright-policy.html">Copyright Policy</a>.</p></div></div>
             </div>
 
             <!-- JAPANESE -->
             <div class="lang-content" data-lang="ja">
-                <div class="toc"><h3><i class="fas fa-list me-2"></i>目次</h3><ul><li><a href="#ja-acceptance">1. 規約への同意</a></li><li><a href="#ja-definitions">2. 定義</a></li><li><a href="#ja-account">3. アカウント</a></li><li><a href="#ja-content">4. コンテンツ</a></li><li><a href="#ja-copyright">5. 著作権</a></li><li><a href="#ja-ai-content">6. AI生成コンテンツ</a></li><li><a href="#ja-revenue">7. 収益配分</a></li><li><a href="#ja-payment">8. 支払い</a></li><li><a href="#ja-prohibited">9. 禁止事項</a></li><li><a href="#ja-moderation">10. コンテンツ審査</a></li><li><a href="#ja-termination">11. アカウント停止</a></li><li><a href="#ja-disclaimer">12. 免責事項</a></li><li><a href="#ja-privacy">13. プライバシー</a></li><li><a href="#ja-changes">14. 規約の変更</a></li><li><a href="#ja-governing">15. 準拠法</a></li><li><a href="#ja-contact">16. お問い合わせ</a></li></ul></div>
+                <div class="toc"><h3><i class="fas fa-list me-2"></i>目次</h3><ul><li><a href="#ja-acceptance">1. 規約への同意</a></li><li><a href="#ja-definitions">2. 定義</a></li><li><a href="#ja-account">3. アカウント</a></li><li><a href="#ja-content">4. コンテンツ</a></li><li><a href="#ja-copyright">5. 著作権</a></li><li><a href="#ja-ai-content">6. AI生成コンテンツ</a></li><li><a href="#ja-revenue">7. 収益配分</a></li><li><a href="#ja-payment">8. 著者への支払い</a></li><li><a href="#ja-prohibited">9. 禁止事項</a></li><li><a href="#ja-moderation">10. コンテンツ審査</a></li><li><a href="#ja-termination">11. アカウント停止</a></li><li><a href="#ja-disclaimer">12. 免責事項</a></li><li><a href="#ja-privacy">13. プライバシー</a></li><li><a href="#ja-changes">14. 規約の変更</a></li><li><a href="#ja-governing">15. 準拠法</a></li><li><a href="#ja-contact">16. お問い合わせ</a></li></ul></div>
                 <div class="section-card" id="ja-acceptance"><h2>1. 規約への同意</h2><p>Publisher（以下「本サービス」）をご利用いただく前に、本利用規約（以下「本規約」）をよくお読みください。本サービスにアクセスまたは利用することにより、お客様は本規約に同意したものとみなされます。本規約に同意されない場合は、本サービスをご利用にならないでください。</p><div class="highlight-box highlight-important"><strong>重要：</strong><br>18歳未満の方は、保護者の同意を得た上でご利用ください。</div></div>
                 <div class="section-card" id="ja-definitions"><h2>2. 定義</h2><ul><li><strong>「ユーザー」</strong>：本サービスに登録し、利用する個人または法人</li><li><strong>「著者」</strong>：オリジナル作品を投稿するユーザー</li><li><strong>「翻訳者」</strong>：作品の翻訳を担当するユーザー</li><li><strong>「編集者」</strong>：作品の編集を担当するユーザー</li><li><strong>「読者」</strong>：作品を閲覧・購入するユーザー</li><li><strong>「作品」</strong>：本サービスに投稿される文章、画像、その他のコンテンツ</li><li><strong>「プラットフォーム」</strong>：Publisher運営者</li></ul></div>
                 <div class="section-card" id="ja-account"><h2>3. アカウント</h2><h3>3.1 アカウント登録</h3><p>本サービスの一部の機能を利用するには、アカウントの登録が必要です。登録時には、正確かつ最新の情報を提供してください。</p><h3>3.2 アカウントの責任</h3><ul><li>アカウントのセキュリティを維持する責任はユーザーにあります</li><li>アカウントを第三者と共有することは禁止です</li><li>不正アクセスを発見した場合は、直ちにご連絡ください</li><li>アカウントを通じて行われたすべての活動について責任を負います</li></ul><h3>3.3 アカウントの種類</h3><ul><li><strong>読者アカウント</strong>：作品の閲覧・購入が可能</li><li><strong>著者アカウント</strong>：作品の投稿・販売が可能</li><li><strong>翻訳者アカウント</strong>：翻訳作業への参加が可能</li></ul></div>
@@ -124,21 +612,21 @@
                 <div class="section-card" id="ja-copyright"><h2>5. 著作権</h2><div class="highlight-box highlight-warning"><strong>重要：</strong><br>Publisherではオリジナル作品のみを受け付けています。詳細は<a href="copyright-policy.html">著作権ポリシー</a>をご確認ください。</div><h3>5.1 禁止されるコンテンツ</h3><ul><li>他者の作品のコピー、盗作</li><li>二次創作、ファンフィクション</li><li>他の出版社が著作権を保有する作品</li><li>許可のない翻訳作品</li><li>著作権のある素材の無断使用</li></ul><h3>5.2 著作権侵害への対応</h3><p>著作権侵害が確認された場合、作品は削除され、ストライクが付与されます。3ストライクでアカウント停止となります。</p></div>
                 <div class="section-card" id="ja-ai-content"><h2>6. AI生成コンテンツ</h2><h3>6.1 許可される条件</h3><ul><li>「AI作品」または「AI-Generated」と明確に表示すること</li><li>使用したAIツール名を明記すること</li><li>AIツールの利用規約で商用利用が許可されていること</li></ul><h3>6.2 禁止されるAIコンテンツ</h3><ul><li>AI生成であることを隠した作品</li><li>商用利用が禁止されているAIツールで生成された作品</li><li>AIで他者の作品スタイルを模倣した作品</li></ul></div>
                 <div class="section-card" id="ja-revenue"><h2>7. 収益配分</h2><h3>7.1 基本配分</h3><p>作品の売上は以下の割合で配分されます：</p><table class="revenue-table"><thead><tr><th>役割</th><th>配分率</th></tr></thead><tbody><tr><td>著者（基本）</td><td>40%</td></tr><tr><td>翻訳者</td><td>20%</td></tr><tr><td>編集者</td><td>10%</td></tr><tr><td>プラットフォーム</td><td>30%</td></tr></tbody></table><h3>7.2 兼任時の配分</h3><table class="revenue-table"><thead><tr><th>シナリオ</th><th>著者</th><th>翻訳者</th><th>編集者</th><th>PF</th></tr></thead><tbody><tr><td>自国語・著者のみ</td><td>70%</td><td>-</td><td>-</td><td>30%</td></tr><tr><td>自国語・著者＋編集者</td><td>60%</td><td>-</td><td>10%</td><td>30%</td></tr><tr><td>翻訳版・著者＋翻訳者</td><td>50%</td><td>20%</td><td>-</td><td>30%</td></tr><tr><td>翻訳版・全員</td><td>40%</td><td>20%</td><td>10%</td><td>30%</td></tr></tbody></table><h3>7.3 コラボレーション契約</h3><p>翻訳者・編集者が参加する場合、全員がデジタル同意書に署名する必要があります。配分の変更には全員の同意が必要です。</p></div>
-                <div class="section-card" id="ja-payment"><h2>8. 支払い</h2><h3>8.1 支払いスケジュール</h3><ul><li>収益は月次で計算されます</li><li>支払いは翌月末までに処理されます</li><li>最低支払い額は $10 USD です</li><li>最低額に満たない場合は翌月に繰り越されます</li></ul><h3>8.2 支払い方法</h3><ul><li>PayPal</li><li>銀行振込（対応地域のみ）</li><li>Stripe（対応地域のみ）</li></ul><h3>8.3 税金</h3><p>ユーザーは、受け取った収益に関する税金の申告・納付について自己責任を負うものとします。必要に応じて、適切な税務書類を提出していただく場合があります。</p></div>
+                <div class="section-card" id="ja-payment"><h2>8. 著者への支払い</h2><h3>8.1 支払いスケジュール</h3><ul><li>収益は月次で計算されます</li><li>支払いは翌月末までに処理されます</li><li>最低支払い額は $10 USD です</li><li>最低額に満たない場合は翌月に繰り越されます</li></ul><h3>8.2 支払い方法</h3><ul><li>Stripe（Stripe Connect経由）</li></ul><h3>8.3 税金</h3><p>ユーザーは、受け取った収益に関する税金の申告・納付について自己責任を負うものとします。必要に応じて、適切な税務書類を提出していただく場合があります。</p></div>
                 <div class="section-card" id="ja-prohibited"><h2>9. 禁止事項</h2><p>以下の行為は禁止されています：</p><ul><li>虚偽の情報でアカウントを登録すること</li><li>他者になりすますこと</li><li>著作権を侵害するコンテンツを投稿すること</li><li>違法、有害、脅迫的、虐待的なコンテンツを投稿すること</li><li>マルウェアやウイルスを配布すること</li><li>本サービスのセキュリティを侵害すること</li><li>スパムや迷惑行為を行うこと</li><li>自動化されたツールで不正にアクセスすること</li><li>収益を不正に操作すること</li><li>複数アカウントを作成して規約を回避すること</li></ul></div>
                 <div class="section-card" id="ja-moderation"><h2>10. コンテンツ審査</h2><h3>10.1 自動審査</h3><p>投稿されたコンテンツは、AIによる自動審査システムでスクリーニングされます。有害なコンテンツが検出された場合、人間による審査のためにフラグが立てられます。</p><h3>10.2 人間による審査</h3><p>以下の場合、人間のモデレーターが審査を行います：</p><ul><li>AIが疑わしいコンテンツを検出した場合</li><li>ユーザーから報告があった場合</li><li>著作権侵害の申し立てがあった場合</li></ul><h3>10.3 削除と復活</h3><p>審査の結果、コンテンツが削除された場合、10営業日以内に異議申し立てが可能です。詳細は<a href="content-guidelines.html">コンテンツガイドライン</a>をご確認ください。</p></div>
                 <div class="section-card" id="ja-termination"><h2>11. アカウント停止</h2><h3>11.1 ユーザーによる解約</h3><p>ユーザーはいつでもアカウントを解約できます。解約後も、未払いの収益は通常のスケジュールで支払われます。</p><h3>11.2 プラットフォームによる停止</h3><p>以下の場合、アカウントを停止する場合があります：</p><ul><li>本規約への重大な違反</li><li>3ストライクの累積</li><li>不正行為の検出</li><li>法的要請への対応</li></ul><h3>11.3 停止時の収益</h3><p>規約違反によりアカウントが停止された場合、未払いの収益は90日間保留され、異議申し立ての結果に基づいて処理されます。</p></div>
-                <div class="section-card" id="ja-disclaimer"><h2>12. 免責事項</h2><h3>12.1 サービスの提供</h3><p>本サービスは「現状有姿」で提供されます。プラットフォームは、サービスの中断、エラー、データ損失について責任を負いません。</p><h3>12.2 ユーザーコンテンツ</h3><p>プラットフォームは、ユーザーが投稿したコンテンツの正確性、合法性、適切性について責任を負いません。</p><h3>12.3 責任の制限</h3><p>法律で許容される最大限の範囲で、プラットフォームは間接的、付随的、特別、結果的な損害について責任を負いません。</p></div>
+                <div class="section-card" id="ja-disclaimer"><h2>12. 免責事項</h2><h3>12.1 サービスの提供</h3><p>プラットフォームは信頼性の高いサービスの提供に努めますが、中断、エラー、データ損失のない運用を保証するものではありません。プラットフォームの過失による場合を除き、サービスの中断、エラー、データ損失について責任を負いません。</p><h3>12.2 ユーザーコンテンツ</h3><p>プラットフォームは、ユーザーが投稿したコンテンツの正確性、合法性、適切性について責任を負いません。</p><h3>12.3 責任の制限</h3><p>法律で許容される最大限の範囲で、プラットフォームは間接的、付随的、特別、結果的な損害について責任を負いません。</p><div class="highlight-box highlight-important"><strong>法定権利について：</strong><br>本規約のいかなる条項も、Consumer Rights Act 2015（消費者権利法）またはその他の適用される消費者保護法に基づくお客様の法定権利に影響を与えるものではありません。消費者であるお客様には、本規約によって排除または制限できない法的権利があります。</div></div>
                 <div class="section-card" id="ja-privacy"><h2>13. プライバシー</h2><p>お客様の個人情報の取り扱いについては、<a href="privacy.html">プライバシーポリシー</a>をご確認ください。</p><p>本サービスを利用することにより、プライバシーポリシーに記載されたデータの収集・使用に同意したものとみなされます。</p></div>
                 <div class="section-card" id="ja-changes"><h2>14. 規約の変更</h2><p>プラットフォームは、本規約をいつでも変更する権利を有します。重要な変更がある場合は、メールまたはサービス内で通知します。</p><p>変更後も本サービスを継続して利用することにより、変更後の規約に同意したものとみなされます。</p></div>
-                <div class="section-card" id="ja-governing"><h2>15. 準拠法</h2><p>本規約は、日本法に準拠し、解釈されるものとします。本規約に関連する紛争は、東京地方裁判所を第一審の専属的合意管轄裁判所とします。</p></div>
+                <div class="section-card" id="ja-governing"><h2>15. 準拠法</h2><p>本規約は、イングランドおよびウェールズの法律に準拠し、解釈されるものとします。本規約に関連する紛争は、イングランドおよびウェールズの裁判所の専属管轄に服するものとします。</p></div>
                 <div class="section-card" id="ja-contact"><h2>16. お問い合わせ</h2><p>本規約に関するお問い合わせは、サポートページをご利用ください：</p><div class="text-center my-4"><a href="support/contact.html" class="btn btn-primary"><i class="fas fa-headset me-2"></i>サポートに連絡</a></div><p class="text-muted small"><a href="support/faq.html">よくある質問</a>や<a href="support/troubleshoot.html">トラブルシューティング</a>もご参照ください。</p></div>
                 <div class="section-card"><div class="highlight-box highlight-important"><h3 class="mb-3">同意の確認</h3><p class="mb-0">本サービスを利用することにより、お客様は本規約、<a href="privacy.html">プライバシーポリシー</a>、<a href="content-guidelines.html">コンテンツガイドライン</a>、および<a href="copyright-policy.html">著作権ポリシー</a>に同意したものとみなされます。</p></div></div>
             </div>
 
             <!-- CHINESE -->
             <div class="lang-content" data-lang="zh">
-                <div class="toc"><h3><i class="fas fa-list me-2"></i>目录</h3><ul><li><a href="#zh-acceptance">1. 接受条款</a></li><li><a href="#zh-definitions">2. 定义</a></li><li><a href="#zh-account">3. 账户</a></li><li><a href="#zh-content">4. 内容</a></li><li><a href="#zh-copyright">5. 版权</a></li><li><a href="#zh-ai-content">6. AI生成内容</a></li><li><a href="#zh-revenue">7. 收益分配</a></li><li><a href="#zh-payment">8. 支付</a></li><li><a href="#zh-prohibited">9. 禁止行为</a></li><li><a href="#zh-moderation">10. 内容审核</a></li><li><a href="#zh-termination">11. 账户终止</a></li><li><a href="#zh-disclaimer">12. 免责声明</a></li><li><a href="#zh-privacy">13. 隐私</a></li><li><a href="#zh-changes">14. 条款变更</a></li><li><a href="#zh-governing">15. 适用法律</a></li><li><a href="#zh-contact">16. 联系我们</a></li></ul></div>
+                <div class="toc"><h3><i class="fas fa-list me-2"></i>目录</h3><ul><li><a href="#zh-acceptance">1. 接受条款</a></li><li><a href="#zh-definitions">2. 定义</a></li><li><a href="#zh-account">3. 账户</a></li><li><a href="#zh-content">4. 内容</a></li><li><a href="#zh-copyright">5. 版权</a></li><li><a href="#zh-ai-content">6. AI生成内容</a></li><li><a href="#zh-revenue">7. 收益分配</a></li><li><a href="#zh-payment">8. 创作者付款</a></li><li><a href="#zh-prohibited">9. 禁止行为</a></li><li><a href="#zh-moderation">10. 内容审核</a></li><li><a href="#zh-termination">11. 账户终止</a></li><li><a href="#zh-disclaimer">12. 免责声明</a></li><li><a href="#zh-privacy">13. 隐私</a></li><li><a href="#zh-changes">14. 条款变更</a></li><li><a href="#zh-governing">15. 适用法律</a></li><li><a href="#zh-contact">16. 联系我们</a></li></ul></div>
                 <div class="section-card" id="zh-acceptance"><h2>1. 接受条款</h2><p>在使用Publisher（以下简称"本服务"）之前，请仔细阅读本使用条款（以下简称"本条款"）。访问或使用本服务即表示您同意受本条款的约束。如果您不同意本条款，请勿使用本服务。</p><div class="highlight-box highlight-important"><strong>重要提示：</strong><br>18岁以下的用户必须获得父母或监护人的同意才能使用本服务。</div></div>
                 <div class="section-card" id="zh-definitions"><h2>2. 定义</h2><ul><li><strong>"用户"</strong>：注册并使用本服务的个人或实体</li><li><strong>"作者"</strong>：发布原创作品的用户</li><li><strong>"翻译者"</strong>：负责作品翻译的用户</li><li><strong>"编辑"</strong>：负责作品编辑的用户</li><li><strong>"读者"</strong>：浏览或购买作品的用户</li><li><strong>"作品"</strong>：发布到本服务的文字、图像和其他内容</li><li><strong>"平台"</strong>：Publisher运营方</li></ul></div>
                 <div class="section-card" id="zh-account"><h2>3. 账户</h2><h3>3.1 账户注册</h3><p>使用本服务的某些功能需要注册账户。注册时请提供准确、最新的信息。</p><h3>3.2 账户责任</h3><ul><li>您有责任维护账户的安全</li><li>禁止与第三方共享账户</li><li>如发现未经授权的访问，请立即联系我们</li><li>您对通过账户进行的所有活动负责</li></ul><h3>3.3 账户类型</h3><ul><li><strong>读者账户</strong>：可以浏览和购买作品</li><li><strong>作者账户</strong>：可以发布和销售作品</li><li><strong>翻译者账户</strong>：可以参与翻译工作</li></ul></div>
@@ -146,21 +634,21 @@
                 <div class="section-card" id="zh-copyright"><h2>5. 版权</h2><div class="highlight-box highlight-warning"><strong>重要提示：</strong><br>Publisher仅接受原创作品。详情请参阅<a href="copyright-policy.html">版权政策</a>。</div><h3>5.1 禁止的内容</h3><ul><li>复制或抄袭他人作品</li><li>衍生作品、同人创作</li><li>其他出版商拥有版权的作品</li><li>未经授权的翻译</li><li>未经授权使用受版权保护的材料</li></ul><h3>5.2 版权侵权处理</h3><p>如确认存在版权侵权，作品将被删除并记录违规。累计三次违规将导致账户暂停。</p></div>
                 <div class="section-card" id="zh-ai-content"><h2>6. AI生成内容</h2><h3>6.1 允许条件</h3><ul><li>必须明确标注为"AI作品"或"AI-Generated"</li><li>必须注明使用的AI工具名称</li><li>AI工具的服务条款必须允许商业使用</li></ul><h3>6.2 禁止的AI内容</h3><ul><li>隐瞒AI生成性质的作品</li><li>使用禁止商业用途的AI工具生成的作品</li><li>使用AI模仿他人风格的作品</li></ul></div>
                 <div class="section-card" id="zh-revenue"><h2>7. 收益分配</h2><h3>7.1 基本分配</h3><p>作品销售收益按以下比例分配：</p><table class="revenue-table"><thead><tr><th>角色</th><th>比例</th></tr></thead><tbody><tr><td>作者（基本）</td><td>40%</td></tr><tr><td>翻译者</td><td>20%</td></tr><tr><td>编辑</td><td>10%</td></tr><tr><td>平台</td><td>30%</td></tr></tbody></table><h3>7.2 角色兼任时的分配</h3><table class="revenue-table"><thead><tr><th>场景</th><th>作者</th><th>翻译者</th><th>编辑</th><th>平台</th></tr></thead><tbody><tr><td>原语言，仅作者</td><td>70%</td><td>-</td><td>-</td><td>30%</td></tr><tr><td>原语言，作者+编辑</td><td>60%</td><td>-</td><td>10%</td><td>30%</td></tr><tr><td>翻译版，作者+翻译者</td><td>50%</td><td>20%</td><td>-</td><td>30%</td></tr><tr><td>翻译版，全部参与</td><td>40%</td><td>20%</td><td>10%</td><td>30%</td></tr></tbody></table><h3>7.3 协作协议</h3><p>当翻译者或编辑参与时，所有各方必须签署数字同意书。更改分配比例需要所有各方同意。</p></div>
-                <div class="section-card" id="zh-payment"><h2>8. 支付</h2><h3>8.1 支付时间表</h3><ul><li>收益按月计算</li><li>支付在次月底前处理</li><li>最低支付金额为10美元</li><li>低于最低金额的将结转到下月</li></ul><h3>8.2 支付方式</h3><ul><li>PayPal</li><li>银行转账（仅限支持地区）</li><li>Stripe（仅限支持地区）</li></ul><h3>8.3 税务</h3><p>用户有责任申报和缴纳收到收益的相关税款。根据需要，您可能需要提交适当的税务文件。</p></div>
+                <div class="section-card" id="zh-payment"><h2>8. 创作者付款</h2><h3>8.1 付款时间表</h3><ul><li>收益按月计算</li><li>支付在次月底前处理</li><li>最低支付金额为10美元</li><li>低于最低金额的将结转到下月</li></ul><h3>8.2 付款方式</h3><ul><li>Stripe（通过 Stripe Connect）</li></ul><h3>8.3 税务</h3><p>用户有责任申报和缴纳收到收益的相关税款。根据需要，您可能需要提交适当的税务文件。</p></div>
                 <div class="section-card" id="zh-prohibited"><h2>9. 禁止行为</h2><p>以下行为被禁止：</p><ul><li>使用虚假信息注册账户</li><li>冒充他人</li><li>发布侵犯版权的内容</li><li>发布非法、有害、威胁性或辱骂性内容</li><li>传播恶意软件或病毒</li><li>危害本服务的安全</li><li>发送垃圾邮件或骚扰他人</li><li>使用自动化工具未经授权访问</li><li>欺诈性地操纵收益</li><li>创建多个账户以规避条款</li></ul></div>
                 <div class="section-card" id="zh-moderation"><h2>10. 内容审核</h2><h3>10.1 自动审核</h3><p>发布的内容会通过AI自动审核系统进行筛查。如果检测到有害内容，将被标记进行人工审核。</p><h3>10.2 人工审核</h3><p>以下情况将进行人工审核：</p><ul><li>AI检测到可疑内容时</li><li>用户举报时</li><li>存在版权侵权投诉时</li></ul><h3>10.3 删除和恢复</h3><p>如果内容因审核被删除，可在10个工作日内提出申诉。详情请参阅<a href="content-guidelines.html">内容准则</a>。</p></div>
                 <div class="section-card" id="zh-termination"><h2>11. 账户终止</h2><h3>11.1 用户注销</h3><p>用户可以随时注销账户。注销后，未支付的收益将按正常时间表支付。</p><h3>11.2 平台暂停</h3><p>以下情况可能导致账户被暂停：</p><ul><li>严重违反本条款</li><li>累计3次违规</li><li>检测到欺诈活动</li><li>响应法律请求</li></ul><h3>11.3 暂停时的收益</h3><p>如果账户因违反条款被暂停，未支付的收益将保留90天，并根据申诉结果进行处理。</p></div>
-                <div class="section-card" id="zh-disclaimer"><h2>12. 免责声明</h2><h3>12.1 服务提供</h3><p>本服务按"现状"提供。平台对服务中断、错误或数据丢失不承担责任。</p><h3>12.2 用户内容</h3><p>平台对用户发布内容的准确性、合法性或适当性不承担责任。</p><h3>12.3 责任限制</h3><p>在法律允许的最大范围内，平台不对间接的、附带的、特殊的或后果性的损害承担责任。</p></div>
+                <div class="section-card" id="zh-disclaimer"><h2>12. 免责声明</h2><h3>12.1 服务提供</h3><p>平台致力于提供可靠的服务，但不保证不间断、无错误或无数据丢失的运营。除因平台过失造成的情况外，平台不对服务中断、错误或数据丢失承担责任。</p><h3>12.2 用户内容</h3><p>平台对用户发布内容的准确性、合法性或适当性不承担责任。</p><h3>12.3 责任限制</h3><p>在法律允许的最大范围内，平台不对间接的、附带的、特殊的或后果性的损害承担责任。</p><div class="highlight-box highlight-important"><strong>您的法定权利：</strong><br>本条款中的任何内容均不影响您根据《2015年消费者权利法》或任何其他适用消费者保护法律所享有的法定权利。作为消费者，您拥有本条款不能排除或限制的合法权利。</div></div>
                 <div class="section-card" id="zh-privacy"><h2>13. 隐私</h2><p>有关我们如何处理您的个人信息，请参阅<a href="privacy.html">隐私政策</a>。</p><p>使用本服务即表示您同意隐私政策中描述的数据收集和使用。</p></div>
                 <div class="section-card" id="zh-changes"><h2>14. 条款变更</h2><p>平台保留随时修改本条款的权利。重大变更将通过电子邮件或服务内通知您。</p><p>在变更后继续使用本服务即表示您同意修改后的条款。</p></div>
-                <div class="section-card" id="zh-governing"><h2>15. 适用法律</h2><p>本条款受日本法律管辖并按其解释。因本条款引起的任何争议应由东京地方法院专属管辖。</p></div>
+                <div class="section-card" id="zh-governing"><h2>15. 适用法律</h2><p>本条款受英格兰和威尔士法律管辖并按其解释。因本条款引起的任何争议应由英格兰和威尔士法院专属管辖。</p></div>
                 <div class="section-card" id="zh-contact"><h2>16. 联系我们</h2><p>有关本条款的咨询，请使用我们的支持页面：</p><div class="text-center my-4"><a href="support/contact.html" class="btn btn-primary"><i class="fas fa-headset me-2"></i>联系支持</a></div><p class="text-muted small">您也可以查看<a href="support/faq.html">常见问题</a>或使用<a href="support/troubleshoot.html">故障排除指南</a>快速获取答案。</p></div>
                 <div class="section-card"><div class="highlight-box highlight-important"><h3 class="mb-3">协议确认</h3><p class="mb-0">使用本服务即表示您确认已阅读、理解并同意受本使用条款、<a href="privacy.html">隐私政策</a>、<a href="content-guidelines.html">内容准则</a>和<a href="copyright-policy.html">版权政策</a>的约束。</p></div></div>
             </div>
 
             <!-- SPANISH -->
             <div class="lang-content" data-lang="es">
-                <div class="toc"><h3><i class="fas fa-list me-2"></i>Contenido</h3><ul><li><a href="#es-acceptance">1. Aceptación de Términos</a></li><li><a href="#es-definitions">2. Definiciones</a></li><li><a href="#es-account">3. Cuenta</a></li><li><a href="#es-content">4. Contenido</a></li><li><a href="#es-copyright">5. Derechos de Autor</a></li><li><a href="#es-ai-content">6. Contenido Generado por IA</a></li><li><a href="#es-revenue">7. Reparto de Ingresos</a></li><li><a href="#es-payment">8. Pago</a></li><li><a href="#es-prohibited">9. Actividades Prohibidas</a></li><li><a href="#es-moderation">10. Moderación de Contenido</a></li><li><a href="#es-termination">11. Terminación de Cuenta</a></li><li><a href="#es-disclaimer">12. Descargo de Responsabilidad</a></li><li><a href="#es-privacy">13. Privacidad</a></li><li><a href="#es-changes">14. Cambios en los Términos</a></li><li><a href="#es-governing">15. Ley Aplicable</a></li><li><a href="#es-contact">16. Contacto</a></li></ul></div>
+                <div class="toc"><h3><i class="fas fa-list me-2"></i>Contenido</h3><ul><li><a href="#es-acceptance">1. Aceptación de Términos</a></li><li><a href="#es-definitions">2. Definiciones</a></li><li><a href="#es-account">3. Cuenta</a></li><li><a href="#es-content">4. Contenido</a></li><li><a href="#es-copyright">5. Derechos de Autor</a></li><li><a href="#es-ai-content">6. Contenido Generado por IA</a></li><li><a href="#es-revenue">7. Reparto de Ingresos</a></li><li><a href="#es-payment">8. Pagos a Creadores</a></li><li><a href="#es-prohibited">9. Actividades Prohibidas</a></li><li><a href="#es-moderation">10. Moderación de Contenido</a></li><li><a href="#es-termination">11. Terminación de Cuenta</a></li><li><a href="#es-disclaimer">12. Descargo de Responsabilidad</a></li><li><a href="#es-privacy">13. Privacidad</a></li><li><a href="#es-changes">14. Cambios en los Términos</a></li><li><a href="#es-governing">15. Ley Aplicable</a></li><li><a href="#es-contact">16. Contacto</a></li></ul></div>
                 <div class="section-card" id="es-acceptance"><h2>1. Aceptación de Términos</h2><p>Por favor, lea estos Términos y Condiciones ("Términos") cuidadosamente antes de usar Publisher ("Servicio"). Al acceder o usar el Servicio, usted acepta estar sujeto a estos Términos. Si no está de acuerdo con estos términos, por favor no use el Servicio.</p><div class="highlight-box highlight-important"><strong>Importante:</strong><br>Los usuarios menores de 18 años deben tener el consentimiento de sus padres para usar este Servicio.</div></div>
                 <div class="section-card" id="es-definitions"><h2>2. Definiciones</h2><ul><li><strong>"Usuario"</strong>: Una persona física o jurídica registrada y que usa el Servicio</li><li><strong>"Autor"</strong>: Un usuario que publica obras originales</li><li><strong>"Traductor"</strong>: Un usuario que realiza traducciones de obras</li><li><strong>"Editor"</strong>: Un usuario que realiza la edición de obras</li><li><strong>"Lector"</strong>: Un usuario que visualiza o compra obras</li><li><strong>"Obra"</strong>: Texto, imágenes y otro contenido publicado en el Servicio</li><li><strong>"Plataforma"</strong>: El operador de Publisher</li></ul></div>
                 <div class="section-card" id="es-account"><h2>3. Cuenta</h2><h3>3.1 Registro de Cuenta</h3><p>Se requiere registro para usar ciertas funciones del Servicio. Por favor, proporcione información precisa y actual al registrarse.</p><h3>3.2 Responsabilidad de la Cuenta</h3><ul><li>Usted es responsable de mantener la seguridad de su cuenta</li><li>Está prohibido compartir su cuenta con terceros</li><li>Por favor, contáctenos inmediatamente si descubre un acceso no autorizado</li><li>Usted es responsable de todas las actividades realizadas a través de su cuenta</li></ul><h3>3.3 Tipos de Cuenta</h3><ul><li><strong>Cuenta de Lector</strong>: Puede ver y comprar obras</li><li><strong>Cuenta de Autor</strong>: Puede publicar y vender obras</li><li><strong>Cuenta de Traductor</strong>: Puede participar en trabajos de traducción</li></ul></div>
@@ -168,21 +656,21 @@
                 <div class="section-card" id="es-copyright"><h2>5. Derechos de Autor</h2><div class="highlight-box highlight-warning"><strong>Importante:</strong><br>Publisher solo acepta obras originales. Por favor, consulte nuestra <a href="copyright-policy.html">Política de Derechos de Autor</a> para más detalles.</div><h3>5.1 Contenido Prohibido</h3><ul><li>Copias o plagio de obras de otros</li><li>Obras derivadas, fan fiction</li><li>Obras con derechos de autor de otras editoriales</li><li>Traducciones no autorizadas</li><li>Uso no autorizado de materiales con derechos de autor</li></ul><h3>5.2 Respuesta a Infracciones</h3><p>Si se confirma una infracción de derechos de autor, la obra será eliminada y se emitirá una advertencia. Tres advertencias resultan en la suspensión de la cuenta.</p></div>
                 <div class="section-card" id="es-ai-content"><h2>6. Contenido Generado por IA</h2><h3>6.1 Condiciones Permitidas</h3><ul><li>Debe estar claramente etiquetado como "Obra de IA" o "Generado por IA"</li><li>Debe especificar la herramienta de IA utilizada</li><li>El uso comercial debe estar permitido por los términos de servicio de la herramienta de IA</li></ul><h3>6.2 Contenido de IA Prohibido</h3><ul><li>Obras que ocultan su naturaleza generada por IA</li><li>Obras generadas por herramientas de IA que prohíben el uso comercial</li><li>Obras que usan IA para imitar estilos de otros</li></ul></div>
                 <div class="section-card" id="es-revenue"><h2>7. Reparto de Ingresos</h2><h3>7.1 Distribución Básica</h3><p>Las ventas de obras se distribuyen de la siguiente manera:</p><table class="revenue-table"><thead><tr><th>Rol</th><th>Porcentaje</th></tr></thead><tbody><tr><td>Autor (Base)</td><td>40%</td></tr><tr><td>Traductor</td><td>20%</td></tr><tr><td>Editor</td><td>10%</td></tr><tr><td>Plataforma</td><td>30%</td></tr></tbody></table><h3>7.2 Distribución al Combinar Roles</h3><table class="revenue-table"><thead><tr><th>Escenario</th><th>Autor</th><th>Traductor</th><th>Editor</th><th>Plataforma</th></tr></thead><tbody><tr><td>Idioma nativo, solo Autor</td><td>70%</td><td>-</td><td>-</td><td>30%</td></tr><tr><td>Idioma nativo, Autor + Editor</td><td>60%</td><td>-</td><td>10%</td><td>30%</td></tr><tr><td>Traducción, Autor + Traductor</td><td>50%</td><td>20%</td><td>-</td><td>30%</td></tr><tr><td>Traducción, Todas las partes</td><td>40%</td><td>20%</td><td>10%</td><td>30%</td></tr></tbody></table><h3>7.3 Acuerdo de Colaboración</h3><p>Cuando participan traductores o editores, todas las partes deben firmar un formulario de consentimiento digital. Los cambios en la distribución requieren el consentimiento de todas las partes.</p></div>
-                <div class="section-card" id="es-payment"><h2>8. Pago</h2><h3>8.1 Calendario de Pagos</h3><ul><li>Los ingresos se calculan mensualmente</li><li>Los pagos se procesan antes de fin del mes siguiente</li><li>El monto mínimo de pago es $10 USD</li><li>Los montos por debajo del mínimo se transfieren al mes siguiente</li></ul><h3>8.2 Métodos de Pago</h3><ul><li>PayPal</li><li>Transferencia bancaria (solo regiones compatibles)</li><li>Stripe (solo regiones compatibles)</li></ul><h3>8.3 Impuestos</h3><p>Los usuarios son responsables de declarar y pagar impuestos sobre los ingresos recibidos.</p></div>
+                <div class="section-card" id="es-payment"><h2>8. Pagos a Creadores</h2><h3>8.1 Calendario de Pagos</h3><ul><li>Los ingresos se calculan mensualmente</li><li>Los pagos se procesan antes de fin del mes siguiente</li><li>El monto mínimo de pago es $10 USD</li><li>Los montos por debajo del mínimo se transfieren al mes siguiente</li></ul><h3>8.2 Método de Pago</h3><ul><li>Stripe (a través de Stripe Connect)</li></ul><h3>8.3 Impuestos</h3><p>Los usuarios son responsables de declarar y pagar impuestos sobre los ingresos recibidos.</p></div>
                 <div class="section-card" id="es-prohibited"><h2>9. Actividades Prohibidas</h2><p>Las siguientes actividades están prohibidas:</p><ul><li>Registrar una cuenta con información falsa</li><li>Hacerse pasar por otros</li><li>Publicar contenido que infrinja derechos de autor</li><li>Publicar contenido ilegal, dañino, amenazante o abusivo</li><li>Distribuir malware o virus</li><li>Comprometer la seguridad del Servicio</li><li>Spam o acoso</li><li>Acceso no autorizado usando herramientas automatizadas</li><li>Manipular ingresos de manera fraudulenta</li><li>Crear múltiples cuentas para evadir los términos</li></ul></div>
                 <div class="section-card" id="es-moderation"><h2>10. Moderación de Contenido</h2><h3>10.1 Revisión Automatizada</h3><p>El contenido publicado es filtrado por un sistema de revisión automatizado impulsado por IA. Si se detecta contenido dañino, se marca para revisión humana.</p><h3>10.2 Revisión Humana</h3><p>Los moderadores humanos revisan el contenido en los siguientes casos:</p><ul><li>Cuando la IA detecta contenido sospechoso</li><li>Cuando es reportado por usuarios</li><li>Cuando hay una reclamación de infracción de derechos de autor</li></ul><h3>10.3 Eliminación y Restauración</h3><p>Si el contenido es eliminado como resultado de la revisión, se puede presentar una apelación dentro de 10 días hábiles.</p></div>
                 <div class="section-card" id="es-termination"><h2>11. Terminación de Cuenta</h2><h3>11.1 Cancelación por el Usuario</h3><p>Los usuarios pueden cancelar su cuenta en cualquier momento. Después de la cancelación, los ingresos no pagados se pagarán según el calendario normal.</p><h3>11.2 Suspensión por la Plataforma</h3><p>Las cuentas pueden ser suspendidas en los siguientes casos:</p><ul><li>Violación grave de estos Términos</li><li>Acumulación de 3 advertencias</li><li>Detección de actividad fraudulenta</li><li>Respuesta a solicitudes legales</li></ul><h3>11.3 Ingresos Tras la Suspensión</h3><p>Si una cuenta es suspendida debido a una violación de los Términos, los ingresos no pagados se retienen durante 90 días.</p></div>
-                <div class="section-card" id="es-disclaimer"><h2>12. Descargo de Responsabilidad</h2><h3>12.1 Provisión del Servicio</h3><p>El Servicio se proporciona "tal cual". La Plataforma no es responsable de interrupciones del servicio, errores o pérdida de datos.</p><h3>12.2 Contenido del Usuario</h3><p>La Plataforma no es responsable de la exactitud, legalidad o idoneidad del contenido publicado por los usuarios.</p><h3>12.3 Limitación de Responsabilidad</h3><p>En la máxima medida permitida por la ley, la Plataforma no es responsable de daños indirectos, incidentales, especiales o consecuentes.</p></div>
+                <div class="section-card" id="es-disclaimer"><h2>12. Descargo de Responsabilidad</h2><h3>12.1 Provisión del Servicio</h3><p>La Plataforma se esfuerza por proporcionar un servicio confiable, pero no garantiza una operación ininterrumpida, sin errores ni pérdida de datos. La Plataforma no es responsable de interrupciones del servicio, errores o pérdida de datos, excepto cuando sean causados por negligencia de la Plataforma.</p><h3>12.2 Contenido del Usuario</h3><p>La Plataforma no es responsable de la exactitud, legalidad o idoneidad del contenido publicado por los usuarios.</p><h3>12.3 Limitación de Responsabilidad</h3><p>En la máxima medida permitida por la ley, la Plataforma no es responsable de daños indirectos, incidentales, especiales o consecuentes.</p><div class="highlight-box highlight-important"><strong>Sus Derechos Legales:</strong><br>Nada en estos Términos afecta sus derechos legales bajo la Ley de Derechos del Consumidor de 2015 u otra legislación de protección al consumidor aplicable. Como consumidor, usted tiene derechos legales que no pueden ser excluidos ni limitados por estos Términos.</div></div>
                 <div class="section-card" id="es-privacy"><h2>13. Privacidad</h2><p>Por favor, consulte nuestra <a href="privacy.html">Política de Privacidad</a> para obtener información sobre cómo manejamos su información personal.</p><p>Al usar este Servicio, usted acepta la recopilación y uso de datos como se describe en la Política de Privacidad.</p></div>
                 <div class="section-card" id="es-changes"><h2>14. Cambios en los Términos</h2><p>La Plataforma se reserva el derecho de modificar estos Términos en cualquier momento. Le notificaremos de cambios significativos por correo electrónico o dentro del Servicio.</p><p>Al continuar usando el Servicio después de que se realicen cambios, usted acepta los Términos modificados.</p></div>
-                <div class="section-card" id="es-governing"><h2>15. Ley Aplicable</h2><p>Estos Términos se regirán e interpretarán de acuerdo con las leyes de Japón. Cualquier disputa que surja de estos Términos estará sujeta a la jurisdicción exclusiva del Tribunal de Distrito de Tokio.</p></div>
+                <div class="section-card" id="es-governing"><h2>15. Ley Aplicable</h2><p>Estos Términos se regirán e interpretarán de acuerdo con las leyes de Inglaterra y Gales. Cualquier disputa que surja de estos Términos estará sujeta a la jurisdicción exclusiva de los tribunales de Inglaterra y Gales.</p></div>
                 <div class="section-card" id="es-contact"><h2>16. Contacto</h2><p>Para consultas sobre estos Términos, por favor use nuestra página de soporte:</p><div class="text-center my-4"><a href="support/contact.html" class="btn btn-primary"><i class="fas fa-headset me-2"></i>Contactar Soporte</a></div><p class="text-muted small">También puede consultar nuestras <a href="support/faq.html">Preguntas Frecuentes</a> o usar la <a href="support/troubleshoot.html">Guía de Solución de Problemas</a>.</p></div>
                 <div class="section-card"><div class="highlight-box highlight-important"><h3 class="mb-3">Confirmación de Acuerdo</h3><p class="mb-0">Al usar este Servicio, usted confirma que ha leído, entendido y acepta estar sujeto a estos Términos y Condiciones, <a href="privacy.html">Política de Privacidad</a>, <a href="content-guidelines.html">Directrices de Contenido</a> y <a href="copyright-policy.html">Política de Derechos de Autor</a>.</p></div></div>
             </div>
 
             <!-- FRENCH -->
             <div class="lang-content" data-lang="fr">
-                <div class="toc"><h3><i class="fas fa-list me-2"></i>Sommaire</h3><ul><li><a href="#fr-acceptance">1. Acceptation des Conditions</a></li><li><a href="#fr-definitions">2. Définitions</a></li><li><a href="#fr-account">3. Compte</a></li><li><a href="#fr-content">4. Contenu</a></li><li><a href="#fr-copyright">5. Droits d'Auteur</a></li><li><a href="#fr-ai-content">6. Contenu Généré par IA</a></li><li><a href="#fr-revenue">7. Partage des Revenus</a></li><li><a href="#fr-payment">8. Paiement</a></li><li><a href="#fr-prohibited">9. Activités Interdites</a></li><li><a href="#fr-moderation">10. Modération du Contenu</a></li><li><a href="#fr-termination">11. Résiliation du Compte</a></li><li><a href="#fr-disclaimer">12. Clause de Non-Responsabilité</a></li><li><a href="#fr-privacy">13. Confidentialité</a></li><li><a href="#fr-changes">14. Modifications des Conditions</a></li><li><a href="#fr-governing">15. Droit Applicable</a></li><li><a href="#fr-contact">16. Contact</a></li></ul></div>
+                <div class="toc"><h3><i class="fas fa-list me-2"></i>Sommaire</h3><ul><li><a href="#fr-acceptance">1. Acceptation des Conditions</a></li><li><a href="#fr-definitions">2. Définitions</a></li><li><a href="#fr-account">3. Compte</a></li><li><a href="#fr-content">4. Contenu</a></li><li><a href="#fr-copyright">5. Droits d'Auteur</a></li><li><a href="#fr-ai-content">6. Contenu Généré par IA</a></li><li><a href="#fr-revenue">7. Partage des Revenus</a></li><li><a href="#fr-payment">8. Paiements aux Créateurs</a></li><li><a href="#fr-prohibited">9. Activités Interdites</a></li><li><a href="#fr-moderation">10. Modération du Contenu</a></li><li><a href="#fr-termination">11. Résiliation du Compte</a></li><li><a href="#fr-disclaimer">12. Clause de Non-Responsabilité</a></li><li><a href="#fr-privacy">13. Confidentialité</a></li><li><a href="#fr-changes">14. Modifications des Conditions</a></li><li><a href="#fr-governing">15. Droit Applicable</a></li><li><a href="#fr-contact">16. Contact</a></li></ul></div>
                 <div class="section-card" id="fr-acceptance"><h2>1. Acceptation des Conditions</h2><p>Veuillez lire attentivement ces Conditions Générales d'Utilisation (« Conditions ») avant d'utiliser Publisher (« Service »). En accédant ou en utilisant le Service, vous acceptez d'être lié par ces Conditions. Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser le Service.</p><div class="highlight-box highlight-important"><strong>Important :</strong><br>Les utilisateurs de moins de 18 ans doivent avoir le consentement parental pour utiliser ce Service.</div></div>
                 <div class="section-card" id="fr-definitions"><h2>2. Définitions</h2><ul><li><strong>« Utilisateur »</strong> : Une personne physique ou morale inscrite et utilisant le Service</li><li><strong>« Auteur »</strong> : Un utilisateur qui publie des œuvres originales</li><li><strong>« Traducteur »</strong> : Un utilisateur qui effectue la traduction d'œuvres</li><li><strong>« Éditeur »</strong> : Un utilisateur qui effectue l'édition d'œuvres</li><li><strong>« Lecteur »</strong> : Un utilisateur qui consulte ou achète des œuvres</li><li><strong>« Œuvre »</strong> : Texte, images et autre contenu publié sur le Service</li><li><strong>« Plateforme »</strong> : L'opérateur de Publisher</li></ul></div>
                 <div class="section-card" id="fr-account"><h2>3. Compte</h2><h3>3.1 Inscription au Compte</h3><p>L'inscription est requise pour utiliser certaines fonctionnalités du Service. Veuillez fournir des informations exactes et à jour lors de l'inscription.</p><h3>3.2 Responsabilité du Compte</h3><ul><li>Vous êtes responsable du maintien de la sécurité de votre compte</li><li>Le partage de votre compte avec des tiers est interdit</li><li>Veuillez nous contacter immédiatement si vous découvrez un accès non autorisé</li><li>Vous êtes responsable de toutes les activités effectuées via votre compte</li></ul><h3>3.3 Types de Compte</h3><ul><li><strong>Compte Lecteur</strong> : Peut consulter et acheter des œuvres</li><li><strong>Compte Auteur</strong> : Peut publier et vendre des œuvres</li><li><strong>Compte Traducteur</strong> : Peut participer aux travaux de traduction</li></ul></div>
@@ -190,21 +678,21 @@
                 <div class="section-card" id="fr-copyright"><h2>5. Droits d'Auteur</h2><div class="highlight-box highlight-warning"><strong>Important :</strong><br>Publisher n'accepte que les œuvres originales. Veuillez consulter notre <a href="copyright-policy.html">Politique des Droits d'Auteur</a> pour plus de détails.</div><h3>5.1 Contenu Interdit</h3><ul><li>Copies ou plagiat d'œuvres d'autrui</li><li>Œuvres dérivées, fan fiction</li><li>Œuvres dont les droits d'auteur appartiennent à d'autres éditeurs</li><li>Traductions non autorisées</li><li>Utilisation non autorisée de matériaux protégés par le droit d'auteur</li></ul><h3>5.2 Réponse aux Violations des Droits d'Auteur</h3><p>Si une violation des droits d'auteur est confirmée, l'œuvre sera supprimée et un avertissement sera émis. Trois avertissements entraînent la suspension du compte.</p></div>
                 <div class="section-card" id="fr-ai-content"><h2>6. Contenu Généré par IA</h2><h3>6.1 Conditions Autorisées</h3><ul><li>Doit être clairement étiqueté comme « Œuvre IA » ou « Généré par IA »</li><li>Doit spécifier l'outil IA utilisé</li><li>L'utilisation commerciale doit être autorisée par les conditions d'utilisation de l'outil IA</li></ul><h3>6.2 Contenu IA Interdit</h3><ul><li>Œuvres qui cachent leur nature générée par IA</li><li>Œuvres générées par des outils IA qui interdisent l'utilisation commerciale</li><li>Œuvres qui utilisent l'IA pour imiter les styles d'autrui</li></ul></div>
                 <div class="section-card" id="fr-revenue"><h2>7. Partage des Revenus</h2><h3>7.1 Répartition de Base</h3><p>Les ventes d'œuvres sont réparties comme suit :</p><table class="revenue-table"><thead><tr><th>Rôle</th><th>Part</th></tr></thead><tbody><tr><td>Auteur (Base)</td><td>40%</td></tr><tr><td>Traducteur</td><td>20%</td></tr><tr><td>Éditeur</td><td>10%</td></tr><tr><td>Plateforme</td><td>30%</td></tr></tbody></table><h3>7.2 Répartition lors du Cumul de Rôles</h3><table class="revenue-table"><thead><tr><th>Scénario</th><th>Auteur</th><th>Traducteur</th><th>Éditeur</th><th>Plateforme</th></tr></thead><tbody><tr><td>Langue native, Auteur seul</td><td>70%</td><td>-</td><td>-</td><td>30%</td></tr><tr><td>Langue native, Auteur + Éditeur</td><td>60%</td><td>-</td><td>10%</td><td>30%</td></tr><tr><td>Traduction, Auteur + Traducteur</td><td>50%</td><td>20%</td><td>-</td><td>30%</td></tr><tr><td>Traduction, Toutes les parties</td><td>40%</td><td>20%</td><td>10%</td><td>30%</td></tr></tbody></table><h3>7.3 Accord de Collaboration</h3><p>Lorsque des traducteurs ou éditeurs participent, toutes les parties doivent signer un formulaire de consentement numérique. Les modifications de répartition nécessitent le consentement de toutes les parties.</p></div>
-                <div class="section-card" id="fr-payment"><h2>8. Paiement</h2><h3>8.1 Calendrier de Paiement</h3><ul><li>Les revenus sont calculés mensuellement</li><li>Les paiements sont traités avant la fin du mois suivant</li><li>Le montant minimum de paiement est de 10 $ USD</li><li>Les montants inférieurs au minimum sont reportés au mois suivant</li></ul><h3>8.2 Méthodes de Paiement</h3><ul><li>PayPal</li><li>Virement bancaire (régions prises en charge uniquement)</li><li>Stripe (régions prises en charge uniquement)</li></ul><h3>8.3 Impôts</h3><p>Les utilisateurs sont responsables de la déclaration et du paiement des impôts sur les revenus perçus. Vous pourriez être tenu de soumettre les documents fiscaux appropriés selon les besoins.</p></div>
+                <div class="section-card" id="fr-payment"><h2>8. Paiements aux Créateurs</h2><h3>8.1 Calendrier de Paiement</h3><ul><li>Les revenus sont calculés mensuellement</li><li>Les paiements sont traités avant la fin du mois suivant</li><li>Le montant minimum de paiement est de 10 $ USD</li><li>Les montants inférieurs au minimum sont reportés au mois suivant</li></ul><h3>8.2 Méthode de Paiement</h3><ul><li>Stripe (via Stripe Connect)</li></ul><h3>8.3 Impôts</h3><p>Les utilisateurs sont responsables de la déclaration et du paiement des impôts sur les revenus perçus. Vous pourriez être tenu de soumettre les documents fiscaux appropriés selon les besoins.</p></div>
                 <div class="section-card" id="fr-prohibited"><h2>9. Activités Interdites</h2><p>Les activités suivantes sont interdites :</p><ul><li>Enregistrer un compte avec de fausses informations</li><li>Se faire passer pour autrui</li><li>Publier du contenu qui enfreint les droits d'auteur</li><li>Publier du contenu illégal, nuisible, menaçant ou abusif</li><li>Distribuer des logiciels malveillants ou des virus</li><li>Compromettre la sécurité du Service</li><li>Spam ou harcèlement</li><li>Accès non autorisé à l'aide d'outils automatisés</li><li>Manipuler les revenus de manière frauduleuse</li><li>Créer plusieurs comptes pour contourner les conditions</li></ul></div>
                 <div class="section-card" id="fr-moderation"><h2>10. Modération du Contenu</h2><h3>10.1 Examen Automatisé</h3><p>Le contenu publié est filtré par un système d'examen automatisé alimenté par l'IA. Si un contenu nuisible est détecté, il est signalé pour examen humain.</p><h3>10.2 Examen Humain</h3><p>Les modérateurs humains examinent le contenu dans les cas suivants :</p><ul><li>Lorsque l'IA détecte du contenu suspect</li><li>Lorsque signalé par les utilisateurs</li><li>Lorsqu'il y a une réclamation pour violation des droits d'auteur</li></ul><h3>10.3 Suppression et Restauration</h3><p>Si le contenu est supprimé suite à un examen, un appel peut être déposé dans les 10 jours ouvrables. Consultez les <a href="content-guidelines.html">Directives de Contenu</a> pour plus de détails.</p></div>
                 <div class="section-card" id="fr-termination"><h2>11. Résiliation du Compte</h2><h3>11.1 Annulation par l'Utilisateur</h3><p>Les utilisateurs peuvent annuler leur compte à tout moment. Après l'annulation, les revenus impayés seront versés selon le calendrier normal.</p><h3>11.2 Suspension par la Plateforme</h3><p>Les comptes peuvent être suspendus dans les cas suivants :</p><ul><li>Violation grave de ces Conditions</li><li>Accumulation de 3 avertissements</li><li>Détection d'activité frauduleuse</li><li>Réponse à des demandes légales</li></ul><h3>11.3 Revenus lors de la Suspension</h3><p>Si un compte est suspendu en raison d'une violation des Conditions, les revenus impayés sont retenus pendant 90 jours et traités en fonction du résultat de tout appel.</p></div>
-                <div class="section-card" id="fr-disclaimer"><h2>12. Clause de Non-Responsabilité</h2><h3>12.1 Fourniture du Service</h3><p>Le Service est fourni « tel quel ». La Plateforme n'est pas responsable des interruptions de service, des erreurs ou de la perte de données.</p><h3>12.2 Contenu Utilisateur</h3><p>La Plateforme n'est pas responsable de l'exactitude, de la légalité ou de la pertinence du contenu publié par les utilisateurs.</p><h3>12.3 Limitation de Responsabilité</h3><p>Dans toute la mesure permise par la loi, la Plateforme n'est pas responsable des dommages indirects, accessoires, spéciaux ou consécutifs.</p></div>
+                <div class="section-card" id="fr-disclaimer"><h2>12. Clause de Non-Responsabilité</h2><h3>12.1 Fourniture du Service</h3><p>La Plateforme s'efforce de fournir un service fiable, mais ne garantit pas un fonctionnement ininterrompu, sans erreur ni perte de données. La Plateforme n'est pas responsable des interruptions de service, des erreurs ou de la perte de données, sauf en cas de négligence de la Plateforme.</p><h3>12.2 Contenu Utilisateur</h3><p>La Plateforme n'est pas responsable de l'exactitude, de la légalité ou de la pertinence du contenu publié par les utilisateurs.</p><h3>12.3 Limitation de Responsabilité</h3><p>Dans toute la mesure permise par la loi, la Plateforme n'est pas responsable des dommages indirects, accessoires, spéciaux ou consécutifs.</p><div class="highlight-box highlight-important"><strong>Vos Droits Légaux :</strong><br>Rien dans ces Conditions n'affecte vos droits légaux en vertu du Consumer Rights Act 2015 (Loi sur les Droits des Consommateurs) ou de toute autre législation applicable en matière de protection des consommateurs. En tant que consommateur, vous disposez de droits légaux qui ne peuvent être exclus ni limités par ces Conditions.</div></div>
                 <div class="section-card" id="fr-privacy"><h2>13. Confidentialité</h2><p>Veuillez consulter notre <a href="privacy.html">Politique de Confidentialité</a> pour obtenir des informations sur la façon dont nous traitons vos informations personnelles.</p><p>En utilisant ce Service, vous acceptez la collecte et l'utilisation des données telles que décrites dans la Politique de Confidentialité.</p></div>
                 <div class="section-card" id="fr-changes"><h2>14. Modifications des Conditions</h2><p>La Plateforme se réserve le droit de modifier ces Conditions à tout moment. Nous vous informerons des changements importants par e-mail ou au sein du Service.</p><p>En continuant à utiliser le Service après les modifications, vous acceptez les Conditions modifiées.</p></div>
-                <div class="section-card" id="fr-governing"><h2>15. Droit Applicable</h2><p>Ces Conditions seront régies et interprétées conformément aux lois du Japon. Tout litige découlant de ces Conditions sera soumis à la compétence exclusive du Tribunal de District de Tokyo.</p></div>
+                <div class="section-card" id="fr-governing"><h2>15. Droit Applicable</h2><p>Ces Conditions seront régies et interprétées conformément aux lois d'Angleterre et du Pays de Galles. Tout litige découlant de ces Conditions sera soumis à la compétence exclusive des tribunaux d'Angleterre et du Pays de Galles.</p></div>
                 <div class="section-card" id="fr-contact"><h2>16. Contact</h2><p>Pour toute question concernant ces Conditions, veuillez utiliser notre page de support :</p><div class="text-center my-4"><a href="support/contact.html" class="btn btn-primary"><i class="fas fa-headset me-2"></i>Contacter le Support</a></div><p class="text-muted small">Vous pouvez également consulter notre <a href="support/faq.html">FAQ</a> ou utiliser le <a href="support/troubleshoot.html">Guide de Dépannage</a> pour des réponses rapides.</p></div>
                 <div class="section-card"><div class="highlight-box highlight-important"><h3 class="mb-3">Confirmation d'Accord</h3><p class="mb-0">En utilisant ce Service, vous confirmez avoir lu, compris et accepté d'être lié par ces Conditions Générales d'Utilisation, la <a href="privacy.html">Politique de Confidentialité</a>, les <a href="content-guidelines.html">Directives de Contenu</a> et la <a href="copyright-policy.html">Politique des Droits d'Auteur</a>.</p></div></div>
             </div>
 
             <!-- GERMAN - FULL VERSION -->
             <div class="lang-content" data-lang="de">
-                <div class="toc"><h3><i class="fas fa-list me-2"></i>Inhaltsverzeichnis</h3><ul><li><a href="#de-acceptance">1. Annahme der Bedingungen</a></li><li><a href="#de-definitions">2. Definitionen</a></li><li><a href="#de-account">3. Konto</a></li><li><a href="#de-content">4. Inhalte</a></li><li><a href="#de-copyright">5. Urheberrecht</a></li><li><a href="#de-ai-content">6. KI-generierte Inhalte</a></li><li><a href="#de-revenue">7. Umsatzbeteiligung</a></li><li><a href="#de-payment">8. Zahlung</a></li><li><a href="#de-prohibited">9. Verbotene Aktivitäten</a></li><li><a href="#de-moderation">10. Inhaltsmoderation</a></li><li><a href="#de-termination">11. Kontobeendigung</a></li><li><a href="#de-disclaimer">12. Haftungsausschluss</a></li><li><a href="#de-privacy">13. Datenschutz</a></li><li><a href="#de-changes">14. Änderungen der Bedingungen</a></li><li><a href="#de-governing">15. Anwendbares Recht</a></li><li><a href="#de-contact">16. Kontakt</a></li></ul></div>
+                <div class="toc"><h3><i class="fas fa-list me-2"></i>Inhaltsverzeichnis</h3><ul><li><a href="#de-acceptance">1. Annahme der Bedingungen</a></li><li><a href="#de-definitions">2. Definitionen</a></li><li><a href="#de-account">3. Konto</a></li><li><a href="#de-content">4. Inhalte</a></li><li><a href="#de-copyright">5. Urheberrecht</a></li><li><a href="#de-ai-content">6. KI-generierte Inhalte</a></li><li><a href="#de-revenue">7. Umsatzbeteiligung</a></li><li><a href="#de-payment">8. Auszahlungen an Ersteller</a></li><li><a href="#de-prohibited">9. Verbotene Aktivitäten</a></li><li><a href="#de-moderation">10. Inhaltsmoderation</a></li><li><a href="#de-termination">11. Kontobeendigung</a></li><li><a href="#de-disclaimer">12. Haftungsausschluss</a></li><li><a href="#de-privacy">13. Datenschutz</a></li><li><a href="#de-changes">14. Änderungen der Bedingungen</a></li><li><a href="#de-governing">15. Anwendbares Recht</a></li><li><a href="#de-contact">16. Kontakt</a></li></ul></div>
                 <div class="section-card" id="de-acceptance"><h2>1. Annahme der Bedingungen</h2><p>Bitte lesen Sie diese Allgemeinen Geschäftsbedingungen („Bedingungen") sorgfältig durch, bevor Sie Publisher („Dienst") nutzen. Durch den Zugriff auf den Dienst oder dessen Nutzung erklären Sie sich mit diesen Bedingungen einverstanden. Wenn Sie diesen Bedingungen nicht zustimmen, nutzen Sie den Dienst bitte nicht.</p><div class="highlight-box highlight-important"><strong>Wichtig:</strong><br>Benutzer unter 18 Jahren benötigen die Zustimmung der Eltern, um diesen Dienst zu nutzen.</div></div>
                 <div class="section-card" id="de-definitions"><h2>2. Definitionen</h2><ul><li><strong>„Benutzer"</strong>: Eine natürliche oder juristische Person, die sich registriert hat und den Dienst nutzt</li><li><strong>„Autor"</strong>: Ein Benutzer, der Originalwerke veröffentlicht</li><li><strong>„Übersetzer"</strong>: Ein Benutzer, der die Übersetzung von Werken übernimmt</li><li><strong>„Redakteur"</strong>: Ein Benutzer, der die Bearbeitung von Werken übernimmt</li><li><strong>„Leser"</strong>: Ein Benutzer, der Werke ansieht oder kauft</li><li><strong>„Werk"</strong>: Text, Bilder und andere Inhalte, die auf dem Dienst veröffentlicht werden</li><li><strong>„Plattform"</strong>: Der Betreiber von Publisher</li></ul></div>
                 <div class="section-card" id="de-account"><h2>3. Konto</h2><h3>3.1 Kontoregistrierung</h3><p>Für die Nutzung bestimmter Funktionen des Dienstes ist eine Registrierung erforderlich. Bitte geben Sie bei der Registrierung genaue und aktuelle Informationen an.</p><h3>3.2 Kontoverantwortung</h3><ul><li>Sie sind für die Aufrechterhaltung der Sicherheit Ihres Kontos verantwortlich</li><li>Die Weitergabe Ihres Kontos an Dritte ist verboten</li><li>Bitte kontaktieren Sie uns sofort, wenn Sie einen unbefugten Zugriff feststellen</li><li>Sie sind für alle Aktivitäten verantwortlich, die über Ihr Konto durchgeführt werden</li></ul><h3>3.3 Kontotypen</h3><ul><li><strong>Leserkonto</strong>: Kann Werke ansehen und kaufen</li><li><strong>Autorenkonto</strong>: Kann Werke veröffentlichen und verkaufen</li><li><strong>Übersetzerkonto</strong>: Kann an Übersetzungsarbeiten teilnehmen</li></ul></div>
@@ -212,21 +700,21 @@
                 <div class="section-card" id="de-copyright"><h2>5. Urheberrecht</h2><div class="highlight-box highlight-warning"><strong>Wichtig:</strong><br>Publisher akzeptiert nur Originalwerke. Bitte lesen Sie unsere <a href="copyright-policy.html">Urheberrechtsrichtlinie</a> für Details.</div><h3>5.1 Verbotene Inhalte</h3><ul><li>Kopien oder Plagiate von Werken anderer</li><li>Abgeleitete Werke, Fan-Fiction</li><li>Werke, deren Urheberrecht bei anderen Verlagen liegt</li><li>Nicht autorisierte Übersetzungen</li><li>Nicht autorisierte Verwendung von urheberrechtlich geschütztem Material</li></ul><h3>5.2 Reaktion auf Urheberrechtsverletzungen</h3><p>Bei bestätigter Urheberrechtsverletzung wird das Werk entfernt und eine Verwarnung ausgesprochen. Drei Verwarnungen führen zur Kontosperrung.</p></div>
                 <div class="section-card" id="de-ai-content"><h2>6. KI-generierte Inhalte</h2><h3>6.1 Erlaubte Bedingungen</h3><ul><li>Muss deutlich als „KI-Werk" oder „KI-generiert" gekennzeichnet sein</li><li>Muss das verwendete KI-Tool angeben</li><li>Die kommerzielle Nutzung muss durch die Nutzungsbedingungen des KI-Tools gestattet sein</li></ul><h3>6.2 Verbotene KI-Inhalte</h3><ul><li>Werke, die ihre KI-generierte Natur verbergen</li><li>Werke, die von KI-Tools generiert wurden, die kommerzielle Nutzung verbieten</li><li>Werke, die KI verwenden, um den Stil anderer zu imitieren</li></ul></div>
                 <div class="section-card" id="de-revenue"><h2>7. Umsatzbeteiligung</h2><h3>7.1 Grundverteilung</h3><p>Werkverkäufe werden wie folgt verteilt:</p><table class="revenue-table"><thead><tr><th>Rolle</th><th>Anteil</th></tr></thead><tbody><tr><td>Autor (Basis)</td><td>40%</td></tr><tr><td>Übersetzer</td><td>20%</td></tr><tr><td>Redakteur</td><td>10%</td></tr><tr><td>Plattform</td><td>30%</td></tr></tbody></table><h3>7.2 Verteilung bei Rollenkombination</h3><table class="revenue-table"><thead><tr><th>Szenario</th><th>Autor</th><th>Übersetzer</th><th>Redakteur</th><th>Plattform</th></tr></thead><tbody><tr><td>Muttersprache, nur Autor</td><td>70%</td><td>-</td><td>-</td><td>30%</td></tr><tr><td>Muttersprache, Autor + Redakteur</td><td>60%</td><td>-</td><td>10%</td><td>30%</td></tr><tr><td>Übersetzung, Autor + Übersetzer</td><td>50%</td><td>20%</td><td>-</td><td>30%</td></tr><tr><td>Übersetzung, alle Parteien</td><td>40%</td><td>20%</td><td>10%</td><td>30%</td></tr></tbody></table><h3>7.3 Kooperationsvereinbarung</h3><p>Wenn Übersetzer oder Redakteure beteiligt sind, müssen alle Parteien ein digitales Einverständnisformular unterzeichnen. Änderungen der Verteilung erfordern die Zustimmung aller Parteien.</p></div>
-                <div class="section-card" id="de-payment"><h2>8. Zahlung</h2><h3>8.1 Zahlungsplan</h3><ul><li>Die Einnahmen werden monatlich berechnet</li><li>Zahlungen werden bis zum Ende des Folgemonats verarbeitet</li><li>Der Mindestauszahlungsbetrag beträgt 10 USD</li><li>Beträge unter dem Minimum werden auf den nächsten Monat übertragen</li></ul><h3>8.2 Zahlungsmethoden</h3><ul><li>PayPal</li><li>Banküberweisung (nur unterstützte Regionen)</li><li>Stripe (nur unterstützte Regionen)</li></ul><h3>8.3 Steuern</h3><p>Benutzer sind für die Meldung und Zahlung von Steuern auf erhaltene Einnahmen verantwortlich. Sie können aufgefordert werden, bei Bedarf entsprechende Steuerunterlagen einzureichen.</p></div>
+                <div class="section-card" id="de-payment"><h2>8. Auszahlungen an Ersteller</h2><h3>8.1 Auszahlungsplan</h3><ul><li>Die Einnahmen werden monatlich berechnet</li><li>Auszahlungen werden bis zum Ende des Folgemonats verarbeitet</li><li>Der Mindestauszahlungsbetrag beträgt 10 USD</li><li>Beträge unter dem Minimum werden auf den nächsten Monat übertragen</li></ul><h3>8.2 Auszahlungsmethode</h3><ul><li>Stripe (über Stripe Connect)</li></ul><h3>8.3 Steuern</h3><p>Benutzer sind für die Meldung und Zahlung von Steuern auf erhaltene Einnahmen verantwortlich. Sie können aufgefordert werden, bei Bedarf entsprechende Steuerunterlagen einzureichen.</p></div>
                 <div class="section-card" id="de-prohibited"><h2>9. Verbotene Aktivitäten</h2><p>Die folgenden Aktivitäten sind verboten:</p><ul><li>Registrierung eines Kontos mit falschen Informationen</li><li>Identitätsdiebstahl</li><li>Veröffentlichung von Inhalten, die Urheberrechte verletzen</li><li>Veröffentlichung illegaler, schädlicher, bedrohlicher oder missbräuchlicher Inhalte</li><li>Verbreitung von Malware oder Viren</li><li>Beeinträchtigung der Sicherheit des Dienstes</li><li>Spam oder Belästigung</li><li>Unbefugter Zugriff mit automatisierten Tools</li><li>Betrügerische Manipulation von Einnahmen</li><li>Erstellen mehrerer Konten zur Umgehung der Bedingungen</li></ul></div>
                 <div class="section-card" id="de-moderation"><h2>10. Inhaltsmoderation</h2><h3>10.1 Automatisierte Überprüfung</h3><p>Veröffentlichte Inhalte werden durch ein KI-gestütztes automatisiertes Überprüfungssystem geprüft. Wenn schädliche Inhalte erkannt werden, werden sie zur menschlichen Überprüfung markiert.</p><h3>10.2 Menschliche Überprüfung</h3><p>Menschliche Moderatoren überprüfen Inhalte in folgenden Fällen:</p><ul><li>Wenn die KI verdächtige Inhalte erkennt</li><li>Wenn von Benutzern gemeldet</li><li>Wenn eine Urheberrechtsverletzung geltend gemacht wird</li></ul><h3>10.3 Entfernung und Wiederherstellung</h3><p>Wenn Inhalte als Ergebnis der Überprüfung entfernt werden, kann innerhalb von 10 Werktagen Einspruch eingelegt werden. Weitere Informationen finden Sie in den <a href="content-guidelines.html">Inhaltsrichtlinien</a>.</p></div>
                 <div class="section-card" id="de-termination"><h2>11. Kontobeendigung</h2><h3>11.1 Kündigung durch den Benutzer</h3><p>Benutzer können ihr Konto jederzeit kündigen. Nach der Kündigung werden nicht ausgezahlte Einnahmen gemäß dem normalen Zeitplan ausgezahlt.</p><h3>11.2 Sperrung durch die Plattform</h3><p>Konten können in folgenden Fällen gesperrt werden:</p><ul><li>Schwerwiegender Verstoß gegen diese Bedingungen</li><li>Ansammlung von 3 Verwarnungen</li><li>Erkennung betrügerischer Aktivitäten</li><li>Reaktion auf rechtliche Anfragen</li></ul><h3>11.3 Einnahmen bei Sperrung</h3><p>Wenn ein Konto aufgrund eines Verstoßes gegen die Bedingungen gesperrt wird, werden nicht ausgezahlte Einnahmen 90 Tage lang einbehalten und basierend auf dem Ergebnis eines Einspruchs verarbeitet.</p></div>
-                <div class="section-card" id="de-disclaimer"><h2>12. Haftungsausschluss</h2><h3>12.1 Dienstbereitstellung</h3><p>Der Dienst wird „wie besehen" bereitgestellt. Die Plattform haftet nicht für Dienstunterbrechungen, Fehler oder Datenverlust.</p><h3>12.2 Benutzerinhalte</h3><p>Die Plattform haftet nicht für die Richtigkeit, Rechtmäßigkeit oder Angemessenheit von von Benutzern veröffentlichten Inhalten.</p><h3>12.3 Haftungsbeschränkung</h3><p>Soweit gesetzlich zulässig, haftet die Plattform nicht für indirekte, zufällige, besondere oder Folgeschäden.</p></div>
+                <div class="section-card" id="de-disclaimer"><h2>12. Haftungsausschluss</h2><h3>12.1 Dienstbereitstellung</h3><p>Die Plattform ist bestrebt, einen zuverlässigen Dienst bereitzustellen, garantiert jedoch keinen ununterbrochenen, fehlerfreien oder verlustfreien Betrieb. Die Plattform haftet nicht für Dienstunterbrechungen, Fehler oder Datenverlust, es sei denn, diese wurden durch Fahrlässigkeit der Plattform verursacht.</p><h3>12.2 Benutzerinhalte</h3><p>Die Plattform haftet nicht für die Richtigkeit, Rechtmäßigkeit oder Angemessenheit von von Benutzern veröffentlichten Inhalten.</p><h3>12.3 Haftungsbeschränkung</h3><p>Soweit gesetzlich zulässig, haftet die Plattform nicht für indirekte, zufällige, besondere oder Folgeschäden.</p><div class="highlight-box highlight-important"><strong>Ihre gesetzlichen Rechte:</strong><br>Nichts in diesen Bedingungen berührt Ihre gesetzlichen Rechte gemäß dem Consumer Rights Act 2015 (Verbraucherrechtegesetz) oder anderen anwendbaren Verbraucherschutzgesetzen. Als Verbraucher haben Sie gesetzliche Rechte, die durch diese Bedingungen weder ausgeschlossen noch eingeschränkt werden können.</div></div>
                 <div class="section-card" id="de-privacy"><h2>13. Datenschutz</h2><p>Bitte lesen Sie unsere <a href="privacy.html">Datenschutzrichtlinie</a> für Informationen darüber, wie wir Ihre persönlichen Daten behandeln.</p><p>Durch die Nutzung dieses Dienstes stimmen Sie der Erhebung und Verwendung von Daten wie in der Datenschutzrichtlinie beschrieben zu.</p></div>
                 <div class="section-card" id="de-changes"><h2>14. Änderungen der Bedingungen</h2><p>Die Plattform behält sich das Recht vor, diese Bedingungen jederzeit zu ändern. Wir werden Sie über wesentliche Änderungen per E-Mail oder innerhalb des Dienstes informieren.</p><p>Durch die weitere Nutzung des Dienstes nach Änderungen stimmen Sie den geänderten Bedingungen zu.</p></div>
-                <div class="section-card" id="de-governing"><h2>15. Anwendbares Recht</h2><p>Diese Bedingungen unterliegen den Gesetzen Japans und werden entsprechend ausgelegt. Alle Streitigkeiten, die sich aus diesen Bedingungen ergeben, unterliegen der ausschließlichen Zuständigkeit des Bezirksgerichts Tokio.</p></div>
+                <div class="section-card" id="de-governing"><h2>15. Anwendbares Recht</h2><p>Diese Bedingungen unterliegen den Gesetzen von England und Wales und werden entsprechend ausgelegt. Alle Streitigkeiten, die sich aus diesen Bedingungen ergeben, unterliegen der ausschließlichen Zuständigkeit der Gerichte von England und Wales.</p></div>
                 <div class="section-card" id="de-contact"><h2>16. Kontakt</h2><p>Bei Fragen zu diesen Bedingungen nutzen Sie bitte unsere Support-Seite:</p><div class="text-center my-4"><a href="support/contact.html" class="btn btn-primary"><i class="fas fa-headset me-2"></i>Support kontaktieren</a></div><p class="text-muted small">Sie können auch unsere <a href="support/faq.html">FAQ</a> einsehen oder den <a href="support/troubleshoot.html">Fehlerbehebungsleitfaden</a> für schnelle Antworten nutzen.</p></div>
                 <div class="section-card"><div class="highlight-box highlight-important"><h3 class="mb-3">Bestätigung der Zustimmung</h3><p class="mb-0">Durch die Nutzung dieses Dienstes bestätigen Sie, dass Sie diese Allgemeinen Geschäftsbedingungen, die <a href="privacy.html">Datenschutzrichtlinie</a>, die <a href="content-guidelines.html">Inhaltsrichtlinien</a> und die <a href="copyright-policy.html">Urheberrechtsrichtlinie</a> gelesen und verstanden haben und damit einverstanden sind.</p></div></div>
             </div>
 
             <!-- KOREAN -->
             <div class="lang-content" data-lang="ko">
-                <div class="toc"><h3><i class="fas fa-list me-2"></i>목차</h3><ul><li><a href="#ko-acceptance">1. 약관 동의</a></li><li><a href="#ko-definitions">2. 정의</a></li><li><a href="#ko-account">3. 계정</a></li><li><a href="#ko-content">4. 콘텐츠</a></li><li><a href="#ko-copyright">5. 저작권</a></li><li><a href="#ko-ai-content">6. AI 생성 콘텐츠</a></li><li><a href="#ko-revenue">7. 수익 배분</a></li><li><a href="#ko-payment">8. 지급</a></li><li><a href="#ko-prohibited">9. 금지 활동</a></li><li><a href="#ko-moderation">10. 콘텐츠 검토</a></li><li><a href="#ko-termination">11. 계정 해지</a></li><li><a href="#ko-disclaimer">12. 면책 조항</a></li><li><a href="#ko-privacy">13. 개인정보</a></li><li><a href="#ko-changes">14. 약관 변경</a></li><li><a href="#ko-governing">15. 준거법</a></li><li><a href="#ko-contact">16. 문의</a></li></ul></div>
+                <div class="toc"><h3><i class="fas fa-list me-2"></i>목차</h3><ul><li><a href="#ko-acceptance">1. 약관 동의</a></li><li><a href="#ko-definitions">2. 정의</a></li><li><a href="#ko-account">3. 계정</a></li><li><a href="#ko-content">4. 콘텐츠</a></li><li><a href="#ko-copyright">5. 저작권</a></li><li><a href="#ko-ai-content">6. AI 생성 콘텐츠</a></li><li><a href="#ko-revenue">7. 수익 배분</a></li><li><a href="#ko-payment">8. 크리에이터 지급</a></li><li><a href="#ko-prohibited">9. 금지 활동</a></li><li><a href="#ko-moderation">10. 콘텐츠 검토</a></li><li><a href="#ko-termination">11. 계정 해지</a></li><li><a href="#ko-disclaimer">12. 면책 조항</a></li><li><a href="#ko-privacy">13. 개인정보</a></li><li><a href="#ko-changes">14. 약관 변경</a></li><li><a href="#ko-governing">15. 준거법</a></li><li><a href="#ko-contact">16. 문의</a></li></ul></div>
                 <div class="section-card" id="ko-acceptance"><h2>1. 약관 동의</h2><p>Publisher("서비스")를 이용하시기 전에 본 이용약관("약관")을 주의 깊게 읽어주시기 바랍니다. 서비스에 접속하거나 이용함으로써 귀하는 본 약관에 동의하게 됩니다.</p><div class="highlight-box highlight-important"><strong>중요:</strong><br>18세 미만의 사용자는 부모의 동의가 있어야 본 서비스를 이용할 수 있습니다.</div></div>
                 <div class="section-card" id="ko-definitions"><h2>2. 정의</h2><ul><li><strong>"사용자"</strong>: 서비스에 등록하여 이용하는 개인 또는 법인</li><li><strong>"저자"</strong>: 원본 작품을 게시하는 사용자</li><li><strong>"번역가"</strong>: 작품의 번역을 담당하는 사용자</li><li><strong>"편집자"</strong>: 작품의 편집을 담당하는 사용자</li><li><strong>"독자"</strong>: 작품을 열람하거나 구매하는 사용자</li><li><strong>"작품"</strong>: 서비스에 게시된 텍스트, 이미지 및 기타 콘텐츠</li><li><strong>"플랫폼"</strong>: Publisher 운영자</li></ul></div>
                 <div class="section-card" id="ko-account"><h2>3. 계정</h2><h3>3.1 계정 등록</h3><p>서비스의 특정 기능을 이용하려면 등록이 필요합니다.</p><h3>3.2 계정 책임</h3><ul><li>귀하는 계정의 보안을 유지할 책임이 있습니다</li><li>제3자와 계정을 공유하는 것은 금지됩니다</li><li>무단 접근을 발견하면 즉시 연락해 주시기 바랍니다</li></ul><h3>3.3 계정 유형</h3><ul><li><strong>독자 계정</strong>: 작품 열람 및 구매 가능</li><li><strong>저자 계정</strong>: 작품 게시 및 판매 가능</li><li><strong>번역가 계정</strong>: 번역 작업 참여 가능</li></ul></div>
@@ -234,21 +722,21 @@
                 <div class="section-card" id="ko-copyright"><h2>5. 저작권</h2><div class="highlight-box highlight-warning"><strong>중요:</strong><br>Publisher는 원본 작품만 허용합니다.</div><h3>5.1 금지 콘텐츠</h3><ul><li>타인 작품의 복사 또는 표절</li><li>2차 창작물, 팬 픽션</li><li>무단 번역물</li></ul><h3>5.2 저작권 침해 대응</h3><p>경고 3회 누적 시 계정이 정지됩니다.</p></div>
                 <div class="section-card" id="ko-ai-content"><h2>6. AI 생성 콘텐츠</h2><h3>6.1 허용 조건</h3><ul><li>AI 생성으로 명확히 표시</li><li>사용한 AI 도구 명시</li><li>상업적 사용 허용 필요</li></ul><h3>6.2 금지 AI 콘텐츠</h3><ul><li>AI 생성 특성을 숨긴 작품</li><li>상업적 사용이 금지된 도구로 생성된 작품</li></ul></div>
                 <div class="section-card" id="ko-revenue"><h2>7. 수익 배분</h2><table class="revenue-table"><thead><tr><th>역할</th><th>비율</th></tr></thead><tbody><tr><td>저자</td><td>40%</td></tr><tr><td>번역가</td><td>20%</td></tr><tr><td>편집자</td><td>10%</td></tr><tr><td>플랫폼</td><td>30%</td></tr></tbody></table></div>
-                <div class="section-card" id="ko-payment"><h2>8. 지급</h2><h3>8.1 지급 일정</h3><ul><li>수익은 월별로 계산됩니다</li><li>지급은 다음 달 말까지 처리됩니다</li><li>최소 지급 금액은 $10 USD입니다</li></ul><h3>8.2 지급 방법</h3><ul><li>PayPal</li><li>은행 송금</li><li>Stripe</li></ul></div>
+                <div class="section-card" id="ko-payment"><h2>8. 크리에이터 지급</h2><h3>8.1 지급 일정</h3><ul><li>수익은 월별로 계산됩니다</li><li>지급은 다음 달 말까지 처리됩니다</li><li>최소 지급 금액은 $10 USD입니다</li></ul><h3>8.2 지급 방법</h3><ul><li>Stripe (Stripe Connect를 통해)</li></ul></div>
                 <div class="section-card" id="ko-prohibited"><h2>9. 금지 활동</h2><ul><li>허위 정보로 계정 등록</li><li>타인 사칭</li><li>저작권 침해 콘텐츠 게시</li><li>불법, 유해 콘텐츠 게시</li><li>스팸 또는 괴롭힘</li></ul></div>
                 <div class="section-card" id="ko-moderation"><h2>10. 콘텐츠 검토</h2><p>AI 기반 자동 검토 및 필요시 인간 검토.</p></div>
                 <div class="section-card" id="ko-termination"><h2>11. 계정 해지</h2><h3>11.1 사용자 해지</h3><p>언제든지 가능합니다.</p><h3>11.2 플랫폼 정지</h3><p>심각한 위반 시 가능합니다.</p></div>
-                <div class="section-card" id="ko-disclaimer"><h2>12. 면책 조항</h2><p>서비스는 "있는 그대로" 제공됩니다.</p></div>
+                <div class="section-card" id="ko-disclaimer"><h2>12. 면책 조항</h2><h3>12.1 서비스 제공</h3><p>플랫폼은 신뢰할 수 있는 서비스를 제공하기 위해 노력하지만, 중단, 오류 또는 데이터 손실 없는 운영을 보장하지 않습니다. 플랫폼의 과실로 인한 경우를 제외하고, 서비스 중단, 오류 또는 데이터 손실에 대해 책임을 지지 않습니다.</p><h3>12.2 사용자 콘텐츠</h3><p>플랫폼은 사용자가 게시한 콘텐츠의 정확성, 합법성 또는 적절성에 대해 책임을 지지 않습니다.</p><h3>12.3 책임 제한</h3><p>법률이 허용하는 최대 범위 내에서, 플랫폼은 간접적, 부수적, 특별 또는 결과적 손해에 대해 책임을 지지 않습니다.</p><div class="highlight-box highlight-important"><strong>귀하의 법적 권리:</strong><br>본 약관의 어떠한 내용도 2015년 소비자 권리법(Consumer Rights Act 2015) 또는 기타 적용 가능한 소비자 보호법에 따른 귀하의 법적 권리에 영향을 미치지 않습니다. 소비자로서 귀하는 본 약관에 의해 배제되거나 제한될 수 없는 법적 권리를 보유합니다.</div></div>
                 <div class="section-card" id="ko-privacy"><h2>13. 개인정보</h2><p><a href="privacy.html">개인정보 처리방침</a>을 참조하시기 바랍니다.</p></div>
                 <div class="section-card" id="ko-changes"><h2>14. 약관 변경</h2><p>플랫폼은 언제든지 본 약관을 변경할 권리를 보유합니다.</p></div>
-                <div class="section-card" id="ko-governing"><h2>15. 준거법</h2><p>일본 법률, 도쿄 지방법원 관할.</p></div>
+                <div class="section-card" id="ko-governing"><h2>15. 준거법</h2><p>본 약관은 잉글랜드 및 웨일스 법률에 따라 규율되고 해석됩니다. 본 약관에서 발생하는 모든 분쟁은 잉글랜드 및 웨일스 법원의 전속 관할에 따릅니다.</p></div>
                 <div class="section-card" id="ko-contact"><h2>16. 문의</h2><div class="text-center my-4"><a href="support/contact.html" class="btn btn-primary"><i class="fas fa-headset me-2"></i>지원팀 문의</a></div></div>
                 <div class="section-card"><div class="highlight-box highlight-important"><h3 class="mb-3">동의 확인</h3><p class="mb-0">본 서비스를 이용함으로써 본 약관에 동의함을 확인합니다.</p></div></div>
             </div>
 
             <!-- ARABIC -->
             <div class="lang-content" data-lang="ar">
-                <div class="toc"><h3><i class="fas fa-list ms-2"></i>المحتويات</h3><ul><li><a href="#ar-acceptance">1. قبول الشروط</a></li><li><a href="#ar-definitions">2. التعريفات</a></li><li><a href="#ar-account">3. الحساب</a></li><li><a href="#ar-content">4. المحتوى</a></li><li><a href="#ar-copyright">5. حقوق النشر</a></li><li><a href="#ar-ai-content">6. المحتوى المُنشأ بالذكاء الاصطناعي</a></li><li><a href="#ar-revenue">7. توزيع الإيرادات</a></li><li><a href="#ar-payment">8. الدفع</a></li><li><a href="#ar-prohibited">9. الأنشطة المحظورة</a></li><li><a href="#ar-moderation">10. مراجعة المحتوى</a></li><li><a href="#ar-termination">11. إنهاء الحساب</a></li><li><a href="#ar-disclaimer">12. إخلاء المسؤولية</a></li><li><a href="#ar-privacy">13. الخصوصية</a></li><li><a href="#ar-changes">14. تغييرات الشروط</a></li><li><a href="#ar-governing">15. القانون الحاكم</a></li><li><a href="#ar-contact">16. الاتصال</a></li></ul></div>
+                <div class="toc"><h3><i class="fas fa-list ms-2"></i>المحتويات</h3><ul><li><a href="#ar-acceptance">1. قبول الشروط</a></li><li><a href="#ar-definitions">2. التعريفات</a></li><li><a href="#ar-account">3. الحساب</a></li><li><a href="#ar-content">4. المحتوى</a></li><li><a href="#ar-copyright">5. حقوق النشر</a></li><li><a href="#ar-ai-content">6. المحتوى المُنشأ بالذكاء الاصطناعي</a></li><li><a href="#ar-revenue">7. توزيع الإيرادات</a></li><li><a href="#ar-payment">8. المدفوعات للمبدعين</a></li><li><a href="#ar-prohibited">9. الأنشطة المحظورة</a></li><li><a href="#ar-moderation">10. مراجعة المحتوى</a></li><li><a href="#ar-termination">11. إنهاء الحساب</a></li><li><a href="#ar-disclaimer">12. إخلاء المسؤولية</a></li><li><a href="#ar-privacy">13. الخصوصية</a></li><li><a href="#ar-changes">14. تغييرات الشروط</a></li><li><a href="#ar-governing">15. القانون الحاكم</a></li><li><a href="#ar-contact">16. الاتصال</a></li></ul></div>
                 <div class="section-card" id="ar-acceptance"><h2>1. قبول الشروط</h2><p>يرجى قراءة هذه الشروط والأحكام ("الشروط") بعناية قبل استخدام Publisher ("الخدمة"). من خلال الوصول إلى الخدمة أو استخدامها، فإنك توافق على الالتزام بهذه الشروط.</p><div class="highlight-box highlight-important"><strong>مهم:</strong><br>يجب على المستخدمين الذين تقل أعمارهم عن 18 عامًا الحصول على موافقة الوالدين لاستخدام هذه الخدمة.</div></div>
                 <div class="section-card" id="ar-definitions"><h2>2. التعريفات</h2><ul><li><strong>"المستخدم"</strong>: فرد أو كيان مسجل ويستخدم الخدمة</li><li><strong>"المؤلف"</strong>: مستخدم ينشر أعمالاً أصلية</li><li><strong>"المترجم"</strong>: مستخدم يتولى ترجمة الأعمال</li><li><strong>"المحرر"</strong>: مستخدم يتولى تحرير الأعمال</li><li><strong>"القارئ"</strong>: مستخدم يشاهد أو يشتري الأعمال</li><li><strong>"العمل"</strong>: النصوص والصور والمحتويات الأخرى المنشورة على الخدمة</li><li><strong>"المنصة"</strong>: مشغل Publisher</li></ul></div>
                 <div class="section-card" id="ar-account"><h2>3. الحساب</h2><h3>3.1 تسجيل الحساب</h3><p>يلزم التسجيل لاستخدام بعض ميزات الخدمة.</p><h3>3.2 مسؤولية الحساب</h3><ul><li>أنت مسؤول عن الحفاظ على أمان حسابك</li><li>يُحظر مشاركة حسابك مع أطراف ثالثة</li><li>يرجى الاتصال بنا فورًا إذا اكتشفت وصولاً غير مصرح به</li></ul><h3>3.3 أنواع الحسابات</h3><ul><li><strong>حساب القارئ</strong>: يمكنه عرض وشراء الأعمال</li><li><strong>حساب المؤلف</strong>: يمكنه نشر وبيع الأعمال</li><li><strong>حساب المترجم</strong>: يمكنه المشاركة في أعمال الترجمة</li></ul></div>
@@ -256,21 +744,21 @@
                 <div class="section-card" id="ar-copyright"><h2>5. حقوق النشر</h2><div class="highlight-box highlight-warning"><strong>مهم:</strong><br>يقبل Publisher الأعمال الأصلية فقط.</div><h3>5.1 المحتوى المحظور</h3><ul><li>نسخ أو سرقة أعمال الآخرين</li><li>الأعمال المشتقة</li><li>الترجمات غير المصرح بها</li></ul><h3>5.2 الاستجابة لانتهاك حقوق النشر</h3><p>ثلاثة تحذيرات تؤدي إلى تعليق الحساب.</p></div>
                 <div class="section-card" id="ar-ai-content"><h2>6. المحتوى المُنشأ بالذكاء الاصطناعي</h2><h3>6.1 الشروط المسموح بها</h3><ul><li>يجب تصنيفه بوضوح على أنه مُنشأ بالذكاء الاصطناعي</li><li>يجب تحديد أداة الذكاء الاصطناعي المستخدمة</li></ul><h3>6.2 محتوى الذكاء الاصطناعي المحظور</h3><ul><li>الأعمال التي تخفي طبيعتها المُنشأة بالذكاء الاصطناعي</li></ul></div>
                 <div class="section-card" id="ar-revenue"><h2>7. توزيع الإيرادات</h2><table class="revenue-table"><thead><tr><th>الدور</th><th>الحصة</th></tr></thead><tbody><tr><td>المؤلف</td><td>40%</td></tr><tr><td>المترجم</td><td>20%</td></tr><tr><td>المحرر</td><td>10%</td></tr><tr><td>المنصة</td><td>30%</td></tr></tbody></table></div>
-                <div class="section-card" id="ar-payment"><h2>8. الدفع</h2><h3>8.1 جدول الدفع</h3><ul><li>يتم حساب الإيرادات شهريًا</li><li>الحد الأدنى لمبلغ الدفع هو 10 دولار أمريكي</li></ul><h3>8.2 طرق الدفع</h3><ul><li>PayPal</li><li>التحويل البنكي</li><li>Stripe</li></ul></div>
+                <div class="section-card" id="ar-payment"><h2>8. المدفوعات للمبدعين</h2><h3>8.1 جدول الدفع</h3><ul><li>يتم حساب الإيرادات شهريًا</li><li>الحد الأدنى لمبلغ الدفع هو 10 دولار أمريكي</li></ul><h3>8.2 طريقة الدفع</h3><ul><li>Stripe (عبر Stripe Connect)</li></ul></div>
                 <div class="section-card" id="ar-prohibited"><h2>9. الأنشطة المحظورة</h2><ul><li>تسجيل حساب بمعلومات كاذبة</li><li>انتحال شخصية الآخرين</li><li>نشر محتوى ينتهك حقوق النشر</li><li>نشر محتوى غير قانوني أو ضار</li><li>البريد العشوائي أو المضايقة</li></ul></div>
                 <div class="section-card" id="ar-moderation"><h2>10. مراجعة المحتوى</h2><p>نظام مراجعة آلي مدعوم بالذكاء الاصطناعي ومراجعة بشرية عند الحاجة.</p></div>
                 <div class="section-card" id="ar-termination"><h2>11. إنهاء الحساب</h2><h3>11.1 إلغاء المستخدم</h3><p>ممكن في أي وقت.</p><h3>11.2 تعليق المنصة</h3><p>في حالة الانتهاكات الخطيرة.</p></div>
-                <div class="section-card" id="ar-disclaimer"><h2>12. إخلاء المسؤولية</h2><p>يتم تقديم الخدمة "كما هي".</p></div>
+                <div class="section-card" id="ar-disclaimer"><h2>12. إخلاء المسؤولية</h2><h3>12.1 تقديم الخدمة</h3><p>تسعى المنصة لتقديم خدمة موثوقة، لكنها لا تضمن تشغيلاً بدون انقطاع أو أخطاء أو فقدان بيانات. لا تتحمل المنصة المسؤولية عن انقطاع الخدمة أو الأخطاء أو فقدان البيانات، إلا في حالة إهمال المنصة.</p><h3>12.2 محتوى المستخدم</h3><p>لا تتحمل المنصة المسؤولية عن دقة أو قانونية أو ملاءمة المحتوى المنشور من قبل المستخدمين.</p><h3>12.3 تحديد المسؤولية</h3><p>إلى أقصى حد يسمح به القانون، لا تتحمل المنصة المسؤولية عن الأضرار غير المباشرة أو العرضية أو الخاصة أو التبعية.</p><div class="highlight-box highlight-important"><strong>حقوقك القانونية:</strong><br>لا يؤثر أي شيء في هذه الشروط على حقوقك القانونية بموجب قانون حقوق المستهلك لعام 2015 (Consumer Rights Act 2015) أو أي تشريع آخر معمول به لحماية المستهلك. بصفتك مستهلكاً، لديك حقوق قانونية لا يمكن استبعادها أو تقييدها بموجب هذه الشروط.</div></div>
                 <div class="section-card" id="ar-privacy"><h2>13. الخصوصية</h2><p>يرجى مراجعة <a href="privacy.html">سياسة الخصوصية</a>.</p></div>
                 <div class="section-card" id="ar-changes"><h2>14. تغييرات الشروط</h2><p>تحتفظ المنصة بالحق في تعديل هذه الشروط في أي وقت.</p></div>
-                <div class="section-card" id="ar-governing"><h2>15. القانون الحاكم</h2><p>قوانين اليابان، اختصاص محكمة منطقة طوكيو.</p></div>
+                <div class="section-card" id="ar-governing"><h2>15. القانون الحاكم</h2><p>تخضع هذه الشروط لقوانين إنجلترا وويلز وتُفسَّر وفقاً لها. تخضع أي نزاعات ناشئة عن هذه الشروط للاختصاص القضائي الحصري لمحاكم إنجلترا وويلز.</p></div>
                 <div class="section-card" id="ar-contact"><h2>16. الاتصال</h2><div class="text-center my-4"><a href="support/contact.html" class="btn btn-primary"><i class="fas fa-headset ms-2"></i>الاتصال بالدعم</a></div></div>
                 <div class="section-card"><div class="highlight-box highlight-important"><h3 class="mb-3">تأكيد الموافقة</h3><p class="mb-0">باستخدام هذه الخدمة، فإنك تؤكد موافقتك على هذه الشروط.</p></div></div>
             </div>
 
             <!-- PORTUGUESE -->
             <div class="lang-content" data-lang="pt">
-                <div class="toc"><h3><i class="fas fa-list me-2"></i>Conteúdo</h3><ul><li><a href="#pt-acceptance">1. Aceitação dos Termos</a></li><li><a href="#pt-definitions">2. Definições</a></li><li><a href="#pt-account">3. Conta</a></li><li><a href="#pt-content">4. Conteúdo</a></li><li><a href="#pt-copyright">5. Direitos Autorais</a></li><li><a href="#pt-ai-content">6. Conteúdo Gerado por IA</a></li><li><a href="#pt-revenue">7. Divisão de Receita</a></li><li><a href="#pt-payment">8. Pagamento</a></li><li><a href="#pt-prohibited">9. Atividades Proibidas</a></li><li><a href="#pt-moderation">10. Moderação de Conteúdo</a></li><li><a href="#pt-termination">11. Encerramento de Conta</a></li><li><a href="#pt-disclaimer">12. Isenção de Responsabilidade</a></li><li><a href="#pt-privacy">13. Privacidade</a></li><li><a href="#pt-changes">14. Alterações nos Termos</a></li><li><a href="#pt-governing">15. Lei Aplicável</a></li><li><a href="#pt-contact">16. Contato</a></li></ul></div>
+                <div class="toc"><h3><i class="fas fa-list me-2"></i>Conteúdo</h3><ul><li><a href="#pt-acceptance">1. Aceitação dos Termos</a></li><li><a href="#pt-definitions">2. Definições</a></li><li><a href="#pt-account">3. Conta</a></li><li><a href="#pt-content">4. Conteúdo</a></li><li><a href="#pt-copyright">5. Direitos Autorais</a></li><li><a href="#pt-ai-content">6. Conteúdo Gerado por IA</a></li><li><a href="#pt-revenue">7. Divisão de Receita</a></li><li><a href="#pt-payment">8. Pagamentos aos Criadores</a></li><li><a href="#pt-prohibited">9. Atividades Proibidas</a></li><li><a href="#pt-moderation">10. Moderação de Conteúdo</a></li><li><a href="#pt-termination">11. Encerramento de Conta</a></li><li><a href="#pt-disclaimer">12. Isenção de Responsabilidade</a></li><li><a href="#pt-privacy">13. Privacidade</a></li><li><a href="#pt-changes">14. Alterações nos Termos</a></li><li><a href="#pt-governing">15. Lei Aplicável</a></li><li><a href="#pt-contact">16. Contato</a></li></ul></div>
                 <div class="section-card" id="pt-acceptance"><h2>1. Aceitação dos Termos</h2><p>Por favor, leia estes Termos e Condições ("Termos") cuidadosamente antes de usar o Publisher ("Serviço"). Ao acessar ou usar o Serviço, você concorda em estar vinculado a estes Termos.</p><div class="highlight-box highlight-important"><strong>Importante:</strong><br>Usuários menores de 18 anos devem ter o consentimento dos pais para usar este Serviço.</div></div>
                 <div class="section-card" id="pt-definitions"><h2>2. Definições</h2><ul><li><strong>"Usuário"</strong>: Um indivíduo ou entidade registrada e usando o Serviço</li><li><strong>"Autor"</strong>: Um usuário que publica obras originais</li><li><strong>"Tradutor"</strong>: Um usuário que realiza a tradução de obras</li><li><strong>"Editor"</strong>: Um usuário que realiza a edição de obras</li><li><strong>"Leitor"</strong>: Um usuário que visualiza ou compra obras</li><li><strong>"Obra"</strong>: Texto, imagens e outro conteúdo publicado no Serviço</li><li><strong>"Plataforma"</strong>: O operador do Publisher</li></ul></div>
                 <div class="section-card" id="pt-account"><h2>3. Conta</h2><h3>3.1 Registro de Conta</h3><p>O registro é necessário para usar certos recursos do Serviço.</p><h3>3.2 Responsabilidade da Conta</h3><ul><li>Você é responsável por manter a segurança da sua conta</li><li>Compartilhar sua conta com terceiros é proibido</li><li>Por favor, entre em contato conosco imediatamente se descobrir acesso não autorizado</li></ul><h3>3.3 Tipos de Conta</h3><ul><li><strong>Conta de Leitor</strong>: Pode visualizar e comprar obras</li><li><strong>Conta de Autor</strong>: Pode publicar e vender obras</li><li><strong>Conta de Tradutor</strong>: Pode participar de trabalhos de tradução</li></ul></div>
@@ -278,14 +766,14 @@
                 <div class="section-card" id="pt-copyright"><h2>5. Direitos Autorais</h2><div class="highlight-box highlight-warning"><strong>Importante:</strong><br>O Publisher aceita apenas obras originais.</div><h3>5.1 Conteúdo Proibido</h3><ul><li>Cópias ou plágio de obras de outros</li><li>Obras derivadas</li><li>Traduções não autorizadas</li></ul><h3>5.2 Resposta a Infrações</h3><p>Três avisos resultam na suspensão da conta.</p></div>
                 <div class="section-card" id="pt-ai-content"><h2>6. Conteúdo Gerado por IA</h2><h3>6.1 Condições Permitidas</h3><ul><li>Deve ser claramente rotulado como gerado por IA</li><li>Deve especificar a ferramenta de IA utilizada</li></ul><h3>6.2 Conteúdo de IA Proibido</h3><ul><li>Obras que ocultam sua natureza gerada por IA</li></ul></div>
                 <div class="section-card" id="pt-revenue"><h2>7. Divisão de Receita</h2><table class="revenue-table"><thead><tr><th>Função</th><th>Participação</th></tr></thead><tbody><tr><td>Autor</td><td>40%</td></tr><tr><td>Tradutor</td><td>20%</td></tr><tr><td>Editor</td><td>10%</td></tr><tr><td>Plataforma</td><td>30%</td></tr></tbody></table></div>
-                <div class="section-card" id="pt-payment"><h2>8. Pagamento</h2><h3>8.1 Cronograma de Pagamento</h3><ul><li>A receita é calculada mensalmente</li><li>O valor mínimo de pagamento é $10 USD</li></ul><h3>8.2 Métodos de Pagamento</h3><ul><li>PayPal</li><li>Transferência bancária</li><li>Stripe</li></ul></div>
+                <div class="section-card" id="pt-payment"><h2>8. Pagamentos aos Criadores</h2><h3>8.1 Cronograma de Pagamento</h3><ul><li>A receita é calculada mensalmente</li><li>O valor mínimo de pagamento é $10 USD</li></ul><h3>8.2 Método de Pagamento</h3><ul><li>Stripe (via Stripe Connect)</li></ul></div>
                 <div class="section-card" id="pt-prohibited"><h2>9. Atividades Proibidas</h2><ul><li>Registrar uma conta com informações falsas</li><li>Se passar por outros</li><li>Publicar conteúdo que infrinja direitos autorais</li><li>Publicar conteúdo ilegal ou prejudicial</li><li>Spam ou assédio</li></ul></div>
                 <div class="section-card" id="pt-moderation"><h2>10. Moderação de Conteúdo</h2><p>Sistema de revisão automatizado com tecnologia de IA e revisão humana quando necessário.</p></div>
                 <div class="section-card" id="pt-termination"><h2>11. Encerramento de Conta</h2><h3>11.1 Cancelamento pelo Usuário</h3><p>Possível a qualquer momento.</p><h3>11.2 Suspensão pela Plataforma</h3><p>Em caso de violações graves.</p></div>
-                <div class="section-card" id="pt-disclaimer"><h2>12. Isenção de Responsabilidade</h2><p>O Serviço é fornecido "como está".</p></div>
+                <div class="section-card" id="pt-disclaimer"><h2>12. Isenção de Responsabilidade</h2><h3>12.1 Fornecimento do Serviço</h3><p>A Plataforma se esforça para fornecer um serviço confiável, mas não garante operação ininterrupta, sem erros ou sem perda de dados. A Plataforma não é responsável por interrupções de serviço, erros ou perda de dados, exceto quando causados por negligência da Plataforma.</p><h3>12.2 Conteúdo do Usuário</h3><p>A Plataforma não é responsável pela precisão, legalidade ou adequação do conteúdo publicado pelos usuários.</p><h3>12.3 Limitação de Responsabilidade</h3><p>Na máxima extensão permitida por lei, a Plataforma não é responsável por danos indiretos, incidentais, especiais ou consequenciais.</p><div class="highlight-box highlight-important"><strong>Seus Direitos Legais:</strong><br>Nada nestes Termos afeta seus direitos legais sob o Consumer Rights Act 2015 (Lei de Direitos do Consumidor) ou qualquer outra legislação de proteção ao consumidor aplicável. Como consumidor, você possui direitos legais que não podem ser excluídos ou limitados por estes Termos.</div></div>
                 <div class="section-card" id="pt-privacy"><h2>13. Privacidade</h2><p>Por favor, consulte nossa <a href="privacy.html">Política de Privacidade</a>.</p></div>
                 <div class="section-card" id="pt-changes"><h2>14. Alterações nos Termos</h2><p>A Plataforma reserva-se o direito de modificar estes Termos a qualquer momento.</p></div>
-                <div class="section-card" id="pt-governing"><h2>15. Lei Aplicável</h2><p>Leis do Japão, jurisdição do Tribunal Distrital de Tóquio.</p></div>
+                <div class="section-card" id="pt-governing"><h2>15. Lei Aplicável</h2><p>Estes Termos serão regidos e interpretados de acordo com as leis da Inglaterra e País de Gales. Quaisquer disputas decorrentes destes Termos estarão sujeitas à jurisdição exclusiva dos tribunais da Inglaterra e País de Gales.</p></div>
                 <div class="section-card" id="pt-contact"><h2>16. Contato</h2><div class="text-center my-4"><a href="support/contact.html" class="btn btn-primary"><i class="fas fa-headset me-2"></i>Contatar Suporte</a></div></div>
                 <div class="section-card"><div class="highlight-box highlight-important"><h3 class="mb-3">Confirmação de Acordo</h3><p class="mb-0">Ao usar este Serviço, você confirma sua concordância com estes Termos.</p></div></div>
             </div>
@@ -305,6 +793,196 @@
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/language-switcher.js"></script>
+    <!-- Pattern C Navbar JavaScript -->
+    <script>
+        // ========== 多言語対応テキスト（9言語）==========
+        const uiText = {
+            translationTools: {
+                en: 'Translation Tools', ja: '翻訳ツール', zh: '翻译工具',
+                es: 'Herramientas de traducción', fr: 'Outils de traduction', de: 'Übersetzungstools',
+                ko: '번역 도구', ar: 'أدوات الترجمة', pt: 'Ferramentas de tradução'
+            },
+            mangaTranslator: {
+                en: 'Manga Translator', ja: 'マンガ翻訳', zh: '漫画翻译',
+                es: 'Traductor de Manga', fr: 'Traducteur de Manga', de: 'Manga-Übersetzer',
+                ko: '만화 번역기', ar: 'مترجم المانجا', pt: 'Tradutor de Mangá'
+            },
+            translationStatus: {
+                en: 'Translation Status', ja: '翻訳状況', zh: '翻译状态',
+                es: 'Estado de traducción', fr: 'Statut de traduction', de: 'Übersetzungsstatus',
+                ko: '번역 상태', ar: 'حالة الترجمة', pt: 'Status da tradução'
+            },
+            findTranslators: {
+                en: 'Find Translators', ja: '翻訳者を探す', zh: '寻找翻译',
+                es: 'Buscar traductores', fr: 'Trouver des traducteurs', de: 'Übersetzer finden',
+                ko: '번역가 찾기', ar: 'البحث عن مترجمين', pt: 'Encontrar tradutores'
+            },
+            contact: {
+                en: 'Contact', ja: 'お問い合わせ', zh: '联系我们',
+                es: 'Contacto', fr: 'Contact', de: 'Kontakt',
+                ko: '문의', ar: 'اتصل بنا', pt: 'Contato'
+            },
+            library: {
+                en: 'Library', ja: 'ライブラリ', zh: '书库',
+                es: 'Biblioteca', fr: 'Bibliothèque', de: 'Bibliothek',
+                ko: '라이브러리', ar: 'المكتبة', pt: 'Biblioteca'
+            },
+            dashboard: {
+                en: 'Dashboard', ja: 'ダッシュボード', zh: '控制台',
+                es: 'Panel', fr: 'Tableau de bord', de: 'Dashboard',
+                ko: '대시보드', ar: 'لوحة التحكم', pt: 'Painel'
+            },
+            accountSettings: {
+                en: 'Account Settings', ja: 'アカウント設定', zh: '账户设置',
+                es: 'Configuración de cuenta', fr: 'Paramètres du compte', de: 'Kontoeinstellungen',
+                ko: '계정 설정', ar: 'إعدادات الحساب', pt: 'Configurações da conta'
+            },
+            logout: {
+                en: 'Log Out', ja: 'ログアウト', zh: '退出登录',
+                es: 'Cerrar sesión', fr: 'Déconnexion', de: 'Abmelden',
+                ko: '로그아웃', ar: 'تسجيل الخروج', pt: 'Sair'
+            },
+            logOutConfirm: {
+                en: 'Are you sure you want to log out?', ja: 'ログアウトしますか？', zh: '确定要退出登录吗？',
+                es: '¿Estás seguro de que quieres cerrar sesión?', fr: 'Êtes-vous sûr de vouloir vous déconnecter?', de: 'Sind Sie sicher, dass Sie sich abmelden möchten?',
+                ko: '로그아웃 하시겠습니까?', ar: 'هل أنت متأكد أنك تريد تسجيل الخروج؟', pt: 'Tem certeza que deseja sair?'
+            }
+        };
+        
+        function getCurrentLanguage() {
+            return localStorage.getItem('preferredLanguage') || 'en';
+        }
+        
+        function getL(obj) {
+            const lang = getCurrentLanguage();
+            return obj[lang] || obj.en || '';
+        }
+        
+        function updateUIText() {
+            const menuDashboard = document.getElementById('menuDashboard');
+            const menuAccountSettings = document.getElementById('menuAccountSettings');
+            const menuLogout = document.getElementById('menuLogout');
+            if (menuDashboard) menuDashboard.textContent = getL(uiText.dashboard);
+            if (menuAccountSettings) menuAccountSettings.textContent = getL(uiText.accountSettings);
+            if (menuLogout) menuLogout.textContent = getL(uiText.logout);
+            
+            const els = {
+                navLibraryPC: uiText.library, navDashboardPC: uiText.dashboard,
+                navTranslationToolsPC: uiText.translationTools, navMangaTranslatorPC: uiText.mangaTranslator,
+                navTranslationStatusPC: uiText.translationStatus, navFindTranslatorsPC: uiText.findTranslators,
+                navContactPC: uiText.contact, navLibraryMobile: uiText.library, navDashboardMobile: uiText.dashboard,
+                navTranslationToolsMobile: uiText.translationTools, navMangaTranslatorMobile: uiText.mangaTranslator,
+                navTranslationStatusMobile: uiText.translationStatus, navFindTranslatorsMobile: uiText.findTranslators,
+                navContactMobile: uiText.contact
+            };
+            Object.keys(els).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = getL(els[id]);
+            });
+        }
+        
+        function toggleUserDropdown(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const dropdown = document.getElementById('userDropdown');
+            const dropdownMenu = document.getElementById('userMenu');
+            dropdown.classList.toggle('open');
+            dropdownMenu.classList.toggle('show');
+        }
+        
+        function handleLogout() {
+            if (confirm(getL(uiText.logOutConfirm))) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.reload();
+            }
+        }
+        
+        function loadUserInfo() {
+            const userStr = localStorage.getItem('user');
+            const token = localStorage.getItem('token');
+            const isLoggedIn = !!(userStr && token);
+            
+            if (isLoggedIn) {
+                try {
+                    const user = JSON.parse(userStr);
+                    const displayName = user.display_name || user.firstName || user.email || 'User';
+                    const userNameEl = document.getElementById('userName');
+                    const userDisplayNameEl = document.getElementById('userDisplayName');
+                    const userEmailEl = document.getElementById('userEmail');
+                    if (userNameEl) userNameEl.textContent = displayName;
+                    if (userDisplayNameEl) userDisplayNameEl.textContent = displayName;
+                    if (userEmailEl) userEmailEl.textContent = user.email || '';
+                    document.body.classList.add('logged-in');
+                } catch (e) {
+                    document.body.classList.remove('logged-in');
+                }
+            } else {
+                document.body.classList.remove('logged-in');
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const desktopSelector = document.getElementById('languageSelector');
+            const mobileSelector = document.getElementById('languageSelectorMobile');
+            
+            if (desktopSelector && mobileSelector) {
+                const savedLang = localStorage.getItem('preferredLanguage') || 'en';
+                desktopSelector.value = savedLang;
+                mobileSelector.value = savedLang;
+                
+                mobileSelector.addEventListener('change', function() {
+                    desktopSelector.value = this.value;
+                    if (typeof changeLanguage === 'function') changeLanguage(this.value);
+                    updateUIText();
+                });
+                
+                desktopSelector.addEventListener('change', function() {
+                    mobileSelector.value = this.value;
+                    if (typeof changeLanguage === 'function') changeLanguage(this.value);
+                    updateUIText();
+                });
+            }
+            
+            updateUIText();
+            setTimeout(updateUIText, 100);
+            loadUserInfo();
+            
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.user-dropdown')) {
+                    const dropdown = document.getElementById('userDropdown');
+                    const dropdownMenu = document.getElementById('userMenu');
+                    if (dropdown) dropdown.classList.remove('open');
+                    if (dropdownMenu) dropdownMenu.classList.remove('show');
+                }
+            });
+            
+            const navbarCollapse = document.getElementById('navbarNav');
+            const navbarOverlay = document.getElementById('navbarOverlay');
+            
+            if (navbarCollapse) {
+                navbarCollapse.addEventListener('show.bs.collapse', function() {
+                    document.body.classList.add('menu-open');
+                    if (navbarOverlay) navbarOverlay.classList.add('show');
+                });
+                navbarCollapse.addEventListener('hide.bs.collapse', function() {
+                    document.body.classList.remove('menu-open');
+                    if (navbarOverlay) navbarOverlay.classList.remove('show');
+                });
+            }
+            
+            if (navbarOverlay) {
+                navbarOverlay.addEventListener('click', function() {
+                    const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                    if (bsCollapse) bsCollapse.hide();
+                });
+            }
+            
+            document.addEventListener('languageChanged', function() {
+                updateUIText();
+            });
+        });
+    </script>
     <script>
         function showLanguageContent(lang) {
             document.querySelectorAll('.lang-content').forEach(el => el.classList.remove('active'));
@@ -317,8 +995,11 @@
             const titleKey = 'legal.pageTitle.terms';
             const translatedTitle = t(titleKey);
             if (translatedTitle !== titleKey) { document.title = translatedTitle; }
-            const langSelect = document.getElementById('languageSelect');
-            if (langSelect) { langSelect.value = lang; }
+            // Pattern C セレクタ同期
+            const desktopSel = document.getElementById('languageSelector');
+            const mobileSel = document.getElementById('languageSelectorMobile');
+            if (desktopSel) { desktopSel.value = lang; }
+            if (mobileSel) { mobileSel.value = lang; }
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 const translated = t(key);
@@ -331,6 +1012,7 @@
         function changeLanguage(lang) {
             if (typeof setLanguage === 'function') { setLanguage(lang); }
             applyTranslations();
+            updateUIText();
         }
         document.addEventListener('languageChanged', function(e) { applyTranslations(); });
         document.addEventListener('DOMContentLoaded', function() { applyTranslations(); });
