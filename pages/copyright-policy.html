@@ -12,8 +12,72 @@
     <link href="../css/style-new.css" rel="stylesheet">
     <style>
         html, body { overflow-x: hidden; max-width: 100%; }
-        .language-selector { position: fixed; top: 70px; right: 15px; z-index: 1050; }
-        .language-selector select { padding: 8px 12px; border: 1px solid #ccc; border-radius: 8px; background: #ffffff; font-size: 14px; cursor: pointer; max-width: 140px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        .navbar-custom.sticky-top { position: fixed !important; top: 0; left: 0; right: 0; z-index: 1050; }
+        body { padding-top: 56px; }
+        /* ========== Mobile Language Selector ========== */
+        .navbar-lang-selector {
+            display: flex;
+            align-items: center;
+            margin-right: 0.5rem;
+        }
+        @media (max-width: 991.98px) {
+            .navbar-lang-selector { order: 1; }
+            .navbar-toggler { order: 2; }
+        }
+        /* ========== PC Navbar - 横並び維持 ========== */
+        @media (min-width: 992px) {
+            .navbar-nav { flex-wrap: nowrap !important; flex-direction: row !important; }
+            .navbar-nav .nav-item { white-space: nowrap !important; }
+            .navbar-nav .nav-link { white-space: nowrap !important; padding: 0.5rem 0.6rem !important; font-size: 0.9rem; }
+            .navbar-collapse .d-flex { flex-wrap: nowrap !important; }
+            .dropdown-menu { white-space: nowrap; }
+            .navbar-buttons-guest { display: flex !important; flex-wrap: nowrap !important; gap: 0.5rem; }
+            .navbar-buttons-guest .btn { white-space: nowrap !important; flex-shrink: 0; }
+        }
+        /* ========== Auth Visibility Control ========== */
+        .auth-only { display: none !important; }
+        .guest-only { display: block; }
+        body.logged-in .auth-only { display: block !important; }
+        body.logged-in .auth-only.nav-item { display: list-item !important; }
+        body.logged-in .auth-only.dropdown { display: block !important; }
+        body.logged-in .guest-only { display: none !important; }
+        @media (min-width: 992px) { body.logged-in .navbar-buttons-guest { display: none !important; } }
+        /* ========== User Dropdown Menu ========== */
+        .user-dropdown { position: relative; }
+        .user-dropdown-toggle { display: flex; align-items: center; gap: 0.5rem; background: transparent; border: 1px solid var(--color-border); border-radius: 25px; padding: 0.4rem 0.75rem; cursor: pointer; color: var(--color-text); transition: all 0.2s; }
+        .user-dropdown-toggle:hover { border-color: var(--color-accent); background: rgba(139, 115, 85, 0.05); }
+        .user-dropdown-toggle i:first-child { font-size: 1.25rem; color: var(--color-accent); }
+        .user-name { font-weight: 500; font-size: 0.9rem; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .user-chevron { font-size: 0.7rem; color: var(--color-text-secondary); transition: transform 0.2s; }
+        .user-dropdown.open .user-chevron { transform: rotate(180deg); }
+        .user-menu { position: absolute; top: calc(100% + 0.5rem); right: 0; background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); min-width: 240px; z-index: 1001; display: none; overflow: hidden; }
+        .user-menu.show { display: block; }
+        .user-menu-header { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; background: var(--color-bg-main); }
+        .user-avatar { font-size: 2.5rem; color: var(--color-accent); }
+        .user-info { flex: 1; min-width: 0; }
+        .user-display-name { font-weight: 600; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .user-email { font-size: 0.8rem; color: var(--color-text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .user-menu-divider { height: 1px; background: var(--color-border); }
+        .user-menu-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; color: var(--color-text); text-decoration: none; font-size: 0.9rem; cursor: pointer; border: none; background: transparent; width: 100%; text-align: left; }
+        .user-menu-item:hover { background: var(--color-bg-hover); color: var(--color-accent); }
+        .user-menu-item i { width: 20px; text-align: center; color: var(--color-text-secondary); }
+        .user-menu-item:hover i { color: var(--color-accent); }
+        .logout-btn { color: var(--color-error); }
+        .logout-btn i { color: var(--color-error); }
+        .logout-btn:hover { background: rgba(199, 93, 93, 0.1); color: var(--color-error); }
+        /* ========== Navbar Overlay ========== */
+        .navbar-overlay { display: none; position: fixed; top: 56px; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 1040; }
+        .navbar-overlay.show { display: block; }
+        /* ========== Mobile Adjustments ========== */
+        @media (max-width: 991.98px) {
+            .user-dropdown { order: 3; margin-left: 0.5rem; }
+            .user-dropdown-toggle { padding: 0.3rem; border-radius: 50%; width: 38px; height: 38px; justify-content: center; }
+            .user-menu { position: fixed; top: 56px; right: 10px; left: auto; min-width: 260px; max-width: calc(100vw - 20px); z-index: 9999; }
+            .navbar-collapse { max-height: 70vh; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+            .navbar-collapse.show, .navbar-collapse.collapsing { position: fixed; top: 56px; left: 0; right: 0; background: #FFFFFF; border-bottom: 1px solid var(--color-border); box-shadow: 0 4px 20px rgba(0,0,0,0.15); z-index: 1045; padding: 0.5rem 1rem; }
+            body.menu-open { overflow: hidden; }
+            .navbar-custom { z-index: 1050 !important; background: #FFFFFF !important; }
+        }
         .policy-container { padding: var(--spacing-xl) 0; max-width: 900px; margin: 0 auto; }
         .policy-header { text-align: center; margin-bottom: var(--spacing-2xl); padding-bottom: var(--spacing-xl); border-bottom: 1px solid var(--color-border); }
         .policy-header h1 { font-size: var(--font-size-3xl); margin-bottom: var(--spacing-md); }
@@ -51,36 +115,245 @@
         [dir="rtl"] .highlight-info { border-right-color: var(--color-info); }
         [dir="rtl"] .prohibited-list li { padding-left: 0; padding-right: var(--spacing-lg); }
         [dir="rtl"] .prohibited-list li::before { left: auto; right: 0; }
-        [dir="rtl"] .language-selector { right: auto; left: 15px; }
+
         [dir="rtl"] .toc ul { columns: 1; }
         [dir="rtl"] .strike-table th, [dir="rtl"] .strike-table td { text-align: right; }
         .lang-content[data-lang="ar"] { font-family: 'Noto Sans Arabic', sans-serif; }
         @media (max-width: 768px) {
             .toc ul { columns: 1; }
-            .language-selector { top: 60px; right: 10px; }
-            .language-selector select { padding: 5px 8px; font-size: 12px; max-width: 110px; }
-            [dir="rtl"] .language-selector { left: 10px; right: auto; }
+
         }
     </style>
 </head>
 <body>
-    <div class="language-selector">
-        <select id="languageSelect" onchange="changeLanguage(this.value)">
-            <option value="en">🇬🇧 English</option>
-            <option value="ja">🇯🇵 日本語</option>
-            <option value="zh">🇨🇳 中文</option>
-            <option value="es">🇪🇸 Español</option>
-            <option value="fr">🇫🇷 Français</option>
-            <option value="de">🇩🇪 Deutsch</option>
-            <option value="ko">🇰🇷 한국어</option>
-            <option value="ar">🇸🇦 العربية</option>
-            <option value="pt">🇧🇷 Português</option>
-        </select>
-    </div>
+    <!-- Navbar Overlay -->
+    <div class="navbar-overlay" id="navbarOverlay"></div>
+
+    <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="../index.html"><i class="fas fa-book-open"></i> Publisher</a>
-            <a href="dashboard.html" class="btn btn-soft-custom btn-sm"><i class="fas fa-arrow-left me-1"></i><span data-i18n="legal.backToHome">Back to Home</span></a>
+            <a class="navbar-brand" href="../index.html">
+                <i class="fas fa-book-open"></i>
+                Publisher
+            </a>
+
+            <!-- Language Selector Mobile -->
+            <div class="navbar-lang-selector d-lg-none">
+                <select class="language-selector" id="languageSelectorMobile">
+                    <option value="en">🇬🇧 EN</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="es">🇪🇸 ES</option>
+                    <option value="fr">🇫🇷 FR</option>
+                    <option value="de">🇩🇪 DE</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="ar">🇸🇦 عربي</option>
+                    <option value="pt">🇧🇷 PT</option>
+                </select>
+            </div>
+
+            <!-- User Dropdown (auth-only) -->
+            <div class="user-dropdown auth-only" id="userDropdown">
+                <button type="button" class="user-dropdown-toggle" id="userDropdownBtn" onclick="toggleUserDropdown(event)">
+                    <i class="fas fa-user-circle"></i>
+                    <span class="user-name d-none d-lg-inline" id="userName">User</span>
+                    <i class="fas fa-chevron-down user-chevron d-none d-lg-inline"></i>
+                </button>
+                <div class="user-menu" id="userMenu">
+                    <div class="user-menu-header">
+                        <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
+                        <div class="user-info">
+                            <div class="user-display-name" id="userDisplayName">User</div>
+                            <div class="user-email" id="userEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b2c7c1d7c0f2d7cad3dfc2ded79cd1dddf">[email&#160;protected]</a></div>
+                        </div>
+                    </div>
+                    <div class="user-menu-divider"></div>
+                    <a href="dashboard.html" class="user-menu-item">
+                        <i class="fas fa-th-large"></i>
+                        <span id="menuDashboard">Dashboard</span>
+                    </a>
+                    <a href="account-settings.html" class="user-menu-item">
+                        <i class="fas fa-cog"></i>
+                        <span id="menuAccountSettings">Account Settings</span>
+                    </a>
+                    <div class="user-menu-divider"></div>
+                    <button class="user-menu-item logout-btn" onclick="handleLogout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span id="menuLogout">Log Out</span>
+                    </button>
+                </div>
+            </div>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <!-- ========== PC Navigation ========== -->
+                <ul class="navbar-nav me-auto d-none d-lg-flex">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../index.html">
+                            <i class="fas fa-home me-1"></i> <span data-i18n="nav.home">Home</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="browse.html">
+                            <i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="genres.html">
+                            <i class="fas fa-layer-group me-1"></i> <span data-i18n="nav.genres">Genres</span>
+                        </a>
+                    </li>
+                    <li class="nav-item auth-only">
+                        <a class="nav-link" href="library.html">
+                            <i class="fas fa-book-reader me-1"></i> <span id="navLibraryPC">Library</span>
+                        </a>
+                    </li>
+                    <li class="nav-item auth-only">
+                        <a class="nav-link" href="dashboard.html">
+                            <i class="fas fa-th-large me-1"></i> <span id="navDashboardPC">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item auth-only">
+                        <a class="nav-link" href="upload.html">
+                            <i class="fas fa-upload me-1"></i> <span data-i18n="nav.upload">Upload</span>
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown auth-only">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-language me-1"></i> <span id="navTranslationToolsPC">Translation Tools</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="manga-translator.html"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorPC">Manga Translator</span></a></li>
+                            <li><a class="dropdown-item" href="translation-status.html"><i class="fas fa-tasks me-2"></i><span id="navTranslationStatusPC">Translation Status</span></a></li>
+                            <li><a class="dropdown-item" href="translators/index.html"><i class="fas fa-users me-2"></i><span id="navFindTranslatorsPC">Find Translators</span></a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-headset me-1"></i> <span data-i18n="nav.support">Support</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="support/faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
+                            <li><a class="dropdown-item" href="support/troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
+                            <li><a class="dropdown-item" href="support/contact.html"><i class="fas fa-envelope me-2"></i><span id="navContactPC">Contact</span></a></li>
+                            <li class="auth-only"><hr class="dropdown-divider"></li>
+                            <li class="auth-only"><a class="dropdown-item" href="support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <!-- ========== Mobile Navigation ========== -->
+                <ul class="navbar-nav d-lg-none">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../index.html">
+                            <i class="fas fa-home me-2"></i> <span data-i18n="nav.home">Home</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="browse.html">
+                            <i class="fas fa-compass me-2"></i> <span data-i18n="nav.browse">Browse</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="genres.html">
+                            <i class="fas fa-layer-group me-2"></i> <span data-i18n="nav.genres">Genres</span>
+                        </a>
+                    </li>
+                    <li class="nav-item auth-only">
+                        <a class="nav-link" href="library.html">
+                            <i class="fas fa-book-reader me-2"></i> <span id="navLibraryMobile">Library</span>
+                        </a>
+                    </li>
+                    <li class="auth-only"><hr class="dropdown-divider"></li>
+                    <li class="nav-item auth-only">
+                        <a class="nav-link" href="dashboard.html">
+                            <i class="fas fa-th-large me-2"></i> <span id="navDashboardMobile">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item auth-only">
+                        <a class="nav-link" href="upload.html">
+                            <i class="fas fa-upload me-2"></i> <span data-i18n="nav.upload">Upload</span>
+                        </a>
+                    </li>
+                    <li class="nav-item auth-only">
+                        <a class="nav-link" data-bs-toggle="collapse" href="#translationToolsMenu" role="button">
+                            <i class="fas fa-language me-2"></i> <span id="navTranslationToolsMobile">Translation Tools</span>
+                            <i class="fas fa-chevron-down ms-auto small"></i>
+                        </a>
+                        <div class="collapse ps-4" id="translationToolsMenu">
+                            <a class="nav-link" href="manga-translator.html">
+                                <i class="fas fa-image me-2"></i> <span id="navMangaTranslatorMobile">Manga Translator</span>
+                            </a>
+                            <a class="nav-link" href="translation-status.html">
+                                <i class="fas fa-tasks me-2"></i> <span id="navTranslationStatusMobile">Translation Status</span>
+                            </a>
+                            <a class="nav-link" href="translators/index.html">
+                                <i class="fas fa-users me-2"></i> <span id="navFindTranslatorsMobile">Find Translators</span>
+                            </a>
+                        </div>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="support/faq.html">
+                            <i class="fas fa-question-circle me-2"></i> <span data-i18n="support.faq.title">FAQ</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="support/troubleshoot.html">
+                            <i class="fas fa-tools me-2"></i> <span data-i18n="support.troubleshoot.title">Troubleshooting</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="support/contact.html">
+                            <i class="fas fa-envelope me-2"></i> <span id="navContactMobile">Contact</span>
+                        </a>
+                    </li>
+                    <li class="nav-item auth-only">
+                        <a class="nav-link" href="support/tickets.html">
+                            <i class="fas fa-ticket-alt me-2"></i> <span data-i18n="support.tickets.title">My Tickets</span>
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li class="nav-item guest-only">
+                        <a class="nav-link" href="login.html">
+                            <i class="fas fa-sign-in-alt me-2"></i> <span data-i18n="nav.login">Sign In</span>
+                        </a>
+                    </li>
+                    <li class="nav-item guest-only">
+                        <a class="nav-link" href="register.html">
+                            <i class="fas fa-user-plus me-2"></i> <span data-i18n="nav.getStarted">Get Started</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Language Selector Desktop -->
+                    <select class="language-selector d-none d-lg-block" id="languageSelector">
+                        <option value="en">🇬🇧 EN</option>
+                        <option value="ja">🇯🇵 日本語</option>
+                        <option value="zh">🇨🇳 中文</option>
+                        <option value="es">🇪🇸 ES</option>
+                        <option value="fr">🇫🇷 FR</option>
+                        <option value="de">🇩🇪 DE</option>
+                        <option value="ko">🇰🇷 한국어</option>
+                        <option value="ar">🇸🇦 عربي</option>
+                        <option value="pt">🇧🇷 PT</option>
+                    </select>
+
+                    <!-- Guest Buttons (PC) -->
+                    <div class="navbar-buttons-guest guest-only d-none d-lg-flex">
+                        <a href="login.html" class="btn btn-soft-custom">
+                            <span data-i18n="nav.login">Sign In</span>
+                        </a>
+                        <a href="register.html" class="btn btn-primary-custom">
+                            <span data-i18n="nav.getStarted">Get Started</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </nav>
     <main class="policy-container">
@@ -92,127 +365,127 @@
 
             <!-- ENGLISH -->
             <div class="lang-content active" data-lang="en">
-                <div class="toc"><h3><i class="fas fa-list me-2"></i>Contents</h3><ul><li><a href="#en-overview">1. Overview</a></li><li><a href="#en-original">2. Original Works Only</a></li><li><a href="#en-prohibited">3. Prohibited Content</a></li><li><a href="#en-ai">4. AI-Generated Content</a></li><li><a href="#en-reporting">5. Reporting Infringement</a></li><li><a href="#en-dmca">6. DMCA Process</a></li><li><a href="#en-strikes">7. Violation Response</a></li><li><a href="#en-counter">8. Counter-Notice</a></li></ul></div>
+                <div class="toc"><h3><i class="fas fa-list me-2"></i>Contents</h3><ul><li><a href="#en-overview">1. Overview</a></li><li><a href="#en-original">2. Original Works Only</a></li><li><a href="#en-prohibited">3. Prohibited Content</a></li><li><a href="#en-ai">4. AI-Generated Content</a></li><li><a href="#en-reporting">5. Reporting Infringement</a></li><li><a href="#en-dmca">6. Copyright Infringement Response Process</a></li><li><a href="#en-strikes">7. Violation Response</a></li><li><a href="#en-counter">8. Counter-Notice</a></li></ul></div>
                 <div class="section-card" id="en-overview"><h2><i class="fas fa-info-circle"></i> 1. Overview</h2><p>Publisher respects the copyrights of creators and is committed to protecting intellectual property rights. This policy outlines the rules regarding copyright on our platform and the procedures for handling infringement cases.</p></div>
-                <div class="section-card" id="en-original"><h2><i class="fas fa-star"></i> 2. Original Works Only</h2><div class="highlight-box highlight-danger"><strong>Important:</strong> Publisher only accepts original works. Content using others' works is strictly prohibited.</div><h3>Allowed Content</h3><ul class="prohibited-list allowed-list"><li>Original works you created yourself</li><li>Works where you hold 100% copyright</li><li>Co-authored works with consent from all authors</li><li>Works using only public domain materials</li></ul><h3>Prohibited Content</h3><ul class="prohibited-list"><li>Copies or plagiarism of others' works</li><li>Fan fiction and derivative works</li><li>Unauthorized reposts from other websites</li><li>Works copyrighted by other publishers</li><li>Works translated without permission</li><li>Unauthorized use of copyrighted images or illustrations</li></ul></div>
-                <div class="section-card" id="en-prohibited"><h2><i class="fas fa-ban"></i> 3. Prohibited Content</h2><h3>3.1 Other Publisher's Works</h3><div class="highlight-box highlight-danger">Posting works copyrighted by other publishers (print or digital) on Publisher is prohibited. This includes:<ul class="mt-2 mb-0"><li>Works under publishing contracts</li><li>Works with exclusive distribution agreements</li><li>Works with transferred copyrights</li></ul></div><h3>3.2 Fan Fiction & Derivative Works</h3><p>Publisher does not accept fan fiction or derivative works for the following reasons:</p><ul><li>To protect original creators' rights</li><li>To avoid legal risks</li><li>To promote original content creation</li></ul><h3>3.3 Unauthorized Translations</h3><p>Translating and posting others' works without the original author's permission is prohibited. Written permission from the original author is required to post translated works.</p></div>
+                <div class="section-card" id="en-original"><h2><i class="fas fa-star"></i> 2. Original Works Only</h2><div class="highlight-box highlight-danger"><strong>Important:</strong> Publisher only accepts original works. Content using others' works is strictly prohibited.</div><h3>Allowed Content</h3><ul class="prohibited-list allowed-list"><li>Original works you created yourself</li><li>Works where you hold 100% copyright</li><li>Co-authored works with consent from all authors</li><li>Works using only public domain materials</li></ul><h3>Prohibited Content</h3><ul class="prohibited-list"><li>Copies or plagiarism of others' works</li><li>Unauthorized fan fiction and derivative works</li><li>Unauthorized reposts from other websites</li><li>Works copyrighted by other publishers</li><li>Works translated without permission</li><li>Unauthorized use of copyrighted images or illustrations</li></ul></div>
+                <div class="section-card" id="en-prohibited"><h2><i class="fas fa-ban"></i> 3. Prohibited Content</h2><h3>3.1 Other Publisher's Works</h3><div class="highlight-box highlight-danger">Posting works copyrighted by other publishers (print or digital) on Publisher is prohibited. This includes:<ul class="mt-2 mb-0"><li>Works under publishing contracts</li><li>Works with exclusive distribution agreements</li><li>Works with transferred copyrights</li></ul></div><h3>3.2 Fan Fiction & Derivative Works</h3><p>Publisher permits fan fiction and derivative works only with written permission from the original creator. Unauthorized fan fiction and derivative works are prohibited for the following reasons:</p><ul><li>To protect original creators' rights</li><li>To avoid legal risks</li><li>To promote original content creation</li></ul><h3>3.3 Unauthorized Translations</h3><p>Translating and posting others' works without the original author's permission is prohibited. Written permission from the original author is required to post translated works.</p></div>
                 <div class="section-card" id="en-ai"><h2><i class="fas fa-robot"></i> 4. AI-Generated Content</h2><div class="highlight-box highlight-info">AI-generated content is permitted only under specific conditions.</div><h3>4.1 Permitted Conditions</h3><ul class="prohibited-list allowed-list"><li>Clearly label the work as "AI Work" or "AI-Generated"</li><li>Specify the AI tool used (e.g., ChatGPT, Midjourney)</li><li>AI tool's terms must permit commercial use</li><li>Distinguish AI-generated parts from human-created parts (recommended)</li></ul><h3>4.2 Prohibited AI Content</h3><ul class="prohibited-list"><li>Works hiding their AI-generated nature</li><li>Works using AI tools that prohibit commercial use</li><li>Works imitating others' styles using AI</li><li>AI-generated "sequels" or "derivatives" of existing works</li></ul><h3>4.3 AI Work Labeling</h3><div class="highlight-box highlight-success"><strong>Correct labeling example:</strong><br><code>🤖 AI Work | AI-Generated Content</code><br><code>Tools used: ChatGPT-4, DALL-E 3</code></div></div>
                 <div class="section-card" id="en-reporting"><h2><i class="fas fa-flag"></i> 5. Reporting Infringement</h2><p>If you discover copyright infringement, please report it with the following information:</p><h3>Required Information</h3><ol><li><strong>Rights Holder Info</strong> - Name, contact, documents proving rights</li><li><strong>Infringing Work Info</strong> - URL and title of the work</li><li><strong>Original Work Info</strong> - URL of original, publication info</li><li><strong>Infringement Description</strong> - Specific explanation of how it infringes</li><li><strong>Declaration</strong> - Statement that the report is accurate</li></ol><h3>How to Report</h3><p>Use the "Report" button on each work's page and select "Copyright Infringement", or contact our support page.</p></div>
-                <div class="section-card" id="en-dmca"><h2><i class="fas fa-gavel"></i> 6. DMCA Process</h2><p>Publisher follows a copyright infringement response process compliant with the U.S. Digital Millennium Copyright Act (DMCA).</p><h3>Response Process</h3><div class="process-step"><div class="step-number">1</div><div><strong>Report Receipt</strong><br>We receive and review the copyright infringement report (within 24 hours)</div></div><div class="process-step"><div class="step-number">2</div><div><strong>Temporary Unpublishing</strong><br>If deemed a valid report, the work is temporarily unpublished</div></div><div class="process-step"><div class="step-number">3</div><div><strong>Uploader Notification</strong><br>We notify the uploader and provide 10 business days to file a counter-notice</div></div><div class="process-step"><div class="step-number">4</div><div><strong>Final Decision</strong><br>Based on counter-notice status, we decide to delete or restore the work</div></div></div>
-                <div class="section-card" id="en-strikes"><h2><i class="fas fa-exclamation-triangle"></i> 7. Violation Response</h2><p>A 3-strike system applies to copyright violations.</p><table class="strike-table"><thead><tr><th>Strike</th><th>Response</th><th>Duration</th></tr></thead><tbody><tr><td>⚠️ 1st</td><td>Work deletion + Warning email</td><td>Expires in 90 days</td></tr><tr><td>⚠️⚠️ 2nd</td><td>Work deletion + 30-day posting restriction</td><td>Expires in 90 days</td></tr><tr><td>⚠️⚠️⚠️ 3rd</td><td>Account suspension (90 days)</td><td>-</td></tr><tr><td>❌ After suspension</td><td>Permanent account ban</td><td>Permanent</td></tr></tbody></table><div class="highlight-box highlight-warning"><strong>Note:</strong> Severe infringement (mass plagiarism, commercial copyright infringement) may result in immediate account suspension regardless of strike count.</div></div>
-                <div class="section-card" id="en-counter"><h2><i class="fas fa-balance-scale"></i> 8. Counter-Notice</h2><p>If you disagree with a copyright infringement report, you may file a counter-notice through the following process.</p><h3>Counter-Notice Conditions</h3><ul><li>You can prove you hold the copyright</li><li>You can explain the report is erroneous</li><li>You can prove you have proper usage permission</li></ul><h3>Required Information</h3><ol><li>Name, address, contact information</li><li>Identification of the removed work</li><li>Statement declaring the removal was erroneous</li><li>Documents proving your rights</li></ol><h3>Processing Time</h3><p>After receiving a counter-notice, we will notify you of the review result within 10-14 business days. If the counter-notice is accepted, the work will be restored and the strike removed.</p></div>
+                <div class="section-card" id="en-dmca"><h2><i class="fas fa-gavel"></i> 6. Copyright Infringement Response Process</h2><p>Publisher follows a notice-and-takedown process for handling copyright infringement claims, in accordance with the Copyright, Designs and Patents Act 1988 (CDPA) and the Electronic Commerce (EC Directive) Regulations 2002. For users in the United States, this process also satisfies the requirements of the Digital Millennium Copyright Act (DMCA).</p><h3>Response Process</h3><div class="process-step"><div class="step-number">1</div><div><strong>Report Receipt</strong><br>We receive and review the copyright infringement report (within 24 hours)</div></div><div class="process-step"><div class="step-number">2</div><div><strong>Temporary Unpublishing</strong><br>If deemed a valid report, the work is temporarily unpublished</div></div><div class="process-step"><div class="step-number">3</div><div><strong>Uploader Notification</strong><br>We notify the uploader and provide 10 business days to file a counter-notice</div></div><div class="process-step"><div class="step-number">4</div><div><strong>Final Decision</strong><br>Based on counter-notice status, we decide to delete or restore the work</div></div></div>
+                <div class="section-card" id="en-strikes"><h2><i class="fas fa-exclamation-triangle"></i> 7. Violation Response</h2><p>A 3-strike system applies to copyright violations.</p><table class="strike-table"><thead><tr><th>Strike</th><th>Response</th><th>Duration</th></tr></thead><tbody><tr><td>⚠️ 1st</td><td>Work deletion + Warning email</td><td>Expires in 90 days</td></tr><tr><td>⚠️⚠️ 2nd</td><td>Work deletion + 30-day posting restriction</td><td>Expires in 90 days</td></tr><tr><td>⚠️⚠️⚠️ 3rd</td><td>Account suspension (90 days) + Revenue payments withheld for 90 days</td><td>-</td></tr><tr><td>❌ After suspension</td><td>Permanent account suspension</td><td>Permanent</td></tr></tbody></table><div class="highlight-box highlight-warning"><strong>Note:</strong> Severe infringement (mass plagiarism, commercial copyright infringement) may result in immediate account suspension regardless of strike count.</div></div>
+                <div class="section-card" id="en-counter"><h2><i class="fas fa-balance-scale"></i> 8. Counter-Notice</h2><p>If you disagree with a copyright infringement report, you may file a counter-notice through the following process. This is a voluntary procedure provided by Publisher as part of our commitment to fairness; it is not a statutory requirement under UK law.</p><div class="highlight-box highlight-warning"><strong>Submission Deadline:</strong> Counter-notices must be filed within <strong>10 business days</strong> of receiving the takedown notification.</div><h3>Counter-Notice Conditions</h3><ul><li>You can prove you hold the copyright</li><li>You can explain the report is erroneous</li><li>You can prove you have proper usage permission</li></ul><h3>Required Information</h3><ol><li>Name, address, contact information</li><li>Identification of the removed work</li><li>Statement declaring the removal was erroneous</li><li>Documents proving your rights</li></ol><h3>Processing Time</h3><p>After receiving a counter-notice, we will notify you of the review result within 10 business days. Based on the evidence provided, Publisher will determine whether to restore the work or maintain its removal, and any associated strike may be adjusted accordingly.</p><div class="highlight-box highlight-info"><strong>Note:</strong> This counter-notice process is an internal platform procedure. The ultimate resolution of copyright disputes may require legal proceedings before a court of competent jurisdiction under applicable law.</div></div>
                 <div class="section-card"><h2><i class="fas fa-headset"></i> Contact</h2><p>For copyright inquiries, please use our support page:</p><div class="text-center my-4"><a href="support/contact.html" class="btn btn-primary"><i class="fas fa-headset me-2"></i>Contact Support</a></div></div>
             </div>
 
             <!-- JAPANESE -->
             <div class="lang-content" data-lang="ja">
-                <div class="toc"><h3><i class="fas fa-list me-2"></i>目次</h3><ul><li><a href="#ja-overview">1. 概要</a></li><li><a href="#ja-original">2. オリジナル作品のみ</a></li><li><a href="#ja-prohibited">3. 禁止事項</a></li><li><a href="#ja-ai">4. AI生成コンテンツ</a></li><li><a href="#ja-reporting">5. 侵害報告</a></li><li><a href="#ja-dmca">6. DMCA対応</a></li><li><a href="#ja-strikes">7. 違反対応</a></li><li><a href="#ja-counter">8. 異議申し立て</a></li></ul></div>
+                <div class="toc"><h3><i class="fas fa-list me-2"></i>目次</h3><ul><li><a href="#ja-overview">1. 概要</a></li><li><a href="#ja-original">2. オリジナル作品のみ</a></li><li><a href="#ja-prohibited">3. 禁止事項</a></li><li><a href="#ja-ai">4. AI生成コンテンツ</a></li><li><a href="#ja-reporting">5. 侵害報告</a></li><li><a href="#ja-dmca">6. 著作権侵害対応プロセス</a></li><li><a href="#ja-strikes">7. 違反対応</a></li><li><a href="#ja-counter">8. 異議申し立て</a></li></ul></div>
                 <div class="section-card" id="ja-overview"><h2><i class="fas fa-info-circle"></i> 1. 概要</h2><p>Publisherは、クリエイターの著作権を尊重し、知的財産権の保護に取り組んでいます。本ポリシーは、プラットフォーム上での著作権に関するルールと、侵害が発生した場合の対応手順を定めています。</p></div>
-                <div class="section-card" id="ja-original"><h2><i class="fas fa-star"></i> 2. オリジナル作品のみ</h2><div class="highlight-box highlight-danger"><strong>重要：</strong>Publisherでは、オリジナル作品のみを受け付けています。他者の作品を使用したコンテンツは一切禁止されています。</div><h3>許可されるコンテンツ</h3><ul class="prohibited-list allowed-list"><li>あなた自身が創作したオリジナル作品</li><li>あなたが著作権を100%保有する作品</li><li>共同著作の場合、全著作者の同意がある作品</li><li>パブリックドメインの素材のみを使用した作品</li></ul><h3>禁止されるコンテンツ</h3><ul class="prohibited-list"><li>他者の作品のコピー、盗作</li><li>二次創作、ファンフィクション</li><li>他のウェブサイトからの無断転載</li><li>他の出版社が著作権を保有する作品</li><li>許可なく翻訳された作品</li><li>著作権のある画像、イラストの無断使用</li></ul></div>
-                <div class="section-card" id="ja-prohibited"><h2><i class="fas fa-ban"></i> 3. 禁止事項</h2><h3>3.1 他社出版物</h3><div class="highlight-box highlight-danger">他の出版社（紙媒体、電子書籍を問わず）が著作権を保有する作品をPublisherに掲載することは禁止されています。これには以下が含まれます：<ul class="mt-2 mb-0"><li>出版契約を結んでいる作品</li><li>独占配信契約のある作品</li><li>著作権を譲渡した作品</li></ul></div><h3>3.2 二次創作・ファンフィクション</h3><p>Publisherでは、二次創作やファンフィクションは受け付けていません。これは以下の理由によります：</p><ul><li>原作者の権利を保護するため</li><li>法的リスクを回避するため</li><li>オリジナル作品の創作を促進するため</li></ul><h3>3.3 無断翻訳</h3><p>原作者の許可なく他者の作品を翻訳して掲載することは禁止です。翻訳作品を掲載する場合は、原作者から書面による許可を得る必要があります。</p></div>
+                <div class="section-card" id="ja-original"><h2><i class="fas fa-star"></i> 2. オリジナル作品のみ</h2><div class="highlight-box highlight-danger"><strong>重要：</strong>Publisherでは、オリジナル作品のみを受け付けています。他者の作品を使用したコンテンツは一切禁止されています。</div><h3>許可されるコンテンツ</h3><ul class="prohibited-list allowed-list"><li>あなた自身が創作したオリジナル作品</li><li>あなたが著作権を100%保有する作品</li><li>共同著作の場合、全著作者の同意がある作品</li><li>パブリックドメインの素材のみを使用した作品</li></ul><h3>禁止されるコンテンツ</h3><ul class="prohibited-list"><li>他者の作品のコピー、盗作</li><li>無許可の二次創作、ファンフィクション</li><li>他のウェブサイトからの無断転載</li><li>他の出版社が著作権を保有する作品</li><li>許可なく翻訳された作品</li><li>著作権のある画像、イラストの無断使用</li></ul></div>
+                <div class="section-card" id="ja-prohibited"><h2><i class="fas fa-ban"></i> 3. 禁止事項</h2><h3>3.1 他社出版物</h3><div class="highlight-box highlight-danger">他の出版社（紙媒体、電子書籍を問わず）が著作権を保有する作品をPublisherに掲載することは禁止されています。これには以下が含まれます：<ul class="mt-2 mb-0"><li>出版契約を結んでいる作品</li><li>独占配信契約のある作品</li><li>著作権を譲渡した作品</li></ul></div><h3>3.2 二次創作・ファンフィクション</h3><p>Publisherでは、原作者の書面による許可がある場合にのみ、二次創作やファンフィクションを許可しています。無許可の二次創作・ファンフィクションは以下の理由により禁止されています：</p><ul><li>原作者の権利を保護するため</li><li>法的リスクを回避するため</li><li>オリジナル作品の創作を促進するため</li></ul><h3>3.3 無断翻訳</h3><p>原作者の許可なく他者の作品を翻訳して掲載することは禁止です。翻訳作品を掲載する場合は、原作者から書面による許可を得る必要があります。</p></div>
                 <div class="section-card" id="ja-ai"><h2><i class="fas fa-robot"></i> 4. AI生成コンテンツ</h2><div class="highlight-box highlight-info">AI生成コンテンツは、特定の条件を満たす場合に限り許可されます。</div><h3>4.1 許可される条件</h3><ul class="prohibited-list allowed-list"><li>作品に「AI作品」または「AI-Generated」と明確に表示すること</li><li>使用したAIツール名を明記すること（例：ChatGPT, Midjourney等）</li><li>AIツールの利用規約で商用利用が許可されていること</li><li>AIが生成した部分と人間が作成した部分を区別できること（推奨）</li></ul><h3>4.2 禁止されるAIコンテンツ</h3><ul class="prohibited-list"><li>AI生成であることを隠して掲載する作品</li><li>AIツールが商用利用を禁止している場合の作品</li><li>AIを使用して他者の作品スタイルを模倣した作品</li><li>AIで生成した既存作品の「続編」や「派生作品」</li></ul><h3>4.3 AI作品の表示方法</h3><div class="highlight-box highlight-success"><strong>正しい表示例：</strong><br><code>🤖 AI作品 | AI-Generated Content</code><br><code>使用ツール: ChatGPT-4, DALL-E 3</code></div></div>
                 <div class="section-card" id="ja-reporting"><h2><i class="fas fa-flag"></i> 5. 侵害報告</h2><p>著作権侵害を発見した場合は、以下の情報とともに報告してください：</p><h3>必要な情報</h3><ol><li><strong>権利者情報</strong> - 氏名、連絡先、権利を証明する書類</li><li><strong>侵害作品情報</strong> - 該当作品のURL、タイトル</li><li><strong>原作品情報</strong> - オリジナル作品のURL、出版情報</li><li><strong>侵害の説明</strong> - どのように侵害されているかの具体的な説明</li><li><strong>宣誓文</strong> - 報告内容が正確であることの宣誓</li></ol><h3>報告方法</h3><p>各作品ページの「報告」ボタンから「著作権侵害」を選択するか、サポートページからお問い合わせください。</p></div>
-                <div class="section-card" id="ja-dmca"><h2><i class="fas fa-gavel"></i> 6. DMCA対応</h2><p>Publisherは、米国デジタルミレニアム著作権法（DMCA）に準拠した著作権侵害対応プロセスを採用しています。</p><h3>対応プロセス</h3><div class="process-step"><div class="step-number">1</div><div><strong>報告受理</strong><br>著作権侵害報告を受け取り、内容を確認します（24時間以内）</div></div><div class="process-step"><div class="step-number">2</div><div><strong>一時的非公開</strong><br>正当な報告と判断された場合、該当作品を一時的に非公開にします</div></div><div class="process-step"><div class="step-number">3</div><div><strong>投稿者への通知</strong><br>作品の投稿者に通知し、10営業日以内の異議申し立て機会を提供します</div></div><div class="process-step"><div class="step-number">4</div><div><strong>最終判断</strong><br>異議申し立ての有無に基づき、作品の削除または復活を決定します</div></div></div>
-                <div class="section-card" id="ja-strikes"><h2><i class="fas fa-exclamation-triangle"></i> 7. 違反対応</h2><p>著作権違反には、3ストライク制を適用します。</p><table class="strike-table"><thead><tr><th>ストライク</th><th>対応</th><th>期間</th></tr></thead><tbody><tr><td>⚠️ 1回目</td><td>作品削除 + 警告メール</td><td>90日で消滅</td></tr><tr><td>⚠️⚠️ 2回目</td><td>作品削除 + 30日間の投稿制限</td><td>90日で消滅</td></tr><tr><td>⚠️⚠️⚠️ 3回目</td><td>アカウント停止（90日間）</td><td>-</td></tr><tr><td>❌ 停止後の再違反</td><td>永久アカウント停止</td><td>永久</td></tr></tbody></table><div class="highlight-box highlight-warning"><strong>注意：</strong>悪質な侵害（大量の盗作、商業的な著作権侵害等）の場合は、ストライク数に関係なく即時アカウント停止となる場合があります。</div></div>
-                <div class="section-card" id="ja-counter"><h2><i class="fas fa-balance-scale"></i> 8. 異議申し立て</h2><p>著作権侵害報告に対して異議がある場合、以下の手順で申し立てができます。</p><h3>異議申し立ての条件</h3><ul><li>あなたが著作権を保有していることを証明できる</li><li>報告が誤りであることを説明できる</li><li>適切な使用許可を持っていることを証明できる</li></ul><h3>必要な情報</h3><ol><li>氏名、住所、連絡先</li><li>削除された作品の特定情報</li><li>誤りまたは誤認であるという宣誓文</li><li>権利を証明する書類</li></ol><h3>処理期間</h3><p>異議申し立てを受理後、10〜14営業日以内に審査結果をお知らせします。審査の結果、異議が認められた場合は作品を復活させ、ストライクを取り消します。</p></div>
+                <div class="section-card" id="ja-dmca"><h2><i class="fas fa-gavel"></i> 6. 著作権侵害対応プロセス</h2><p>Publisherは、1988年著作権・意匠・特許法（CDPA）および2002年電子商取引規則に基づく通知・削除プロセスを採用しています。米国のユーザーについては、本プロセスはデジタルミレニアム著作権法（DMCA）の要件も満たします。</p><h3>対応プロセス</h3><div class="process-step"><div class="step-number">1</div><div><strong>報告受理</strong><br>著作権侵害報告を受け取り、内容を確認します（24時間以内）</div></div><div class="process-step"><div class="step-number">2</div><div><strong>一時的非公開</strong><br>正当な報告と判断された場合、該当作品を一時的に非公開にします</div></div><div class="process-step"><div class="step-number">3</div><div><strong>投稿者への通知</strong><br>作品の投稿者に通知し、10営業日以内の異議申し立て機会を提供します</div></div><div class="process-step"><div class="step-number">4</div><div><strong>最終判断</strong><br>異議申し立ての有無に基づき、作品の削除または復活を決定します</div></div></div>
+                <div class="section-card" id="ja-strikes"><h2><i class="fas fa-exclamation-triangle"></i> 7. 違反対応</h2><p>著作権違反には、3ストライク制を適用します。</p><table class="strike-table"><thead><tr><th>ストライク</th><th>対応</th><th>期間</th></tr></thead><tbody><tr><td>⚠️ 1回目</td><td>作品削除 + 警告メール</td><td>90日で消滅</td></tr><tr><td>⚠️⚠️ 2回目</td><td>作品削除 + 30日間の投稿制限</td><td>90日で消滅</td></tr><tr><td>⚠️⚠️⚠️ 3回目</td><td>アカウント停止（90日間）+ 収益の支払い90日間保留</td><td>-</td></tr><tr><td>❌ 停止後の再違反</td><td>永久アカウント停止</td><td>永久</td></tr></tbody></table><div class="highlight-box highlight-warning"><strong>注意：</strong>悪質な侵害（大量の盗作、商業的な著作権侵害等）の場合は、ストライク数に関係なく即時アカウント停止となる場合があります。</div></div>
+                <div class="section-card" id="ja-counter"><h2><i class="fas fa-balance-scale"></i> 8. 異議申し立て</h2><p>著作権侵害報告に対して異議がある場合、以下の手順で申し立てができます。本手続きは、Publisherが公平性の観点から独自に提供する任意の手続きであり、英国法上の法定要件ではありません。</p><div class="highlight-box highlight-warning"><strong>提出期限：</strong>異議申し立ては、削除通知を受領してから<strong>10営業日以内</strong>に提出する必要があります。</div><h3>異議申し立ての条件</h3><ul><li>あなたが著作権を保有していることを証明できる</li><li>報告が誤りであることを説明できる</li><li>適切な使用許可を持っていることを証明できる</li></ul><h3>必要な情報</h3><ol><li>氏名、住所、連絡先</li><li>削除された作品の特定情報</li><li>誤りまたは誤認であるという宣誓文</li><li>権利を証明する書類</li></ol><h3>処理期間</h3><p>異議申し立てを受理後、10営業日以内に審査結果をお知らせします。提出された証拠に基づき、Publisherが作品の復活または削除維持を判断し、関連するストライクも適宜調整されます。</p><div class="highlight-box highlight-info"><strong>注意：</strong>本異議申し立て手続きはプラットフォーム内部の手続きです。著作権紛争の最終的な解決には、適用法に基づく管轄裁判所での法的手続きが必要となる場合があります。</div></div>
                 <div class="section-card"><h2><i class="fas fa-headset"></i> お問い合わせ</h2><p>著作権に関するお問い合わせは、サポートページをご利用ください：</p><div class="text-center my-4"><a href="support/contact.html" class="btn btn-primary"><i class="fas fa-headset me-2"></i>サポートに連絡</a></div></div>
             </div>
 
             <!-- CHINESE -->
             <div class="lang-content" data-lang="zh">
-                <div class="toc"><h3><i class="fas fa-list me-2"></i>目录</h3><ul><li><a href="#zh-overview">1. 概述</a></li><li><a href="#zh-original">2. 仅限原创作品</a></li><li><a href="#zh-prohibited">3. 禁止内容</a></li><li><a href="#zh-ai">4. AI生成内容</a></li><li><a href="#zh-reporting">5. 侵权举报</a></li><li><a href="#zh-dmca">6. DMCA流程</a></li><li><a href="#zh-strikes">7. 违规处理</a></li><li><a href="#zh-counter">8. 申诉</a></li></ul></div>
+                <div class="toc"><h3><i class="fas fa-list me-2"></i>目录</h3><ul><li><a href="#zh-overview">1. 概述</a></li><li><a href="#zh-original">2. 仅限原创作品</a></li><li><a href="#zh-prohibited">3. 禁止内容</a></li><li><a href="#zh-ai">4. AI生成内容</a></li><li><a href="#zh-reporting">5. 侵权举报</a></li><li><a href="#zh-dmca">6. 版权侵权响应流程</a></li><li><a href="#zh-strikes">7. 违规处理</a></li><li><a href="#zh-counter">8. 申诉</a></li></ul></div>
                 <div class="section-card" id="zh-overview"><h2><i class="fas fa-info-circle"></i> 1. 概述</h2><p>Publisher尊重创作者的版权，致力于保护知识产权。本政策概述了我们平台上有关版权的规则以及处理侵权案件的程序。</p></div>
-                <div class="section-card" id="zh-original"><h2><i class="fas fa-star"></i> 2. 仅限原创作品</h2><div class="highlight-box highlight-danger"><strong>重要：</strong>Publisher仅接受原创作品。严禁使用他人作品的内容。</div><h3>允许的内容</h3><ul class="prohibited-list allowed-list"><li>您自己创作的原创作品</li><li>您拥有100%版权的作品</li><li>合著作品需获得所有作者同意</li><li>仅使用公有领域素材的作品</li></ul><h3>禁止的内容</h3><ul class="prohibited-list"><li>复制或抄袭他人作品</li><li>同人作品和衍生作品</li><li>未经授权从其他网站转载</li><li>其他出版商拥有版权的作品</li><li>未经许可翻译的作品</li><li>未经授权使用受版权保护的图像或插图</li></ul></div>
-                <div class="section-card" id="zh-prohibited"><h2><i class="fas fa-ban"></i> 3. 禁止内容</h2><h3>3.1 其他出版商的作品</h3><div class="highlight-box highlight-danger">禁止在Publisher上发布其他出版商（无论纸质还是电子版）拥有版权的作品。包括：<ul class="mt-2 mb-0"><li>签有出版合同的作品</li><li>独家发行协议的作品</li><li>已转让版权的作品</li></ul></div><h3>3.2 同人作品和衍生作品</h3><p>Publisher不接受同人作品或衍生作品，原因如下：</p><ul><li>保护原创作者的权利</li><li>避免法律风险</li><li>促进原创内容创作</li></ul><h3>3.3 未经授权的翻译</h3><p>未经原作者许可翻译和发布他人作品是被禁止的。发布翻译作品需要获得原作者的书面许可。</p></div>
+                <div class="section-card" id="zh-original"><h2><i class="fas fa-star"></i> 2. 仅限原创作品</h2><div class="highlight-box highlight-danger"><strong>重要：</strong>Publisher仅接受原创作品。严禁使用他人作品的内容。</div><h3>允许的内容</h3><ul class="prohibited-list allowed-list"><li>您自己创作的原创作品</li><li>您拥有100%版权的作品</li><li>合著作品需获得所有作者同意</li><li>仅使用公有领域素材的作品</li></ul><h3>禁止的内容</h3><ul class="prohibited-list"><li>复制或抄袭他人作品</li><li>未经授权的同人作品和衍生作品</li><li>未经授权从其他网站转载</li><li>其他出版商拥有版权的作品</li><li>未经许可翻译的作品</li><li>未经授权使用受版权保护的图像或插图</li></ul></div>
+                <div class="section-card" id="zh-prohibited"><h2><i class="fas fa-ban"></i> 3. 禁止内容</h2><h3>3.1 其他出版商的作品</h3><div class="highlight-box highlight-danger">禁止在Publisher上发布其他出版商（无论纸质还是电子版）拥有版权的作品。包括：<ul class="mt-2 mb-0"><li>签有出版合同的作品</li><li>独家发行协议的作品</li><li>已转让版权的作品</li></ul></div><h3>3.2 同人作品和衍生作品</h3><p>Publisher仅在获得原作者书面许可的情况下允许同人作品和衍生作品。未经授权的同人作品和衍生作品因以下原因被禁止：</p><ul><li>保护原创作者的权利</li><li>避免法律风险</li><li>促进原创内容创作</li></ul><h3>3.3 未经授权的翻译</h3><p>未经原作者许可翻译和发布他人作品是被禁止的。发布翻译作品需要获得原作者的书面许可。</p></div>
                 <div class="section-card" id="zh-ai"><h2><i class="fas fa-robot"></i> 4. AI生成内容</h2><div class="highlight-box highlight-info">AI生成内容仅在满足特定条件时才被允许。</div><h3>4.1 允许条件</h3><ul class="prohibited-list allowed-list"><li>明确标注作品为"AI作品"或"AI-Generated"</li><li>注明使用的AI工具（如：ChatGPT、Midjourney）</li><li>AI工具的条款必须允许商业使用</li><li>区分AI生成部分和人工创作部分（推荐）</li></ul><h3>4.2 禁止的AI内容</h3><ul class="prohibited-list"><li>隐藏AI生成性质的作品</li><li>使用禁止商业使用的AI工具的作品</li><li>使用AI模仿他人风格的作品</li><li>AI生成的现有作品"续集"或"衍生作品"</li></ul><h3>4.3 AI作品标注</h3><div class="highlight-box highlight-success"><strong>正确标注示例：</strong><br><code>🤖 AI作品 | AI-Generated Content</code><br><code>使用工具: ChatGPT-4, DALL-E 3</code></div></div>
                 <div class="section-card" id="zh-reporting"><h2><i class="fas fa-flag"></i> 5. 侵权举报</h2><p>如果您发现版权侵权，请提供以下信息进行举报：</p><h3>所需信息</h3><ol><li><strong>权利人信息</strong> - 姓名、联系方式、证明权利的文件</li><li><strong>侵权作品信息</strong> - 作品的URL和标题</li><li><strong>原作品信息</strong> - 原作的URL、出版信息</li><li><strong>侵权说明</strong> - 具体说明如何侵权</li><li><strong>声明</strong> - 声明举报内容准确</li></ol><h3>举报方法</h3><p>使用每个作品页面上的"举报"按钮并选择"版权侵权"，或联系我们的支持页面。</p></div>
-                <div class="section-card" id="zh-dmca"><h2><i class="fas fa-gavel"></i> 6. DMCA流程</h2><p>Publisher遵循符合美国数字千年版权法（DMCA）的版权侵权响应流程。</p><h3>响应流程</h3><div class="process-step"><div class="step-number">1</div><div><strong>接收举报</strong><br>我们接收并审查版权侵权举报（24小时内）</div></div><div class="process-step"><div class="step-number">2</div><div><strong>临时下架</strong><br>如果被认定为有效举报，作品将被临时下架</div></div><div class="process-step"><div class="step-number">3</div><div><strong>通知上传者</strong><br>我们通知上传者并提供10个工作日提交申诉</div></div><div class="process-step"><div class="step-number">4</div><div><strong>最终决定</strong><br>根据申诉情况，决定删除或恢复作品</div></div></div>
-                <div class="section-card" id="zh-strikes"><h2><i class="fas fa-exclamation-triangle"></i> 7. 违规处理</h2><p>版权违规适用3次警告制度。</p><table class="strike-table"><thead><tr><th>警告</th><th>处理</th><th>期限</th></tr></thead><tbody><tr><td>⚠️ 第1次</td><td>作品删除 + 警告邮件</td><td>90天后消除</td></tr><tr><td>⚠️⚠️ 第2次</td><td>作品删除 + 30天发布限制</td><td>90天后消除</td></tr><tr><td>⚠️⚠️⚠️ 第3次</td><td>账户暂停（90天）</td><td>-</td></tr><tr><td>❌ 暂停后再犯</td><td>永久封禁账户</td><td>永久</td></tr></tbody></table><div class="highlight-box highlight-warning"><strong>注意：</strong>严重侵权（大量抄袭、商业版权侵权）可能会立即暂停账户，无论警告次数。</div></div>
-                <div class="section-card" id="zh-counter"><h2><i class="fas fa-balance-scale"></i> 8. 申诉</h2><p>如果您不同意版权侵权举报，可以通过以下流程提交申诉。</p><h3>申诉条件</h3><ul><li>您可以证明您拥有版权</li><li>您可以说明举报有误</li><li>您可以证明您有适当的使用许可</li></ul><h3>所需信息</h3><ol><li>姓名、地址、联系方式</li><li>被删除作品的识别信息</li><li>声明删除是错误的</li><li>证明您权利的文件</li></ol><h3>处理时间</h3><p>收到申诉后，我们将在10-14个工作日内通知您审核结果。如果申诉被接受，作品将被恢复，警告将被撤销。</p></div>
+                <div class="section-card" id="zh-dmca"><h2><i class="fas fa-gavel"></i> 6. 版权侵权响应流程</h2><p>Publisher采用基于1988年版权、外观设计和专利法（CDPA）及2002年电子商务法规的通知与删除流程。对于美国用户，本流程也满足数字千年版权法（DMCA）的要求。</p><h3>响应流程</h3><div class="process-step"><div class="step-number">1</div><div><strong>接收举报</strong><br>我们接收并审查版权侵权举报（24小时内）</div></div><div class="process-step"><div class="step-number">2</div><div><strong>临时下架</strong><br>如果被认定为有效举报，作品将被临时下架</div></div><div class="process-step"><div class="step-number">3</div><div><strong>通知上传者</strong><br>我们通知上传者并提供10个工作日提交申诉</div></div><div class="process-step"><div class="step-number">4</div><div><strong>最终决定</strong><br>根据申诉情况，决定删除或恢复作品</div></div></div>
+                <div class="section-card" id="zh-strikes"><h2><i class="fas fa-exclamation-triangle"></i> 7. 违规处理</h2><p>版权违规适用3次警告制度。</p><table class="strike-table"><thead><tr><th>警告</th><th>处理</th><th>期限</th></tr></thead><tbody><tr><td>⚠️ 第1次</td><td>作品删除 + 警告邮件</td><td>90天后消除</td></tr><tr><td>⚠️⚠️ 第2次</td><td>作品删除 + 30天发布限制</td><td>90天后消除</td></tr><tr><td>⚠️⚠️⚠️ 第3次</td><td>账户暂停（90天）+ 收益支付暂停90天</td><td>-</td></tr><tr><td>❌ 暂停后再犯</td><td>永久暂停账户</td><td>永久</td></tr></tbody></table><div class="highlight-box highlight-warning"><strong>注意：</strong>严重侵权（大量抄袭、商业版权侵权）可能会立即暂停账户，无论警告次数。</div></div>
+                <div class="section-card" id="zh-counter"><h2><i class="fas fa-balance-scale"></i> 8. 申诉</h2><p>如果您不同意版权侵权举报，可以通过以下流程提交申诉。本程序是Publisher基于公平原则自行提供的自愿程序，并非英国法律的法定要求。</p><div class="highlight-box highlight-warning"><strong>提交期限：</strong>申诉必须在收到删除通知后<strong>10个工作日内</strong>提交。</div><h3>申诉条件</h3><ul><li>您可以证明您拥有版权</li><li>您可以说明举报有误</li><li>您可以证明您有适当的使用许可</li></ul><h3>所需信息</h3><ol><li>姓名、地址、联系方式</li><li>被删除作品的识别信息</li><li>声明删除是错误的</li><li>证明您权利的文件</li></ol><h3>处理时间</h3><p>收到申诉后，我们将在10个工作日内通知您审核结果。根据提供的证据，Publisher将决定是否恢复作品或维持删除，相关警告也将相应调整。</p><div class="highlight-box highlight-info"><strong>注意：</strong>本申诉程序是平台内部程序。版权纠纷的最终解决可能需要根据适用法律在管辖法院进行法律程序。</div></div>
                 <div class="section-card"><h2><i class="fas fa-headset"></i> 联系我们</h2><p>有关版权的咨询，请使用我们的支持页面：</p><div class="text-center my-4"><a href="support/contact.html" class="btn btn-primary"><i class="fas fa-headset me-2"></i>联系支持</a></div></div>
             </div>
 
             <!-- SPANISH -->
             <div class="lang-content" data-lang="es">
-                <div class="toc"><h3><i class="fas fa-list me-2"></i>Contenido</h3><ul><li><a href="#es-overview">1. Descripción General</a></li><li><a href="#es-original">2. Solo Obras Originales</a></li><li><a href="#es-prohibited">3. Contenido Prohibido</a></li><li><a href="#es-ai">4. Contenido Generado por IA</a></li><li><a href="#es-reporting">5. Reportar Infracciones</a></li><li><a href="#es-dmca">6. Proceso DMCA</a></li><li><a href="#es-strikes">7. Respuesta a Violaciones</a></li><li><a href="#es-counter">8. Contranotificación</a></li></ul></div>
+                <div class="toc"><h3><i class="fas fa-list me-2"></i>Contenido</h3><ul><li><a href="#es-overview">1. Descripción General</a></li><li><a href="#es-original">2. Solo Obras Originales</a></li><li><a href="#es-prohibited">3. Contenido Prohibido</a></li><li><a href="#es-ai">4. Contenido Generado por IA</a></li><li><a href="#es-reporting">5. Reportar Infracciones</a></li><li><a href="#es-dmca">6. Proceso de Respuesta a Infracciones de Derechos de Autor</a></li><li><a href="#es-strikes">7. Respuesta a Violaciones</a></li><li><a href="#es-counter">8. Contranotificación</a></li></ul></div>
                 <div class="section-card" id="es-overview"><h2><i class="fas fa-info-circle"></i> 1. Descripción General</h2><p>Publisher respeta los derechos de autor de los creadores y está comprometido con la protección de los derechos de propiedad intelectual. Esta política describe las reglas sobre derechos de autor en nuestra plataforma y los procedimientos para manejar casos de infracción.</p></div>
-                <div class="section-card" id="es-original"><h2><i class="fas fa-star"></i> 2. Solo Obras Originales</h2><div class="highlight-box highlight-danger"><strong>Importante:</strong> Publisher solo acepta obras originales. El contenido que utiliza obras de otros está estrictamente prohibido.</div><h3>Contenido Permitido</h3><ul class="prohibited-list allowed-list"><li>Obras originales que usted mismo creó</li><li>Obras donde usted posee el 100% de los derechos de autor</li><li>Obras coautorales con consentimiento de todos los autores</li><li>Obras que usan solo materiales de dominio público</li></ul><h3>Contenido Prohibido</h3><ul class="prohibited-list"><li>Copias o plagio de obras de otros</li><li>Fan fiction y obras derivadas</li><li>Republicaciones no autorizadas de otros sitios web</li><li>Obras con derechos de autor de otras editoriales</li><li>Obras traducidas sin permiso</li><li>Uso no autorizado de imágenes o ilustraciones protegidas</li></ul></div>
-                <div class="section-card" id="es-prohibited"><h2><i class="fas fa-ban"></i> 3. Contenido Prohibido</h2><h3>3.1 Obras de Otras Editoriales</h3><div class="highlight-box highlight-danger">Está prohibido publicar en Publisher obras con derechos de autor de otras editoriales (impresas o digitales). Esto incluye:<ul class="mt-2 mb-0"><li>Obras bajo contratos de publicación</li><li>Obras con acuerdos de distribución exclusiva</li><li>Obras con derechos de autor transferidos</li></ul></div><h3>3.2 Fan Fiction y Obras Derivadas</h3><p>Publisher no acepta fan fiction ni obras derivadas por las siguientes razones:</p><ul><li>Proteger los derechos de los creadores originales</li><li>Evitar riesgos legales</li><li>Promover la creación de contenido original</li></ul><h3>3.3 Traducciones No Autorizadas</h3><p>Está prohibido traducir y publicar obras de otros sin el permiso del autor original. Se requiere permiso escrito del autor original para publicar obras traducidas.</p></div>
+                <div class="section-card" id="es-original"><h2><i class="fas fa-star"></i> 2. Solo Obras Originales</h2><div class="highlight-box highlight-danger"><strong>Importante:</strong> Publisher solo acepta obras originales. El contenido que utiliza obras de otros está estrictamente prohibido.</div><h3>Contenido Permitido</h3><ul class="prohibited-list allowed-list"><li>Obras originales que usted mismo creó</li><li>Obras donde usted posee el 100% de los derechos de autor</li><li>Obras coautorales con consentimiento de todos los autores</li><li>Obras que usan solo materiales de dominio público</li></ul><h3>Contenido Prohibido</h3><ul class="prohibited-list"><li>Copias o plagio de obras de otros</li><li>Fan fiction y obras derivadas no autorizados</li><li>Republicaciones no autorizadas de otros sitios web</li><li>Obras con derechos de autor de otras editoriales</li><li>Obras traducidas sin permiso</li><li>Uso no autorizado de imágenes o ilustraciones protegidas</li></ul></div>
+                <div class="section-card" id="es-prohibited"><h2><i class="fas fa-ban"></i> 3. Contenido Prohibido</h2><h3>3.1 Obras de Otras Editoriales</h3><div class="highlight-box highlight-danger">Está prohibido publicar en Publisher obras con derechos de autor de otras editoriales (impresas o digitales). Esto incluye:<ul class="mt-2 mb-0"><li>Obras bajo contratos de publicación</li><li>Obras con acuerdos de distribución exclusiva</li><li>Obras con derechos de autor transferidos</li></ul></div><h3>3.2 Fan Fiction y Obras Derivadas</h3><p>Publisher permite fan fiction y obras derivadas únicamente con permiso escrito del creador original. Las obras no autorizadas están prohibidas por las siguientes razones:</p><ul><li>Proteger los derechos de los creadores originales</li><li>Evitar riesgos legales</li><li>Promover la creación de contenido original</li></ul><h3>3.3 Traducciones No Autorizadas</h3><p>Está prohibido traducir y publicar obras de otros sin el permiso del autor original. Se requiere permiso escrito del autor original para publicar obras traducidas.</p></div>
                 <div class="section-card" id="es-ai"><h2><i class="fas fa-robot"></i> 4. Contenido Generado por IA</h2><div class="highlight-box highlight-info">El contenido generado por IA solo está permitido bajo condiciones específicas.</div><h3>4.1 Condiciones Permitidas</h3><ul class="prohibited-list allowed-list"><li>Etiquetar claramente la obra como "Obra IA" o "AI-Generated"</li><li>Especificar la herramienta de IA utilizada (ej., ChatGPT, Midjourney)</li><li>Los términos de la herramienta de IA deben permitir uso comercial</li><li>Distinguir las partes generadas por IA de las creadas por humanos (recomendado)</li></ul><h3>4.2 Contenido IA Prohibido</h3><ul class="prohibited-list"><li>Obras que ocultan su naturaleza generada por IA</li><li>Obras que usan herramientas de IA que prohíben uso comercial</li><li>Obras que imitan estilos de otros usando IA</li><li>"Secuelas" o "derivados" de obras existentes generados por IA</li></ul><h3>4.3 Etiquetado de Obras IA</h3><div class="highlight-box highlight-success"><strong>Ejemplo de etiquetado correcto:</strong><br><code>🤖 Obra IA | AI-Generated Content</code><br><code>Herramientas usadas: ChatGPT-4, DALL-E 3</code></div></div>
                 <div class="section-card" id="es-reporting"><h2><i class="fas fa-flag"></i> 5. Reportar Infracciones</h2><p>Si descubre una infracción de derechos de autor, repórtela con la siguiente información:</p><h3>Información Requerida</h3><ol><li><strong>Info del Titular</strong> - Nombre, contacto, documentos que prueban los derechos</li><li><strong>Info de la Obra Infractora</strong> - URL y título de la obra</li><li><strong>Info de la Obra Original</strong> - URL del original, info de publicación</li><li><strong>Descripción de la Infracción</strong> - Explicación específica de cómo infringe</li><li><strong>Declaración</strong> - Declaración de que el reporte es preciso</li></ol><h3>Cómo Reportar</h3><p>Use el botón "Reportar" en la página de cada obra y seleccione "Infracción de Derechos de Autor", o contacte nuestra página de soporte.</p></div>
-                <div class="section-card" id="es-dmca"><h2><i class="fas fa-gavel"></i> 6. Proceso DMCA</h2><p>Publisher sigue un proceso de respuesta a infracciones de derechos de autor conforme a la Ley de Derechos de Autor del Milenio Digital de EE.UU. (DMCA).</p><h3>Proceso de Respuesta</h3><div class="process-step"><div class="step-number">1</div><div><strong>Recepción del Reporte</strong><br>Recibimos y revisamos el reporte de infracción (dentro de 24 horas)</div></div><div class="process-step"><div class="step-number">2</div><div><strong>Despublicación Temporal</strong><br>Si se considera un reporte válido, la obra se despublica temporalmente</div></div><div class="process-step"><div class="step-number">3</div><div><strong>Notificación al Publicador</strong><br>Notificamos al publicador y proporcionamos 10 días hábiles para presentar contranotificación</div></div><div class="process-step"><div class="step-number">4</div><div><strong>Decisión Final</strong><br>Basado en el estado de la contranotificación, decidimos eliminar o restaurar la obra</div></div></div>
-                <div class="section-card" id="es-strikes"><h2><i class="fas fa-exclamation-triangle"></i> 7. Respuesta a Violaciones</h2><p>Se aplica un sistema de 3 strikes a las violaciones de derechos de autor.</p><table class="strike-table"><thead><tr><th>Strike</th><th>Respuesta</th><th>Duración</th></tr></thead><tbody><tr><td>⚠️ 1°</td><td>Eliminación de obra + Email de advertencia</td><td>Expira en 90 días</td></tr><tr><td>⚠️⚠️ 2°</td><td>Eliminación de obra + Restricción de publicación 30 días</td><td>Expira en 90 días</td></tr><tr><td>⚠️⚠️⚠️ 3°</td><td>Suspensión de cuenta (90 días)</td><td>-</td></tr><tr><td>❌ Después de suspensión</td><td>Prohibición permanente de cuenta</td><td>Permanente</td></tr></tbody></table><div class="highlight-box highlight-warning"><strong>Nota:</strong> Infracciones graves (plagio masivo, infracción comercial de derechos de autor) pueden resultar en suspensión inmediata de cuenta independientemente del número de strikes.</div></div>
-                <div class="section-card" id="es-counter"><h2><i class="fas fa-balance-scale"></i> 8. Contranotificación</h2><p>Si no está de acuerdo con un reporte de infracción de derechos de autor, puede presentar una contranotificación mediante el siguiente proceso.</p><h3>Condiciones de Contranotificación</h3><ul><li>Puede probar que posee los derechos de autor</li><li>Puede explicar que el reporte es erróneo</li><li>Puede probar que tiene permiso de uso apropiado</li></ul><h3>Información Requerida</h3><ol><li>Nombre, dirección, información de contacto</li><li>Identificación de la obra eliminada</li><li>Declaración de que la eliminación fue errónea</li><li>Documentos que prueban sus derechos</li></ol><h3>Tiempo de Procesamiento</h3><p>Después de recibir una contranotificación, le notificaremos el resultado de la revisión dentro de 10-14 días hábiles. Si la contranotificación es aceptada, la obra será restaurada y el strike eliminado.</p></div>
+                <div class="section-card" id="es-dmca"><h2><i class="fas fa-gavel"></i> 6. Proceso de Respuesta a Infracciones de Derechos de Autor</h2><p>Publisher sigue un proceso de notificación y retirada para gestionar reclamaciones por infracción de derechos de autor, de acuerdo con la Copyright, Designs and Patents Act 1988 (CDPA) y las Electronic Commerce (EC Directive) Regulations 2002. Para usuarios en Estados Unidos, este proceso también cumple con los requisitos de la Digital Millennium Copyright Act (DMCA).</p><h3>Proceso de Respuesta</h3><div class="process-step"><div class="step-number">1</div><div><strong>Recepción del Reporte</strong><br>Recibimos y revisamos el reporte de infracción (dentro de 24 horas)</div></div><div class="process-step"><div class="step-number">2</div><div><strong>Despublicación Temporal</strong><br>Si se considera un reporte válido, la obra se despublica temporalmente</div></div><div class="process-step"><div class="step-number">3</div><div><strong>Notificación al Publicador</strong><br>Notificamos al publicador y proporcionamos 10 días hábiles para presentar contranotificación</div></div><div class="process-step"><div class="step-number">4</div><div><strong>Decisión Final</strong><br>Basado en el estado de la contranotificación, decidimos eliminar o restaurar la obra</div></div></div>
+                <div class="section-card" id="es-strikes"><h2><i class="fas fa-exclamation-triangle"></i> 7. Respuesta a Violaciones</h2><p>Se aplica un sistema de 3 strikes a las violaciones de derechos de autor.</p><table class="strike-table"><thead><tr><th>Strike</th><th>Respuesta</th><th>Duración</th></tr></thead><tbody><tr><td>⚠️ 1°</td><td>Eliminación de obra + Email de advertencia</td><td>Expira en 90 días</td></tr><tr><td>⚠️⚠️ 2°</td><td>Eliminación de obra + Restricción de publicación 30 días</td><td>Expira en 90 días</td></tr><tr><td>⚠️⚠️⚠️ 3°</td><td>Suspensión de cuenta (90 días) + Retención de pagos de ingresos por 90 días</td><td>-</td></tr><tr><td>❌ Después de suspensión</td><td>Suspensión permanente de cuenta</td><td>Permanente</td></tr></tbody></table><div class="highlight-box highlight-warning"><strong>Nota:</strong> Infracciones graves (plagio masivo, infracción comercial de derechos de autor) pueden resultar en suspensión inmediata de cuenta independientemente del número de strikes.</div></div>
+                <div class="section-card" id="es-counter"><h2><i class="fas fa-balance-scale"></i> 8. Contranotificación</h2><p>Si no está de acuerdo con un reporte de infracción de derechos de autor, puede presentar una contranotificación mediante el siguiente proceso. Este es un procedimiento voluntario proporcionado por Publisher como parte de nuestro compromiso con la equidad; no es un requisito legal bajo la legislación del Reino Unido.</p><div class="highlight-box highlight-warning"><strong>Plazo de presentación:</strong> Las contranotificaciones deben presentarse dentro de los <strong>10 días hábiles</strong> posteriores a la recepción de la notificación de eliminación.</div><h3>Condiciones de Contranotificación</h3><ul><li>Puede probar que posee los derechos de autor</li><li>Puede explicar que el reporte es erróneo</li><li>Puede probar que tiene permiso de uso apropiado</li></ul><h3>Información Requerida</h3><ol><li>Nombre, dirección, información de contacto</li><li>Identificación de la obra eliminada</li><li>Declaración de que la eliminación fue errónea</li><li>Documentos que prueban sus derechos</li></ol><h3>Tiempo de Procesamiento</h3><p>Después de recibir una contranotificación, le notificaremos el resultado de la revisión dentro de 10 días hábiles. Basándose en las pruebas proporcionadas, Publisher determinará si restaurar la obra o mantener su eliminación, y cualquier strike asociado podrá ajustarse en consecuencia.</p><div class="highlight-box highlight-info"><strong>Nota:</strong> Este proceso de contranotificación es un procedimiento interno de la plataforma. La resolución definitiva de disputas de derechos de autor puede requerir procedimientos legales ante un tribunal competente bajo la legislación aplicable.</div></div>
                 <div class="section-card"><h2><i class="fas fa-headset"></i> Contacto</h2><p>Para consultas sobre derechos de autor, use nuestra página de soporte:</p><div class="text-center my-4"><a href="support/contact.html" class="btn btn-primary"><i class="fas fa-headset me-2"></i>Contactar Soporte</a></div></div>
             </div>
 
             <!-- FRENCH -->
             <div class="lang-content" data-lang="fr">
-                <div class="toc"><h3><i class="fas fa-list me-2"></i>Sommaire</h3><ul><li><a href="#fr-overview">1. Aperçu</a></li><li><a href="#fr-original">2. Œuvres Originales Uniquement</a></li><li><a href="#fr-prohibited">3. Contenu Interdit</a></li><li><a href="#fr-ai">4. Contenu Généré par IA</a></li><li><a href="#fr-reporting">5. Signaler une Infraction</a></li><li><a href="#fr-dmca">6. Processus DMCA</a></li><li><a href="#fr-strikes">7. Réponse aux Violations</a></li><li><a href="#fr-counter">8. Contre-Notification</a></li></ul></div>
+                <div class="toc"><h3><i class="fas fa-list me-2"></i>Sommaire</h3><ul><li><a href="#fr-overview">1. Aperçu</a></li><li><a href="#fr-original">2. Œuvres Originales Uniquement</a></li><li><a href="#fr-prohibited">3. Contenu Interdit</a></li><li><a href="#fr-ai">4. Contenu Généré par IA</a></li><li><a href="#fr-reporting">5. Signaler une Infraction</a></li><li><a href="#fr-dmca">6. Processus de Réponse aux Infractions</a></li><li><a href="#fr-strikes">7. Réponse aux Violations</a></li><li><a href="#fr-counter">8. Contre-Notification</a></li></ul></div>
                 <div class="section-card" id="fr-overview"><h2><i class="fas fa-info-circle"></i> 1. Aperçu</h2><p>Publisher respecte les droits d'auteur des créateurs et s'engage à protéger les droits de propriété intellectuelle. Cette politique décrit les règles concernant les droits d'auteur sur notre plateforme et les procédures de traitement des cas d'infraction.</p></div>
-                <div class="section-card" id="fr-original"><h2><i class="fas fa-star"></i> 2. Œuvres Originales Uniquement</h2><div class="highlight-box highlight-danger"><strong>Important :</strong> Publisher n'accepte que les œuvres originales. Le contenu utilisant les œuvres d'autrui est strictement interdit.</div><h3>Contenu Autorisé</h3><ul class="prohibited-list allowed-list"><li>Œuvres originales que vous avez créées vous-même</li><li>Œuvres dont vous détenez 100% des droits d'auteur</li><li>Œuvres coécrites avec le consentement de tous les auteurs</li><li>Œuvres n'utilisant que des matériaux du domaine public</li></ul><h3>Contenu Interdit</h3><ul class="prohibited-list"><li>Copies ou plagiats d'œuvres d'autrui</li><li>Fan fiction et œuvres dérivées</li><li>Republications non autorisées d'autres sites web</li><li>Œuvres protégées par d'autres éditeurs</li><li>Œuvres traduites sans permission</li><li>Utilisation non autorisée d'images ou illustrations protégées</li></ul></div>
-                <div class="section-card" id="fr-prohibited"><h2><i class="fas fa-ban"></i> 3. Contenu Interdit</h2><h3>3.1 Œuvres d'Autres Éditeurs</h3><div class="highlight-box highlight-danger">Il est interdit de publier sur Publisher des œuvres protégées par d'autres éditeurs (imprimées ou numériques). Cela inclut :<ul class="mt-2 mb-0"><li>Œuvres sous contrats de publication</li><li>Œuvres avec accords de distribution exclusive</li><li>Œuvres avec droits d'auteur transférés</li></ul></div><h3>3.2 Fan Fiction et Œuvres Dérivées</h3><p>Publisher n'accepte pas les fan fictions ni les œuvres dérivées pour les raisons suivantes :</p><ul><li>Protéger les droits des créateurs originaux</li><li>Éviter les risques juridiques</li><li>Promouvoir la création de contenu original</li></ul><h3>3.3 Traductions Non Autorisées</h3><p>Il est interdit de traduire et publier les œuvres d'autrui sans la permission de l'auteur original. Une autorisation écrite de l'auteur original est requise pour publier des œuvres traduites.</p></div>
+                <div class="section-card" id="fr-original"><h2><i class="fas fa-star"></i> 2. Œuvres Originales Uniquement</h2><div class="highlight-box highlight-danger"><strong>Important :</strong> Publisher n'accepte que les œuvres originales. Le contenu utilisant les œuvres d'autrui est strictement interdit.</div><h3>Contenu Autorisé</h3><ul class="prohibited-list allowed-list"><li>Œuvres originales que vous avez créées vous-même</li><li>Œuvres dont vous détenez 100% des droits d'auteur</li><li>Œuvres coécrites avec le consentement de tous les auteurs</li><li>Œuvres n'utilisant que des matériaux du domaine public</li></ul><h3>Contenu Interdit</h3><ul class="prohibited-list"><li>Copies ou plagiats d'œuvres d'autrui</li><li>Fan fiction et œuvres dérivées non autorisées</li><li>Republications non autorisées d'autres sites web</li><li>Œuvres protégées par d'autres éditeurs</li><li>Œuvres traduites sans permission</li><li>Utilisation non autorisée d'images ou illustrations protégées</li></ul></div>
+                <div class="section-card" id="fr-prohibited"><h2><i class="fas fa-ban"></i> 3. Contenu Interdit</h2><h3>3.1 Œuvres d'Autres Éditeurs</h3><div class="highlight-box highlight-danger">Il est interdit de publier sur Publisher des œuvres protégées par d'autres éditeurs (imprimées ou numériques). Cela inclut :<ul class="mt-2 mb-0"><li>Œuvres sous contrats de publication</li><li>Œuvres avec accords de distribution exclusive</li><li>Œuvres avec droits d'auteur transférés</li></ul></div><h3>3.2 Fan Fiction et Œuvres Dérivées</h3><p>Publisher autorise les fan fictions et les œuvres dérivées uniquement avec l'autorisation écrite du créateur original. Les œuvres non autorisées sont interdites pour les raisons suivantes :</p><ul><li>Protéger les droits des créateurs originaux</li><li>Éviter les risques juridiques</li><li>Promouvoir la création de contenu original</li></ul><h3>3.3 Traductions Non Autorisées</h3><p>Il est interdit de traduire et publier les œuvres d'autrui sans la permission de l'auteur original. Une autorisation écrite de l'auteur original est requise pour publier des œuvres traduites.</p></div>
                 <div class="section-card" id="fr-ai"><h2><i class="fas fa-robot"></i> 4. Contenu Généré par IA</h2><div class="highlight-box highlight-info">Le contenu généré par IA n'est autorisé que sous certaines conditions.</div><h3>4.1 Conditions Autorisées</h3><ul class="prohibited-list allowed-list"><li>Étiqueter clairement l'œuvre comme "Œuvre IA" ou "AI-Generated"</li><li>Spécifier l'outil IA utilisé (ex. : ChatGPT, Midjourney)</li><li>Les conditions de l'outil IA doivent permettre l'usage commercial</li><li>Distinguer les parties générées par IA des parties créées par l'humain (recommandé)</li></ul><h3>4.2 Contenu IA Interdit</h3><ul class="prohibited-list"><li>Œuvres cachant leur nature générée par IA</li><li>Œuvres utilisant des outils IA interdisant l'usage commercial</li><li>Œuvres imitant le style d'autrui avec l'IA</li><li>"Suites" ou "dérivés" d'œuvres existantes générés par IA</li></ul><h3>4.3 Étiquetage des Œuvres IA</h3><div class="highlight-box highlight-success"><strong>Exemple d'étiquetage correct :</strong><br><code>🤖 Œuvre IA | AI-Generated Content</code><br><code>Outils utilisés : ChatGPT-4, DALL-E 3</code></div></div>
                 <div class="section-card" id="fr-reporting"><h2><i class="fas fa-flag"></i> 5. Signaler une Infraction</h2><p>Si vous découvrez une violation de droits d'auteur, signalez-la avec les informations suivantes :</p><h3>Informations Requises</h3><ol><li><strong>Info du Titulaire</strong> - Nom, contact, documents prouvant les droits</li><li><strong>Info de l'Œuvre Contrefaite</strong> - URL et titre de l'œuvre</li><li><strong>Info de l'Œuvre Originale</strong> - URL de l'original, info de publication</li><li><strong>Description de l'Infraction</strong> - Explication spécifique de l'infraction</li><li><strong>Déclaration</strong> - Déclaration que le signalement est exact</li></ol><h3>Comment Signaler</h3><p>Utilisez le bouton "Signaler" sur la page de chaque œuvre et sélectionnez "Violation de Droits d'Auteur", ou contactez notre page de support.</p></div>
-                <div class="section-card" id="fr-dmca"><h2><i class="fas fa-gavel"></i> 6. Processus DMCA</h2><p>Publisher suit un processus de réponse aux violations de droits d'auteur conforme au Digital Millennium Copyright Act (DMCA) américain.</p><h3>Processus de Réponse</h3><div class="process-step"><div class="step-number">1</div><div><strong>Réception du Signalement</strong><br>Nous recevons et examinons le signalement (dans les 24 heures)</div></div><div class="process-step"><div class="step-number">2</div><div><strong>Dépublication Temporaire</strong><br>Si le signalement est jugé valide, l'œuvre est temporairement dépubliée</div></div><div class="process-step"><div class="step-number">3</div><div><strong>Notification à l'Auteur</strong><br>Nous notifions l'auteur et lui accordons 10 jours ouvrables pour déposer une contre-notification</div></div><div class="process-step"><div class="step-number">4</div><div><strong>Décision Finale</strong><br>Selon la contre-notification, nous décidons de supprimer ou restaurer l'œuvre</div></div></div>
-                <div class="section-card" id="fr-strikes"><h2><i class="fas fa-exclamation-triangle"></i> 7. Réponse aux Violations</h2><p>Un système de 3 avertissements s'applique aux violations de droits d'auteur.</p><table class="strike-table"><thead><tr><th>Avertissement</th><th>Réponse</th><th>Durée</th></tr></thead><tbody><tr><td>⚠️ 1er</td><td>Suppression de l'œuvre + Email d'avertissement</td><td>Expire en 90 jours</td></tr><tr><td>⚠️⚠️ 2e</td><td>Suppression de l'œuvre + Restriction de publication 30 jours</td><td>Expire en 90 jours</td></tr><tr><td>⚠️⚠️⚠️ 3e</td><td>Suspension du compte (90 jours)</td><td>-</td></tr><tr><td>❌ Après suspension</td><td>Bannissement permanent du compte</td><td>Permanent</td></tr></tbody></table><div class="highlight-box highlight-warning"><strong>Note :</strong> Les infractions graves (plagiat massif, violation commerciale) peuvent entraîner une suspension immédiate du compte quel que soit le nombre d'avertissements.</div></div>
-                <div class="section-card" id="fr-counter"><h2><i class="fas fa-balance-scale"></i> 8. Contre-Notification</h2><p>Si vous n'êtes pas d'accord avec un signalement de violation, vous pouvez déposer une contre-notification via le processus suivant.</p><h3>Conditions de Contre-Notification</h3><ul><li>Vous pouvez prouver que vous détenez les droits d'auteur</li><li>Vous pouvez expliquer que le signalement est erroné</li><li>Vous pouvez prouver que vous avez une autorisation d'utilisation appropriée</li></ul><h3>Informations Requises</h3><ol><li>Nom, adresse, coordonnées</li><li>Identification de l'œuvre supprimée</li><li>Déclaration que la suppression était erronée</li><li>Documents prouvant vos droits</li></ol><h3>Délai de Traitement</h3><p>Après réception d'une contre-notification, nous vous informerons du résultat de l'examen dans les 10-14 jours ouvrables. Si la contre-notification est acceptée, l'œuvre sera restaurée et l'avertissement supprimé.</p></div>
+                <div class="section-card" id="fr-dmca"><h2><i class="fas fa-gavel"></i> 6. Processus de Réponse aux Infractions</h2><p>Publisher suit un processus de notification et de retrait pour traiter les réclamations pour atteinte aux droits d'auteur, conformément à la Copyright, Designs and Patents Act 1988 (CDPA) et aux Electronic Commerce (EC Directive) Regulations 2002. Pour les utilisateurs aux États-Unis, ce processus satisfait également aux exigences du Digital Millennium Copyright Act (DMCA).</p><h3>Processus de Réponse</h3><div class="process-step"><div class="step-number">1</div><div><strong>Réception du Signalement</strong><br>Nous recevons et examinons le signalement (dans les 24 heures)</div></div><div class="process-step"><div class="step-number">2</div><div><strong>Dépublication Temporaire</strong><br>Si le signalement est jugé valide, l'œuvre est temporairement dépubliée</div></div><div class="process-step"><div class="step-number">3</div><div><strong>Notification à l'Auteur</strong><br>Nous notifions l'auteur et lui accordons 10 jours ouvrables pour déposer une contre-notification</div></div><div class="process-step"><div class="step-number">4</div><div><strong>Décision Finale</strong><br>Selon la contre-notification, nous décidons de supprimer ou restaurer l'œuvre</div></div></div>
+                <div class="section-card" id="fr-strikes"><h2><i class="fas fa-exclamation-triangle"></i> 7. Réponse aux Violations</h2><p>Un système de 3 avertissements s'applique aux violations de droits d'auteur.</p><table class="strike-table"><thead><tr><th>Avertissement</th><th>Réponse</th><th>Durée</th></tr></thead><tbody><tr><td>⚠️ 1er</td><td>Suppression de l'œuvre + Email d'avertissement</td><td>Expire en 90 jours</td></tr><tr><td>⚠️⚠️ 2e</td><td>Suppression de l'œuvre + Restriction de publication 30 jours</td><td>Expire en 90 jours</td></tr><tr><td>⚠️⚠️⚠️ 3e</td><td>Suspension du compte (90 jours) + Rétention des paiements de revenus pendant 90 jours</td><td>-</td></tr><tr><td>❌ Après suspension</td><td>Suspension permanente du compte</td><td>Permanent</td></tr></tbody></table><div class="highlight-box highlight-warning"><strong>Note :</strong> Les infractions graves (plagiat massif, violation commerciale) peuvent entraîner une suspension immédiate du compte quel que soit le nombre d'avertissements.</div></div>
+                <div class="section-card" id="fr-counter"><h2><i class="fas fa-balance-scale"></i> 8. Contre-Notification</h2><p>Si vous n'êtes pas d'accord avec un signalement de violation, vous pouvez déposer une contre-notification via le processus suivant. Il s'agit d'une procédure volontaire fournie par Publisher dans le cadre de notre engagement en faveur de l'équité ; ce n'est pas une exigence légale en vertu du droit britannique.</p><div class="highlight-box highlight-warning"><strong>Délai de soumission :</strong> Les contre-notifications doivent être déposées dans les <strong>10 jours ouvrables</strong> suivant la réception de la notification de retrait.</div><h3>Conditions de Contre-Notification</h3><ul><li>Vous pouvez prouver que vous détenez les droits d'auteur</li><li>Vous pouvez expliquer que le signalement est erroné</li><li>Vous pouvez prouver que vous avez une autorisation d'utilisation appropriée</li></ul><h3>Informations Requises</h3><ol><li>Nom, adresse, coordonnées</li><li>Identification de l'œuvre supprimée</li><li>Déclaration que la suppression était erronée</li><li>Documents prouvant vos droits</li></ol><h3>Délai de Traitement</h3><p>Après réception d'une contre-notification, nous vous informerons du résultat de l'examen dans les 10 jours ouvrables. Sur la base des preuves fournies, Publisher déterminera s'il convient de restaurer l'œuvre ou de maintenir sa suppression, et tout avertissement associé pourra être ajusté en conséquence.</p><div class="highlight-box highlight-info"><strong>Note :</strong> Ce processus de contre-notification est une procédure interne de la plateforme. La résolution définitive des litiges en matière de droits d'auteur peut nécessiter des procédures judiciaires devant un tribunal compétent en vertu du droit applicable.</div></div>
                 <div class="section-card"><h2><i class="fas fa-headset"></i> Contact</h2><p>Pour les questions relatives aux droits d'auteur, utilisez notre page de support :</p><div class="text-center my-4"><a href="support/contact.html" class="btn btn-primary"><i class="fas fa-headset me-2"></i>Contacter le Support</a></div></div>
             </div>
 
             <!-- GERMAN -->
             <div class="lang-content" data-lang="de">
-                <div class="toc"><h3><i class="fas fa-list me-2"></i>Inhalt</h3><ul><li><a href="#de-overview">1. Überblick</a></li><li><a href="#de-original">2. Nur Originalwerke</a></li><li><a href="#de-prohibited">3. Verbotene Inhalte</a></li><li><a href="#de-ai">4. KI-generierte Inhalte</a></li><li><a href="#de-reporting">5. Verstoß melden</a></li><li><a href="#de-dmca">6. DMCA-Prozess</a></li><li><a href="#de-strikes">7. Reaktion auf Verstöße</a></li><li><a href="#de-counter">8. Gegendarstellung</a></li></ul></div>
+                <div class="toc"><h3><i class="fas fa-list me-2"></i>Inhalt</h3><ul><li><a href="#de-overview">1. Überblick</a></li><li><a href="#de-original">2. Nur Originalwerke</a></li><li><a href="#de-prohibited">3. Verbotene Inhalte</a></li><li><a href="#de-ai">4. KI-generierte Inhalte</a></li><li><a href="#de-reporting">5. Verstoß melden</a></li><li><a href="#de-dmca">6. Verfahren bei Urheberrechtsverletzungen</a></li><li><a href="#de-strikes">7. Reaktion auf Verstöße</a></li><li><a href="#de-counter">8. Gegendarstellung</a></li></ul></div>
                 <div class="section-card" id="de-overview"><h2><i class="fas fa-info-circle"></i> 1. Überblick</h2><p>Publisher respektiert die Urheberrechte von Kreativen und setzt sich für den Schutz geistiger Eigentumsrechte ein. Diese Richtlinie beschreibt die Regeln bezüglich Urheberrecht auf unserer Plattform und die Verfahren zur Behandlung von Verstößen.</p></div>
-                <div class="section-card" id="de-original"><h2><i class="fas fa-star"></i> 2. Nur Originalwerke</h2><div class="highlight-box highlight-danger"><strong>Wichtig:</strong> Publisher akzeptiert nur Originalwerke. Inhalte, die Werke anderer verwenden, sind streng verboten.</div><h3>Erlaubte Inhalte</h3><ul class="prohibited-list allowed-list"><li>Originalwerke, die Sie selbst erstellt haben</li><li>Werke, bei denen Sie 100% des Urheberrechts besitzen</li><li>Gemeinsame Werke mit Zustimmung aller Autoren</li><li>Werke, die nur gemeinfreie Materialien verwenden</li></ul><h3>Verbotene Inhalte</h3><ul class="prohibited-list"><li>Kopien oder Plagiate von Werken anderer</li><li>Fan-Fiction und abgeleitete Werke</li><li>Nicht autorisierte Wiederveröffentlichungen von anderen Websites</li><li>Werke, deren Urheberrecht bei anderen Verlagen liegt</li><li>Werke, die ohne Erlaubnis übersetzt wurden</li><li>Nicht autorisierte Verwendung urheberrechtlich geschützter Bilder oder Illustrationen</li></ul></div>
-                <div class="section-card" id="de-prohibited"><h2><i class="fas fa-ban"></i> 3. Verbotene Inhalte</h2><h3>3.1 Werke anderer Verlage</h3><div class="highlight-box highlight-danger">Das Veröffentlichen von Werken, deren Urheberrecht bei anderen Verlagen liegt (gedruckt oder digital), auf Publisher ist verboten. Dies umfasst:<ul class="mt-2 mb-0"><li>Werke unter Verlagsverträgen</li><li>Werke mit Exklusivvertriebsvereinbarungen</li><li>Werke mit übertragenen Urheberrechten</li></ul></div><h3>3.2 Fan-Fiction und abgeleitete Werke</h3><p>Publisher akzeptiert keine Fan-Fiction oder abgeleitete Werke aus folgenden Gründen:</p><ul><li>Schutz der Rechte der ursprünglichen Schöpfer</li><li>Vermeidung rechtlicher Risiken</li><li>Förderung der Erstellung von Originalinhalten</li></ul><h3>3.3 Nicht autorisierte Übersetzungen</h3><p>Das Übersetzen und Veröffentlichen von Werken anderer ohne Erlaubnis des Originalautors ist verboten. Für die Veröffentlichung übersetzter Werke ist eine schriftliche Genehmigung des Originalautors erforderlich.</p></div>
+                <div class="section-card" id="de-original"><h2><i class="fas fa-star"></i> 2. Nur Originalwerke</h2><div class="highlight-box highlight-danger"><strong>Wichtig:</strong> Publisher akzeptiert nur Originalwerke. Inhalte, die Werke anderer verwenden, sind streng verboten.</div><h3>Erlaubte Inhalte</h3><ul class="prohibited-list allowed-list"><li>Originalwerke, die Sie selbst erstellt haben</li><li>Werke, bei denen Sie 100% des Urheberrechts besitzen</li><li>Gemeinsame Werke mit Zustimmung aller Autoren</li><li>Werke, die nur gemeinfreie Materialien verwenden</li></ul><h3>Verbotene Inhalte</h3><ul class="prohibited-list"><li>Kopien oder Plagiate von Werken anderer</li><li>Nicht autorisierte Fan-Fiction und abgeleitete Werke</li><li>Nicht autorisierte Wiederveröffentlichungen von anderen Websites</li><li>Werke, deren Urheberrecht bei anderen Verlagen liegt</li><li>Werke, die ohne Erlaubnis übersetzt wurden</li><li>Nicht autorisierte Verwendung urheberrechtlich geschützter Bilder oder Illustrationen</li></ul></div>
+                <div class="section-card" id="de-prohibited"><h2><i class="fas fa-ban"></i> 3. Verbotene Inhalte</h2><h3>3.1 Werke anderer Verlage</h3><div class="highlight-box highlight-danger">Das Veröffentlichen von Werken, deren Urheberrecht bei anderen Verlagen liegt (gedruckt oder digital), auf Publisher ist verboten. Dies umfasst:<ul class="mt-2 mb-0"><li>Werke unter Verlagsverträgen</li><li>Werke mit Exklusivvertriebsvereinbarungen</li><li>Werke mit übertragenen Urheberrechten</li></ul></div><h3>3.2 Fan-Fiction und abgeleitete Werke</h3><p>Publisher erlaubt Fan-Fiction und abgeleitete Werke nur mit schriftlicher Genehmigung des ursprünglichen Schöpfers. Nicht autorisierte Werke sind aus folgenden Gründen verboten:</p><ul><li>Schutz der Rechte der ursprünglichen Schöpfer</li><li>Vermeidung rechtlicher Risiken</li><li>Förderung der Erstellung von Originalinhalten</li></ul><h3>3.3 Nicht autorisierte Übersetzungen</h3><p>Das Übersetzen und Veröffentlichen von Werken anderer ohne Erlaubnis des Originalautors ist verboten. Für die Veröffentlichung übersetzter Werke ist eine schriftliche Genehmigung des Originalautors erforderlich.</p></div>
                 <div class="section-card" id="de-ai"><h2><i class="fas fa-robot"></i> 4. KI-generierte Inhalte</h2><div class="highlight-box highlight-info">KI-generierte Inhalte sind nur unter bestimmten Bedingungen erlaubt.</div><h3>4.1 Erlaubte Bedingungen</h3><ul class="prohibited-list allowed-list"><li>Das Werk klar als "KI-Werk" oder "AI-Generated" kennzeichnen</li><li>Das verwendete KI-Tool angeben (z.B. ChatGPT, Midjourney)</li><li>Die Bedingungen des KI-Tools müssen kommerzielle Nutzung erlauben</li><li>KI-generierte Teile von menschlich erstellten Teilen unterscheiden (empfohlen)</li></ul><h3>4.2 Verbotene KI-Inhalte</h3><ul class="prohibited-list"><li>Werke, die ihre KI-generierte Natur verbergen</li><li>Werke, die KI-Tools verwenden, die kommerzielle Nutzung verbieten</li><li>Werke, die mit KI den Stil anderer imitieren</li><li>KI-generierte "Fortsetzungen" oder "Ableitungen" bestehender Werke</li></ul><h3>4.3 KI-Werk-Kennzeichnung</h3><div class="highlight-box highlight-success"><strong>Korrektes Kennzeichnungsbeispiel:</strong><br><code>🤖 KI-Werk | AI-Generated Content</code><br><code>Verwendete Tools: ChatGPT-4, DALL-E 3</code></div></div>
                 <div class="section-card" id="de-reporting"><h2><i class="fas fa-flag"></i> 5. Verstoß melden</h2><p>Wenn Sie eine Urheberrechtsverletzung entdecken, melden Sie diese bitte mit folgenden Informationen:</p><h3>Erforderliche Informationen</h3><ol><li><strong>Rechteinhaber-Info</strong> - Name, Kontakt, Dokumente zum Nachweis der Rechte</li><li><strong>Info zum verletzenden Werk</strong> - URL und Titel des Werks</li><li><strong>Info zum Originalwerk</strong> - URL des Originals, Veröffentlichungsinfo</li><li><strong>Verletzungsbeschreibung</strong> - Spezifische Erklärung der Verletzung</li><li><strong>Erklärung</strong> - Erklärung, dass die Meldung korrekt ist</li></ol><h3>Wie melden</h3><p>Verwenden Sie die Schaltfläche "Melden" auf jeder Werkseite und wählen Sie "Urheberrechtsverletzung", oder kontaktieren Sie unsere Support-Seite.</p></div>
-                <div class="section-card" id="de-dmca"><h2><i class="fas fa-gavel"></i> 6. DMCA-Prozess</h2><p>Publisher folgt einem Urheberrechtsverletzungs-Reaktionsprozess gemäß dem U.S. Digital Millennium Copyright Act (DMCA).</p><h3>Reaktionsprozess</h3><div class="process-step"><div class="step-number">1</div><div><strong>Meldungseingang</strong><br>Wir erhalten und prüfen die Urheberrechtsverletzungsmeldung (innerhalb von 24 Stunden)</div></div><div class="process-step"><div class="step-number">2</div><div><strong>Vorübergehende Depublikation</strong><br>Bei gültiger Meldung wird das Werk vorübergehend depubliziert</div></div><div class="process-step"><div class="step-number">3</div><div><strong>Benachrichtigung des Uploaders</strong><br>Wir benachrichtigen den Uploader und gewähren 10 Werktage für eine Gegendarstellung</div></div><div class="process-step"><div class="step-number">4</div><div><strong>Endgültige Entscheidung</strong><br>Basierend auf der Gegendarstellung entscheiden wir über Löschung oder Wiederherstellung</div></div></div>
-                <div class="section-card" id="de-strikes"><h2><i class="fas fa-exclamation-triangle"></i> 7. Reaktion auf Verstöße</h2><p>Ein 3-Strike-System gilt für Urheberrechtsverletzungen.</p><table class="strike-table"><thead><tr><th>Strike</th><th>Reaktion</th><th>Dauer</th></tr></thead><tbody><tr><td>⚠️ 1.</td><td>Werklöschung + Warn-E-Mail</td><td>Läuft nach 90 Tagen ab</td></tr><tr><td>⚠️⚠️ 2.</td><td>Werklöschung + 30-tägige Veröffentlichungsbeschränkung</td><td>Läuft nach 90 Tagen ab</td></tr><tr><td>⚠️⚠️⚠️ 3.</td><td>Kontosperrung (90 Tage)</td><td>-</td></tr><tr><td>❌ Nach Sperrung</td><td>Permanente Kontosperre</td><td>Permanent</td></tr></tbody></table><div class="highlight-box highlight-warning"><strong>Hinweis:</strong> Schwere Verstöße (Massenplagiat, kommerzielle Urheberrechtsverletzung) können unabhängig von der Strike-Anzahl zur sofortigen Kontosperrung führen.</div></div>
-                <div class="section-card" id="de-counter"><h2><i class="fas fa-balance-scale"></i> 8. Gegendarstellung</h2><p>Wenn Sie mit einer Urheberrechtsverletzungsmeldung nicht einverstanden sind, können Sie über folgenden Prozess eine Gegendarstellung einreichen.</p><h3>Bedingungen für Gegendarstellung</h3><ul><li>Sie können nachweisen, dass Sie das Urheberrecht besitzen</li><li>Sie können erklären, dass die Meldung fehlerhaft ist</li><li>Sie können nachweisen, dass Sie eine entsprechende Nutzungserlaubnis haben</li></ul><h3>Erforderliche Informationen</h3><ol><li>Name, Adresse, Kontaktinformationen</li><li>Identifizierung des entfernten Werks</li><li>Erklärung, dass die Entfernung fehlerhaft war</li><li>Dokumente zum Nachweis Ihrer Rechte</li></ol><h3>Bearbeitungszeit</h3><p>Nach Erhalt einer Gegendarstellung werden wir Sie innerhalb von 10-14 Werktagen über das Prüfungsergebnis informieren. Wird die Gegendarstellung akzeptiert, wird das Werk wiederhergestellt und der Strike entfernt.</p></div>
+                <div class="section-card" id="de-dmca"><h2><i class="fas fa-gavel"></i> 6. Verfahren bei Urheberrechtsverletzungen</h2><p>Publisher folgt einem Benachrichtigungs- und Löschverfahren zur Bearbeitung von Urheberrechtsverletzungen gemäß dem Copyright, Designs and Patents Act 1988 (CDPA) und den Electronic Commerce (EC Directive) Regulations 2002. Für Nutzer in den Vereinigten Staaten erfüllt dieses Verfahren auch die Anforderungen des Digital Millennium Copyright Act (DMCA).</p><h3>Reaktionsprozess</h3><div class="process-step"><div class="step-number">1</div><div><strong>Meldungseingang</strong><br>Wir erhalten und prüfen die Urheberrechtsverletzungsmeldung (innerhalb von 24 Stunden)</div></div><div class="process-step"><div class="step-number">2</div><div><strong>Vorübergehende Depublikation</strong><br>Bei gültiger Meldung wird das Werk vorübergehend depubliziert</div></div><div class="process-step"><div class="step-number">3</div><div><strong>Benachrichtigung des Uploaders</strong><br>Wir benachrichtigen den Uploader und gewähren 10 Werktage für eine Gegendarstellung</div></div><div class="process-step"><div class="step-number">4</div><div><strong>Endgültige Entscheidung</strong><br>Basierend auf der Gegendarstellung entscheiden wir über Löschung oder Wiederherstellung</div></div></div>
+                <div class="section-card" id="de-strikes"><h2><i class="fas fa-exclamation-triangle"></i> 7. Reaktion auf Verstöße</h2><p>Ein 3-Strike-System gilt für Urheberrechtsverletzungen.</p><table class="strike-table"><thead><tr><th>Strike</th><th>Reaktion</th><th>Dauer</th></tr></thead><tbody><tr><td>⚠️ 1.</td><td>Werklöschung + Warn-E-Mail</td><td>Läuft nach 90 Tagen ab</td></tr><tr><td>⚠️⚠️ 2.</td><td>Werklöschung + 30-tägige Veröffentlichungsbeschränkung</td><td>Läuft nach 90 Tagen ab</td></tr><tr><td>⚠️⚠️⚠️ 3.</td><td>Kontosperrung (90 Tage) + Einbehaltung von Einnahmenzahlungen für 90 Tage</td><td>-</td></tr><tr><td>❌ Nach Sperrung</td><td>Dauerhafte Kontosperrung</td><td>Permanent</td></tr></tbody></table><div class="highlight-box highlight-warning"><strong>Hinweis:</strong> Schwere Verstöße (Massenplagiat, kommerzielle Urheberrechtsverletzung) können unabhängig von der Strike-Anzahl zur sofortigen Kontosperrung führen.</div></div>
+                <div class="section-card" id="de-counter"><h2><i class="fas fa-balance-scale"></i> 8. Gegendarstellung</h2><p>Wenn Sie mit einer Urheberrechtsverletzungsmeldung nicht einverstanden sind, können Sie über folgenden Prozess eine Gegendarstellung einreichen. Dies ist ein freiwilliges Verfahren, das Publisher im Rahmen unseres Engagements für Fairness bereitstellt; es ist keine gesetzliche Anforderung nach britischem Recht.</p><div class="highlight-box highlight-warning"><strong>Einreichungsfrist:</strong> Gegendarstellungen müssen innerhalb von <strong>10 Werktagen</strong> nach Erhalt der Löschungsbenachrichtigung eingereicht werden.</div><h3>Bedingungen für Gegendarstellung</h3><ul><li>Sie können nachweisen, dass Sie das Urheberrecht besitzen</li><li>Sie können erklären, dass die Meldung fehlerhaft ist</li><li>Sie können nachweisen, dass Sie eine entsprechende Nutzungserlaubnis haben</li></ul><h3>Erforderliche Informationen</h3><ol><li>Name, Adresse, Kontaktinformationen</li><li>Identifizierung des entfernten Werks</li><li>Erklärung, dass die Entfernung fehlerhaft war</li><li>Dokumente zum Nachweis Ihrer Rechte</li></ol><h3>Bearbeitungszeit</h3><p>Nach Erhalt einer Gegendarstellung werden wir Sie innerhalb von 10 Werktagen über das Prüfungsergebnis informieren. Auf Grundlage der vorgelegten Beweise wird Publisher entscheiden, ob das Werk wiederhergestellt oder die Entfernung beibehalten wird, und etwaige damit verbundene Strikes können entsprechend angepasst werden.</p><div class="highlight-box highlight-info"><strong>Hinweis:</strong> Dieses Gegendarstellungsverfahren ist ein plattforminternes Verfahren. Die endgültige Beilegung von Urheberrechtsstreitigkeiten kann ein gerichtliches Verfahren vor einem zuständigen Gericht nach geltendem Recht erfordern.</div></div>
                 <div class="section-card"><h2><i class="fas fa-headset"></i> Kontakt</h2><p>Für Urheberrechtsfragen nutzen Sie bitte unsere Support-Seite:</p><div class="text-center my-4"><a href="support/contact.html" class="btn btn-primary"><i class="fas fa-headset me-2"></i>Support kontaktieren</a></div></div>
             </div>
 
             <!-- KOREAN -->
             <div class="lang-content" data-lang="ko">
-                <div class="toc"><h3><i class="fas fa-list me-2"></i>목차</h3><ul><li><a href="#ko-overview">1. 개요</a></li><li><a href="#ko-original">2. 원작 작품만</a></li><li><a href="#ko-prohibited">3. 금지 콘텐츠</a></li><li><a href="#ko-ai">4. AI 생성 콘텐츠</a></li><li><a href="#ko-reporting">5. 침해 신고</a></li><li><a href="#ko-dmca">6. DMCA 절차</a></li><li><a href="#ko-strikes">7. 위반 대응</a></li><li><a href="#ko-counter">8. 이의 제기</a></li></ul></div>
+                <div class="toc"><h3><i class="fas fa-list me-2"></i>목차</h3><ul><li><a href="#ko-overview">1. 개요</a></li><li><a href="#ko-original">2. 원작 작품만</a></li><li><a href="#ko-prohibited">3. 금지 콘텐츠</a></li><li><a href="#ko-ai">4. AI 생성 콘텐츠</a></li><li><a href="#ko-reporting">5. 침해 신고</a></li><li><a href="#ko-dmca">6. 저작권 침해 대응 절차</a></li><li><a href="#ko-strikes">7. 위반 대응</a></li><li><a href="#ko-counter">8. 이의 제기</a></li></ul></div>
                 <div class="section-card" id="ko-overview"><h2><i class="fas fa-info-circle"></i> 1. 개요</h2><p>Publisher는 창작자의 저작권을 존중하고 지적 재산권 보호에 전념합니다. 이 정책은 플랫폼의 저작권 관련 규칙과 침해 사례 처리 절차를 설명합니다.</p></div>
-                <div class="section-card" id="ko-original"><h2><i class="fas fa-star"></i> 2. 원작 작품만</h2><div class="highlight-box highlight-danger"><strong>중요:</strong> Publisher는 원작 작품만 허용합니다. 타인의 작품을 사용한 콘텐츠는 엄격히 금지됩니다.</div><h3>허용되는 콘텐츠</h3><ul class="prohibited-list allowed-list"><li>본인이 직접 창작한 원작 작품</li><li>저작권을 100% 보유한 작품</li><li>모든 저작자의 동의가 있는 공동 저작물</li><li>퍼블릭 도메인 자료만 사용한 작품</li></ul><h3>금지되는 콘텐츠</h3><ul class="prohibited-list"><li>타인 작품의 복제 또는 표절</li><li>팬픽션 및 2차 창작물</li><li>다른 웹사이트에서 무단 전재</li><li>다른 출판사가 저작권을 보유한 작품</li><li>허가 없이 번역된 작품</li><li>저작권이 있는 이미지나 일러스트의 무단 사용</li></ul></div>
-                <div class="section-card" id="ko-prohibited"><h2><i class="fas fa-ban"></i> 3. 금지 콘텐츠</h2><h3>3.1 다른 출판사 작품</h3><div class="highlight-box highlight-danger">다른 출판사(인쇄물 또는 디지털)가 저작권을 보유한 작품을 Publisher에 게시하는 것은 금지됩니다. 여기에는 다음이 포함됩니다:<ul class="mt-2 mb-0"><li>출판 계약 하의 작품</li><li>독점 배포 계약이 있는 작품</li><li>저작권이 양도된 작품</li></ul></div><h3>3.2 팬픽션 및 2차 창작물</h3><p>Publisher는 다음과 같은 이유로 팬픽션이나 2차 창작물을 허용하지 않습니다:</p><ul><li>원작자의 권리 보호</li><li>법적 위험 회피</li><li>원작 콘텐츠 창작 촉진</li></ul><h3>3.3 무단 번역</h3><p>원작자의 허가 없이 타인의 작품을 번역하여 게시하는 것은 금지됩니다. 번역 작품을 게시하려면 원작자의 서면 허가가 필요합니다.</p></div>
+                <div class="section-card" id="ko-original"><h2><i class="fas fa-star"></i> 2. 원작 작품만</h2><div class="highlight-box highlight-danger"><strong>중요:</strong> Publisher는 원작 작품만 허용합니다. 타인의 작품을 사용한 콘텐츠는 엄격히 금지됩니다.</div><h3>허용되는 콘텐츠</h3><ul class="prohibited-list allowed-list"><li>본인이 직접 창작한 원작 작품</li><li>저작권을 100% 보유한 작품</li><li>모든 저작자의 동의가 있는 공동 저작물</li><li>퍼블릭 도메인 자료만 사용한 작품</li></ul><h3>금지되는 콘텐츠</h3><ul class="prohibited-list"><li>타인 작품의 복제 또는 표절</li><li>무허가 팬픽션 및 2차 창작물</li><li>다른 웹사이트에서 무단 전재</li><li>다른 출판사가 저작권을 보유한 작품</li><li>허가 없이 번역된 작품</li><li>저작권이 있는 이미지나 일러스트의 무단 사용</li></ul></div>
+                <div class="section-card" id="ko-prohibited"><h2><i class="fas fa-ban"></i> 3. 금지 콘텐츠</h2><h3>3.1 다른 출판사 작품</h3><div class="highlight-box highlight-danger">다른 출판사(인쇄물 또는 디지털)가 저작권을 보유한 작품을 Publisher에 게시하는 것은 금지됩니다. 여기에는 다음이 포함됩니다:<ul class="mt-2 mb-0"><li>출판 계약 하의 작품</li><li>독점 배포 계약이 있는 작품</li><li>저작권이 양도된 작품</li></ul></div><h3>3.2 팬픽션 및 2차 창작물</h3><p>Publisher는 원작자의 서면 허가가 있는 경우에만 팬픽션과 2차 창작물을 허용합니다. 무허가 팬픽션 및 2차 창작물은 다음과 같은 이유로 금지됩니다:</p><ul><li>원작자의 권리 보호</li><li>법적 위험 회피</li><li>원작 콘텐츠 창작 촉진</li></ul><h3>3.3 무단 번역</h3><p>원작자의 허가 없이 타인의 작품을 번역하여 게시하는 것은 금지됩니다. 번역 작품을 게시하려면 원작자의 서면 허가가 필요합니다.</p></div>
                 <div class="section-card" id="ko-ai"><h2><i class="fas fa-robot"></i> 4. AI 생성 콘텐츠</h2><div class="highlight-box highlight-info">AI 생성 콘텐츠는 특정 조건에서만 허용됩니다.</div><h3>4.1 허용 조건</h3><ul class="prohibited-list allowed-list"><li>작품을 "AI 작품" 또는 "AI-Generated"로 명확히 표시</li><li>사용한 AI 도구 명시 (예: ChatGPT, Midjourney)</li><li>AI 도구의 약관이 상업적 사용을 허용해야 함</li><li>AI 생성 부분과 인간 창작 부분 구분 (권장)</li></ul><h3>4.2 금지되는 AI 콘텐츠</h3><ul class="prohibited-list"><li>AI 생성임을 숨기는 작품</li><li>상업적 사용을 금지하는 AI 도구를 사용한 작품</li><li>AI를 사용하여 타인의 스타일을 모방한 작품</li><li>AI로 생성한 기존 작품의 "속편" 또는 "파생작"</li></ul><h3>4.3 AI 작품 표시</h3><div class="highlight-box highlight-success"><strong>올바른 표시 예시:</strong><br><code>🤖 AI 작품 | AI-Generated Content</code><br><code>사용 도구: ChatGPT-4, DALL-E 3</code></div></div>
                 <div class="section-card" id="ko-reporting"><h2><i class="fas fa-flag"></i> 5. 침해 신고</h2><p>저작권 침해를 발견하면 다음 정보와 함께 신고해 주세요:</p><h3>필요한 정보</h3><ol><li><strong>권리자 정보</strong> - 이름, 연락처, 권리 증명 서류</li><li><strong>침해 작품 정보</strong> - 작품의 URL과 제목</li><li><strong>원작 정보</strong> - 원작의 URL, 출판 정보</li><li><strong>침해 설명</strong> - 어떻게 침해하는지 구체적 설명</li><li><strong>선언</strong> - 신고 내용이 정확하다는 선언</li></ol><h3>신고 방법</h3><p>각 작품 페이지의 "신고" 버튼을 사용하여 "저작권 침해"를 선택하거나 지원 페이지로 문의하세요.</p></div>
-                <div class="section-card" id="ko-dmca"><h2><i class="fas fa-gavel"></i> 6. DMCA 절차</h2><p>Publisher는 미국 디지털 밀레니엄 저작권법(DMCA)을 준수하는 저작권 침해 대응 절차를 따릅니다.</p><h3>대응 절차</h3><div class="process-step"><div class="step-number">1</div><div><strong>신고 접수</strong><br>저작권 침해 신고를 접수하고 검토합니다 (24시간 이내)</div></div><div class="process-step"><div class="step-number">2</div><div><strong>임시 비공개</strong><br>유효한 신고로 판단되면 작품을 임시 비공개 처리합니다</div></div><div class="process-step"><div class="step-number">3</div><div><strong>업로더 통지</strong><br>업로더에게 통지하고 10영업일 이내 이의 제기 기회를 제공합니다</div></div><div class="process-step"><div class="step-number">4</div><div><strong>최종 결정</strong><br>이의 제기 여부에 따라 작품 삭제 또는 복원을 결정합니다</div></div></div>
-                <div class="section-card" id="ko-strikes"><h2><i class="fas fa-exclamation-triangle"></i> 7. 위반 대응</h2><p>저작권 위반에는 3회 경고 제도가 적용됩니다.</p><table class="strike-table"><thead><tr><th>경고</th><th>대응</th><th>기간</th></tr></thead><tbody><tr><td>⚠️ 1회</td><td>작품 삭제 + 경고 이메일</td><td>90일 후 소멸</td></tr><tr><td>⚠️⚠️ 2회</td><td>작품 삭제 + 30일 게시 제한</td><td>90일 후 소멸</td></tr><tr><td>⚠️⚠️⚠️ 3회</td><td>계정 정지 (90일)</td><td>-</td></tr><tr><td>❌ 정지 후 재위반</td><td>영구 계정 정지</td><td>영구</td></tr></tbody></table><div class="highlight-box highlight-warning"><strong>참고:</strong> 심각한 침해(대량 표절, 상업적 저작권 침해)는 경고 횟수와 관계없이 즉시 계정 정지될 수 있습니다.</div></div>
-                <div class="section-card" id="ko-counter"><h2><i class="fas fa-balance-scale"></i> 8. 이의 제기</h2><p>저작권 침해 신고에 동의하지 않으면 다음 절차를 통해 이의를 제기할 수 있습니다.</p><h3>이의 제기 조건</h3><ul><li>저작권을 보유하고 있음을 증명할 수 있음</li><li>신고가 잘못되었음을 설명할 수 있음</li><li>적절한 사용 허가가 있음을 증명할 수 있음</li></ul><h3>필요한 정보</h3><ol><li>이름, 주소, 연락처</li><li>삭제된 작품 식별 정보</li><li>삭제가 잘못되었다는 선언</li><li>권리 증명 서류</li></ol><h3>처리 기간</h3><p>이의 제기 접수 후 10-14영업일 이내에 검토 결과를 알려드립니다. 이의 제기가 수락되면 작품이 복원되고 경고가 제거됩니다.</p></div>
+                <div class="section-card" id="ko-dmca"><h2><i class="fas fa-gavel"></i> 6. 저작권 침해 대응 절차</h2><p>Publisher는 1988년 저작권·디자인·특허법(CDPA) 및 2002년 전자상거래 규정에 따른 통지 및 삭제 절차를 따릅니다. 미국 사용자의 경우, 본 절차는 디지털 밀레니엄 저작권법(DMCA)의 요건도 충족합니다.</p><h3>대응 절차</h3><div class="process-step"><div class="step-number">1</div><div><strong>신고 접수</strong><br>저작권 침해 신고를 접수하고 검토합니다 (24시간 이내)</div></div><div class="process-step"><div class="step-number">2</div><div><strong>임시 비공개</strong><br>유효한 신고로 판단되면 작품을 임시 비공개 처리합니다</div></div><div class="process-step"><div class="step-number">3</div><div><strong>업로더 통지</strong><br>업로더에게 통지하고 10영업일 이내 이의 제기 기회를 제공합니다</div></div><div class="process-step"><div class="step-number">4</div><div><strong>최종 결정</strong><br>이의 제기 여부에 따라 작품 삭제 또는 복원을 결정합니다</div></div></div>
+                <div class="section-card" id="ko-strikes"><h2><i class="fas fa-exclamation-triangle"></i> 7. 위반 대응</h2><p>저작권 위반에는 3회 경고 제도가 적용됩니다.</p><table class="strike-table"><thead><tr><th>경고</th><th>대응</th><th>기간</th></tr></thead><tbody><tr><td>⚠️ 1회</td><td>작품 삭제 + 경고 이메일</td><td>90일 후 소멸</td></tr><tr><td>⚠️⚠️ 2회</td><td>작품 삭제 + 30일 게시 제한</td><td>90일 후 소멸</td></tr><tr><td>⚠️⚠️⚠️ 3회</td><td>계정 정지 (90일) + 수익 90일간 지급 보류</td><td>-</td></tr><tr><td>❌ 정지 후 재위반</td><td>영구 계정 정지</td><td>영구</td></tr></tbody></table><div class="highlight-box highlight-warning"><strong>참고:</strong> 심각한 침해(대량 표절, 상업적 저작권 침해)는 경고 횟수와 관계없이 즉시 계정 정지될 수 있습니다.</div></div>
+                <div class="section-card" id="ko-counter"><h2><i class="fas fa-balance-scale"></i> 8. 이의 제기</h2><p>저작권 침해 신고에 동의하지 않으면 다음 절차를 통해 이의를 제기할 수 있습니다. 본 절차는 Publisher가 공정성을 위해 자체적으로 제공하는 임의 절차이며, 영국법상의 법적 요건은 아닙니다.</p><div class="highlight-box highlight-warning"><strong>제출 기한:</strong> 이의 제기는 삭제 통지를 수령한 후 <strong>10영업일 이내</strong>에 제출해야 합니다.</div><h3>이의 제기 조건</h3><ul><li>저작권을 보유하고 있음을 증명할 수 있음</li><li>신고가 잘못되었음을 설명할 수 있음</li><li>적절한 사용 허가가 있음을 증명할 수 있음</li></ul><h3>필요한 정보</h3><ol><li>이름, 주소, 연락처</li><li>삭제된 작품 식별 정보</li><li>삭제가 잘못되었다는 선언</li><li>권리 증명 서류</li></ol><h3>처리 기간</h3><p>이의 제기 접수 후 10영업일 이내에 검토 결과를 알려드립니다. 제출된 증거를 바탕으로 Publisher가 작품 복원 또는 삭제 유지를 판단하며, 관련 경고도 적절히 조정됩니다.</p><div class="highlight-box highlight-info"><strong>참고:</strong> 본 이의 제기 절차는 플랫폼 내부 절차입니다. 저작권 분쟁의 최종적인 해결은 적용 법률에 따른 관할 법원에서의 법적 절차가 필요할 수 있습니다.</div></div>
                 <div class="section-card"><h2><i class="fas fa-headset"></i> 문의</h2><p>저작권 관련 문의는 지원 페이지를 이용해 주세요:</p><div class="text-center my-4"><a href="support/contact.html" class="btn btn-primary"><i class="fas fa-headset me-2"></i>지원 문의</a></div></div>
             </div>
 
             <!-- ARABIC -->
             <div class="lang-content" data-lang="ar">
-                <div class="toc"><h3><i class="fas fa-list me-2"></i>المحتويات</h3><ul><li><a href="#ar-overview">1. نظرة عامة</a></li><li><a href="#ar-original">2. الأعمال الأصلية فقط</a></li><li><a href="#ar-prohibited">3. المحتوى المحظور</a></li><li><a href="#ar-ai">4. محتوى الذكاء الاصطناعي</a></li><li><a href="#ar-reporting">5. الإبلاغ عن الانتهاك</a></li><li><a href="#ar-dmca">6. عملية DMCA</a></li><li><a href="#ar-strikes">7. الرد على المخالفات</a></li><li><a href="#ar-counter">8. الاعتراض</a></li></ul></div>
+                <div class="toc"><h3><i class="fas fa-list me-2"></i>المحتويات</h3><ul><li><a href="#ar-overview">1. نظرة عامة</a></li><li><a href="#ar-original">2. الأعمال الأصلية فقط</a></li><li><a href="#ar-prohibited">3. المحتوى المحظور</a></li><li><a href="#ar-ai">4. محتوى الذكاء الاصطناعي</a></li><li><a href="#ar-reporting">5. الإبلاغ عن الانتهاك</a></li><li><a href="#ar-dmca">6. عملية الاستجابة لانتهاكات حقوق النشر</a></li><li><a href="#ar-strikes">7. الرد على المخالفات</a></li><li><a href="#ar-counter">8. الاعتراض</a></li></ul></div>
                 <div class="section-card" id="ar-overview"><h2><i class="fas fa-info-circle"></i> 1. نظرة عامة</h2><p>Publisher يحترم حقوق النشر للمبدعين ويلتزم بحماية حقوق الملكية الفكرية. توضح هذه السياسة القواعد المتعلقة بحقوق النشر على منصتنا وإجراءات التعامل مع حالات الانتهاك.</p></div>
-                <div class="section-card" id="ar-original"><h2><i class="fas fa-star"></i> 2. الأعمال الأصلية فقط</h2><div class="highlight-box highlight-danger"><strong>مهم:</strong> Publisher يقبل فقط الأعمال الأصلية. المحتوى الذي يستخدم أعمال الآخرين محظور تماماً.</div><h3>المحتوى المسموح</h3><ul class="prohibited-list allowed-list"><li>أعمال أصلية أنشأتها بنفسك</li><li>أعمال تمتلك فيها 100% من حقوق النشر</li><li>أعمال مشتركة بموافقة جميع المؤلفين</li><li>أعمال تستخدم فقط مواد الملكية العامة</li></ul><h3>المحتوى المحظور</h3><ul class="prohibited-list"><li>نسخ أو سرقة أعمال الآخرين</li><li>قصص المعجبين والأعمال المشتقة</li><li>إعادة نشر غير مصرح بها من مواقع أخرى</li><li>أعمال حقوق نشرها لناشرين آخرين</li><li>أعمال مترجمة بدون إذن</li><li>استخدام غير مصرح به للصور أو الرسوم المحمية</li></ul></div>
-                <div class="section-card" id="ar-prohibited"><h2><i class="fas fa-ban"></i> 3. المحتوى المحظور</h2><h3>3.1 أعمال الناشرين الآخرين</h3><div class="highlight-box highlight-danger">يُحظر نشر أعمال حقوق نشرها لناشرين آخرين (مطبوعة أو رقمية) على Publisher. يشمل ذلك:<ul class="mt-2 mb-0"><li>أعمال تحت عقود نشر</li><li>أعمال باتفاقيات توزيع حصرية</li><li>أعمال بحقوق نشر منقولة</li></ul></div><h3>3.2 قصص المعجبين والأعمال المشتقة</h3><p>Publisher لا يقبل قصص المعجبين أو الأعمال المشتقة للأسباب التالية:</p><ul><li>حماية حقوق المبدعين الأصليين</li><li>تجنب المخاطر القانونية</li><li>تعزيز إنشاء محتوى أصلي</li></ul><h3>3.3 الترجمات غير المصرح بها</h3><p>ترجمة ونشر أعمال الآخرين بدون إذن المؤلف الأصلي محظورة. يُشترط الحصول على إذن كتابي من المؤلف الأصلي لنشر الأعمال المترجمة.</p></div>
+                <div class="section-card" id="ar-original"><h2><i class="fas fa-star"></i> 2. الأعمال الأصلية فقط</h2><div class="highlight-box highlight-danger"><strong>مهم:</strong> Publisher يقبل فقط الأعمال الأصلية. المحتوى الذي يستخدم أعمال الآخرين محظور تماماً.</div><h3>المحتوى المسموح</h3><ul class="prohibited-list allowed-list"><li>أعمال أصلية أنشأتها بنفسك</li><li>أعمال تمتلك فيها 100% من حقوق النشر</li><li>أعمال مشتركة بموافقة جميع المؤلفين</li><li>أعمال تستخدم فقط مواد الملكية العامة</li></ul><h3>المحتوى المحظور</h3><ul class="prohibited-list"><li>نسخ أو سرقة أعمال الآخرين</li><li>قصص المعجبين والأعمال المشتقة غير المصرح بها</li><li>إعادة نشر غير مصرح بها من مواقع أخرى</li><li>أعمال حقوق نشرها لناشرين آخرين</li><li>أعمال مترجمة بدون إذن</li><li>استخدام غير مصرح به للصور أو الرسوم المحمية</li></ul></div>
+                <div class="section-card" id="ar-prohibited"><h2><i class="fas fa-ban"></i> 3. المحتوى المحظور</h2><h3>3.1 أعمال الناشرين الآخرين</h3><div class="highlight-box highlight-danger">يُحظر نشر أعمال حقوق نشرها لناشرين آخرين (مطبوعة أو رقمية) على Publisher. يشمل ذلك:<ul class="mt-2 mb-0"><li>أعمال تحت عقود نشر</li><li>أعمال باتفاقيات توزيع حصرية</li><li>أعمال بحقوق نشر منقولة</li></ul></div><h3>3.2 قصص المعجبين والأعمال المشتقة</h3><p>يسمح Publisher بقصص المعجبين والأعمال المشتقة فقط بإذن كتابي من المبدع الأصلي. تُحظر الأعمال غير المصرح بها للأسباب التالية:</p><ul><li>حماية حقوق المبدعين الأصليين</li><li>تجنب المخاطر القانونية</li><li>تعزيز إنشاء محتوى أصلي</li></ul><h3>3.3 الترجمات غير المصرح بها</h3><p>ترجمة ونشر أعمال الآخرين بدون إذن المؤلف الأصلي محظورة. يُشترط الحصول على إذن كتابي من المؤلف الأصلي لنشر الأعمال المترجمة.</p></div>
                 <div class="section-card" id="ar-ai"><h2><i class="fas fa-robot"></i> 4. محتوى الذكاء الاصطناعي</h2><div class="highlight-box highlight-info">يُسمح بمحتوى الذكاء الاصطناعي فقط بشروط محددة.</div><h3>4.1 الشروط المسموحة</h3><ul class="prohibited-list allowed-list"><li>تصنيف العمل بوضوح كـ "عمل AI" أو "AI-Generated"</li><li>تحديد أداة AI المستخدمة (مثل: ChatGPT, Midjourney)</li><li>يجب أن تسمح شروط أداة AI بالاستخدام التجاري</li><li>التمييز بين الأجزاء المولدة بـ AI والأجزاء البشرية (موصى به)</li></ul><h3>4.2 محتوى AI المحظور</h3><ul class="prohibited-list"><li>أعمال تخفي طبيعتها المولدة بـ AI</li><li>أعمال تستخدم أدوات AI تحظر الاستخدام التجاري</li><li>أعمال تقلد أساليب الآخرين باستخدام AI</li><li>"تتمات" أو "مشتقات" AI لأعمال موجودة</li></ul><h3>4.3 تصنيف أعمال AI</h3><div class="highlight-box highlight-success"><strong>مثال تصنيف صحيح:</strong><br><code>🤖 عمل AI | AI-Generated Content</code><br><code>الأدوات المستخدمة: ChatGPT-4, DALL-E 3</code></div></div>
                 <div class="section-card" id="ar-reporting"><h2><i class="fas fa-flag"></i> 5. الإبلاغ عن الانتهاك</h2><p>إذا اكتشفت انتهاكاً لحقوق النشر، يرجى الإبلاغ مع المعلومات التالية:</p><h3>المعلومات المطلوبة</h3><ol><li><strong>معلومات صاحب الحق</strong> - الاسم، جهة الاتصال، وثائق إثبات الحقوق</li><li><strong>معلومات العمل المنتهك</strong> - رابط وعنوان العمل</li><li><strong>معلومات العمل الأصلي</strong> - رابط الأصل، معلومات النشر</li><li><strong>وصف الانتهاك</strong> - شرح محدد لكيفية الانتهاك</li><li><strong>إقرار</strong> - بيان بأن البلاغ دقيق</li></ol><h3>كيفية الإبلاغ</h3><p>استخدم زر "إبلاغ" في صفحة كل عمل واختر "انتهاك حقوق النشر"، أو تواصل عبر صفحة الدعم.</p></div>
-                <div class="section-card" id="ar-dmca"><h2><i class="fas fa-gavel"></i> 6. عملية DMCA</h2><p>Publisher يتبع عملية استجابة لانتهاكات حقوق النشر وفقاً لقانون الألفية الرقمية الأمريكي (DMCA).</p><h3>عملية الاستجابة</h3><div class="process-step"><div class="step-number">1</div><div><strong>استلام البلاغ</strong><br>نستلم ونراجع بلاغ انتهاك حقوق النشر (خلال 24 ساعة)</div></div><div class="process-step"><div class="step-number">2</div><div><strong>إلغاء النشر المؤقت</strong><br>إذا اعتُبر البلاغ صحيحاً، يتم إلغاء نشر العمل مؤقتاً</div></div><div class="process-step"><div class="step-number">3</div><div><strong>إخطار الناشر</strong><br>نخطر الناشر ونمنحه 10 أيام عمل لتقديم اعتراض</div></div><div class="process-step"><div class="step-number">4</div><div><strong>القرار النهائي</strong><br>بناءً على حالة الاعتراض، نقرر حذف أو استعادة العمل</div></div></div>
-                <div class="section-card" id="ar-strikes"><h2><i class="fas fa-exclamation-triangle"></i> 7. الرد على المخالفات</h2><p>يُطبق نظام 3 إنذارات على انتهاكات حقوق النشر.</p><table class="strike-table"><thead><tr><th>الإنذار</th><th>الرد</th><th>المدة</th></tr></thead><tbody><tr><td>⚠️ الأول</td><td>حذف العمل + بريد تحذيري</td><td>ينتهي بعد 90 يوماً</td></tr><tr><td>⚠️⚠️ الثاني</td><td>حذف العمل + تقييد النشر 30 يوماً</td><td>ينتهي بعد 90 يوماً</td></tr><tr><td>⚠️⚠️⚠️ الثالث</td><td>تعليق الحساب (90 يوماً)</td><td>-</td></tr><tr><td>❌ بعد التعليق</td><td>حظر الحساب الدائم</td><td>دائم</td></tr></tbody></table><div class="highlight-box highlight-warning"><strong>ملاحظة:</strong> الانتهاكات الجسيمة (السرقة الجماعية، انتهاك حقوق النشر التجاري) قد تؤدي إلى تعليق فوري للحساب بغض النظر عن عدد الإنذارات.</div></div>
-                <div class="section-card" id="ar-counter"><h2><i class="fas fa-balance-scale"></i> 8. الاعتراض</h2><p>إذا لم توافق على بلاغ انتهاك حقوق النشر، يمكنك تقديم اعتراض عبر العملية التالية.</p><h3>شروط الاعتراض</h3><ul><li>يمكنك إثبات أنك تمتلك حقوق النشر</li><li>يمكنك شرح أن البلاغ خاطئ</li><li>يمكنك إثبات أن لديك إذن استخدام مناسب</li></ul><h3>المعلومات المطلوبة</h3><ol><li>الاسم، العنوان، معلومات الاتصال</li><li>تحديد العمل المحذوف</li><li>بيان بأن الحذف كان خاطئاً</li><li>وثائق تثبت حقوقك</li></ol><h3>وقت المعالجة</h3><p>بعد استلام الاعتراض، سنخطرك بنتيجة المراجعة خلال 10-14 يوم عمل. إذا قُبل الاعتراض، سيُستعاد العمل ويُزال الإنذار.</p></div>
+                <div class="section-card" id="ar-dmca"><h2><i class="fas fa-gavel"></i> 6. عملية الاستجابة لانتهاكات حقوق النشر</h2><p>Publisher يتبع عملية إشعار وإزالة للتعامل مع مطالبات انتهاك حقوق النشر، وفقاً لقانون حقوق النشر والتصاميم وبراءات الاختراع لعام 1988 (CDPA) ولوائح التجارة الإلكترونية لعام 2002. بالنسبة للمستخدمين في الولايات المتحدة، تستوفي هذه العملية أيضاً متطلبات قانون الألفية الرقمية لحقوق النشر (DMCA).</p><h3>عملية الاستجابة</h3><div class="process-step"><div class="step-number">1</div><div><strong>استلام البلاغ</strong><br>نستلم ونراجع بلاغ انتهاك حقوق النشر (خلال 24 ساعة)</div></div><div class="process-step"><div class="step-number">2</div><div><strong>إلغاء النشر المؤقت</strong><br>إذا اعتُبر البلاغ صحيحاً، يتم إلغاء نشر العمل مؤقتاً</div></div><div class="process-step"><div class="step-number">3</div><div><strong>إخطار الناشر</strong><br>نخطر الناشر ونمنحه 10 أيام عمل لتقديم اعتراض</div></div><div class="process-step"><div class="step-number">4</div><div><strong>القرار النهائي</strong><br>بناءً على حالة الاعتراض، نقرر حذف أو استعادة العمل</div></div></div>
+                <div class="section-card" id="ar-strikes"><h2><i class="fas fa-exclamation-triangle"></i> 7. الرد على المخالفات</h2><p>يُطبق نظام 3 إنذارات على انتهاكات حقوق النشر.</p><table class="strike-table"><thead><tr><th>الإنذار</th><th>الرد</th><th>المدة</th></tr></thead><tbody><tr><td>⚠️ الأول</td><td>حذف العمل + بريد تحذيري</td><td>ينتهي بعد 90 يوماً</td></tr><tr><td>⚠️⚠️ الثاني</td><td>حذف العمل + تقييد النشر 30 يوماً</td><td>ينتهي بعد 90 يوماً</td></tr><tr><td>⚠️⚠️⚠️ الثالث</td><td>تعليق الحساب (90 يوماً) + حجب مدفوعات الإيرادات لمدة 90 يوماً</td><td>-</td></tr><tr><td>❌ بعد التعليق</td><td>تعليق الحساب الدائم</td><td>دائم</td></tr></tbody></table><div class="highlight-box highlight-warning"><strong>ملاحظة:</strong> الانتهاكات الجسيمة (السرقة الجماعية، انتهاك حقوق النشر التجاري) قد تؤدي إلى تعليق فوري للحساب بغض النظر عن عدد الإنذارات.</div></div>
+                <div class="section-card" id="ar-counter"><h2><i class="fas fa-balance-scale"></i> 8. الاعتراض</h2><p>إذا لم توافق على بلاغ انتهاك حقوق النشر، يمكنك تقديم اعتراض عبر العملية التالية. هذا إجراء طوعي يقدمه Publisher كجزء من التزامنا بالإنصاف؛ وليس مطلباً قانونياً بموجب القانون البريطاني.</p><div class="highlight-box highlight-warning"><strong>الموعد النهائي للتقديم:</strong> يجب تقديم الاعتراضات خلال <strong>10 أيام عمل</strong> من استلام إشعار الإزالة.</div><h3>شروط الاعتراض</h3><ul><li>يمكنك إثبات أنك تمتلك حقوق النشر</li><li>يمكنك شرح أن البلاغ خاطئ</li><li>يمكنك إثبات أن لديك إذن استخدام مناسب</li></ul><h3>المعلومات المطلوبة</h3><ol><li>الاسم، العنوان، معلومات الاتصال</li><li>تحديد العمل المحذوف</li><li>بيان بأن الحذف كان خاطئاً</li><li>وثائق تثبت حقوقك</li></ol><h3>وقت المعالجة</h3><p>بعد استلام الاعتراض، سنخطرك بنتيجة المراجعة خلال 10 أيام عمل. بناءً على الأدلة المقدمة، سيقرر Publisher ما إذا كان سيتم استعادة العمل أو الإبقاء على إزالته، وقد يتم تعديل أي إنذار مرتبط وفقاً لذلك.</p><div class="highlight-box highlight-info"><strong>ملاحظة:</strong> عملية الاعتراض هذه هي إجراء داخلي للمنصة. قد يتطلب الحل النهائي لنزاعات حقوق النشر إجراءات قانونية أمام محكمة مختصة بموجب القانون المعمول به.</div></div>
                 <div class="section-card"><h2><i class="fas fa-headset"></i> اتصل بنا</h2><p>للاستفسارات المتعلقة بحقوق النشر، يرجى استخدام صفحة الدعم:</p><div class="text-center my-4"><a href="support/contact.html" class="btn btn-primary"><i class="fas fa-headset me-2"></i>اتصل بالدعم</a></div></div>
             </div>
 
             <!-- PORTUGUESE -->
             <div class="lang-content" data-lang="pt">
-                <div class="toc"><h3><i class="fas fa-list me-2"></i>Índice</h3><ul><li><a href="#pt-overview">1. Visão Geral</a></li><li><a href="#pt-original">2. Apenas Obras Originais</a></li><li><a href="#pt-prohibited">3. Conteúdo Proibido</a></li><li><a href="#pt-ai">4. Conteúdo Gerado por IA</a></li><li><a href="#pt-reporting">5. Reportar Infração</a></li><li><a href="#pt-dmca">6. Processo DMCA</a></li><li><a href="#pt-strikes">7. Resposta a Violações</a></li><li><a href="#pt-counter">8. Contranotificação</a></li></ul></div>
+                <div class="toc"><h3><i class="fas fa-list me-2"></i>Índice</h3><ul><li><a href="#pt-overview">1. Visão Geral</a></li><li><a href="#pt-original">2. Apenas Obras Originais</a></li><li><a href="#pt-prohibited">3. Conteúdo Proibido</a></li><li><a href="#pt-ai">4. Conteúdo Gerado por IA</a></li><li><a href="#pt-reporting">5. Reportar Infração</a></li><li><a href="#pt-dmca">6. Processo de Resposta a Infrações de Direitos Autorais</a></li><li><a href="#pt-strikes">7. Resposta a Violações</a></li><li><a href="#pt-counter">8. Contranotificação</a></li></ul></div>
                 <div class="section-card" id="pt-overview"><h2><i class="fas fa-info-circle"></i> 1. Visão Geral</h2><p>Publisher respeita os direitos autorais dos criadores e está comprometido em proteger os direitos de propriedade intelectual. Esta política descreve as regras sobre direitos autorais em nossa plataforma e os procedimentos para lidar com casos de infração.</p></div>
-                <div class="section-card" id="pt-original"><h2><i class="fas fa-star"></i> 2. Apenas Obras Originais</h2><div class="highlight-box highlight-danger"><strong>Importante:</strong> Publisher aceita apenas obras originais. Conteúdo usando obras de outros é estritamente proibido.</div><h3>Conteúdo Permitido</h3><ul class="prohibited-list allowed-list"><li>Obras originais que você mesmo criou</li><li>Obras onde você detém 100% dos direitos autorais</li><li>Obras em coautoria com consentimento de todos os autores</li><li>Obras usando apenas materiais de domínio público</li></ul><h3>Conteúdo Proibido</h3><ul class="prohibited-list"><li>Cópias ou plágio de obras de outros</li><li>Fan fiction e obras derivadas</li><li>Republicações não autorizadas de outros sites</li><li>Obras com direitos autorais de outras editoras</li><li>Obras traduzidas sem permissão</li><li>Uso não autorizado de imagens ou ilustrações protegidas</li></ul></div>
-                <div class="section-card" id="pt-prohibited"><h2><i class="fas fa-ban"></i> 3. Conteúdo Proibido</h2><h3>3.1 Obras de Outras Editoras</h3><div class="highlight-box highlight-danger">É proibido publicar no Publisher obras com direitos autorais de outras editoras (impressas ou digitais). Isso inclui:<ul class="mt-2 mb-0"><li>Obras sob contratos de publicação</li><li>Obras com acordos de distribuição exclusiva</li><li>Obras com direitos autorais transferidos</li></ul></div><h3>3.2 Fan Fiction e Obras Derivadas</h3><p>Publisher não aceita fan fiction ou obras derivadas pelos seguintes motivos:</p><ul><li>Proteger os direitos dos criadores originais</li><li>Evitar riscos legais</li><li>Promover a criação de conteúdo original</li></ul><h3>3.3 Traduções Não Autorizadas</h3><p>É proibido traduzir e publicar obras de outros sem a permissão do autor original. É necessária permissão escrita do autor original para publicar obras traduzidas.</p></div>
+                <div class="section-card" id="pt-original"><h2><i class="fas fa-star"></i> 2. Apenas Obras Originais</h2><div class="highlight-box highlight-danger"><strong>Importante:</strong> Publisher aceita apenas obras originais. Conteúdo usando obras de outros é estritamente proibido.</div><h3>Conteúdo Permitido</h3><ul class="prohibited-list allowed-list"><li>Obras originais que você mesmo criou</li><li>Obras onde você detém 100% dos direitos autorais</li><li>Obras em coautoria com consentimento de todos os autores</li><li>Obras usando apenas materiais de domínio público</li></ul><h3>Conteúdo Proibido</h3><ul class="prohibited-list"><li>Cópias ou plágio de obras de outros</li><li>Fan fiction e obras derivadas não autorizadas</li><li>Republicações não autorizadas de outros sites</li><li>Obras com direitos autorais de outras editoras</li><li>Obras traduzidas sem permissão</li><li>Uso não autorizado de imagens ou ilustrações protegidas</li></ul></div>
+                <div class="section-card" id="pt-prohibited"><h2><i class="fas fa-ban"></i> 3. Conteúdo Proibido</h2><h3>3.1 Obras de Outras Editoras</h3><div class="highlight-box highlight-danger">É proibido publicar no Publisher obras com direitos autorais de outras editoras (impressas ou digitais). Isso inclui:<ul class="mt-2 mb-0"><li>Obras sob contratos de publicação</li><li>Obras com acordos de distribuição exclusiva</li><li>Obras com direitos autorais transferidos</li></ul></div><h3>3.2 Fan Fiction e Obras Derivadas</h3><p>Publisher permite fan fiction e obras derivadas apenas com permissão escrita do criador original. Obras não autorizadas são proibidas pelos seguintes motivos:</p><ul><li>Proteger os direitos dos criadores originais</li><li>Evitar riscos legais</li><li>Promover a criação de conteúdo original</li></ul><h3>3.3 Traduções Não Autorizadas</h3><p>É proibido traduzir e publicar obras de outros sem a permissão do autor original. É necessária permissão escrita do autor original para publicar obras traduzidas.</p></div>
                 <div class="section-card" id="pt-ai"><h2><i class="fas fa-robot"></i> 4. Conteúdo Gerado por IA</h2><div class="highlight-box highlight-info">Conteúdo gerado por IA é permitido apenas sob condições específicas.</div><h3>4.1 Condições Permitidas</h3><ul class="prohibited-list allowed-list"><li>Rotular claramente a obra como "Obra IA" ou "AI-Generated"</li><li>Especificar a ferramenta de IA usada (ex.: ChatGPT, Midjourney)</li><li>Os termos da ferramenta de IA devem permitir uso comercial</li><li>Distinguir partes geradas por IA das criadas por humanos (recomendado)</li></ul><h3>4.2 Conteúdo IA Proibido</h3><ul class="prohibited-list"><li>Obras que ocultam sua natureza gerada por IA</li><li>Obras usando ferramentas de IA que proíbem uso comercial</li><li>Obras imitando estilos de outros usando IA</li><li>"Sequências" ou "derivados" de obras existentes gerados por IA</li></ul><h3>4.3 Rotulagem de Obras IA</h3><div class="highlight-box highlight-success"><strong>Exemplo de rotulagem correta:</strong><br><code>🤖 Obra IA | AI-Generated Content</code><br><code>Ferramentas usadas: ChatGPT-4, DALL-E 3</code></div></div>
                 <div class="section-card" id="pt-reporting"><h2><i class="fas fa-flag"></i> 5. Reportar Infração</h2><p>Se você descobrir uma violação de direitos autorais, reporte com as seguintes informações:</p><h3>Informações Necessárias</h3><ol><li><strong>Info do Titular</strong> - Nome, contato, documentos comprovando os direitos</li><li><strong>Info da Obra Infratora</strong> - URL e título da obra</li><li><strong>Info da Obra Original</strong> - URL do original, info de publicação</li><li><strong>Descrição da Infração</strong> - Explicação específica de como infringe</li><li><strong>Declaração</strong> - Declaração de que o reporte é preciso</li></ol><h3>Como Reportar</h3><p>Use o botão "Reportar" na página de cada obra e selecione "Violação de Direitos Autorais", ou contate nossa página de suporte.</p></div>
-                <div class="section-card" id="pt-dmca"><h2><i class="fas fa-gavel"></i> 6. Processo DMCA</h2><p>Publisher segue um processo de resposta a infrações de direitos autorais em conformidade com a Lei de Direitos Autorais do Milênio Digital dos EUA (DMCA).</p><h3>Processo de Resposta</h3><div class="process-step"><div class="step-number">1</div><div><strong>Recebimento do Reporte</strong><br>Recebemos e revisamos o reporte de infração (dentro de 24 horas)</div></div><div class="process-step"><div class="step-number">2</div><div><strong>Despublicação Temporária</strong><br>Se considerado um reporte válido, a obra é temporariamente despublicada</div></div><div class="process-step"><div class="step-number">3</div><div><strong>Notificação ao Uploader</strong><br>Notificamos o uploader e fornecemos 10 dias úteis para apresentar contranotificação</div></div><div class="process-step"><div class="step-number">4</div><div><strong>Decisão Final</strong><br>Com base no status da contranotificação, decidimos excluir ou restaurar a obra</div></div></div>
-                <div class="section-card" id="pt-strikes"><h2><i class="fas fa-exclamation-triangle"></i> 7. Resposta a Violações</h2><p>Um sistema de 3 avisos se aplica a violações de direitos autorais.</p><table class="strike-table"><thead><tr><th>Aviso</th><th>Resposta</th><th>Duração</th></tr></thead><tbody><tr><td>⚠️ 1º</td><td>Exclusão da obra + Email de advertência</td><td>Expira em 90 dias</td></tr><tr><td>⚠️⚠️ 2º</td><td>Exclusão da obra + Restrição de publicação 30 dias</td><td>Expira em 90 dias</td></tr><tr><td>⚠️⚠️⚠️ 3º</td><td>Suspensão da conta (90 dias)</td><td>-</td></tr><tr><td>❌ Após suspensão</td><td>Banimento permanente da conta</td><td>Permanente</td></tr></tbody></table><div class="highlight-box highlight-warning"><strong>Nota:</strong> Infrações graves (plágio em massa, violação comercial de direitos autorais) podem resultar em suspensão imediata da conta, independentemente do número de avisos.</div></div>
-                <div class="section-card" id="pt-counter"><h2><i class="fas fa-balance-scale"></i> 8. Contranotificação</h2><p>Se você não concordar com um reporte de infração de direitos autorais, pode apresentar uma contranotificação através do seguinte processo.</p><h3>Condições da Contranotificação</h3><ul><li>Você pode provar que detém os direitos autorais</li><li>Você pode explicar que o reporte está errado</li><li>Você pode provar que tem permissão de uso adequada</li></ul><h3>Informações Necessárias</h3><ol><li>Nome, endereço, informações de contato</li><li>Identificação da obra removida</li><li>Declaração de que a remoção foi errônea</li><li>Documentos comprovando seus direitos</li></ol><h3>Tempo de Processamento</h3><p>Após receber uma contranotificação, notificaremos você sobre o resultado da revisão dentro de 10-14 dias úteis. Se a contranotificação for aceita, a obra será restaurada e o aviso removido.</p></div>
+                <div class="section-card" id="pt-dmca"><h2><i class="fas fa-gavel"></i> 6. Processo de Resposta a Infrações de Direitos Autorais</h2><p>Publisher segue um processo de notificação e remoção para lidar com reclamações de infração de direitos autorais, de acordo com o Copyright, Designs and Patents Act 1988 (CDPA) e as Electronic Commerce (EC Directive) Regulations 2002. Para usuários nos Estados Unidos, este processo também atende aos requisitos da Digital Millennium Copyright Act (DMCA).</p><h3>Processo de Resposta</h3><div class="process-step"><div class="step-number">1</div><div><strong>Recebimento do Reporte</strong><br>Recebemos e revisamos o reporte de infração (dentro de 24 horas)</div></div><div class="process-step"><div class="step-number">2</div><div><strong>Despublicação Temporária</strong><br>Se considerado um reporte válido, a obra é temporariamente despublicada</div></div><div class="process-step"><div class="step-number">3</div><div><strong>Notificação ao Uploader</strong><br>Notificamos o uploader e fornecemos 10 dias úteis para apresentar contranotificação</div></div><div class="process-step"><div class="step-number">4</div><div><strong>Decisão Final</strong><br>Com base no status da contranotificação, decidimos excluir ou restaurar a obra</div></div></div>
+                <div class="section-card" id="pt-strikes"><h2><i class="fas fa-exclamation-triangle"></i> 7. Resposta a Violações</h2><p>Um sistema de 3 avisos se aplica a violações de direitos autorais.</p><table class="strike-table"><thead><tr><th>Aviso</th><th>Resposta</th><th>Duração</th></tr></thead><tbody><tr><td>⚠️ 1º</td><td>Exclusão da obra + Email de advertência</td><td>Expira em 90 dias</td></tr><tr><td>⚠️⚠️ 2º</td><td>Exclusão da obra + Restrição de publicação 30 dias</td><td>Expira em 90 dias</td></tr><tr><td>⚠️⚠️⚠️ 3º</td><td>Suspensão da conta (90 dias) + Retenção de pagamentos de receita por 90 dias</td><td>-</td></tr><tr><td>❌ Após suspensão</td><td>Suspensão permanente da conta</td><td>Permanente</td></tr></tbody></table><div class="highlight-box highlight-warning"><strong>Nota:</strong> Infrações graves (plágio em massa, violação comercial de direitos autorais) podem resultar em suspensão imediata da conta, independentemente do número de avisos.</div></div>
+                <div class="section-card" id="pt-counter"><h2><i class="fas fa-balance-scale"></i> 8. Contranotificação</h2><p>Se você não concordar com um reporte de infração de direitos autorais, pode apresentar uma contranotificação através do seguinte processo. Este é um procedimento voluntário fornecido pela Publisher como parte do nosso compromisso com a equidade; não é uma exigência legal sob a legislação do Reino Unido.</p><div class="highlight-box highlight-warning"><strong>Prazo de envio:</strong> As contranotificações devem ser apresentadas dentro de <strong>10 dias úteis</strong> após o recebimento da notificação de remoção.</div><h3>Condições da Contranotificação</h3><ul><li>Você pode provar que detém os direitos autorais</li><li>Você pode explicar que o reporte está errado</li><li>Você pode provar que tem permissão de uso adequada</li></ul><h3>Informações Necessárias</h3><ol><li>Nome, endereço, informações de contato</li><li>Identificação da obra removida</li><li>Declaração de que a remoção foi errônea</li><li>Documentos comprovando seus direitos</li></ol><h3>Tempo de Processamento</h3><p>Após receber uma contranotificação, notificaremos você sobre o resultado da revisão dentro de 10 dias úteis. Com base nas evidências fornecidas, a Publisher determinará se deve restaurar a obra ou manter sua remoção, e qualquer aviso associado poderá ser ajustado conforme apropriado.</p><div class="highlight-box highlight-info"><strong>Nota:</strong> Este processo de contranotificação é um procedimento interno da plataforma. A resolução definitiva de disputas de direitos autorais pode exigir procedimentos legais perante um tribunal competente sob a legislação aplicável.</div></div>
                 <div class="section-card"><h2><i class="fas fa-headset"></i> Contato</h2><p>Para dúvidas sobre direitos autorais, use nossa página de suporte:</p><div class="text-center my-4"><a href="support/contact.html" class="btn btn-primary"><i class="fas fa-headset me-2"></i>Contatar Suporte</a></div></div>
             </div>
 
@@ -230,27 +503,276 @@
             </div>
         </div>
     </footer>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const availableLanguages = { en: { name: 'English', flag: '🇬🇧' }, ja: { name: '日本語', flag: '🇯🇵' }, zh: { name: '中文', flag: '🇨🇳' }, es: { name: 'Español', flag: '🇪🇸' }, fr: { name: 'Français', flag: '🇫🇷' }, de: { name: 'Deutsch', flag: '🇩🇪' }, ko: { name: '한국어', flag: '🇰🇷' }, ar: { name: 'العربية', flag: '🇸🇦', rtl: true }, pt: { name: 'Português', flag: '🇧🇷' } };
-        function getCurrentLanguage() { return localStorage.getItem('publisher_language') || 'en'; }
-        function setLanguage(lang) { localStorage.setItem('publisher_language', lang); }
+        // ========== 多言語対応テキスト（9言語）==========
+        const uiText = {
+            translationTools: {
+                en: 'Translation Tools', ja: '翻訳ツール', zh: '翻译工具',
+                es: 'Herramientas de traducción', fr: 'Outils de traduction', de: 'Übersetzungstools',
+                ko: '번역 도구', ar: 'أدوات الترجمة', pt: 'Ferramentas de tradução'
+            },
+            mangaTranslator: {
+                en: 'Manga Translator', ja: 'マンガ翻訳', zh: '漫画翻译',
+                es: 'Traductor de Manga', fr: 'Traducteur de Manga', de: 'Manga-Übersetzer',
+                ko: '만화 번역기', ar: 'مترجم المانجا', pt: 'Tradutor de Mangá'
+            },
+            translationStatus: {
+                en: 'Translation Status', ja: '翻訳状況', zh: '翻译状态',
+                es: 'Estado de traducción', fr: 'Statut de traduction', de: 'Übersetzungsstatus',
+                ko: '번역 상태', ar: 'حالة الترجمة', pt: 'Status da tradução'
+            },
+            findTranslators: {
+                en: 'Find Translators', ja: '翻訳者を探す', zh: '寻找翻译',
+                es: 'Buscar traductores', fr: 'Trouver des traducteurs', de: 'Übersetzer finden',
+                ko: '번역가 찾기', ar: 'البحث عن مترجمين', pt: 'Encontrar tradutores'
+            },
+            contact: {
+                en: 'Contact', ja: 'お問い合わせ', zh: '联系我们',
+                es: 'Contacto', fr: 'Contact', de: 'Kontakt',
+                ko: '문의', ar: 'اتصل بنا', pt: 'Contato'
+            },
+            library: {
+                en: 'Library', ja: 'ライブラリ', zh: '书库',
+                es: 'Biblioteca', fr: 'Bibliothèque', de: 'Bibliothek',
+                ko: '라이브러리', ar: 'المكتبة', pt: 'Biblioteca'
+            },
+            dashboard: {
+                en: 'Dashboard', ja: 'ダッシュボード', zh: '控制台',
+                es: 'Panel', fr: 'Tableau de bord', de: 'Dashboard',
+                ko: '대시보드', ar: 'لوحة التحكم', pt: 'Painel'
+            },
+            accountSettings: {
+                en: 'Account Settings', ja: 'アカウント設定', zh: '账户设置',
+                es: 'Configuración de cuenta', fr: 'Paramètres du compte', de: 'Kontoeinstellungen',
+                ko: '계정 설정', ar: 'إعدادات الحساب', pt: 'Configurações da conta'
+            },
+            logout: {
+                en: 'Log Out', ja: 'ログアウト', zh: '退出登录',
+                es: 'Cerrar sesión', fr: 'Déconnexion', de: 'Abmelden',
+                ko: '로그아웃', ar: 'تسجيل الخروج', pt: 'Sair'
+            },
+            logOutConfirm: {
+                en: 'Are you sure you want to log out?', ja: 'ログアウトしますか？', zh: '确定要退出登录吗？',
+                es: '¿Estás seguro de que quieres cerrar sesión?', fr: 'Êtes-vous sûr de vouloir vous déconnecter?', de: 'Sind Sie sicher, dass Sie sich abmelden möchten?',
+                ko: '로그아웃 하시겠습니까?', ar: 'هل أنت متأكد أنك تريد تسجيل الخروج؟', pt: 'Tem certeza que deseja sair?'
+            }
+        };
+
+        // ========== data-i18n 属性用の翻訳マップ ==========
+        const i18nMap = {
+            'nav.home': {
+                en: 'Home', ja: 'ホーム', zh: '首页',
+                es: 'Inicio', fr: 'Accueil', de: 'Startseite',
+                ko: '홈', ar: 'الرئيسية', pt: 'Início'
+            },
+            'nav.browse': {
+                en: 'Browse', ja: '作品を探す', zh: '浏览',
+                es: 'Explorar', fr: 'Parcourir', de: 'Durchsuchen',
+                ko: '둘러보기', ar: 'تصفح', pt: 'Explorar'
+            },
+            'nav.genres': {
+                en: 'Genres', ja: 'ジャンル', zh: '类型',
+                es: 'Géneros', fr: 'Genres', de: 'Genres',
+                ko: '장르', ar: 'التصنيفات', pt: 'Gêneros'
+            },
+            'nav.upload': {
+                en: 'Upload', ja: 'アップロード', zh: '上传',
+                es: 'Subir', fr: 'Télécharger', de: 'Hochladen',
+                ko: '업로드', ar: 'رفع', pt: 'Enviar'
+            },
+            'nav.support': {
+                en: 'Support', ja: 'サポート', zh: '支持',
+                es: 'Soporte', fr: 'Support', de: 'Support',
+                ko: '지원', ar: 'الدعم', pt: 'Suporte'
+            },
+            'nav.login': {
+                en: 'Sign In', ja: 'ログイン', zh: '登录',
+                es: 'Iniciar sesión', fr: 'Connexion', de: 'Anmelden',
+                ko: '로그인', ar: 'تسجيل الدخول', pt: 'Entrar'
+            },
+            'nav.getStarted': {
+                en: 'Get Started', ja: '新規登録', zh: '开始使用',
+                es: 'Comenzar', fr: 'Commencer', de: 'Loslegen',
+                ko: '시작하기', ar: 'ابدأ الآن', pt: 'Começar'
+            },
+            'support.faq.title': {
+                en: 'FAQ', ja: 'よくある質問', zh: '常见问题',
+                es: 'Preguntas frecuentes', fr: 'FAQ', de: 'FAQ',
+                ko: '자주 묻는 질문', ar: 'الأسئلة الشائعة', pt: 'Perguntas frequentes'
+            },
+            'support.troubleshoot.title': {
+                en: 'Troubleshooting', ja: 'トラブルシューティング', zh: '故障排除',
+                es: 'Solución de problemas', fr: 'Dépannage', de: 'Fehlerbehebung',
+                ko: '문제 해결', ar: 'استكشاف الأخطاء', pt: 'Solução de problemas'
+            },
+            'support.tickets.title': {
+                en: 'My Tickets', ja: 'マイチケット', zh: '我的工单',
+                es: 'Mis tickets', fr: 'Mes tickets', de: 'Meine Tickets',
+                ko: '내 티켓', ar: 'تذاكري', pt: 'Meus tickets'
+            }
+        };
+
+        const rtlLanguages = ['ar'];
+
+        function getCurrentLanguage() {
+            return localStorage.getItem('preferredLanguage') || 'en';
+        }
+
+        function getL(obj) {
+            const lang = getCurrentLanguage();
+            return obj[lang] || obj.en || '';
+        }
+
+        // ========== ページ固有: 言語コンテンツ切替 ==========
         function showLanguageContent(lang) {
             document.querySelectorAll('.lang-content').forEach(el => el.classList.remove('active'));
             const content = document.querySelector(`.lang-content[data-lang="${lang}"]`);
             if (content) { content.classList.add('active'); }
             else { document.querySelector('.lang-content[data-lang="en"]')?.classList.add('active'); }
         }
-        function applyTranslations() {
+
+        function applyPageLanguage() {
             const lang = getCurrentLanguage();
-            const langSelect = document.getElementById('languageSelect');
-            if (langSelect) { langSelect.value = lang; }
             showLanguageContent(lang);
-            if (availableLanguages[lang] && availableLanguages[lang].rtl) { document.documentElement.dir = 'rtl'; }
+            if (rtlLanguages.includes(lang)) { document.documentElement.dir = 'rtl'; }
             else { document.documentElement.dir = 'ltr'; }
         }
-        function changeLanguage(lang) { setLanguage(lang); applyTranslations(); }
-        document.addEventListener('DOMContentLoaded', function() { applyTranslations(); });
-    </script>
-</body>
-</html>
+
+        function changeLanguage(lang) {
+            localStorage.setItem('preferredLanguage', lang);
+            applyPageLanguage();
+            updateUIText();
+        }
+
+        // ========== Navbar UIテキスト更新 ==========
+        function updateUIText() {
+            const menuDashboard = document.getElementById('menuDashboard');
+            const menuAccountSettings = document.getElementById('menuAccountSettings');
+            const menuLogout = document.getElementById('menuLogout');
+            if (menuDashboard) menuDashboard.textContent = getL(uiText.dashboard);
+            if (menuAccountSettings) menuAccountSettings.textContent = getL(uiText.accountSettings);
+            if (menuLogout) menuLogout.textContent = getL(uiText.logout);
+
+            const els = {
+                navLibraryPC: uiText.library, navDashboardPC: uiText.dashboard,
+                navTranslationToolsPC: uiText.translationTools, navMangaTranslatorPC: uiText.mangaTranslator,
+                navTranslationStatusPC: uiText.translationStatus, navFindTranslatorsPC: uiText.findTranslators,
+                navContactPC: uiText.contact, navLibraryMobile: uiText.library, navDashboardMobile: uiText.dashboard,
+                navTranslationToolsMobile: uiText.translationTools, navMangaTranslatorMobile: uiText.mangaTranslator,
+                navTranslationStatusMobile: uiText.translationStatus, navFindTranslatorsMobile: uiText.findTranslators,
+                navContactMobile: uiText.contact
+            };
+            Object.keys(els).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = getL(els[id]);
+            });
+
+            // data-i18n 属性の翻訳を適用
+            const lang = getCurrentLanguage();
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18nMap[key] && i18nMap[key][lang]) {
+                    el.textContent = i18nMap[key][lang];
+                }
+            });
+        }
+
+        // ========== ユーザードロップダウン ==========
+        function toggleUserDropdown(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const dropdown = document.getElementById('userDropdown');
+            const dropdownMenu = document.getElementById('userMenu');
+            dropdown.classList.toggle('open');
+            dropdownMenu.classList.toggle('show');
+        }
+
+        function handleLogout() {
+            if (confirm(getL(uiText.logOutConfirm))) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.reload();
+            }
+        }
+
+        function loadUserInfo() {
+            const userStr = localStorage.getItem('user');
+            const token = localStorage.getItem('token');
+            const isLoggedIn = !!(userStr && token);
+
+            if (isLoggedIn) {
+                try {
+                    const user = JSON.parse(userStr);
+                    const displayName = user.display_name || user.firstName || user.email || 'User';
+                    const userNameEl = document.getElementById('userName');
+                    const userDisplayNameEl = document.getElementById('userDisplayName');
+                    const userEmailEl = document.getElementById('userEmail');
+                    if (userNameEl) userNameEl.textContent = displayName;
+                    if (userDisplayNameEl) userDisplayNameEl.textContent = displayName;
+                    if (userEmailEl) userEmailEl.textContent = user.email || '';
+                    document.body.classList.add('logged-in');
+                } catch (e) {
+                    document.body.classList.remove('logged-in');
+                }
+            } else {
+                document.body.classList.remove('logged-in');
+            }
+        }
+
+        // ========== 初期化 ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            const desktopSelector = document.getElementById('languageSelector');
+            const mobileSelector = document.getElementById('languageSelectorMobile');
+
+            if (desktopSelector && mobileSelector) {
+                const savedLang = localStorage.getItem('preferredLanguage') || 'en';
+                desktopSelector.value = savedLang;
+                mobileSelector.value = savedLang;
+
+                mobileSelector.addEventListener('change', function() {
+                    desktopSelector.value = this.value;
+                    changeLanguage(this.value);
+                });
+
+                desktopSelector.addEventListener('change', function() {
+                    mobileSelector.value = this.value;
+                    changeLanguage(this.value);
+                });
+            }
+
+            applyPageLanguage();
+            updateUIText();
+            setTimeout(updateUIText, 100);
+            loadUserInfo();
+
+            // ユーザードロップダウン外クリックで閉じる
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.user-dropdown')) {
+                    const dropdown = document.getElementById('userDropdown');
+                    const dropdownMenu = document.getElementById('userMenu');
+                    if (dropdown) dropdown.classList.remove('open');
+                    if (dropdownMenu) dropdownMenu.classList.remove('show');
+                }
+            });
+
+            // Navbarオーバーレイ
+            const navbarCollapse = document.getElementById('navbarNav');
+            const navbarOverlay = document.getElementById('navbarOverlay');
+
+            if (navbarCollapse) {
+                navbarCollapse.addEventListener('show.bs.collapse', function() {
+                    document.body.classList.add('menu-open');
+                    if (navbarOverlay) navbarOverlay.classList.add('show');
+                });
+                navbarCollapse.addEventListener('hide.bs.collapse', function() {
+                    document.body.classList.remove('menu-open');
+                    if (navbarOverlay) navbarOverlay.classList.remove('show');
+                });
+            }
+
+            if (navbarOverlay) {
+                navbarOverlay.addEventListener('click', function() {
+                    const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                    if (bsCollapse) bsCollapse.hide();
+     
