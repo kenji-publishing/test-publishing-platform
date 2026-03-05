@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work Detail - Publisher</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="../css/style-new.css" rel="stylesheet">
+    <link href="../css/mobile-fixes.css" rel="stylesheet">
+    <!-- Pattern C Navbar Styles -->
+    <style>
+        /* ========== Mobile Language Selector ========== */
+        .navbar-lang-selector {
+            display: flex;
+            align-items: center;
+            margin-right: 0.5rem;
+        }
+
+        @media (max-width: 991.98px) {
+            .navbar-lang-selector {
+                order: 1;
+            }
+            .navbar-toggler {
+                order: 2;
+            }
+        }
+
+        /* ========== PC Navbar - 横並び維持 ========== */
+        @media (min-width: 992px) {
+            .navbar-nav {
+                flex-wrap: nowrap !important;
+                flex-direction: row !important;
+            }
+            .navbar-nav .nav-item {
+                white-space: nowrap !important;
+            }
+            .navbar-nav .nav-link {
+                white-space: nowrap !important;
+                padding: 0.5rem 0.6rem !important;
+                font-size: 0.9rem;
+            }
+            .navbar-collapse .d-flex {
+                flex-wrap: nowrap !important;
+            }
+            .dropdown-menu {
+                white-space: nowrap;
+            }
+            .navbar-buttons-guest {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                gap: 0.5rem;
+            }
+            .navbar-buttons-guest .btn {
+                white-space: nowrap !important;
+                flex-shrink: 0;
+            }
+        }
+
+        /* ========== Auth Visibility Control ========== */
+        .auth-only {
+            display: none !important;
+        }
+        .guest-only {
+            display: block;
+        }
+        body.logged-in .auth-only {
+            display: block !important;
+        }
+        body.logged-in .auth-only.nav-item {
+            display: list-item !important;
+        }
+        body.logged-in .auth-only.dropdown {
+            display: block !important;
+        }
+        body.logged-in .guest-only {
+            display: none !important;
+        }
+        @media (min-width: 992px) {
+            body.logged-in .navbar-buttons-guest {
+                display: none !important;
+            }
+        }
+
+        /* ========== User Dropdown Menu ========== */
+        .user-dropdown {
+            position: relative;
+        }
+        .user-dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: transparent;
+            border: 1px solid var(--color-border);
+            border-radius: 25px;
+            padding: 0.4rem 0.75rem;
+            cursor: pointer;
+            color: var(--color-text);
+            transition: all 0.2s;
+        }
+        .user-dropdown-toggle:hover {
+            border-color: var(--color-accent);
+            background: rgba(139, 115, 85, 0.05);
+        }
+        .user-dropdown-toggle i:first-child {
+            font-size: 1.25rem;
+            color: var(--color-accent);
+        }
+        .user-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-chevron {
+            font-size: 0.7rem;
+            color: var(--color-text-secondary);
+            transition: transform 0.2s;
+        }
+        .user-dropdown.open .user-chevron {
+            transform: rotate(180deg);
+        }
+        .user-menu {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            right: 0;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            min-width: 240px;
+            z-index: 1055;
+            display: none;
+            overflow: hidden;
+        }
+        .user-menu.show {
+            display: block;
+        }
+        .user-menu-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--color-bg-main);
+        }
+        .user-avatar {
+            font-size: 2.5rem;
+            color: var(--color-accent);
+        }
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .user-display-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-email {
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-menu-divider {
+            height: 1px;
+            background: var(--color-border);
+        }
+        .user-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--color-text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+        .user-menu-item:hover {
+            background: var(--color-bg-hover);
+            color: var(--color-accent);
+        }
+        .user-menu-item i {
+            width: 20px;
+            text-align: center;
+            color: var(--color-text-secondary);
+        }
+        .user-menu-item:hover i {
+            color: var(--color-accent);
+        }
+        .logout-btn {
+            color: var(--color-error);
+        }
+        .logout-btn i {
+            color: var(--color-error);
+        }
+        .logout-btn:hover {
+            background: rgba(199, 93, 93, 0.1);
+            color: var(--color-error);
+        }
+
+        /* ========== Navbar Overlay ========== */
+        .navbar-overlay {
+            display: none;
+            position: fixed;
+            top: 56px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1030;
+        }
+        .navbar-overlay.show {
+            display: block;
+        }
+        body.menu-open {
+            overflow: hidden;
+        }
+
+        /* ========== Mobile Menu ========== */
+        @media (max-width: 991.98px) {
+            .navbar-collapse {
+                max-height: 70vh;
+                overflow-y: auto;
+                overscroll-behavior: contain;
+            }
+            .navbar-collapse.show,
+            .navbar-collapse.collapsing {
+                position: fixed;
+                top: 56px;
+                left: 0;
+                right: 0;
+                background: var(--color-bg-card);
+                border-bottom: 1px solid var(--color-border);
+                box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+                z-index: 1045;
+                padding: 0.5rem 1rem;
+            }
+            .navbar-custom {
+                z-index: 1050 !important;
+            }
+        }
+    </style>
+
+    <!-- Work Detail Page Styles -->
+    <style>
+        .work-detail-container { padding: var(--spacing-xl) 0; }
+
+        /* Work header - side-by-side layout */
+        .work-header {
+            display: flex;
+            gap: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+        }
+
+        /* Cover image area */
+        .work-detail-cover {
+            flex-shrink: 0;
+            width: 280px;
+            height: 400px;
+            background: var(--color-bg-hover);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .work-detail-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .work-detail-cover i {
+            font-size: 5rem;
+            color: var(--color-accent-light);
+        }
+
+        /* Work info section */
+        .work-detail-info { flex: 1; }
+        .work-detail-title {
+            font-family: var(--font-heading);
+            font-size: var(--font-size-3xl);
+            font-weight: 700;
+            margin-bottom: var(--spacing-sm);
+            color: var(--color-text-primary);
+        }
+        .work-detail-author {
+            font-size: var(--font-size-lg);
+            color: var(--color-text-secondary);
+            margin-bottom: var(--spacing-md);
+        }
+        .work-detail-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+            align-items: center;
+        }
+        .genre-badge {
+            background: rgba(139, 115, 85, 0.1);
+            color: var(--color-accent);
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+        }
+        .rating-display {
+            color: var(--color-warning);
+            font-size: var(--font-size-base);
+        }
+        .rating-display .rating-number {
+            color: var(--color-text-primary);
+            font-weight: 600;
+            margin-left: 0.25rem;
+        }
+        .price-display {
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+            color: var(--color-accent);
+        }
+        .language-badge {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+        }
+
+        /* Action buttons */
+        .action-buttons {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+            flex-wrap: wrap;
+        }
+        .btn-read {
+            background: var(--color-accent);
+            color: #FFFFFF;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: var(--font-size-base);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+        .btn-read:hover { background: var(--color-accent-hover); color: #FFFFFF; }
+        .btn-purchase {
+            background: var(--color-success);
+            color: #FFFFFF;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+        .btn-purchase:hover { background: #4a8a47; color: #FFFFFF; }
+        .btn-library {
+            background: transparent;
+            color: var(--color-accent);
+            border: 2px solid var(--color-accent);
+            padding: 0.75rem 2rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-library:hover {
+            background: var(--color-accent);
+            color: #FFFFFF;
+        }
+
+        /* Section cards */
+        .detail-section {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-lg);
+        }
+        .detail-section h2 {
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+            margin-bottom: var(--spacing-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+        .detail-section h2 i { color: var(--color-accent); }
+        .synopsis-text {
+            font-size: var(--font-size-base);
+            line-height: 1.8;
+            color: var(--color-text-primary);
+            white-space: pre-wrap;
+        }
+
+        /* Work metadata */
+        .work-metadata {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+        }
+        .metadata-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .metadata-label {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            margin-bottom: var(--spacing-xs);
+        }
+        .metadata-value {
+            font-weight: 500;
+            color: var(--color-text-primary);
+        }
+
+        /* Reviews section */
+        .rating-summary {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+            padding-bottom: var(--spacing-lg);
+            border-bottom: 1px solid var(--color-border);
+        }
+        .rating-big {
+            text-align: center;
+        }
+        .rating-big .number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            line-height: 1;
+        }
+        .rating-big .stars {
+            color: var(--color-warning);
+            font-size: var(--font-size-lg);
+            margin: var(--spacing-xs) 0;
+        }
+        .rating-big .count {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+        }
+
+        /* Review item */
+        .review-item {
+            padding: var(--spacing-lg) 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+        .review-item:last-child { border-bottom: none; }
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-sm);
+        }
+        .review-user {
+            font-weight: 600;
+            color: var(--color-text-primary);
+        }
+        .review-date {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+        }
+        .review-stars {
+            color: var(--color-warning);
+            margin-bottom: var(--spacing-sm);
+        }
+        .review-text {
+            color: var(--color-text-primary);
+            line-height: 1.6;
+        }
+
+        /* Write review form */
+        .review-form {
+            background: var(--color-bg-main);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-lg);
+            margin-top: var(--spacing-lg);
+        }
+        .review-form h3 {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            margin-bottom: var(--spacing-md);
+        }
+        .star-selector {
+            display: flex;
+            gap: 0.25rem;
+            margin-bottom: var(--spacing-md);
+            font-size: 1.5rem;
+        }
+        .star-selector i {
+            cursor: pointer;
+            color: var(--color-border);
+            transition: color 0.2s;
+        }
+        .star-selector i.active,
+        .star-selector i:hover {
+            color: var(--color-warning);
+        }
+        .review-form textarea {
+            width: 100%;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+            font-family: var(--font-primary);
+            resize: vertical;
+            min-height: 100px;
+        }
+        .review-form textarea:focus {
+            outline: none;
+            border-color: var(--color-accent);
+        }
+
+        /* Guest review prompt */
+        .guest-review-prompt {
+            text-align: center;
+            padding: var(--spacing-lg);
+            color: var(--color-text-secondary);
+            background: var(--color-bg-main);
+            border-radius: var(--radius-md);
+            margin-top: var(--spacing-lg);
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+            margin-bottom: var(--spacing-md);
+        }
+        .breadcrumb a {
+            color: var(--color-accent);
+            text-decoration: none;
+        }
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .work-header {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            .work-detail-cover { width: 200px; height: 300px; }
+            .work-detail-meta { justify-content: center; }
+            .action-buttons { justify-content: center; }
+            .rating-summary { flex-direction: column; text-align: center; }
+            .work-metadata { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 576px) {
+            .work-detail-cover { width: 160px; height: 240px; }
+            .work-detail-title { font-size: var(--font-size-xl); }
+            .action-buttons { flex-direction: column; }
+            .action-buttons .btn-read,
+            .action-buttons .btn-purchase,
+            .action-buttons .btn-library { width: 100%; justify-content: center; }
+            .work-metadata { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<!-- ========== NAVBAR PATTERN C (pages/ 階層) ========== -->
+<nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+    <div class="container">
+        <!-- Brand -->
+        <a class="navbar-brand" href="../index.html">
+            <i class="fas fa-book-open"></i>
+            Publisher
+        </a>
+
+        <!-- Language Selector Mobile -->
+        <div class="navbar-lang-selector d-lg-none">
+            <select class="language-selector" id="languageSelectorMobile">
+                <option value="en">🇬🇧 EN</option>
+                <option value="ja">🇯🇵 日本語</option>
+                <option value="zh">🇨🇳 中文</option>
+                <option value="es">🇪🇸 ES</option>
+                <option value="fr">🇫🇷 FR</option>
+                <option value="de">🇩🇪 DE</option>
+                <option value="ko">🇰🇷 한국어</option>
+                <option value="ar">🇸🇦 عربي</option>
+                <option value="pt">🇧🇷 PT</option>
+            </select>
+        </div>
+
+        <!-- User Dropdown (auth-only) -->
+        <div class="user-dropdown auth-only" id="userDropdown">
+            <button type="button" class="user-dropdown-toggle" id="userDropdownBtn" onclick="toggleUserDropdown(event)">
+                <i class="fas fa-user-circle"></i>
+                <span class="user-name d-none d-lg-inline" id="userName">User</span>
+                <i class="fas fa-chevron-down user-chevron d-none d-lg-inline"></i>
+            </button>
+            <div class="user-menu" id="userMenu">
+                <div class="user-menu-header">
+                    <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
+                    <div class="user-info">
+                        <div class="user-display-name" id="userDisplayName">User</div>
+                        <div class="user-email" id="userEmail">user@example.com</div>
+                    </div>
+                </div>
+                <div class="user-menu-divider"></div>
+                <a href="dashboard.html" class="user-menu-item">
+                    <i class="fas fa-th-large"></i>
+                    <span id="menuDashboard">Dashboard</span>
+                </a>
+                <a href="account-settings.html" class="user-menu-item">
+                    <i class="fas fa-cog"></i>
+                    <span id="menuAccountSettings">Account Settings</span>
+                </a>
+                <div class="user-menu-divider"></div>
+                <button class="user-menu-item logout-btn" onclick="handleLogout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span id="menuLogout">Log Out</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Hamburger -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Navbar Overlay -->
+        <div class="navbar-overlay d-lg-none" id="navbarOverlay"></div>
+
+        <!-- Navbar Content -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <!-- PC Navigation -->
+            <ul class="navbar-nav me-auto d-none d-lg-flex">
+                <li class="nav-item">
+                    <a class="nav-link" href="browse.html">
+                        <i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span>
+                    </a>
+                </li>
+                <li class="nav-item auth-only">
+                    <a class="nav-link" href="library.html">
+                        <i class="fas fa-book-reader me-1"></i> <span id="navLibraryPC">Library</span>
+                    </a>
+                </li>
+                <li class="nav-item auth-only">
+                    <a class="nav-link" href="dashboard.html">
+                        <i class="fas fa-th-large me-1"></i> <span id="navDashboardPC">Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item auth-only">
+                    <a class="nav-link" href="upload.html">
+                        <i class="fas fa-upload me-1"></i> <span data-i18n="nav.upload">Upload</span>
+                    </a>
+                </li>
+                <li class="nav-item dropdown auth-only">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-language me-1"></i> <span id="navTranslationToolsPC">Translation Tools</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="manga-translator.html"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorPC">Manga Translator</span></a></li>
+                        <li><a class="dropdown-item" href="translation-status.html"><i class="fas fa-tasks me-2"></i><span id="navTranslationStatusPC">Translation Status</span></a></li>
+                        <li><a class="dropdown-item" href="translators/index.html"><i class="fas fa-users me-2"></i><span id="navFindTranslatorsPC">Find Translators</span></a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-headset me-1"></i> <span data-i18n="nav.support">Support</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="support/faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
+                        <li><a class="dropdown-item" href="support/troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
+                        <li><a class="dropdown-item" href="support/contact.html"><i class="fas fa-envelope me-2"></i><span id="navContactPC">Contact</span></a></li>
+                        <li class="auth-only"><hr class="dropdown-divider"></li>
+                        <li class="auth-only"><a class="dropdown-item" href="support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
+                    </ul>
+                </li>
+            </ul>
+
+            <!-- Mobile Navigation -->
+            <ul class="navbar-nav d-lg-none">
+                <li class="nav-item">
+                    <a class="nav-link" href="browse.html">
+                        <i class="fas fa-compass me-2"></i><span data-i18n="nav.browse">Browse</span>
+                    </a>
+                </li>
+                <li class="nav-item auth-only">
+                    <a class="nav-link" href="library.html">
+                        <i class="fas fa-book-reader me-2"></i><span id="navLibraryMobile">Library</span>
+                    </a>
+                </li>
+                <li class="nav-item auth-only">
+                    <a class="nav-link" href="dashboard.html">
+                        <i class="fas fa-th-large me-2"></i><span id="navDashboardMobile">Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item auth-only">
+                    <a class="nav-link" href="upload.html">
+                        <i class="fas fa-upload me-2"></i><span data-i18n="nav.upload">Upload</span>
+                    </a>
+                </li>
+                <li class="nav-item dropdown auth-only">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                        <i class="fas fa-language me-2"></i><span id="navTranslationToolsMobile">Translation Tools</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="manga-translator.html"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorMobile">Manga Translator</span></a></li>
+                        <li><a class="dropdown-item" href="translation-status.html"><i class="fas fa-tasks me-2"></i><span id="navTranslationStatusMobile">Translation Status</span></a></li>
+                        <li><a class="dropdown-item" href="translators/index.html"><i class="fas fa-users me-2"></i><span id="navFindTranslatorsMobile">Find Translators</span></a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                        <i class="fas fa-headset me-2"></i><span data-i18n="nav.support">Support</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="support/faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
+                        <li><a class="dropdown-item" href="support/troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
+                        <li><a class="dropdown-item" href="support/contact.html"><i class="fas fa-envelope me-2"></i><span id="navContactMobile">Contact</span></a></li>
+                        <li class="auth-only"><hr class="dropdown-divider"></li>
+                        <li class="auth-only"><a class="dropdown-item" href="support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
+                    </ul>
+                </li>
+                <li class="nav-item guest-only border-top mt-2 pt-2">
+                    <a class="nav-link" href="login.html">
+                        <i class="fas fa-sign-in-alt me-2"></i><span data-i18n="nav.login">Sign In</span>
+                    </a>
+                </li>
+                <li class="nav-item guest-only">
+                    <a class="nav-link text-accent fw-bold" href="register.html">
+                        <i class="fas fa-user-plus me-2"></i><span data-i18n="nav.getStarted">Get Started</span>
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Right Side (PC) -->
+            <div class="d-none d-lg-flex align-items-center gap-3">
+                <select class="language-selector" id="languageSelector">
+                    <option value="en">🇬🇧 EN</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="es">🇪🇸 ES</option>
+                    <option value="fr">🇫🇷 FR</option>
+                    <option value="de">🇩🇪 DE</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="ar">🇸🇦 عربي</option>
+                    <option value="pt">🇧🇷 PT</option>
+                </select>
+
+                <div class="navbar-buttons-guest guest-only d-none d-lg-flex">
+                    <a href="login.html" class="btn btn-soft-custom">
+                        <span data-i18n="nav.login">Sign In</span>
+                    </a>
+                    <a href="register.html" class="btn btn-primary-custom">
+                        <span data-i18n="nav.getStarted">Get Started</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+<!-- ========== NAVBAR PATTERN C END ========== -->
+
+    <main class="work-detail-container">
+        <div class="container" style="max-width: 900px;">
+
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="browse.html" id="breadcrumbBrowse">Browse</a></li>
+                    <li class="breadcrumb-item active" id="breadcrumbTitle">Work Title</li>
+                </ol>
+            </nav>
+
+            <!-- Work Header Card -->
+            <div class="work-header">
+                <div class="work-detail-cover" id="workCover">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div class="work-detail-info">
+                    <h1 class="work-detail-title" id="workTitle"></h1>
+                    <p class="work-detail-author" id="workAuthor"></p>
+                    <div class="work-detail-meta">
+                        <span class="genre-badge" id="workGenre"></span>
+                        <span class="rating-display" id="workRating"></span>
+                        <span class="price-display" id="workPrice"></span>
+                        <span class="language-badge" id="workLanguage">
+                            <i class="fas fa-globe me-1"></i>
+                        </span>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn-read" id="btnRead" onclick="startReading()">
+                            <i class="fas fa-book-reader"></i>
+                            <span id="btnReadText">Start Reading</span>
+                        </button>
+                        <button class="btn-purchase" id="btnPurchase" onclick="purchaseWork()" style="display:none;">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span id="btnPurchaseText">Purchase</span>
+                        </button>
+                        <button class="btn-library auth-only" id="btnLibrary" onclick="addToLibrary()">
+                            <i class="fas fa-plus"></i>
+                            <span id="btnLibraryText">Add to Library</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Synopsis Section -->
+            <div class="detail-section">
+                <h2><i class="fas fa-align-left"></i> <span id="synopsisTitle">Synopsis</span></h2>
+                <div class="synopsis-text" id="synopsisContent"></div>
+            </div>
+
+            <!-- Work Details / Metadata Section -->
+            <div class="detail-section">
+                <h2><i class="fas fa-info-circle"></i> <span id="detailsTitle">Details</span></h2>
+                <div class="work-metadata">
+                    <div class="metadata-item">
+                        <span class="metadata-label" id="labelContentType">Content Type</span>
+                        <span class="metadata-value" id="valueContentType"></span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="metadata-label" id="labelOriginalLang">Original Language</span>
+                        <span class="metadata-value" id="valueOriginalLang"></span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="metadata-label" id="labelTranslations">Translations Available</span>
+                        <span class="metadata-value" id="valueTranslations"></span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="metadata-label" id="labelCategory">Category</span>
+                        <span class="metadata-value" id="valueCategory"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reviews Section -->
+            <div class="detail-section">
+                <h2><i class="fas fa-star"></i> <span id="reviewsTitle">Reviews</span></h2>
+
+                <!-- Rating Summary -->
+                <div class="rating-summary">
+                    <div class="rating-big">
+                        <div class="number" id="avgRating">4.8</div>
+                        <div class="stars" id="avgStars"></div>
+                        <div class="count" id="reviewCount"></div>
+                    </div>
+                </div>
+
+                <!-- Review List -->
+                <div id="reviewList"></div>
+
+                <!-- Write Review Form (auth-only) -->
+                <div class="review-form auth-only" id="reviewForm">
+                    <h3 id="writeReviewTitle">Write a Review</h3>
+                    <div class="star-selector" id="starSelector">
+                        <i class="far fa-star" data-value="1"></i>
+                        <i class="far fa-star" data-value="2"></i>
+                        <i class="far fa-star" data-value="3"></i>
+                        <i class="far fa-star" data-value="4"></i>
+                        <i class="far fa-star" data-value="5"></i>
+                    </div>
+                    <textarea id="reviewTextarea" rows="4" placeholder="Share your thoughts..."></textarea>
+                    <button class="btn-read mt-3" onclick="submitReview()" id="btnSubmitReview">
+                        <i class="fas fa-paper-plane"></i>
+                        <span id="btnSubmitText">Submit Review</span>
+                    </button>
+                </div>
+
+                <!-- Guest prompt -->
+                <div class="guest-review-prompt guest-only">
+                    <p id="loginToReview">Sign in to write a review</p>
+                    <a href="login.html" class="btn-read" style="display:inline-flex;">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span id="btnSignInReview">Sign In</span>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="footer-custom">
+        <div class="container">
+            <div class="d-flex flex-wrap justify-content-between align-items-center">
+                <p class="small mb-0">&copy; 2026 Publisher. All rights reserved.</p>
+                <div class="d-flex gap-3">
+                    <a href="support/faq.html" class="text-secondary" id="footerHelp">Help</a>
+                    <a href="terms.html" class="text-secondary" id="footerTerms">Terms</a>
+                    <a href="privacy.html" class="text-secondary" id="footerPrivacy">Privacy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/lang/ja.js"></script>
+    <script src="../js/lang/en.js"></script>
+    <script src="../js/lang/zh.js"></script>
+    <script src="../js/lang/es.js"></script>
+    <script src="../js/lang/fr.js"></script>
+    <script src="../js/lang/de.js"></script>
+    <script src="../js/lang/ko.js"></script>
+    <script src="../js/lang/ar.js"></script>
+    <script src="../js/lang/pt.js"></script>
+    <script src="../js/lang/translations-base.js"></script>
+    <script src="../js/language-switcher.js"></script>
+    <script src="../js/header-notification.js"></script>
+
+    <!-- Pattern C Navbar Script -->
+    <script>
+        // ========== 多言語対応テキスト（9言語）==========
+        const navText = {
+            translationTools: {
+                en: 'Translation Tools', ja: '翻訳ツール', zh: '翻译工具',
+                es: 'Herramientas de traducción', fr: 'Outils de traduction', de: 'Übersetzungstools',
+                ko: '번역 도구', ar: 'أدوات الترجمة', pt: 'Ferramentas de tradução'
+            },
+            mangaTranslator: {
+                en: 'Manga Translator', ja: 'マンガ翻訳', zh: '漫画翻译',
+                es: 'Traductor de Manga', fr: 'Traducteur de Manga', de: 'Manga-Übersetzer',
+                ko: '만화 번역기', ar: 'مترجم المانجا', pt: 'Tradutor de Mangá'
+            },
+            translationStatus: {
+                en: 'Translation Status', ja: '翻訳状況', zh: '翻译状态',
+                es: 'Estado de traducción', fr: 'Statut de traduction', de: 'Übersetzungsstatus',
+                ko: '번역 상태', ar: 'حالة الترجمة', pt: 'Status da tradução'
+            },
+            findTranslators: {
+                en: 'Find Translators', ja: '翻訳者を探す', zh: '寻找翻译',
+                es: 'Buscar traductores', fr: 'Trouver des traducteurs', de: 'Übersetzer finden',
+                ko: '번역가 찾기', ar: 'البحث عن مترجمين', pt: 'Encontrar tradutores'
+            },
+            contact: {
+                en: 'Contact', ja: 'お問い合わせ', zh: '联系我们',
+                es: 'Contacto', fr: 'Contact', de: 'Kontakt',
+                ko: '문의', ar: 'اتصل بنا', pt: 'Contato'
+            },
+            library: {
+                en: 'Library', ja: 'ライブラリ', zh: '书库',
+                es: 'Biblioteca', fr: 'Bibliothèque', de: 'Bibliothek',
+                ko: '라이브러리', ar: 'المكتبة', pt: 'Biblioteca'
+            },
+            dashboard: {
+                en: 'Dashboard', ja: 'ダッシュボード', zh: '控制台',
+                es: 'Panel', fr: 'Tableau de bord', de: 'Dashboard',
+                ko: '대시보드', ar: 'لوحة التحكم', pt: 'Painel'
+            },
+            accountSettings: {
+                en: 'Account Settings', ja: 'アカウント設定', zh: '账户设置',
+                es: 'Configuración de cuenta', fr: 'Paramètres du compte', de: 'Kontoeinstellungen',
+                ko: '계정 설정', ar: 'إعدادات الحساب', pt: 'Configurações da conta'
+            },
+            logout: {
+                en: 'Log Out', ja: 'ログアウト', zh: '退出登录',
+                es: 'Cerrar sesión', fr: 'Déconnexion', de: 'Abmelden',
+                ko: '로그아웃', ar: 'تسجيل الخروج', pt: 'Sair'
+            },
+            logOutConfirm: {
+                en: 'Are you sure you want to log out?', ja: 'ログアウトしますか？', zh: '确定要退出登录吗？',
+                es: '¿Estás seguro de que quieres cerrar sesión?', fr: 'Êtes-vous sûr de vouloir vous déconnecter?', de: 'Sind Sie sicher, dass Sie sich abmelden möchten?',
+                ko: '로그아웃 하시겠습니까?', ar: 'هل أنت متأكد أنك تريد تسجيل الخروج؟', pt: 'Tem certeza que deseja sair?'
+            }
+        };
+
+        function getNavL(obj) {
+            const lang = localStorage.getItem('preferredLanguage') || 'en';
+            return obj[lang] || obj.en || '';
+        }
+
+        function updateNavUIText() {
+            const menuDashboard = document.getElementById('menuDashboard');
+            const menuAccountSettings = document.getElementById('menuAccountSettings');
+            const menuLogout = document.getElementById('menuLogout');
+            if (menuDashboard) menuDashboard.textContent = getNavL(navText.dashboard);
+            if (menuAccountSettings) menuAccountSettings.textContent = getNavL(navText.accountSettings);
+            if (menuLogout) menuLogout.textContent = getNavL(navText.logout);
+
+            const els = {
+                navLibraryPC: navText.library, navDashboardPC: navText.dashboard,
+                navTranslationToolsPC: navText.translationTools, navMangaTranslatorPC: navText.mangaTranslator,
+                navTranslationStatusPC: navText.translationStatus, navFindTranslatorsPC: navText.findTranslators,
+                navContactPC: navText.contact, navLibraryMobile: navText.library, navDashboardMobile: navText.dashboard,
+                navTranslationToolsMobile: navText.translationTools, navMangaTranslatorMobile: navText.mangaTranslator,
+                navTranslationStatusMobile: navText.translationStatus, navFindTranslatorsMobile: navText.findTranslators,
+                navContactMobile: navText.contact
+            };
+            Object.keys(els).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = getNavL(els[id]);
+            });
+        }
+
+        function toggleUserDropdown(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const dropdown = document.getElementById('userDropdown');
+            const dropdownMenu = document.getElementById('userMenu');
+            dropdown.classList.toggle('open');
+            dropdownMenu.classList.toggle('show');
+        }
+
+        function handleLogout() {
+            if (confirm(getNavL(navText.logOutConfirm))) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
+            }
+        }
+
+        function loadUserInfo() {
+            const userStr = localStorage.getItem('user');
+            const token = localStorage.getItem('token');
+            const isLoggedIn = !!(userStr && token);
+
+            if (isLoggedIn) {
+                try {
+                    const user = JSON.parse(userStr);
+                    const displayName = user.display_name || user.firstName || user.email || 'User';
+                    const userNameEl = document.getElementById('userName');
+                    const userDisplayNameEl = document.getElementById('userDisplayName');
+                    const userEmailEl = document.getElementById('userEmail');
+                    if (userNameEl) userNameEl.textContent = displayName;
+                    if (userDisplayNameEl) userDisplayNameEl.textContent = displayName;
+                    if (userEmailEl) userEmailEl.textContent = user.email || '';
+                    document.body.classList.add('logged-in');
+                } catch (e) {
+                    document.body.classList.remove('logged-in');
+                }
+            } else {
+                document.body.classList.remove('logged-in');
+            }
+        }
+
+        // Navbar initialization
+        (function() {
+            document.addEventListener('DOMContentLoaded', function() {
+                updateNavUIText();
+                loadUserInfo();
+
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('.user-dropdown')) {
+                        const dropdown = document.getElementById('userDropdown');
+                        const dropdownMenu = document.getElementById('userMenu');
+                        if (dropdown) dropdown.classList.remove('open');
+                        if (dropdownMenu) dropdownMenu.classList.remove('show');
+                    }
+                });
+
+                const navbarCollapse = document.getElementById('navbarNav');
+                const navbarOverlay = document.getElementById('navbarOverlay');
+
+                if (navbarCollapse) {
+                    navbarCollapse.addEventListener('show.bs.collapse', function() {
+                        document.body.classList.add('menu-open');
+                        if (navbarOverlay) navbarOverlay.classList.add('show');
+                    });
+                    navbarCollapse.addEventListener('hide.bs.collapse', function() {
+                        document.body.classList.remove('menu-open');
+                        if (navbarOverlay) navbarOverlay.classList.remove('show');
+                    });
+                }
+
+                if (navbarOverlay) {
+                    navbarOverlay.addEventListener('click', function() {
+                        const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                        if (bsCollapse) bsCollapse.hide();
+                    });
+                }
+            });
+
+            document.addEventListener('languageChanged', function() {
+                updateNavUIText();
+            });
+        })();
+    </script>
+
+    <!-- Work Detail Page Script -->
+    <script>
+        // ========== 多言語対応テキスト（9言語）==========
+        const uiText = {
+            breadcrumbBrowse: {
+                en: 'Browse', ja: '作品を探す', zh: '浏览', es: 'Explorar',
+                fr: 'Parcourir', de: 'Durchsuchen', ko: '둘러보기', ar: 'تصفح', pt: 'Explorar'
+            },
+            by: {
+                en: 'by', ja: '著者:', zh: '作者:', es: 'por',
+                fr: 'par', de: 'von', ko: '저자:', ar: 'بواسطة', pt: 'por'
+            },
+            free: {
+                en: 'Free', ja: '無料', zh: '免费', es: 'Gratis',
+                fr: 'Gratuit', de: 'Kostenlos', ko: '무료', ar: 'مجاني', pt: 'Grátis'
+            },
+            startReading: {
+                en: 'Start Reading', ja: '読み始める', zh: '开始阅读', es: 'Comenzar a leer',
+                fr: 'Commencer la lecture', de: 'Lesen beginnen', ko: '읽기 시작', ar: 'ابدأ القراءة', pt: 'Começar a ler'
+            },
+            purchase: {
+                en: 'Purchase', ja: '購入する', zh: '购买', es: 'Comprar',
+                fr: 'Acheter', de: 'Kaufen', ko: '구매', ar: 'شراء', pt: 'Comprar'
+            },
+            addToLibrary: {
+                en: 'Add to Library', ja: 'ライブラリに追加', zh: '添加到书库', es: 'Agregar a la biblioteca',
+                fr: 'Ajouter à la bibliothèque', de: 'Zur Bibliothek hinzufügen', ko: '라이브러리에 추가', ar: 'أضف إلى المكتبة', pt: 'Adicionar à biblioteca'
+            },
+            synopsis: {
+                en: 'Synopsis', ja: 'あらすじ', zh: '简介', es: 'Sinopsis',
+                fr: 'Synopsis', de: 'Zusammenfassung', ko: '줄거리', ar: 'ملخص', pt: 'Sinopse'
+            },
+            details: {
+                en: 'Details', ja: '詳細情報', zh: '详细信息', es: 'Detalles',
+                fr: 'Détails', de: 'Details', ko: '상세 정보', ar: 'تفاصيل', pt: 'Detalhes'
+            },
+            contentType: {
+                en: 'Content Type', ja: 'コンテンツタイプ', zh: '内容类型', es: 'Tipo de contenido',
+                fr: 'Type de contenu', de: 'Inhaltstyp', ko: '콘텐츠 유형', ar: 'نوع المحتوى', pt: 'Tipo de conteúdo'
+            },
+            originalLanguage: {
+                en: 'Original Language', ja: '原作言語', zh: '原始语言', es: 'Idioma original',
+                fr: 'Langue originale', de: 'Originalsprache', ko: '원본 언어', ar: 'اللغة الأصلية', pt: 'Idioma original'
+            },
+            translationsAvailable: {
+                en: 'Translations Available', ja: '翻訳言語', zh: '可用翻译', es: 'Traducciones disponibles',
+                fr: 'Traductions disponibles', de: 'Verfügbare Übersetzungen', ko: '번역 가능', ar: 'الترجمات المتاحة', pt: 'Traduções disponíveis'
+            },
+            category: {
+                en: 'Category', ja: 'カテゴリ', zh: '类别', es: 'Categoría',
+                fr: 'Catégorie', de: 'Kategorie', ko: '카테고리', ar: 'الفئة', pt: 'Categoria'
+            },
+            reviews: {
+                en: 'Reviews', ja: 'レビュー', zh: '评论', es: 'Reseñas',
+                fr: 'Avis', de: 'Bewertungen', ko: '리뷰', ar: 'المراجعات', pt: 'Avaliações'
+            },
+            reviewCount: {
+                en: 'reviews', ja: '件のレビュー', zh: '条评论', es: 'reseñas',
+                fr: 'avis', de: 'Bewertungen', ko: '개 리뷰', ar: 'مراجعة', pt: 'avaliações'
+            },
+            writeReview: {
+                en: 'Write a Review', ja: 'レビューを書く', zh: '写评论', es: 'Escribir una reseña',
+                fr: 'Écrire un avis', de: 'Bewertung schreiben', ko: '리뷰 작성', ar: 'اكتب مراجعة', pt: 'Escrever uma avaliação'
+            },
+            submitReview: {
+                en: 'Submit Review', ja: 'レビューを送信', zh: '提交评论', es: 'Enviar reseña',
+                fr: 'Soumettre un avis', de: 'Bewertung einreichen', ko: '리뷰 제출', ar: 'إرسال المراجعة', pt: 'Enviar avaliação'
+            },
+            reviewPlaceholder: {
+                en: 'Share your thoughts about this work...', ja: 'この作品についての感想を書いてください...',
+                zh: '分享你对这部作品的看法...', es: 'Comparte tus pensamientos sobre esta obra...',
+                fr: 'Partagez vos impressions sur cette œuvre...', de: 'Teilen Sie Ihre Gedanken zu diesem Werk...',
+                ko: '이 작품에 대한 생각을 공유하세요...', ar: 'شارك أفكارك حول هذا العمل...',
+                pt: 'Compartilhe seus pensamentos sobre esta obra...'
+            },
+            loginToReview: {
+                en: 'Sign in to write a review', ja: 'レビューを書くにはログインしてください',
+                zh: '登录以写评论', es: 'Inicia sesión para escribir una reseña',
+                fr: 'Connectez-vous pour écrire un avis', de: 'Melden Sie sich an, um eine Bewertung zu schreiben',
+                ko: '리뷰를 작성하려면 로그인하세요', ar: 'سجل الدخول لكتابة مراجعة',
+                pt: 'Faça login para escrever uma avaliação'
+            },
+            signIn: {
+                en: 'Sign In', ja: 'ログイン', zh: '登录', es: 'Iniciar sesión',
+                fr: 'Se connecter', de: 'Anmelden', ko: '로그인', ar: 'تسجيل الدخول', pt: 'Entrar'
+            },
+            reviewSubmitted: {
+                en: 'Review submitted!', ja: 'レビューを投稿しました！', zh: '评论已提交！',
+                es: '¡Reseña enviada!', fr: 'Avis soumis !', de: 'Bewertung eingereicht!',
+                ko: '리뷰가 제출되었습니다!', ar: 'تم إرسال المراجعة!', pt: 'Avaliação enviada!'
+            },
+            addedToLibrary: {
+                en: 'Added to Library!', ja: 'ライブラリに追加しました！', zh: '已添加到书库！',
+                es: '¡Agregado a la biblioteca!', fr: 'Ajouté à la bibliothèque !', de: 'Zur Bibliothek hinzugefügt!',
+                ko: '라이브러리에 추가되었습니다!', ar: 'تمت الإضافة إلى المكتبة!', pt: 'Adicionado à biblioteca!'
+            },
+            selectRating: {
+                en: 'Please select a rating', ja: '評価を選択してください', zh: '请选择评分',
+                es: 'Por favor seleccione una calificación', fr: 'Veuillez sélectionner une note', de: 'Bitte wählen Sie eine Bewertung',
+                ko: '평점을 선택해주세요', ar: 'يرجى تحديد تقييم', pt: 'Por favor, selecione uma avaliação'
+            },
+            writeComment: {
+                en: 'Please write a review', ja: 'レビューを書いてください', zh: '请写评论',
+                es: 'Por favor escriba una reseña', fr: 'Veuillez écrire un avis', de: 'Bitte schreiben Sie eine Bewertung',
+                ko: '리뷰를 작성해주세요', ar: 'يرجى كتابة مراجعة', pt: 'Por favor, escreva uma avaliação'
+            },
+            footerHelp: { en: 'Help', ja: 'ヘルプ', zh: '帮助', es: 'Ayuda', fr: 'Aide', de: 'Hilfe', ko: '도움말', ar: 'مساعدة', pt: 'Ajuda' },
+            footerTerms: { en: 'Terms', ja: '利用規約', zh: '条款', es: 'Términos', fr: 'Conditions', de: 'Bedingungen', ko: '약관', ar: 'الشروط', pt: 'Termos' },
+            footerPrivacy: { en: 'Privacy', ja: 'プライバシー', zh: '隐私', es: 'Privacidad', fr: 'Confidentialité', de: 'Datenschutz', ko: '개인정보', ar: 'الخصوصية', pt: 'Privacidade' }
+        };
+
+        // ========== サンプル作品データ（browse.htmlの6作品を拡張）==========
+        const workDetails = {
+            1: {
+                id: 1, title: 'The Adventure of Magic Academy', author: 'Sarah Chen',
+                price: 4.99, rating: 4.8, category: 'fiction', language: 'en',
+                contentType: 'novel', originalLanguage: 'en',
+                translationsAvailable: ['ja', 'zh', 'es', 'fr', 'de'],
+                description: 'In a world where magic is taught at prestigious academies, young Aria discovers she possesses a rare and dangerous power that could change the fate of the magical world. As she navigates the treacherous halls of the Silver Tower Academy, she must learn to control her abilities while uncovering a conspiracy that threatens to plunge the world into chaos.\n\nJoin Aria on her journey through ancient libraries, forbidden forests, and dangerous duels as she forges unlikely friendships and confronts the darkness within.',
+                reviews: [
+                    { user: 'BookLover42', rating: 5, date: '2026-02-15', text: 'Absolutely captivating! Could not put it down. The world-building is phenomenal and the characters feel so real.' },
+                    { user: 'MagicFan', rating: 5, date: '2026-02-10', text: 'Best fantasy novel I have read this year. The magic system is unique and well thought out.' },
+                    { user: 'CriticalReader', rating: 4, date: '2026-01-28', text: 'Great story with wonderful characters. The pacing slows a bit in the middle but picks up nicely for the climax.' },
+                    { user: 'YukiT', rating: 5, date: '2026-01-15', text: 'The Japanese translation is excellent too! Highly recommend.' }
+                ]
+            },
+            2: {
+                id: 2, title: 'Whispers of Tomorrow', author: 'James Miller',
+                price: 3.99, rating: 4.6, category: 'fiction', language: 'en',
+                contentType: 'novel', originalLanguage: 'en',
+                translationsAvailable: ['ja', 'ko'],
+                description: 'A thought-provoking science fiction novel that explores a future where memories can be shared between people. When journalist Maya Cole discovers a memory that could expose a massive cover-up, she must decide what truths are worth fighting for.\n\nSet in a world that feels uncomfortably close to our own, Whispers of Tomorrow raises profound questions about privacy, identity, and the nature of truth.',
+                reviews: [
+                    { user: 'SciFiNerd', rating: 5, date: '2026-02-20', text: 'Mind-bending and thought-provoking. A must-read for sci-fi fans.' },
+                    { user: 'JaneDoe', rating: 4, date: '2026-02-01', text: 'Really enjoyed the premise. Some plot holes but overall excellent.' }
+                ]
+            },
+            3: {
+                id: 3, title: 'Digital Dreams', author: 'Yuki Tanaka',
+                price: 5.99, rating: 4.9, category: 'manga', language: 'ja',
+                contentType: 'manga', originalLanguage: 'ja',
+                translationsAvailable: ['en', 'zh', 'ko'],
+                description: 'In the neon-lit streets of Neo-Tokyo 2089, a young hacker named Rei discovers a virtual world where dreams become reality. But when the line between the digital and real worlds begins to blur, Rei must confront the architect of this dreamscape before both worlds collapse.\n\nA visually stunning manga that combines cyberpunk aesthetics with emotional storytelling.',
+                reviews: [
+                    { user: 'MangaKing', rating: 5, date: '2026-03-01', text: 'Stunning artwork and incredible story. Tanaka-sensei has outdone themselves.' },
+                    { user: 'OtakuReader', rating: 5, date: '2026-02-25', text: 'This is what manga should be. Perfect blend of art and narrative.' },
+                    { user: 'DigitalNomad', rating: 5, date: '2026-02-18', text: 'The cyberpunk world-building is on another level.' }
+                ]
+            },
+            4: {
+                id: 4, title: 'The Last Kingdom', author: 'Maria Garcia',
+                price: 2.99, rating: 4.5, category: 'fiction', language: 'es',
+                contentType: 'novel', originalLanguage: 'es',
+                translationsAvailable: ['en', 'fr', 'pt'],
+                description: 'En un reino al borde de la destruccion, una joven princesa debe encontrar la fuerza para unir a su pueblo dividido contra una amenaza antigua que regresa.\n\nA sweeping epic that blends historical fiction with fantasy elements, The Last Kingdom is a tale of courage, sacrifice, and the power of hope.',
+                reviews: [
+                    { user: 'HistoryBuff', rating: 5, date: '2026-02-12', text: 'Beautiful prose and compelling characters.' },
+                    { user: 'FantasyReader', rating: 4, date: '2026-01-30', text: 'Great world-building. Looking forward to the sequel!' }
+                ]
+            },
+            5: {
+                id: 5, title: '\u6708\u5149\u306e\u8a69', author: '\u7530\u4e2d\u82b1\u5b50',
+                price: 0, rating: 4.7, category: 'poetry', language: 'ja',
+                contentType: 'poetry', originalLanguage: 'ja',
+                translationsAvailable: ['en'],
+                description: '\u6708\u306e\u5149\u306b\u7167\u3089\u3055\u308c\u305f\u4e16\u754c\u3092\u63cf\u304f\u7f8e\u3057\u3044\u8a69\u96c6\u3002\u81ea\u7136\u3068\u4eba\u9593\u306e\u7e4a\u7d30\u306a\u95a2\u4fc2\u3092\u7db4\u3063\u305f\u4f5c\u54c1\u96c6\u3067\u3059\u3002\n\nA collection of poetry illuminated by moonlight, exploring the delicate relationship between nature and humanity.',
+                reviews: [
+                    { user: 'PoetryLover', rating: 5, date: '2026-02-28', text: 'Hauntingly beautiful. Every poem resonates deeply.' },
+                    { user: '\u6587\u5b66\u597d\u304d', rating: 5, date: '2026-02-20', text: '\u7d20\u6674\u3089\u3057\u3044\u8a69\u96c6\u3067\u3059\u3002\u5fc3\u306b\u67d3\u307f\u5165\u308a\u307e\u3059\u3002' }
+                ]
+            },
+            6: {
+                id: 6, title: 'Le Monde Nouveau', author: 'Pierre Dubois',
+                price: 3.49, rating: 4.4, category: 'non-fiction', language: 'fr',
+                contentType: 'article', originalLanguage: 'fr',
+                translationsAvailable: ['en', 'de', 'es'],
+                description: 'Une exploration fascinante de la maniere dont la technologie transforme notre societe. Pierre Dubois examine les implications sociales, economiques et culturelles de la revolution numerique.\n\nA fascinating exploration of how technology is transforming our society, examining social, economic, and cultural implications of the digital revolution.',
+                reviews: [
+                    { user: 'TechReader', rating: 4, date: '2026-02-08', text: 'Insightful analysis of modern technology trends.' },
+                    { user: 'FrenchLit', rating: 5, date: '2026-01-20', text: 'Excellente lecture. Tres bien ecrit et bien argumente.' }
+                ]
+            }
+        };
+
+        // ========== ヘルパー関数 ==========
+        function getCurrentLang() {
+            return localStorage.getItem('preferredLanguage') || 'en';
+        }
+
+        function getL(obj) {
+            if (!obj) return '';
+            const l = getCurrentLang();
+            return obj[l] || obj.en || '';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function getWorkIdFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return parseInt(params.get('id'));
+        }
+
+        function renderStars(rating) {
+            let html = '';
+            const full = Math.floor(rating);
+            const half = rating % 1 >= 0.3;
+            const empty = 5 - full - (half ? 1 : 0);
+            for (let i = 0; i < full; i++) html += '<i class="fas fa-star"></i>';
+            if (half) html += '<i class="fas fa-star-half-alt"></i>';
+            for (let i = 0; i < empty; i++) html += '<i class="far fa-star"></i>';
+            return html;
+        }
+
+        function getLanguageName(code) {
+            const names = {
+                en: 'English', ja: '日本語', zh: '中文', es: 'Español',
+                fr: 'Français', de: 'Deutsch', ko: '한국어', ar: 'العربية', pt: 'Português'
+            };
+            return names[code] || code;
+        }
+
+        function getGenreLabel(genre) {
+            const genreLabels = {
+                fiction: { en: 'Fiction', ja: '小説', zh: '小说', es: 'Ficción', fr: 'Fiction', de: 'Belletristik', ko: '소설', ar: 'خيال', pt: 'Ficção' },
+                'non-fiction': { en: 'Non-Fiction', ja: 'ノンフィクション', zh: '非虚构', es: 'No ficción', fr: 'Non-fiction', de: 'Sachbuch', ko: '논픽션', ar: 'غير خيالي', pt: 'Não ficção' },
+                manga: { en: 'Manga', ja: 'マンガ', zh: '漫画', es: 'Manga', fr: 'Manga', de: 'Manga', ko: '만화', ar: 'مانغا', pt: 'Mangá' },
+                poetry: { en: 'Poetry', ja: '詩', zh: '诗歌', es: 'Poesía', fr: 'Poésie', de: 'Poesie', ko: '시', ar: 'شعر', pt: 'Poesia' }
+            };
+            return genreLabels[genre] ? getL(genreLabels[genre]) : genre;
+        }
+
+        function getContentTypeLabel(type) {
+            const labels = {
+                novel: { en: 'Novel', ja: '小説', zh: '小说', es: 'Novela', fr: 'Roman', de: 'Roman', ko: '소설', ar: 'رواية', pt: 'Romance' },
+                'short-story': { en: 'Short Story', ja: '短編', zh: '短篇小说', es: 'Cuento', fr: 'Nouvelle', de: 'Kurzgeschichte', ko: '단편', ar: 'قصة قصيرة', pt: 'Conto' },
+                article: { en: 'Article', ja: '記事', zh: '文章', es: 'Artículo', fr: 'Article', de: 'Artikel', ko: '기사', ar: 'مقال', pt: 'Artigo' },
+                manga: { en: 'Manga', ja: 'マンガ', zh: '漫画', es: 'Manga', fr: 'Manga', de: 'Manga', ko: '만화', ar: 'مانغا', pt: 'Mangá' },
+                poetry: { en: 'Poetry', ja: '詩', zh: '诗歌', es: 'Poesía', fr: 'Poésie', de: 'Poesie', ko: '시', ar: 'شعر', pt: 'Poesia' }
+            };
+            return labels[type] ? getL(labels[type]) : type;
+        }
+
+        // ========== メインの描画関数 ==========
+        function loadWork() {
+            const id = getWorkIdFromUrl();
+            const work = workDetails[id];
+
+            if (!work) {
+                window.location.href = 'browse.html';
+                return;
+            }
+
+            // ページタイトル
+            document.title = `${work.title} - Publisher`;
+
+            // パンくずリスト
+            document.getElementById('breadcrumbBrowse').textContent = getL(uiText.breadcrumbBrowse);
+            document.getElementById('breadcrumbTitle').textContent = work.title;
+
+            // 作品ヘッダー
+            document.getElementById('workTitle').textContent = work.title;
+            document.getElementById('workAuthor').textContent = `${getL(uiText.by)} ${work.author}`;
+
+            // ジャンルバッジ
+            document.getElementById('workGenre').textContent = getGenreLabel(work.category);
+
+            // 評価
+            const ratingEl = document.getElementById('workRating');
+            ratingEl.innerHTML = renderStars(work.rating) + ` <span class="rating-number">${work.rating}</span>`;
+
+            // 価格
+            const priceEl = document.getElementById('workPrice');
+            if (work.price === 0) {
+                priceEl.textContent = getL(uiText.free);
+            } else {
+                priceEl.textContent = '$' + work.price.toFixed(2);
+            }
+
+            // 言語
+            document.getElementById('workLanguage').innerHTML =
+                `<i class="fas fa-globe me-1"></i>${getLanguageName(work.language)}`;
+
+            // ボタン
+            document.getElementById('btnReadText').textContent = getL(uiText.startReading);
+            document.getElementById('btnLibraryText').textContent = getL(uiText.addToLibrary);
+
+            if (work.price > 0) {
+                document.getElementById('btnPurchase').style.display = 'inline-flex';
+                document.getElementById('btnPurchaseText').textContent =
+                    `${getL(uiText.purchase)} - $${work.price.toFixed(2)}`;
+            } else {
+                document.getElementById('btnPurchase').style.display = 'none';
+            }
+
+            // あらすじ
+            document.getElementById('synopsisTitle').textContent = getL(uiText.synopsis);
+            document.getElementById('synopsisContent').textContent = work.description;
+
+            // 詳細情報
+            document.getElementById('detailsTitle').textContent = getL(uiText.details);
+            document.getElementById('labelContentType').textContent = getL(uiText.contentType);
+            document.getElementById('valueContentType').textContent = getContentTypeLabel(work.contentType);
+            document.getElementById('labelOriginalLang').textContent = getL(uiText.originalLanguage);
+            document.getElementById('valueOriginalLang').textContent = getLanguageName(work.originalLanguage);
+            document.getElementById('labelTranslations').textContent = getL(uiText.translationsAvailable);
+            document.getElementById('valueTranslations').textContent =
+                work.translationsAvailable.map(getLanguageName).join(', ');
+            document.getElementById('labelCategory').textContent = getL(uiText.category);
+            document.getElementById('valueCategory').textContent = getGenreLabel(work.category);
+
+            // レビュー
+            document.getElementById('reviewsTitle').textContent = getL(uiText.reviews);
+            renderReviews(work.reviews, work.rating);
+
+            // レビューフォーム
+            document.getElementById('writeReviewTitle').textContent = getL(uiText.writeReview);
+            document.getElementById('btnSubmitText').textContent = getL(uiText.submitReview);
+            document.getElementById('reviewTextarea').placeholder = getL(uiText.reviewPlaceholder);
+            document.getElementById('loginToReview').textContent = getL(uiText.loginToReview);
+            document.getElementById('btnSignInReview').textContent = getL(uiText.signIn);
+
+            // フッター
+            document.getElementById('footerHelp').textContent = getL(uiText.footerHelp);
+            document.getElementById('footerTerms').textContent = getL(uiText.footerTerms);
+            document.getElementById('footerPrivacy').textContent = getL(uiText.footerPrivacy);
+        }
+
+        function renderReviews(reviews, avgRating) {
+            document.getElementById('avgRating').textContent = avgRating.toFixed(1);
+            document.getElementById('avgStars').innerHTML = renderStars(avgRating);
+            document.getElementById('reviewCount').textContent =
+                `${reviews.length} ${getL(uiText.reviewCount)}`;
+
+            const listEl = document.getElementById('reviewList');
+            listEl.innerHTML = reviews.map(review => `
+                <div class="review-item">
+                    <div class="review-header">
+                        <span class="review-user"><i class="fas fa-user-circle me-1"></i>${escapeHtml(review.user)}</span>
+                        <span class="review-date">${review.date}</span>
+                    </div>
+                    <div class="review-stars">${renderStars(review.rating)}</div>
+                    <div class="review-text">${escapeHtml(review.text)}</div>
+                </div>
+            `).join('');
+        }
+
+        // ========== 星セレクター ==========
+        let selectedRating = 0;
+
+        function initStarSelector() {
+            const stars = document.querySelectorAll('#starSelector i');
+
+            stars.forEach(star => {
+                star.addEventListener('mouseenter', function() {
+                    const val = parseInt(this.getAttribute('data-value'));
+                    stars.forEach(s => {
+                        const sv = parseInt(s.getAttribute('data-value'));
+                        s.className = sv <= val ? 'fas fa-star active' : 'far fa-star';
+                    });
+                });
+
+                star.addEventListener('mouseleave', function() {
+                    stars.forEach(s => {
+                        const sv = parseInt(s.getAttribute('data-value'));
+                        s.className = sv <= selectedRating ? 'fas fa-star active' : 'far fa-star';
+                    });
+                });
+
+                star.addEventListener('click', function() {
+                    selectedRating = parseInt(this.getAttribute('data-value'));
+                    stars.forEach(s => {
+                        const sv = parseInt(s.getAttribute('data-value'));
+                        s.className = sv <= selectedRating ? 'fas fa-star active' : 'far fa-star';
+                    });
+                });
+            });
+        }
+
+        // ========== アクションハンドラー ==========
+        function startReading() {
+            const id = getWorkIdFromUrl();
+            window.location.href = `reader.html?id=${id}`;
+        }
+
+        function purchaseWork() {
+            const id = getWorkIdFromUrl();
+            window.location.href = `checkout.html?id=${id}`;
+        }
+
+        function addToLibrary() {
+            const btn = document.getElementById('btnLibrary');
+            btn.innerHTML = `<i class="fas fa-check"></i> <span>${getL(uiText.addedToLibrary)}</span>`;
+            btn.style.background = 'var(--color-success)';
+            btn.style.borderColor = 'var(--color-success)';
+            btn.style.color = '#FFFFFF';
+            btn.disabled = true;
+        }
+
+        function submitReview() {
+            const text = document.getElementById('reviewTextarea').value.trim();
+
+            if (selectedRating === 0) {
+                alert(getL(uiText.selectRating));
+                return;
+            }
+            if (!text) {
+                alert(getL(uiText.writeComment));
+                return;
+            }
+
+            // デモ：レビューをリストに追加
+            const id = getWorkIdFromUrl();
+            const work = workDetails[id];
+            if (work) {
+                work.reviews.unshift({
+                    user: 'You',
+                    rating: selectedRating,
+                    date: new Date().toISOString().split('T')[0],
+                    text: text
+                });
+
+                const avg = work.reviews.reduce((sum, r) => sum + r.rating, 0) / work.reviews.length;
+                renderReviews(work.reviews, avg);
+            }
+
+            // フォームリセット
+            document.getElementById('reviewTextarea').value = '';
+            selectedRating = 0;
+            document.querySelectorAll('#starSelector i').forEach(s => {
+                s.className = 'far fa-star';
+            });
+
+            alert(getL(uiText.reviewSubmitted));
+        }
+
+        // ========== 言語切替・初期化 ==========
+        function syncSelectors() {
+            const d = document.getElementById('languageSelector');
+            const m = document.getElementById('languageSelectorMobile');
+            const l = getCurrentLang();
+            if (d) d.value = l;
+            if (m) m.value = l;
+            if (m) m.addEventListener('change', function() {
+                if (d) d.value = this.value;
+                localStorage.setItem('preferredLanguage', this.value);
+                loadWork();
+            });
+            if (d) d.addEventListener('change', function() {
+                if (m) m.value = this.value;
+                localStorage.setItem('preferredLanguage', this.value);
+                loadWork();
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            syncSelectors();
+            loadWork();
+            initStarSelector();
+        });
+
+        document.addEventListener('languageChanged', function(e) {
+            const l = e.detail && (e.detail.language || e.detail.lang);
+            if (l) {
+                const d = document.getElementById('languageSelector');
+                const m = document.getElementById('languageSelectorMobile');
+                if (d) d.value = l;
+                if (m) m.value = l;
+            }
+            loadWork();
+        });
+    </script>
+</body>
+</html>
