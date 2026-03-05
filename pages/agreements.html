@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collaboration Agreements - Publisher</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="../css/style-new.css" rel="stylesheet">
+    <link href="../css/mobile-fixes.css" rel="stylesheet">
+    <!-- Pattern C Navbar Styles -->
+    <style>
+        .navbar-lang-selector { display: flex; align-items: center; margin-right: 0.5rem; }
+        @media (max-width: 991.98px) {
+            .navbar-lang-selector { order: 1; }
+            .navbar-toggler { order: 2; }
+        }
+        @media (min-width: 992px) {
+            .navbar-nav { flex-wrap: nowrap !important; flex-direction: row !important; }
+            .navbar-nav .nav-item { white-space: nowrap !important; }
+            .navbar-nav .nav-link { white-space: nowrap !important; padding: 0.5rem 0.6rem !important; font-size: 0.9rem; }
+            .navbar-collapse .d-flex { flex-wrap: nowrap !important; }
+            .dropdown-menu { white-space: nowrap; }
+            .navbar-buttons-guest { display: flex !important; flex-wrap: nowrap !important; gap: 0.5rem; }
+            .navbar-buttons-guest .btn { white-space: nowrap !important; flex-shrink: 0; }
+        }
+        .auth-only { display: none !important; }
+        .guest-only { display: block; }
+        body.logged-in .auth-only { display: block !important; }
+        body.logged-in .auth-only.nav-item { display: list-item !important; }
+        body.logged-in .auth-only.dropdown { display: block !important; }
+        body.logged-in .guest-only { display: none !important; }
+        @media (min-width: 992px) { body.logged-in .navbar-buttons-guest { display: none !important; } }
+        .user-dropdown { position: relative; }
+        .user-dropdown-toggle { display: flex; align-items: center; gap: 0.5rem; background: transparent; border: 1px solid var(--color-border); border-radius: 25px; padding: 0.4rem 0.75rem; cursor: pointer; color: var(--color-text); transition: all 0.2s; }
+        .user-dropdown-toggle:hover { border-color: var(--color-accent); background: rgba(139, 115, 85, 0.05); }
+        .user-dropdown-toggle i:first-child { font-size: 1.25rem; color: var(--color-accent); }
+        .user-name { font-weight: 500; font-size: 0.9rem; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .user-chevron { font-size: 0.7rem; color: var(--color-text-secondary); transition: transform 0.2s; }
+        .user-dropdown.open .user-chevron { transform: rotate(180deg); }
+        .user-menu { position: absolute; top: calc(100% + 0.5rem); right: 0; background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); min-width: 240px; z-index: 1055; display: none; overflow: hidden; }
+        .user-menu.show { display: block; }
+        .user-menu-header { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; background: var(--color-bg-main); }
+        .user-avatar { font-size: 2.5rem; color: var(--color-accent); }
+        .user-info { flex: 1; min-width: 0; }
+        .user-display-name { font-weight: 600; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .user-email { font-size: 0.8rem; color: var(--color-text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .user-menu-divider { height: 1px; background: var(--color-border); }
+        .user-menu-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; color: var(--color-text); text-decoration: none; font-size: 0.9rem; cursor: pointer; border: none; background: transparent; width: 100%; text-align: left; }
+        .user-menu-item:hover { background: var(--color-bg-hover); color: var(--color-accent); }
+        .user-menu-item i { width: 20px; text-align: center; color: var(--color-text-secondary); }
+        .user-menu-item:hover i { color: var(--color-accent); }
+        .logout-btn { color: var(--color-error); }
+        .logout-btn i { color: var(--color-error); }
+        .logout-btn:hover { background: rgba(199, 93, 93, 0.1); color: var(--color-error); }
+        .navbar-overlay { display: none; position: fixed; top: 56px; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1030; }
+        .navbar-overlay.show { display: block; }
+        body.menu-open { overflow: hidden; }
+        @media (max-width: 991.98px) {
+            .navbar-collapse { max-height: 70vh; overflow-y: auto; overscroll-behavior: contain; }
+            .navbar-collapse.show, .navbar-collapse.collapsing { position: fixed; top: 56px; left: 0; right: 0; background: var(--color-bg-card); border-bottom: 1px solid var(--color-border); box-shadow: 0 4px 20px rgba(0,0,0,0.15); z-index: 1045; padding: 0.5rem 1rem; }
+            .navbar-custom { z-index: 1050 !important; }
+        }
+    </style>
+    <!-- Agreements Page Styles -->
+    <style>
+        .agreements-header h1 { font-size: var(--font-size-2xl); color: var(--color-text-primary); margin-bottom: var(--spacing-sm); }
+        .agreements-header h1 i { color: var(--color-accent); }
+
+        .agreement-type-card {
+            background: var(--color-bg-card); border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg); padding: var(--spacing-xl);
+            text-align: center; cursor: pointer; transition: all 0.2s; height: 100%;
+        }
+        .agreement-type-card:hover { border-color: var(--color-accent); transform: translateY(-4px); box-shadow: var(--shadow-md); }
+        .agreement-type-card.selected { border-color: var(--color-accent); background: rgba(139, 115, 85, 0.05); box-shadow: var(--shadow-md); }
+        .type-icon {
+            width: 60px; height: 60px; border-radius: 50%;
+            background: rgba(139, 115, 85, 0.1); display: flex; align-items: center; justify-content: center;
+            margin: 0 auto var(--spacing-md); font-size: 1.5rem; color: var(--color-accent);
+        }
+        .type-parties { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: var(--spacing-xs); margin-top: var(--spacing-md); }
+
+        .badge-role { display: inline-block; padding: 0.25rem 0.6rem; border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 600; }
+        .badge-author { background: rgba(139, 115, 85, 0.15); color: var(--color-accent); }
+        .badge-translator { background: rgba(93, 156, 89, 0.15); color: var(--color-success); }
+        .badge-editor { background: rgba(93, 139, 199, 0.15); color: var(--color-info); }
+        .badge-platform { background: rgba(212, 168, 83, 0.15); color: var(--color-warning); }
+
+        .agreement-form-card {
+            background: var(--color-bg-card); border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg); padding: var(--spacing-xl);
+        }
+        .form-section { margin-bottom: var(--spacing-xl); }
+        .form-section h5 { font-size: var(--font-size-lg); font-weight: 600; margin-bottom: var(--spacing-md); display: flex; align-items: center; gap: var(--spacing-sm); }
+        .form-section h5 i { color: var(--color-accent); }
+
+        .revenue-display { display: flex; flex-wrap: wrap; gap: var(--spacing-md); justify-content: center; }
+        .revenue-item {
+            background: var(--color-bg-main); border: 1px solid var(--color-border);
+            border-radius: var(--radius-md); padding: var(--spacing-md) var(--spacing-lg);
+            text-align: center; min-width: 120px;
+        }
+        .revenue-item .percentage { font-size: 1.75rem; font-weight: 700; }
+        .revenue-item .role-label { font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-top: var(--spacing-xs); }
+
+        .terms-box {
+            max-height: 300px; overflow-y: auto;
+            background: var(--color-bg-main); border: 1px solid var(--color-border);
+            border-radius: var(--radius-md); padding: var(--spacing-lg);
+            font-size: var(--font-size-sm); line-height: 1.7;
+        }
+        .terms-box h6 { font-weight: 600; margin-top: var(--spacing-md); margin-bottom: var(--spacing-xs); color: var(--color-text-primary); }
+        .terms-box h6:first-child { margin-top: 0; }
+        .terms-box p { color: var(--color-text-secondary); margin-bottom: var(--spacing-sm); }
+
+        .history-item {
+            background: var(--color-bg-card); border: 1px solid var(--color-border);
+            border-radius: var(--radius-md); padding: var(--spacing-md) var(--spacing-lg);
+            margin-bottom: var(--spacing-sm);
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: var(--spacing-sm); transition: all 0.2s;
+        }
+        .history-item:hover { border-color: var(--color-accent); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .history-meta { display: flex; align-items: center; gap: var(--spacing-md); flex-wrap: wrap; }
+        .history-type-badge { padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; background: rgba(139, 115, 85, 0.1); color: var(--color-accent); }
+        .status-active { color: var(--color-success); font-weight: 600; font-size: var(--font-size-sm); }
+
+        .modal-detail-section { margin-bottom: var(--spacing-lg); }
+        .modal-detail-section h6 { font-weight: 600; color: var(--color-accent); margin-bottom: var(--spacing-sm); }
+        .modal-party-card {
+            background: var(--color-bg-main); border-radius: var(--radius-md);
+            padding: var(--spacing-md); margin-bottom: var(--spacing-sm);
+        }
+
+        .guest-prompt { text-align: center; padding: 100px 20px 60px; }
+        .guest-prompt i { color: var(--color-accent); }
+
+        @media (max-width: 768px) {
+            .agreements-header h1 { font-size: var(--font-size-xl); }
+            .agreement-type-card { padding: var(--spacing-lg); }
+            .type-icon { width: 48px; height: 48px; font-size: 1.25rem; }
+            .revenue-display { flex-direction: column; align-items: center; }
+            .history-item { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+<!-- ========== NAVBAR PATTERN C (pages/ 階層) ========== -->
+<nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+    <div class="container">
+        <a class="navbar-brand" href="../index.html"><i class="fas fa-book-open"></i> Publisher</a>
+        <div class="navbar-lang-selector d-lg-none">
+            <select class="language-selector" id="languageSelectorMobile">
+                <option value="en">🇬🇧 EN</option><option value="ja">🇯🇵 日本語</option><option value="zh">🇨🇳 中文</option>
+                <option value="es">🇪🇸 ES</option><option value="fr">🇫🇷 FR</option><option value="de">🇩🇪 DE</option>
+                <option value="ko">🇰🇷 한국어</option><option value="ar">🇸🇦 عربي</option><option value="pt">🇧🇷 PT</option>
+            </select>
+        </div>
+        <div class="user-dropdown auth-only" id="userDropdown">
+            <button type="button" class="user-dropdown-toggle" id="userDropdownBtn" onclick="toggleUserDropdown(event)">
+                <i class="fas fa-user-circle"></i>
+                <span class="user-name d-none d-lg-inline" id="userName">User</span>
+                <i class="fas fa-chevron-down user-chevron d-none d-lg-inline"></i>
+            </button>
+            <div class="user-menu" id="userMenu">
+                <div class="user-menu-header">
+                    <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
+                    <div class="user-info">
+                        <div class="user-display-name" id="userDisplayName">User</div>
+                        <div class="user-email" id="userEmail">user@example.com</div>
+                    </div>
+                </div>
+                <div class="user-menu-divider"></div>
+                <a href="dashboard.html" class="user-menu-item"><i class="fas fa-th-large"></i><span id="menuDashboard">Dashboard</span></a>
+                <a href="account-settings.html" class="user-menu-item"><i class="fas fa-cog"></i><span id="menuAccountSettings">Account Settings</span></a>
+                <div class="user-menu-divider"></div>
+                <button class="user-menu-item logout-btn" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i><span id="menuLogout">Log Out</span></button>
+            </div>
+        </div>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
+        <div class="navbar-overlay d-lg-none" id="navbarOverlay"></div>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto d-none d-lg-flex">
+                <li class="nav-item"><a class="nav-link" href="browse.html"><i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span></a></li>
+                <li class="nav-item auth-only"><a class="nav-link" href="library.html"><i class="fas fa-book-reader me-1"></i> <span id="navLibraryPC">Library</span></a></li>
+                <li class="nav-item auth-only"><a class="nav-link" href="dashboard.html"><i class="fas fa-th-large me-1"></i> <span id="navDashboardPC">Dashboard</span></a></li>
+                <li class="nav-item auth-only"><a class="nav-link" href="upload.html"><i class="fas fa-upload me-1"></i> <span data-i18n="nav.upload">Upload</span></a></li>
+                <li class="nav-item dropdown auth-only">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"><i class="fas fa-language me-1"></i> <span id="navTranslationToolsPC">Translation Tools</span></a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="manga-translator.html"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorPC">Manga Translator</span></a></li>
+                        <li><a class="dropdown-item" href="translation-status.html"><i class="fas fa-tasks me-2"></i><span id="navTranslationStatusPC">Translation Status</span></a></li>
+                        <li><a class="dropdown-item" href="translators/index.html"><i class="fas fa-users me-2"></i><span id="navFindTranslatorsPC">Find Translators</span></a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"><i class="fas fa-headset me-1"></i> <span data-i18n="nav.support">Support</span></a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="support/faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
+                        <li><a class="dropdown-item" href="support/troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
+                        <li><a class="dropdown-item" href="support/contact.html"><i class="fas fa-envelope me-2"></i><span id="navContactPC">Contact</span></a></li>
+                        <li class="auth-only"><hr class="dropdown-divider"></li>
+                        <li class="auth-only"><a class="dropdown-item" href="support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
+                    </ul>
+                </li>
+            </ul>
+            <ul class="navbar-nav d-lg-none">
+                <li class="nav-item"><a class="nav-link" href="browse.html"><i class="fas fa-compass me-2"></i><span data-i18n="nav.browse">Browse</span></a></li>
+                <li class="nav-item auth-only"><a class="nav-link" href="library.html"><i class="fas fa-book-reader me-2"></i><span id="navLibraryMobile">Library</span></a></li>
+                <li class="nav-item auth-only"><a class="nav-link" href="dashboard.html"><i class="fas fa-th-large me-2"></i><span id="navDashboardMobile">Dashboard</span></a></li>
+                <li class="nav-item auth-only"><a class="nav-link" href="upload.html"><i class="fas fa-upload me-2"></i><span data-i18n="nav.upload">Upload</span></a></li>
+                <li class="nav-item dropdown auth-only">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="fas fa-language me-2"></i><span id="navTranslationToolsMobile">Translation Tools</span></a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="manga-translator.html"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorMobile">Manga Translator</span></a></li>
+                        <li><a class="dropdown-item" href="translation-status.html"><i class="fas fa-tasks me-2"></i><span id="navTranslationStatusMobile">Translation Status</span></a></li>
+                        <li><a class="dropdown-item" href="translators/index.html"><i class="fas fa-users me-2"></i><span id="navFindTranslatorsMobile">Find Translators</span></a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="fas fa-headset me-2"></i><span data-i18n="nav.support">Support</span></a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="support/faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
+                        <li><a class="dropdown-item" href="support/troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
+                        <li><a class="dropdown-item" href="support/contact.html"><i class="fas fa-envelope me-2"></i><span id="navContactMobile">Contact</span></a></li>
+                        <li class="auth-only"><hr class="dropdown-divider"></li>
+                        <li class="auth-only"><a class="dropdown-item" href="support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
+                    </ul>
+                </li>
+                <li class="nav-item guest-only border-top mt-2 pt-2"><a class="nav-link" href="login.html"><i class="fas fa-sign-in-alt me-2"></i><span data-i18n="nav.login">Sign In</span></a></li>
+                <li class="nav-item guest-only"><a class="nav-link text-accent fw-bold" href="register.html"><i class="fas fa-user-plus me-2"></i><span data-i18n="nav.getStarted">Get Started</span></a></li>
+            </ul>
+            <div class="d-none d-lg-flex align-items-center gap-3">
+                <select class="language-selector" id="languageSelector">
+                    <option value="en">🇬🇧 EN</option><option value="ja">🇯🇵 日本語</option><option value="zh">🇨🇳 中文</option>
+                    <option value="es">🇪🇸 ES</option><option value="fr">🇫🇷 FR</option><option value="de">🇩🇪 DE</option>
+                    <option value="ko">🇰🇷 한국어</option><option value="ar">🇸🇦 عربي</option><option value="pt">🇧🇷 PT</option>
+                </select>
+                <div class="navbar-buttons-guest guest-only d-none d-lg-flex">
+                    <a href="login.html" class="btn btn-soft-custom"><span data-i18n="nav.login">Sign In</span></a>
+                    <a href="register.html" class="btn btn-primary-custom"><span data-i18n="nav.getStarted">Get Started</span></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+<!-- ========== NAVBAR PATTERN C END ========== -->
+
+    <!-- Guest Prompt -->
+    <div class="guest-prompt guest-only">
+        <i class="fas fa-lock fa-3x mb-3"></i>
+        <h2 id="guestTitle">Please Sign In</h2>
+        <p class="text-secondary mt-2 mb-4" id="guestSubtitle">You need to be signed in to create and view collaboration agreements.</p>
+        <a href="login.html" class="btn btn-primary-custom btn-lg" id="guestSignIn">Sign In</a>
+    </div>
+
+    <!-- Auth Content -->
+    <main class="container auth-only py-5" style="max-width: 960px;">
+        <!-- Page Header -->
+        <div class="agreements-header text-center mb-4">
+            <h1><i class="fas fa-handshake me-2"></i><span id="pageTitle">Collaboration Agreements</span></h1>
+            <p class="text-secondary" id="pageSubtitle">Create mutual agreements between collaborators to ensure clear terms and prevent disputes.</p>
+        </div>
+
+        <!-- Agreement Type Selection -->
+        <div class="row g-4 mb-4" id="typeSelectionRow">
+            <div class="col-md-4">
+                <div class="agreement-type-card" onclick="selectAgreementType('translation')" id="cardTranslation">
+                    <div class="type-icon"><i class="fas fa-language"></i></div>
+                    <h5 id="typeTranslationTitle">Translation Agreement</h5>
+                    <p class="text-secondary small" id="typeTranslationDesc">Author &#8596; Translator</p>
+                    <div class="type-parties">
+                        <span class="badge-role badge-author">Author 40%</span>
+                        <i class="fas fa-arrows-alt-h mx-1 text-secondary"></i>
+                        <span class="badge-role badge-translator">Translator 20%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="agreement-type-card" onclick="selectAgreementType('editing')" id="cardEditing">
+                    <div class="type-icon"><i class="fas fa-edit"></i></div>
+                    <h5 id="typeEditingTitle">Editing Agreement</h5>
+                    <p class="text-secondary small" id="typeEditingDesc">Author &#8596; Editor</p>
+                    <div class="type-parties">
+                        <span class="badge-role badge-author">Author 40%</span>
+                        <i class="fas fa-arrows-alt-h mx-1 text-secondary"></i>
+                        <span class="badge-role badge-editor">Editor 10%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="agreement-type-card" onclick="selectAgreementType('collaboration')" id="cardCollaboration">
+                    <div class="type-icon"><i class="fas fa-users"></i></div>
+                    <h5 id="typeCollabTitle">Collaboration Agreement</h5>
+                    <p class="text-secondary small" id="typeCollabDesc">Author &#8596; Translator &#8596; Editor</p>
+                    <div class="type-parties">
+                        <span class="badge-role badge-author">Author 40%</span>
+                        <span class="badge-role badge-translator">Translator 20%</span>
+                        <span class="badge-role badge-editor">Editor 10%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Agreement Form -->
+        <div id="agreementFormSection" style="display: none;">
+            <div class="agreement-form-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 id="formTitle" class="mb-0"><i class="fas fa-file-signature me-2" style="color: var(--color-accent);"></i>Translation Agreement</h4>
+                    <button class="btn btn-soft-custom btn-sm" onclick="closeForm()" id="btnBack"><i class="fas fa-arrow-left me-1"></i>Back</button>
+                </div>
+
+                <form onsubmit="handleSubmit(event)">
+                    <!-- Section 1: Project Details -->
+                    <div class="form-section">
+                        <h5><i class="fas fa-book"></i> <span id="sectionProject">Project Details</span></h5>
+                        <div class="mb-3">
+                            <label class="form-label" id="labelWorkTitle">Work Title</label>
+                            <input type="text" class="form-control" id="inputWorkTitle" required>
+                        </div>
+                        <div class="mb-3" id="langGroup">
+                            <label class="form-label" id="labelTargetLang">Target Translation Language</label>
+                            <select class="form-select" id="inputTargetLang">
+                                <option value="" id="optSelectLang">-- Select Language --</option>
+                                <option value="en">English</option><option value="ja">日本語</option><option value="zh">中文</option>
+                                <option value="es">Español</option><option value="fr">Français</option><option value="de">Deutsch</option>
+                                <option value="ko">한국어</option><option value="ar">العربية</option><option value="pt">Português</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" id="labelDeadline">Deadline (Optional)</label>
+                            <input type="date" class="form-control" id="inputDeadline">
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Parties -->
+                    <div class="form-section">
+                        <h5><i class="fas fa-users"></i> <span id="sectionParties">Parties Involved</span></h5>
+                        <div class="row g-3 mb-3" id="authorFields">
+                            <div class="col-md-6">
+                                <label class="form-label" id="labelAuthorName">Author Name</label>
+                                <input type="text" class="form-control" id="inputAuthorName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" id="labelAuthorEmail">Author Email</label>
+                                <input type="email" class="form-control" id="inputAuthorEmail" required>
+                            </div>
+                        </div>
+                        <div class="row g-3 mb-3" id="translatorFields">
+                            <div class="col-md-6">
+                                <label class="form-label" id="labelTranslatorName">Translator Name</label>
+                                <input type="text" class="form-control" id="inputTranslatorName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" id="labelTranslatorEmail">Translator Email</label>
+                                <input type="email" class="form-control" id="inputTranslatorEmail" required>
+                            </div>
+                        </div>
+                        <div class="row g-3 mb-3" id="editorFields">
+                            <div class="col-md-6">
+                                <label class="form-label" id="labelEditorName">Editor Name</label>
+                                <input type="text" class="form-control" id="inputEditorName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" id="labelEditorEmail">Editor Email</label>
+                                <input type="email" class="form-control" id="inputEditorEmail" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Revenue Distribution -->
+                    <div class="form-section">
+                        <h5><i class="fas fa-chart-pie"></i> <span id="sectionRevenue">Revenue Distribution</span></h5>
+                        <p class="text-secondary small mb-3" id="revenueNote">Revenue percentages are fixed by the platform and cannot be modified.</p>
+                        <div class="revenue-display" id="revenueDisplay"></div>
+                    </div>
+
+                    <!-- Section 4: Agreement Terms -->
+                    <div class="form-section">
+                        <h5><i class="fas fa-file-alt"></i> <span id="sectionTerms">Agreement Terms</span></h5>
+                        <div class="terms-box" id="termsBox"></div>
+                    </div>
+
+                    <!-- Section 5: Digital Consent -->
+                    <div class="form-section">
+                        <h5><i class="fas fa-check-double"></i> <span id="sectionConsent">Digital Consent</span></h5>
+                        <div class="form-check mb-2" id="consentAuthorGroup">
+                            <input class="form-check-input" type="checkbox" id="consentAuthor" required>
+                            <label class="form-check-label" for="consentAuthor" id="consentAuthorLabel">I (Author) have read and agree to the terms above.</label>
+                        </div>
+                        <div class="form-check mb-2" id="consentTranslatorGroup">
+                            <input class="form-check-input" type="checkbox" id="consentTranslator" required>
+                            <label class="form-check-label" for="consentTranslator" id="consentTranslatorLabel">I (Translator) have read and agree to the terms above.</label>
+                        </div>
+                        <div class="form-check mb-2" id="consentEditorGroup">
+                            <input class="form-check-input" type="checkbox" id="consentEditor" required>
+                            <label class="form-check-label" for="consentEditor" id="consentEditorLabel">I (Editor) have read and agree to the terms above.</label>
+                        </div>
+                    </div>
+
+                    <!-- Section 6: Date + Submit -->
+                    <div class="form-section">
+                        <div class="mb-3">
+                            <label class="form-label" id="labelDate">Agreement Date</label>
+                            <input type="text" class="form-control" id="inputDate" readonly>
+                        </div>
+                        <button type="submit" class="btn btn-primary-custom btn-lg w-100" id="btnCreateAgreement">
+                            <i class="fas fa-file-signature me-2"></i>Create Agreement
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Agreement History -->
+        <div class="mt-5">
+            <h3 class="mb-3"><i class="fas fa-history me-2" style="color: var(--color-accent);"></i><span id="historyTitle">Agreement History</span></h3>
+            <div id="historyList"></div>
+            <div id="noHistory" class="text-center text-secondary py-4">
+                <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                <p id="noHistoryText">No agreements yet. Create your first agreement above.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Agreement Detail Modal -->
+    <div class="modal fade" id="detailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle"><i class="fas fa-file-contract me-2"></i>Agreement Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modalBody"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-soft-custom" data-bs-dismiss="modal" id="modalClose">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer-custom">
+        <div class="container">
+            <div class="d-flex flex-wrap justify-content-between align-items-center">
+                <p class="small mb-0">&copy; 2026 Publisher. All rights reserved.</p>
+                <div class="d-flex gap-3">
+                    <a href="support/faq.html" class="text-secondary" id="footerHelp">Help</a>
+                    <a href="terms.html" class="text-secondary" id="footerTerms">Terms</a>
+                    <a href="privacy.html" class="text-secondary" id="footerPrivacy">Privacy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/lang/ja.js"></script>
+    <script src="../js/lang/en.js"></script>
+    <script src="../js/lang/zh.js"></script>
+    <script src="../js/lang/es.js"></script>
+    <script src="../js/lang/fr.js"></script>
+    <script src="../js/lang/de.js"></script>
+    <script src="../js/lang/ko.js"></script>
+    <script src="../js/lang/ar.js"></script>
+    <script src="../js/lang/pt.js"></script>
+    <script src="../js/lang/translations-base.js"></script>
+    <script src="../js/language-switcher.js"></script>
+    <script src="../js/header-notification.js"></script>
+
+    <!-- Pattern C Navbar Script -->
+    <script>
+        const navText = {
+            translationTools: { en: 'Translation Tools', ja: '翻訳ツール', zh: '翻译工具', es: 'Herramientas de traducción', fr: 'Outils de traduction', de: 'Übersetzungstools', ko: '번역 도구', ar: 'أدوات الترجمة', pt: 'Ferramentas de tradução' },
+            mangaTranslator: { en: 'Manga Translator', ja: 'マンガ翻訳', zh: '漫画翻译', es: 'Traductor de Manga', fr: 'Traducteur de Manga', de: 'Manga-Übersetzer', ko: '만화 번역기', ar: 'مترجم المانجا', pt: 'Tradutor de Mangá' },
+            translationStatus: { en: 'Translation Status', ja: '翻訳状況', zh: '翻译状态', es: 'Estado de traducción', fr: 'Statut de traduction', de: 'Übersetzungsstatus', ko: '번역 상태', ar: 'حالة الترجمة', pt: 'Status da tradução' },
+            findTranslators: { en: 'Find Translators', ja: '翻訳者を探す', zh: '寻找翻译', es: 'Buscar traductores', fr: 'Trouver des traducteurs', de: 'Übersetzer finden', ko: '번역가 찾기', ar: 'البحث عن مترجمين', pt: 'Encontrar tradutores' },
+            contact: { en: 'Contact', ja: 'お問い合わせ', zh: '联系我们', es: 'Contacto', fr: 'Contact', de: 'Kontakt', ko: '문의', ar: 'اتصل بنا', pt: 'Contato' },
+            library: { en: 'Library', ja: 'ライブラリ', zh: '书库', es: 'Biblioteca', fr: 'Bibliothèque', de: 'Bibliothek', ko: '라이브러리', ar: 'المكتبة', pt: 'Biblioteca' },
+            dashboard: { en: 'Dashboard', ja: 'ダッシュボード', zh: '控制台', es: 'Panel', fr: 'Tableau de bord', de: 'Dashboard', ko: '대시보드', ar: 'لوحة التحكم', pt: 'Painel' },
+            accountSettings: { en: 'Account Settings', ja: 'アカウント設定', zh: '账户设置', es: 'Configuración de cuenta', fr: 'Paramètres du compte', de: 'Kontoeinstellungen', ko: '계정 설정', ar: 'إعدادات الحساب', pt: 'Configurações da conta' },
+            logout: { en: 'Log Out', ja: 'ログアウト', zh: '退出登录', es: 'Cerrar sesión', fr: 'Déconnexion', de: 'Abmelden', ko: '로그아웃', ar: 'تسجيل الخروج', pt: 'Sair' },
+            logOutConfirm: { en: 'Are you sure you want to log out?', ja: 'ログアウトしますか？', zh: '确定要退出登录吗？', es: '¿Estás seguro de que quieres cerrar sesión?', fr: 'Êtes-vous sûr de vouloir vous déconnecter?', de: 'Sind Sie sicher, dass Sie sich abmelden möchten?', ko: '로그아웃 하시겠습니까?', ar: 'هل أنت متأكد أنك تريد تسجيل الخروج؟', pt: 'Tem certeza que deseja sair?' }
+        };
+        function getNavL(obj) { const lang = localStorage.getItem('preferredLanguage') || 'en'; return obj[lang] || obj.en || ''; }
+        function updateNavUIText() {
+            const m = document.getElementById('menuDashboard'), a = document.getElementById('menuAccountSettings'), l = document.getElementById('menuLogout');
+            if (m) m.textContent = getNavL(navText.dashboard); if (a) a.textContent = getNavL(navText.accountSettings); if (l) l.textContent = getNavL(navText.logout);
+            const els = { navLibraryPC: navText.library, navDashboardPC: navText.dashboard, navTranslationToolsPC: navText.translationTools, navMangaTranslatorPC: navText.mangaTranslator, navTranslationStatusPC: navText.translationStatus, navFindTranslatorsPC: navText.findTranslators, navContactPC: navText.contact, navLibraryMobile: navText.library, navDashboardMobile: navText.dashboard, navTranslationToolsMobile: navText.translationTools, navMangaTranslatorMobile: navText.mangaTranslator, navTranslationStatusMobile: navText.translationStatus, navFindTranslatorsMobile: navText.findTranslators, navContactMobile: navText.contact };
+            Object.keys(els).forEach(id => { const el = document.getElementById(id); if (el) el.textContent = getNavL(els[id]); });
+        }
+        function toggleUserDropdown(e) { e.preventDefault(); e.stopPropagation(); document.getElementById('userDropdown').classList.toggle('open'); document.getElementById('userMenu').classList.toggle('show'); }
+        function handleLogout() { if (confirm(getNavL(navText.logOutConfirm))) { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = 'login.html'; } }
+        function loadUserInfo() {
+            const userStr = localStorage.getItem('user'), token = localStorage.getItem('token'), isLoggedIn = !!(userStr && token);
+            if (isLoggedIn) { try { const user = JSON.parse(userStr); const dn = user.display_name || user.firstName || user.email || 'User'; const n = document.getElementById('userName'), d = document.getElementById('userDisplayName'), e = document.getElementById('userEmail'); if (n) n.textContent = dn; if (d) d.textContent = dn; if (e) e.textContent = user.email || ''; document.body.classList.add('logged-in'); } catch(e) { document.body.classList.remove('logged-in'); } }
+            else { document.body.classList.remove('logged-in'); }
+        }
+        (function() {
+            document.addEventListener('DOMContentLoaded', function() {
+                updateNavUIText(); loadUserInfo();
+                document.addEventListener('click', function(e) { if (!e.target.closest('.user-dropdown')) { const d = document.getElementById('userDropdown'), m = document.getElementById('userMenu'); if (d) d.classList.remove('open'); if (m) m.classList.remove('show'); } });
+                const nc = document.getElementById('navbarNav'), no = document.getElementById('navbarOverlay');
+                if (nc) { nc.addEventListener('show.bs.collapse', function() { document.body.classList.add('menu-open'); if (no) no.classList.add('show'); }); nc.addEventListener('hide.bs.collapse', function() { document.body.classList.remove('menu-open'); if (no) no.classList.remove('show'); }); }
+                if (no) { no.addEventListener('click', function() { const bc = bootstrap.Collapse.getInstance(nc); if (bc) bc.hide(); }); }
+            });
+            document.addEventListener('languageChanged', function() { updateNavUIText(); });
+        })();
+    </script>
+
+    <!-- Agreements Page Script -->
+    <script>
+        let selectedType = null;
+        const STORAGE_KEY = 'publisher_agreements';
+
+        const uiText = {
+            pageTitle: { en: 'Collaboration Agreements', ja: '共同制作同意書', zh: '合作协议', es: 'Acuerdos de colaboración', fr: 'Accords de collaboration', de: 'Zusammenarbeitsvereinbarungen', ko: '협업 동의서', ar: 'اتفاقيات التعاون', pt: 'Acordos de colaboração' },
+            pageSubtitle: { en: 'Create mutual agreements between collaborators to ensure clear terms and prevent disputes.', ja: '共同作業者間の同意書を作成し、明確な条件を定めてトラブルを防止します。', zh: '创建合作者之间的协议，确保条款明确，防止纠纷。', es: 'Crea acuerdos mutuos entre colaboradores para asegurar términos claros y prevenir disputas.', fr: 'Créez des accords mutuels entre collaborateurs pour garantir des conditions claires et prévenir les litiges.', de: 'Erstellen Sie gegenseitige Vereinbarungen zwischen Mitarbeitern, um klare Bedingungen zu gewährleisten und Streitigkeiten zu vermeiden.', ko: '협업자 간의 상호 동의서를 작성하여 명확한 조건을 설정하고 분쟁을 방지합니다.', ar: 'أنشئ اتفاقيات متبادلة بين المتعاونين لضمان شروط واضحة ومنع النزاعات.', pt: 'Crie acordos mútuos entre colaboradores para garantir termos claros e prevenir disputas.' },
+            guestTitle: { en: 'Please Sign In', ja: 'ログインしてください', zh: '请登录', es: 'Inicia sesión', fr: 'Veuillez vous connecter', de: 'Bitte anmelden', ko: '로그인해주세요', ar: 'يرجى تسجيل الدخول', pt: 'Faça login' },
+            guestSubtitle: { en: 'You need to be signed in to create and view collaboration agreements.', ja: '同意書の作成・閲覧にはログインが必要です。', zh: '您需要登录才能创建和查看合作协议。', es: 'Necesitas iniciar sesión para crear y ver acuerdos de colaboración.', fr: 'Vous devez être connecté pour créer et consulter des accords de collaboration.', de: 'Sie müssen angemeldet sein, um Vereinbarungen zu erstellen und anzuzeigen.', ko: '협업 동의서를 작성하고 확인하려면 로그인이 필요합니다.', ar: 'يجب تسجيل الدخول لإنشاء وعرض اتفاقيات التعاون.', pt: 'Você precisa estar conectado para criar e visualizar acordos de colaboração.' },
+            guestSignIn: { en: 'Sign In', ja: 'ログイン', zh: '登录', es: 'Iniciar sesión', fr: 'Se connecter', de: 'Anmelden', ko: '로그인', ar: 'تسجيل الدخول', pt: 'Entrar' },
+            typeTranslationTitle: { en: 'Translation Agreement', ja: '翻訳同意書', zh: '翻译协议', es: 'Acuerdo de traducción', fr: 'Accord de traduction', de: 'Übersetzungsvereinbarung', ko: '번역 동의서', ar: 'اتفاقية الترجمة', pt: 'Acordo de tradução' },
+            typeTranslationDesc: { en: 'Author ↔ Translator', ja: '著者 ↔ 翻訳者', zh: '作者 ↔ 翻译者', es: 'Autor ↔ Traductor', fr: 'Auteur ↔ Traducteur', de: 'Autor ↔ Übersetzer', ko: '저자 ↔ 번역가', ar: 'المؤلف ↔ المترجم', pt: 'Autor ↔ Tradutor' },
+            typeEditingTitle: { en: 'Editing Agreement', ja: '編集同意書', zh: '编辑协议', es: 'Acuerdo de edición', fr: "Accord d'édition", de: 'Lektoratsvereinbarung', ko: '편집 동의서', ar: 'اتفاقية التحرير', pt: 'Acordo de edição' },
+            typeEditingDesc: { en: 'Author ↔ Editor', ja: '著者 ↔ 編集者', zh: '作者 ↔ 编辑', es: 'Autor ↔ Editor', fr: 'Auteur ↔ Éditeur', de: 'Autor ↔ Lektor', ko: '저자 ↔ 편집자', ar: 'المؤلف ↔ المحرر', pt: 'Autor ↔ Editor' },
+            typeCollabTitle: { en: 'Collaboration Agreement', ja: '共同制作同意書', zh: '合作协议', es: 'Acuerdo de colaboración', fr: 'Accord de collaboration', de: 'Zusammenarbeitsvereinbarung', ko: '공동 제작 동의서', ar: 'اتفاقية التعاون', pt: 'Acordo de colaboração' },
+            typeCollabDesc: { en: 'Author ↔ Translator ↔ Editor', ja: '著者 ↔ 翻訳者 ↔ 編集者', zh: '作者 ↔ 翻译者 ↔ 编辑', es: 'Autor ↔ Traductor ↔ Editor', fr: 'Auteur ↔ Traducteur ↔ Éditeur', de: 'Autor ↔ Übersetzer ↔ Lektor', ko: '저자 ↔ 번역가 ↔ 편집자', ar: 'المؤلف ↔ المترجم ↔ المحرر', pt: 'Autor ↔ Tradutor ↔ Editor' },
+            formTitleTranslation: { en: 'Translation Agreement', ja: '翻訳同意書', zh: '翻译协议', es: 'Acuerdo de traducción', fr: 'Accord de traduction', de: 'Übersetzungsvereinbarung', ko: '번역 동의서', ar: 'اتفاقية الترجمة', pt: 'Acordo de tradução' },
+            formTitleEditing: { en: 'Editing Agreement', ja: '編集同意書', zh: '编辑协议', es: 'Acuerdo de edición', fr: "Accord d'édition", de: 'Lektoratsvereinbarung', ko: '편집 동의서', ar: 'اتفاقية التحرير', pt: 'Acordo de edição' },
+            formTitleCollaboration: { en: 'Collaboration Agreement', ja: '共同制作同意書', zh: '合作协议', es: 'Acuerdo de colaboración', fr: 'Accord de collaboration', de: 'Zusammenarbeitsvereinbarung', ko: '공동 제작 동의서', ar: 'اتفاقية التعاون', pt: 'Acordo de colaboração' },
+            btnBack: { en: 'Back', ja: '戻る', zh: '返回', es: 'Volver', fr: 'Retour', de: 'Zurück', ko: '뒤로', ar: 'رجوع', pt: 'Voltar' },
+            sectionProject: { en: 'Project Details', ja: 'プロジェクト情報', zh: '项目详情', es: 'Detalles del proyecto', fr: 'Détails du projet', de: 'Projektdetails', ko: '프로젝트 정보', ar: 'تفاصيل المشروع', pt: 'Detalhes do projeto' },
+            labelWorkTitle: { en: 'Work Title', ja: '作品タイトル', zh: '作品标题', es: 'Título de la obra', fr: "Titre de l'œuvre", de: 'Werktitel', ko: '작품 제목', ar: 'عنوان العمل', pt: 'Título da obra' },
+            labelTargetLang: { en: 'Target Translation Language', ja: '翻訳先言語', zh: '目标翻译语言', es: 'Idioma de traducción', fr: 'Langue de traduction cible', de: 'Zielsprache', ko: '번역 대상 언어', ar: 'لغة الترجمة المستهدفة', pt: 'Idioma de tradução alvo' },
+            optSelectLang: { en: '-- Select Language --', ja: '-- 言語を選択 --', zh: '-- 选择语言 --', es: '-- Seleccionar idioma --', fr: '-- Sélectionner la langue --', de: '-- Sprache auswählen --', ko: '-- 언어 선택 --', ar: '-- اختر اللغة --', pt: '-- Selecionar idioma --' },
+            labelDeadline: { en: 'Deadline (Optional)', ja: '期限（任意）', zh: '截止日期（可选）', es: 'Fecha límite (Opcional)', fr: 'Date limite (Optionnel)', de: 'Frist (Optional)', ko: '마감일 (선택)', ar: 'الموعد النهائي (اختياري)', pt: 'Prazo (Opcional)' },
+            sectionParties: { en: 'Parties Involved', ja: '当事者情報', zh: '相关方', es: 'Partes involucradas', fr: 'Parties impliquées', de: 'Beteiligte Parteien', ko: '당사자 정보', ar: 'الأطراف المعنية', pt: 'Partes envolvidas' },
+            labelAuthorName: { en: 'Author Name', ja: '著者名', zh: '作者姓名', es: 'Nombre del autor', fr: "Nom de l'auteur", de: 'Autorenname', ko: '저자 이름', ar: 'اسم المؤلف', pt: 'Nome do autor' },
+            labelAuthorEmail: { en: 'Author Email', ja: '著者メール', zh: '作者邮箱', es: 'Email del autor', fr: "Email de l'auteur", de: 'Autoren-E-Mail', ko: '저자 이메일', ar: 'بريد المؤلف', pt: 'Email do autor' },
+            labelTranslatorName: { en: 'Translator Name', ja: '翻訳者名', zh: '翻译者姓名', es: 'Nombre del traductor', fr: 'Nom du traducteur', de: 'Übersetzername', ko: '번역가 이름', ar: 'اسم المترجم', pt: 'Nome do tradutor' },
+            labelTranslatorEmail: { en: 'Translator Email', ja: '翻訳者メール', zh: '翻译者邮箱', es: 'Email del traductor', fr: 'Email du traducteur', de: 'Übersetzer-E-Mail', ko: '번역가 이메일', ar: 'بريد المترجم', pt: 'Email do tradutor' },
+            labelEditorName: { en: 'Editor Name', ja: '編集者名', zh: '编辑姓名', es: 'Nombre del editor', fr: "Nom de l'éditeur", de: 'Lektorname', ko: '편집자 이름', ar: 'اسم المحرر', pt: 'Nome do editor' },
+            labelEditorEmail: { en: 'Editor Email', ja: '編集者メール', zh: '编辑邮箱', es: 'Email del editor', fr: "Email de l'éditeur", de: 'Lektor-E-Mail', ko: '편집자 이메일', ar: 'بريد المحرر', pt: 'Email do editor' },
+            sectionRevenue: { en: 'Revenue Distribution', ja: '収益配分', zh: '收益分配', es: 'Distribución de ingresos', fr: 'Répartition des revenus', de: 'Umsatzverteilung', ko: '수익 배분', ar: 'توزيع الإيرادات', pt: 'Distribuição de receita' },
+            revenueNote: { en: 'Revenue percentages are fixed by the platform and cannot be modified.', ja: '収益配分はプラットフォームにより固定されており、変更できません。', zh: '收益百分比由平台固定，不可修改。', es: 'Los porcentajes de ingresos son fijos y no se pueden modificar.', fr: 'Les pourcentages de revenus sont fixés par la plateforme et ne peuvent pas être modifiés.', de: 'Die Umsatzprozentsätze sind von der Plattform festgelegt und können nicht geändert werden.', ko: '수익 비율은 플랫폼에 의해 고정되어 변경할 수 없습니다.', ar: 'نسب الإيرادات ثابتة من قبل المنصة ولا يمكن تعديلها.', pt: 'As porcentagens de receita são fixadas pela plataforma e não podem ser modificadas.' },
+            roleAuthor: { en: 'Author', ja: '著者', zh: '作者', es: 'Autor', fr: 'Auteur', de: 'Autor', ko: '저자', ar: 'المؤلف', pt: 'Autor' },
+            roleTranslator: { en: 'Translator', ja: '翻訳者', zh: '翻译者', es: 'Traductor', fr: 'Traducteur', de: 'Übersetzer', ko: '번역가', ar: 'المترجم', pt: 'Tradutor' },
+            roleEditor: { en: 'Editor', ja: '編集者', zh: '编辑', es: 'Editor', fr: 'Éditeur', de: 'Lektor', ko: '편집자', ar: 'المحرر', pt: 'Editor' },
+            rolePlatform: { en: 'Platform', ja: 'プラットフォーム', zh: '平台', es: 'Plataforma', fr: 'Plateforme', de: 'Plattform', ko: '플랫폼', ar: 'المنصة', pt: 'Plataforma' },
+            sectionTerms: { en: 'Agreement Terms', ja: '同意書条項', zh: '协议条款', es: 'Términos del acuerdo', fr: "Termes de l'accord", de: 'Vereinbarungsbedingungen', ko: '동의서 조항', ar: 'شروط الاتفاقية', pt: 'Termos do acordo' },
+            sectionConsent: { en: 'Digital Consent', ja: 'デジタル同意', zh: '数字同意', es: 'Consentimiento digital', fr: 'Consentement numérique', de: 'Digitale Zustimmung', ko: '디지털 동의', ar: 'الموافقة الرقمية', pt: 'Consentimento digital' },
+            consentAuthorLabel: { en: 'I (Author) have read and agree to the terms above.', ja: '私（著者）は上記の条項を読み、同意します。', zh: '我（作者）已阅读并同意上述条款。', es: 'Yo (Autor) he leído y acepto los términos anteriores.', fr: "Je (Auteur) ai lu et j'accepte les termes ci-dessus.", de: 'Ich (Autor) habe die obigen Bedingungen gelesen und stimme ihnen zu.', ko: '저(저자)는 위 조항을 읽고 동의합니다.', ar: 'أنا (المؤلف) قرأت وأوافق على الشروط أعلاه.', pt: 'Eu (Autor) li e concordo com os termos acima.' },
+            consentTranslatorLabel: { en: 'I (Translator) have read and agree to the terms above.', ja: '私（翻訳者）は上記の条項を読み、同意します。', zh: '我（翻译者）已阅读并同意上述条款。', es: 'Yo (Traductor) he leído y acepto los términos anteriores.', fr: "Je (Traducteur) ai lu et j'accepte les termes ci-dessus.", de: 'Ich (Übersetzer) habe die obigen Bedingungen gelesen und stimme ihnen zu.', ko: '저(번역가)는 위 조항을 읽고 동의합니다.', ar: 'أنا (المترجم) قرأت وأوافق على الشروط أعلاه.', pt: 'Eu (Tradutor) li e concordo com os termos acima.' },
+            consentEditorLabel: { en: 'I (Editor) have read and agree to the terms above.', ja: '私（編集者）は上記の条項を読み、同意します。', zh: '我（编辑）已阅读并同意上述条款。', es: 'Yo (Editor) he leído y acepto los términos anteriores.', fr: "Je (Éditeur) ai lu et j'accepte les termes ci-dessus.", de: 'Ich (Lektor) habe die obigen Bedingungen gelesen und stimme ihnen zu.', ko: '저(편집자)는 위 조항을 읽고 동의합니다.', ar: 'أنا (المحرر) قرأت وأوافق على الشروط أعلاه.', pt: 'Eu (Editor) li e concordo com os termos acima.' },
+            labelDate: { en: 'Agreement Date', ja: '同意日', zh: '协议日期', es: 'Fecha del acuerdo', fr: "Date de l'accord", de: 'Vereinbarungsdatum', ko: '동의 날짜', ar: 'تاريخ الاتفاقية', pt: 'Data do acordo' },
+            btnCreateAgreement: { en: 'Create Agreement', ja: '同意書を作成', zh: '创建协议', es: 'Crear acuerdo', fr: "Créer l'accord", de: 'Vereinbarung erstellen', ko: '동의서 작성', ar: 'إنشاء الاتفاقية', pt: 'Criar acordo' },
+            historyTitle: { en: 'Agreement History', ja: '同意書履歴', zh: '协议历史', es: 'Historial de acuerdos', fr: 'Historique des accords', de: 'Vereinbarungsverlauf', ko: '동의서 이력', ar: 'سجل الاتفاقيات', pt: 'Histórico de acordos' },
+            noHistoryText: { en: 'No agreements yet. Create your first agreement above.', ja: 'まだ同意書がありません。上のカードから最初の同意書を作成してください。', zh: '还没有协议。请在上方创建您的第一份协议。', es: 'No hay acuerdos aún. Crea tu primer acuerdo arriba.', fr: "Pas encore d'accords. Créez votre premier accord ci-dessus.", de: 'Noch keine Vereinbarungen. Erstellen Sie oben Ihre erste Vereinbarung.', ko: '아직 동의서가 없습니다. 위에서 첫 번째 동의서를 작성하세요.', ar: 'لا توجد اتفاقيات بعد. أنشئ أول اتفاقية أعلاه.', pt: 'Nenhum acordo ainda. Crie seu primeiro acordo acima.' },
+            btnViewDetails: { en: 'View Details', ja: '詳細を見る', zh: '查看详情', es: 'Ver detalles', fr: 'Voir les détails', de: 'Details anzeigen', ko: '상세 보기', ar: 'عرض التفاصيل', pt: 'Ver detalhes' },
+            statusActive: { en: 'Active', ja: '有効', zh: '有效', es: 'Activo', fr: 'Actif', de: 'Aktiv', ko: '활성', ar: 'نشط', pt: 'Ativo' },
+            modalTitle: { en: 'Agreement Details', ja: '同意書の詳細', zh: '协议详情', es: 'Detalles del acuerdo', fr: "Détails de l'accord", de: 'Vereinbarungsdetails', ko: '동의서 상세', ar: 'تفاصيل الاتفاقية', pt: 'Detalhes do acordo' },
+            modalClose: { en: 'Close', ja: '閉じる', zh: '关闭', es: 'Cerrar', fr: 'Fermer', de: 'Schließen', ko: '닫기', ar: 'إغلاق', pt: 'Fechar' },
+            successMessage: { en: 'Agreement created successfully!', ja: '同意書が作成されました！', zh: '协议创建成功！', es: '¡Acuerdo creado exitosamente!', fr: 'Accord créé avec succès !', de: 'Vereinbarung erfolgreich erstellt!', ko: '동의서가 성공적으로 작성되었습니다!', ar: 'تم إنشاء الاتفاقية بنجاح!', pt: 'Acordo criado com sucesso!' },
+            footerHelp: { en: 'Help', ja: 'ヘルプ', zh: '帮助', es: 'Ayuda', fr: 'Aide', de: 'Hilfe', ko: '도움말', ar: 'مساعدة', pt: 'Ajuda' },
+            footerTerms: { en: 'Terms', ja: '利用規約', zh: '条款', es: 'Términos', fr: 'Conditions', de: 'Bedingungen', ko: '약관', ar: 'الشروط', pt: 'Termos' },
+            footerPrivacy: { en: 'Privacy', ja: 'プライバシー', zh: '隐私', es: 'Privacidad', fr: 'Confidentialité', de: 'Datenschutz', ko: '개인정보', ar: 'الخصوصية', pt: 'Privacidade' }
+        };
+
+        // Agreement terms content (English only for demo; full i18n can be added later)
+        const termsContent = {
+            translation: [
+                { title: '1. Grant of Translation Rights', body: 'The Author grants the Translator a non-exclusive right to translate the specified work into the designated target language. This right is limited to the specific work and language pair identified in this agreement.' },
+                { title: '2. Revenue Distribution', body: 'Revenue from sales of the translated work shall be distributed as follows: Author 40%, Translator 20%, Platform 30%. These percentages are fixed by the Publisher platform and are non-negotiable.' },
+                { title: '3. Translation Quality Standards', body: 'The Translator agrees to deliver an accurate, culturally appropriate translation that maintains the original meaning and tone of the work. The translation must be original human work and not solely machine-generated output.' },
+                { title: '4. Timeline and Deadlines', body: 'The Translator shall complete the translation by the deadline specified in this agreement. If no deadline is specified, both parties shall negotiate a reasonable timeline. Extensions may be granted by mutual written consent.' },
+                { title: '5. Copyright Ownership', body: 'Original copyright remains with the Author. The Translator holds copyright over the translated text. Both parties grant the Publisher platform a non-exclusive license to distribute the work.' },
+                { title: '6. Dispute Resolution', body: 'Any disputes arising from this agreement shall first be addressed through direct communication between the parties. If unresolved, disputes may be escalated to the Publisher platform for mediation. Both parties agree to act in good faith.' },
+                { title: '7. Termination', body: 'Either party may terminate this agreement with 30 days written notice. Upon termination, any existing translated work already published shall continue to be sold under the specified revenue distribution terms.' }
+            ],
+            editing: [
+                { title: '1. Scope of Editing Work', body: 'The Editor agrees to provide professional editing services for the specified work, including proofreading, grammar correction, style consistency review, and content improvement suggestions as appropriate.' },
+                { title: '2. Revenue Distribution', body: 'Revenue from sales of the edited work shall be distributed as follows: Author 40%, Editor 10%, Platform 30%. These percentages are fixed by the Publisher platform and are non-negotiable.' },
+                { title: '3. Editorial Standards', body: 'The Editor shall maintain professional editorial standards, preserving the Author\'s voice and creative intent while improving clarity, readability, and overall quality of the work.' },
+                { title: '4. Timeline and Deadlines', body: 'The Editor shall complete the editing work by the deadline specified in this agreement. If no deadline is specified, both parties shall negotiate a reasonable timeline. Extensions may be granted by mutual written consent.' },
+                { title: '5. Copyright Ownership', body: 'Copyright of the work remains entirely with the Author. The Editor\'s contributions are considered work performed within the revenue-sharing framework established by this agreement.' },
+                { title: '6. Dispute Resolution', body: 'Any disputes arising from this agreement shall first be addressed through direct communication between the parties. If unresolved, disputes may be escalated to the Publisher platform for mediation. Both parties agree to act in good faith.' },
+                { title: '7. Termination', body: 'Either party may terminate this agreement with 30 days written notice. Upon termination, any editing work already incorporated into published versions shall remain, and the revenue distribution terms shall continue to apply.' }
+            ],
+            collaboration: [
+                { title: '1. Roles and Responsibilities', body: 'This agreement defines the roles of all three parties: the Author (original content creator), the Translator (language adaptation specialist), and the Editor (quality assurance and refinement). Each party commits to fulfilling their designated role professionally.' },
+                { title: '2. Revenue Distribution', body: 'Revenue from sales shall be distributed as follows: Author 40%, Translator 20%, Editor 10%, Platform 30%. These percentages are fixed by the Publisher platform and are non-negotiable.' },
+                { title: '3. Workflow and Communication', body: 'The Author provides the original work, the Translator produces the translation, and the Editor reviews and refines the final output. All parties shall maintain open and timely communication throughout the collaboration process.' },
+                { title: '4. Quality Standards', body: 'All parties commit to maintaining professional standards in their respective roles. The Author provides complete and final content, the Translator delivers accurate and culturally appropriate translations, and the Editor ensures overall quality and consistency.' },
+                { title: '5. Timeline and Deadlines', body: 'The collaboration follows a sequential workflow with agreed timelines for each phase. Each party shall complete their work within the specified deadline. Extensions may be granted by mutual consent of all parties.' },
+                { title: '6. Copyright Ownership', body: 'The Author holds copyright over the original work. The Translator holds copyright over the translated text. The Editor\'s contributions are considered work performed within the revenue-sharing framework. All parties grant the Publisher platform a distribution license.' },
+                { title: '7. Dispute Resolution', body: 'Any disputes shall first be addressed through direct communication among all parties. If unresolved, disputes may be escalated to the Publisher platform for mediation. All parties agree to act in good faith and seek amicable resolution.' },
+                { title: '8. Termination', body: 'Any party may terminate their participation with 30 days written notice to all other parties. Completed and published work shall continue under the existing revenue distribution terms. The remaining parties may continue the collaboration independently.' }
+            ]
+        };
+
+        function getCurrentLang() { return localStorage.getItem('preferredLanguage') || 'en'; }
+        function getL(obj) { if (!obj) return ''; const l = getCurrentLang(); return obj[l] || obj.en || ''; }
+        function escapeHtml(text) { const d = document.createElement('div'); d.textContent = text; return d.innerHTML; }
+
+        function selectAgreementType(type) {
+            selectedType = type;
+            document.querySelectorAll('.agreement-type-card').forEach(c => c.classList.remove('selected'));
+            document.getElementById('card' + type.charAt(0).toUpperCase() + type.slice(1)).classList.add('selected');
+            document.getElementById('agreementFormSection').style.display = 'block';
+            updateFormForType(type);
+            document.getElementById('inputDate').value = new Date().toLocaleDateString(getCurrentLang() === 'ja' ? 'ja-JP' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('agreementFormSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function closeForm() {
+            selectedType = null;
+            document.getElementById('agreementFormSection').style.display = 'none';
+            document.querySelectorAll('.agreement-type-card').forEach(c => c.classList.remove('selected'));
+        }
+
+        function updateFormForType(type) {
+            const titleKey = { translation: 'formTitleTranslation', editing: 'formTitleEditing', collaboration: 'formTitleCollaboration' };
+            document.getElementById('formTitle').innerHTML = `<i class="fas fa-file-signature me-2" style="color: var(--color-accent);"></i>${getL(uiText[titleKey[type]])}`;
+
+            // Show/hide fields
+            document.getElementById('translatorFields').style.display = (type === 'translation' || type === 'collaboration') ? '' : 'none';
+            document.getElementById('editorFields').style.display = (type === 'editing' || type === 'collaboration') ? '' : 'none';
+            document.getElementById('langGroup').style.display = (type === 'translation' || type === 'collaboration') ? '' : 'none';
+
+            // Required attributes
+            document.getElementById('inputTranslatorName').required = (type === 'translation' || type === 'collaboration');
+            document.getElementById('inputTranslatorEmail').required = (type === 'translation' || type === 'collaboration');
+            document.getElementById('inputEditorName').required = (type === 'editing' || type === 'collaboration');
+            document.getElementById('inputEditorEmail').required = (type === 'editing' || type === 'collaboration');
+
+            // Consent checkboxes
+            document.getElementById('consentTranslatorGroup').style.display = (type === 'translation' || type === 'collaboration') ? '' : 'none';
+            document.getElementById('consentEditorGroup').style.display = (type === 'editing' || type === 'collaboration') ? '' : 'none';
+            document.getElementById('consentTranslator').required = (type === 'translation' || type === 'collaboration');
+            document.getElementById('consentEditor').required = (type === 'editing' || type === 'collaboration');
+
+            populateRevenueDisplay(type);
+            populateTerms(type);
+        }
+
+        function populateRevenueDisplay(type) {
+            const items = [{ pct: 40, role: getL(uiText.roleAuthor), cls: 'color: var(--color-accent)' }];
+            if (type === 'translation' || type === 'collaboration') items.push({ pct: 20, role: getL(uiText.roleTranslator), cls: 'color: var(--color-success)' });
+            if (type === 'editing' || type === 'collaboration') items.push({ pct: 10, role: getL(uiText.roleEditor), cls: 'color: var(--color-info)' });
+            items.push({ pct: 30, role: getL(uiText.rolePlatform), cls: 'color: var(--color-warning)' });
+
+            document.getElementById('revenueDisplay').innerHTML = items.map(i =>
+                `<div class="revenue-item"><div class="percentage" style="${i.cls}">${i.pct}%</div><div class="role-label">${i.role}</div></div>`
+            ).join('');
+        }
+
+        function populateTerms(type) {
+            const terms = termsContent[type] || [];
+            document.getElementById('termsBox').innerHTML = terms.map(t =>
+                `<h6>${escapeHtml(t.title)}</h6><p>${escapeHtml(t.body)}</p>`
+            ).join('');
+        }
+
+        function handleSubmit(e) {
+            e.preventDefault();
+            const agreement = generateAgreement();
+            saveAgreement(agreement);
+            closeForm();
+            e.target.reset();
+            loadAgreementHistory();
+            alert(getL(uiText.successMessage));
+        }
+
+        function generateAgreement() {
+            const now = new Date().toISOString();
+            const agr = {
+                id: 'AGR-' + Date.now(),
+                type: selectedType,
+                workTitle: document.getElementById('inputWorkTitle').value,
+                deadline: document.getElementById('inputDeadline').value || null,
+                targetLanguage: (selectedType !== 'editing') ? document.getElementById('inputTargetLang').value : null,
+                parties: {
+                    author: { name: document.getElementById('inputAuthorName').value, email: document.getElementById('inputAuthorEmail').value, revenuePercent: 40, consentTimestamp: now }
+                },
+                revenue: { author: 40, platform: 30 },
+                status: 'active',
+                createdAt: now
+            };
+            if (selectedType === 'translation' || selectedType === 'collaboration') {
+                agr.parties.translator = { name: document.getElementById('inputTranslatorName').value, email: document.getElementById('inputTranslatorEmail').value, revenuePercent: 20, consentTimestamp: now };
+                agr.revenue.translator = 20;
+            }
+            if (selectedType === 'editing' || selectedType === 'collaboration') {
+                agr.parties.editor = { name: document.getElementById('inputEditorName').value, email: document.getElementById('inputEditorEmail').value, revenuePercent: 10, consentTimestamp: now };
+                agr.revenue.editor = 10;
+            }
+            return agr;
+        }
+
+        function saveAgreement(agr) {
+            const list = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            list.unshift(agr);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+        }
+
+        function loadAgreementHistory() {
+            const list = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const container = document.getElementById('historyList');
+            const noHistory = document.getElementById('noHistory');
+
+            if (list.length === 0) {
+                container.innerHTML = '';
+                noHistory.style.display = 'block';
+                return;
+            }
+            noHistory.style.display = 'none';
+            const typeLabels = { translation: getL(uiText.typeTranslationTitle), editing: getL(uiText.typeEditingTitle), collaboration: getL(uiText.typeCollabTitle) };
+
+            container.innerHTML = list.map(agr => {
+                const parties = Object.keys(agr.parties).map(k => agr.parties[k].name).join(', ');
+                const date = new Date(agr.createdAt).toLocaleDateString();
+                return `<div class="history-item">
+                    <div class="history-meta">
+                        <span class="history-type-badge">${typeLabels[agr.type] || agr.type}</span>
+                        <strong>${escapeHtml(agr.workTitle)}</strong>
+                        <span class="text-secondary small">${escapeHtml(parties)}</span>
+                        <span class="text-secondary small">${date}</span>
+                        <span class="status-active"><i class="fas fa-check-circle me-1"></i>${getL(uiText.statusActive)}</span>
+                    </div>
+                    <button class="btn btn-soft-custom btn-sm" onclick="viewAgreementDetail('${agr.id}')">${getL(uiText.btnViewDetails)}</button>
+                </div>`;
+            }).join('');
+        }
+
+        function viewAgreementDetail(id) {
+            const list = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const agr = list.find(a => a.id === id);
+            if (!agr) return;
+
+            const typeLabels = { translation: getL(uiText.typeTranslationTitle), editing: getL(uiText.typeEditingTitle), collaboration: getL(uiText.typeCollabTitle) };
+            const langNames = { en: 'English', ja: '日本語', zh: '中文', es: 'Español', fr: 'Français', de: 'Deutsch', ko: '한국어', ar: 'العربية', pt: 'Português' };
+
+            let partiesHtml = '';
+            Object.keys(agr.parties).forEach(role => {
+                const p = agr.parties[role];
+                const roleLabel = getL(uiText['role' + role.charAt(0).toUpperCase() + role.slice(1)]) || role;
+                partiesHtml += `<div class="modal-party-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <strong>${roleLabel}</strong>
+                        <span class="badge-role badge-${role}">${p.revenuePercent}%</span>
+                    </div>
+                    <div class="small text-secondary mt-1">${escapeHtml(p.name)} (${escapeHtml(p.email)})</div>
+                    <div class="small text-secondary">${getL(uiText.sectionConsent)}: ${new Date(p.consentTimestamp).toLocaleString()}</div>
+                </div>`;
+            });
+
+            let revenueHtml = Object.keys(agr.revenue).map(k => {
+                const roleLabel = getL(uiText['role' + k.charAt(0).toUpperCase() + k.slice(1)]) || k;
+                return `<span class="badge-role badge-${k} me-2">${roleLabel}: ${agr.revenue[k]}%</span>`;
+            }).join('');
+
+            document.getElementById('modalBody').innerHTML = `
+                <div class="modal-detail-section">
+                    <h6><i class="fas fa-tag me-1"></i>ID</h6>
+                    <p class="mb-0 small text-secondary">${agr.id}</p>
+                </div>
+                <div class="modal-detail-section">
+                    <h6><i class="fas fa-file-contract me-1"></i>${getL(uiText.typeTranslationTitle).split(' ')[0]}</h6>
+                    <span class="history-type-badge">${typeLabels[agr.type]}</span>
+                </div>
+                <div class="modal-detail-section">
+                    <h6><i class="fas fa-book me-1"></i>${getL(uiText.labelWorkTitle)}</h6>
+                    <p class="mb-0">${escapeHtml(agr.workTitle)}</p>
+                </div>
+                ${agr.targetLanguage ? `<div class="modal-detail-section"><h6><i class="fas fa-globe me-1"></i>${getL(uiText.labelTargetLang)}</h6><p class="mb-0">${langNames[agr.targetLanguage] || agr.targetLanguage}</p></div>` : ''}
+                ${agr.deadline ? `<div class="modal-detail-section"><h6><i class="fas fa-calendar me-1"></i>${getL(uiText.labelDeadline)}</h6><p class="mb-0">${agr.deadline}</p></div>` : ''}
+                <div class="modal-detail-section">
+                    <h6><i class="fas fa-users me-1"></i>${getL(uiText.sectionParties)}</h6>
+                    ${partiesHtml}
+                </div>
+                <div class="modal-detail-section">
+                    <h6><i class="fas fa-chart-pie me-1"></i>${getL(uiText.sectionRevenue)}</h6>
+                    <div>${revenueHtml}</div>
+                </div>
+                <div class="modal-detail-section">
+                    <h6><i class="fas fa-calendar-check me-1"></i>${getL(uiText.labelDate)}</h6>
+                    <p class="mb-0">${new Date(agr.createdAt).toLocaleString()}</p>
+                </div>
+                <div class="modal-detail-section">
+                    <h6><i class="fas fa-check-circle me-1"></i>Status</h6>
+                    <span class="status-active"><i class="fas fa-check-circle me-1"></i>${getL(uiText.statusActive)}</span>
+                </div>
+            `;
+
+            new bootstrap.Modal(document.getElementById('detailModal')).show();
+        }
+
+        function updateAllText() {
+            document.title = getL(uiText.pageTitle) + ' - Publisher';
+            const map = {
+                pageTitle: 'pageTitle', pageSubtitle: 'pageSubtitle', guestTitle: 'guestTitle', guestSubtitle: 'guestSubtitle', guestSignIn: 'guestSignIn',
+                typeTranslationTitle: 'typeTranslationTitle', typeTranslationDesc: 'typeTranslationDesc',
+                typeEditingTitle: 'typeEditingTitle', typeEditingDesc: 'typeEditingDesc',
+                typeCollabTitle: 'typeCollabTitle', typeCollabDesc: 'typeCollabDesc',
+                sectionProject: 'sectionProject', labelWorkTitle: 'labelWorkTitle', labelTargetLang: 'labelTargetLang',
+                optSelectLang: 'optSelectLang', labelDeadline: 'labelDeadline',
+                sectionParties: 'sectionParties', labelAuthorName: 'labelAuthorName', labelAuthorEmail: 'labelAuthorEmail',
+                labelTranslatorName: 'labelTranslatorName', labelTranslatorEmail: 'labelTranslatorEmail',
+                labelEditorName: 'labelEditorName', labelEditorEmail: 'labelEditorEmail',
+                sectionRevenue: 'sectionRevenue', revenueNote: 'revenueNote',
+                sectionTerms: 'sectionTerms', sectionConsent: 'sectionConsent',
+                consentAuthorLabel: 'consentAuthorLabel', consentTranslatorLabel: 'consentTranslatorLabel', consentEditorLabel: 'consentEditorLabel',
+                labelDate: 'labelDate', btnCreateAgreement: 'btnCreateAgreement',
+                historyTitle: 'historyTitle', noHistoryText: 'noHistoryText',
+                modalTitle: 'modalTitle', modalClose: 'modalClose',
+                footerHelp: 'footerHelp', footerTerms: 'footerTerms', footerPrivacy: 'footerPrivacy'
+            };
+            Object.keys(map).forEach(id => { const el = document.getElementById(id); if (el) el.textContent = getL(uiText[map[id]]); });
+            document.getElementById('btnBack').innerHTML = `<i class="fas fa-arrow-left me-1"></i>${getL(uiText.btnBack)}`;
+
+            if (selectedType) { updateFormForType(selectedType); }
+            loadAgreementHistory();
+        }
+
+        function syncSelectors() {
+            const d = document.getElementById('languageSelector'), m = document.getElementById('languageSelectorMobile'), l = getCurrentLang();
+            if (d) d.value = l; if (m) m.value = l;
+            if (m) m.addEventListener('change', function() { if (d) d.value = this.value; localStorage.setItem('preferredLanguage', this.value); updateAllText(); });
+            if (d) d.addEventListener('change', function() { if (m) m.value = this.value; localStorage.setItem('preferredLanguage', this.value); updateAllText(); });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            syncSelectors();
+            updateAllText();
+            loadAgreementHistory();
+            // Auto-fill author info from logged-in user
+            try {
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                if (user.display_name || user.firstName) document.getElementById('inputAuthorName').value = user.display_name || user.firstName || '';
+                if (user.email) document.getElementById('inputAuthorEmail').value = user.email || '';
+            } catch(e) {}
+        });
+
+        document.addEventListener('languageChanged', function(e) {
+            const l = e.detail && (e.detail.language || e.detail.lang);
+            if (l) { const d = document.getElementById('languageSelector'), m = document.getElementById('languageSelectorMobile'); if (d) d.value = l; if (m) m.value = l; }
+            updateAllText();
+        });
+    </script>
+</body>
+</html>
