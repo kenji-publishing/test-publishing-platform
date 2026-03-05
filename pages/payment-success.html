@@ -8,275 +8,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="../css/style-new.css" rel="stylesheet">
     <link href="../css/mobile-fixes.css" rel="stylesheet">
-    <style>
-        /* ========== Mobile Language Selector ========== */
-        .navbar-lang-selector {
-            display: flex;
-            align-items: center;
-            margin-right: 0.5rem;
-        }
-        
-        @media (max-width: 991.98px) {
-            .navbar-lang-selector {
-                order: 1;
-            }
-            .navbar-toggler {
-                order: 2;
-            }
-        }
-        
-        /* ========== PC Navbar - 横並び維持 ========== */
-        @media (min-width: 992px) {
-            .navbar-nav {
-                flex-wrap: nowrap !important;
-                flex-direction: row !important;
-            }
-            .navbar-nav .nav-item {
-                white-space: nowrap !important;
-            }
-            .navbar-nav .nav-link {
-                white-space: nowrap !important;
-                padding: 0.5rem 0.6rem !important;
-                font-size: 0.9rem;
-            }
-            .navbar-collapse .d-flex {
-                flex-wrap: nowrap !important;
-            }
-            .dropdown-menu {
-                white-space: nowrap;
-            }
-            .navbar-buttons-guest {
-                display: flex !important;
-                flex-wrap: nowrap !important;
-                gap: 0.5rem;
-            }
-            .navbar-buttons-guest .btn {
-                white-space: nowrap !important;
-                flex-shrink: 0;
-            }
-        }
-        
-        /* ========== Auth Visibility Control ========== */
-        .auth-only {
-            display: none !important;
-        }
-        .guest-only {
-            display: block;
-        }
-        body.logged-in .auth-only {
-            display: block !important;
-        }
-        body.logged-in .auth-only.nav-item {
-            display: list-item !important;
-        }
-        body.logged-in .auth-only.dropdown {
-            display: block !important;
-        }
-        body.logged-in .guest-only {
-            display: none !important;
-        }
-        @media (min-width: 992px) {
-            body.logged-in .navbar-buttons-guest {
-                display: none !important;
-            }
-        }
-        
-        /* ========== User Dropdown Menu ========== */
-        .user-dropdown {
-            position: relative;
-        }
-        .user-dropdown-toggle {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: transparent;
-            border: 1px solid var(--color-border);
-            border-radius: 25px;
-            padding: 0.4rem 0.75rem;
-            cursor: pointer;
-            color: var(--color-text);
-            transition: all 0.2s;
-        }
-        .user-dropdown-toggle:hover {
-            border-color: var(--color-accent);
-            background: rgba(139, 115, 85, 0.05);
-        }
-        .user-dropdown-toggle i:first-child {
-            font-size: 1.25rem;
-            color: var(--color-accent);
-        }
-        .user-name {
-            font-weight: 500;
-            font-size: 0.9rem;
-            max-width: 120px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .user-chevron {
-            font-size: 0.7rem;
-            color: var(--color-text-secondary);
-            transition: transform 0.2s;
-        }
-        .user-dropdown.open .user-chevron {
-            transform: rotate(180deg);
-        }
-        .user-menu {
-            position: absolute;
-            top: calc(100% + 0.5rem);
-            right: 0;
-            background: var(--color-bg-card);
-            border: 1px solid var(--color-border);
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            min-width: 240px;
-            z-index: 1001;
-            display: none;
-            overflow: hidden;
-        }
-        .user-menu.show {
-            display: block;
-        }
-        .user-menu-header {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 1rem;
-            background: var(--color-bg-main);
-        }
-        .user-avatar {
-            font-size: 2.5rem;
-            color: var(--color-accent);
-        }
-        .user-info {
-            flex: 1;
-            min-width: 0;
-        }
-        .user-display-name {
-            font-weight: 600;
-            font-size: 0.95rem;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .user-email {
-            font-size: 0.8rem;
-            color: var(--color-text-secondary);
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .user-menu-divider {
-            height: 1px;
-            background: var(--color-border);
-        }
-        .user-menu-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
-            color: var(--color-text);
-            text-decoration: none;
-            font-size: 0.9rem;
-            cursor: pointer;
-            border: none;
-            background: transparent;
-            width: 100%;
-            text-align: left;
-        }
-        .user-menu-item:hover {
-            background: var(--color-bg-hover);
-            color: var(--color-accent);
-        }
-        .user-menu-item i {
-            width: 20px;
-            text-align: center;
-            color: var(--color-text-secondary);
-        }
-        .user-menu-item:hover i {
-            color: var(--color-accent);
-        }
-        .logout-btn {
-            color: var(--color-error);
-        }
-        .logout-btn i {
-            color: var(--color-error);
-        }
-        .logout-btn:hover {
-            background: rgba(199, 93, 93, 0.1);
-            color: var(--color-error);
-        }
-        
-        /* ========== Navbar Overlay ========== */
-        .navbar-overlay {
-            display: none;
-            position: fixed;
-            top: 56px;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1040;
-        }
-        .navbar-overlay.show {
-            display: block;
-        }
-        
-        /* ========== Mobile Adjustments ========== */
-        @media (max-width: 991.98px) {
-            .user-dropdown {
-                order: 3;
-                margin-left: 0.5rem;
-            }
-            .user-dropdown-toggle {
-                padding: 0.3rem;
-                border-radius: 50%;
-                width: 38px;
-                height: 38px;
-                justify-content: center;
-            }
-            .user-menu {
-                position: fixed;
-                top: 56px;
-                right: 10px;
-                left: auto;
-                min-width: 260px;
-                max-width: calc(100vw - 20px);
-                z-index: 9999;
-            }
-            .navbar-collapse {
-                max-height: 70vh;
-                overflow-y: auto;
-                overscroll-behavior: contain;
-                -webkit-overflow-scrolling: touch;
-            }
-            .navbar-collapse.show,
-            .navbar-collapse.collapsing {
-                position: fixed;
-                top: 56px;
-                left: 0;
-                right: 0;
-                background: #FFFFFF;
-                border-bottom: 1px solid var(--color-border);
-                box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-                z-index: 1045;
-                padding: 0.5rem 1rem;
-            }
-            body.menu-open {
-                overflow: hidden;
-            }
-            .navbar-custom {
-                z-index: 1050 !important;
-                background: #FFFFFF !important;
-            }
-        }
-
-        /* ========== Page Specific: Payment Success ========== */
-        .success-icon{font-size:6rem;color:#198754;animation:bounceIn 0.6s ease-out}@keyframes bounceIn{0%{transform:scale(0);opacity:0}50%{transform:scale(1.2)}100%{transform:scale(1);opacity:1}}
-        .success-card{max-width:600px;margin:0 auto}
-        .confetti{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;z-index:1000}
-        .confetti-piece{position:absolute;width:10px;height:10px;animation:confetti-fall 3s ease-out forwards}@keyframes confetti-fall{0%{transform:translateY(-100px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
-    </style>
+    <link href="../css/navbar.css" rel="stylesheet">
 </head>
 <body>
     <div class="confetti" id="confetti"></div>
@@ -579,6 +311,7 @@
     <script src="../js/lang/translations-base.js"></script>
     <!-- 言語切替機能 -->
     <script src="../js/language-switcher.js"></script>
+    <script src="../js/navbar.js"></script>
 
     <!-- ========== Pattern C Navbar JS ========== -->
     <script>
@@ -635,17 +368,7 @@
             ko: '로그아웃 하시겠습니까?', ar: 'هل أنت متأكد أنك تريد تسجيل الخروج؟', pt: 'Tem certeza que deseja sair?'
         }
     };
-
-    function getCurrentLanguage() {
-        return localStorage.getItem('preferredLanguage') || 'en';
-    }
-
-    function getL(obj) {
-        const lang = getCurrentLanguage();
-        return obj[lang] || obj.en || '';
-    }
-
-    function updateUIText() {
+function updateUIText() {
         const menuDashboard = document.getElementById('menuDashboard');
         const menuAccountSettings = document.getElementById('menuAccountSettings');
         const menuLogout = document.getElementById('menuLogout');
@@ -667,46 +390,7 @@
             if (el) el.textContent = getL(els[id]);
         });
     }
-
-    function toggleUserDropdown(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const dropdown = document.getElementById('userDropdown');
-        const dropdownMenu = document.getElementById('userMenu');
-        dropdown.classList.toggle('open');
-        dropdownMenu.classList.toggle('show');
     }
-
-    function handleLogout() {
-        if (confirm(getL(uiText.logOutConfirm))) {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.reload();
-        }
-    }
-
-    function loadUserInfo() {
-        const userStr = localStorage.getItem('user');
-        const token = localStorage.getItem('token');
-        const isLoggedIn = !!(userStr && token);
-
-        if (isLoggedIn) {
-            try {
-                const user = JSON.parse(userStr);
-                const displayName = user.display_name || user.firstName || user.email || 'User';
-                const userNameEl = document.getElementById('userName');
-                const userDisplayNameEl = document.getElementById('userDisplayName');
-                const userEmailEl = document.getElementById('userEmail');
-                if (userNameEl) userNameEl.textContent = displayName;
-                if (userDisplayNameEl) userDisplayNameEl.textContent = displayName;
-                if (userEmailEl) userEmailEl.textContent = user.email || '';
-                document.body.classList.add('logged-in');
-            } catch (e) {
-                document.body.classList.remove('logged-in');
-            }
-        } else {
-            document.body.classList.remove('logged-in');
-        }
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -732,8 +416,6 @@
 
         updateUIText();
         setTimeout(updateUIText, 100);
-        loadUserInfo();
-
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.user-dropdown')) {
                 const dropdown = document.getElementById('userDropdown');

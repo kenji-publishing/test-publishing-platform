@@ -17,314 +17,8 @@
     <!-- Custom Styles -->
     <link href="../../css/style-new.css" rel="stylesheet">
     <link href="../../css/mobile-fixes.css" rel="stylesheet">
+    <link href="../../css/navbar.css" rel="stylesheet">
     
-    <style>
-    /* ========== Mobile Language Selector ========== */
-    .navbar-lang-selector {
-        display: flex;
-        align-items: center;
-        margin-right: 0.5rem;
-    }
-    
-    @media (max-width: 991.98px) {
-        .navbar-lang-selector {
-            order: 1;
-        }
-        .navbar-toggler {
-            order: 2;
-        }
-    }
-    
-    /* ========== PC Navbar - 横並び維持 ========== */
-    @media (min-width: 992px) {
-        .navbar-nav {
-            flex-wrap: nowrap !important;
-            flex-direction: row !important;
-        }
-        .navbar-nav .nav-item {
-            white-space: nowrap !important;
-        }
-        .navbar-nav .nav-link {
-            white-space: nowrap !important;
-            padding: 0.5rem 0.6rem !important;
-            font-size: 0.9rem;
-        }
-        .navbar-collapse .d-flex {
-            flex-wrap: nowrap !important;
-        }
-        .dropdown-menu {
-            white-space: nowrap;
-        }
-        .navbar-buttons-guest {
-            display: flex !important;
-            flex-wrap: nowrap !important;
-            gap: 0.5rem;
-        }
-        .navbar-buttons-guest .btn {
-            white-space: nowrap !important;
-            flex-shrink: 0;
-        }
-    }
-    
-    /* ========== Auth Visibility Control ========== */
-    .auth-only {
-        display: none !important;
-    }
-    .guest-only {
-        display: block;
-    }
-    body.logged-in .auth-only {
-        display: block !important;
-    }
-    body.logged-in .auth-only.nav-item {
-        display: list-item !important;
-    }
-    body.logged-in .auth-only.dropdown {
-        display: block !important;
-    }
-    body.logged-in .guest-only {
-        display: none !important;
-    }
-    @media (min-width: 992px) {
-        body.logged-in .navbar-buttons-guest {
-            display: none !important;
-        }
-    }
-    
-    /* ========== User Dropdown Menu ========== */
-    .user-dropdown {
-        position: relative;
-    }
-    .user-dropdown-toggle {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        background: transparent;
-        border: 1px solid var(--color-border);
-        border-radius: 25px;
-        padding: 0.4rem 0.75rem;
-        cursor: pointer;
-        color: var(--color-text);
-        transition: all 0.2s;
-    }
-    .user-dropdown-toggle:hover {
-        border-color: var(--color-accent);
-        background: rgba(139, 115, 85, 0.05);
-    }
-    .user-dropdown-toggle i:first-child {
-        font-size: 1.25rem;
-        color: var(--color-accent);
-    }
-    .user-name {
-        font-weight: 500;
-        font-size: 0.9rem;
-        max-width: 120px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-    .user-chevron {
-        font-size: 0.7rem;
-        color: var(--color-text-secondary);
-        transition: transform 0.2s;
-    }
-    .user-dropdown.open .user-chevron {
-        transform: rotate(180deg);
-    }
-    .user-menu {
-        position: absolute;
-        top: calc(100% + 0.5rem);
-        right: 0;
-        background: var(--color-bg-card);
-        border: 1px solid var(--color-border);
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-        min-width: 240px;
-        z-index: 1001;
-        display: none;
-        overflow: hidden;
-    }
-    .user-menu.show {
-        display: block;
-    }
-    .user-menu-header {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 1rem;
-        background: var(--color-bg-main);
-    }
-    .user-avatar {
-        font-size: 2.5rem;
-        color: var(--color-accent);
-    }
-    .user-info {
-        flex: 1;
-        min-width: 0;
-    }
-    .user-display-name {
-        font-weight: 600;
-        font-size: 0.95rem;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-    .user-email {
-        font-size: 0.8rem;
-        color: var(--color-text-secondary);
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-    .user-menu-divider {
-        height: 1px;
-        background: var(--color-border);
-    }
-    .user-menu-item {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.75rem 1rem;
-        color: var(--color-text);
-        text-decoration: none;
-        font-size: 0.9rem;
-        cursor: pointer;
-        border: none;
-        background: transparent;
-        width: 100%;
-        text-align: left;
-    }
-    .user-menu-item:hover {
-        background: var(--color-bg-hover);
-        color: var(--color-accent);
-    }
-    .user-menu-item i {
-        width: 20px;
-        text-align: center;
-        color: var(--color-text-secondary);
-    }
-    .user-menu-item:hover i {
-        color: var(--color-accent);
-    }
-    .logout-btn {
-        color: var(--color-error);
-    }
-    .logout-btn i {
-        color: var(--color-error);
-    }
-    .logout-btn:hover {
-        background: rgba(199, 93, 93, 0.1);
-        color: var(--color-error);
-    }
-    
-    /* ========== Navbar Overlay ========== */
-    .navbar-overlay {
-        display: none;
-        position: fixed;
-        top: 56px;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 1040;
-    }
-    .navbar-overlay.show {
-        display: block;
-    }
-    
-    /* ========== Mobile Adjustments ========== */
-    @media (max-width: 991.98px) {
-        .user-dropdown {
-            order: 3;
-            margin-left: 0.5rem;
-        }
-        .user-dropdown-toggle {
-            padding: 0.3rem;
-            border-radius: 50%;
-            width: 38px;
-            height: 38px;
-            justify-content: center;
-        }
-        .user-menu {
-            position: fixed;
-            top: 56px;
-            right: 10px;
-            left: auto;
-            min-width: 260px;
-            max-width: calc(100vw - 20px);
-            z-index: 9999;
-        }
-        .navbar-collapse {
-            max-height: 70vh;
-            overflow-y: auto;
-            overscroll-behavior: contain;
-            -webkit-overflow-scrolling: touch;
-        }
-        .navbar-collapse.show,
-        .navbar-collapse.collapsing {
-            position: fixed;
-            top: 56px;
-            left: 0;
-            right: 0;
-            background: #FFFFFF;
-            border-bottom: 1px solid var(--color-border);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            z-index: 1045;
-            padding: 0.5rem 1rem;
-        }
-        body.menu-open {
-            overflow: hidden;
-        }
-        .navbar-custom {
-            z-index: 1050 !important;
-            background: #FFFFFF !important;
-        }
-    }
-
-        /* ========== FAQ Page Styles ========== */
-        .faq-hero { background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%); padding: var(--spacing-2xl) 0; color: white; text-align: center; }
-        .faq-hero h1 { color: white; font-size: var(--font-size-3xl); margin-bottom: var(--spacing-sm); }
-        .faq-hero p { color: rgba(255, 255, 255, 0.9); margin-bottom: var(--spacing-lg); }
-        .faq-search { max-width: 500px; margin: 0 auto; position: relative; }
-        .faq-search input { width: 100%; padding: var(--spacing-md) var(--spacing-lg); padding-left: 50px; border: none; border-radius: var(--radius-full); font-size: var(--font-size-base); box-shadow: var(--shadow-lg); }
-        .faq-search input:focus { outline: none; box-shadow: var(--shadow-xl); }
-        .faq-search i { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--color-text-secondary); }
-        .category-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--spacing-md); margin-bottom: var(--spacing-xl); }
-        .category-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-lg); text-align: center; cursor: pointer; transition: all var(--transition-fast); }
-        .category-card:hover { border-color: var(--color-accent); box-shadow: var(--shadow-md); transform: translateY(-3px); }
-        .category-card.active { border-color: var(--color-accent); background: rgba(139, 115, 85, 0.05); }
-        .category-card .icon { width: 50px; height: 50px; border-radius: var(--radius-md); background: rgba(139, 115, 85, 0.1); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-sm); color: var(--color-accent); font-size: 1.25rem; }
-        .category-card h3 { font-size: var(--font-size-base); margin-bottom: var(--spacing-xs); }
-        .category-card .count { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
-        .faq-section { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); margin-bottom: var(--spacing-xl); overflow: hidden; }
-        .faq-section-header { padding: var(--spacing-lg); border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; background: var(--color-bg-hover); }
-        .faq-section-header h2 { font-size: var(--font-size-lg); margin: 0; }
-        .faq-accordion .accordion-item { border: none; border-bottom: 1px solid var(--color-border); }
-        .faq-accordion .accordion-item:last-child { border-bottom: none; }
-        .faq-accordion .accordion-button { background: transparent; font-weight: 500; color: var(--color-text-primary); padding: var(--spacing-lg); }
-        .faq-accordion .accordion-button:not(.collapsed) { background: var(--color-bg-hover); color: var(--color-accent); box-shadow: none; }
-        .faq-accordion .accordion-button:focus { box-shadow: none; }
-        .faq-accordion .accordion-button::after { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%238B7355'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e"); }
-        .faq-accordion .accordion-body { padding: 0 var(--spacing-lg) var(--spacing-lg); color: var(--color-text-secondary); line-height: 1.7; }
-        .helpful-section { border-top: 1px solid var(--color-border); padding-top: var(--spacing-md); margin-top: var(--spacing-md); display: flex; align-items: center; gap: var(--spacing-md); }
-        .helpful-section span { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
-        .helpful-btn { padding: 4px 12px; border-radius: var(--radius-full); border: 1px solid var(--color-border); background: transparent; font-size: var(--font-size-sm); cursor: pointer; transition: all var(--transition-fast); }
-        .helpful-btn:hover { background: var(--color-bg-hover); }
-        .helpful-btn.voted { background: var(--color-accent); color: white; border-color: var(--color-accent); }
-        .search-results { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); margin-bottom: var(--spacing-xl); overflow: hidden; }
-        .search-result-item { padding: var(--spacing-lg); border-bottom: 1px solid var(--color-border); cursor: pointer; transition: background var(--transition-fast); }
-        .search-result-item:hover { background: var(--color-bg-hover); }
-        .search-result-item:last-child { border-bottom: none; }
-        .search-result-item h4 { font-size: var(--font-size-base); margin-bottom: var(--spacing-xs); color: var(--color-text-primary); }
-        .search-result-item p { font-size: var(--font-size-sm); color: var(--color-text-secondary); margin: 0; }
-        .troubleshoot-cta { background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%); border-radius: var(--radius-lg); padding: var(--spacing-xl); text-align: center; color: white; }
-        .troubleshoot-cta h3 { margin-bottom: var(--spacing-sm); color: white; }
-        .troubleshoot-cta p { color: rgba(255, 255, 255, 0.9); margin-bottom: var(--spacing-lg); }
-        .troubleshoot-cta .btn { background: white; color: var(--color-accent); border: none; font-weight: 600; }
-        .troubleshoot-cta .btn:hover { background: var(--color-cream); }
-        @media (max-width: 992px) { .category-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 576px) { .category-grid { grid-template-columns: 1fr; } .faq-section-header { flex-direction: column; gap: var(--spacing-md); } }
-    </style>
 </head>
 <body>
 <!-- ========== NAVBAR HTML START ========== -->
@@ -658,6 +352,7 @@
     <script src="../../js/lang/pt.js"></script>
     <script src="../../js/lang/translations-base.js"></script>
     <script src="../../js/language-switcher.js"></script>
+    <script src="../../js/navbar.js"></script>
     <script src="../../js/faq-data.js"></script>
     
     <script>
@@ -716,16 +411,7 @@
         };
 
         // ========== Pattern C: ヘルパー関数 ==========
-        function getCurrentLanguage() {
-            return localStorage.getItem('preferredLanguage') || 'en';
-        }
-
-        function getL(obj) {
-            const lang = getCurrentLanguage();
-            return obj[lang] || obj.en || '';
-        }
-
-        function updateUIText() {
+function updateUIText() {
             const menuDashboard = document.getElementById('menuDashboard');
             const menuAccountSettings = document.getElementById('menuAccountSettings');
             const menuLogout = document.getElementById('menuLogout');
@@ -749,52 +435,10 @@
         }
 
         // ========== Pattern C: ユーザードロップダウン ==========
-        function toggleUserDropdown(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            const dropdown = document.getElementById('userDropdown');
-            const dropdownMenu = document.getElementById('userMenu');
-            dropdown.classList.toggle('open');
-            dropdownMenu.classList.toggle('show');
-        }
-
         // ========== Pattern C: ログアウト ==========
-        function handleLogout() {
-            if (confirm(getL(uiText.logOutConfirm))) {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                window.location.reload();
-            }
         }
 
         // ========== Pattern C: ユーザー情報読み込み ==========
-        function loadUserInfo() {
-            const userStr = localStorage.getItem('user');
-            const token = localStorage.getItem('token');
-            const loggedIn = !!(userStr && token);
-
-            if (loggedIn) {
-                try {
-                    const user = JSON.parse(userStr);
-                    const displayName = user.display_name || user.firstName || user.email || 'User';
-                    const userNameEl = document.getElementById('userName');
-                    const userDisplayNameEl = document.getElementById('userDisplayName');
-                    const userEmailEl = document.getElementById('userEmail');
-                    if (userNameEl) userNameEl.textContent = displayName;
-                    if (userDisplayNameEl) userDisplayNameEl.textContent = displayName;
-                    if (userEmailEl) userEmailEl.textContent = user.email || '';
-                    document.body.classList.add('logged-in');
-                    isLoggedIn = true;
-                } catch (e) {
-                    document.body.classList.remove('logged-in');
-                    isLoggedIn = false;
-                }
-            } else {
-                document.body.classList.remove('logged-in');
-                isLoggedIn = false;
-            }
-        }
-
         // ========== FAQ固有: 変数 ==========
         const API_BASE = 'http://localhost:3000/api';
         let categories = [];
@@ -848,8 +492,6 @@
             // --- Pattern C: UI初期化 ---
             updateUIText();
             setTimeout(updateUIText, 100);
-            loadUserInfo();
-
             // --- Pattern C: ドロップダウン外クリックで閉じる ---
             document.addEventListener('click', function(e) {
                 if (!e.target.closest('.user-dropdown')) {
