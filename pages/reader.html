@@ -266,6 +266,36 @@
         .touch-hint.show { display: block; animation: fadeOut 3s forwards; }
         @keyframes fadeOut { 0%, 70% { opacity: 1; } 100% { opacity: 0; } }
 
+        /* Click Zone Navigation */
+        .click-zone {
+            position: fixed;
+            top: 126px;
+            bottom: 0;
+            z-index: 50;
+            cursor: pointer;
+        }
+        .click-zone-left { left: 0; width: 25%; }
+        .click-zone-right { right: 0; width: 25%; }
+
+        /* Reading Progress Bar */
+        .reading-progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(0, 0, 0, 0.1);
+            z-index: 1100;
+            pointer-events: none;
+        }
+        .reading-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #8B7355, #A89070);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 0 1.5px 1.5px 0;
+        }
+
         @media (max-width: 768px) {
             .reader-content { padding: 1rem; }
             .work-title { display: none; }
@@ -621,6 +651,10 @@
         </button>
     </div>
 
+    <!-- Click Zone Navigation -->
+    <div class="click-zone click-zone-left" id="clickZoneLeft"></div>
+    <div class="click-zone click-zone-right" id="clickZoneRight"></div>
+
     <main class="reader-main" id="readerMain">
         <div class="reader-content writing-horizontal" id="readerContent">
             <div class="page" data-page="1">
@@ -815,6 +849,10 @@ function getL(obj, replacements = {}) {
         let touchStartX = 0, touchStartY = 0, touchEndX = 0;
         let isSwiping = false, longPressTimer = null, isLongPress = false;
 
+        // Mouse Drag State
+        let isDragging = false, hasDragged = false;
+        let dragStartX = 0, dragStartY = 0;
+
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             updateAllText();
@@ -822,6 +860,8 @@ function getL(obj, replacements = {}) {
             renderBookmarks();
             renderNotes();
             initTouchEvents();
+            initClickZones();
+            initMouseDrag();
             showTouchHint();
         });
 
@@ -995,6 +1035,12 @@ function getL(obj, replacements = {}) {
             document.querySelectorAll('.page').forEach(page => {
                 page.style.display = page.dataset.page == currentPage ? 'block' : 'none';
             });
+            updateReadingProgress();
+        }
+
+        function updateReadingProgress() {
+            const fill = document.getElementById('readingProgressFill');
+            if (fill) fill.style.width = (currentPage / totalPages) * 100 + '%';
         }
 
         function nextPage() { if (currentPage < totalPages) { currentPage++; updatePageInfo(); window.scrollTo(0, 0); } }
@@ -1117,6 +1163,87 @@ function getL(obj, replacements = {}) {
 
         function clearSearch() { document.getElementById('searchInput').value = ''; document.getElementById('searchResults').textContent = ''; }
 
+        // RTL mode check
+        function isRtlMode() {
+            return document.getElementById('readerContent').classList.contains('writing-rtl');
+        }
+        function isVerticalMode() {
+            return document.getElementById('readerContent').classList.contains('writing-vertical');
+        }
+
+        // Click Zone Navigation
+        function initClickZones() {
+            var leftZone = document.getElementById('clickZoneLeft');
+            var rightZone = document.getElementById('clickZoneRight');
+            if (leftZone) {
+                leftZone.addEventListener('click', function() {
+                    if (!hasDragged) { isRtlMode() ? nextPage() : prevPage(); }
+                });
+            }
+            if (rightZone) {
+                rightZone.addEventListener('click', function() {
+                    if (!hasDragged) { isRtlMode() ? prevPage() : nextPage(); }
+                });
+            }
+        }
+
+        // Mouse Drag Navigation
+        function initMouseDrag() {
+            var main = document.getElementById('readerMain');
+            var DRAG_THRESHOLD = 80;
+
+            main.addEventListener('mousedown', function(e) {
+                if (e.target.closest('.reader-toolbar, .notes-section, .settings-panel, .bookmarks-panel, .search-panel, .highlight-toolbar, .click-zone, button, a, input, textarea, select')) return;
+                if (e.detail >= 2) return; // Allow double-click text selection
+                if (isVerticalMode()) return; // Conflicts with horizontal scroll
+                isDragging = true;
+                hasDragged = false;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                var diffX = e.clientX - dragStartX;
+                var diffY = Math.abs(e.clientY - dragStartY);
+
+                if (Math.abs(diffX) > 10 && !hasDragged) {
+                    window.getSelection().removeAllRanges();
+                    hasDragged = true;
+                }
+
+                if (hasDragged && Math.abs(diffX) > 30 && diffY < 100) {
+                    if (diffX > 50 && currentPage > 1) {
+                        document.getElementById('swipeLeft').classList.add('show');
+                        document.getElementById('swipeRight').classList.remove('show');
+                    } else if (diffX < -50 && currentPage < totalPages) {
+                        document.getElementById('swipeRight').classList.add('show');
+                        document.getElementById('swipeLeft').classList.remove('show');
+                    } else {
+                        document.getElementById('swipeLeft').classList.remove('show');
+                        document.getElementById('swipeRight').classList.remove('show');
+                    }
+                }
+            });
+
+            document.addEventListener('mouseup', function(e) {
+                if (!isDragging) return;
+                isDragging = false;
+                document.getElementById('swipeLeft').classList.remove('show');
+                document.getElementById('swipeRight').classList.remove('show');
+
+                if (hasDragged) {
+                    var diffX = e.clientX - dragStartX;
+                    if (Math.abs(diffX) > DRAG_THRESHOLD) {
+                        var rtl = isRtlMode();
+                        if (diffX > 0) { rtl ? nextPage() : prevPage(); }
+                        else { rtl ? prevPage() : nextPage(); }
+                    }
+                    setTimeout(function() { hasDragged = false; }, 50);
+                }
+            });
+        }
+
         document.addEventListener('keydown', function(e) {
             if (e.key === 'ArrowRight') nextPage();
             else if (e.key === 'ArrowLeft') prevPage();
@@ -1130,6 +1257,7 @@ function getL(obj, replacements = {}) {
         });
 
         document.addEventListener('click', function(e) {
+            if (e.target.closest('.click-zone')) return; // Don't close panels when clicking navigation zones
             if (!e.target.closest('.settings-panel, [onclick*="toggleSettings"]')) document.getElementById('settingsPanel').classList.remove('show');
             if (!e.target.closest('.bookmarks-panel, [onclick*="toggleBookmarks"]')) document.getElementById('bookmarksPanel').classList.remove('show');
             if (!e.target.closest('.search-panel, [onclick*="toggleSearch"]')) document.getElementById('searchPanel').classList.remove('show');
@@ -1338,6 +1466,11 @@ function getL(obj, replacements = {}) {
         });
     });
     </script>
+
+    <!-- Reading Progress Bar -->
+    <div class="reading-progress-bar" id="readingProgressBar">
+        <div class="reading-progress-fill" id="readingProgressFill"></div>
+    </div>
 
     <!-- Notification Badge -->
     <script src="../js/header-notification.js"></script>

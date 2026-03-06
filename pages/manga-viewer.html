@@ -307,6 +307,36 @@
             z-index: 1000;
         }
 
+        /* Click Zone Navigation */
+        .click-zone {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            z-index: 5;
+            cursor: pointer;
+        }
+        .click-zone-left { left: 0; width: 25%; }
+        .click-zone-right { right: 0; width: 25%; }
+
+        /* Reading Progress Bar */
+        .reading-progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(0, 0, 0, 0.1);
+            z-index: 1100;
+            pointer-events: none;
+        }
+        .reading-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #8B7355, #A89070);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 0 1.5px 1.5px 0;
+        }
+
         /* Viewer button styles (override Bootstrap) */
         .viewer-controls .btn-viewer {
             background: transparent;
@@ -677,18 +707,21 @@
 
         <!-- Viewer Content -->
         <div class="viewer-content" id="viewerContent">
+            <!-- Click Zone Navigation -->
+            <div class="click-zone click-zone-left" id="clickZoneLeft"></div>
+            <div class="click-zone click-zone-right" id="clickZoneRight"></div>
+
             <!-- Loading indicator (shown initially) -->
             <div class="page-loading" id="pageLoading">
                 <div class="spinner"></div>
                 <p data-i18n="mangaViewer.loadingPage">Loading page...</p>
             </div>
-            
+
             <!-- Manga page with lazy loading -->
-            <img src="" 
-                 class="manga-page lazy-image" 
+            <img src=""
+                 class="manga-page lazy-image"
                  id="mangaPage"
                  alt="Manga Page"
-                 onclick="nextPage()"
                  style="display: none;">
             
             <!-- Navigation arrows -->
@@ -919,6 +952,8 @@
             initThumbnails();
             loadPage(1);
             preloadPages(1);
+            initClickZones();
+            initMouseDrag();
         });
 
         // =====================================================
@@ -963,7 +998,8 @@
             // Update UI
             document.getElementById('currentPage').textContent = pageNum;
             updateThumbnailActive(pageNum);
-            
+            updateReadingProgress();
+
             // Preload surrounding pages
             preloadPages(pageNum);
         }
@@ -1187,6 +1223,77 @@
         });
 
         // =====================================================
+        // Reading Progress Bar
+        // =====================================================
+        function updateReadingProgress() {
+            var fill = document.getElementById('readingProgressFill');
+            if (fill) fill.style.width = (currentPage / totalPages) * 100 + '%';
+        }
+
+        // =====================================================
+        // Click Zone Navigation
+        // =====================================================
+        function initClickZones() {
+            var leftZone = document.getElementById('clickZoneLeft');
+            var rightZone = document.getElementById('clickZoneRight');
+            if (leftZone) {
+                leftZone.addEventListener('click', function() {
+                    if (!hasDragged) previousPage();
+                });
+            }
+            if (rightZone) {
+                rightZone.addEventListener('click', function() {
+                    if (!hasDragged) nextPage();
+                });
+            }
+        }
+
+        // =====================================================
+        // Mouse Drag Navigation
+        // =====================================================
+        let isDragging = false, hasDragged = false;
+        let dragStartX = 0, dragStartY = 0;
+
+        function initMouseDrag() {
+            var content = document.getElementById('viewerContent');
+            var DRAG_THRESHOLD = 50;
+
+            content.addEventListener('mousedown', function(e) {
+                if (e.target.closest('button, a, .click-zone')) return;
+                if (zoomLevel > 1) return; // Don't drag when zoomed in
+                isDragging = true;
+                hasDragged = false;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+                content.style.cursor = 'grabbing';
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                var diffX = Math.abs(e.clientX - dragStartX);
+                if (diffX > 10 && !hasDragged) {
+                    hasDragged = true;
+                }
+            });
+
+            document.addEventListener('mouseup', function(e) {
+                if (!isDragging) return;
+                isDragging = false;
+                content.style.cursor = '';
+
+                if (hasDragged) {
+                    var diffX = e.clientX - dragStartX;
+                    if (Math.abs(diffX) > DRAG_THRESHOLD) {
+                        if (diffX > 0) { previousPage(); }
+                        else { nextPage(); }
+                    }
+                    setTimeout(function() { hasDragged = false; }, 50);
+                }
+            });
+        }
+
+        // =====================================================
         // Touch Gestures (for mobile)
         // =====================================================
         let touchStartX = 0;
@@ -1216,6 +1323,11 @@
             }
         }
     </script>
+    <!-- Reading Progress Bar -->
+    <div class="reading-progress-bar" id="readingProgressBar">
+        <div class="reading-progress-fill" id="readingProgressFill"></div>
+    </div>
+
     <!-- Notification Badge -->
     <script src="../js/header-notification.js"></script>
     <script src="../js/navbar.js"></script>
