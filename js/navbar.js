@@ -51,6 +51,11 @@ var navText = {
         es: 'Panel', fr: 'Tableau de bord', de: 'Dashboard',
         ko: '대시보드', ar: 'لوحة التحكم', pt: 'Painel'
     },
+    myWorks: {
+        en: 'My Works', ja: 'マイ作品', zh: '我的作品',
+        es: 'Mis obras', fr: 'Mes œuvres', de: 'Meine Werke',
+        ko: '내 작품', ar: 'أعمالي', pt: 'Minhas obras'
+    },
     accountSettings: {
         en: 'Account Settings', ja: 'アカウント設定', zh: '账户设置',
         es: 'Configuración de cuenta', fr: 'Paramètres du compte', de: 'Kontoeinstellungen',
@@ -81,9 +86,11 @@ function getL(obj) {
 
 function updateNavText() {
     var menuDashboard = document.getElementById('menuDashboard');
+    var menuMyWorks = document.getElementById('menuMyWorks');
     var menuAccountSettings = document.getElementById('menuAccountSettings');
     var menuLogout = document.getElementById('menuLogout');
     if (menuDashboard) menuDashboard.textContent = getL(navText.dashboard);
+    if (menuMyWorks) menuMyWorks.textContent = getL(navText.myWorks);
     if (menuAccountSettings) menuAccountSettings.textContent = getL(navText.accountSettings);
     if (menuLogout) menuLogout.textContent = getL(navText.logout);
 

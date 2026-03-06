@@ -92,7 +92,7 @@ async function notifySale(authorId, workTitle, amount, buyerName = '読者', wor
         type: NotificationTypes.SALE,
         title: '作品が購入されました！',
         message: `「${workTitle}」が${buyerName}さんに購入されました。収益: ¥${amount.toLocaleString()}`,
-        actionUrl: workId ? `/pages/work-detail.html?id=${workId}` : '/pages/earnings.html',
+        actionUrl: workId ? `/pages/work-detail.html?id=${workId}` : '/pages/dashboard.html',
         metadata: { workTitle, amount, buyerName, workId }
     });
 }
@@ -163,7 +163,7 @@ async function notifyComment(authorId, workTitle, commenterName, commentPreview,
         type: NotificationTypes.COMMENT,
         title: '新しいコメント',
         message: `${commenterName}さんが「${workTitle}」にコメントしました: "${preview}"`,
-        actionUrl: workId ? `/pages/work-detail.html?id=${workId}#comments` : '/pages/my-works.html',
+        actionUrl: workId ? `/pages/work-detail.html?id=${workId}#comments` : '/pages/dashboard.html',
         metadata: { workTitle, commenterName, commentPreview, workId }
     });
 }

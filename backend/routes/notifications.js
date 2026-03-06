@@ -563,14 +563,14 @@ router.post('/demo/generate-all', authenticate, async (req, res) => {
         type: 'sale',
         title: '💰 作品が購入されました！',
         message: `「異世界転生物語」がJohn Smithさんに購入されました。¥1,200の収益が発生しました。`,
-        actionUrl: '/pages/earnings.html',
+        actionUrl: '/pages/dashboard.html',
         metadata: { amount: 1200, buyer: 'John Smith', work_title: '異世界転生物語' }
       },
       {
         type: 'sale',
         title: '💰 新しい購入がありました',
         message: `「Tokyo Days」がMariaさんに購入されました。¥800の収益が発生しました。`,
-        actionUrl: '/pages/earnings.html',
+        actionUrl: '/pages/dashboard.html',
         metadata: { amount: 800, buyer: 'Maria', work_title: 'Tokyo Days' }
       },
       {
@@ -931,7 +931,7 @@ router.post('/purchase', authenticate, async (req, res) => {
       notificationType: 'sale',
       title: '作品が購入されました！ 💰',
       message: `「${author.title}」が${buyerName}さんに購入されました。¥${amount}の収益が発生しました。`,
-      actionUrl: '/pages/earnings.html',
+      actionUrl: '/pages/dashboard.html',
       metadata: {
         work_id: workId,
         work_title: author.title,
@@ -975,7 +975,7 @@ router.post('/test', authenticate, async (req, res) => {
       sale: {
         title: 'テスト: 作品が購入されました！ 💰',
         message: `「サンプル作品」がJohnさんに購入されました。¥980の収益が発生しました。`,
-        actionUrl: '/pages/earnings.html',
+        actionUrl: '/pages/dashboard.html',
         metadata: { amount: 980, buyer: 'John', work_title: 'サンプル作品' }
       },
       translation_complete: {

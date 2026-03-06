@@ -15,6 +15,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <!-- Custom Styles -->
     <link href="../css/style-new.css" rel="stylesheet">
     <link href="../css/mobile-fixes.css" rel="stylesheet">
@@ -145,6 +148,30 @@
         @media (max-width: 992px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .quick-actions { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 768px) { .translation-item { flex-wrap: wrap; gap: 0.5rem; } .translation-item .translation-info { flex: 1; min-width: calc(100% - 60px); } .translation-item .status-badge { margin-left: auto; } }
         @media (max-width: 576px) { .stats-grid { grid-template-columns: 1fr 1fr; gap: 0.5rem; } .stat-card { padding: var(--spacing-md); } .stat-card .stat-icon { width: 36px; height: 36px; margin-bottom: var(--spacing-sm); } .stat-card .stat-value { font-size: var(--font-size-lg); } .stat-card .stat-label { font-size: var(--font-size-xs); } .stat-card .stat-change { display: none; } .quick-actions { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; } .action-card { padding: var(--spacing-md); } .action-card i { font-size: 1.5rem; } .welcome-banner { text-align: center; padding: var(--spacing-lg); } .welcome-banner h1 { font-size: var(--font-size-lg); } .welcome-banner .d-flex { flex-direction: column; gap: var(--spacing-md); } .work-item { flex-wrap: wrap; } .work-item .work-cover { width: 50px; height: 65px; } .work-item .work-info { flex: 1; min-width: calc(100% - 70px); } .work-item .work-title { white-space: normal; font-size: var(--font-size-sm); } .work-item .work-stats { width: 100%; text-align: left; margin-top: var(--spacing-sm); padding-top: var(--spacing-sm); border-top: 1px solid var(--color-border); display: flex; justify-content: space-between; } .section-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; } .section-header h2 { font-size: var(--font-size-base); } .usage-card { padding: var(--spacing-md); } .usage-count { font-size: var(--font-size-2xl); } }
+
+        /* ===== Analytics Section Styles ===== */
+        .analytics-section { margin-bottom: 2rem; }
+        .period-selector { background: var(--color-bg-card); border-radius: 12px; padding: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 1.5rem; border: 1px solid var(--color-border); }
+        .period-btn { padding: 0.5rem 1rem; border: 1px solid var(--color-border); background: var(--color-bg-card); border-radius: 8px; cursor: pointer; transition: all 0.2s; font-size: 0.9rem; }
+        .period-btn:hover { border-color: var(--color-accent); }
+        .period-btn.active { background: var(--color-accent); color: white; border-color: var(--color-accent); }
+        .chart-card { background: var(--color-bg-card); border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 1.5rem; border: 1px solid var(--color-border); }
+        .chart-card h3 { font-family: var(--font-heading); font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .chart-card h3 i { color: var(--color-accent); }
+        .engagement-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+        @media(max-width: 768px) { .engagement-grid { grid-template-columns: repeat(2, 1fr); } }
+        .engagement-item { text-align: center; padding: 1rem; background: var(--color-cream, #f8f6f3); border-radius: 8px; }
+        .engagement-item i { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .engagement-item .eng-value { font-size: 1.25rem; font-weight: 700; color: var(--color-text); }
+        .engagement-item .eng-label { font-size: 0.8rem; color: var(--color-text-secondary); }
+        .top-works-table { width: 100%; }
+        .top-works-table th { font-weight: 500; color: var(--color-text-secondary); font-size: 0.85rem; padding: 0.75rem; border-bottom: 2px solid var(--color-border); }
+        .top-works-table td { padding: 0.75rem; border-bottom: 1px solid var(--color-border); vertical-align: middle; }
+        .top-works-table tr:hover { background: var(--color-cream, #f8f6f3); }
+        .work-rank { width: 28px; height: 28px; border-radius: 50%; background: var(--color-accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.85rem; }
+        .work-rank.rank-1 { background: #f59e0b; }
+        .work-rank.rank-2 { background: #6b7280; }
+        .work-rank.rank-3 { background: #b45309; }
     </style>
 </head>
 <body>
@@ -190,6 +217,10 @@
                         </div>
                     </div>
                     <div class="user-menu-divider"></div>
+                    <a href="my-works.html" class="user-menu-item">
+                        <i class="fas fa-book"></i>
+                        <span id="menuMyWorks" data-i18n="nav.myWorks">My Works</span>
+                    </a>
                     <a href="profile.html" class="user-menu-item">
                         <i class="fas fa-user"></i>
                         <span id="menuProfile" data-i18n="nav.profile">Profile</span>
@@ -216,16 +247,6 @@
                     <li class="nav-item">
                         <a class="nav-link active" href="dashboard.html">
                             <i class="fas fa-th-large me-1"></i> <span data-i18n="nav.dashboard">Dashboard</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="my-works.html">
-                            <i class="fas fa-book me-1"></i> <span data-i18n="dashboard.myWorks">My Works</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="earnings.html">
-                            <i class="fas fa-coins me-1"></i> <span data-i18n="dashboard.earnings">Earnings</span>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -262,16 +283,6 @@
                     <li class="nav-item">
                         <a class="nav-link active" href="dashboard.html">
                             <i class="fas fa-th-large me-2"></i> <span data-i18n="nav.dashboard">Dashboard</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="my-works.html">
-                            <i class="fas fa-book me-2"></i> <span data-i18n="dashboard.myWorks">My Works</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="earnings.html">
-                            <i class="fas fa-coins me-2"></i> <span data-i18n="dashboard.earnings">Earnings</span>
                         </a>
                     </li>
                     <li><hr class="dropdown-divider"></li>
@@ -388,6 +399,60 @@
                 </div>
             </div>
 
+
+            <!-- ===== Analytics Section ===== -->
+            <div class="analytics-section fade-in">
+                <div class="period-selector d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted me-2" data-i18n="analytics.period">Period:</span>
+                        <button class="period-btn" data-period="7" data-i18n="analytics.days7">7 days</button>
+                        <button class="period-btn active" data-period="30" data-i18n="analytics.days30">30 days</button>
+                        <button class="period-btn" data-period="90" data-i18n="analytics.days90">90 days</button>
+                    </div>
+                    <div class="text-muted small"><i class="fas fa-sync-alt me-1"></i><span data-i18n="analytics.lastUpdate">Last update</span>: <span id="analyticsLastUpdated">--</span></div>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-lg-8">
+                        <div class="chart-card">
+                            <h3><i class="fas fa-chart-area"></i> <span data-i18n="analytics.viewsTrend">Views Trend</span></h3>
+                            <div style="height:300px;"><canvas id="viewsChart"></canvas></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="chart-card">
+                            <h3><i class="fas fa-heart"></i> <span data-i18n="analytics.engagement">Engagement</span></h3>
+                            <div class="engagement-grid" id="engagementStats">
+                                <div class="engagement-item"><i class="fas fa-heart text-danger"></i><div class="eng-value" id="engLikes">--</div><div class="eng-label" data-i18n="analytics.likes">Likes</div></div>
+                                <div class="engagement-item"><i class="fas fa-comment text-primary"></i><div class="eng-value" id="engComments">--</div><div class="eng-label" data-i18n="analytics.comments">Comments</div></div>
+                                <div class="engagement-item"><i class="fas fa-bookmark text-warning"></i><div class="eng-value" id="engBookmarks">--</div><div class="eng-label" data-i18n="analytics.bookmarks">Bookmarks</div></div>
+                                <div class="engagement-item"><i class="fas fa-download text-success"></i><div class="eng-value" id="engDownloads">--</div><div class="eng-label" data-i18n="analytics.downloads">Downloads</div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <h3><i class="fas fa-trophy"></i> <span data-i18n="analytics.topWorks">Top Works</span></h3>
+                    <div class="table-responsive">
+                        <table class="top-works-table" id="topWorksTable">
+                            <thead>
+                                <tr>
+                                    <th style="width:50px;">#</th>
+                                    <th data-i18n="analytics.workTitle">Title</th>
+                                    <th class="text-end" data-i18n="analytics.views">Views</th>
+                                    <th class="text-end" data-i18n="analytics.readers">Readers</th>
+                                    <th class="text-end" data-i18n="analytics.revenue">Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topWorksBody">
+                                <tr><td colspan="5" class="text-center text-muted py-4"><i class="fas fa-chart-bar fa-2x mb-2 d-block text-muted"></i><span data-i18n="analytics.noData">No analytics data yet</span></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <div class="row">
                 <!-- Left Column -->
                 <div class="col-lg-8">
@@ -395,7 +460,7 @@
                     <div class="dashboard-section fade-in">
                         <div class="section-header">
                             <h2><i class="fas fa-clock me-2 text-accent"></i><span data-i18n="dashboard.recentActivity">Recent Works</span></h2>
-                            <a href="my-works.html" class="btn btn-soft-custom btn-sm" data-i18n="dashboard.viewAll">View All</a>
+                            <a href="dashboard.html" class="btn btn-soft-custom btn-sm" data-i18n="dashboard.viewAll">View All</a>
                         </div>
                         <div class="section-body" id="recentWorksBody">
                             <!-- Empty State (shown when no works) -->
@@ -517,6 +582,11 @@
     <script>
         // 多言語対応テキスト
         const uiText = {
+            myWorks: {
+                en: 'My Works', ja: 'マイ作品', zh: '我的作品',
+                es: 'Mis obras', fr: 'Mes œuvres', de: 'Meine Werke',
+                ko: '내 작품', ar: 'أعمالي', pt: 'Minhas obras'
+            },
             profile: {
                 en: 'Profile',
                 ja: 'プロフィール',
@@ -676,6 +746,8 @@
             const menuLogout = document.getElementById('menuLogout');
             
             if (menuProfile) menuProfile.textContent = getL(uiText.profile);
+            const menuMyWorks = document.getElementById('menuMyWorks');
+            if (menuMyWorks) menuMyWorks.textContent = getL(uiText.myWorks);
             if (menuAccountSettings) menuAccountSettings.textContent = getL(uiText.accountSettings);
             if (menuLogout) menuLogout.textContent = getL(uiText.logout);
             
@@ -784,6 +856,9 @@
                 document.getElementById('aiUsageCount').textContent = '3 / 5';
                 document.getElementById('aiUsageBar').style.width = '60%';
                 document.getElementById('aiUsageRemaining').textContent = getL(uiText.freeRemaining).replace('{count}', '2');
+                
+                // Load analytics demo data
+                loadAnalyticsDemoData();
             } else {
                 // Empty state - no data
                 document.getElementById('emptyWorksState').style.display = 'block';
@@ -798,6 +873,98 @@
             }
         }
         
+
+        // ===== Analytics Functions =====
+        let currentPeriod = 30;
+        let viewsChart = null;
+
+        function loadAnalyticsDemoData() {
+            document.getElementById('engLikes').textContent = '2,456';
+            document.getElementById('engComments').textContent = '389';
+            document.getElementById('engBookmarks').textContent = '1,234';
+            document.getElementById('engDownloads').textContent = '567';
+            document.getElementById('analyticsLastUpdated').textContent = new Date().toLocaleTimeString();
+
+            var ctx = document.getElementById('viewsChart');
+            if (ctx) {
+                var labels = [];
+                var viewsData = [];
+                var readersData = [];
+                var days = currentPeriod;
+                for (var i = days - 1; i >= 0; i--) {
+                    var d = new Date();
+                    d.setDate(d.getDate() - i);
+                    labels.push((d.getMonth() + 1) + '/' + d.getDate());
+                    viewsData.push(Math.floor(Math.random() * 300) + 100);
+                    readersData.push(Math.floor(Math.random() * 100) + 30);
+                }
+                if (viewsChart) viewsChart.destroy();
+                viewsChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Views',
+                            data: viewsData,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59,130,246,0.1)',
+                            fill: true,
+                            tension: 0.3
+                        }, {
+                            label: 'Readers',
+                            data: readersData,
+                            borderColor: '#10b981',
+                            backgroundColor: 'transparent',
+                            borderDash: [5, 5],
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'top', align: 'end' } },
+                        scales: {
+                            x: { grid: { display: false } },
+                            y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }
+                        },
+                        interaction: { intersect: false, mode: 'index' }
+                    }
+                });
+            }
+
+            var topWorksBody = document.getElementById('topWorksBody');
+            if (topWorksBody) {
+                var demoWorks = [
+                    { title: 'The Adventure of Magic Academy', views: 1234, readers: 456, revenue: 234.50 },
+                    { title: 'Whispers of Tomorrow', views: 892, readers: 234, revenue: 156.00 },
+                    { title: 'Digital Dreams: A Cyberpunk Story', views: 567, readers: 189, revenue: 89.25 },
+                    { title: 'Moonlit Serenade', views: 345, readers: 123, revenue: 67.80 },
+                    { title: 'Chronicles of the Lost Kingdom', views: 234, readers: 98, revenue: 45.00 }
+                ];
+                topWorksBody.innerHTML = demoWorks.map(function(w, i) {
+                    return '<tr>' +
+                    '<td><span class="work-rank ' + (i < 3 ? 'rank-' + (i + 1) : '') + '">' + (i + 1) + '</span></td>' +
+                    '<td>' + w.title + '</td>' +
+                    '<td class="text-end">' + w.views.toLocaleString() + '</td>' +
+                    '<td class="text-end">' + w.readers.toLocaleString() + '</td>' +
+                    '<td class="text-end">$' + w.revenue.toFixed(2) + '</td>' +
+                    '</tr>';
+                }).join('');
+            }
+        }
+
+        // Period selector events
+        document.querySelectorAll('.period-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.period-btn').forEach(function(b) { b.classList.remove('active'); });
+                this.classList.add('active');
+                currentPeriod = parseInt(this.dataset.period);
+                if (new URLSearchParams(window.location.search).has('demo')) {
+                    loadAnalyticsDemoData();
+                }
+            });
+        });
+
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             // Sync language selectors
