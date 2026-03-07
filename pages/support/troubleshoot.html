@@ -19,7 +19,274 @@
     <link href="../../css/style-new.css" rel="stylesheet">
     <link href="../../css/mobile-fixes.css" rel="stylesheet">
     <link href="../../css/navbar.css" rel="stylesheet">
-    
+
+    <!-- Troubleshoot Page Styles -->
+    <style>
+        /* Troubleshoot Hero */
+        .troubleshoot-hero {
+            background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
+            padding: var(--spacing-2xl) 0;
+            color: white;
+            text-align: center;
+        }
+        .troubleshoot-hero h1 { color: white; font-size: var(--font-size-3xl); margin-bottom: var(--spacing-sm); }
+        .troubleshoot-hero p { color: rgba(255, 255, 255, 0.9); }
+
+        /* Wizard Progress */
+        .wizard-progress {
+            background: var(--color-cream);
+            padding: 1.5rem 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+        .progress-steps {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .progress-step {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--color-text-muted);
+            font-size: 0.9rem;
+        }
+        .progress-step.active { color: var(--color-accent); font-weight: 500; }
+        .progress-step.completed { color: var(--color-success); }
+        .step-number {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--color-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        .progress-step.active .step-number { background: var(--color-accent); color: white; }
+        .progress-step.completed .step-number { background: var(--color-success); color: white; }
+        .progress-line {
+            width: 60px;
+            height: 2px;
+            background: var(--color-border);
+            margin: 0 0.5rem;
+        }
+        .progress-line.completed { background: var(--color-success); }
+
+        /* Wizard Content */
+        .wizard-content {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .wizard-step { display: none; }
+        .wizard-step.active { display: block; }
+        .wizard-question { text-align: center; margin-bottom: 2rem; }
+        .wizard-question h2 {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            color: var(--color-text);
+            margin-bottom: 0.5rem;
+        }
+        .wizard-question p { color: var(--color-text-muted); }
+
+        /* Option Grid */
+        .option-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        @media (max-width: 576px) {
+            .option-grid { grid-template-columns: 1fr; }
+        }
+        .option-card {
+            background: white;
+            border: 2px solid var(--color-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        .option-card:hover {
+            border-color: var(--color-accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .option-card.selected { border-color: var(--color-accent); background: var(--color-cream); }
+        .option-card i { font-size: 2rem; color: var(--color-accent); margin-bottom: 0.75rem; }
+        .option-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem; color: var(--color-text); }
+        .option-card p { font-size: 0.85rem; color: var(--color-text-muted); margin: 0; }
+
+        /* Solution Card */
+        .solution-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .solution-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+        .solution-header i { font-size: 2.5rem; color: var(--color-accent); }
+        .solution-header h3 { font-family: var(--font-heading); font-size: 1.25rem; margin: 0; }
+        .solution-steps { margin-bottom: 1.5rem; }
+        .solution-step {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: var(--color-cream);
+            border-radius: 8px;
+        }
+        .solution-step-number {
+            width: 28px;
+            height: 28px;
+            background: var(--color-accent);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+        .solution-step-content h4 { font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem; }
+        .solution-step-content p { font-size: 0.9rem; color: var(--color-text-muted); margin: 0; }
+        .solution-action { display: inline-block; margin-top: 0.5rem; }
+
+        /* Resolution Check */
+        .resolution-check {
+            background: var(--color-cream);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+        .resolution-check h4 { font-size: 1.1rem; margin-bottom: 1rem; }
+        .resolution-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .btn-resolved {
+            background: var(--color-success);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-resolved:hover { background: #2e7d32; }
+        .btn-not-resolved {
+            background: white;
+            color: var(--color-text);
+            border: 2px solid var(--color-border);
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-not-resolved:hover { border-color: var(--color-accent); }
+
+        /* Related FAQs */
+        .related-faqs { margin-top: 2rem; display: none; }
+        .related-faqs.show { display: block; }
+        .related-faqs h4 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .related-faqs h4 i { color: var(--color-accent); }
+        .faq-mini-card {
+            background: white;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .faq-mini-card:hover { border-color: var(--color-accent); }
+        .faq-mini-card h5 { font-size: 0.95rem; margin: 0; color: var(--color-text); }
+        .faq-mini-card .faq-answer {
+            display: none;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--color-border);
+            font-size: 0.9rem;
+            color: var(--color-text-muted);
+        }
+        .faq-mini-card.expanded .faq-answer { display: block; }
+
+        /* Contact Section */
+        .contact-section { margin-top: 2rem; display: none; }
+        .contact-section.show { display: block; }
+        .contact-card {
+            background: linear-gradient(135deg, var(--color-accent), var(--color-accent-light));
+            color: white;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+        }
+        .contact-card h4 { font-family: var(--font-heading); font-size: 1.25rem; margin-bottom: 0.5rem; }
+        .contact-card p { opacity: 0.9; margin-bottom: 1.5rem; }
+        .contact-card .btn { background: white; color: var(--color-accent); font-weight: 600; }
+        .contact-card .btn:hover { background: var(--color-cream); }
+
+        /* Success Screen */
+        .success-screen { text-align: center; padding: 3rem 1rem; }
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--color-success);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin: 0 auto 1.5rem;
+        }
+        .success-screen h2 { font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .success-screen p { color: var(--color-text-muted); margin-bottom: 2rem; }
+
+        /* Wizard Nav */
+        .wizard-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--color-border);
+        }
+        .btn-back {
+            background: transparent;
+            color: var(--color-text-muted);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-back:hover { color: var(--color-text); }
+    </style>
 </head>
 <body>
     <!-- ========== NAVBAR HTML START ========== -->
