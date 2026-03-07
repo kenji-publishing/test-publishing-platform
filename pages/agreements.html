@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <title>Collaboration Agreements - Publisher</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="../css/style-new.css" rel="stylesheet">
+    <link href="../css/mobile-fixes.css" rel="stylesheet">
+    <link href="../css/navbar.css" rel="stylesheet">
+<!-- Agreements Page Styles -->
+    <style>
+        .agreements-header h1 { font-size: var(--font-size-2xl); color: var(--color-text-primary); margin-bottom: var(--spacing-sm); }
+        .agreements-header h1 i { color: var(--color-accent); }
+
+        .agreement-type-card {
+            background: var(--color-bg-card); border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg); padding: var(--spacing-xl);
+            text-align: center; cursor: pointer; transition: all 0.2s; height: 100%;
+        }
+        .agreement-type-card:hover { border-color: var(--color-accent); transform: translateY(-4px); box-shadow: var(--shadow-md); }
+        .agreement-type-card.selected { border-color: var(--color-accent); background: rgba(139, 115, 85, 0.05); box-shadow: var(--shadow-md); }
+        .type-icon {
+            width: 60px; height: 60px; border-radius: 50%;
+            background: rgba(139, 115, 85, 0.1); display: flex; align-items: center; justify-content: center;
+            margin: 0 auto var(--spacing-md); font-size: 1.5rem; color: var(--color-accent);
+        }
+        .type-parties { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: var(--spacing-xs); margin-top: var(--spacing-md); }
+
+        .badge-role { display: inline-block; padding: 0.25rem 0.6rem; border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 600; }
+        .badge-author { background: rgba(139, 115, 85, 0.15); color: var(--color-accent); }
+        .badge-translator { background: rgba(93, 156, 89, 0.15); color: var(--color-success); }
+        .badge-editor { background: rgba(93, 139, 199, 0.15); color: var(--color-info); }
+        .badge-platform { background: rgba(212, 168, 83, 0.15); color: var(--color-warning); }
+
+        .agreement-form-card {
+            background: var(--color-bg-card); border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg); padding: var(--spacing-xl);
+        }
+        .form-section { margin-bottom: var(--spacing-xl); }
+        .form-section h5 { font-size: var(--font-size-lg); font-weight: 600; margin-bottom: var(--spacing-md); display: flex; align-items: center; gap: var(--spacing-sm); }
+        .form-section h5 i { color: var(--color-accent); }
+
+        .revenue-display { display: flex; flex-wrap: wrap; gap: var(--spacing-md); justify-content: center; }
+        .revenue-item {
+            background: var(--color-bg-main); border: 1px solid var(--color-border);
+            border-radius: var(--radius-md); padding: var(--spacing-md) var(--spacing-lg);
+            text-align: center; min-width: 120px;
+        }
+        .revenue-item .percentage { font-size: 1.75rem; font-weight: 700; }
+        .revenue-item .role-label { font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-top: var(--spacing-xs); }
+
+        .terms-box {
+            max-height: 300px; overflow-y: auto;
+            background: var(--color-bg-main); border: 1px solid var(--color-border);
+            border-radius: var(--radius-md); padding: var(--spacing-lg);
+            font-size: var(--font-size-sm); line-height: 1.7;
+        }
+        .terms-box h6 { font-weight: 600; margin-top: var(--spacing-md); margin-bottom: var(--spacing-xs); color: var(--color-text-primary); }
+        .terms-box h6:first-child { margin-top: 0; }
+        .terms-box p { color: var(--color-text-secondary); margin-bottom: var(--spacing-sm); }
+
+        .history-item {
+            background: var(--color-bg-card); border: 1px solid var(--color-border);
+            border-radius: var(--radius-md); padding: var(--spacing-md) var(--spacing-lg);
+            margin-bottom: var(--spacing-sm);
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: var(--spacing-sm); transition: all 0.2s;
+        }
+        .history-item:hover { border-color: var(--color-accent); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .history-meta { display: flex; align-items: center; gap: var(--spacing-md); flex-wrap: wrap; }
+        .history-type-badge { padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; background: rgba(139, 115, 85, 0.1); color: var(--color-accent); }
+        .status-active { color: var(--color-success); font-weight: 600; font-size: var(--font-size-sm); }
+
+        .modal-detail-section { margin-bottom: var(--spacing-lg); }
+        .modal-detail-section h6 { font-weight: 600; color: var(--color-accent); margin-bottom: var(--spacing-sm); }
+        .modal-party-card {
+            background: var(--color-bg-main); border-radius: var(--radius-md);
+            padding: var(--spacing-md); margin-bottom: var(--spacing-sm);
+        }
+
+        .guest-prompt { text-align: center; padding: 100px 20px 60px; }
+        .guest-prompt i { color: var(--color-accent); }
+
+        @media (max-width: 768px) {
+            .agreements-header h1 { font-size: var(--font-size-xl); }
+            .agreement-type-card { padding: var(--spacing-lg); }
+            .type-icon { width: 48px; height: 48px; font-size: 1.25rem; }
+            .revenue-display { flex-direction: column; align-items: center; }
+            .history-item { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+<!-- ========== NAVBAR PATTERN C (pages/ 階層) ========== -->
+<nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+    <div class="container">
+        <a class="navbar-brand" href="../index.html"><i class="fas fa-book-open"></i> Publisher</a>
+        <div class="navbar-lang-selector d-lg-none">
+            <select class="language-selector" id="languageSelectorMobile">
+                <option value="en">🇬🇧 EN</option><option value="ja">🇯🇵 日本語</option><option value="zh">🇨🇳 中文</option>
+                <option value="es">🇪🇸 ES</option><option value="fr">🇫🇷 FR</option><option value="de">🇩🇪 DE</option>
+                <option value="ko">🇰🇷 한국어</option><option value="ar">🇸🇦 عربي</option><option value="pt">🇧🇷 PT</option>
+            </select>
+        </div>
+        <div class="user-dropdown auth-only" id="userDropdown">
+            <button type="button" class="user-dropdown-toggle" id="userDropdownBtn" onclick="toggleUserDropdown(event)">
+                <i class="fas fa-user-circle"></i>
+                <span class="user-name d-none d-lg-inline" id="userName">User</span>
+                <i class="fas fa-chevron-down user-chevron d-none d-lg-inline"></i>
+            </button>
+            <div class="user-menu" id="userMenu">
+                <div class="user-menu-header">
+                    <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
+                    <div class="user-info">
+                        <div class="user-display-name" id="userDisplayName">User</div>
+                        <div class="user-email" id="userEmail">user@example.com</div>
+                    </div>
+                </div>
+                <div class="user-menu-divider"></div>
+                <a href="dashboard.html" class="user-menu-item"><i class="fas fa-th-large"></i><span id="menuDashboard">Dashboard</span></a>
+                <a href="my-works.html" class="user-menu-item"><i class="fas fa-book"></i><span id="menuMyWorks">My Works</span></a>
+                <a href="account-settings.html" class="user-menu-item"><i class="fas fa-cog"></i><span id="menuAccountSettings">Account Settings</span></a>
+                <div class="user-menu-divider"></div>
+                <button class="user-menu-item logout-btn" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i><span id="menuLogout">Log Out</span></button>
+            </div>
+        </div>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
+        <div class="navbar-overlay d-lg-none" id="navbarOverlay"></div>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto d-none d-lg-flex">
+                <li class="nav-item"><a class="nav-link" href="browse.html"><i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span></a></li>
+                <li class="nav-item auth-only"><a class="nav-link" href="library.html"><i class="fas fa-book-reader me-1"></i> <span id="navLibraryPC">Library</span></a></li>
+                <li class="nav-item auth-only"><a class="nav-link" href="dashboard.html"><i class="fas fa-th-large me-1"></i> <span id="navDashboardPC">Dashboard</span></a></li>
+                <li class="nav-item auth-only"><a class="nav-link" href="upload.html"><i class="fas fa-upload me-1"></i> <span data-i18n="nav.upload">Upload</span></a></li>
+                <li class="nav-item dropdown auth-only">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"><i class="fas fa-language me-1"></i> <span id="navTranslationToolsPC">Translation Tools</span></a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="manga-translator.html"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorPC">Manga Translator</span></a></li>
+                        <li><a class="dropdown-item" href="translation-status.html"><i class="fas fa-tasks me-2"></i><span id="navTranslationStatusPC">Translation Status</span></a></li>
+                        <li><a class="dropdown-item" href="translators/index.html"><i class="fas fa-users me-2"></i><span id="navFindTranslatorsPC">Find Translators</span></a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"><i class="fas fa-headset me-1"></i> <span data-i18n="nav.support">Support</span></a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="support/faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
+                        <li><a class="dropdown-item" href="support/troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
+                        <li><a class="dropdown-item" href="support/contact.html"><i class="fas fa-envelope me-2"></i><span id="navContactPC">Contact</span></a></li>
+                        <li class="auth-only"><hr class="dropdown-divider"></li>
+                        <li class="auth-only"><a class="dropdown-item" href="support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
+                    </ul>
+                </li>
+            </ul>
+            <ul class="navbar-nav d-lg-none">
+                <li class="nav-item"><a class="nav-link" href="browse.html"><i class="fas fa-compass me-2"></i><span data-i18n="nav.browse">Browse</span></a></li>
+                <li class="nav-item auth-only"><a class="nav-link" href="library.html"><i class="fas fa-book-reader me-2"></i><span id="navLibraryMobile">Library</span></a></li>
+                <li class="nav-item auth-only"><a class="nav-link" href="dashboard.html"><i class="fas fa-th-large me-2"></i><span id="navDashboardMobile">Dashboard</span></a></li>
+                <li class="nav-item auth-only"><a class="nav-link" href="upload.html"><i class="fas fa-upload me-2"></i><span data-i18n="nav.upload">Upload</span></a></li>
+                <li class="nav-item dropdown auth-only">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="fas fa-language me-2"></i><span id="navTranslationToolsMobile">Translation Tools</span></a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="manga-translator.html"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorMobile">Manga Translator</span></a></li>
+                        <li><a class="dropdown-item" href="translation-status.html"><i class="fas fa-tasks me-2"></i><span id="navTranslationStatusMobile">Translation Status</span></a></li>
+                        <li><a class="dropdown-item" href="translators/index.html"><i class="fas fa-users me-2"></i><span id="navFindTranslatorsMobile">Find Translators</span></a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="fas fa-headset me-2"></i><span data-i18n="nav.support">Support</span></a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="support/faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
+                        <li><a class="dropdown-item" href="support/troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
+                        <li><a class="dropdown-item" href="support/contact.html"><i class="fas fa-envelope me-2"></i><span id="navContactMobile">Contact</span></a></li>
+                        <li class="auth-only"><hr class="dropdown-divider"></li>
+                        <li class="auth-only"><a class="dropdown-item" href="support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
+                    </ul>
+                </li>
+                <li class="nav-item guest-only border-top mt-2 pt-2"><a class="nav-link" href="login.html"><i class="fas fa-sign-in-alt me-2"></i><span data-i18n="nav.login">Sign In</span></a></li>
+                <li class="nav-item guest-only"><a class="nav-link text-accent fw-bold" href="register.html"><i class="fas fa-user-plus me-2"></i><span data-i18n="nav.getStarted">Get Started</span></a></li>
+            </ul>
+            <div class="d-none d-lg-flex align-items-center gap-3">
+                <select class="language-selector" id="languageSelector">
+                    <option value="en">🇬🇧 EN</option><option value="ja">🇯🇵 日本語</option><option value="zh">🇨🇳 中文</option>
+                    <option value="es">🇪🇸 ES</option><option value="fr">🇫🇷 FR</option><option value="de">🇩🇪 DE</option>
+                    <option value="ko">🇰🇷 한국어</option><option value="ar">🇸🇦 عربي</option><option value="pt">🇧🇷 PT</option>
+                </select>
+                <div class="navbar-buttons-guest guest-only d-none d-lg-flex">
+                    <a href="login.html" class="btn btn-soft-custom"><span data-i18n="nav.login">Sign In</span></a>
+                    <a href="register.html" class="btn btn-primary-custom"><span data-i18n="nav.getStarted">Get Started</span></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+<!-- ========== NAVBAR PATTERN C END ========== -->
+
+    <!-- Guest Prompt -->
+    <div class="guest-prompt guest-only">
+        <i class="fas fa-lock fa-3x mb-3"></i>
+        <h2 id="guestTitle">Please Sign In</h2>
+        <p class="text-secondary mt-2 mb-4" id="guestSubtitle">You need to be signed in to create and view collaboration agreements.</p>
+        <a href="login.html" class="btn btn-primary-custom btn-lg" id="guestSignIn">Sign In</a>
+    </div>
+
+    <!-- Auth Content -->
+    <main class="container auth-only py-5" style="max-width: 960px;">
+        <!-- Page Header -->
+        <div class="agreements-header text-center mb-4">
+            <h1><i class="fas fa-handshake me-2"></i><span id="pageTitle">Collaboration Agreements</span></h1>
+            <p class="text-secondary" id="pageSubtitle">Create mutual agreements between collaborators to ensure clear terms and prevent disputes.</p>
+        </div>
+
+        <!-- Agreement Type Selection -->
+        <div class="row g-4 mb-4" id="typeSelectionRow">
+            <div class="col-md-4">
+                <div class="agreement-type-card" onclick="selectAgreementType('translation')" id="cardTranslation">
+                    <div class="type-icon"><i class="fas fa-language"></i></div>
+                    <h5 id="typeTranslationTitle">Translation Agreement</h5>
+                    <p class="text-secondary small" id="typeTranslationDesc">Author &#8596; Translator</p>
+                    <div class="type-parties">
+                        <span class="badge-role badge-author" id="badgeTranslationAuthor">Author+Editor 50%</span>
+                        <i class="fas fa-arrows-alt-h mx-1 text-secondary"></i>
+                        <span class="badge-role badge-translator" id="badgeTranslationTranslator">Translator 20%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="agreement-type-card" onclick="selectAgreementType('editing')" id="cardEditing">
+                    <div class="type-icon"><i class="fas fa-edit"></i></div>
+                    <h5 id="typeEditingTitle">Editing Agreement</h5>
+                    <p class="text-secondary small" id="typeEditingDesc">Author &#8596; Editor</p>
+                    <div class="type-parties">
+                        <span class="badge-role badge-author" id="badgeEditingAuthor">Author+Translator 60%</span>
+                        <i class="fas fa-arrows-alt-h mx-1 text-secondary"></i>
+                        <span class="badge-role badge-editor" id="badgeEditingEditor">Editor 10%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="agreement-type-card" onclick="selectAgreementType('collaboration')" id="cardCollaboration">
+                    <div class="type-icon"><i class="fas fa-users"></i></div>
+                    <h5 id="typeCollabTitle">Collaboration Agreement</h5>
+                    <p class="text-secondary small" id="typeCollabDesc">Author &#8596; Translator &#8596; Editor</p>
+                    <div class="type-parties">
+                        <span class="badge-role badge-author">Author 40%</span>
+                        <span class="badge-role badge-translator">Translator 20%</span>
+                        <span class="badge-role badge-editor">Editor 10%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Agreement Form -->
+        <div id="agreementFormSection" style="display: none;">
+            <div class="agreement-form-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 id="formTitle" class="mb-0"><i class="fas fa-file-signature me-2" style="color: var(--color-accent);"></i>Translation Agreement</h4>
+                    <button class="btn btn-soft-custom btn-sm" onclick="closeForm()" id="btnBack"><i class="fas fa-arrow-left me-1"></i>Back</button>
+                </div>
+
+                <form onsubmit="handleSubmit(event)">
+                    <!-- Section 1: Project Details -->
+                    <div class="form-section">
+                        <h5><i class="fas fa-book"></i> <span id="sectionProject">Project Details</span></h5>
+                        <div class="mb-3">
+                            <label class="form-label" id="labelWorkTitle">Work Title</label>
+                            <input type="text" class="form-control" id="inputWorkTitle" required>
+                        </div>
+                        <div class="mb-3" id="langGroup">
+                            <label class="form-label" id="labelTargetLang">Target Translation Language</label>
+                            <select class="form-select" id="inputTargetLang">
+                                <option value="" id="optSelectLang">-- Select Language --</option>
+                                <option value="en">English</option><option value="ja">日本語</option><option value="zh">中文</option>
+                                <option value="es">Español</option><option value="fr">Français</option><option value="de">Deutsch</option>
+                                <option value="ko">한국어</option><option value="ar">العربية</option><option value="pt">Português</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" id="labelDeadline">Deadline (Optional)</label>
+                            <input type="date" class="form-control" id="inputDeadline">
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Parties -->
+                    <div class="form-section">
+                        <h5><i class="fas fa-users"></i> <span id="sectionParties">Parties Involved</span></h5>
+                        <div class="row g-3 mb-3" id="authorFields">
+                            <div class="col-md-6">
+                                <label class="form-label" id="labelAuthorName">Author Name</label>
+                                <input type="text" class="form-control" id="inputAuthorName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" id="labelAuthorEmail">Author Email</label>
+                                <input type="email" class="form-control" id="inputAuthorEmail" required>
+                            </div>
+                        </div>
+                        <div class="row g-3 mb-3" id="translatorFields">
+                            <div class="col-md-6">
+                                <label class="form-label" id="labelTranslatorName">Translator Name</label>
+                                <input type="text" class="form-control" id="inputTranslatorName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" id="labelTranslatorEmail">Translator Email</label>
+                                <input type="email" class="form-control" id="inputTranslatorEmail" required>
+                            </div>
+                        </div>
+                        <div class="row g-3 mb-3" id="editorFields">
+                            <div class="col-md-6">
+                                <label class="form-label" id="labelEditorName">Editor Name</label>
+                                <input type="text" class="form-control" id="inputEditorName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" id="labelEditorEmail">Editor Email</label>
+                                <input type="email" class="form-control" id="inputEditorEmail" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Revenue Distribution -->
+                    <div class="form-section">
+                        <h5><i class="fas fa-chart-pie"></i> <span id="sectionRevenue">Revenue Distribution</span></h5>
+                        <p class="text-secondary small mb-3" id="revenueNote">Revenue percentages are fixed by the platform and cannot be modified.</p>
+                        <div class="revenue-display" id="revenueDisplay"></div>
+                    </div>
+
+                    <!-- Section 4: Agreement Terms -->
+                    <div class="form-section">
+                        <h5><i class="fas fa-file-alt"></i> <span id="sectionTerms">Agreement Terms</span></h5>
+                        <div class="terms-box" id="termsBox"></div>
+                    </div>
+
+                    <!-- Section 5: Digital Consent -->
+                    <div class="form-section">
+                        <h5><i class="fas fa-check-double"></i> <span id="sectionConsent">Digital Consent</span></h5>
+                        <div class="form-check mb-2" id="consentAuthorGroup">
+                            <input class="form-check-input" type="checkbox" id="consentAuthor" required>
+                            <label class="form-check-label" for="consentAuthor" id="consentAuthorLabel">I (Author) have read and agree to the terms above.</label>
+                        </div>
+                        <div class="form-check mb-2" id="consentTranslatorGroup">
+                            <input class="form-check-input" type="checkbox" id="consentTranslator" required>
+                            <label class="form-check-label" for="consentTranslator" id="consentTranslatorLabel">I (Translator) have read and agree to the terms above.</label>
+                        </div>
+                        <div class="form-check mb-2" id="consentEditorGroup">
+                            <input class="form-check-input" type="checkbox" id="consentEditor" required>
+                            <label class="form-check-label" for="consentEditor" id="consentEditorLabel">I (Editor) have read and agree to the terms above.</label>
+                        </div>
+                    </div>
+
+                    <!-- Section 6: Date + Submit -->
+                    <div class="form-section">
+                        <div class="mb-3">
+                            <label class="form-label" id="labelDate">Agreement Date</label>
+                            <input type="text" class="form-control" id="inputDate" readonly>
+                        </div>
+                        <button type="submit" class="btn btn-primary-custom btn-lg w-100" id="btnCreateAgreement">
+                            <i class="fas fa-file-signature me-2"></i>Create Agreement
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Agreement History -->
+        <div class="mt-5">
+            <h3 class="mb-3"><i class="fas fa-history me-2" style="color: var(--color-accent);"></i><span id="historyTitle">Agreement History</span></h3>
+            <div id="historyList"></div>
+            <div id="noHistory" class="text-center text-secondary py-4">
+                <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                <p id="noHistoryText">No agreements yet. Create your first agreement above.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Agreement Detail Modal -->
+    <div class="modal fade" id="detailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle"><i class="fas fa-file-contract me-2"></i>Agreement Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modalBody"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-soft-custom" data-bs-dismiss="modal" id="modalClose">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer-custom">
+        <div class="container">
+            <div class="d-flex flex-wrap justify-content-between align-items-center">
+                <p class="small mb-0">&copy; 2026 Publisher. All rights reserved.</p>
+                <div class="d-flex gap-3">
+                    <a href="support/faq.html" class="text-secondary" id="footerHelp">Help</a>
+                    <a href="terms.html" class="text-secondary" id="footerTerms">Terms</a>
+                    <a href="privacy.html" class="text-secondary" id="footerPrivacy">Privacy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/lang/ja.js"></script>
+    <script src="../js/lang/en.js"></script>
+    <script src="../js/lang/zh.js"></script>
+    <script src="../js/lang/es.js"></script>
+    <script src="../js/lang/fr.js"></script>
+    <script src="../js/lang/de.js"></script>
+    <script src="../js/lang/ko.js"></script>
+    <script src="../js/lang/ar.js"></script>
+    <script src="../js/lang/pt.js"></script>
+    <script src="../js/lang/translations-base.js"></script>
+    <script src="../js/language-switcher.js"></script>
+    <script src="../js/header-notification.js"></script>
+    <script src="../js/navbar.js"></script>
+
+<!-- Agreements Page Script -->
+    <script>
+        let selectedType = null;
+        const STORAGE_KEY = 'publisher_agreements';
+
+        const uiText = {
+            pageTitle: { en: 'Collaboration Agreements', ja: '共同制作同意書', zh: '合作协议', es: 'Acuerdos de colaboración', fr: 'Accords de collaboration', de: 'Zusammenarbeitsvereinbarungen', ko: '협업 동의서', ar: 'اتفاقيات التعاون', pt: 'Acordos de colaboração' },
+            pageSubtitle: { en: 'Create mutual agreements between collaborators to ensure clear terms and prevent disputes.', ja: '共同作業者間の同意書を作成し、明確な条件を定めてトラブルを防止します。', zh: '创建合作者之间的协议，确保条款明确，防止纠纷。', es: 'Crea acuerdos mutuos entre colaboradores para asegurar términos claros y prevenir disputas.', fr: 'Créez des accords mutuels entre collaborateurs pour garantir des conditions claires et prévenir les litiges.', de: 'Erstellen Sie gegenseitige Vereinbarungen zwischen Mitarbeitern, um klare Bedingungen zu gewährleisten und Streitigkeiten zu vermeiden.', ko: '협업자 간의 상호 동의서를 작성하여 명확한 조건을 설정하고 분쟁을 방지합니다.', ar: 'أنشئ اتفاقيات متبادلة بين المتعاونين لضمان شروط واضحة ومنع النزاعات.', pt: 'Crie acordos mútuos entre colaboradores para garantir termos claros e prevenir disputas.' },
+            guestTitle: { en: 'Please Sign In', ja: 'ログインしてください', zh: '请登录', es: 'Inicia sesión', fr: 'Veuillez vous connecter', de: 'Bitte anmelden', ko: '로그인해주세요', ar: 'يرجى تسجيل الدخول', pt: 'Faça login' },
+            guestSubtitle: { en: 'You need to be signed in to create and view collaboration agreements.', ja: '同意書の作成・閲覧にはログインが必要です。', zh: '您需要登录才能创建和查看合作协议。', es: 'Necesitas iniciar sesión para crear y ver acuerdos de colaboración.', fr: 'Vous devez être connecté pour créer et consulter des accords de collaboration.', de: 'Sie müssen angemeldet sein, um Vereinbarungen zu erstellen und anzuzeigen.', ko: '협업 동의서를 작성하고 확인하려면 로그인이 필요합니다.', ar: 'يجب تسجيل الدخول لإنشاء وعرض اتفاقيات التعاون.', pt: 'Você precisa estar conectado para criar e visualizar acordos de colaboração.' },
+            guestSignIn: { en: 'Sign In', ja: 'ログイン', zh: '登录', es: 'Iniciar sesión', fr: 'Se connecter', de: 'Anmelden', ko: '로그인', ar: 'تسجيل الدخول', pt: 'Entrar' },
+            typeTranslationTitle: { en: 'Translation Agreement', ja: '翻訳同意書', zh: '翻译协议', es: 'Acuerdo de traducción', fr: 'Accord de traduction', de: 'Übersetzungsvereinbarung', ko: '번역 동의서', ar: 'اتفاقية الترجمة', pt: 'Acordo de tradução' },
+            typeTranslationDesc: { en: 'Author ↔ Translator', ja: '著者 ↔ 翻訳者', zh: '作者 ↔ 翻译者', es: 'Autor ↔ Traductor', fr: 'Auteur ↔ Traducteur', de: 'Autor ↔ Übersetzer', ko: '저자 ↔ 번역가', ar: 'المؤلف ↔ المترجم', pt: 'Autor ↔ Tradutor' },
+            typeEditingTitle: { en: 'Editing Agreement', ja: '編集同意書', zh: '编辑协议', es: 'Acuerdo de edición', fr: "Accord d'édition", de: 'Lektoratsvereinbarung', ko: '편집 동의서', ar: 'اتفاقية التحرير', pt: 'Acordo de edição' },
+            typeEditingDesc: { en: 'Author ↔ Editor', ja: '著者 ↔ 編集者', zh: '作者 ↔ 编辑', es: 'Autor ↔ Editor', fr: 'Auteur ↔ Éditeur', de: 'Autor ↔ Lektor', ko: '저자 ↔ 편집자', ar: 'المؤلف ↔ المحرر', pt: 'Autor ↔ Editor' },
+            typeCollabTitle: { en: 'Collaboration Agreement', ja: '共同制作同意書', zh: '合作协议', es: 'Acuerdo de colaboración', fr: 'Accord de collaboration', de: 'Zusammenarbeitsvereinbarung', ko: '공동 제작 동의서', ar: 'اتفاقية التعاون', pt: 'Acordo de colaboração' },
+            typeCollabDesc: { en: 'Author ↔ Translator ↔ Editor', ja: '著者 ↔ 翻訳者 ↔ 編集者', zh: '作者 ↔ 翻译者 ↔ 编辑', es: 'Autor ↔ Traductor ↔ Editor', fr: 'Auteur ↔ Traducteur ↔ Éditeur', de: 'Autor ↔ Übersetzer ↔ Lektor', ko: '저자 ↔ 번역가 ↔ 편집자', ar: 'المؤلف ↔ المترجم ↔ المحرر', pt: 'Autor ↔ Tradutor ↔ Editor' },
+            formTitleTranslation: { en: 'Translation Agreement', ja: '翻訳同意書', zh: '翻译协议', es: 'Acuerdo de traducción', fr: 'Accord de traduction', de: 'Übersetzungsvereinbarung', ko: '번역 동의서', ar: 'اتفاقية الترجمة', pt: 'Acordo de tradução' },
+            formTitleEditing: { en: 'Editing Agreement', ja: '編集同意書', zh: '编辑协议', es: 'Acuerdo de edición', fr: "Accord d'édition", de: 'Lektoratsvereinbarung', ko: '편집 동의서', ar: 'اتفاقية التحرير', pt: 'Acordo de edição' },
+            formTitleCollaboration: { en: 'Collaboration Agreement', ja: '共同制作同意書', zh: '合作协议', es: 'Acuerdo de colaboración', fr: 'Accord de collaboration', de: 'Zusammenarbeitsvereinbarung', ko: '공동 제작 동의서', ar: 'اتفاقية التعاون', pt: 'Acordo de colaboração' },
+            btnBack: { en: 'Back', ja: '戻る', zh: '返回', es: 'Volver', fr: 'Retour', de: 'Zurück', ko: '뒤로', ar: 'رجوع', pt: 'Voltar' },
+            sectionProject: { en: 'Project Details', ja: 'プロジェクト情報', zh: '项目详情', es: 'Detalles del proyecto', fr: 'Détails du projet', de: 'Projektdetails', ko: '프로젝트 정보', ar: 'تفاصيل المشروع', pt: 'Detalhes do projeto' },
+            labelWorkTitle: { en: 'Work Title', ja: '作品タイトル', zh: '作品标题', es: 'Título de la obra', fr: "Titre de l'œuvre", de: 'Werktitel', ko: '작품 제목', ar: 'عنوان العمل', pt: 'Título da obra' },
+            labelTargetLang: { en: 'Target Translation Language', ja: '翻訳先言語', zh: '目标翻译语言', es: 'Idioma de traducción', fr: 'Langue de traduction cible', de: 'Zielsprache', ko: '번역 대상 언어', ar: 'لغة الترجمة المستهدفة', pt: 'Idioma de tradução alvo' },
+            optSelectLang: { en: '-- Select Language --', ja: '-- 言語を選択 --', zh: '-- 选择语言 --', es: '-- Seleccionar idioma --', fr: '-- Sélectionner la langue --', de: '-- Sprache auswählen --', ko: '-- 언어 선택 --', ar: '-- اختر اللغة --', pt: '-- Selecionar idioma --' },
+            labelDeadline: { en: 'Deadline (Optional)', ja: '期限（任意）', zh: '截止日期（可选）', es: 'Fecha límite (Opcional)', fr: 'Date limite (Optionnel)', de: 'Frist (Optional)', ko: '마감일 (선택)', ar: 'الموعد النهائي (اختياري)', pt: 'Prazo (Opcional)' },
+            sectionParties: { en: 'Parties Involved', ja: '当事者情報', zh: '相关方', es: 'Partes involucradas', fr: 'Parties impliquées', de: 'Beteiligte Parteien', ko: '당사자 정보', ar: 'الأطراف المعنية', pt: 'Partes envolvidas' },
+            labelAuthorName: { en: 'Author Name', ja: '著者名', zh: '作者姓名', es: 'Nombre del autor', fr: "Nom de l'auteur", de: 'Autorenname', ko: '저자 이름', ar: 'اسم المؤلف', pt: 'Nome do autor' },
+            labelAuthorEmail: { en: 'Author Email', ja: '著者メール', zh: '作者邮箱', es: 'Email del autor', fr: "Email de l'auteur", de: 'Autoren-E-Mail', ko: '저자 이메일', ar: 'بريد المؤلف', pt: 'Email do autor' },
+            labelTranslatorName: { en: 'Translator Name', ja: '翻訳者名', zh: '翻译者姓名', es: 'Nombre del traductor', fr: 'Nom du traducteur', de: 'Übersetzername', ko: '번역가 이름', ar: 'اسم المترجم', pt: 'Nome do tradutor' },
+            labelTranslatorEmail: { en: 'Translator Email', ja: '翻訳者メール', zh: '翻译者邮箱', es: 'Email del traductor', fr: 'Email du traducteur', de: 'Übersetzer-E-Mail', ko: '번역가 이메일', ar: 'بريد المترجم', pt: 'Email do tradutor' },
+            labelEditorName: { en: 'Editor Name', ja: '編集者名', zh: '编辑姓名', es: 'Nombre del editor', fr: "Nom de l'éditeur", de: 'Lektorname', ko: '편집자 이름', ar: 'اسم المحرر', pt: 'Nome do editor' },
+            labelEditorEmail: { en: 'Editor Email', ja: '編集者メール', zh: '编辑邮箱', es: 'Email del editor', fr: "Email de l'éditeur", de: 'Lektor-E-Mail', ko: '편집자 이메일', ar: 'بريد المحرر', pt: 'Email do editor' },
+            sectionRevenue: { en: 'Revenue Distribution', ja: '収益配分', zh: '收益分配', es: 'Distribución de ingresos', fr: 'Répartition des revenus', de: 'Umsatzverteilung', ko: '수익 배분', ar: 'توزيع الإيرادات', pt: 'Distribuição de receita' },
+            revenueNote: { en: 'Revenue percentages are fixed by the platform and cannot be modified.', ja: '収益配分はプラットフォームにより固定されており、変更できません。', zh: '收益百分比由平台固定，不可修改。', es: 'Los porcentajes de ingresos son fijos y no se pueden modificar.', fr: 'Les pourcentages de revenus sont fixés par la plateforme et ne peuvent pas être modifiés.', de: 'Die Umsatzprozentsätze sind von der Plattform festgelegt und können nicht geändert werden.', ko: '수익 비율은 플랫폼에 의해 고정되어 변경할 수 없습니다.', ar: 'نسب الإيرادات ثابتة من قبل المنصة ولا يمكن تعديلها.', pt: 'As porcentagens de receita são fixadas pela plataforma e não podem ser modificadas.' },
+            roleAuthor: { en: 'Author', ja: '著者', zh: '作者', es: 'Autor', fr: 'Auteur', de: 'Autor', ko: '저자', ar: 'المؤلف', pt: 'Autor' },
+            roleTranslator: { en: 'Translator', ja: '翻訳者', zh: '翻译者', es: 'Traductor', fr: 'Traducteur', de: 'Übersetzer', ko: '번역가', ar: 'المترجم', pt: 'Tradutor' },
+            roleEditor: { en: 'Editor', ja: '編集者', zh: '编辑', es: 'Editor', fr: 'Éditeur', de: 'Lektor', ko: '편집자', ar: 'المحرر', pt: 'Editor' },
+            rolePlatform: { en: 'Platform', ja: 'プラットフォーム', zh: '平台', es: 'Plataforma', fr: 'Plateforme', de: 'Plattform', ko: '플랫폼', ar: 'المنصة', pt: 'Plataforma' },
+            roleAuthorEditor: { en: 'Author + Editor', ja: '著者兼編集', zh: '作者兼编辑', es: 'Autor + Editor', fr: 'Auteur + Éditeur', de: 'Autor + Lektor', ko: '저자 겸 편집자', ar: 'المؤلف + المحرر', pt: 'Autor + Editor' },
+            roleAuthorTranslator: { en: 'Author + Translator', ja: '著者兼翻訳', zh: '作者兼翻译', es: 'Autor + Traductor', fr: 'Auteur + Traducteur', de: 'Autor + Übersetzer', ko: '저자 겸 번역가', ar: 'المؤلف + المترجم', pt: 'Autor + Tradutor' },
+            sectionTerms: { en: 'Agreement Terms', ja: '同意書条項', zh: '协议条款', es: 'Términos del acuerdo', fr: "Termes de l'accord", de: 'Vereinbarungsbedingungen', ko: '동의서 조항', ar: 'شروط الاتفاقية', pt: 'Termos do acordo' },
+            sectionConsent: { en: 'Digital Consent', ja: 'デジタル同意', zh: '数字同意', es: 'Consentimiento digital', fr: 'Consentement numérique', de: 'Digitale Zustimmung', ko: '디지털 동의', ar: 'الموافقة الرقمية', pt: 'Consentimento digital' },
+            consentAuthorLabel: { en: 'I (Author) have read and agree to the terms above.', ja: '私（著者）は上記の条項を読み、同意します。', zh: '我（作者）已阅读并同意上述条款。', es: 'Yo (Autor) he leído y acepto los términos anteriores.', fr: "Je (Auteur) ai lu et j'accepte les termes ci-dessus.", de: 'Ich (Autor) habe die obigen Bedingungen gelesen und stimme ihnen zu.', ko: '저(저자)는 위 조항을 읽고 동의합니다.', ar: 'أنا (المؤلف) قرأت وأوافق على الشروط أعلاه.', pt: 'Eu (Autor) li e concordo com os termos acima.' },
+            consentTranslatorLabel: { en: 'I (Translator) have read and agree to the terms above.', ja: '私（翻訳者）は上記の条項を読み、同意します。', zh: '我（翻译者）已阅读并同意上述条款。', es: 'Yo (Traductor) he leído y acepto los términos anteriores.', fr: "Je (Traducteur) ai lu et j'accepte les termes ci-dessus.", de: 'Ich (Übersetzer) habe die obigen Bedingungen gelesen und stimme ihnen zu.', ko: '저(번역가)는 위 조항을 읽고 동의합니다.', ar: 'أنا (المترجم) قرأت وأوافق على الشروط أعلاه.', pt: 'Eu (Tradutor) li e concordo com os termos acima.' },
+            consentEditorLabel: { en: 'I (Editor) have read and agree to the terms above.', ja: '私（編集者）は上記の条項を読み、同意します。', zh: '我（编辑）已阅读并同意上述条款。', es: 'Yo (Editor) he leído y acepto los términos anteriores.', fr: "Je (Éditeur) ai lu et j'accepte les termes ci-dessus.", de: 'Ich (Lektor) habe die obigen Bedingungen gelesen und stimme ihnen zu.', ko: '저(편집자)는 위 조항을 읽고 동의합니다.', ar: 'أنا (المحرر) قرأت وأوافق على الشروط أعلاه.', pt: 'Eu (Editor) li e concordo com os termos acima.' },
+            labelDate: { en: 'Agreement Date', ja: '同意日', zh: '协议日期', es: 'Fecha del acuerdo', fr: "Date de l'accord", de: 'Vereinbarungsdatum', ko: '동의 날짜', ar: 'تاريخ الاتفاقية', pt: 'Data do acordo' },
+            btnCreateAgreement: { en: 'Create Agreement', ja: '同意書を作成', zh: '创建协议', es: 'Crear acuerdo', fr: "Créer l'accord", de: 'Vereinbarung erstellen', ko: '동의서 작성', ar: 'إنشاء الاتفاقية', pt: 'Criar acordo' },
+            historyTitle: { en: 'Agreement History', ja: '同意書履歴', zh: '协议历史', es: 'Historial de acuerdos', fr: 'Historique des accords', de: 'Vereinbarungsverlauf', ko: '동의서 이력', ar: 'سجل الاتفاقيات', pt: 'Histórico de acordos' },
+            noHistoryText: { en: 'No agreements yet. Create your first agreement above.', ja: 'まだ同意書がありません。上のカードから最初の同意書を作成してください。', zh: '还没有协议。请在上方创建您的第一份协议。', es: 'No hay acuerdos aún. Crea tu primer acuerdo arriba.', fr: "Pas encore d'accords. Créez votre premier accord ci-dessus.", de: 'Noch keine Vereinbarungen. Erstellen Sie oben Ihre erste Vereinbarung.', ko: '아직 동의서가 없습니다. 위에서 첫 번째 동의서를 작성하세요.', ar: 'لا توجد اتفاقيات بعد. أنشئ أول اتفاقية أعلاه.', pt: 'Nenhum acordo ainda. Crie seu primeiro acordo acima.' },
+            btnViewDetails: { en: 'View Details', ja: '詳細を見る', zh: '查看详情', es: 'Ver detalles', fr: 'Voir les détails', de: 'Details anzeigen', ko: '상세 보기', ar: 'عرض التفاصيل', pt: 'Ver detalhes' },
+            statusActive: { en: 'Active', ja: '有効', zh: '有效', es: 'Activo', fr: 'Actif', de: 'Aktiv', ko: '활성', ar: 'نشط', pt: 'Ativo' },
+            modalTitle: { en: 'Agreement Details', ja: '同意書の詳細', zh: '协议详情', es: 'Detalles del acuerdo', fr: "Détails de l'accord", de: 'Vereinbarungsdetails', ko: '동의서 상세', ar: 'تفاصيل الاتفاقية', pt: 'Detalhes do acordo' },
+            modalClose: { en: 'Close', ja: '閉じる', zh: '关闭', es: 'Cerrar', fr: 'Fermer', de: 'Schließen', ko: '닫기', ar: 'إغلاق', pt: 'Fechar' },
+            successMessage: { en: 'Agreement created successfully!', ja: '同意書が作成されました！', zh: '协议创建成功！', es: '¡Acuerdo creado exitosamente!', fr: 'Accord créé avec succès !', de: 'Vereinbarung erfolgreich erstellt!', ko: '동의서가 성공적으로 작성되었습니다!', ar: 'تم إنشاء الاتفاقية بنجاح!', pt: 'Acordo criado com sucesso!' },
+            footerHelp: { en: 'Help', ja: 'ヘルプ', zh: '帮助', es: 'Ayuda', fr: 'Aide', de: 'Hilfe', ko: '도움말', ar: 'مساعدة', pt: 'Ajuda' },
+            footerTerms: { en: 'Terms', ja: '利用規約', zh: '条款', es: 'Términos', fr: 'Conditions', de: 'Bedingungen', ko: '약관', ar: 'الشروط', pt: 'Termos' },
+            footerPrivacy: { en: 'Privacy', ja: 'プライバシー', zh: '隐私', es: 'Privacidad', fr: 'Confidentialité', de: 'Datenschutz', ko: '개인정보', ar: 'الخصوصية', pt: 'Privacidade' },
+            myWorks: {
+                en: 'My Works', ja: 'マイ作品', zh: '我的作品',
+                es: 'Mis Obras', fr: 'Mes Œuvres', de: 'Meine Werke',
+                ko: '내 작품', ar: 'أعمالي', pt: 'Minhas Obras'
+            }
+        };
+
+        const termsContent = {
+            translation: [
+                {
+                    title: { en: '1. Grant of Translation Rights', ja: '1. 翻訳権の付与', zh: '1. 翻译权的授予', es: '1. Concesión de derechos de traducción', fr: '1. Octroi des droits de traduction', de: '1. Einräumung der Übersetzungsrechte', ko: '1. 번역권 부여', ar: '1. منح حقوق الترجمة', pt: '1. Concessão de direitos de tradução' },
+                    body: { en: 'The Author grants the Translator a non-exclusive right to translate the specified work into the designated target language. This right is limited to the specific work and language pair identified in this agreement.', ja: '著者は翻訳者に対し、指定された作品を指定の対象言語に翻訳する非独占的権利を付与します。この権利は、本同意書で特定された作品および言語の組み合わせに限定されます。', zh: '作者授予翻译者将指定作品翻译为指定目标语言的非独占权利。该权利仅限于本协议中确定的特定作品和语言组合。', es: 'El Autor otorga al Traductor un derecho no exclusivo para traducir la obra especificada al idioma de destino designado. Este derecho se limita a la obra específica y al par de idiomas identificados en este acuerdo.', fr: 'L\'Auteur accorde au Traducteur un droit non exclusif de traduire l\'œuvre spécifiée dans la langue cible désignée. Ce droit est limité à l\'œuvre spécifique et à la paire de langues identifiées dans le présent accord.', de: 'Der Autor räumt dem Übersetzer ein nicht-exklusives Recht ein, das angegebene Werk in die bezeichnete Zielsprache zu übersetzen. Dieses Recht ist auf das in dieser Vereinbarung genannte Werk und Sprachenpaar beschränkt.', ko: '저자는 번역가에게 지정된 작품을 지정된 대상 언어로 번역할 비독점적 권리를 부여합니다. 이 권리는 본 동의서에서 명시된 특정 작품 및 언어 조합에 한정됩니다.', ar: 'يمنح المؤلف المترجم حقًا غير حصري لترجمة العمل المحدد إلى اللغة المستهدفة المعينة. يقتصر هذا الحق على العمل المحدد وزوج اللغات المحدد في هذه الاتفاقية.', pt: 'O Autor concede ao Tradutor um direito não exclusivo de traduzir a obra especificada para o idioma-alvo designado. Este direito é limitado à obra específica e ao par de idiomas identificados neste acordo.' }
+                },
+                {
+                    title: { en: '2. Revenue Distribution', ja: '2. 収益配分', zh: '2. 收益分配', es: '2. Distribución de ingresos', fr: '2. Répartition des revenus', de: '2. Umsatzverteilung', ko: '2. 수익 배분', ar: '2. توزيع الإيرادات', pt: '2. Distribuição de receita' },
+                    body: { en: 'Revenue from sales of the translated work shall be distributed as follows: Author+Editor 50%, Translator 20%, Platform 30%. These percentages are fixed by the Publisher platform and are non-negotiable.', ja: '翻訳作品の販売による収益は以下のとおり配分されます：著者＋編集者 50%、翻訳者 20%、プラットフォーム 30%。これらの配分率はPublisherプラットフォームにより固定されており、交渉の対象外です。', zh: '翻译作品销售收益的分配如下：作者+编辑 50%、翻译者 20%、平台 30%。这些百分比由Publisher平台固定，不可协商。', es: 'Los ingresos por ventas de la obra traducida se distribuirán de la siguiente manera: Autor+Editor 50%, Traductor 20%, Plataforma 30%. Estos porcentajes son fijados por la plataforma Publisher y no son negociables.', fr: 'Les revenus des ventes de l\'œuvre traduite seront répartis comme suit : Auteur+Éditeur 50%, Traducteur 20%, Plateforme 30%. Ces pourcentages sont fixés par la plateforme Publisher et ne sont pas négociables.', de: 'Die Einnahmen aus dem Verkauf des übersetzten Werks werden wie folgt verteilt: Autor+Lektor 50%, Übersetzer 20%, Plattform 30%. Diese Prozentsätze sind von der Publisher-Plattform festgelegt und nicht verhandelbar.', ko: '번역 작품의 판매 수익은 다음과 같이 배분됩니다: 저자+편집자 50%, 번역가 20%, 플랫폼 30%. 이 비율은 Publisher 플랫폼에 의해 고정되며 협상 대상이 아닙니다.', ar: 'يتم توزيع إيرادات مبيعات العمل المترجم على النحو التالي: المؤلف+المحرر 50%، المترجم 20%، المنصة 30%. هذه النسب ثابتة من قبل منصة Publisher وغير قابلة للتفاوض.', pt: 'A receita das vendas da obra traduzida será distribuída da seguinte forma: Autor+Editor 50%, Tradutor 20%, Plataforma 30%. Essas porcentagens são fixadas pela plataforma Publisher e não são negociáveis.' }
+                },
+                {
+                    title: { en: '3. Translation Quality Standards', ja: '3. 翻訳品質基準', zh: '3. 翻译质量标准', es: '3. Estándares de calidad de traducción', fr: '3. Normes de qualité de traduction', de: '3. Qualitätsstandards für Übersetzungen', ko: '3. 번역 품질 기준', ar: '3. معايير جودة الترجمة', pt: '3. Padrões de qualidade de tradução' },
+                    body: { en: 'The Translator agrees to deliver an accurate, culturally appropriate translation that maintains the original meaning and tone of the work. The translation must be original human work and not solely machine-generated output.', ja: '翻訳者は、原作の意味と語調を維持した正確かつ文化的に適切な翻訳を納品することに同意します。翻訳は人間によるオリジナルの作業でなければならず、機械翻訳のみによる出力であってはなりません。', zh: '翻译者同意提供准确且符合文化背景的翻译，保持原作的含义和语调。翻译必须是人工原创作品，不得仅为机器翻译输出。', es: 'El Traductor acepta entregar una traducción precisa y culturalmente apropiada que mantenga el significado y tono originales de la obra. La traducción debe ser trabajo humano original y no únicamente resultado de traducción automática.', fr: 'Le Traducteur s\'engage à fournir une traduction précise et culturellement appropriée qui préserve le sens et le ton originaux de l\'œuvre. La traduction doit être un travail humain original et non uniquement un résultat généré par machine.', de: 'Der Übersetzer verpflichtet sich, eine genaue, kulturell angemessene Übersetzung zu liefern, die die ursprüngliche Bedeutung und den Ton des Werks beibehält. Die Übersetzung muss ein originales menschliches Werk sein und darf nicht ausschließlich maschinell erstellt worden sein.', ko: '번역가는 원작의 의미와 어조를 유지하면서 정확하고 문화적으로 적절한 번역을 제공하는 데 동의합니다. 번역은 인간의 독창적인 작업이어야 하며, 기계 번역 출력만으로 구성되어서는 안 됩니다.', ar: 'يوافق المترجم على تقديم ترجمة دقيقة ومناسبة ثقافيًا تحافظ على المعنى والنبرة الأصلية للعمل. يجب أن تكون الترجمة عملًا بشريًا أصيلًا وليست مجرد مخرجات مولدة آليًا.', pt: 'O Tradutor concorda em entregar uma tradução precisa e culturalmente apropriada que mantenha o significado e o tom originais da obra. A tradução deve ser trabalho humano original e não apenas resultado gerado por máquina.' }
+                },
+                {
+                    title: { en: '4. Timeline and Deadlines', ja: '4. スケジュールと期限', zh: '4. 时间表与截止日期', es: '4. Plazos y fechas límite', fr: '4. Calendrier et délais', de: '4. Zeitplan und Fristen', ko: '4. 일정 및 마감일', ar: '4. الجدول الزمني والمواعيد النهائية', pt: '4. Cronograma e prazos' },
+                    body: { en: 'The Translator shall complete the translation by the deadline specified in this agreement. If no deadline is specified, both parties shall negotiate a reasonable timeline. Extensions may be granted by mutual written consent.', ja: '翻訳者は、本同意書で指定された期限までに翻訳を完了するものとします。期限が指定されていない場合、両当事者は合理的なスケジュールを協議するものとします。延長は双方の書面による合意により認められる場合があります。', zh: '翻译者应在本协议规定的截止日期前完成翻译。如未指定截止日期，双方应协商合理的时间表。经双方书面同意，可批准延期。', es: 'El Traductor completará la traducción antes de la fecha límite especificada en este acuerdo. Si no se especifica una fecha límite, ambas partes negociarán un plazo razonable. Las extensiones pueden concederse por consentimiento mutuo por escrito.', fr: 'Le Traducteur doit achever la traduction avant la date limite spécifiée dans le présent accord. Si aucune date limite n\'est spécifiée, les deux parties négocieront un calendrier raisonnable. Des prolongations peuvent être accordées par consentement écrit mutuel.', de: 'Der Übersetzer hat die Übersetzung bis zu der in dieser Vereinbarung festgelegten Frist fertigzustellen. Ist keine Frist festgelegt, verhandeln beide Parteien einen angemessenen Zeitplan. Verlängerungen können durch gegenseitige schriftliche Zustimmung gewährt werden.', ko: '번역가는 본 동의서에 명시된 마감일까지 번역을 완료해야 합니다. 마감일이 지정되지 않은 경우, 양 당사자는 합리적인 일정을 협의해야 합니다. 연장은 양 당사자의 서면 합의에 의해 허가될 수 있습니다.', ar: 'يجب على المترجم إكمال الترجمة بحلول الموعد النهائي المحدد في هذه الاتفاقية. إذا لم يتم تحديد موعد نهائي، يتفاوض الطرفان على جدول زمني معقول. يجوز منح تمديدات بموافقة خطية متبادلة.', pt: 'O Tradutor deverá concluir a tradução até o prazo especificado neste acordo. Se nenhum prazo for especificado, ambas as partes negociarão um cronograma razoável. Extensões podem ser concedidas por consentimento mútuo por escrito.' }
+                },
+                {
+                    title: { en: '5. Copyright Ownership', ja: '5. 著作権の帰属', zh: '5. 版权归属', es: '5. Propiedad de los derechos de autor', fr: '5. Propriété des droits d\'auteur', de: '5. Urheberrecht', ko: '5. 저작권 소유', ar: '5. ملكية حقوق النشر', pt: '5. Propriedade dos direitos autorais' },
+                    body: { en: 'Original copyright remains with the Author. The Translator holds copyright over the translated text. Both parties grant the Publisher platform a non-exclusive license to distribute the work.', ja: '原著作権は著者に帰属します。翻訳者は翻訳されたテキストの著作権を保有します。両当事者はPublisherプラットフォームに対し、作品を配布するための非独占的ライセンスを付与します。', zh: '原始版权归作者所有。翻译者拥有翻译文本的版权。双方授予Publisher平台非独占的作品发行许可。', es: 'Los derechos de autor originales permanecen con el Autor. El Traductor posee los derechos de autor sobre el texto traducido. Ambas partes otorgan a la plataforma Publisher una licencia no exclusiva para distribuir la obra.', fr: 'Les droits d\'auteur originaux restent à l\'Auteur. Le Traducteur détient les droits d\'auteur sur le texte traduit. Les deux parties accordent à la plateforme Publisher une licence non exclusive de distribution de l\'œuvre.', de: 'Das ursprüngliche Urheberrecht verbleibt beim Autor. Der Übersetzer hält das Urheberrecht am übersetzten Text. Beide Parteien räumen der Publisher-Plattform eine nicht-exklusive Lizenz zur Verbreitung des Werks ein.', ko: '원저작권은 저자에게 귀속됩니다. 번역가는 번역된 텍스트에 대한 저작권을 보유합니다. 양 당사자는 Publisher 플랫폼에 작품 배포를 위한 비독점적 라이선스를 부여합니다.', ar: 'تبقى حقوق النشر الأصلية للمؤلف. يحتفظ المترجم بحقوق النشر على النص المترجم. يمنح كلا الطرفين منصة Publisher ترخيصًا غير حصري لتوزيع العمل.', pt: 'Os direitos autorais originais permanecem com o Autor. O Tradutor detém os direitos autorais sobre o texto traduzido. Ambas as partes concedem à plataforma Publisher uma licença não exclusiva para distribuir a obra.' }
+                },
+                {
+                    title: { en: '6. Dispute Resolution', ja: '6. 紛争解決', zh: '6. 争议解决', es: '6. Resolución de disputas', fr: '6. Résolution des litiges', de: '6. Streitbeilegung', ko: '6. 분쟁 해결', ar: '6. حل النزاعات', pt: '6. Resolução de disputas' },
+                    body: { en: 'Any disputes arising from this agreement shall first be addressed through direct communication between the parties. If unresolved, disputes may be escalated to the Publisher platform for mediation. Both parties agree to act in good faith.', ja: '本同意書に起因する紛争は、まず当事者間の直接の話し合いにより解決を図るものとします。解決に至らない場合、紛争はPublisherプラットフォームの仲裁に委ねることができます。両当事者は誠実に行動することに同意します。', zh: '因本协议引起的任何争议应首先通过当事方之间的直接沟通解决。如未能解决，争议可提交Publisher平台进行调解。双方同意本着善意行事。', es: 'Cualquier disputa derivada de este acuerdo se abordará primero mediante comunicación directa entre las partes. Si no se resuelve, las disputas pueden escalarse a la plataforma Publisher para mediación. Ambas partes acuerdan actuar de buena fe.', fr: 'Tout litige découlant du présent accord sera d\'abord traité par communication directe entre les parties. En cas de non-résolution, les litiges peuvent être soumis à la plateforme Publisher pour médiation. Les deux parties s\'engagent à agir de bonne foi.', de: 'Streitigkeiten aus dieser Vereinbarung werden zunächst durch direkte Kommunikation zwischen den Parteien behandelt. Bei Nichteinigung können Streitigkeiten an die Publisher-Plattform zur Mediation weitergeleitet werden. Beide Parteien verpflichten sich, nach Treu und Glauben zu handeln.', ko: '본 동의서로 인해 발생하는 분쟁은 먼저 당사자 간의 직접 소통을 통해 해결합니다. 해결되지 않을 경우, Publisher 플랫폼에 중재를 요청할 수 있습니다. 양 당사자는 성실하게 행동할 것에 동의합니다.', ar: 'يتم معالجة أي نزاعات ناشئة عن هذه الاتفاقية أولاً من خلال التواصل المباشر بين الأطراف. في حالة عدم الحل، يجوز تصعيد النزاعات إلى منصة Publisher للوساطة. يوافق كلا الطرفين على التصرف بحسن نية.', pt: 'Quaisquer disputas decorrentes deste acordo serão primeiramente tratadas por comunicação direta entre as partes. Se não resolvidas, as disputas podem ser encaminhadas à plataforma Publisher para mediação. Ambas as partes concordam em agir de boa-fé.' }
+                },
+                {
+                    title: { en: '7. Termination', ja: '7. 契約の終了', zh: '7. 终止', es: '7. Terminación', fr: '7. Résiliation', de: '7. Kündigung', ko: '7. 계약 해지', ar: '7. الإنهاء', pt: '7. Rescisão' },
+                    body: { en: 'Either party may terminate this agreement with 30 days written notice. Upon termination, any existing translated work already published shall continue to be sold under the specified revenue distribution terms.', ja: 'いずれの当事者も、30日前の書面による通知をもって本同意書を終了することができます。終了時点で既に公開されている翻訳作品は、指定された収益配分条件に基づき引き続き販売されるものとします。', zh: '任何一方均可提前30天书面通知终止本协议。终止后，已出版的翻译作品应继续按照规定的收益分配条款进行销售。', es: 'Cualquier parte puede terminar este acuerdo con 30 días de aviso por escrito. Tras la terminación, cualquier obra traducida ya publicada continuará vendiéndose bajo los términos de distribución de ingresos especificados.', fr: 'L\'une ou l\'autre des parties peut résilier le présent accord moyennant un préavis écrit de 30 jours. À la résiliation, toute œuvre traduite déjà publiée continuera d\'être vendue selon les conditions de répartition des revenus spécifiées.', de: 'Jede Partei kann diese Vereinbarung mit einer schriftlichen Kündigungsfrist von 30 Tagen kündigen. Nach der Kündigung werden bereits veröffentlichte übersetzte Werke weiterhin gemäß den festgelegten Umsatzverteilungsbedingungen verkauft.', ko: '어느 당사자든 30일 전 서면 통지로 본 동의서를 해지할 수 있습니다. 해지 시, 이미 출판된 번역 작품은 명시된 수익 배분 조건에 따라 계속 판매됩니다.', ar: 'يجوز لأي من الطرفين إنهاء هذه الاتفاقية بإشعار خطي قبل 30 يومًا. عند الإنهاء، يستمر بيع أي عمل مترجم منشور بالفعل وفقًا لشروط توزيع الإيرادات المحددة.', pt: 'Qualquer parte pode rescindir este acordo com 30 dias de aviso prévio por escrito. Após a rescisão, qualquer obra traduzida já publicada continuará a ser vendida sob os termos de distribuição de receita especificados.' }
+                }
+            ],
+            editing: [
+                {
+                    title: { en: '1. Scope of Editing Work', ja: '1. 編集作業の範囲', zh: '1. 编辑工作范围', es: '1. Alcance del trabajo de edición', fr: '1. Portée du travail d\'édition', de: '1. Umfang der Lektoratsarbeit', ko: '1. 편집 작업 범위', ar: '1. نطاق أعمال التحرير', pt: '1. Escopo do trabalho de edição' },
+                    body: { en: 'The Editor agrees to provide professional editing services for the specified work, including proofreading, grammar correction, style consistency review, and content improvement suggestions as appropriate.', ja: '編集者は、指定された作品に対し、校正、文法修正、文体の一貫性の確認、および適切な内容改善の提案を含む専門的な編集サービスを提供することに同意します。', zh: '编辑同意为指定作品提供专业编辑服务，包括校对、语法纠正、风格一致性审查以及适当的内容改进建议。', es: 'El Editor acepta proporcionar servicios de edición profesional para la obra especificada, incluyendo corrección de pruebas, corrección gramatical, revisión de consistencia de estilo y sugerencias de mejora de contenido según corresponda.', fr: 'L\'Éditeur s\'engage à fournir des services d\'édition professionnels pour l\'œuvre spécifiée, comprenant la relecture, la correction grammaticale, la vérification de la cohérence stylistique et des suggestions d\'amélioration du contenu selon les besoins.', de: 'Der Lektor verpflichtet sich, professionelle Lektoratsdienstleistungen für das angegebene Werk zu erbringen, einschließlich Korrekturlesen, Grammatikkorrektur, Überprüfung der stilistischen Konsistenz und angemessener Vorschläge zur inhaltlichen Verbesserung.', ko: '편집자는 지정된 작품에 대해 교정, 문법 수정, 문체 일관성 검토 및 적절한 내용 개선 제안을 포함한 전문 편집 서비스를 제공하는 데 동의합니다.', ar: 'يوافق المحرر على تقديم خدمات تحرير مهنية للعمل المحدد، بما في ذلك التدقيق اللغوي وتصحيح القواعد ومراجعة اتساق الأسلوب واقتراحات تحسين المحتوى حسب الاقتضاء.', pt: 'O Editor concorda em fornecer serviços de edição profissional para a obra especificada, incluindo revisão, correção gramatical, revisão de consistência de estilo e sugestões de melhoria de conteúdo conforme apropriado.' }
+                },
+                {
+                    title: { en: '2. Revenue Distribution', ja: '2. 収益配分', zh: '2. 收益分配', es: '2. Distribución de ingresos', fr: '2. Répartition des revenus', de: '2. Umsatzverteilung', ko: '2. 수익 배분', ar: '2. توزيع الإيرادات', pt: '2. Distribuição de receita' },
+                    body: { en: 'Revenue from sales of the edited work shall be distributed as follows: Author+Translator 60%, Editor 10%, Platform 30%. These percentages are fixed by the Publisher platform and are non-negotiable.', ja: '編集された作品の販売による収益は以下のとおり配分されます：著者＋翻訳者 60%、編集者 10%、プラットフォーム 30%。これらの配分率はPublisherプラットフォームにより固定されており、交渉の対象外です。', zh: '编辑作品销售收益的分配如下：作者+翻译者 60%、编辑 10%、平台 30%。这些百分比由Publisher平台固定，不可协商。', es: 'Los ingresos por ventas de la obra editada se distribuirán de la siguiente manera: Autor+Traductor 60%, Editor 10%, Plataforma 30%. Estos porcentajes son fijados por la plataforma Publisher y no son negociables.', fr: 'Les revenus des ventes de l\'œuvre éditée seront répartis comme suit : Auteur+Traducteur 60%, Éditeur 10%, Plateforme 30%. Ces pourcentages sont fixés par la plateforme Publisher et ne sont pas négociables.', de: 'Die Einnahmen aus dem Verkauf des lektorierten Werks werden wie folgt verteilt: Autor+Übersetzer 60%, Lektor 10%, Plattform 30%. Diese Prozentsätze sind von der Publisher-Plattform festgelegt und nicht verhandelbar.', ko: '편집된 작품의 판매 수익은 다음과 같이 배분됩니다: 저자+번역가 60%, 편집자 10%, 플랫폼 30%. 이 비율은 Publisher 플랫폼에 의해 고정되며 협상 대상이 아닙니다.', ar: 'يتم توزيع إيرادات مبيعات العمل المحرر على النحو التالي: المؤلف+المترجم 60%، المحرر 10%، المنصة 30%. هذه النسب ثابتة من قبل منصة Publisher وغير قابلة للتفاوض.', pt: 'A receita das vendas da obra editada será distribuída da seguinte forma: Autor+Tradutor 60%, Editor 10%, Plataforma 30%. Essas porcentagens são fixadas pela plataforma Publisher e não são negociáveis.' }
+                },
+                {
+                    title: { en: '3. Editorial Standards', ja: '3. 編集基準', zh: '3. 编辑标准', es: '3. Estándares editoriales', fr: '3. Normes éditoriales', de: '3. Lektoratsstandards', ko: '3. 편집 기준', ar: '3. المعايير التحريرية', pt: '3. Padrões editoriais' },
+                    body: { en: 'The Editor shall maintain professional editorial standards, preserving the Author\'s voice and creative intent while improving clarity, readability, and overall quality of the work.', ja: '編集者は、著者の表現と創作意図を尊重しつつ、明確さ、読みやすさ、および作品全体の品質を向上させ、専門的な編集基準を維持するものとします。', zh: '编辑应保持专业的编辑标准，在保留作者的声音和创作意图的同时，提高作品的清晰度、可读性和整体质量。', es: 'El Editor mantendrá estándares editoriales profesionales, preservando la voz y la intención creativa del Autor mientras mejora la claridad, legibilidad y calidad general de la obra.', fr: 'L\'Éditeur maintiendra des normes éditoriales professionnelles, préservant la voix et l\'intention créative de l\'Auteur tout en améliorant la clarté, la lisibilité et la qualité globale de l\'œuvre.', de: 'Der Lektor wahrt professionelle Lektoratsstandards und bewahrt die Stimme und kreative Absicht des Autors, während Klarheit, Lesbarkeit und Gesamtqualität des Werks verbessert werden.', ko: '편집자는 저자의 목소리와 창작 의도를 보존하면서 작품의 명확성, 가독성 및 전반적인 품질을 향상시키고, 전문적인 편집 기준을 유지해야 합니다.', ar: 'يحافظ المحرر على معايير تحريرية مهنية، مع الحفاظ على صوت المؤلف ونيته الإبداعية مع تحسين الوضوح وسهولة القراءة والجودة العامة للعمل.', pt: 'O Editor deverá manter padrões editoriais profissionais, preservando a voz e a intenção criativa do Autor enquanto melhora a clareza, legibilidade e qualidade geral da obra.' }
+                },
+                {
+                    title: { en: '4. Timeline and Deadlines', ja: '4. スケジュールと期限', zh: '4. 时间表与截止日期', es: '4. Plazos y fechas límite', fr: '4. Calendrier et délais', de: '4. Zeitplan und Fristen', ko: '4. 일정 및 마감일', ar: '4. الجدول الزمني والمواعيد النهائية', pt: '4. Cronograma e prazos' },
+                    body: { en: 'The Editor shall complete the editing work by the deadline specified in this agreement. If no deadline is specified, both parties shall negotiate a reasonable timeline. Extensions may be granted by mutual written consent.', ja: '編集者は、本同意書で指定された期限までに編集作業を完了するものとします。期限が指定されていない場合、両当事者は合理的なスケジュールを協議するものとします。延長は双方の書面による合意により認められる場合があります。', zh: '编辑应在本协议规定的截止日期前完成编辑工作。如未指定截止日期，双方应协商合理的时间表。经双方书面同意，可批准延期。', es: 'El Editor completará el trabajo de edición antes de la fecha límite especificada en este acuerdo. Si no se especifica una fecha límite, ambas partes negociarán un plazo razonable. Las extensiones pueden concederse por consentimiento mutuo por escrito.', fr: 'L\'Éditeur doit achever le travail d\'édition avant la date limite spécifiée dans le présent accord. Si aucune date limite n\'est spécifiée, les deux parties négocieront un calendrier raisonnable. Des prolongations peuvent être accordées par consentement écrit mutuel.', de: 'Der Lektor hat die Lektoratsarbeit bis zu der in dieser Vereinbarung festgelegten Frist fertigzustellen. Ist keine Frist festgelegt, verhandeln beide Parteien einen angemessenen Zeitplan. Verlängerungen können durch gegenseitige schriftliche Zustimmung gewährt werden.', ko: '편집자는 본 동의서에 명시된 마감일까지 편집 작업을 완료해야 합니다. 마감일이 지정되지 않은 경우, 양 당사자는 합리적인 일정을 협의해야 합니다. 연장은 양 당사자의 서면 합의에 의해 허가될 수 있습니다.', ar: 'يجب على المحرر إكمال أعمال التحرير بحلول الموعد النهائي المحدد في هذه الاتفاقية. إذا لم يتم تحديد موعد نهائي، يتفاوض الطرفان على جدول زمني معقول. يجوز منح تمديدات بموافقة خطية متبادلة.', pt: 'O Editor deverá concluir o trabalho de edição até o prazo especificado neste acordo. Se nenhum prazo for especificado, ambas as partes negociarão um cronograma razoável. Extensões podem ser concedidas por consentimento mútuo por escrito.' }
+                },
+                {
+                    title: { en: '5. Copyright Ownership', ja: '5. 著作権の帰属', zh: '5. 版权归属', es: '5. Propiedad de los derechos de autor', fr: '5. Propriété des droits d\'auteur', de: '5. Urheberrecht', ko: '5. 저작권 소유', ar: '5. ملكية حقوق النشر', pt: '5. Propriedade dos direitos autorais' },
+                    body: { en: 'Copyright of the work remains entirely with the Author. The Editor\'s contributions are considered work performed within the revenue-sharing framework established by this agreement.', ja: '作品の著作権は完全に著者に帰属します。編集者の貢献は、本同意書で定められた収益配分の枠組み内で行われた作業とみなされます。', zh: '作品的版权完全归作者所有。编辑的贡献被视为在本协议确立的收益分配框架内完成的工作。', es: 'Los derechos de autor de la obra permanecen íntegramente con el Autor. Las contribuciones del Editor se consideran trabajo realizado dentro del marco de reparto de ingresos establecido por este acuerdo.', fr: 'Les droits d\'auteur de l\'œuvre restent entièrement à l\'Auteur. Les contributions de l\'Éditeur sont considérées comme un travail effectué dans le cadre du partage des revenus établi par le présent accord.', de: 'Das Urheberrecht am Werk verbleibt vollständig beim Autor. Die Beiträge des Lektors gelten als im Rahmen der durch diese Vereinbarung festgelegten Umsatzbeteiligung erbrachte Arbeit.', ko: '작품의 저작권은 전적으로 저자에게 귀속됩니다. 편집자의 기여는 본 동의서에서 정한 수익 배분 체계 내에서 수행된 작업으로 간주됩니다.', ar: 'تبقى حقوق النشر للعمل بالكامل للمؤلف. تعتبر مساهمات المحرر عملاً تم تنفيذه ضمن إطار تقاسم الإيرادات المنصوص عليه في هذه الاتفاقية.', pt: 'Os direitos autorais da obra permanecem inteiramente com o Autor. As contribuições do Editor são consideradas trabalho realizado dentro da estrutura de compartilhamento de receita estabelecida por este acordo.' }
+                },
+                {
+                    title: { en: '6. Dispute Resolution', ja: '6. 紛争解決', zh: '6. 争议解决', es: '6. Resolución de disputas', fr: '6. Résolution des litiges', de: '6. Streitbeilegung', ko: '6. 분쟁 해결', ar: '6. حل النزاعات', pt: '6. Resolução de disputas' },
+                    body: { en: 'Any disputes arising from this agreement shall first be addressed through direct communication between the parties. If unresolved, disputes may be escalated to the Publisher platform for mediation. Both parties agree to act in good faith.', ja: '本同意書に起因する紛争は、まず当事者間の直接の話し合いにより解決を図るものとします。解決に至らない場合、紛争はPublisherプラットフォームの仲裁に委ねることができます。両当事者は誠実に行動することに同意します。', zh: '因本协议引起的任何争议应首先通过当事方之间的直接沟通解决。如未能解决，争议可提交Publisher平台进行调解。双方同意本着善意行事。', es: 'Cualquier disputa derivada de este acuerdo se abordará primero mediante comunicación directa entre las partes. Si no se resuelve, las disputas pueden escalarse a la plataforma Publisher para mediación. Ambas partes acuerdan actuar de buena fe.', fr: 'Tout litige découlant du présent accord sera d\'abord traité par communication directe entre les parties. En cas de non-résolution, les litiges peuvent être soumis à la plateforme Publisher pour médiation. Les deux parties s\'engagent à agir de bonne foi.', de: 'Streitigkeiten aus dieser Vereinbarung werden zunächst durch direkte Kommunikation zwischen den Parteien behandelt. Bei Nichteinigung können Streitigkeiten an die Publisher-Plattform zur Mediation weitergeleitet werden. Beide Parteien verpflichten sich, nach Treu und Glauben zu handeln.', ko: '본 동의서로 인해 발생하는 분쟁은 먼저 당사자 간의 직접 소통을 통해 해결합니다. 해결되지 않을 경우, Publisher 플랫폼에 중재를 요청할 수 있습니다. 양 당사자는 성실하게 행동할 것에 동의합니다.', ar: 'يتم معالجة أي نزاعات ناشئة عن هذه الاتفاقية أولاً من خلال التواصل المباشر بين الأطراف. في حالة عدم الحل، يجوز تصعيد النزاعات إلى منصة Publisher للوساطة. يوافق كلا الطرفين على التصرف بحسن نية.', pt: 'Quaisquer disputas decorrentes deste acordo serão primeiramente tratadas por comunicação direta entre as partes. Se não resolvidas, as disputas podem ser encaminhadas à plataforma Publisher para mediação. Ambas as partes concordam em agir de boa-fé.' }
+                },
+                {
+                    title: { en: '7. Termination', ja: '7. 契約の終了', zh: '7. 终止', es: '7. Terminación', fr: '7. Résiliation', de: '7. Kündigung', ko: '7. 계약 해지', ar: '7. الإنهاء', pt: '7. Rescisão' },
+                    body: { en: 'Either party may terminate this agreement with 30 days written notice. Upon termination, any editing work already incorporated into published versions shall remain, and the revenue distribution terms shall continue to apply.', ja: 'いずれの当事者も、30日前の書面による通知をもって本同意書を終了することができます。終了時点で既に出版版に組み込まれた編集作業はそのまま残り、収益配分条件は引き続き適用されるものとします。', zh: '任何一方均可提前30天书面通知终止本协议。终止后，已纳入已出版版本的编辑工作应予以保留，收益分配条款应继续适用。', es: 'Cualquier parte puede terminar este acuerdo con 30 días de aviso por escrito. Tras la terminación, cualquier trabajo de edición ya incorporado en versiones publicadas permanecerá, y los términos de distribución de ingresos continuarán aplicándose.', fr: 'L\'une ou l\'autre des parties peut résilier le présent accord moyennant un préavis écrit de 30 jours. À la résiliation, tout travail d\'édition déjà incorporé dans les versions publiées sera maintenu, et les conditions de répartition des revenus continueront de s\'appliquer.', de: 'Jede Partei kann diese Vereinbarung mit einer schriftlichen Kündigungsfrist von 30 Tagen kündigen. Nach der Kündigung bleiben bereits in veröffentlichte Versionen eingearbeitete Lektoratsarbeiten bestehen, und die Umsatzverteilungsbedingungen gelten weiterhin.', ko: '어느 당사자든 30일 전 서면 통지로 본 동의서를 해지할 수 있습니다. 해지 시, 이미 출판된 버전에 반영된 편집 작업은 유지되며, 수익 배분 조건은 계속 적용됩니다.', ar: 'يجوز لأي من الطرفين إنهاء هذه الاتفاقية بإشعار خطي قبل 30 يومًا. عند الإنهاء، يظل أي عمل تحريري مدمج بالفعل في الإصدارات المنشورة قائمًا، وتستمر شروط توزيع الإيرادات في التطبيق.', pt: 'Qualquer parte pode rescindir este acordo com 30 dias de aviso prévio por escrito. Após a rescisão, qualquer trabalho de edição já incorporado nas versões publicadas permanecerá, e os termos de distribuição de receita continuarão a ser aplicados.' }
+                }
+            ],
+            collaboration: [
+                {
+                    title: { en: '1. Roles and Responsibilities', ja: '1. 役割と責任', zh: '1. 角色与职责', es: '1. Roles y responsabilidades', fr: '1. Rôles et responsabilités', de: '1. Rollen und Verantwortlichkeiten', ko: '1. 역할 및 책임', ar: '1. الأدوار والمسؤوليات', pt: '1. Papéis e responsabilidades' },
+                    body: { en: 'This agreement defines the roles of all three parties: the Author (original content creator), the Translator (language adaptation specialist), and the Editor (quality assurance and refinement). Each party commits to fulfilling their designated role professionally.', ja: '本同意書は、三者の役割を定義します：著者（オリジナルコンテンツの作成者）、翻訳者（言語適応の専門家）、および編集者（品質保証と精緻化）。各当事者は、指定された役割を専門的に遂行することを約束します。', zh: '本协议定义了三方的角色：作者（原始内容创作者）、翻译者（语言适配专家）和编辑（质量保证与完善）。各方承诺以专业方式履行其指定角色。', es: 'Este acuerdo define los roles de las tres partes: el Autor (creador del contenido original), el Traductor (especialista en adaptación lingüística) y el Editor (aseguramiento de calidad y refinamiento). Cada parte se compromete a cumplir su rol designado de manera profesional.', fr: 'Le présent accord définit les rôles des trois parties : l\'Auteur (créateur du contenu original), le Traducteur (spécialiste de l\'adaptation linguistique) et l\'Éditeur (assurance qualité et perfectionnement). Chaque partie s\'engage à remplir son rôle désigné de manière professionnelle.', de: 'Diese Vereinbarung definiert die Rollen aller drei Parteien: den Autor (Ersteller des Originalinhalts), den Übersetzer (Spezialist für Sprachanpassung) und den Lektor (Qualitätssicherung und Verfeinerung). Jede Partei verpflichtet sich, ihre zugewiesene Rolle professionell zu erfüllen.', ko: '본 동의서는 세 당사자의 역할을 정의합니다: 저자(원본 콘텐츠 작성자), 번역가(언어 적응 전문가), 편집자(품질 보증 및 정제). 각 당사자는 지정된 역할을 전문적으로 수행할 것을 약속합니다.', ar: 'تحدد هذه الاتفاقية أدوار الأطراف الثلاثة: المؤلف (منشئ المحتوى الأصلي)، والمترجم (متخصص التكييف اللغوي)، والمحرر (ضمان الجودة والتنقيح). يلتزم كل طرف بأداء دوره المحدد بشكل مهني.', pt: 'Este acordo define os papéis das três partes: o Autor (criador do conteúdo original), o Tradutor (especialista em adaptação linguística) e o Editor (garantia de qualidade e refinamento). Cada parte se compromete a cumprir seu papel designado de forma profissional.' }
+                },
+                {
+                    title: { en: '2. Revenue Distribution', ja: '2. 収益配分', zh: '2. 收益分配', es: '2. Distribución de ingresos', fr: '2. Répartition des revenus', de: '2. Umsatzverteilung', ko: '2. 수익 배분', ar: '2. توزيع الإيرادات', pt: '2. Distribuição de receita' },
+                    body: { en: 'Revenue from sales shall be distributed as follows: Author 40%, Translator 20%, Editor 10%, Platform 30%. These percentages are fixed by the Publisher platform and are non-negotiable.', ja: '販売による収益は以下のとおり配分されます：著者 40%、翻訳者 20%、編集者 10%、プラットフォーム 30%。これらの配分率はPublisherプラットフォームにより固定されており、交渉の対象外です。', zh: '销售收益的分配如下：作者 40%、翻译者 20%、编辑 10%、平台 30%。这些百分比由Publisher平台固定，不可协商。', es: 'Los ingresos por ventas se distribuirán de la siguiente manera: Autor 40%, Traductor 20%, Editor 10%, Plataforma 30%. Estos porcentajes son fijados por la plataforma Publisher y no son negociables.', fr: 'Les revenus des ventes seront répartis comme suit : Auteur 40%, Traducteur 20%, Éditeur 10%, Plateforme 30%. Ces pourcentages sont fixés par la plateforme Publisher et ne sont pas négociables.', de: 'Die Verkaufseinnahmen werden wie folgt verteilt: Autor 40%, Übersetzer 20%, Lektor 10%, Plattform 30%. Diese Prozentsätze sind von der Publisher-Plattform festgelegt und nicht verhandelbar.', ko: '판매 수익은 다음과 같이 배분됩니다: 저자 40%, 번역가 20%, 편집자 10%, 플랫폼 30%. 이 비율은 Publisher 플랫폼에 의해 고정되며 협상 대상이 아닙니다.', ar: 'يتم توزيع إيرادات المبيعات على النحو التالي: المؤلف 40%، المترجم 20%، المحرر 10%، المنصة 30%. هذه النسب ثابتة من قبل منصة Publisher وغير قابلة للتفاوض.', pt: 'A receita das vendas será distribuída da seguinte forma: Autor 40%, Tradutor 20%, Editor 10%, Plataforma 30%. Essas porcentagens são fixadas pela plataforma Publisher e não são negociáveis.' }
+                },
+                {
+                    title: { en: '3. Workflow and Communication', ja: '3. ワークフローとコミュニケーション', zh: '3. 工作流程与沟通', es: '3. Flujo de trabajo y comunicación', fr: '3. Flux de travail et communication', de: '3. Arbeitsablauf und Kommunikation', ko: '3. 워크플로 및 커뮤니케이션', ar: '3. سير العمل والتواصل', pt: '3. Fluxo de trabalho e comunicação' },
+                    body: { en: 'The Author provides the original work, the Translator produces the translation, and the Editor reviews and refines the final output. All parties shall maintain open and timely communication throughout the collaboration process.', ja: '著者が原作を提供し、翻訳者が翻訳を作成し、編集者が最終成果物を確認・精緻化します。全当事者は、共同制作プロセスを通じてオープンかつ適時のコミュニケーションを維持するものとします。', zh: '作者提供原作，翻译者进行翻译，编辑审查和完善最终成果。各方应在整个合作过程中保持公开及时的沟通。', es: 'El Autor proporciona la obra original, el Traductor produce la traducción y el Editor revisa y perfecciona el resultado final. Todas las partes mantendrán una comunicación abierta y oportuna durante todo el proceso de colaboración.', fr: 'L\'Auteur fournit l\'œuvre originale, le Traducteur produit la traduction et l\'Éditeur examine et perfectionne le résultat final. Toutes les parties maintiendront une communication ouverte et en temps opportun tout au long du processus de collaboration.', de: 'Der Autor stellt das Originalwerk bereit, der Übersetzer erstellt die Übersetzung und der Lektor überprüft und verfeinert das Endergebnis. Alle Parteien pflegen während des gesamten Zusammenarbeitsprozesses eine offene und zeitnahe Kommunikation.', ko: '저자가 원작을 제공하고, 번역가가 번역을 수행하며, 편집자가 최종 결과물을 검토하고 정제합니다. 모든 당사자는 협업 과정 전반에 걸쳐 공개적이고 시기적절한 소통을 유지해야 합니다.', ar: 'يقدم المؤلف العمل الأصلي، وينتج المترجم الترجمة، ويراجع المحرر المخرجات النهائية ويحسنها. يحافظ جميع الأطراف على تواصل مفتوح وفي الوقت المناسب طوال عملية التعاون.', pt: 'O Autor fornece a obra original, o Tradutor produz a tradução e o Editor revisa e refina o resultado final. Todas as partes deverão manter comunicação aberta e oportuna durante todo o processo de colaboração.' }
+                },
+                {
+                    title: { en: '4. Quality Standards', ja: '4. 品質基準', zh: '4. 质量标准', es: '4. Estándares de calidad', fr: '4. Normes de qualité', de: '4. Qualitätsstandards', ko: '4. 품질 기준', ar: '4. معايير الجودة', pt: '4. Padrões de qualidade' },
+                    body: { en: 'All parties commit to maintaining professional standards in their respective roles. The Author provides complete and final content, the Translator delivers accurate and culturally appropriate translations, and the Editor ensures overall quality and consistency.', ja: 'すべての当事者は、それぞれの役割において専門的な基準を維持することを約束します。著者は完全かつ最終的なコンテンツを提供し、翻訳者は正確で文化的に適切な翻訳を納品し、編集者は全体の品質と一貫性を確保します。', zh: '各方承诺在各自角色中保持专业标准。作者提供完整的最终内容，翻译者提供准确且符合文化背景的翻译，编辑确保整体质量和一致性。', es: 'Todas las partes se comprometen a mantener estándares profesionales en sus respectivos roles. El Autor proporciona contenido completo y final, el Traductor entrega traducciones precisas y culturalmente apropiadas, y el Editor asegura la calidad y consistencia general.', fr: 'Toutes les parties s\'engagent à maintenir des normes professionnelles dans leurs rôles respectifs. L\'Auteur fournit un contenu complet et définitif, le Traducteur livre des traductions précises et culturellement appropriées, et l\'Éditeur assure la qualité et la cohérence globales.', de: 'Alle Parteien verpflichten sich, in ihren jeweiligen Rollen professionelle Standards einzuhalten. Der Autor liefert vollständige und endgültige Inhalte, der Übersetzer liefert genaue und kulturell angemessene Übersetzungen, und der Lektor gewährleistet die Gesamtqualität und Konsistenz.', ko: '모든 당사자는 각자의 역할에서 전문적인 기준을 유지할 것을 약속합니다. 저자는 완전하고 최종적인 콘텐츠를 제공하고, 번역가는 정확하고 문화적으로 적절한 번역을 제공하며, 편집자는 전반적인 품질과 일관성을 보장합니다.', ar: 'يلتزم جميع الأطراف بالحفاظ على المعايير المهنية في أدوارهم المعنية. يقدم المؤلف محتوى كاملاً ونهائيًا، ويقدم المترجم ترجمات دقيقة ومناسبة ثقافيًا، ويضمن المحرر الجودة والاتساق العام.', pt: 'Todas as partes se comprometem a manter padrões profissionais em seus respectivos papéis. O Autor fornece conteúdo completo e final, o Tradutor entrega traduções precisas e culturalmente apropriadas, e o Editor assegura a qualidade e consistência geral.' }
+                },
+                {
+                    title: { en: '5. Timeline and Deadlines', ja: '5. スケジュールと期限', zh: '5. 时间表与截止日期', es: '5. Plazos y fechas límite', fr: '5. Calendrier et délais', de: '5. Zeitplan und Fristen', ko: '5. 일정 및 마감일', ar: '5. الجدول الزمني والمواعيد النهائية', pt: '5. Cronograma e prazos' },
+                    body: { en: 'The collaboration follows a sequential workflow with agreed timelines for each phase. Each party shall complete their work within the specified deadline. Extensions may be granted by mutual consent of all parties.', ja: '共同制作は、各段階の合意されたスケジュールに従い、順次ワークフローで進行します。各当事者は、指定された期限内に作業を完了するものとします。延長は全当事者の合意により認められる場合があります。', zh: '合作按照顺序工作流程进行，各阶段有商定的时间表。各方应在规定的截止日期内完成工作。经全体当事方同意，可批准延期。', es: 'La colaboración sigue un flujo de trabajo secuencial con plazos acordados para cada fase. Cada parte completará su trabajo dentro del plazo especificado. Las extensiones pueden concederse por consentimiento mutuo de todas las partes.', fr: 'La collaboration suit un flux de travail séquentiel avec des délais convenus pour chaque phase. Chaque partie doit achever son travail dans le délai spécifié. Des prolongations peuvent être accordées par consentement mutuel de toutes les parties.', de: 'Die Zusammenarbeit folgt einem sequenziellen Arbeitsablauf mit vereinbarten Zeitplänen für jede Phase. Jede Partei hat ihre Arbeit innerhalb der festgelegten Frist fertigzustellen. Verlängerungen können durch gegenseitige Zustimmung aller Parteien gewährt werden.', ko: '협업은 각 단계에 대한 합의된 일정에 따라 순차적 워크플로로 진행됩니다. 각 당사자는 지정된 마감일 내에 작업을 완료해야 합니다. 연장은 모든 당사자의 합의에 의해 허가될 수 있습니다.', ar: 'يتبع التعاون سير عمل متسلسل بجداول زمنية متفق عليها لكل مرحلة. يجب على كل طرف إكمال عمله ضمن الموعد النهائي المحدد. يجوز منح تمديدات بموافقة متبادلة من جميع الأطراف.', pt: 'A colaboração segue um fluxo de trabalho sequencial com cronogramas acordados para cada fase. Cada parte deverá concluir seu trabalho dentro do prazo especificado. Extensões podem ser concedidas por consentimento mútuo de todas as partes.' }
+                },
+                {
+                    title: { en: '6. Copyright Ownership', ja: '6. 著作権の帰属', zh: '6. 版权归属', es: '6. Propiedad de los derechos de autor', fr: '6. Propriété des droits d\'auteur', de: '6. Urheberrecht', ko: '6. 저작권 소유', ar: '6. ملكية حقوق النشر', pt: '6. Propriedade dos direitos autorais' },
+                    body: { en: 'The Author holds copyright over the original work. The Translator holds copyright over the translated text. The Editor\'s contributions are considered work performed within the revenue-sharing framework. All parties grant the Publisher platform a distribution license.', ja: '著者は原作の著作権を保有します。翻訳者は翻訳されたテキストの著作権を保有します。編集者の貢献は、収益配分の枠組み内で行われた作業とみなされます。全当事者はPublisherプラットフォームに配布ライセンスを付与します。', zh: '作者拥有原作的版权。翻译者拥有翻译文本的版权。编辑的贡献被视为在收益分配框架内完成的工作。各方授予Publisher平台发行许可。', es: 'El Autor posee los derechos de autor sobre la obra original. El Traductor posee los derechos de autor sobre el texto traducido. Las contribuciones del Editor se consideran trabajo realizado dentro del marco de reparto de ingresos. Todas las partes otorgan a la plataforma Publisher una licencia de distribución.', fr: 'L\'Auteur détient les droits d\'auteur sur l\'œuvre originale. Le Traducteur détient les droits d\'auteur sur le texte traduit. Les contributions de l\'Éditeur sont considérées comme un travail effectué dans le cadre du partage des revenus. Toutes les parties accordent à la plateforme Publisher une licence de distribution.', de: 'Der Autor hält das Urheberrecht am Originalwerk. Der Übersetzer hält das Urheberrecht am übersetzten Text. Die Beiträge des Lektors gelten als im Rahmen der Umsatzbeteiligung erbrachte Arbeit. Alle Parteien räumen der Publisher-Plattform eine Vertriebslizenz ein.', ko: '저자는 원작에 대한 저작권을 보유합니다. 번역가는 번역된 텍스트에 대한 저작권을 보유합니다. 편집자의 기여는 수익 배분 체계 내에서 수행된 작업으로 간주됩니다. 모든 당사자는 Publisher 플랫폼에 배포 라이선스를 부여합니다.', ar: 'يحتفظ المؤلف بحقوق النشر على العمل الأصلي. يحتفظ المترجم بحقوق النشر على النص المترجم. تعتبر مساهمات المحرر عملاً تم تنفيذه ضمن إطار تقاسم الإيرادات. يمنح جميع الأطراف منصة Publisher ترخيص توزيع.', pt: 'O Autor detém os direitos autorais sobre a obra original. O Tradutor detém os direitos autorais sobre o texto traduzido. As contribuições do Editor são consideradas trabalho realizado dentro da estrutura de compartilhamento de receita. Todas as partes concedem à plataforma Publisher uma licença de distribuição.' }
+                },
+                {
+                    title: { en: '7. Dispute Resolution', ja: '7. 紛争解決', zh: '7. 争议解决', es: '7. Resolución de disputas', fr: '7. Résolution des litiges', de: '7. Streitbeilegung', ko: '7. 분쟁 해결', ar: '7. حل النزاعات', pt: '7. Resolução de disputas' },
+                    body: { en: 'Any disputes shall first be addressed through direct communication among all parties. If unresolved, disputes may be escalated to the Publisher platform for mediation. All parties agree to act in good faith and seek amicable resolution.', ja: '紛争はまず全当事者間の直接の話し合いにより解決を図るものとします。解決に至らない場合、紛争はPublisherプラットフォームの仲裁に委ねることができます。全当事者は誠実に行動し、円満な解決を目指すことに同意します。', zh: '任何争议应首先通过全体当事方之间的直接沟通解决。如未能解决，争议可提交Publisher平台进行调解。各方同意本着善意行事并寻求友好解决。', es: 'Cualquier disputa se abordará primero mediante comunicación directa entre todas las partes. Si no se resuelve, las disputas pueden escalarse a la plataforma Publisher para mediación. Todas las partes acuerdan actuar de buena fe y buscar una resolución amistosa.', fr: 'Tout litige sera d\'abord traité par communication directe entre toutes les parties. En cas de non-résolution, les litiges peuvent être soumis à la plateforme Publisher pour médiation. Toutes les parties s\'engagent à agir de bonne foi et à rechercher une résolution amiable.', de: 'Streitigkeiten werden zunächst durch direkte Kommunikation zwischen allen Parteien behandelt. Bei Nichteinigung können Streitigkeiten an die Publisher-Plattform zur Mediation weitergeleitet werden. Alle Parteien verpflichten sich, nach Treu und Glauben zu handeln und eine gütliche Einigung anzustreben.', ko: '분쟁은 먼저 모든 당사자 간의 직접 소통을 통해 해결합니다. 해결되지 않을 경우, Publisher 플랫폼에 중재를 요청할 수 있습니다. 모든 당사자는 성실하게 행동하고 원만한 해결을 추구할 것에 동의합니다.', ar: 'يتم معالجة أي نزاعات أولاً من خلال التواصل المباشر بين جميع الأطراف. في حالة عدم الحل، يجوز تصعيد النزاعات إلى منصة Publisher للوساطة. يوافق جميع الأطراف على التصرف بحسن نية والسعي إلى حل ودي.', pt: 'Quaisquer disputas serão primeiramente tratadas por comunicação direta entre todas as partes. Se não resolvidas, as disputas podem ser encaminhadas à plataforma Publisher para mediação. Todas as partes concordam em agir de boa-fé e buscar resolução amigável.' }
+                },
+                {
+                    title: { en: '8. Termination', ja: '8. 契約の終了', zh: '8. 终止', es: '8. Terminación', fr: '8. Résiliation', de: '8. Kündigung', ko: '8. 계약 해지', ar: '8. الإنهاء', pt: '8. Rescisão' },
+                    body: { en: 'Any party may terminate their participation with 30 days written notice to all other parties. Completed and published work shall continue under the existing revenue distribution terms. The remaining parties may continue the collaboration independently.', ja: 'いずれの当事者も、他のすべての当事者への30日前の書面による通知をもって参加を終了することができます。完了し出版された作品は、既存の収益配分条件に基づき継続されるものとします。残りの当事者は独立して共同制作を継続することができます。', zh: '任何一方均可提前30天书面通知所有其他当事方终止参与。已完成并出版的作品应继续按照现有收益分配条款执行。其余当事方可独立继续合作。', es: 'Cualquier parte puede terminar su participación con 30 días de aviso por escrito a todas las demás partes. Las obras completadas y publicadas continuarán bajo los términos de distribución de ingresos existentes. Las partes restantes pueden continuar la colaboración de forma independiente.', fr: 'Toute partie peut mettre fin à sa participation moyennant un préavis écrit de 30 jours à toutes les autres parties. Les œuvres achevées et publiées continueront selon les conditions de répartition des revenus existantes. Les parties restantes peuvent poursuivre la collaboration de manière indépendante.', de: 'Jede Partei kann ihre Teilnahme mit einer schriftlichen Kündigungsfrist von 30 Tagen an alle anderen Parteien beenden. Fertiggestellte und veröffentlichte Werke bestehen unter den bestehenden Umsatzverteilungsbedingungen fort. Die verbleibenden Parteien können die Zusammenarbeit unabhängig fortsetzen.', ko: '어느 당사자든 모든 다른 당사자에게 30일 전 서면 통지로 참여를 종료할 수 있습니다. 완료되어 출판된 작품은 기존 수익 배분 조건에 따라 계속됩니다. 나머지 당사자는 독립적으로 협업을 계속할 수 있습니다.', ar: 'يجوز لأي طرف إنهاء مشاركته بإشعار خطي قبل 30 يومًا لجميع الأطراف الأخرى. يستمر العمل المكتمل والمنشور وفقًا لشروط توزيع الإيرادات الحالية. يجوز للأطراف المتبقية مواصلة التعاون بشكل مستقل.', pt: 'Qualquer parte pode encerrar sua participação com 30 dias de aviso prévio por escrito a todas as outras partes. Obras concluídas e publicadas continuarão sob os termos de distribuição de receita existentes. As partes restantes podem continuar a colaboração de forma independente.' }
+                }
+            ]
+        };
+function escapeHtml(text) { const d = document.createElement('div'); d.textContent = text; return d.innerHTML; }
+
+        function selectAgreementType(type) {
+            selectedType = type;
+            document.querySelectorAll('.agreement-type-card').forEach(c => c.classList.remove('selected'));
+            document.getElementById('card' + type.charAt(0).toUpperCase() + type.slice(1)).classList.add('selected');
+            document.getElementById('agreementFormSection').style.display = 'block';
+            updateFormForType(type);
+            document.getElementById('inputDate').value = new Date().toLocaleDateString(getCurrentLang() === 'ja' ? 'ja-JP' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('agreementFormSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function closeForm() {
+            selectedType = null;
+            document.getElementById('agreementFormSection').style.display = 'none';
+            document.querySelectorAll('.agreement-type-card').forEach(c => c.classList.remove('selected'));
+        }
+
+        function updateFormForType(type) {
+            const titleKey = { translation: 'formTitleTranslation', editing: 'formTitleEditing', collaboration: 'formTitleCollaboration' };
+            document.getElementById('formTitle').innerHTML = `<i class="fas fa-file-signature me-2" style="color: var(--color-accent);"></i>${getL(uiText[titleKey[type]])}`;
+
+            // Show/hide fields
+            document.getElementById('translatorFields').style.display = (type === 'translation' || type === 'collaboration') ? '' : 'none';
+            document.getElementById('editorFields').style.display = (type === 'editing' || type === 'collaboration') ? '' : 'none';
+            document.getElementById('langGroup').style.display = (type === 'translation' || type === 'collaboration') ? '' : 'none';
+
+            // Required attributes
+            document.getElementById('inputTranslatorName').required = (type === 'translation' || type === 'collaboration');
+            document.getElementById('inputTranslatorEmail').required = (type === 'translation' || type === 'collaboration');
+            document.getElementById('inputEditorName').required = (type === 'editing' || type === 'collaboration');
+            document.getElementById('inputEditorEmail').required = (type === 'editing' || type === 'collaboration');
+
+            // Consent checkboxes
+            document.getElementById('consentTranslatorGroup').style.display = (type === 'translation' || type === 'collaboration') ? '' : 'none';
+            document.getElementById('consentEditorGroup').style.display = (type === 'editing' || type === 'collaboration') ? '' : 'none';
+            document.getElementById('consentTranslator').required = (type === 'translation' || type === 'collaboration');
+            document.getElementById('consentEditor').required = (type === 'editing' || type === 'collaboration');
+
+            populateRevenueDisplay(type);
+            populateTerms(type);
+        }
+
+        function populateRevenueDisplay(type) {
+            const items = [];
+            if (type === 'translation') {
+                items.push({ pct: 50, role: getL(uiText.roleAuthorEditor), cls: 'color: var(--color-accent)' });
+                items.push({ pct: 20, role: getL(uiText.roleTranslator), cls: 'color: var(--color-success)' });
+            } else if (type === 'editing') {
+                items.push({ pct: 60, role: getL(uiText.roleAuthorTranslator), cls: 'color: var(--color-accent)' });
+                items.push({ pct: 10, role: getL(uiText.roleEditor), cls: 'color: var(--color-info)' });
+            } else {
+                items.push({ pct: 40, role: getL(uiText.roleAuthor), cls: 'color: var(--color-accent)' });
+                items.push({ pct: 20, role: getL(uiText.roleTranslator), cls: 'color: var(--color-success)' });
+                items.push({ pct: 10, role: getL(uiText.roleEditor), cls: 'color: var(--color-info)' });
+            }
+            items.push({ pct: 30, role: getL(uiText.rolePlatform), cls: 'color: var(--color-warning)' });
+
+            document.getElementById('revenueDisplay').innerHTML = items.map(i =>
+                `<div class="revenue-item"><div class="percentage" style="${i.cls}">${i.pct}%</div><div class="role-label">${i.role}</div></div>`
+            ).join('');
+        }
+
+        function populateTerms(type) {
+            const terms = termsContent[type] || [];
+            document.getElementById('termsBox').innerHTML = terms.map(t =>
+                `<h6>${escapeHtml(getL(t.title))}</h6><p>${escapeHtml(getL(t.body))}</p>`
+            ).join('');
+        }
+
+        function handleSubmit(e) {
+            e.preventDefault();
+            const agreement = generateAgreement();
+            saveAgreement(agreement);
+            closeForm();
+            e.target.reset();
+            loadAgreementHistory();
+            alert(getL(uiText.successMessage));
+        }
+
+        function generateAgreement() {
+            const now = new Date().toISOString();
+            const agr = {
+                id: 'AGR-' + Date.now(),
+                type: selectedType,
+                workTitle: document.getElementById('inputWorkTitle').value,
+                deadline: document.getElementById('inputDeadline').value || null,
+                targetLanguage: (selectedType !== 'editing') ? document.getElementById('inputTargetLang').value : null,
+                parties: {
+                    author: { name: document.getElementById('inputAuthorName').value, email: document.getElementById('inputAuthorEmail').value, revenuePercent: selectedType === 'editing' ? 60 : selectedType === 'translation' ? 50 : 40, consentTimestamp: now }
+                },
+                revenue: { author: selectedType === 'editing' ? 60 : selectedType === 'translation' ? 50 : 40, platform: 30 },
+                status: 'active',
+                createdAt: now
+            };
+            if (selectedType === 'translation' || selectedType === 'collaboration') {
+                agr.parties.translator = { name: document.getElementById('inputTranslatorName').value, email: document.getElementById('inputTranslatorEmail').value, revenuePercent: 20, consentTimestamp: now };
+                agr.revenue.translator = 20;
+            }
+            if (selectedType === 'editing' || selectedType === 'collaboration') {
+                agr.parties.editor = { name: document.getElementById('inputEditorName').value, email: document.getElementById('inputEditorEmail').value, revenuePercent: 10, consentTimestamp: now };
+                agr.revenue.editor = 10;
+            }
+            return agr;
+        }
+
+        function saveAgreement(agr) {
+            const list = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            list.unshift(agr);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+        }
+
+        function loadAgreementHistory() {
+            const list = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const container = document.getElementById('historyList');
+            const noHistory = document.getElementById('noHistory');
+
+            if (list.length === 0) {
+                container.innerHTML = '';
+                noHistory.style.display = 'block';
+                return;
+            }
+            noHistory.style.display = 'none';
+            const typeLabels = { translation: getL(uiText.typeTranslationTitle), editing: getL(uiText.typeEditingTitle), collaboration: getL(uiText.typeCollabTitle) };
+
+            container.innerHTML = list.map(agr => {
+                const parties = Object.keys(agr.parties).map(k => agr.parties[k].name).join(', ');
+                const date = new Date(agr.createdAt).toLocaleDateString();
+                return `<div class="history-item">
+                    <div class="history-meta">
+                        <span class="history-type-badge">${typeLabels[agr.type] || agr.type}</span>
+                        <strong>${escapeHtml(agr.workTitle)}</strong>
+                        <span class="text-secondary small">${escapeHtml(parties)}</span>
+                        <span class="text-secondary small">${date}</span>
+                        <span class="status-active"><i class="fas fa-check-circle me-1"></i>${getL(uiText.statusActive)}</span>
+                    </div>
+                    <button class="btn btn-soft-custom btn-sm" onclick="viewAgreementDetail('${agr.id}')">${getL(uiText.btnViewDetails)}</button>
+                </div>`;
+            }).join('');
+        }
+
+        function viewAgreementDetail(id) {
+            const list = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const agr = list.find(a => a.id === id);
+            if (!agr) return;
+
+            const typeLabels = { translation: getL(uiText.typeTranslationTitle), editing: getL(uiText.typeEditingTitle), collaboration: getL(uiText.typeCollabTitle) };
+            const langNames = { en: 'English', ja: '日本語', zh: '中文', es: 'Español', fr: 'Français', de: 'Deutsch', ko: '한국어', ar: 'العربية', pt: 'Português' };
+
+            let partiesHtml = '';
+            Object.keys(agr.parties).forEach(role => {
+                const p = agr.parties[role];
+                const roleLabel = getL(uiText['role' + role.charAt(0).toUpperCase() + role.slice(1)]) || role;
+                partiesHtml += `<div class="modal-party-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <strong>${roleLabel}</strong>
+                        <span class="badge-role badge-${role}">${p.revenuePercent}%</span>
+                    </div>
+                    <div class="small text-secondary mt-1">${escapeHtml(p.name)} (${escapeHtml(p.email)})</div>
+                    <div class="small text-secondary">${getL(uiText.sectionConsent)}: ${new Date(p.consentTimestamp).toLocaleString()}</div>
+                </div>`;
+            });
+
+            let revenueHtml = Object.keys(agr.revenue).map(k => {
+                const roleLabel = getL(uiText['role' + k.charAt(0).toUpperCase() + k.slice(1)]) || k;
+                return `<span class="badge-role badge-${k} me-2">${roleLabel}: ${agr.revenue[k]}%</span>`;
+            }).join('');
+
+            document.getElementById('modalBody').innerHTML = `
+                <div class="modal-detail-section">
+                    <h6><i class="fas fa-tag me-1"></i>ID</h6>
+                    <p class="mb-0 small text-secondary">${agr.id}</p>
+                </div>
+                <div class="modal-detail-section">
+                    <h6><i class="fas fa-file-contract me-1"></i>${getL(uiText.typeTranslationTitle).split(' ')[0]}</h6>
+                    <span class="history-type-badge">${typeLabels[agr.type]}</span>
+                </div>
+                <div class="modal-detail-section">
+                    <h6><i class="fas fa-book me-1"></i>${getL(uiText.labelWorkTitle)}</h6>
+                    <p class="mb-0">${escapeHtml(agr.workTitle)}</p>
+                </div>
+                ${agr.targetLanguage ? `<div class="modal-detail-section"><h6><i class="fas fa-globe me-1"></i>${getL(uiText.labelTargetLang)}</h6><p class="mb-0">${langNames[agr.targetLanguage] || agr.targetLanguage}</p></div>` : ''}
+                ${agr.deadline ? `<div class="modal-detail-section"><h6><i class="fas fa-calendar me-1"></i>${getL(uiText.labelDeadline)}</h6><p class="mb-0">${agr.deadline}</p></div>` : ''}
+                <div class="modal-detail-section">
+                    <h6><i class="fas fa-users me-1"></i>${getL(uiText.sectionParties)}</h6>
+                    ${partiesHtml}
+                </div>
+                <div class="modal-detail-section">
+                    <h6><i class="fas fa-chart-pie me-1"></i>${getL(uiText.sectionRevenue)}</h6>
+                    <div>${revenueHtml}</div>
+                </div>
+                <div class="modal-detail-section">
+                    <h6><i class="fas fa-calendar-check me-1"></i>${getL(uiText.labelDate)}</h6>
+                    <p class="mb-0">${new Date(agr.createdAt).toLocaleString()}</p>
+                </div>
+                <div class="modal-detail-section">
+                    <h6><i class="fas fa-check-circle me-1"></i>Status</h6>
+                    <span class="status-active"><i class="fas fa-check-circle me-1"></i>${getL(uiText.statusActive)}</span>
+                </div>
+            `;
+
+            new bootstrap.Modal(document.getElementById('detailModal')).show();
+        }
+
+        function updateAllText() {
+            document.title = getL(uiText.pageTitle) + ' - Publisher';
+            const map = {
+                pageTitle: 'pageTitle', pageSubtitle: 'pageSubtitle', guestTitle: 'guestTitle', guestSubtitle: 'guestSubtitle', guestSignIn: 'guestSignIn',
+                typeTranslationTitle: 'typeTranslationTitle', typeTranslationDesc: 'typeTranslationDesc',
+                typeEditingTitle: 'typeEditingTitle', typeEditingDesc: 'typeEditingDesc',
+                typeCollabTitle: 'typeCollabTitle', typeCollabDesc: 'typeCollabDesc',
+                sectionProject: 'sectionProject', labelWorkTitle: 'labelWorkTitle', labelTargetLang: 'labelTargetLang',
+                optSelectLang: 'optSelectLang', labelDeadline: 'labelDeadline',
+                sectionParties: 'sectionParties', labelAuthorName: 'labelAuthorName', labelAuthorEmail: 'labelAuthorEmail',
+                labelTranslatorName: 'labelTranslatorName', labelTranslatorEmail: 'labelTranslatorEmail',
+                labelEditorName: 'labelEditorName', labelEditorEmail: 'labelEditorEmail',
+                sectionRevenue: 'sectionRevenue', revenueNote: 'revenueNote',
+                sectionTerms: 'sectionTerms', sectionConsent: 'sectionConsent',
+                consentAuthorLabel: 'consentAuthorLabel', consentTranslatorLabel: 'consentTranslatorLabel', consentEditorLabel: 'consentEditorLabel',
+                labelDate: 'labelDate', btnCreateAgreement: 'btnCreateAgreement',
+                historyTitle: 'historyTitle', noHistoryText: 'noHistoryText',
+                modalTitle: 'modalTitle', modalClose: 'modalClose',
+                footerHelp: 'footerHelp', footerTerms: 'footerTerms', footerPrivacy: 'footerPrivacy'
+            };
+            Object.keys(map).forEach(id => { const el = document.getElementById(id); if (el) el.textContent = getL(uiText[map[id]]); });
+            document.getElementById('btnBack').innerHTML = `<i class="fas fa-arrow-left me-1"></i>${getL(uiText.btnBack)}`;
+
+            if (selectedType) { updateFormForType(selectedType); }
+            loadAgreementHistory();
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAllText();
+            loadAgreementHistory();
+            // Auto-fill author info from logged-in user
+            try {
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                if (user.display_name || user.firstName) document.getElementById('inputAuthorName').value = user.display_name || user.firstName || '';
+                if (user.email) document.getElementById('inputAuthorEmail').value = user.email || '';
+            } catch(e) {}
+        });
+
+        document.addEventListener('languageChanged', function(e) {
+            const l = e.detail && (e.detail.language || e.detail.lang);
+            if (l) { const d = document.getElementById('languageSelector'), m = document.getElementById('languageSelectorMobile'); if (d) d.value = l; if (m) m.value = l; }
+            updateAllText();
+        });
+    </script>
+</body>
+</html>

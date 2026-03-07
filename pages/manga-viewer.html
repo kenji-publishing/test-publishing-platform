@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <title data-i18n="mangaViewer.pageTitle">Manga Viewer - Publisher</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="../css/mobile-fixes.css" rel="stylesheet">
+    <link href="../css/navbar.css" rel="stylesheet">
     <!-- ========== Pattern C Navbar CSS (Reader Style) ========== -->
     <style>
     :root {
@@ -44,42 +46,9 @@
         transition: all 150ms ease;
     }
     .language-selector:hover { border-color: var(--reader-accent); }
-    .navbar-lang-selector { display: flex; align-items: center; margin-right: 0.5rem; }
-    @media (max-width: 991.98px) {
-        .navbar-lang-selector { order: 1; }
-        .navbar-toggler { order: 2; }
-    }
-    @media (min-width: 992px) {
-        .navbar-nav { flex-wrap: nowrap !important; flex-direction: row !important; }
-        .navbar-nav .nav-item { white-space: nowrap !important; }
-        .navbar-nav .nav-link { white-space: nowrap !important; padding: 0.5rem 0.6rem !important; font-size: 0.9rem; }
-        .navbar-collapse .d-flex { flex-wrap: nowrap !important; }
-        .dropdown-menu { white-space: nowrap; }
-        .navbar-buttons-guest { display: flex !important; flex-wrap: nowrap !important; gap: 0.5rem; }
-        .navbar-buttons-guest .btn { white-space: nowrap !important; flex-shrink: 0; }
-    }
-    .auth-only { display: none !important; }
-    .guest-only { display: block; }
-    body.logged-in .auth-only { display: block !important; }
-    body.logged-in .auth-only.nav-item { display: list-item !important; }
-    body.logged-in .auth-only.dropdown { display: block !important; }
-    body.logged-in .guest-only { display: none !important; }
-    @media (min-width: 992px) { body.logged-in .navbar-buttons-guest { display: none !important; } }
-    .user-dropdown { position: relative; }
-    .user-dropdown-toggle { display: flex; align-items: center; gap: 0.5rem; background: transparent; border: 1px solid var(--reader-border); border-radius: 25px; padding: 0.4rem 0.75rem; cursor: pointer; color: var(--reader-text); transition: all 0.2s; }
-    .user-dropdown-toggle:hover { border-color: var(--reader-accent); background: rgba(139, 115, 85, 0.05); }
-    .user-dropdown-toggle i:first-child { font-size: 1.25rem; color: var(--reader-accent); }
     .user-name-nav { font-weight: 500; font-size: 0.9rem; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .user-chevron { font-size: 0.7rem; color: var(--reader-secondary); transition: transform 0.2s; }
-    .user-dropdown.open .user-chevron { transform: rotate(180deg); }
     .user-menu-nav { position: absolute; top: calc(100% + 0.5rem); right: 0; background: var(--reader-bg); border: 1px solid var(--reader-border); border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); min-width: 240px; z-index: 1001; display: none; overflow: hidden; }
     .user-menu-nav.show { display: block; }
-    .user-menu-header { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; background: rgba(139, 115, 85, 0.05); }
-    .user-avatar { font-size: 2.5rem; color: var(--reader-accent); }
-    .user-info { flex: 1; min-width: 0; }
-    .user-display-name { font-weight: 600; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .user-email { font-size: 0.8rem; color: var(--reader-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .user-menu-divider { height: 1px; background: var(--reader-border); }
     .user-menu-item-nav { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; color: var(--reader-text); text-decoration: none; font-size: 0.9rem; cursor: pointer; border: none; background: transparent; width: 100%; text-align: left; }
     .user-menu-item-nav:hover { background: rgba(139, 115, 85, 0.1); color: var(--reader-accent); }
     .user-menu-item-nav i { width: 20px; text-align: center; color: var(--reader-secondary); }
@@ -87,17 +56,6 @@
     .logout-btn-nav { color: #C75D5D; }
     .logout-btn-nav i { color: #C75D5D; }
     .logout-btn-nav:hover { background: rgba(199, 93, 93, 0.1); color: #C75D5D; }
-    .navbar-overlay { display: none; position: fixed; top: 66px; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 1040; }
-    .navbar-overlay.show { display: block; }
-    @media (max-width: 991.98px) {
-        .user-dropdown { order: 3; margin-left: 0.5rem; }
-        .user-dropdown-toggle { padding: 0.3rem; border-radius: 50%; width: 38px; height: 38px; justify-content: center; }
-        .user-menu-nav { position: fixed; top: 66px; right: 10px; left: auto; min-width: 260px; max-width: calc(100vw - 20px); z-index: 9999; }
-        .navbar-collapse { max-height: 70vh; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
-        .navbar-collapse.show, .navbar-collapse.collapsing { position: fixed; top: 66px; left: 0; right: 0; background: #FFFFFF; border-bottom: 1px solid var(--reader-border); box-shadow: 0 4px 20px rgba(0,0,0,0.15); z-index: 1045; padding: 0.5rem 1rem; }
-        body.menu-open { overflow: hidden; }
-        .navbar-custom { z-index: 1050 !important; background: #FFFFFF !important; }
-    }
     .btn-soft-custom {
         background: rgba(139, 115, 85, 0.1);
         color: var(--reader-accent);
@@ -350,6 +308,36 @@
             z-index: 1000;
         }
 
+        /* Click Zone Navigation */
+        .click-zone {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            z-index: 5;
+            cursor: pointer;
+        }
+        .click-zone-left { left: 0; width: 25%; }
+        .click-zone-right { right: 0; width: 25%; }
+
+        /* Reading Progress Bar */
+        .reading-progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(0, 0, 0, 0.1);
+            z-index: 1100;
+            pointer-events: none;
+        }
+        .reading-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #8B7355, #A89070);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 0 1.5px 1.5px 0;
+        }
+
         /* Viewer button styles (override Bootstrap) */
         .viewer-controls .btn-viewer {
             background: transparent;
@@ -485,6 +473,10 @@
                     <i class="fas fa-th-large"></i>
                     <span id="menuDashboard">Dashboard</span>
                 </a>
+                <a href="my-works.html" class="user-menu-item-nav">
+                    <i class="fas fa-book"></i>
+                    <span id="menuMyWorks">My Works</span>
+                </a>
                 <a href="account-settings.html" class="user-menu-item-nav">
                     <i class="fas fa-cog"></i>
                     <span id="menuAccountSettings">Account Settings</span>
@@ -512,11 +504,6 @@
                 <li class="nav-item">
                     <a class="nav-link" href="browse.html">
                         <i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="genres.html">
-                        <i class="fas fa-layer-group me-1"></i> <span data-i18n="nav.genres">Genres</span>
                     </a>
                 </li>
                 <!-- Auth: Library -->
@@ -573,11 +560,6 @@
                 <li class="nav-item">
                     <a class="nav-link" href="browse.html">
                         <i class="fas fa-compass me-2"></i> <span data-i18n="nav.browse">Browse</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="genres.html">
-                        <i class="fas fa-layer-group me-2"></i> <span data-i18n="nav.genres">Genres</span>
                     </a>
                 </li>
                 <!-- Auth: Library -->
@@ -720,18 +702,21 @@
 
         <!-- Viewer Content -->
         <div class="viewer-content" id="viewerContent">
+            <!-- Click Zone Navigation -->
+            <div class="click-zone click-zone-left" id="clickZoneLeft"></div>
+            <div class="click-zone click-zone-right" id="clickZoneRight"></div>
+
             <!-- Loading indicator (shown initially) -->
             <div class="page-loading" id="pageLoading">
                 <div class="spinner"></div>
                 <p data-i18n="mangaViewer.loadingPage">Loading page...</p>
             </div>
-            
+
             <!-- Manga page with lazy loading -->
-            <img src="" 
-                 class="manga-page lazy-image" 
+            <img src=""
+                 class="manga-page lazy-image"
                  id="mangaPage"
                  alt="Manga Page"
-                 onclick="nextPage()"
                  style="display: none;">
             
             <!-- Navigation arrows -->
@@ -858,7 +843,6 @@
             // Navbar items (fallback if translations.js doesn't have them)
             'nav.home': { en: 'Home', ja: 'ホーム', zh: '首页', es: 'Inicio', fr: 'Accueil', de: 'Startseite', ko: '홈', ar: 'الرئيسية', pt: 'Início' },
             'nav.browse': { en: 'Browse', ja: '作品を探す', zh: '浏览', es: 'Explorar', fr: 'Parcourir', de: 'Durchsuchen', ko: '둘러보기', ar: 'تصفح', pt: 'Explorar' },
-            'nav.genres': { en: 'Genres', ja: 'ジャンル', zh: '类型', es: 'Géneros', fr: 'Genres', de: 'Genres', ko: '장르', ar: 'الأنواع', pt: 'Gêneros' },
             'nav.upload': { en: 'Upload', ja: 'アップロード', zh: '上传', es: 'Subir', fr: 'Téléverser', de: 'Hochladen', ko: '업로드', ar: 'رفع', pt: 'Enviar' },
             'nav.support': { en: 'Support', ja: 'サポート', zh: '支持', es: 'Soporte', fr: 'Support', de: 'Support', ko: '지원', ar: 'الدعم', pt: 'Suporte' },
             'nav.login': { en: 'Sign In', ja: 'ログイン', zh: '登录', es: 'Iniciar sesión', fr: 'Connexion', de: 'Anmelden', ko: '로그인', ar: 'تسجيل الدخول', pt: 'Entrar' },
@@ -962,6 +946,8 @@
             initThumbnails();
             loadPage(1);
             preloadPages(1);
+            initClickZones();
+            initMouseDrag();
         });
 
         // =====================================================
@@ -1006,7 +992,8 @@
             // Update UI
             document.getElementById('currentPage').textContent = pageNum;
             updateThumbnailActive(pageNum);
-            
+            updateReadingProgress();
+
             // Preload surrounding pages
             preloadPages(pageNum);
         }
@@ -1230,6 +1217,77 @@
         });
 
         // =====================================================
+        // Reading Progress Bar
+        // =====================================================
+        function updateReadingProgress() {
+            var fill = document.getElementById('readingProgressFill');
+            if (fill) fill.style.width = (currentPage / totalPages) * 100 + '%';
+        }
+
+        // =====================================================
+        // Click Zone Navigation
+        // =====================================================
+        function initClickZones() {
+            var leftZone = document.getElementById('clickZoneLeft');
+            var rightZone = document.getElementById('clickZoneRight');
+            if (leftZone) {
+                leftZone.addEventListener('click', function() {
+                    if (!hasDragged) previousPage();
+                });
+            }
+            if (rightZone) {
+                rightZone.addEventListener('click', function() {
+                    if (!hasDragged) nextPage();
+                });
+            }
+        }
+
+        // =====================================================
+        // Mouse Drag Navigation
+        // =====================================================
+        let isDragging = false, hasDragged = false;
+        let dragStartX = 0, dragStartY = 0;
+
+        function initMouseDrag() {
+            var content = document.getElementById('viewerContent');
+            var DRAG_THRESHOLD = 50;
+
+            content.addEventListener('mousedown', function(e) {
+                if (e.target.closest('button, a, .click-zone')) return;
+                if (zoomLevel > 1) return; // Don't drag when zoomed in
+                isDragging = true;
+                hasDragged = false;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+                content.style.cursor = 'grabbing';
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                var diffX = Math.abs(e.clientX - dragStartX);
+                if (diffX > 10 && !hasDragged) {
+                    hasDragged = true;
+                }
+            });
+
+            document.addEventListener('mouseup', function(e) {
+                if (!isDragging) return;
+                isDragging = false;
+                content.style.cursor = '';
+
+                if (hasDragged) {
+                    var diffX = e.clientX - dragStartX;
+                    if (Math.abs(diffX) > DRAG_THRESHOLD) {
+                        if (diffX > 0) { previousPage(); }
+                        else { nextPage(); }
+                    }
+                    setTimeout(function() { hasDragged = false; }, 50);
+                }
+            });
+        }
+
+        // =====================================================
         // Touch Gestures (for mobile)
         // =====================================================
         let touchStartX = 0;
@@ -1259,8 +1317,14 @@
             }
         }
     </script>
+    <!-- Reading Progress Bar -->
+    <div class="reading-progress-bar" id="readingProgressBar">
+        <div class="reading-progress-fill" id="readingProgressFill"></div>
+    </div>
+
     <!-- Notification Badge -->
     <script src="../js/header-notification.js"></script>
+    <script src="../js/navbar.js"></script>
 
     <!-- ========== Pattern C Navbar JavaScript ========== -->
     <script>
@@ -1301,6 +1365,7 @@
             es: 'Panel', fr: 'Tableau de bord', de: 'Dashboard',
             ko: '대시보드', ar: 'لوحة التحكم', pt: 'Painel'
         },
+        myWorks: { en: 'My Works', ja: 'マイ作品', zh: '我的作品', es: 'Mis obras', fr: 'Mes œuvres', de: 'Meine Werke', ko: '내 작품', ar: 'أعمالي', pt: 'Minhas obras' },
         accountSettings: {
             en: 'Account Settings', ja: 'アカウント設定', zh: '账户设置',
             es: 'Configuración de cuenta', fr: 'Paramètres du compte', de: 'Kontoeinstellungen',
@@ -1328,6 +1393,8 @@
         var menuAccountSettings = document.getElementById('menuAccountSettings');
         var menuLogout = document.getElementById('menuLogout');
         if (menuDashboard) menuDashboard.textContent = getNL(navbarUiText.dashboard);
+        var menuMyWorks = document.getElementById('menuMyWorks');
+        if (menuMyWorks) menuMyWorks.textContent = getNL(navbarUiText.myWorks);
         if (menuAccountSettings) menuAccountSettings.textContent = getNL(navbarUiText.accountSettings);
         if (menuLogout) menuLogout.textContent = getNL(navbarUiText.logout);
 

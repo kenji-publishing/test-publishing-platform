@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <title>Profile - Publisher</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="../css/style-new.css" rel="stylesheet">
+    <link href="../css/mobile-fixes.css" rel="stylesheet">
+    <link href="../css/navbar.css" rel="stylesheet">
+    <style>
+        .profile-container { padding: var(--spacing-xl) 0; }
+        .profile-column { max-width: 800px; margin: 0 auto; }
+        .page-header { margin-bottom: var(--spacing-xl); }
+        .page-header h1 { font-size: var(--font-size-2xl); margin-bottom: var(--spacing-xs); }
+        .page-header p { color: var(--color-text-secondary); }
+        .profile-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-lg); margin-bottom: var(--spacing-lg); box-shadow: var(--shadow-sm); }
+        .profile-card h5 { font-weight: 600; margin-bottom: var(--spacing-md); color: var(--color-text-primary); display: flex; align-items: center; gap: var(--spacing-sm); }
+        .profile-card h5 i { color: var(--color-accent); }
+        .profile-avatar { width: 80px; height: 80px; border-radius: 50%; background: var(--color-bg-hover); display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 700; color: var(--color-accent); margin: 0 auto var(--spacing-md); overflow: hidden; border: 3px solid var(--color-border); }
+        .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-display-name { font-size: var(--font-size-xl); font-weight: 600; text-align: center; color: var(--color-text-primary); margin-bottom: var(--spacing-xs); }
+        .profile-email { font-size: var(--font-size-sm); color: var(--color-text-muted); text-align: center; margin-bottom: var(--spacing-lg); }
+        .profile-info-list { list-style: none; padding: 0; margin: 0 0 var(--spacing-lg); }
+        .profile-info-list li { display: flex; padding: var(--spacing-sm) 0; border-bottom: 1px solid var(--color-border-light); }
+        .profile-info-list li:last-child { border-bottom: none; }
+        .profile-info-label { font-weight: 500; color: var(--color-text-secondary); min-width: 160px; flex-shrink: 0; }
+        .profile-info-value { color: var(--color-text-primary); word-break: break-word; }
+        .profile-info-value.bio-text { white-space: pre-line; }
+        .profile-edit-mode { display: none; }
+        .profile-edit-mode.active { display: block; }
+        .profile-view-mode.hidden { display: none; }
+        .avatar-edit-wrapper { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-sm); margin-bottom: var(--spacing-lg); }
+        .btn-change-photo { font-size: var(--font-size-sm); color: var(--color-accent); background: none; border: 1px solid var(--color-accent); border-radius: var(--radius-md); padding: var(--spacing-xs) var(--spacing-md); cursor: pointer; transition: all var(--transition-fast); }
+        .btn-change-photo:hover { background: var(--color-accent); color: #fff; }
+        .email-info-row { display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); background: var(--color-bg-hover); border-radius: var(--radius-md); margin-bottom: var(--spacing-sm); }
+        .email-info-row i { color: var(--color-accent); }
+        .email-info-row span { font-weight: 500; color: var(--color-text-primary); }
+        .email-hint { font-size: var(--font-size-sm); color: var(--color-text-muted); display: flex; align-items: center; gap: var(--spacing-xs); }
+        .email-hint a { color: var(--color-accent); text-decoration: none; }
+        .email-hint a:hover { text-decoration: underline; }
+        .password-input-wrapper { position: relative; margin-bottom: var(--spacing-md); }
+        .password-toggle-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--color-text-muted); cursor: pointer; padding: 4px; font-size: var(--font-size-base); }
+        .password-toggle-btn:hover { color: var(--color-text-primary); }
+        .password-requirements { list-style: none; padding: 0; margin: 0 0 var(--spacing-md); font-size: var(--font-size-sm); }
+        .password-requirements li { display: flex; align-items: center; gap: var(--spacing-xs); padding: 3px 0; color: var(--color-text-muted); }
+        .password-requirements li i { font-size: 0.7rem; }
+        .password-requirements li.met { color: var(--color-success); }
+        .password-requirements li.met i { color: var(--color-success); }
+        .toast-container { position: fixed; top: 80px; right: 20px; z-index: 9999; }
+        .toast-message { padding: var(--spacing-sm) var(--spacing-lg); border-radius: var(--radius-md); color: #fff; font-size: var(--font-size-sm); box-shadow: var(--shadow-md); margin-bottom: var(--spacing-sm); display: flex; align-items: center; gap: var(--spacing-sm); animation: toastSlideIn 0.3s ease; }
+        .toast-message.success { background: var(--color-success); }
+        .toast-message.error { background: var(--color-error); }
+        @keyframes toastSlideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .btn-profile-action { background: var(--color-accent); color: #fff; border: none; border-radius: var(--radius-md); padding: var(--spacing-sm) var(--spacing-lg); font-weight: 500; cursor: pointer; transition: background var(--transition-fast); }
+        .btn-profile-action:hover { background: var(--color-accent-hover); color: #fff; }
+        .btn-profile-secondary { background: transparent; color: var(--color-text-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--spacing-sm) var(--spacing-lg); font-weight: 500; cursor: pointer; transition: all var(--transition-fast); }
+        .btn-profile-secondary:hover { background: var(--color-bg-hover); color: var(--color-text-primary); }
+        @media (max-width: 576px) {
+            .profile-info-list li { flex-direction: column; gap: 2px; }
+            .profile-info-label { min-width: unset; }
+        }
+    </style>
+</head>
+<body>
+    <!-- ========== NAVBAR HTML START (Pattern C) ========== -->
+
+    <!-- Navbar Overlay -->
+    <div class="navbar-overlay" id="navbarOverlay"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+        <div class="container">
+            <!-- Brand -->
+            <a class="navbar-brand" href="../index.html">
+                <i class="fas fa-book-open"></i>
+                Publisher
+            </a>
+
+            <!-- Language Selector Mobile -->
+            <div class="navbar-lang-selector d-lg-none">
+                <select class="language-selector" id="languageSelectorMobile">
+                    <option value="en">EN</option><option value="ja">日本語</option><option value="zh">中文</option>
+                    <option value="es">ES</option><option value="fr">FR</option><option value="de">DE</option>
+                    <option value="ko">한국어</option><option value="ar">عربي</option><option value="pt">PT</option>
+                </select>
+            </div>
+            <!-- User Dropdown (auth-only) -->
+            <div class="user-dropdown auth-only" id="userDropdown">
+                <button type="button" class="user-dropdown-toggle" id="userDropdownBtn" onclick="toggleUserDropdown(event)">
+                    <i class="fas fa-user-circle"></i>
+                    <span class="user-name d-none d-lg-inline" id="userName">User</span>
+                    <i class="fas fa-chevron-down user-chevron d-none d-lg-inline"></i>
+                </button>
+                <div class="user-menu" id="userMenu">
+                    <div class="user-menu-header">
+                        <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
+                        <div class="user-info">
+                            <div class="user-display-name" id="userDisplayName">User</div>
+                            <div class="user-email" id="userEmail">user@example.com</div>
+                        </div>
+                    </div>
+                    <div class="user-menu-divider"></div>
+                    <a href="dashboard.html" class="user-menu-item">
+                        <i class="fas fa-th-large"></i>
+                        <span id="menuDashboard">Dashboard</span>
+                    </a>
+                    <a href="my-works.html" class="user-menu-item">
+                        <i class="fas fa-book"></i>
+                        <span id="menuMyWorks">My Works</span>
+                    </a>
+                    <a href="account-settings.html" class="user-menu-item">
+                        <i class="fas fa-cog"></i>
+                        <span id="menuAccountSettings">Account Settings</span>
+                    </a>
+                    <div class="user-menu-divider"></div>
+                    <button class="user-menu-item logout-btn" onclick="handleLogout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span id="menuLogout">Log Out</span>
+                    </button>
+                </div>
+            </div>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <!-- PC Navigation -->
+                <ul class="navbar-nav me-auto d-none d-lg-flex">
+                    <li class="nav-item"><a class="nav-link" href="../index.html"><i class="fas fa-home me-1"></i> <span data-i18n="nav.home">Home</span></a></li>
+                    <li class="nav-item"><a class="nav-link" href="browse.html"><i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span></a></li>
+                    <li class="nav-item auth-only"><a class="nav-link" href="library.html"><i class="fas fa-book-reader me-1"></i> <span id="navLibraryPC">Library</span></a></li>
+                    <li class="nav-item auth-only"><a class="nav-link" href="dashboard.html"><i class="fas fa-th-large me-1"></i> <span id="navDashboardPC">Dashboard</span></a></li>
+                    <li class="nav-item auth-only"><a class="nav-link" href="upload.html"><i class="fas fa-upload me-1"></i> <span data-i18n="nav.upload">Upload</span></a></li>
+                    <li class="nav-item dropdown auth-only">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-language me-1"></i> <span id="navTranslationToolsPC">Translation Tools</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="manga-translator.html"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorPC">Manga Translator</span></a></li>
+                            <li><a class="dropdown-item" href="translation-status.html"><i class="fas fa-tasks me-2"></i><span id="navTranslationStatusPC">Translation Status</span></a></li>
+                            <li><a class="dropdown-item" href="translators/index.html"><i class="fas fa-users me-2"></i><span id="navFindTranslatorsPC">Find Translators</span></a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-headset me-1"></i> <span data-i18n="nav.support">Support</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="support/faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
+                            <li><a class="dropdown-item" href="support/troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
+                            <li><a class="dropdown-item" href="support/contact.html"><i class="fas fa-envelope me-2"></i><span id="navContactPC">Contact</span></a></li>
+                            <li class="auth-only"><hr class="dropdown-divider"></li>
+                            <li class="auth-only"><a class="dropdown-item" href="support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <!-- Mobile Navigation -->
+                <ul class="navbar-nav d-lg-none">
+                    <li class="nav-item"><a class="nav-link" href="../index.html"><i class="fas fa-home me-2"></i> <span data-i18n="nav.home">Home</span></a></li>
+                    <li class="nav-item"><a class="nav-link" href="browse.html"><i class="fas fa-compass me-2"></i> <span data-i18n="nav.browse">Browse</span></a></li>
+                    <li class="nav-item auth-only"><a class="nav-link" href="library.html"><i class="fas fa-book-reader me-2"></i> <span id="navLibraryMobile">Library</span></a></li>
+                    <li class="auth-only"><hr class="dropdown-divider"></li>
+                    <li class="nav-item auth-only"><a class="nav-link" href="dashboard.html"><i class="fas fa-th-large me-2"></i> <span id="navDashboardMobile">Dashboard</span></a></li>
+                    <li class="nav-item auth-only"><a class="nav-link" href="upload.html"><i class="fas fa-upload me-2"></i> <span data-i18n="nav.upload">Upload</span></a></li>
+                    <li class="nav-item auth-only">
+                        <a class="nav-link" data-bs-toggle="collapse" href="#translationToolsMenu" role="button">
+                            <i class="fas fa-language me-2"></i> <span id="navTranslationToolsMobile">Translation Tools</span>
+                            <i class="fas fa-chevron-down ms-auto small"></i>
+                        </a>
+                        <div class="collapse ps-4" id="translationToolsMenu">
+                            <a class="nav-link" href="manga-translator.html"><i class="fas fa-image me-2"></i> <span id="navMangaTranslatorMobile">Manga Translator</span></a>
+                            <a class="nav-link" href="translation-status.html"><i class="fas fa-tasks me-2"></i> <span id="navTranslationStatusMobile">Translation Status</span></a>
+                            <a class="nav-link" href="translators/index.html"><i class="fas fa-users me-2"></i> <span id="navFindTranslatorsMobile">Find Translators</span></a>
+                        </div>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li class="nav-item"><a class="nav-link" href="support/faq.html"><i class="fas fa-question-circle me-2"></i> <span data-i18n="support.faq.title">FAQ</span></a></li>
+                    <li class="nav-item"><a class="nav-link" href="support/troubleshoot.html"><i class="fas fa-tools me-2"></i> <span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
+                    <li class="nav-item"><a class="nav-link" href="support/contact.html"><i class="fas fa-envelope me-2"></i> <span id="navContactMobile">Contact</span></a></li>
+                    <li class="nav-item auth-only"><a class="nav-link" href="support/tickets.html"><i class="fas fa-ticket-alt me-2"></i> <span data-i18n="support.tickets.title">My Tickets</span></a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li class="nav-item guest-only"><a class="nav-link" href="login.html"><i class="fas fa-sign-in-alt me-2"></i> <span data-i18n="nav.login">Sign In</span></a></li>
+                    <li class="nav-item guest-only"><a class="nav-link" href="register.html"><i class="fas fa-user-plus me-2"></i> <span data-i18n="nav.getStarted">Get Started</span></a></li>
+                </ul>
+                <div class="d-flex align-items-center gap-3">
+                    <select class="language-selector d-none d-lg-block" id="languageSelector">
+                        <option value="en">EN</option><option value="ja">日本語</option><option value="zh">中文</option>
+                        <option value="es">ES</option><option value="fr">FR</option><option value="de">DE</option>
+                        <option value="ko">한국어</option><option value="ar">عربي</option><option value="pt">PT</option>
+                    </select>
+                    <div class="navbar-buttons-guest guest-only d-none d-lg-flex">
+                        <a href="login.html" class="btn btn-soft-custom"><span data-i18n="nav.login">Sign In</span></a>
+                        <a href="register.html" class="btn btn-primary-custom"><span data-i18n="nav.getStarted">Get Started</span></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <!-- ========== NAVBAR HTML END ========== -->
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <main class="profile-container">
+        <div class="container">
+            <div class="profile-column">
+                <div class="page-header">
+                    <h1><i class="fas fa-user-circle me-2 text-accent"></i><span id="pageTitle">Profile</span></h1>
+                    <p id="pageSubtitle">Manage your personal information</p>
+                </div>
+
+                <!-- Card 1: Profile Information -->
+                <div class="profile-card">
+                    <h5><i class="fas fa-id-card"></i> <span id="sectionProfileInfo">Profile Information</span></h5>
+                    <!-- View Mode -->
+                    <div class="profile-view-mode" id="profileViewMode">
+                        <div class="profile-avatar" id="profileAvatar"><span id="profileInitial">U</span></div>
+                        <div class="profile-display-name" id="profileDisplayName">User</div>
+                        <div class="profile-email" id="profileEmailDisplay">user@example.com</div>
+                        <ul class="profile-info-list">
+                            <li><span class="profile-info-label" id="labelFirstName">First Name</span><span class="profile-info-value" id="viewFirstName">-</span></li>
+                            <li><span class="profile-info-label" id="labelLastName">Last Name</span><span class="profile-info-value" id="viewLastName">-</span></li>
+                            <li><span class="profile-info-label" id="labelDisplayName">Display Name / Pen Name</span><span class="profile-info-value" id="viewDisplayName">-</span></li>
+                            <li><span class="profile-info-label" id="labelBio">Bio</span><span class="profile-info-value bio-text" id="viewBio">-</span></li>
+                            <li><span class="profile-info-label" id="labelPreferredLang">Preferred Language</span><span class="profile-info-value" id="viewPreferredLang">-</span></li>
+                        </ul>
+                        <div class="text-center">
+                            <button type="button" class="btn-profile-action" onclick="toggleEditMode(true)">
+                                <i class="fas fa-edit me-1"></i> <span id="btnEditProfile">Edit Profile</span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Edit Mode -->
+                    <div class="profile-edit-mode" id="profileEditMode">
+                        <div class="avatar-edit-wrapper">
+                            <div class="profile-avatar" id="editAvatar"><span id="editAvatarInitial">U</span></div>
+                            <button type="button" class="btn-change-photo" onclick="document.getElementById('avatarInput').click()">
+                                <i class="fas fa-camera me-1"></i> <span id="btnChangePhoto">Change Photo</span>
+                            </button>
+                            <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="handleAvatarChange(event)">
+                        </div>
+                        <form id="profileForm" onsubmit="saveProfile(event)">
+                            <div class="mb-3">
+                                <label for="editFirstName" class="form-label" id="editLabelFirstName">First Name</label>
+                                <input type="text" class="form-control" id="editFirstName">
+                            </div>
+                            <div class="mb-3">
+                                <label for="editLastName" class="form-label" id="editLabelLastName">Last Name</label>
+                                <input type="text" class="form-control" id="editLastName">
+                            </div>
+                            <div class="mb-3">
+                                <label for="editDisplayNameField" class="form-label" id="editLabelDisplayName">Display Name / Pen Name</label>
+                                <input type="text" class="form-control" id="editDisplayNameField">
+                            </div>
+                            <div class="mb-3">
+                                <label for="editBio" class="form-label" id="editLabelBio">Bio</label>
+                                <textarea class="form-control" id="editBio" rows="4"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="editPreferredLang" class="form-label" id="editLabelPreferredLang">Preferred Language</label>
+                                <select class="form-select" id="editPreferredLang">
+                                    <option value="en">English</option>
+                                    <option value="ja">日本語</option>
+                                    <option value="zh">中文</option>
+                                    <option value="es">Espa&ntilde;ol</option>
+                                    <option value="fr">Fran&ccedil;ais</option>
+                                    <option value="de">Deutsch</option>
+                                    <option value="ko">한국어</option>
+                                    <option value="ar">العربية</option>
+                                    <option value="pt">Portugu&ecirc;s</option>
+                                </select>
+                            </div>
+                            <div class="d-flex gap-2 justify-content-center">
+                                <button type="submit" class="btn-profile-action"><i class="fas fa-save me-1"></i> <span id="btnSave">Save</span></button>
+                                <button type="button" class="btn-profile-secondary" onclick="toggleEditMode(false)"><i class="fas fa-times me-1"></i> <span id="btnCancel">Cancel</span></button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Card 2: Email -->
+                <div class="profile-card">
+                    <h5><i class="fas fa-envelope"></i> <span id="sectionEmail">Email</span></h5>
+                    <div class="email-info-row">
+                        <i class="fas fa-at"></i>
+                        <span id="emailValue">user@example.com</span>
+                    </div>
+                    <div class="email-hint">
+                        <i class="fas fa-info-circle"></i>
+                        <span id="emailHintText">To change your email, go to <a href="account-settings.html" id="emailHintLink">Account Settings</a>.</span>
+                    </div>
+                </div>
+
+                <!-- Card 3: Change Password -->
+                <div class="profile-card">
+                    <h5><i class="fas fa-lock"></i> <span id="sectionChangePassword">Change Password</span></h5>
+                    <form id="passwordForm" onsubmit="changePassword(event)">
+                        <div class="mb-3">
+                            <label for="currentPassword" class="form-label" id="labelCurrentPassword">Current Password</label>
+                            <div class="password-input-wrapper">
+                                <input type="password" class="form-control" id="currentPassword" required>
+                                <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('currentPassword')"><i class="fas fa-eye"></i></button>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label" id="labelNewPassword">New Password</label>
+                            <div class="password-input-wrapper">
+                                <input type="password" class="form-control" id="newPassword" required oninput="validatePasswordRealtime()">
+                                <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('newPassword')"><i class="fas fa-eye"></i></button>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label" id="labelConfirmPassword">Confirm Password</label>
+                            <div class="password-input-wrapper">
+                                <input type="password" class="form-control" id="confirmPassword" required>
+                                <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('confirmPassword')"><i class="fas fa-eye"></i></button>
+                            </div>
+                        </div>
+                        <ul class="password-requirements" id="passwordRequirements">
+                            <li id="reqLength"><i class="fas fa-circle"></i> <span id="reqLengthText">At least 8 characters</span></li>
+                            <li id="reqUppercase"><i class="fas fa-circle"></i> <span id="reqUppercaseText">At least one uppercase letter</span></li>
+                            <li id="reqLowercase"><i class="fas fa-circle"></i> <span id="reqLowercaseText">At least one lowercase letter</span></li>
+                            <li id="reqNumber"><i class="fas fa-circle"></i> <span id="reqNumberText">At least one number</span></li>
+                        </ul>
+                        <div class="text-center">
+                            <button type="submit" class="btn-profile-action"><i class="fas fa-key me-1"></i> <span id="btnChangePassword">Change Password</span></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer-custom">
+        <div class="container text-center">
+            <a href="support/faq.html" id="footerHelp" class="text-muted me-3">Help</a>
+            <a href="terms.html" id="footerTerms" class="text-muted me-3">Terms</a>
+            <a href="privacy.html" id="footerPrivacy" class="text-muted me-3">Privacy</a>
+            <span class="text-muted">&copy; <span id="footerYear">2025</span> Publisher</span>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/navbar.js"></script>
+    <script>
+        // ========== 9-Language UI Text ==========
+        const uiText = {
+            // Navbar
+            translationTools: { en:'Translation Tools', ja:'翻訳ツール', zh:'翻译工具', es:'Herramientas de traducci\u00f3n', fr:'Outils de traduction', de:'\u00dcbersetzungstools', ko:'번역 도구', ar:'أدوات الترجمة', pt:'Ferramentas de tradu\u00e7\u00e3o' },
+            mangaTranslator: { en:'Manga Translator', ja:'マンガ翻訳', zh:'漫画翻译', es:'Traductor de Manga', fr:'Traducteur de Manga', de:'Manga-\u00dcbersetzer', ko:'만화 번역기', ar:'مترجم المانجا', pt:'Tradutor de Mang\u00e1' },
+            translationStatus: { en:'Translation Status', ja:'翻訳状況', zh:'翻译状态', es:'Estado de traducci\u00f3n', fr:'Statut de traduction', de:'\u00dcbersetzungsstatus', ko:'번역 상태', ar:'حالة الترجمة', pt:'Status da tradu\u00e7\u00e3o' },
+            findTranslators: { en:'Find Translators', ja:'翻訳者を探す', zh:'寻找翻译', es:'Buscar traductores', fr:'Trouver des traducteurs', de:'\u00dcbersetzer finden', ko:'번역가 찾기', ar:'البحث عن مترجمين', pt:'Encontrar tradutores' },
+            contact: { en:'Contact', ja:'お問い合わせ', zh:'联系我们', es:'Contacto', fr:'Contact', de:'Kontakt', ko:'문의', ar:'اتصل بنا', pt:'Contato' },
+            library: { en:'Library', ja:'ライブラリ', zh:'书库', es:'Biblioteca', fr:'Biblioth\u00e8que', de:'Bibliothek', ko:'라이브러리', ar:'المكتبة', pt:'Biblioteca' },
+            dashboard: { en:'Dashboard', ja:'ダッシュボード', zh:'控制台', es:'Panel', fr:'Tableau de bord', de:'Dashboard', ko:'대시보드', ar:'لوحة التحكم', pt:'Painel' },
+            myWorks: { en:'My Works', ja:'マイ作品', zh:'我的作品', es:'Mis obras', fr:'Mes \u0153uvres', de:'Meine Werke', ko:'내 작품', ar:'أعمالي', pt:'Minhas obras' },
+            accountSettings: { en:'Account Settings', ja:'アカウント設定', zh:'账户设置', es:'Configuraci\u00f3n de cuenta', fr:'Param\u00e8tres du compte', de:'Kontoeinstellungen', ko:'계정 설정', ar:'إعدادات الحساب', pt:'Configura\u00e7\u00f5es da conta' },
+            logout: { en:'Log Out', ja:'ログアウト', zh:'退出登录', es:'Cerrar sesi\u00f3n', fr:'D\u00e9connexion', de:'Abmelden', ko:'로그아웃', ar:'تسجيل الخروج', pt:'Sair' },
+            logOutConfirm: { en:'Are you sure you want to log out?', ja:'ログアウトしますか？', zh:'确定要退出登录吗？', es:'\u00bfEst\u00e1s seguro de que quieres cerrar sesi\u00f3n?', fr:'\u00cates-vous s\u00fbr de vouloir vous d\u00e9connecter?', de:'Sind Sie sicher, dass Sie sich abmelden m\u00f6chten?', ko:'로그아웃 하시겠습니까?', ar:'هل أنت متأكد أنك تريد تسجيل الخروج؟', pt:'Tem certeza que deseja sair?' },
+            // Profile page
+            pageTitle: { en:'Profile', ja:'プロフィール', zh:'个人资料', es:'Perfil', fr:'Profil', de:'Profil', ko:'프로필', ar:'الملف الشخصي', pt:'Perfil' },
+            pageSubtitle: { en:'Manage your personal information', ja:'個人情報を管理する', zh:'管理您的个人信息', es:'Administra tu informaci\u00f3n personal', fr:'G\u00e9rez vos informations personnelles', de:'Verwalten Sie Ihre pers\u00f6nlichen Informationen', ko:'개인 정보 관리', ar:'إدارة معلوماتك الشخصية', pt:'Gerencie suas informa\u00e7\u00f5es pessoais' },
+            sectionProfileInfo: { en:'Profile Information', ja:'プロフィール情報', zh:'个人资料信息', es:'Informaci\u00f3n del perfil', fr:'Informations du profil', de:'Profilinformationen', ko:'프로필 정보', ar:'معلومات الملف الشخصي', pt:'Informa\u00e7\u00f5es do perfil' },
+            labelFirstName: { en:'First Name', ja:'名', zh:'名', es:'Nombre', fr:'Pr\u00e9nom', de:'Vorname', ko:'이름', ar:'الاسم الأول', pt:'Nome' },
+            labelLastName: { en:'Last Name', ja:'姓', zh:'姓', es:'Apellido', fr:'Nom', de:'Nachname', ko:'성', ar:'الاسم الأخير', pt:'Sobrenome' },
+            labelDisplayName: { en:'Display Name / Pen Name', ja:'表示名 / ペンネーム', zh:'显示名称 / 笔名', es:'Nombre visible / Seud\u00f3nimo', fr:"Nom d'affichage / Pseudonyme", de:'Anzeigename / K\u00fcnstlername', ko:'표시 이름 / 필명', ar:'اسم العرض / الاسم المستعار', pt:'Nome de exibi\u00e7\u00e3o / Pseud\u00f4nimo' },
+            labelBio: { en:'Bio', ja:'自己紹介', zh:'个人简介', es:'Biograf\u00eda', fr:'Biographie', de:'Biografie', ko:'소개', ar:'السيرة الذاتية', pt:'Biografia' },
+            labelPreferredLang: { en:'Preferred Language', ja:'使用言語', zh:'首选语言', es:'Idioma preferido', fr:'Langue pr\u00e9f\u00e9r\u00e9e', de:'Bevorzugte Sprache', ko:'선호 언어', ar:'اللغة المفضلة', pt:'Idioma preferido' },
+            btnEditProfile: { en:'Edit Profile', ja:'プロフィールを編集', zh:'编辑资料', es:'Editar perfil', fr:'Modifier le profil', de:'Profil bearbeiten', ko:'프로필 수정', ar:'تعديل الملف الشخصي', pt:'Editar perfil' },
+            btnChangePhoto: { en:'Change Photo', ja:'写真を変更', zh:'更换照片', es:'Cambiar foto', fr:'Changer la photo', de:'Foto \u00e4ndern', ko:'사진 변경', ar:'تغيير الصورة', pt:'Alterar foto' },
+            btnSave: { en:'Save', ja:'保存', zh:'保存', es:'Guardar', fr:'Enregistrer', de:'Speichern', ko:'저장', ar:'حفظ', pt:'Salvar' },
+            btnCancel: { en:'Cancel', ja:'キャンセル', zh:'取消', es:'Cancelar', fr:'Annuler', de:'Abbrechen', ko:'취소', ar:'إلغاء', pt:'Cancelar' },
+            sectionEmail: { en:'Email', ja:'メールアドレス', zh:'电子邮箱', es:'Correo electr\u00f3nico', fr:'E-mail', de:'E-Mail', ko:'이메일', ar:'البريد الإلكتروني', pt:'E-mail' },
+            emailHintText: { en:'To change your email, go to', ja:'メールアドレスの変更は', zh:'要更改电子邮箱，请前往', es:'Para cambiar tu correo, ve a', fr:'Pour changer votre e-mail, allez \u00e0', de:'Um Ihre E-Mail zu \u00e4ndern, gehen Sie zu', ko:'이메일을 변경하려면 다음으로 이동하세요:', ar:'لتغيير بريدك الإلكتروني، انتقل إلى', pt:'Para alterar seu e-mail, v\u00e1 para' },
+            emailHintLinkText: { en:'Account Settings', ja:'アカウント設定', zh:'账户设置', es:'Configuraci\u00f3n de cuenta', fr:'Param\u00e8tres du compte', de:'Kontoeinstellungen', ko:'계정 설정', ar:'إعدادات الحساب', pt:'Configura\u00e7\u00f5es da conta' },
+            sectionChangePassword: { en:'Change Password', ja:'パスワード変更', zh:'修改密码', es:'Cambiar contrase\u00f1a', fr:'Changer le mot de passe', de:'Passwort \u00e4ndern', ko:'비밀번호 변경', ar:'تغيير كلمة المرور', pt:'Alterar senha' },
+            labelCurrentPassword: { en:'Current Password', ja:'現在のパスワード', zh:'当前密码', es:'Contrase\u00f1a actual', fr:'Mot de passe actuel', de:'Aktuelles Passwort', ko:'현재 비밀번호', ar:'كلمة المرور الحالية', pt:'Senha atual' },
+            labelNewPassword: { en:'New Password', ja:'新しいパスワード', zh:'新密码', es:'Nueva contrase\u00f1a', fr:'Nouveau mot de passe', de:'Neues Passwort', ko:'새 비밀번호', ar:'كلمة المرور الجديدة', pt:'Nova senha' },
+            labelConfirmPassword: { en:'Confirm Password', ja:'パスワード確認', zh:'确认密码', es:'Confirmar contrase\u00f1a', fr:'Confirmer le mot de passe', de:'Passwort best\u00e4tigen', ko:'비밀번호 확인', ar:'تأكيد كلمة المرور', pt:'Confirmar senha' },
+            reqLength: { en:'At least 8 characters', ja:'8文字以上', zh:'至少8个字符', es:'Al menos 8 caracteres', fr:'Au moins 8 caract\u00e8res', de:'Mindestens 8 Zeichen', ko:'8자 이상', ar:'8 أحرف على الأقل', pt:'Pelo menos 8 caracteres' },
+            reqUppercase: { en:'At least one uppercase letter', ja:'大文字を1つ以上', zh:'至少一个大写字母', es:'Al menos una may\u00fascula', fr:'Au moins une majuscule', de:'Mindestens ein Gro\u00dfbuchstabe', ko:'대문자 1개 이상', ar:'حرف كبير واحد على الأقل', pt:'Pelo menos uma letra mai\u00fascula' },
+            reqLowercase: { en:'At least one lowercase letter', ja:'小文字を1つ以上', zh:'至少一个小写字母', es:'Al menos una min\u00fascula', fr:'Au moins une minuscule', de:'Mindestens ein Kleinbuchstabe', ko:'소문자 1개 이상', ar:'حرف صغير واحد على الأقل', pt:'Pelo menos uma letra min\u00fascula' },
+            reqNumber: { en:'At least one number', ja:'数字を1つ以上', zh:'至少一个数字', es:'Al menos un n\u00famero', fr:'Au moins un chiffre', de:'Mindestens eine Zahl', ko:'숫자 1개 이상', ar:'رقم واحد على الأقل', pt:'Pelo menos um n\u00famero' },
+            btnChangePassword: { en:'Change Password', ja:'パスワードを変更', zh:'修改密码', es:'Cambiar contrase\u00f1a', fr:'Changer le mot de passe', de:'Passwort \u00e4ndern', ko:'비밀번호 변경', ar:'تغيير كلمة المرور', pt:'Alterar senha' },
+            // Messages
+            profileSaved: { en:'Profile saved successfully!', ja:'プロフィールを保存しました！', zh:'个人资料保存成功！', es:'\u00a1Perfil guardado con \u00e9xito!', fr:'Profil enregistr\u00e9 avec succ\u00e8s !', de:'Profil erfolgreich gespeichert!', ko:'프로필이 저장되었습니다!', ar:'تم حفظ الملف الشخصي بنجاح!', pt:'Perfil salvo com sucesso!' },
+            profileSaveError: { en:'Failed to save profile. Please try again.', ja:'プロフィールの保存に失敗しました。', zh:'保存个人资料失败，请重试。', es:'Error al guardar el perfil.', fr:"\u00c9chec de l'enregistrement du profil.", de:'Profil konnte nicht gespeichert werden.', ko:'프로필 저장에 실패했습니다.', ar:'فشل في حفظ الملف الشخصي.', pt:'Falha ao salvar o perfil.' },
+            passwordChanged: { en:'Password changed successfully!', ja:'パスワードを変更しました！', zh:'密码修改成功！', es:'\u00a1Contrase\u00f1a cambiada con \u00e9xito!', fr:'Mot de passe chang\u00e9 avec succ\u00e8s !', de:'Passwort erfolgreich ge\u00e4ndert!', ko:'비밀번호가 변경되었습니다!', ar:'تم تغيير كلمة المرور بنجاح!', pt:'Senha alterada com sucesso!' },
+            passwordMismatch: { en:'Passwords do not match.', ja:'パスワードが一致しません。', zh:'密码不匹配。', es:'Las contrase\u00f1as no coinciden.', fr:'Les mots de passe ne correspondent pas.', de:'Passw\u00f6rter stimmen nicht \u00fcberein.', ko:'비밀번호가 일치하지 않습니다.', ar:'كلمات المرور غير متطابقة.', pt:'As senhas n\u00e3o coincidem.' },
+            passwordRequirementsNotMet: { en:'Password does not meet all requirements.', ja:'パスワードが要件を満たしていません。', zh:'密码不满足所有要求。', es:'La contrase\u00f1a no cumple todos los requisitos.', fr:'Le mot de passe ne r\u00e9pond pas aux exigences.', de:'Passwort erf\u00fcllt nicht alle Anforderungen.', ko:'비밀번호가 요구 사항을 충족하지 않습니다.', ar:'كلمة المرور لا تستوفي المتطلبات.', pt:'A senha n\u00e3o atende aos requisitos.' },
+            passwordChangeError: { en:'Failed to change password. Please try again.', ja:'パスワードの変更に失敗しました。', zh:'修改密码失败，请重试。', es:'Error al cambiar la contrase\u00f1a.', fr:'\u00c9chec du changement de mot de passe.', de:'Passwort konnte nicht ge\u00e4ndert werden.', ko:'비밀번호 변경에 실패했습니다.', ar:'فشل في تغيير كلمة المرور.', pt:'Falha ao alterar a senha.' },
+            // Footer
+            footerHelp: { en:'Help', ja:'ヘルプ', zh:'帮助', es:'Ayuda', fr:'Aide', de:'Hilfe', ko:'도움말', ar:'مساعدة', pt:'Ajuda' },
+            footerTerms: { en:'Terms', ja:'利用規約', zh:'条款', es:'T\u00e9rminos', fr:'Conditions', de:'Bedingungen', ko:'약관', ar:'الشروط', pt:'Termos' },
+            footerPrivacy: { en:'Privacy', ja:'プライバシー', zh:'隐私', es:'Privacidad', fr:'Confidentialit\u00e9', de:'Datenschutz', ko:'개인정보', ar:'الخصوصية', pt:'Privacidade' }
+        };
+
+        // ========== Language Helpers ==========
+        function getCurrentLanguage() { return localStorage.getItem('preferredLanguage') || 'en'; }
+        var getCurrentLang = getCurrentLanguage;
+        function getL(obj) { if (!obj) return ''; var l = getCurrentLanguage(); return obj[l] || obj.en || ''; }
+
+        // Language display names (per UI language)
+        const languageNames = {
+            en: { en:'English', ja:'英語', zh:'英语', es:'Ingl\u00e9s', fr:'Anglais', de:'Englisch', ko:'영어', ar:'الإنجليزية', pt:'Ingl\u00eas' },
+            ja: { en:'Japanese', ja:'日本語', zh:'日语', es:'Japon\u00e9s', fr:'Japonais', de:'Japanisch', ko:'일본어', ar:'اليابانية', pt:'Japon\u00eas' },
+            zh: { en:'Chinese', ja:'中国語', zh:'中文', es:'Chino', fr:'Chinois', de:'Chinesisch', ko:'중국어', ar:'الصينية', pt:'Chin\u00eas' },
+            es: { en:'Spanish', ja:'スペイン語', zh:'西班牙语', es:'Espa\u00f1ol', fr:'Espagnol', de:'Spanisch', ko:'스페인어', ar:'الإسبانية', pt:'Espanhol' },
+            fr: { en:'French', ja:'フランス語', zh:'法语', es:'Franc\u00e9s', fr:'Fran\u00e7ais', de:'Franz\u00f6sisch', ko:'프랑스어', ar:'الفرنسية', pt:'Franc\u00eas' },
+            de: { en:'German', ja:'ドイツ語', zh:'德语', es:'Alem\u00e1n', fr:'Allemand', de:'Deutsch', ko:'독일어', ar:'الألمانية', pt:'Alem\u00e3o' },
+            ko: { en:'Korean', ja:'韓国語', zh:'韩语', es:'Coreano', fr:'Cor\u00e9en', de:'Koreanisch', ko:'한국어', ar:'الكورية', pt:'Coreano' },
+            ar: { en:'Arabic', ja:'アラビア語', zh:'阿拉伯语', es:'\u00c1rabe', fr:'Arabe', de:'Arabisch', ko:'아랍어', ar:'العربية', pt:'\u00c1rabe' },
+            pt: { en:'Portuguese', ja:'ポルトガル語', zh:'葡萄牙语', es:'Portugu\u00e9s', fr:'Portugais', de:'Portugiesisch', ko:'포르투갈어', ar:'البرتغالية', pt:'Portugu\u00eas' }
+        };
+        function getLanguageName(code) {
+            var ui = getCurrentLanguage();
+            return (languageNames[code] && languageNames[code][ui]) || (languageNames[code] ? languageNames[code].en : code);
+        }
+
+        // ========== State ==========
+        let profileData = null;
+        let isEditMode = false;
+
+        // ========== Navbar Text Update ==========
+        function updateUIText() {
+            var els = {
+                menuDashboard: uiText.dashboard, menuMyWorks: uiText.myWorks,
+                menuAccountSettings: uiText.accountSettings, menuLogout: uiText.logout,
+                navLibraryPC: uiText.library, navDashboardPC: uiText.dashboard,
+                navTranslationToolsPC: uiText.translationTools, navMangaTranslatorPC: uiText.mangaTranslator,
+                navTranslationStatusPC: uiText.translationStatus, navFindTranslatorsPC: uiText.findTranslators,
+                navContactPC: uiText.contact, navLibraryMobile: uiText.library, navDashboardMobile: uiText.dashboard,
+                navTranslationToolsMobile: uiText.translationTools, navMangaTranslatorMobile: uiText.mangaTranslator,
+                navTranslationStatusMobile: uiText.translationStatus, navFindTranslatorsMobile: uiText.findTranslators,
+                navContactMobile: uiText.contact
+            };
+            Object.keys(els).forEach(function(id) { var el = document.getElementById(id); if (el) el.textContent = getL(els[id]); });
+        }
+
+        // ========== Page Text Update ==========
+        function updateAllText() {
+            document.title = getL(uiText.pageTitle) + ' - Publisher';
+            var map = {
+                pageTitle: uiText.pageTitle, pageSubtitle: uiText.pageSubtitle,
+                sectionProfileInfo: uiText.sectionProfileInfo,
+                labelFirstName: uiText.labelFirstName, editLabelFirstName: uiText.labelFirstName,
+                labelLastName: uiText.labelLastName, editLabelLastName: uiText.labelLastName,
+                labelDisplayName: uiText.labelDisplayName, editLabelDisplayName: uiText.labelDisplayName,
+                labelBio: uiText.labelBio, editLabelBio: uiText.labelBio,
+                labelPreferredLang: uiText.labelPreferredLang, editLabelPreferredLang: uiText.labelPreferredLang,
+                btnEditProfile: uiText.btnEditProfile, btnChangePhoto: uiText.btnChangePhoto,
+                btnSave: uiText.btnSave, btnCancel: uiText.btnCancel,
+                sectionEmail: uiText.sectionEmail,
+                sectionChangePassword: uiText.sectionChangePassword,
+                labelCurrentPassword: uiText.labelCurrentPassword, labelNewPassword: uiText.labelNewPassword,
+                labelConfirmPassword: uiText.labelConfirmPassword,
+                reqLengthText: uiText.reqLength, reqUppercaseText: uiText.reqUppercase,
+                reqLowercaseText: uiText.reqLowercase, reqNumberText: uiText.reqNumber,
+                btnChangePassword: uiText.btnChangePassword,
+                footerHelp: uiText.footerHelp, footerTerms: uiText.footerTerms, footerPrivacy: uiText.footerPrivacy
+            };
+            Object.keys(map).forEach(function(id) { var el = document.getElementById(id); if (el) el.textContent = getL(map[id]); });
+            // Email hint with link
+            var hint = document.getElementById('emailHintText');
+            if (hint) hint.innerHTML = getL(uiText.emailHintText) + ' <a href="account-settings.html">' + getL(uiText.emailHintLinkText) + '</a>';
+            // Preferred language in view mode
+            if (profileData && profileData.preferred_language) {
+                var vl = document.getElementById('viewPreferredLang');
+                if (vl) vl.textContent = getLanguageName(profileData.preferred_language);
+            }
+        }
+
+        // ========== Language Change ==========
+        function changeLanguage(lang) {
+            localStorage.setItem('preferredLanguage', lang);
+            updateUIText();
+            updateAllText();
+        }
+
+        // ========== Load Profile ==========
+        function loadProfile() {
+            var isDemo = window.location.search.indexOf('demo') !== -1;
+            if (isDemo) {
+                profileData = {
+                    first_name: '\u592a\u90ce', last_name: '\u5c71\u7530', display_name: '\u5c71\u7530\u592a\u90ce',
+                    bio: '\u5c0f\u8aac\u5bb6\u3092\u76ee\u6307\u3057\u3066\u3044\u307e\u3059\u3002\u30d5\u30a1\u30f3\u30bf\u30b8\u30fc\u3068SF\u304c\u597d\u304d\u3067\u3059\u3002',
+                    preferred_language: 'ja', email: 'taro@example.com', avatar_url: null
+                };
+                renderProfile(); return;
+            }
+            var token = localStorage.getItem('token');
+            if (!token) {
+                profileData = { first_name:'', last_name:'', display_name:'User', bio:'', preferred_language:'en', email:'user@example.com', avatar_url:null };
+                renderProfile(); return;
+            }
+            fetch('/api/auth/profile', { headers: { 'Authorization': 'Bearer ' + token } })
+                .then(function(res) { if (!res.ok) throw new Error('Failed'); return res.json(); })
+                .then(function(data) { profileData = data; renderProfile(); })
+                .catch(function() {
+                    profileData = { first_name:'', last_name:'', display_name:'User', bio:'', preferred_language:'en', email:'user@example.com', avatar_url:null };
+                    renderProfile();
+                });
+        }
+
+        // ========== Render Profile ==========
+        function renderProfile() {
+            if (!profileData) return;
+            var dn = profileData.display_name || (profileData.first_name + ' ' + profileData.last_name).trim() || 'User';
+            var initial = dn.charAt(0).toUpperCase();
+            var email = profileData.email || '';
+            // Avatar (view)
+            var avatarEl = document.getElementById('profileAvatar');
+            if (profileData.avatar_url) avatarEl.innerHTML = '<img src="' + profileData.avatar_url + '" alt="Avatar">';
+            else document.getElementById('profileInitial').textContent = initial;
+            // Avatar (edit)
+            var editAvatar = document.getElementById('editAvatar');
+            if (profileData.avatar_url) editAvatar.innerHTML = '<img src="' + profileData.avatar_url + '" alt="Avatar">';
+            else document.getElementById('editAvatarInitial').textContent = initial;
+            // Text fields
+            document.getElementById('profileDisplayName').textContent = dn;
+            document.getElementById('profileEmailDisplay').textContent = email;
+            document.getElementById('viewFirstName').textContent = profileData.first_name || '-';
+            document.getElementById('viewLastName').textContent = profileData.last_name || '-';
+            document.getElementById('viewDisplayName').textContent = profileData.display_name || '-';
+            document.getElementById('viewBio').textContent = profileData.bio || '-';
+            document.getElementById('viewPreferredLang').textContent = getLanguageName(profileData.preferred_language || 'en');
+            document.getElementById('emailValue').textContent = email;
+            // Populate edit form
+            document.getElementById('editFirstName').value = profileData.first_name || '';
+            document.getElementById('editLastName').value = profileData.last_name || '';
+            document.getElementById('editDisplayNameField').value = profileData.display_name || '';
+            document.getElementById('editBio').value = profileData.bio || '';
+            document.getElementById('editPreferredLang').value = profileData.preferred_language || 'en';
+        }
+
+        // ========== Toggle Edit Mode ==========
+        function toggleEditMode(edit) {
+            isEditMode = edit;
+            var viewMode = document.getElementById('profileViewMode');
+            var editMode = document.getElementById('profileEditMode');
+            if (edit) {
+                viewMode.classList.add('hidden');
+                editMode.classList.add('active');
+                if (profileData) {
+                    document.getElementById('editFirstName').value = profileData.first_name || '';
+                    document.getElementById('editLastName').value = profileData.last_name || '';
+                    document.getElementById('editDisplayNameField').value = profileData.display_name || '';
+                    document.getElementById('editBio').value = profileData.bio || '';
+                    document.getElementById('editPreferredLang').value = profileData.preferred_language || 'en';
+                }
+            } else {
+                viewMode.classList.remove('hidden');
+                editMode.classList.remove('active');
+            }
+        }
+
+        // ========== Avatar Change ==========
+        function handleAvatarChange(event) {
+            var file = event.target.files[0];
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('editAvatar').innerHTML = '<img src="' + e.target.result + '" alt="Avatar">';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // ========== Save Profile ==========
+        function saveProfile(event) {
+            event.preventDefault();
+            var updated = {
+                first_name: document.getElementById('editFirstName').value.trim(),
+                last_name: document.getElementById('editLastName').value.trim(),
+                display_name: document.getElementById('editDisplayNameField').value.trim(),
+                bio: document.getElementById('editBio').value.trim(),
+                preferred_language: document.getElementById('editPreferredLang').value
+            };
+            var isDemo = window.location.search.indexOf('demo') !== -1;
+            var token = localStorage.getItem('token');
+            if (isDemo || !token) {
+                Object.assign(profileData, updated);
+                renderProfile(); toggleEditMode(false);
+                showToast(getL(uiText.profileSaved), 'success'); return;
+            }
+            fetch('/api/auth/profile', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify(updated)
+            })
+            .then(function(res) { if (!res.ok) throw new Error('Save failed'); return res.json(); })
+            .then(function(data) {
+                profileData = data.user || Object.assign(profileData, updated);
+                renderProfile(); toggleEditMode(false);
+                showToast(getL(uiText.profileSaved), 'success');
+            })
+            .catch(function() { showToast(getL(uiText.profileSaveError), 'error'); });
+        }
+
+        // ========== Password Visibility ==========
+        function togglePasswordVisibility(fieldId) {
+            var field = document.getElementById(fieldId);
+            var icon = field.parentElement.querySelector('.password-toggle-btn i');
+            if (field.type === 'password') { field.type = 'text'; icon.className = 'fas fa-eye-slash'; }
+            else { field.type = 'password'; icon.className = 'fas fa-eye'; }
+        }
+
+        // ========== Password Realtime Validation ==========
+        function validatePasswordRealtime() {
+            var pw = document.getElementById('newPassword').value;
+            var checks = { reqLength: pw.length >= 8, reqUppercase: /[A-Z]/.test(pw), reqLowercase: /[a-z]/.test(pw), reqNumber: /[0-9]/.test(pw) };
+            Object.keys(checks).forEach(function(id) {
+                var li = document.getElementById(id);
+                if (!li) return;
+                if (checks[id]) { li.classList.add('met'); li.querySelector('i').className = 'fas fa-check-circle'; }
+                else { li.classList.remove('met'); li.querySelector('i').className = 'fas fa-circle'; }
+            });
+        }
+
+        // ========== Change Password ==========
+        function changePassword(event) {
+            event.preventDefault();
+            var currentPw = document.getElementById('currentPassword').value;
+            var newPw = document.getElementById('newPassword').value;
+            var confirmPw = document.getElementById('confirmPassword').value;
+            if (newPw.length < 8 || !/[A-Z]/.test(newPw) || !/[a-z]/.test(newPw) || !/[0-9]/.test(newPw)) {
+                showToast(getL(uiText.passwordRequirementsNotMet), 'error'); return;
+            }
+            if (newPw !== confirmPw) { showToast(getL(uiText.passwordMismatch), 'error'); return; }
+            var isDemo = window.location.search.indexOf('demo') !== -1;
+            var token = localStorage.getItem('token');
+            function resetPwForm() {
+                document.getElementById('passwordForm').reset();
+                ['reqLength','reqUppercase','reqLowercase','reqNumber'].forEach(function(id) {
+                    var li = document.getElementById(id);
+                    if (li) { li.classList.remove('met'); li.querySelector('i').className = 'fas fa-circle'; }
+                });
+            }
+            if (isDemo || !token) { resetPwForm(); showToast(getL(uiText.passwordChanged), 'success'); return; }
+            fetch('/api/auth/password', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ current_password: currentPw, new_password: newPw })
+            })
+            .then(function(res) { if (!res.ok) throw new Error('Failed'); return res.json(); })
+            .then(function() { resetPwForm(); showToast(getL(uiText.passwordChanged), 'success'); })
+            .catch(function() { showToast(getL(uiText.passwordChangeError), 'error'); });
+        }
+
+        // ========== Toast Notifications ==========
+        function showToast(message, type) {
+            var container = document.getElementById('toastContainer');
+            var toast = document.createElement('div');
+            toast.className = 'toast-message ' + (type || 'success');
+            toast.innerHTML = '<i class="fas ' + (type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle') + '"></i> ' + message;
+            container.appendChild(toast);
+            setTimeout(function() {
+                toast.style.opacity = '0'; toast.style.transform = 'translateX(100%)'; toast.style.transition = 'all 0.3s ease';
+                setTimeout(function() { toast.remove(); }, 300);
+            }, 3000);
+        }
+
+        // ========== DOMContentLoaded ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            var dSel = document.getElementById('languageSelector');
+            var mSel = document.getElementById('languageSelectorMobile');
+            if (dSel && mSel) {
+                var saved = localStorage.getItem('preferredLanguage') || 'en';
+                dSel.value = saved; mSel.value = saved;
+                mSel.addEventListener('change', function() { dSel.value = this.value; changeLanguage(this.value); });
+                dSel.addEventListener('change', function() { mSel.value = this.value; changeLanguage(this.value); });
+            }
+            updateUIText(); updateAllText();
+            setTimeout(function() { updateUIText(); updateAllText(); }, 100);
+            loadProfile();
+            // Close user dropdown on outside click
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.user-dropdown')) {
+                    var dd = document.getElementById('userDropdown');
+                    var dm = document.getElementById('userMenu');
+                    if (dd) dd.classList.remove('open');
+                    if (dm) dm.classList.remove('show');
+                }
+            });
+            // Navbar overlay & mobile menu
+            var navCollapse = document.getElementById('navbarNav');
+            var navOverlay = document.getElementById('navbarOverlay');
+            if (navCollapse) {
+                navCollapse.addEventListener('show.bs.collapse', function() { document.body.classList.add('menu-open'); if (navOverlay) navOverlay.classList.add('show'); });
+                navCollapse.addEventListener('hide.bs.collapse', function() { document.body.classList.remove('menu-open'); if (navOverlay) navOverlay.classList.remove('show'); });
+            }
+            if (navOverlay) {
+                navOverlay.addEventListener('click', function() { var c = bootstrap.Collapse.getInstance(navCollapse); if (c) c.hide(); });
+            }
+            // Language changed event
+            document.addEventListener('languageChanged', function() { updateUIText(); updateAllText(); });
+            // Footer year
+            var fy = document.getElementById('footerYear'); if (fy) fy.textContent = new Date().getFullYear();
+        });
+    </script>
+</body>
+</html>

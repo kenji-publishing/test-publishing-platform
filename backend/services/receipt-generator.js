@@ -383,7 +383,7 @@ function getTexts(lang) {
             totalAmount: '合計金額',
             thankYou: 'ご購入ありがとうございます',
             footerLine1: 'Publisher - 世界中の読者と作家をつなぐ',
-            footerLine2: '© 2025 Publisher. All rights reserved.',
+            footerLine2: '© 2026 Publisher. All rights reserved.',
             printButton: '印刷 / PDFとして保存'
         },
         en: {
@@ -399,7 +399,7 @@ function getTexts(lang) {
             totalAmount: 'Total Amount',
             thankYou: 'Thank you for your purchase',
             footerLine1: 'Publisher - Connecting readers and authors worldwide',
-            footerLine2: '© 2025 Publisher. All rights reserved.',
+            footerLine2: '© 2026 Publisher. All rights reserved.',
             printButton: 'Print / Save as PDF'
         },
         zh: {
@@ -415,7 +415,7 @@ function getTexts(lang) {
             totalAmount: '总金额',
             thankYou: '感谢您的购买',
             footerLine1: 'Publisher - 连接全球读者与作者',
-            footerLine2: '© 2025 Publisher. 保留所有权利。',
+            footerLine2: '© 2026 Publisher. 保留所有权利。',
             printButton: '打印 / 保存为PDF'
         },
         ko: {
@@ -431,7 +431,7 @@ function getTexts(lang) {
             totalAmount: '총액',
             thankYou: '구매해 주셔서 감사합니다',
             footerLine1: 'Publisher - 전 세계 독자와 작가를 연결',
-            footerLine2: '© 2025 Publisher. All rights reserved.',
+            footerLine2: '© 2026 Publisher. All rights reserved.',
             printButton: '인쇄 / PDF로 저장'
         },
         es: {
@@ -447,7 +447,7 @@ function getTexts(lang) {
             totalAmount: 'Monto Total',
             thankYou: 'Gracias por su compra',
             footerLine1: 'Publisher - Conectando lectores y autores en todo el mundo',
-            footerLine2: '© 2025 Publisher. Todos los derechos reservados.',
+            footerLine2: '© 2026 Publisher. Todos los derechos reservados.',
             printButton: 'Imprimir / Guardar como PDF'
         },
         fr: {
@@ -463,7 +463,7 @@ function getTexts(lang) {
             totalAmount: 'Montant Total',
             thankYou: 'Merci pour votre achat',
             footerLine1: 'Publisher - Connecter les lecteurs et les auteurs du monde entier',
-            footerLine2: '© 2025 Publisher. Tous droits réservés.',
+            footerLine2: '© 2026 Publisher. Tous droits réservés.',
             printButton: 'Imprimer / Enregistrer en PDF'
         },
         de: {
@@ -479,7 +479,7 @@ function getTexts(lang) {
             totalAmount: 'Gesamtbetrag',
             thankYou: 'Vielen Dank für Ihren Kauf',
             footerLine1: 'Publisher - Leser und Autoren weltweit verbinden',
-            footerLine2: '© 2025 Publisher. Alle Rechte vorbehalten.',
+            footerLine2: '© 2026 Publisher. Alle Rechte vorbehalten.',
             printButton: 'Drucken / Als PDF speichern'
         },
         ar: {
@@ -495,7 +495,7 @@ function getTexts(lang) {
             totalAmount: 'المبلغ الإجمالي',
             thankYou: 'شكراً لشرائك',
             footerLine1: 'Publisher - ربط القراء والمؤلفين حول العالم',
-            footerLine2: '© 2025 Publisher. جميع الحقوق محفوظة.',
+            footerLine2: '© 2026 Publisher. جميع الحقوق محفوظة.',
             printButton: 'طباعة / حفظ كـ PDF'
         },
         pt: {
@@ -511,7 +511,7 @@ function getTexts(lang) {
             totalAmount: 'Valor Total',
             thankYou: 'Obrigado pela sua compra',
             footerLine1: 'Publisher - Conectando leitores e autores em todo o mundo',
-            footerLine2: '© 2025 Publisher. Todos os direitos reservados.',
+            footerLine2: '© 2026 Publisher. Todos os direitos reservados.',
             printButton: 'Imprimir / Salvar como PDF'
         }
     };

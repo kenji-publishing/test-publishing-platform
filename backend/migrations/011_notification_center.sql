@@ -197,7 +197,7 @@ INSERT INTO notifications (user_id, notification_type, title, message, icon, ico
 VALUES 
     ('YOUR_USER_ID', 'sale', '作品が購入されました！', 
      '「サンプル作品」がJohnさんに購入されました。¥980の収益が発生しました。',
-     'fa-dollar-sign', 'success', '/pages/earnings.html',
+     'fa-dollar-sign', 'success', '/pages/dashboard.html',
      '{"work_title": "サンプル作品", "amount": 980, "buyer": "John"}'
     ),
     ('YOUR_USER_ID', 'translation_complete', '翻訳が完了しました',

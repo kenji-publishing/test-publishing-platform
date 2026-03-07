@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
     <title>Register as Translator - Publisher</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,296 +12,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="../../css/style-new.css" rel="stylesheet">
+    <link href="../../css/navbar.css" rel="stylesheet">
     
-    <style>
-        /* ========== Mobile Language Selector ========== */
-        .navbar-lang-selector {
-            display: flex;
-            align-items: center;
-            margin-right: 0.5rem;
-        }
-        
-        @media (max-width: 991.98px) {
-            .navbar-lang-selector {
-                order: 1;
-            }
-            .navbar-toggler {
-                order: 2;
-            }
-        }
-        
-        /* ========== PC Navbar - 横並び維持 ========== */
-        @media (min-width: 992px) {
-            .navbar-nav {
-                flex-wrap: nowrap !important;
-                flex-direction: row !important;
-            }
-            .navbar-nav .nav-item {
-                white-space: nowrap !important;
-            }
-            .navbar-nav .nav-link {
-                white-space: nowrap !important;
-                padding: 0.5rem 0.6rem !important;
-                font-size: 0.9rem;
-            }
-            .navbar-collapse .d-flex {
-                flex-wrap: nowrap !important;
-            }
-            .dropdown-menu {
-                white-space: nowrap;
-            }
-            .navbar-buttons-guest {
-                display: flex !important;
-                flex-wrap: nowrap !important;
-                gap: 0.5rem;
-            }
-            .navbar-buttons-guest .btn {
-                white-space: nowrap !important;
-                flex-shrink: 0;
-            }
-        }
-        
-        /* ========== Auth Visibility Control ========== */
-        .auth-only {
-            display: none !important;
-        }
-        .guest-only {
-            display: block;
-        }
-        body.logged-in .auth-only {
-            display: block !important;
-        }
-        body.logged-in .auth-only.nav-item {
-            display: list-item !important;
-        }
-        body.logged-in .auth-only.dropdown {
-            display: block !important;
-        }
-        body.logged-in .guest-only {
-            display: none !important;
-        }
-        @media (min-width: 992px) {
-            body.logged-in .navbar-buttons-guest {
-                display: none !important;
-            }
-        }
-        
-        /* ========== User Dropdown Menu ========== */
-        .user-dropdown {
-            position: relative;
-        }
-        .user-dropdown-toggle {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: transparent;
-            border: 1px solid var(--color-border);
-            border-radius: 25px;
-            padding: 0.4rem 0.75rem;
-            cursor: pointer;
-            color: var(--color-text);
-            transition: all 0.2s;
-        }
-        .user-dropdown-toggle:hover {
-            border-color: var(--color-accent);
-            background: rgba(139, 115, 85, 0.05);
-        }
-        .user-dropdown-toggle i:first-child {
-            font-size: 1.25rem;
-            color: var(--color-accent);
-        }
-        .user-name {
-            font-weight: 500;
-            font-size: 0.9rem;
-            max-width: 120px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .user-chevron {
-            font-size: 0.7rem;
-            color: var(--color-text-secondary);
-            transition: transform 0.2s;
-        }
-        .user-dropdown.open .user-chevron {
-            transform: rotate(180deg);
-        }
-        .user-menu {
-            position: absolute;
-            top: calc(100% + 0.5rem);
-            right: 0;
-            background: var(--color-bg-card);
-            border: 1px solid var(--color-border);
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            min-width: 240px;
-            z-index: 1001;
-            display: none;
-            overflow: hidden;
-        }
-        .user-menu.show {
-            display: block;
-        }
-        .user-menu-header {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 1rem;
-            background: var(--color-bg-main);
-        }
-        .user-avatar {
-            font-size: 2.5rem;
-            color: var(--color-accent);
-        }
-        .user-info {
-            flex: 1;
-            min-width: 0;
-        }
-        .user-display-name {
-            font-weight: 600;
-            font-size: 0.95rem;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .user-email {
-            font-size: 0.8rem;
-            color: var(--color-text-secondary);
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .user-menu-divider {
-            height: 1px;
-            background: var(--color-border);
-        }
-        .user-menu-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
-            color: var(--color-text);
-            text-decoration: none;
-            font-size: 0.9rem;
-            cursor: pointer;
-            border: none;
-            background: transparent;
-            width: 100%;
-            text-align: left;
-        }
-        .user-menu-item:hover {
-            background: var(--color-bg-hover);
-            color: var(--color-accent);
-        }
-        .user-menu-item i {
-            width: 20px;
-            text-align: center;
-            color: var(--color-text-secondary);
-        }
-        .user-menu-item:hover i {
-            color: var(--color-accent);
-        }
-        .logout-btn {
-            color: var(--color-error);
-        }
-        .logout-btn i {
-            color: var(--color-error);
-        }
-        .logout-btn:hover {
-            background: rgba(199, 93, 93, 0.1);
-            color: var(--color-error);
-        }
-        
-        /* ========== Navbar Overlay ========== */
-        .navbar-overlay {
-            display: none;
-            position: fixed;
-            top: 56px;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1040;
-        }
-        .navbar-overlay.show {
-            display: block;
-        }
-        
-        /* ========== Mobile Adjustments ========== */
-        @media (max-width: 991.98px) {
-            .user-dropdown {
-                order: 3;
-                margin-left: 0.5rem;
-            }
-            .user-dropdown-toggle {
-                padding: 0.3rem;
-                border-radius: 50%;
-                width: 38px;
-                height: 38px;
-                justify-content: center;
-            }
-            .user-menu {
-                position: fixed;
-                top: 56px;
-                right: 10px;
-                left: auto;
-                min-width: 260px;
-                max-width: calc(100vw - 20px);
-                z-index: 9999;
-            }
-            .navbar-collapse {
-                max-height: 70vh;
-                overflow-y: auto;
-                overscroll-behavior: contain;
-                -webkit-overflow-scrolling: touch;
-            }
-            .navbar-collapse.show,
-            .navbar-collapse.collapsing {
-                position: fixed;
-                top: 56px;
-                left: 0;
-                right: 0;
-                background: #FFFFFF;
-                border-bottom: 1px solid var(--color-border);
-                box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-                z-index: 1045;
-                padding: 0.5rem 1rem;
-            }
-            body.menu-open {
-                overflow: hidden;
-            }
-            .navbar-custom {
-                z-index: 1050 !important;
-                background: #FFFFFF !important;
-            }
-        }
-
-        /* ========== Page Specific Styles ========== */
-        .page-header { background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%); color: white; padding: var(--spacing-xl) 0; margin-bottom: var(--spacing-xl); }
-        .page-header h1 { color: white; font-size: var(--font-size-2xl); margin-bottom: var(--spacing-xs); }
-        .page-header p { color: rgba(255,255,255,0.9); margin: 0; }
-        .form-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-xl); margin-bottom: var(--spacing-lg); }
-        .form-card h4 { font-family: var(--font-heading); color: var(--color-text-primary); margin-bottom: var(--spacing-lg); padding-bottom: var(--spacing-md); border-bottom: 1px solid var(--color-border); }
-        .step-indicator { display: flex; justify-content: center; margin-bottom: var(--spacing-xl); gap: var(--spacing-sm); }
-        .step { display: flex; align-items: center; gap: var(--spacing-sm); }
-        .step-num { width: 36px; height: 36px; border-radius: 50%; background: var(--color-bg-hover); color: var(--color-text-secondary); display: flex; align-items: center; justify-content: center; font-weight: 600; transition: all var(--transition-fast); }
-        .step.active .step-num { background: var(--color-accent); color: white; }
-        .step.completed .step-num { background: var(--color-success); color: white; }
-        .step-label { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
-        .step.active .step-label { color: var(--color-text-primary); font-weight: 500; }
-        .step-line { width: 40px; height: 2px; background: var(--color-border); margin: 0 var(--spacing-xs); }
-        .lang-pair-item { background: var(--color-bg-hover); border-radius: var(--radius-md); padding: var(--spacing-md); margin-bottom: var(--spacing-sm); display: flex; align-items: center; gap: var(--spacing-md); flex-wrap: wrap; }
-        .lang-pair-item .form-select { flex: 1; min-width: 120px; }
-        .info-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-lg); margin-bottom: var(--spacing-lg); }
-        .info-card h5 { font-weight: 600; margin-bottom: var(--spacing-md); color: var(--color-text-primary); }
-        .benefits-list { list-style: none; padding: 0; margin: 0; }
-        .benefits-list li { padding: var(--spacing-sm) 0; display: flex; align-items: center; gap: var(--spacing-sm); color: var(--color-text-secondary); }
-        .benefits-list li i { color: var(--color-success); }
-        .revenue-highlight { background: linear-gradient(135deg, rgba(93, 156, 89, 0.1), rgba(93, 156, 89, 0.05)); border: 1px solid rgba(93, 156, 89, 0.3); border-radius: var(--radius-lg); padding: var(--spacing-lg); text-align: center; margin-bottom: var(--spacing-lg); }
-        .revenue-highlight .percent { font-family: var(--font-heading); font-size: var(--font-size-3xl); font-weight: 700; color: var(--color-success); }
-        .revenue-highlight .label { color: var(--color-text-secondary); font-size: var(--font-size-sm); }
-        .success-icon { font-size: 5rem; color: var(--color-success); margin-bottom: var(--spacing-lg); }
-    </style>
 </head>
 <body>
     <!-- ========== NAVBAR HTML START ========== -->
@@ -352,6 +65,10 @@
                         <i class="fas fa-th-large"></i>
                         <span id="menuDashboard">Dashboard</span>
                     </a>
+                    <a href="../my-works.html" class="user-menu-item">
+                        <i class="fas fa-book"></i>
+                        <span id="menuMyWorks">My Works</span>
+                    </a>
                     <a href="../account-settings.html" class="user-menu-item">
                         <i class="fas fa-cog"></i>
                         <span id="menuAccountSettings">Account Settings</span>
@@ -379,11 +96,6 @@
                     <li class="nav-item">
                         <a class="nav-link" href="../browse.html">
                             <i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../genres.html">
-                            <i class="fas fa-layer-group me-1"></i> <span data-i18n="nav.genres">Genres</span>
                         </a>
                     </li>
                     <!-- Auth: Library -->
@@ -440,11 +152,6 @@
                     <li class="nav-item">
                         <a class="nav-link" href="../browse.html">
                             <i class="fas fa-compass me-2"></i> <span data-i18n="nav.browse">Browse</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../genres.html">
-                            <i class="fas fa-layer-group me-2"></i> <span data-i18n="nav.genres">Genres</span>
                         </a>
                     </li>
                     <!-- Auth: Library -->
@@ -811,6 +518,11 @@
                 en: 'Are you sure you want to log out?', ja: 'ログアウトしますか？', zh: '确定要退出登录吗？',
                 es: '¿Estás seguro de que quieres cerrar sesión?', fr: 'Êtes-vous sûr de vouloir vous déconnecter?', de: 'Sind Sie sicher, dass Sie sich abmelden möchten?',
                 ko: '로그아웃 하시겠습니까?', ar: 'هل أنت متأكد أنك تريد تسجيل الخروج؟', pt: 'Tem certeza que deseja sair?'
+            },
+            myWorks: {
+                en: 'My Works', ja: 'マイ作品', zh: '我的作品',
+                es: 'Mis Obras', fr: 'Mes Œuvres', de: 'Meine Werke',
+                ko: '내 작품', ar: 'أعمالي', pt: 'Minhas Obras'
             }
         };
 
@@ -825,9 +537,11 @@
 
         function updateNavUIText() {
             const menuDashboard = document.getElementById('menuDashboard');
+            const menuMyWorks = document.getElementById('menuMyWorks');
             const menuAccountSettings = document.getElementById('menuAccountSettings');
             const menuLogout = document.getElementById('menuLogout');
             if (menuDashboard) menuDashboard.textContent = navGetL(navUiText.dashboard);
+            if (menuMyWorks) menuMyWorks.textContent = navGetL(navUiText.myWorks);
             if (menuAccountSettings) menuAccountSettings.textContent = navGetL(navUiText.accountSettings);
             if (menuLogout) menuLogout.textContent = navGetL(navUiText.logout);
 
@@ -845,48 +559,7 @@
                 if (el) el.textContent = navGetL(els[id]);
             });
         }
-
-        function toggleUserDropdown(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            const dropdown = document.getElementById('userDropdown');
-            const dropdownMenu = document.getElementById('userMenu');
-            dropdown.classList.toggle('open');
-            dropdownMenu.classList.toggle('show');
         }
-
-        function handleLogout() {
-            if (confirm(navGetL(navUiText.logOutConfirm))) {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                window.location.reload();
-            }
-        }
-
-        function loadUserInfo() {
-            const userStr = localStorage.getItem('user');
-            const token = localStorage.getItem('token');
-            const isLoggedIn = !!(userStr && token);
-
-            if (isLoggedIn) {
-                try {
-                    const user = JSON.parse(userStr);
-                    const displayName = user.display_name || user.firstName || user.email || 'User';
-                    const userNameEl = document.getElementById('userName');
-                    const userDisplayNameEl = document.getElementById('userDisplayName');
-                    const userEmailEl = document.getElementById('userEmail');
-                    if (userNameEl) userNameEl.textContent = displayName;
-                    if (userDisplayNameEl) userDisplayNameEl.textContent = displayName;
-                    if (userEmailEl) userEmailEl.textContent = user.email || '';
-                    document.body.classList.add('logged-in');
-                } catch (e) {
-                    document.body.classList.remove('logged-in');
-                }
-            } else {
-                document.body.classList.remove('logged-in');
-            }
-        }
-
         document.addEventListener('DOMContentLoaded', function() {
             const desktopSelector = document.getElementById('languageSelector');
             const mobileSelector = document.getElementById('languageSelectorMobile');
@@ -912,8 +585,6 @@
 
             updateNavUIText();
             setTimeout(updateNavUIText, 100);
-            loadUserInfo();
-
             document.addEventListener('click', function(e) {
                 if (!e.target.closest('.user-dropdown')) {
                     const dropdown = document.getElementById('userDropdown');
@@ -1014,11 +685,7 @@
             alertAtLeastOnePair: { en: 'Please add at least one language pair', ja: '最低1つの言語ペアを設定してください', zh: '请至少添加一个语言对', es: 'Por favor agregue al menos un par de idiomas', fr: 'Veuillez ajouter au moins une paire de langues', de: 'Bitte fügen Sie mindestens ein Sprachpaar hinzu', ko: '최소 1개의 언어 쌍을 추가해주세요', ar: 'يرجى إضافة زوج لغات واحد على الأقل', pt: 'Por favor adicione pelo menos um par de idiomas' },
             alertRegFailed: { en: 'Registration failed', ja: '登録に失敗しました', zh: '注册失败', es: 'Registro fallido', fr: "L'inscription a échoué", de: 'Registrierung fehlgeschlagen', ko: '등록 실패', ar: 'فشل التسجيل', pt: 'Registro falhou' }
         };
-
-        function getCurrentLang() { return localStorage.getItem('preferredLanguage') || 'en'; }
-        function getL(obj) { if (!obj) return ''; const l = getCurrentLang(); return obj[l] || obj['en'] || ''; }
-
-        function updateAllText() {
+function updateAllText() {
             const l = getCurrentLang();
             document.title = getL(uiText.pageTitle) + ' - Publisher';
             document.getElementById('pageTitle').textContent = getL(uiText.pageTitle);
@@ -1242,5 +909,6 @@
         });
     </script>
     <script src="../../js/header-notification.js"></script>
+    <script src="../../js/navbar.js"></script>
 </body>
 </html>

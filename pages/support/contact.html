@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
     <title data-i18n="support.contact.title">Contact Us - Publisher</title>
     
     <!-- Google Fonts -->
@@ -18,272 +19,10 @@
     <!-- Custom Styles -->
     <link href="../../css/style-new.css" rel="stylesheet">
     <link href="../../css/mobile-fixes.css" rel="stylesheet">
-    
+    <link href="../../css/navbar.css" rel="stylesheet">
+
+    <!-- Contact Page Styles -->
     <style>
-        /* ========== Mobile Language Selector ========== */
-        .navbar-lang-selector {
-            display: flex;
-            align-items: center;
-            margin-right: 0.5rem;
-        }
-        
-        @media (max-width: 991.98px) {
-            .navbar-lang-selector {
-                order: 1;
-            }
-            .navbar-toggler {
-                order: 2;
-            }
-        }
-        
-        /* ========== PC Navbar - 横並び維持 ========== */
-        @media (min-width: 992px) {
-            .navbar-nav {
-                flex-wrap: nowrap !important;
-                flex-direction: row !important;
-            }
-            .navbar-nav .nav-item {
-                white-space: nowrap !important;
-            }
-            .navbar-nav .nav-link {
-                white-space: nowrap !important;
-                padding: 0.5rem 0.6rem !important;
-                font-size: 0.9rem;
-            }
-            .navbar-collapse .d-flex {
-                flex-wrap: nowrap !important;
-            }
-            .dropdown-menu {
-                white-space: nowrap;
-            }
-            .navbar-buttons-guest {
-                display: flex !important;
-                flex-wrap: nowrap !important;
-                gap: 0.5rem;
-            }
-            .navbar-buttons-guest .btn {
-                white-space: nowrap !important;
-                flex-shrink: 0;
-            }
-        }
-        
-        /* ========== Auth Visibility Control ========== */
-        .auth-only {
-            display: none !important;
-        }
-        .guest-only {
-            display: block;
-        }
-        body.logged-in .auth-only {
-            display: block !important;
-        }
-        body.logged-in .auth-only.nav-item {
-            display: list-item !important;
-        }
-        body.logged-in .auth-only.dropdown {
-            display: block !important;
-        }
-        body.logged-in .guest-only {
-            display: none !important;
-        }
-        @media (min-width: 992px) {
-            body.logged-in .navbar-buttons-guest {
-                display: none !important;
-            }
-        }
-        
-        /* ========== User Dropdown Menu ========== */
-        .user-dropdown {
-            position: relative;
-        }
-        .user-dropdown-toggle {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: transparent;
-            border: 1px solid var(--color-border);
-            border-radius: 25px;
-            padding: 0.4rem 0.75rem;
-            cursor: pointer;
-            color: var(--color-text);
-            transition: all 0.2s;
-        }
-        .user-dropdown-toggle:hover {
-            border-color: var(--color-accent);
-            background: rgba(139, 115, 85, 0.05);
-        }
-        .user-dropdown-toggle i:first-child {
-            font-size: 1.25rem;
-            color: var(--color-accent);
-        }
-        .user-name {
-            font-weight: 500;
-            font-size: 0.9rem;
-            max-width: 120px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .user-chevron {
-            font-size: 0.7rem;
-            color: var(--color-text-secondary);
-            transition: transform 0.2s;
-        }
-        .user-dropdown.open .user-chevron {
-            transform: rotate(180deg);
-        }
-        .user-menu {
-            position: absolute;
-            top: calc(100% + 0.5rem);
-            right: 0;
-            background: var(--color-bg-card);
-            border: 1px solid var(--color-border);
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            min-width: 240px;
-            z-index: 1001;
-            display: none;
-            overflow: hidden;
-        }
-        .user-menu.show {
-            display: block;
-        }
-        .user-menu-header {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 1rem;
-            background: var(--color-bg-main);
-        }
-        .user-avatar {
-            font-size: 2.5rem;
-            color: var(--color-accent);
-        }
-        .user-info {
-            flex: 1;
-            min-width: 0;
-        }
-        .user-display-name {
-            font-weight: 600;
-            font-size: 0.95rem;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .user-email {
-            font-size: 0.8rem;
-            color: var(--color-text-secondary);
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .user-menu-divider {
-            height: 1px;
-            background: var(--color-border);
-        }
-        .user-menu-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
-            color: var(--color-text);
-            text-decoration: none;
-            font-size: 0.9rem;
-            cursor: pointer;
-            border: none;
-            background: transparent;
-            width: 100%;
-            text-align: left;
-        }
-        .user-menu-item:hover {
-            background: var(--color-bg-hover);
-            color: var(--color-accent);
-        }
-        .user-menu-item i {
-            width: 20px;
-            text-align: center;
-            color: var(--color-text-secondary);
-        }
-        .user-menu-item:hover i {
-            color: var(--color-accent);
-        }
-        .logout-btn {
-            color: var(--color-error);
-        }
-        .logout-btn i {
-            color: var(--color-error);
-        }
-        .logout-btn:hover {
-            background: rgba(199, 93, 93, 0.1);
-            color: var(--color-error);
-        }
-        
-        /* ========== Navbar Overlay ========== */
-        .navbar-overlay {
-            display: none;
-            position: fixed;
-            top: 56px;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1040;
-        }
-        .navbar-overlay.show {
-            display: block;
-        }
-        
-        /* ========== Mobile Adjustments ========== */
-        @media (max-width: 991.98px) {
-            .user-dropdown {
-                order: 3;
-                margin-left: 0.5rem;
-            }
-            .user-dropdown-toggle {
-                padding: 0.3rem;
-                border-radius: 50%;
-                width: 38px;
-                height: 38px;
-                justify-content: center;
-            }
-            .user-menu {
-                position: fixed;
-                top: 56px;
-                right: 10px;
-                left: auto;
-                min-width: 260px;
-                max-width: calc(100vw - 20px);
-                z-index: 9999;
-            }
-            .navbar-collapse {
-                max-height: 70vh;
-                overflow-y: auto;
-                overscroll-behavior: contain;
-                -webkit-overflow-scrolling: touch;
-            }
-            .navbar-collapse.show,
-            .navbar-collapse.collapsing {
-                position: fixed;
-                top: 56px;
-                left: 0;
-                right: 0;
-                background: #FFFFFF;
-                border-bottom: 1px solid var(--color-border);
-                box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-                z-index: 1045;
-                padding: 0.5rem 1rem;
-            }
-            body.menu-open {
-                overflow: hidden;
-            }
-            .navbar-custom {
-                z-index: 1050 !important;
-                background: #FFFFFF !important;
-            }
-        }
-
-        /* ========== Contact Page Styles ========== */
-
         /* Contact Hero Section */
         .contact-hero {
             background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
@@ -291,16 +30,8 @@
             color: white;
             text-align: center;
         }
-
-        .contact-hero h1 {
-            color: white;
-            font-size: var(--font-size-3xl);
-            margin-bottom: var(--spacing-sm);
-        }
-
-        .contact-hero p {
-            color: rgba(255, 255, 255, 0.9);
-        }
+        .contact-hero h1 { color: white; font-size: var(--font-size-3xl); margin-bottom: var(--spacing-sm); }
+        .contact-hero p { color: rgba(255, 255, 255, 0.9); }
 
         /* Redirect Notice */
         .redirect-notice {
@@ -317,7 +48,6 @@
             margin-left: auto;
             margin-right: auto;
         }
-
         .redirect-icon {
             width: 80px;
             height: 80px;
@@ -330,16 +60,8 @@
             color: white;
             font-size: 2rem;
         }
-
-        .redirect-notice h2 {
-            margin-bottom: var(--spacing-md);
-        }
-
-        .redirect-notice p {
-            color: var(--color-text-secondary);
-            margin-bottom: var(--spacing-lg);
-        }
-
+        .redirect-notice h2 { margin-bottom: var(--spacing-md); }
+        .redirect-notice p { color: var(--color-text-secondary); margin-bottom: var(--spacing-lg); }
         .redirect-steps {
             background: var(--color-bg-hover);
             border-radius: var(--radius-md);
@@ -347,31 +69,16 @@
             margin-bottom: var(--spacing-lg);
             text-align: left;
         }
-
-        .redirect-steps h5 {
-            margin-bottom: var(--spacing-md);
-            color: var(--color-text-primary);
-        }
-
+        .redirect-steps h5 { margin-bottom: var(--spacing-md); color: var(--color-text-primary); }
         .redirect-step {
             display: flex;
             align-items: flex-start;
             gap: var(--spacing-md);
             margin-bottom: var(--spacing-sm);
         }
-
-        .redirect-step:last-child {
-            margin-bottom: 0;
-        }
-
-        .redirect-step i {
-            color: var(--color-accent);
-            margin-top: 3px;
-        }
-
-        .redirect-step span {
-            color: var(--color-text-secondary);
-        }
+        .redirect-step:last-child { margin-bottom: 0; }
+        .redirect-step i { color: var(--color-accent); margin-top: 3px; }
+        .redirect-step span { color: var(--color-text-secondary); }
 
         /* Contact Form Card */
         .contact-card {
@@ -383,10 +90,7 @@
             position: relative;
             z-index: 10;
         }
-
-        .contact-card-body {
-            padding: var(--spacing-xl);
-        }
+        .contact-card-body { padding: var(--spacing-xl); }
 
         /* Category Selection */
         .category-select-grid {
@@ -395,7 +99,6 @@
             gap: var(--spacing-md);
             margin-bottom: var(--spacing-lg);
         }
-
         .category-select-card {
             border: 2px solid var(--color-border);
             border-radius: var(--radius-md);
@@ -405,33 +108,11 @@
             transition: all var(--transition-fast);
             background: var(--color-bg-card);
         }
-
-        .category-select-card:hover {
-            border-color: var(--color-accent);
-            background: var(--color-bg-hover);
-        }
-
-        .category-select-card.selected {
-            border-color: var(--color-accent);
-            background: rgba(139, 115, 85, 0.1);
-        }
-
-        .category-select-card .icon {
-            font-size: 1.5rem;
-            color: var(--color-accent);
-            margin-bottom: var(--spacing-sm);
-        }
-
-        .category-select-card h4 {
-            font-size: var(--font-size-base);
-            margin-bottom: var(--spacing-xs);
-        }
-
-        .category-select-card p {
-            font-size: var(--font-size-sm);
-            color: var(--color-text-secondary);
-            margin: 0;
-        }
+        .category-select-card:hover { border-color: var(--color-accent); background: var(--color-bg-hover); }
+        .category-select-card.selected { border-color: var(--color-accent); background: rgba(139, 115, 85, 0.1); }
+        .category-select-card .icon { font-size: 1.5rem; color: var(--color-accent); margin-bottom: var(--spacing-sm); }
+        .category-select-card h4 { font-size: var(--font-size-base); margin-bottom: var(--spacing-xs); }
+        .category-select-card p { font-size: var(--font-size-sm); color: var(--color-text-secondary); margin: 0; }
 
         /* Info Sidebar */
         .info-card {
@@ -442,7 +123,6 @@
             height: 100%;
             margin-top: -60px;
         }
-
         .info-item {
             display: flex;
             align-items: flex-start;
@@ -450,13 +130,7 @@
             padding-bottom: var(--spacing-lg);
             border-bottom: 1px solid var(--color-border);
         }
-
-        .info-item:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-
+        .info-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
         .info-item .icon {
             width: 40px;
             height: 40px;
@@ -469,24 +143,11 @@
             margin-right: var(--spacing-md);
             flex-shrink: 0;
         }
-
-        .info-item h5 {
-            font-size: var(--font-size-base);
-            margin-bottom: var(--spacing-xs);
-        }
-
-        .info-item p {
-            font-size: var(--font-size-sm);
-            color: var(--color-text-secondary);
-            margin: 0;
-        }
+        .info-item h5 { font-size: var(--font-size-base); margin-bottom: var(--spacing-xs); }
+        .info-item p { font-size: var(--font-size-sm); color: var(--color-text-secondary); margin: 0; }
 
         /* Success Section */
-        .success-section {
-            text-align: center;
-            padding: var(--spacing-2xl);
-        }
-
+        .success-section { text-align: center; padding: var(--spacing-2xl); }
         .success-icon {
             width: 80px;
             height: 80px;
@@ -507,12 +168,7 @@
             padding: var(--spacing-lg);
             margin-top: var(--spacing-lg);
         }
-
-        .faq-suggestion h5 {
-            font-size: var(--font-size-base);
-            margin-bottom: var(--spacing-md);
-        }
-
+        .faq-suggestion h5 { font-size: var(--font-size-base); margin-bottom: var(--spacing-md); }
         .faq-suggestion-item {
             display: flex;
             align-items: center;
@@ -521,15 +177,8 @@
             transition: color var(--transition-fast);
             color: var(--color-text-primary);
         }
-
-        .faq-suggestion-item:hover {
-            color: var(--color-accent);
-        }
-
-        .faq-suggestion-item i {
-            color: var(--color-accent);
-            margin-right: var(--spacing-sm);
-        }
+        .faq-suggestion-item:hover { color: var(--color-accent); }
+        .faq-suggestion-item i { color: var(--color-accent); margin-right: var(--spacing-sm); }
 
         /* Step Indicator */
         .step-indicator {
@@ -540,18 +189,13 @@
             padding-bottom: var(--spacing-lg);
             border-bottom: 1px solid var(--color-border);
         }
-
         .step {
             display: flex;
             align-items: center;
             gap: var(--spacing-sm);
             color: var(--color-text-secondary);
         }
-
-        .step.active {
-            color: var(--color-accent);
-        }
-
+        .step.active { color: var(--color-accent); }
         .step .number {
             width: 30px;
             height: 30px;
@@ -563,23 +207,11 @@
             font-size: var(--font-size-sm);
             font-weight: 600;
         }
-
-        .step.active .number {
-            background: var(--color-accent);
-            color: white;
-        }
+        .step.active .number { background: var(--color-accent); color: white; }
 
         /* Form Styles */
-        .form-control:focus {
-            border-color: var(--color-accent);
-            box-shadow: 0 0 0 3px rgba(139, 115, 85, 0.1);
-        }
-
-        .form-label {
-            font-weight: 500;
-            color: var(--color-text-primary);
-            margin-bottom: var(--spacing-xs);
-        }
+        .form-control:focus { border-color: var(--color-accent); box-shadow: 0 0 0 3px rgba(139, 115, 85, 0.1); }
+        .form-label { font-weight: 500; color: var(--color-text-primary); margin-bottom: var(--spacing-xs); }
 
         /* Wizard Notice Banner */
         .wizard-notice {
@@ -592,38 +224,17 @@
             align-items: center;
             gap: var(--spacing-md);
         }
-
-        .wizard-notice i {
-            color: var(--color-accent);
-            font-size: 1.5rem;
-        }
-
-        .wizard-notice p {
-            margin: 0;
-            font-size: var(--font-size-sm);
-        }
+        .wizard-notice i { color: var(--color-accent); font-size: 1.5rem; }
+        .wizard-notice p { margin: 0; font-size: var(--font-size-sm); }
 
         /* Responsive */
         @media (max-width: 768px) {
-            .category-select-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .info-card {
-                margin-top: var(--spacing-xl);
-            }
+            .category-select-grid { grid-template-columns: repeat(2, 1fr); }
+            .info-card { margin-top: var(--spacing-xl); }
         }
-
         @media (max-width: 576px) {
-            .category-select-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .step-indicator {
-                flex-direction: column;
-                align-items: center;
-                gap: var(--spacing-sm);
-            }
+            .category-select-grid { grid-template-columns: 1fr; }
+            .step-indicator { flex-direction: column; align-items: center; gap: var(--spacing-sm); }
         }
     </style>
 </head>
@@ -674,6 +285,10 @@
                         <i class="fas fa-th-large"></i>
                         <span id="menuDashboard">Dashboard</span>
                     </a>
+                    <a href="../my-works.html" class="user-menu-item">
+                        <i class="fas fa-book"></i>
+                        <span id="menuMyWorks">My Works</span>
+                    </a>
                     <a href="../account-settings.html" class="user-menu-item">
                         <i class="fas fa-cog"></i>
                         <span id="menuAccountSettings">Account Settings</span>
@@ -701,11 +316,6 @@
                     <li class="nav-item">
                         <a class="nav-link" href="../browse.html">
                             <i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../genres.html">
-                            <i class="fas fa-layer-group me-1"></i> <span data-i18n="nav.genres">Genres</span>
                         </a>
                     </li>
                     <li class="nav-item auth-only">
@@ -757,11 +367,6 @@
                     <li class="nav-item">
                         <a class="nav-link" href="../browse.html">
                             <i class="fas fa-compass me-2"></i> <span data-i18n="nav.browse">Browse</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../genres.html">
-                            <i class="fas fa-layer-group me-2"></i> <span data-i18n="nav.genres">Genres</span>
                         </a>
                     </li>
                     <li class="nav-item auth-only">
@@ -1135,7 +740,7 @@
     <footer class="footer-custom">
         <div class="container">
             <div class="d-flex flex-wrap justify-content-between align-items-center">
-                <p class="small mb-0">&copy; 2024 Publisher. All rights reserved.</p>
+                <p class="small mb-0">&copy; 2025 Publisher. All rights reserved.</p>
                 <div class="d-flex gap-3">
                     <a href="faq.html" data-i18n="support.faq.title">FAQ</a>
                     <a href="troubleshoot.html" data-i18n="support.troubleshoot.title">Troubleshooting</a>
@@ -1158,6 +763,7 @@
     <script src="../../js/lang/pt.js"></script>
     <script src="../../js/lang/translations-base.js"></script>
     <script src="../../js/language-switcher.js"></script>
+    <script src="../../js/navbar.js"></script>
     <script>
         // ========== Pattern C: Navbar Multi-language UI Text ==========
         const uiText = {
@@ -1210,23 +816,20 @@
                 en: 'Are you sure you want to log out?', ja: 'ログアウトしますか？', zh: '确定要退出登录吗？',
                 es: '¿Estás seguro de que quieres cerrar sesión?', fr: 'Êtes-vous sûr de vouloir vous déconnecter?', de: 'Sind Sie sicher, dass Sie sich abmelden möchten?',
                 ko: '로그아웃 하시겠습니까?', ar: 'هل أنت متأكد أنك تريد تسجيل الخروج؟', pt: 'Tem certeza que deseja sair?'
+            },
+            myWorks: {
+                en: 'My Works', ja: 'マイ作品', zh: '我的作品',
+                es: 'Mis Obras', fr: 'Mes Œuvres', de: 'Meine Werke',
+                ko: '내 작품', ar: 'أعمالي', pt: 'Minhas Obras'
             }
         };
-
-        function getCurrentLanguage() {
-            return localStorage.getItem('preferredLanguage') || 'en';
-        }
-
-        function getL(obj) {
-            const lang = getCurrentLanguage();
-            return obj[lang] || obj.en || '';
-        }
-
-        function updateUIText() {
+function updateUIText() {
             const menuDashboard = document.getElementById('menuDashboard');
+            const menuMyWorks = document.getElementById('menuMyWorks');
             const menuAccountSettings = document.getElementById('menuAccountSettings');
             const menuLogout = document.getElementById('menuLogout');
             if (menuDashboard) menuDashboard.textContent = getL(uiText.dashboard);
+            if (menuMyWorks) menuMyWorks.textContent = getL(uiText.myWorks);
             if (menuAccountSettings) menuAccountSettings.textContent = getL(uiText.accountSettings);
             if (menuLogout) menuLogout.textContent = getL(uiText.logout);
 
@@ -1244,57 +847,6 @@
                 if (el) el.textContent = getL(els[id]);
             });
         }
-
-        function toggleUserDropdown(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            const dropdown = document.getElementById('userDropdown');
-            const dropdownMenu = document.getElementById('userMenu');
-            dropdown.classList.toggle('open');
-            dropdownMenu.classList.toggle('show');
-        }
-
-        function handleLogout() {
-            if (confirm(getL(uiText.logOutConfirm))) {
-                fetch(`${API_BASE}/auth/logout`, {
-                    method: 'POST',
-                    credentials: 'include'
-                }).finally(() => {
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
-                    window.location.reload();
-                });
-            }
-        }
-
-        function loadUserInfo() {
-            const userStr = localStorage.getItem('user');
-            const token = localStorage.getItem('token');
-            const loggedIn = !!(userStr && token);
-
-            if (loggedIn) {
-                try {
-                    const user = JSON.parse(userStr);
-                    const displayName = user.display_name || user.firstName || user.email || 'User';
-                    const userNameEl = document.getElementById('userName');
-                    const userDisplayNameEl = document.getElementById('userDisplayName');
-                    const userEmailEl = document.getElementById('userEmail');
-                    if (userNameEl) userNameEl.textContent = displayName;
-                    if (userDisplayNameEl) userDisplayNameEl.textContent = displayName;
-                    if (userEmailEl) userEmailEl.textContent = user.email || '';
-                    document.body.classList.add('logged-in');
-                    // Contact form: hide guest fields
-                    isLoggedIn = true;
-                    const guestFields = document.getElementById('guestFields');
-                    if (guestFields) guestFields.style.display = 'none';
-                } catch (e) {
-                    document.body.classList.remove('logged-in');
-                }
-            } else {
-                document.body.classList.remove('logged-in');
-            }
-        }
-
         // ========== Contact Form Logic ==========
         const API_BASE = 'http://localhost:3000/api';
         let selectedCategory = null;
@@ -1324,8 +876,6 @@
 
             updateUIText();
             setTimeout(updateUIText, 100);
-            loadUserInfo();
-
             // User dropdown close on outside click
             document.addEventListener('click', function(e) {
                 if (!e.target.closest('.user-dropdown')) {

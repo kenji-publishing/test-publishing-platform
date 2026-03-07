@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <title>Reader - Publisher</title>
     
     <!-- Google Fonts -->
@@ -13,7 +14,8 @@
     <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
+    <link href="../css/navbar.css" rel="stylesheet">
+
     <style>
         :root {
             --reader-bg: #FFFFFF;
@@ -265,6 +267,36 @@
         .touch-hint.show { display: block; animation: fadeOut 3s forwards; }
         @keyframes fadeOut { 0%, 70% { opacity: 1; } 100% { opacity: 0; } }
 
+        /* Click Zone Navigation */
+        .click-zone {
+            position: fixed;
+            top: 126px;
+            bottom: 0;
+            z-index: 50;
+            cursor: pointer;
+        }
+        .click-zone-left { left: 0; width: 25%; }
+        .click-zone-right { right: 0; width: 25%; }
+
+        /* Reading Progress Bar */
+        .reading-progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(0, 0, 0, 0.1);
+            z-index: 1100;
+            pointer-events: none;
+        }
+        .reading-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #8B7355, #A89070);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 0 1.5px 1.5px 0;
+        }
+
         @media (max-width: 768px) {
             .reader-content { padding: 1rem; }
             .work-title { display: none; }
@@ -341,14 +373,12 @@
         }
 
     /* ========== Pattern C Navbar Styles ========== */
-    /* Navbar Base (style-new.css準拠) */
     .navbar-custom {
         background-color: var(--reader-bg) !important;
         border-bottom: 1px solid var(--reader-border);
         padding: 1rem 0;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
     }
-    /* Navbar Brand (style-new.css準拠) */
     .navbar-custom .navbar-brand {
         font-family: 'Noto Serif JP', Georgia, 'Times New Roman', serif;
         font-size: 1.25rem;
@@ -371,42 +401,9 @@
         transition: all 150ms ease;
     }
     .language-selector:hover { border-color: var(--reader-accent); }
-    .navbar-lang-selector { display: flex; align-items: center; margin-right: 0.5rem; }
-    @media (max-width: 991.98px) {
-        .navbar-lang-selector { order: 1; }
-        .navbar-toggler { order: 2; }
-    }
-    @media (min-width: 992px) {
-        .navbar-nav { flex-wrap: nowrap !important; flex-direction: row !important; }
-        .navbar-nav .nav-item { white-space: nowrap !important; }
-        .navbar-nav .nav-link { white-space: nowrap !important; padding: 0.5rem 0.6rem !important; font-size: 0.9rem; }
-        .navbar-collapse .d-flex { flex-wrap: nowrap !important; }
-        .dropdown-menu { white-space: nowrap; }
-        .navbar-buttons-guest { display: flex !important; flex-wrap: nowrap !important; gap: 0.5rem; }
-        .navbar-buttons-guest .btn { white-space: nowrap !important; flex-shrink: 0; }
-    }
-    .auth-only { display: none !important; }
-    .guest-only { display: block; }
-    body.logged-in .auth-only { display: block !important; }
-    body.logged-in .auth-only.nav-item { display: list-item !important; }
-    body.logged-in .auth-only.dropdown { display: block !important; }
-    body.logged-in .guest-only { display: none !important; }
-    @media (min-width: 992px) { body.logged-in .navbar-buttons-guest { display: none !important; } }
-    .user-dropdown { position: relative; }
-    .user-dropdown-toggle { display: flex; align-items: center; gap: 0.5rem; background: transparent; border: 1px solid var(--reader-border); border-radius: 25px; padding: 0.4rem 0.75rem; cursor: pointer; color: var(--reader-text); transition: all 0.2s; }
-    .user-dropdown-toggle:hover { border-color: var(--reader-accent); background: rgba(139, 115, 85, 0.05); }
-    .user-dropdown-toggle i:first-child { font-size: 1.25rem; color: var(--reader-accent); }
     .user-name-nav { font-weight: 500; font-size: 0.9rem; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .user-chevron { font-size: 0.7rem; color: var(--reader-secondary); transition: transform 0.2s; }
-    .user-dropdown.open .user-chevron { transform: rotate(180deg); }
     .user-menu-nav { position: absolute; top: calc(100% + 0.5rem); right: 0; background: var(--reader-bg); border: 1px solid var(--reader-border); border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); min-width: 240px; z-index: 1001; display: none; overflow: hidden; }
     .user-menu-nav.show { display: block; }
-    .user-menu-header { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; background: rgba(139, 115, 85, 0.05); }
-    .user-avatar { font-size: 2.5rem; color: var(--reader-accent); }
-    .user-info { flex: 1; min-width: 0; }
-    .user-display-name { font-weight: 600; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .user-email { font-size: 0.8rem; color: var(--reader-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .user-menu-divider { height: 1px; background: var(--reader-border); }
     .user-menu-item-nav { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; color: var(--reader-text); text-decoration: none; font-size: 0.9rem; cursor: pointer; border: none; background: transparent; width: 100%; text-align: left; }
     .user-menu-item-nav:hover { background: rgba(139, 115, 85, 0.1); color: var(--reader-accent); }
     .user-menu-item-nav i { width: 20px; text-align: center; color: var(--reader-secondary); }
@@ -414,17 +411,6 @@
     .logout-btn-nav { color: #C75D5D; }
     .logout-btn-nav i { color: #C75D5D; }
     .logout-btn-nav:hover { background: rgba(199, 93, 93, 0.1); color: #C75D5D; }
-    .navbar-overlay { display: none; position: fixed; top: 66px; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 1040; }
-    .navbar-overlay.show { display: block; }
-    @media (max-width: 991.98px) {
-        .user-dropdown { order: 3; margin-left: 0.5rem; }
-        .user-dropdown-toggle { padding: 0.3rem; border-radius: 50%; width: 38px; height: 38px; justify-content: center; }
-        .user-menu-nav { position: fixed; top: 66px; right: 10px; left: auto; min-width: 260px; max-width: calc(100vw - 20px); z-index: 9999; }
-        .navbar-collapse { max-height: 70vh; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
-        .navbar-collapse.show, .navbar-collapse.collapsing { position: fixed; top: 66px; left: 0; right: 0; background: #FFFFFF; border-bottom: 1px solid var(--reader-border); box-shadow: 0 4px 20px rgba(0,0,0,0.15); z-index: 1045; padding: 0.5rem 1rem; }
-        body.menu-open { overflow: hidden; }
-        .navbar-custom { z-index: 1050 !important; background: #FFFFFF !important; }
-    }
     </style>
 </head>
 <body class="theme-light text-medium">
@@ -463,6 +449,7 @@
                     </div>
                     <div class="user-menu-divider"></div>
                     <a href="dashboard.html" class="user-menu-item-nav"><i class="fas fa-th-large"></i><span id="menuDashboard">Dashboard</span></a>
+                    <a href="my-works.html" class="user-menu-item-nav"><i class="fas fa-book"></i><span id="menuMyWorks">My Works</span></a>
                     <a href="account-settings.html" class="user-menu-item-nav"><i class="fas fa-cog"></i><span id="menuAccountSettings">Account Settings</span></a>
                     <div class="user-menu-divider"></div>
                     <button class="user-menu-item-nav logout-btn-nav" onclick="handleLogoutNav()"><i class="fas fa-sign-out-alt"></i><span id="menuLogout">Log Out</span></button>
@@ -474,7 +461,6 @@
                 <ul class="navbar-nav me-auto d-none d-lg-flex">
                     <li class="nav-item"><a class="nav-link" href="../index.html"><i class="fas fa-home me-1"></i> <span data-i18n="nav.home">Home</span></a></li>
                     <li class="nav-item"><a class="nav-link" href="browse.html"><i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span></a></li>
-                    <li class="nav-item"><a class="nav-link" href="genres.html"><i class="fas fa-layer-group me-1"></i> <span data-i18n="nav.genres">Genres</span></a></li>
                     <li class="nav-item auth-only"><a class="nav-link" href="library.html"><i class="fas fa-book-reader me-1"></i> <span id="navLibraryPC">Library</span></a></li>
                     <li class="nav-item auth-only"><a class="nav-link" href="dashboard.html"><i class="fas fa-th-large me-1"></i> <span id="navDashboardPC">Dashboard</span></a></li>
                     <li class="nav-item auth-only"><a class="nav-link" href="upload.html"><i class="fas fa-upload me-1"></i> <span data-i18n="nav.upload">Upload</span></a></li>
@@ -501,7 +487,6 @@
                 <ul class="navbar-nav d-lg-none">
                     <li class="nav-item"><a class="nav-link" href="../index.html"><i class="fas fa-home me-2"></i> <span data-i18n="nav.home">Home</span></a></li>
                     <li class="nav-item"><a class="nav-link" href="browse.html"><i class="fas fa-compass me-2"></i> <span data-i18n="nav.browse">Browse</span></a></li>
-                    <li class="nav-item"><a class="nav-link" href="genres.html"><i class="fas fa-layer-group me-2"></i> <span data-i18n="nav.genres">Genres</span></a></li>
                     <li class="nav-item auth-only"><a class="nav-link" href="library.html"><i class="fas fa-book-reader me-2"></i> <span id="navLibraryMobile">Library</span></a></li>
                     <li class="auth-only"><hr class="dropdown-divider"></li>
                     <li class="nav-item auth-only"><a class="nav-link" href="dashboard.html"><i class="fas fa-th-large me-2"></i> <span id="navDashboardMobile">Dashboard</span></a></li>
@@ -666,6 +651,10 @@
         </button>
     </div>
 
+    <!-- Click Zone Navigation -->
+    <div class="click-zone click-zone-left" id="clickZoneLeft"></div>
+    <div class="click-zone click-zone-right" id="clickZoneRight"></div>
+
     <main class="reader-main" id="readerMain">
         <div class="reader-content writing-horizontal" id="readerContent">
             <div class="page" data-page="1">
@@ -759,10 +748,7 @@
         };
 
         let currentLang = localStorage.getItem('preferredLanguage') || 'en';
-
-        function getCurrentLang() { return currentLang; }
-        
-        function getL(obj, replacements = {}) {
+function getL(obj, replacements = {}) {
             if (!obj) return '';
             let text = obj[currentLang] || obj['en'] || '';
             Object.keys(replacements).forEach(key => {
@@ -863,6 +849,10 @@
         let touchStartX = 0, touchStartY = 0, touchEndX = 0;
         let isSwiping = false, longPressTimer = null, isLongPress = false;
 
+        // Mouse Drag State
+        let isDragging = false, hasDragged = false;
+        let dragStartX = 0, dragStartY = 0;
+
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             updateAllText();
@@ -870,6 +860,8 @@
             renderBookmarks();
             renderNotes();
             initTouchEvents();
+            initClickZones();
+            initMouseDrag();
             showTouchHint();
         });
 
@@ -1043,6 +1035,12 @@
             document.querySelectorAll('.page').forEach(page => {
                 page.style.display = page.dataset.page == currentPage ? 'block' : 'none';
             });
+            updateReadingProgress();
+        }
+
+        function updateReadingProgress() {
+            const fill = document.getElementById('readingProgressFill');
+            if (fill) fill.style.width = (currentPage / totalPages) * 100 + '%';
         }
 
         function nextPage() { if (currentPage < totalPages) { currentPage++; updatePageInfo(); window.scrollTo(0, 0); } }
@@ -1165,6 +1163,87 @@
 
         function clearSearch() { document.getElementById('searchInput').value = ''; document.getElementById('searchResults').textContent = ''; }
 
+        // RTL mode check
+        function isRtlMode() {
+            return document.getElementById('readerContent').classList.contains('writing-rtl');
+        }
+        function isVerticalMode() {
+            return document.getElementById('readerContent').classList.contains('writing-vertical');
+        }
+
+        // Click Zone Navigation
+        function initClickZones() {
+            var leftZone = document.getElementById('clickZoneLeft');
+            var rightZone = document.getElementById('clickZoneRight');
+            if (leftZone) {
+                leftZone.addEventListener('click', function() {
+                    if (!hasDragged) { isRtlMode() ? nextPage() : prevPage(); }
+                });
+            }
+            if (rightZone) {
+                rightZone.addEventListener('click', function() {
+                    if (!hasDragged) { isRtlMode() ? prevPage() : nextPage(); }
+                });
+            }
+        }
+
+        // Mouse Drag Navigation
+        function initMouseDrag() {
+            var main = document.getElementById('readerMain');
+            var DRAG_THRESHOLD = 80;
+
+            main.addEventListener('mousedown', function(e) {
+                if (e.target.closest('.reader-toolbar, .notes-section, .settings-panel, .bookmarks-panel, .search-panel, .highlight-toolbar, .click-zone, button, a, input, textarea, select')) return;
+                if (e.detail >= 2) return; // Allow double-click text selection
+                if (isVerticalMode()) return; // Conflicts with horizontal scroll
+                isDragging = true;
+                hasDragged = false;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                var diffX = e.clientX - dragStartX;
+                var diffY = Math.abs(e.clientY - dragStartY);
+
+                if (Math.abs(diffX) > 10 && !hasDragged) {
+                    window.getSelection().removeAllRanges();
+                    hasDragged = true;
+                }
+
+                if (hasDragged && Math.abs(diffX) > 30 && diffY < 100) {
+                    if (diffX > 50 && currentPage > 1) {
+                        document.getElementById('swipeLeft').classList.add('show');
+                        document.getElementById('swipeRight').classList.remove('show');
+                    } else if (diffX < -50 && currentPage < totalPages) {
+                        document.getElementById('swipeRight').classList.add('show');
+                        document.getElementById('swipeLeft').classList.remove('show');
+                    } else {
+                        document.getElementById('swipeLeft').classList.remove('show');
+                        document.getElementById('swipeRight').classList.remove('show');
+                    }
+                }
+            });
+
+            document.addEventListener('mouseup', function(e) {
+                if (!isDragging) return;
+                isDragging = false;
+                document.getElementById('swipeLeft').classList.remove('show');
+                document.getElementById('swipeRight').classList.remove('show');
+
+                if (hasDragged) {
+                    var diffX = e.clientX - dragStartX;
+                    if (Math.abs(diffX) > DRAG_THRESHOLD) {
+                        var rtl = isRtlMode();
+                        if (diffX > 0) { rtl ? nextPage() : prevPage(); }
+                        else { rtl ? prevPage() : nextPage(); }
+                    }
+                    setTimeout(function() { hasDragged = false; }, 50);
+                }
+            });
+        }
+
         document.addEventListener('keydown', function(e) {
             if (e.key === 'ArrowRight') nextPage();
             else if (e.key === 'ArrowLeft') prevPage();
@@ -1178,6 +1257,7 @@
         });
 
         document.addEventListener('click', function(e) {
+            if (e.target.closest('.click-zone')) return; // Don't close panels when clicking navigation zones
             if (!e.target.closest('.settings-panel, [onclick*="toggleSettings"]')) document.getElementById('settingsPanel').classList.remove('show');
             if (!e.target.closest('.bookmarks-panel, [onclick*="toggleBookmarks"]')) document.getElementById('bookmarksPanel').classList.remove('show');
             if (!e.target.closest('.search-panel, [onclick*="toggleSearch"]')) document.getElementById('searchPanel').classList.remove('show');
@@ -1224,6 +1304,7 @@
             es: 'Panel', fr: 'Tableau de bord', de: 'Dashboard',
             ko: '대시보드', ar: 'لوحة التحكم', pt: 'Painel'
         },
+        myWorks: { en: 'My Works', ja: 'マイ作品', zh: '我的作品', es: 'Mis obras', fr: 'Mes œuvres', de: 'Meine Werke', ko: '내 작품', ar: 'أعمالي', pt: 'Minhas obras' },
         accountSettings: {
             en: 'Account Settings', ja: 'アカウント設定', zh: '账户设置',
             es: 'Configuración de cuenta', fr: 'Paramètres du compte', de: 'Kontoeinstellungen',
@@ -1251,6 +1332,8 @@
         var menuAccountSettings = document.getElementById('menuAccountSettings');
         var menuLogout = document.getElementById('menuLogout');
         if (menuDashboard) menuDashboard.textContent = getNL(navbarUiText.dashboard);
+        var menuMyWorks = document.getElementById('menuMyWorks');
+        if (menuMyWorks) menuMyWorks.textContent = getNL(navbarUiText.myWorks);
         if (menuAccountSettings) menuAccountSettings.textContent = getNL(navbarUiText.accountSettings);
         if (menuLogout) menuLogout.textContent = getNL(navbarUiText.logout);
 
@@ -1387,7 +1470,13 @@
     });
     </script>
 
+    <!-- Reading Progress Bar -->
+    <div class="reading-progress-bar" id="readingProgressBar">
+        <div class="reading-progress-fill" id="readingProgressFill"></div>
+    </div>
+
     <!-- Notification Badge -->
     <script src="../js/header-notification.js"></script>
+    <script src="../js/navbar.js"></script>
 </body>
 </html>

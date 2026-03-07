@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
     <title data-i18n="support.tickets.pageTitle">Support Tickets - Publisher</title>
     
     <!-- Google Fonts -->
@@ -18,273 +19,10 @@
     <!-- Custom Styles -->
     <link href="../../css/style-new.css" rel="stylesheet">
     <link href="../../css/mobile-fixes.css" rel="stylesheet">
+    <link href="../../css/navbar.css" rel="stylesheet">
     
     <!-- Pattern C Navbar CSS -->
-    <style>
-    /* ========== Mobile Language Selector ========== */
-    .navbar-lang-selector {
-        display: flex;
-        align-items: center;
-        margin-right: 0.5rem;
-    }
-    
-    @media (max-width: 991.98px) {
-        .navbar-lang-selector {
-            order: 1;
-        }
-        .navbar-toggler {
-            order: 2;
-        }
-    }
-    
-    /* ========== PC Navbar - 横並び維持 ========== */
-    @media (min-width: 992px) {
-        .navbar-nav {
-            flex-wrap: nowrap !important;
-            flex-direction: row !important;
-        }
-        .navbar-nav .nav-item {
-            white-space: nowrap !important;
-        }
-        .navbar-nav .nav-link {
-            white-space: nowrap !important;
-            padding: 0.5rem 0.6rem !important;
-            font-size: 0.9rem;
-        }
-        .navbar-collapse .d-flex {
-            flex-wrap: nowrap !important;
-        }
-        .dropdown-menu {
-            white-space: nowrap;
-        }
-        .navbar-buttons-guest {
-            display: flex !important;
-            flex-wrap: nowrap !important;
-            gap: 0.5rem;
-        }
-        .navbar-buttons-guest .btn {
-            white-space: nowrap !important;
-            flex-shrink: 0;
-        }
-    }
-    
-    /* ========== Auth Visibility Control ========== */
-    .auth-only {
-        display: none !important;
-    }
-    .guest-only {
-        display: block;
-    }
-    body.logged-in .auth-only {
-        display: block !important;
-    }
-    body.logged-in .auth-only.nav-item {
-        display: list-item !important;
-    }
-    body.logged-in .auth-only.dropdown {
-        display: block !important;
-    }
-    body.logged-in .guest-only {
-        display: none !important;
-    }
-    @media (min-width: 992px) {
-        body.logged-in .navbar-buttons-guest {
-            display: none !important;
-        }
-    }
-    
-    /* ========== User Dropdown Menu ========== */
-    .user-dropdown {
-        position: relative;
-    }
-    .user-dropdown-toggle {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        background: transparent;
-        border: 1px solid var(--color-border);
-        border-radius: 25px;
-        padding: 0.4rem 0.75rem;
-        cursor: pointer;
-        color: var(--color-text);
-        transition: all 0.2s;
-    }
-    .user-dropdown-toggle:hover {
-        border-color: var(--color-accent);
-        background: rgba(139, 115, 85, 0.05);
-    }
-    .user-dropdown-toggle i:first-child {
-        font-size: 1.25rem;
-        color: var(--color-accent);
-    }
-    .user-name {
-        font-weight: 500;
-        font-size: 0.9rem;
-        max-width: 120px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-    .user-chevron {
-        font-size: 0.7rem;
-        color: var(--color-text-secondary);
-        transition: transform 0.2s;
-    }
-    .user-dropdown.open .user-chevron {
-        transform: rotate(180deg);
-    }
-    .user-menu {
-        position: absolute;
-        top: calc(100% + 0.5rem);
-        right: 0;
-        background: var(--color-bg-card);
-        border: 1px solid var(--color-border);
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-        min-width: 240px;
-        z-index: 1001;
-        display: none;
-        overflow: hidden;
-    }
-    .user-menu.show {
-        display: block;
-    }
-    .user-menu-header {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 1rem;
-        background: var(--color-bg-main);
-    }
-    .user-avatar {
-        font-size: 2.5rem;
-        color: var(--color-accent);
-    }
-    .user-info {
-        flex: 1;
-        min-width: 0;
-    }
-    .user-display-name {
-        font-weight: 600;
-        font-size: 0.95rem;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-    .user-email {
-        font-size: 0.8rem;
-        color: var(--color-text-secondary);
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-    .user-menu-divider {
-        height: 1px;
-        background: var(--color-border);
-    }
-    .user-menu-item {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.75rem 1rem;
-        color: var(--color-text);
-        text-decoration: none;
-        font-size: 0.9rem;
-        cursor: pointer;
-        border: none;
-        background: transparent;
-        width: 100%;
-        text-align: left;
-    }
-    .user-menu-item:hover {
-        background: var(--color-bg-hover);
-        color: var(--color-accent);
-    }
-    .user-menu-item i {
-        width: 20px;
-        text-align: center;
-        color: var(--color-text-secondary);
-    }
-    .user-menu-item:hover i {
-        color: var(--color-accent);
-    }
-    .logout-btn {
-        color: var(--color-error);
-    }
-    .logout-btn i {
-        color: var(--color-error);
-    }
-    .logout-btn:hover {
-        background: rgba(199, 93, 93, 0.1);
-        color: var(--color-error);
-    }
-    
-    /* ========== Navbar Overlay ========== */
-    .navbar-overlay {
-        display: none;
-        position: fixed;
-        top: 56px;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 1040;
-    }
-    .navbar-overlay.show {
-        display: block;
-    }
-    
-    /* ========== Mobile Adjustments ========== */
-    @media (max-width: 991.98px) {
-        .user-dropdown {
-            order: 3;
-            margin-left: 0.5rem;
-        }
-        .user-dropdown-toggle {
-            padding: 0.3rem;
-            border-radius: 50%;
-            width: 38px;
-            height: 38px;
-            justify-content: center;
-        }
-        .user-menu {
-            position: fixed;
-            top: 56px;
-            right: 10px;
-            left: auto;
-            min-width: 260px;
-            max-width: calc(100vw - 20px);
-            z-index: 9999;
-        }
-        .navbar-collapse {
-            max-height: 70vh;
-            overflow-y: auto;
-            overscroll-behavior: contain;
-            -webkit-overflow-scrolling: touch;
-        }
-        .navbar-collapse.show,
-        .navbar-collapse.collapsing {
-            position: fixed;
-            top: 56px;
-            left: 0;
-            right: 0;
-            background: #FFFFFF;
-            border-bottom: 1px solid var(--color-border);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            z-index: 1045;
-            padding: 0.5rem 1rem;
-        }
-        body.menu-open {
-            overflow: hidden;
-        }
-        .navbar-custom {
-            z-index: 1050 !important;
-            background: #FFFFFF !important;
-        }
-    }
-    </style>
-
-    <!-- Page Specific CSS -->
+<!-- Page Specific CSS -->
     <style>
         .ticket-card {
             border: none;
@@ -447,6 +185,10 @@
                         <i class="fas fa-th-large"></i>
                         <span id="menuDashboard">Dashboard</span>
                     </a>
+                    <a href="../my-works.html" class="user-menu-item">
+                        <i class="fas fa-book"></i>
+                        <span id="menuMyWorks">My Works</span>
+                    </a>
                     <a href="../account-settings.html" class="user-menu-item">
                         <i class="fas fa-cog"></i>
                         <span id="menuAccountSettings">Account Settings</span>
@@ -474,11 +216,6 @@
                     <li class="nav-item">
                         <a class="nav-link" href="../browse.html">
                             <i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../genres.html">
-                            <i class="fas fa-layer-group me-1"></i> <span data-i18n="nav.genres">Genres</span>
                         </a>
                     </li>
                     <!-- Auth: Library -->
@@ -535,11 +272,6 @@
                     <li class="nav-item">
                         <a class="nav-link" href="../browse.html">
                             <i class="fas fa-compass me-2"></i> <span data-i18n="nav.browse">Browse</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../genres.html">
-                            <i class="fas fa-layer-group me-2"></i> <span data-i18n="nav.genres">Genres</span>
                         </a>
                     </li>
                     <!-- Auth: Library -->
@@ -766,7 +498,7 @@
     <footer class="footer-custom">
         <div class="container">
             <div class="d-flex flex-wrap justify-content-between align-items-center">
-                <p class="small mb-0">&copy; 2024 Publisher. All rights reserved.</p>
+                <p class="small mb-0">&copy; 2025 Publisher. All rights reserved.</p>
                 <div class="d-flex gap-3">
                     <a href="faq.html" class="text-accent" data-i18n="support.faq.title">FAQ</a>
                     <a href="troubleshoot.html" data-i18n="support.troubleshoot.title">Troubleshooting</a>
@@ -791,11 +523,11 @@
     <script src="../../js/lang/translations-base.js"></script>
     <script src="../../js/language-switcher.js"></script>
     
+<script src="../../js/header-notification.js"></script>
+    <script src="../../js/navbar.js"></script>
     <script>
-        // ========== 多言語対応テキスト（9言語）==========
-        // Pattern C Navbar keys + Page-specific keys
+        // ========== Pattern C: 多言語対応テキスト（9言語） ==========
         const uiText = {
-            // --- Pattern C Navbar keys ---
             translationTools: {
                 en: 'Translation Tools', ja: '翻訳ツール', zh: '翻译工具',
                 es: 'Herramientas de traducción', fr: 'Outils de traduction', de: 'Übersetzungstools',
@@ -846,245 +578,39 @@
                 es: '¿Estás seguro de que quieres cerrar sesión?', fr: 'Êtes-vous sûr de vouloir vous déconnecter?', de: 'Sind Sie sicher, dass Sie sich abmelden möchten?',
                 ko: '로그아웃 하시겠습니까?', ar: 'هل أنت متأكد أنك تريد تسجيل الخروج؟', pt: 'Tem certeza que deseja sair?'
             },
-            // --- Page-specific keys ---
-            pageTitle: {
-                en: 'Support Tickets', ja: 'サポートチケット', zh: '支持工单',
-                es: 'Tickets de Soporte', fr: 'Tickets de Support', de: 'Support-Tickets',
-                ko: '지원 티켓', ar: 'تذاكر الدعم', pt: 'Tickets de Suporte'
+            myWorks: {
+                en: 'My Works', ja: 'マイ作品', zh: '我的作品',
+                es: 'Mis Obras', fr: 'Mes Œuvres', de: 'Meine Werke',
+                ko: '내 작품', ar: 'أعمالي', pt: 'Minhas Obras'
             },
-            newTicket: {
-                en: 'New Ticket', ja: '新規チケット', zh: '新建工单',
-                es: 'Nuevo Ticket', fr: 'Nouveau Ticket', de: 'Neues Ticket',
-                ko: '새 티켓', ar: 'تذكرة جديدة', pt: 'Novo Ticket'
-            },
-            statusLabel: {
-                en: 'Status', ja: 'ステータス', zh: '状态',
-                es: 'Estado', fr: 'Statut', de: 'Status',
-                ko: '상태', ar: 'الحالة', pt: 'Status'
-            },
-            filterAll: {
-                en: 'All', ja: 'すべて', zh: '全部',
-                es: 'Todos', fr: 'Tous', de: 'Alle',
-                ko: '전체', ar: 'الكل', pt: 'Todos'
-            },
-            statusOpen: {
-                en: 'Open', ja: 'オープン', zh: '待处理',
-                es: 'Abierto', fr: 'Ouvert', de: 'Offen',
-                ko: '열림', ar: 'مفتوح', pt: 'Aberto'
-            },
-            statusInProgress: {
-                en: 'In Progress', ja: '対応中', zh: '处理中',
-                es: 'En Progreso', fr: 'En Cours', de: 'In Bearbeitung',
-                ko: '진행 중', ar: 'قيد التنفيذ', pt: 'Em Progresso'
-            },
-            statusWaitingUser: {
-                en: 'Waiting for Reply', ja: '返信待ち', zh: '等待回复',
-                es: 'Esperando Respuesta', fr: 'En Attente de Réponse', de: 'Warte auf Antwort',
-                ko: '답변 대기', ar: 'في انتظار الرد', pt: 'Aguardando Resposta'
-            },
-            statusWaitingAdmin: {
-                en: 'Waiting for Support', ja: 'サポート待ち', zh: '等待客服',
-                es: 'Esperando Soporte', fr: 'En Attente du Support', de: 'Warte auf Support',
-                ko: '지원 대기', ar: 'في انتظار الدعم', pt: 'Aguardando Suporte'
-            },
-            statusResolved: {
-                en: 'Resolved', ja: '解決済み', zh: '已解决',
-                es: 'Resuelto', fr: 'Résolu', de: 'Gelöst',
-                ko: '해결됨', ar: 'تم الحل', pt: 'Resolvido'
-            },
-            statusClosed: {
-                en: 'Closed', ja: 'クローズ', zh: '已关闭',
-                es: 'Cerrado', fr: 'Fermé', de: 'Geschlossen',
-                ko: '종료됨', ar: 'مغلق', pt: 'Fechado'
-            },
-            unreadOnly: {
-                en: 'Only with unread messages', ja: '未読メッセージのみ', zh: '仅显示未读消息',
-                es: 'Solo con mensajes no leídos', fr: 'Seulement avec messages non lus', de: 'Nur mit ungelesenen Nachrichten',
-                ko: '읽지 않은 메시지만', ar: 'فقط الرسائل غير المقروءة', pt: 'Apenas com mensagens não lidas'
-            },
-            noTickets: {
-                en: 'No tickets found', ja: 'チケットがありません', zh: '没有找到工单',
-                es: 'No se encontraron tickets', fr: 'Aucun ticket trouvé', de: 'Keine Tickets gefunden',
-                ko: '티켓이 없습니다', ar: 'لم يتم العثور على تذاكر', pt: 'Nenhum ticket encontrado'
-            },
-            noTicketsDesc: {
-                en: 'If you have questions or requests, please feel free to contact us',
-                ja: 'ご質問やご要望がございましたら、お気軽にお問い合わせください',
-                zh: '如有问题或需求，请随时联系我们',
-                es: 'Si tiene preguntas o solicitudes, no dude en contactarnos',
-                fr: "Si vous avez des questions ou des demandes, n'hésitez pas à nous contacter",
-                de: 'Wenn Sie Fragen oder Wünsche haben, kontaktieren Sie uns bitte',
-                ko: '질문이나 요청이 있으시면 언제든지 문의해 주세요',
-                ar: 'إذا كانت لديك أسئلة أو طلبات، فلا تتردد في الاتصال بنا',
-                pt: 'Se você tiver perguntas ou solicitações, não hesite em nos contatar'
-            },
-            contactUs: {
-                en: 'Contact Us', ja: 'お問い合わせ', zh: '联系我们',
-                es: 'Contáctenos', fr: 'Contactez-nous', de: 'Kontaktieren Sie uns',
-                ko: '문의하기', ar: 'اتصل بنا', pt: 'Fale Conosco'
-            },
-            faq: {
-                en: 'FAQ', ja: 'よくある質問', zh: '常见问题',
-                es: 'Preguntas Frecuentes', fr: 'FAQ', de: 'FAQ',
-                ko: '자주 묻는 질문', ar: 'الأسئلة الشائعة', pt: 'Perguntas Frequentes'
-            },
-            troubleshooting: {
-                en: 'Troubleshooting', ja: 'トラブルシューティング', zh: '故障排除',
-                es: 'Solución de Problemas', fr: 'Dépannage', de: 'Fehlerbehebung',
-                ko: '문제 해결', ar: 'استكشاف الأخطاء وإصلاحها', pt: 'Solução de Problemas'
-            },
-            terms: {
-                en: 'Terms', ja: '利用規約', zh: '服务条款',
-                es: 'Términos', fr: 'Conditions', de: 'Nutzungsbedingungen',
-                ko: '이용약관', ar: 'الشروط', pt: 'Termos'
-            },
-            privacy: {
-                en: 'Privacy', ja: 'プライバシー', zh: '隐私政策',
-                es: 'Privacidad', fr: 'Confidentialité', de: 'Datenschutz',
-                ko: '개인정보', ar: 'الخصوصية', pt: 'Privacidade'
-            },
-            loading: {
-                en: 'Loading...', ja: '読み込み中...', zh: '加载中...',
-                es: 'Cargando...', fr: 'Chargement...', de: 'Wird geladen...',
-                ko: '로딩 중...', ar: 'جاري التحميل...', pt: 'Carregando...'
-            },
-            reply: {
-                en: 'Reply', ja: '返信', zh: '回复',
-                es: 'Responder', fr: 'Répondre', de: 'Antworten',
-                ko: '답장', ar: 'رد', pt: 'Responder'
-            },
-            replyPlaceholder: {
-                en: 'Enter your reply', ja: '返信を入力してください', zh: '请输入您的回复',
-                es: 'Ingrese su respuesta', fr: 'Entrez votre réponse', de: 'Geben Sie Ihre Antwort ein',
-                ko: '답변을 입력하세요', ar: 'أدخل ردك', pt: 'Digite sua resposta'
-            },
-            send: {
-                en: 'Send', ja: '送信', zh: '发送',
-                es: 'Enviar', fr: 'Envoyer', de: 'Senden',
-                ko: '보내기', ar: 'إرسال', pt: 'Enviar'
-            },
-            ratingQuestion: {
-                en: 'How was our support?', ja: 'サポートはいかがでしたか？', zh: '我们的支持服务如何？',
-                es: '¿Cómo fue nuestro soporte?', fr: 'Comment était notre support?', de: 'Wie war unser Support?',
-                ko: '저희 지원 서비스는 어떠셨나요?', ar: 'كيف كان دعمنا؟', pt: 'Como foi nosso suporte?'
-            },
-            commentOptional: {
-                en: 'Comment (optional)', ja: 'コメント（任意）', zh: '评论（可选）',
-                es: 'Comentario (opcional)', fr: 'Commentaire (optionnel)', de: 'Kommentar (optional)',
-                ko: '코멘트 (선택사항)', ar: 'تعليق (اختياري)', pt: 'Comentário (opcional)'
-            },
-            submitRating: {
-                en: 'Submit Rating', ja: '評価を送信', zh: '提交评分',
-                es: 'Enviar Calificación', fr: "Soumettre l'évaluation", de: 'Bewertung abgeben',
-                ko: '평가 제출', ar: 'إرسال التقييم', pt: 'Enviar Avaliação'
-            }
+            // --- Ticket Page Specific ---
+            filterAll: { en: 'All', ja: 'すべて', zh: '全部', es: 'Todos', fr: 'Tous', de: 'Alle', ko: '전체', ar: 'الكل', pt: 'Todos' },
+            filterOpen: { en: 'Open', ja: '未対応', zh: '待处理', es: 'Abierto', fr: 'Ouvert', de: 'Offen', ko: '미처리', ar: 'مفتوح', pt: 'Aberto' },
+            filterInProgress: { en: 'In Progress', ja: '対応中', zh: '处理中', es: 'En progreso', fr: 'En cours', de: 'In Bearbeitung', ko: '처리 중', ar: 'قيد التنفيذ', pt: 'Em andamento' },
+            filterWaitingUser: { en: 'Waiting for Reply', ja: '返信待ち', zh: '等待回复', es: 'Esperando respuesta', fr: 'En attente de réponse', de: 'Wartet auf Antwort', ko: '답변 대기', ar: 'في انتظار الرد', pt: 'Aguardando resposta' },
+            filterWaitingAdmin: { en: 'Waiting for Support', ja: 'サポート待ち', zh: '等待客服', es: 'Esperando soporte', fr: 'En attente du support', de: 'Wartet auf Support', ko: '지원 대기', ar: 'في انتظار الدعم', pt: 'Aguardando suporte' },
+            filterResolved: { en: 'Resolved', ja: '解決済み', zh: '已解决', es: 'Resuelto', fr: 'Résolu', de: 'Gelöst', ko: '해결됨', ar: 'تم الحل', pt: 'Resolvido' },
+            filterClosed: { en: 'Closed', ja: 'クローズ', zh: '已关闭', es: 'Cerrado', fr: 'Fermé', de: 'Geschlossen', ko: '종료', ar: 'مغلق', pt: 'Fechado' },
+            unreadOnly: { en: 'Only with unread messages', ja: '未読メッセージのみ', zh: '仅未读消息', es: 'Solo con mensajes sin leer', fr: 'Uniquement avec messages non lus', de: 'Nur mit ungelesenen Nachrichten', ko: '읽지 않은 메시지만', ar: 'فقط مع رسائل غير مقروءة', pt: 'Apenas com mensagens não lidas' },
+            noTickets: { en: 'No tickets found', ja: 'チケットがありません', zh: '没有找到工单', es: 'No se encontraron tickets', fr: 'Aucun ticket trouvé', de: 'Keine Tickets gefunden', ko: '티켓이 없습니다', ar: 'لم يتم العثور على تذاكر', pt: 'Nenhum ticket encontrado' },
+            noTicketsDesc: { en: 'If you have questions or requests, please feel free to contact us', ja: 'ご質問やご要望がございましたら、お気軽にお問い合わせください', zh: '如果您有任何问题或需求，请随时与我们联系', es: 'Si tiene preguntas o solicitudes, no dude en contactarnos', fr: 'Si vous avez des questions ou des demandes, n\'hésitez pas à nous contacter', de: 'Wenn Sie Fragen oder Wünsche haben, kontaktieren Sie uns gerne', ko: '질문이나 요청이 있으시면 언제든지 문의해 주세요', ar: 'إذا كان لديك أسئلة أو طلبات، لا تتردد في الاتصال بنا', pt: 'Se tiver perguntas ou solicitações, não hesite em nos contatar' },
+            newTicket: { en: 'New Ticket', ja: '新規チケット', zh: '新建工单', es: 'Nuevo Ticket', fr: 'Nouveau Ticket', de: 'Neues Ticket', ko: '새 티켓', ar: 'تذكرة جديدة', pt: 'Novo Ticket' },
+            created: { en: 'Created', ja: '作成日', zh: '创建于', es: 'Creado', fr: 'Créé', de: 'Erstellt', ko: '생성일', ar: 'أُنشئت', pt: 'Criado' },
+            updated: { en: 'Updated', ja: '更新日', zh: '更新于', es: 'Actualizado', fr: 'Mis à jour', de: 'Aktualisiert', ko: '업데이트', ar: 'تم التحديث', pt: 'Atualizado' },
+            unreadMessages: { en: 'unread', ja: '未読', zh: '未读', es: 'sin leer', fr: 'non lu', de: 'ungelesen', ko: '읽지 않음', ar: 'غير مقروء', pt: 'não lida' }
         };
-        
-        // API settings
-        const API_BASE = '/api';
-        let currentTicket = null;
-        let selectedRating = 0;
-        let isDemo = false;
-        let isLoggedIn = false;
-        let currentLang = localStorage.getItem('preferredLanguage') || 'en';
 
-        // ========== Pattern C Navbar Functions ==========
-        function getCurrentLanguage() {
-            return localStorage.getItem('preferredLanguage') || 'en';
-        }
-        
-        function getL(obj) {
-            const lang = getCurrentLanguage();
-            return obj[lang] || obj.en || '';
-        }
-
-        function toggleUserDropdown(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            const dropdown = document.getElementById('userDropdown');
-            const dropdownMenu = document.getElementById('userMenu');
-            dropdown.classList.toggle('open');
-            dropdownMenu.classList.toggle('show');
-        }
-        
-        function handleLogout() {
-            if (confirm(getL(uiText.logOutConfirm))) {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                window.location.reload();
-            }
-        }
-        
-        function loadUserInfo() {
-            const userStr = localStorage.getItem('user');
-            const token = localStorage.getItem('token');
-            const loggedIn = !!(userStr && token);
-            
-            if (loggedIn) {
-                try {
-                    const user = JSON.parse(userStr);
-                    const displayName = user.display_name || user.firstName || user.email || 'User';
-                    const userNameEl = document.getElementById('userName');
-                    const userDisplayNameEl = document.getElementById('userDisplayName');
-                    const userEmailEl = document.getElementById('userEmail');
-                    if (userNameEl) userNameEl.textContent = displayName;
-                    if (userDisplayNameEl) userDisplayNameEl.textContent = displayName;
-                    if (userEmailEl) userEmailEl.textContent = user.email || '';
-                    document.body.classList.add('logged-in');
-                    isLoggedIn = true;
-                } catch (e) {
-                    document.body.classList.remove('logged-in');
-                    isLoggedIn = false;
-                }
-            } else {
-                document.body.classList.remove('logged-in');
-                isLoggedIn = false;
-            }
-        }
-
-        // ========== Page Helper Functions ==========
-        // Translate function (uses language-switcher.js translations)
-        function t(key) {
-            try {
-                const keys = key.split('.');
-                let value = window.translations || {};
-                for (const k of keys) {
-                    if (value && typeof value === 'object' && k in value) {
-                        value = value[k];
-                    } else {
-                        return key;
-                    }
-                }
-                return typeof value === 'string' ? value : key;
-            } catch (e) {
-                return key;
-            }
-        }
-
-        // Status labels
-        function getStatusLabels() {
-            return {
-                open: getL(uiText.statusOpen),
-                in_progress: getL(uiText.statusInProgress),
-                waiting_user: getL(uiText.statusWaitingUser),
-                waiting_admin: getL(uiText.statusWaitingAdmin),
-                resolved: getL(uiText.statusResolved),
-                closed: getL(uiText.statusClosed)
-            };
-        }
-
-        // ========== Combined updateUIText (Navbar + Page) ==========
+        // ========== Pattern C: ヘルパー関数 ==========
         function updateUIText() {
-            const lang = getCurrentLanguage();
-            
-            // --- Pattern C Navbar updates ---
             const menuDashboard = document.getElementById('menuDashboard');
+            const menuMyWorks = document.getElementById('menuMyWorks');
             const menuAccountSettings = document.getElementById('menuAccountSettings');
             const menuLogout = document.getElementById('menuLogout');
             if (menuDashboard) menuDashboard.textContent = getL(uiText.dashboard);
+            if (menuMyWorks) menuMyWorks.textContent = getL(uiText.myWorks);
             if (menuAccountSettings) menuAccountSettings.textContent = getL(uiText.accountSettings);
             if (menuLogout) menuLogout.textContent = getL(uiText.logout);
-            
+
             const els = {
                 navLibraryPC: uiText.library, navDashboardPC: uiText.dashboard,
                 navTranslationToolsPC: uiText.translationTools, navMangaTranslatorPC: uiText.mangaTranslator,
@@ -1098,429 +624,256 @@
                 const el = document.getElementById(id);
                 if (el) el.textContent = getL(els[id]);
             });
-            
-            // --- Page-specific updates ---
-            // Page title
-            document.title = getL(uiText.pageTitle) + ' - Publisher';
-            const pageTitleSpan = document.querySelector('.page-header h2 span');
-            if (pageTitleSpan) pageTitleSpan.textContent = getL(uiText.pageTitle);
-            
-            // New Ticket button
-            const newTicketBtn = document.querySelector('.page-header .btn span');
-            if (newTicketBtn) newTicketBtn.textContent = getL(uiText.newTicket);
-            
-            // Status label
-            const statusLabel = document.querySelector('label[data-i18n="support.tickets.status"]');
-            if (statusLabel) statusLabel.textContent = getL(uiText.statusLabel);
-            
-            // Status filter options
+
+            // Update filter options
             const statusFilter = document.getElementById('statusFilter');
-            if (statusFilter && statusFilter.options) {
+            if (statusFilter) {
                 const options = statusFilter.options;
-                const statusTexts = [
-                    getL(uiText.filterAll),
-                    getL(uiText.statusOpen),
-                    getL(uiText.statusInProgress),
-                    getL(uiText.statusWaitingUser),
-                    getL(uiText.statusWaitingAdmin),
-                    getL(uiText.statusResolved),
-                    getL(uiText.statusClosed)
-                ];
-                for (let i = 0; i < options.length && i < statusTexts.length; i++) {
-                    if (statusTexts[i]) {
-                        options[i].text = statusTexts[i];
-                    }
-                }
+                if (options[0]) options[0].textContent = getL(uiText.filterAll);
+                if (options[1]) options[1].textContent = getL(uiText.filterOpen);
+                if (options[2]) options[2].textContent = getL(uiText.filterInProgress);
+                if (options[3]) options[3].textContent = getL(uiText.filterWaitingUser);
+                if (options[4]) options[4].textContent = getL(uiText.filterWaitingAdmin);
+                if (options[5]) options[5].textContent = getL(uiText.filterResolved);
+                if (options[6]) options[6].textContent = getL(uiText.filterClosed);
             }
-            
-            // Unread only checkbox
             const unreadLabel = document.querySelector('label[for="unreadOnly"]');
             if (unreadLabel) unreadLabel.textContent = getL(uiText.unreadOnly);
-            
-            // Empty state
-            const noTicketsTitle = document.querySelector('#emptyState h4');
-            const noTicketsDesc = document.querySelector('#emptyState p');
-            const contactUsBtn = document.querySelector('#emptyState .btn span');
-            if (noTicketsTitle) noTicketsTitle.textContent = getL(uiText.noTickets);
-            if (noTicketsDesc) noTicketsDesc.textContent = getL(uiText.noTicketsDesc);
-            if (contactUsBtn) contactUsBtn.textContent = getL(uiText.contactUs);
-            
-            // Footer links
-            const footerLinks = document.querySelectorAll('.footer-custom a');
-            footerLinks.forEach(link => {
-                const i18nKey = link.getAttribute('data-i18n');
-                if (i18nKey === 'support.faq.title') link.textContent = getL(uiText.faq);
-                if (i18nKey === 'support.troubleshoot.title') link.textContent = getL(uiText.troubleshooting);
-                if (i18nKey === 'footer.terms') link.textContent = getL(uiText.terms);
-                if (i18nKey === 'footer.privacy') link.textContent = getL(uiText.privacy);
-            });
-            
-            // Modal elements
-            const replyTitle = document.querySelector('#replyForm h6 span');
-            const replyTextarea = document.getElementById('replyMessage');
-            const sendBtn = document.querySelector('#sendReplyBtn span');
-            const ratingQuestion = document.querySelector('#ratingForm h6');
-            const commentTextarea = document.getElementById('ratingComment');
-            const submitRatingBtn = document.querySelector('#submitRatingBtn span');
-            
-            if (replyTitle) replyTitle.textContent = getL(uiText.reply);
-            if (replyTextarea) replyTextarea.placeholder = getL(uiText.replyPlaceholder);
-            if (sendBtn) sendBtn.textContent = getL(uiText.send);
-            if (ratingQuestion) ratingQuestion.textContent = getL(uiText.ratingQuestion);
-            if (commentTextarea) commentTextarea.placeholder = getL(uiText.commentOptional);
-            if (submitRatingBtn) submitRatingBtn.textContent = getL(uiText.submitRating);
         }
 
-        // Demo data
+        // ========== Tickets Page Logic ==========
+        const API_BASE = 'http://localhost:3000/api';
+        let tickets = [];
+        let currentTicket = null;
+
+        // Demo ticket data
         const demoTickets = [
             {
-                id: 1,
-                ticket_number: 'TKT-20240115-0001',
-                subject: 'Payment not received',
-                category: 'payment',
-                priority: 'high',
-                status: 'in_progress',
-                created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-                updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-                unread_count: 1
+                id: 1, ticket_number: 'TKT-20240115-0001', subject: 'Payment not processed',
+                status: 'in_progress', priority: 'high', category: 'payment',
+                created_at: '2024-01-15T10:30:00Z', updated_at: '2024-01-16T14:20:00Z',
+                unread_count: 1,
+                messages: [
+                    { id: 1, sender_type: 'user', message: 'My payment was charged but the purchase did not go through.', created_at: '2024-01-15T10:30:00Z' },
+                    { id: 2, sender_type: 'admin', message: 'We are looking into this issue. Could you provide your order ID?', created_at: '2024-01-15T14:00:00Z' },
+                    { id: 3, sender_type: 'user', message: 'The order ID is ORD-20240115-0042.', created_at: '2024-01-16T09:00:00Z' },
+                    { id: 4, sender_type: 'admin', message: 'We have confirmed the issue. A refund has been initiated and should appear within 3-5 business days.', created_at: '2024-01-16T14:20:00Z' }
+                ]
             },
             {
-                id: 2,
-                ticket_number: 'TKT-20240112-0002',
-                subject: 'How to change username?',
-                category: 'account',
-                priority: 'normal',
-                status: 'resolved',
-                created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-                updated_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-                unread_count: 0
+                id: 2, ticket_number: 'TKT-20240112-0003', subject: 'Cannot upload manga files',
+                status: 'resolved', priority: 'normal', category: 'technical',
+                created_at: '2024-01-12T08:15:00Z', updated_at: '2024-01-13T11:45:00Z',
+                unread_count: 0,
+                messages: [
+                    { id: 5, sender_type: 'user', message: 'I get an error when trying to upload my manga. The files are in PNG format.', created_at: '2024-01-12T08:15:00Z' },
+                    { id: 6, sender_type: 'admin', message: 'Please try compressing your images to under 10MB each, and ensure total upload is under 100MB.', created_at: '2024-01-12T16:30:00Z' },
+                    { id: 7, sender_type: 'user', message: 'That worked! Thank you for the help.', created_at: '2024-01-13T11:45:00Z' }
+                ]
             },
             {
-                id: 3,
-                ticket_number: 'TKT-20240110-0003',
-                subject: 'Translation quality issue',
-                category: 'translation',
-                priority: 'normal',
-                status: 'waiting_user',
-                created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-                updated_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-                unread_count: 2
+                id: 3, ticket_number: 'TKT-20240110-0005', subject: 'Translation quality issue',
+                status: 'waiting_user', priority: 'normal', category: 'translation',
+                created_at: '2024-01-10T15:00:00Z', updated_at: '2024-01-11T10:00:00Z',
+                unread_count: 1,
+                messages: [
+                    { id: 8, sender_type: 'user', message: 'The AI translation of my novel has several grammatical errors in Chapter 3.', created_at: '2024-01-10T15:00:00Z' },
+                    { id: 9, sender_type: 'admin', message: 'Could you specify which sections have errors so we can review and improve the translation?', created_at: '2024-01-11T10:00:00Z' }
+                ]
             }
         ];
 
-        const demoMessages = {
-            1: [
-                { id: 1, sender_type: 'user', message: 'I made a withdrawal request 5 days ago, but the money hasn\'t arrived yet. My bank account is correct.', created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() },
-                { id: 2, sender_type: 'admin', message: 'Thank you for contacting us. We\'ll look into your payment status. Could you please provide your bank name and last 4 digits of account number for verification?', created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
-                { id: 3, sender_type: 'user', message: 'Sure, it\'s ABC Bank, account ending in 1234.', created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000 + 3600000).toISOString() },
-                { id: 4, sender_type: 'admin', message: 'Thank you. We have confirmed your payment was processed. It may take 2-3 business days to reflect in your account. Please check again tomorrow.', created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() }
-            ],
-            2: [
-                { id: 1, sender_type: 'user', message: 'How can I change my username? I can\'t find the option.', created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString() },
-                { id: 2, sender_type: 'admin', message: 'You can change your username from Account Settings > Profile. Click Edit next to your username to change it.', created_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString() },
-                { id: 3, sender_type: 'user', message: 'Found it! Thank you!', created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
-                { id: 4, sender_type: 'system', message: 'This ticket has been resolved.', created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() }
-            ],
-            3: [
-                { id: 1, sender_type: 'user', message: 'The Japanese to English translation of my work has some grammar errors.', created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString() },
-                { id: 2, sender_type: 'admin', message: 'We apologize for the inconvenience. Could you please specify which chapter and which sentences have issues?', created_at: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000).toISOString() },
-                { id: 3, sender_type: 'admin', message: 'We are waiting for your response to proceed with the correction.', created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() }
-            ]
-        };
+        function getStatusLabel(status) {
+            const map = {
+                'open': uiText.filterOpen, 'in_progress': uiText.filterInProgress,
+                'waiting_user': uiText.filterWaitingUser, 'waiting_admin': uiText.filterWaitingAdmin,
+                'resolved': uiText.filterResolved, 'closed': uiText.filterClosed
+            };
+            return map[status] ? getL(map[status]) : status;
+        }
 
-        // Load tickets
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString(getCurrentLanguage(), { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
         async function loadTickets() {
-            const ticketList = document.getElementById('ticketList');
-            const emptyState = document.getElementById('emptyState');
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE}/support/tickets`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    tickets = data.tickets;
+                } else {
+                    tickets = demoTickets;
+                }
+            } catch (error) {
+                console.log('Using demo ticket data');
+                tickets = demoTickets;
+            }
+            renderTickets();
+        }
+
+        function renderTickets() {
+            const container = document.getElementById('ticketList');
             const loading = document.getElementById('loading');
+            const emptyState = document.getElementById('emptyState');
             const statusFilter = document.getElementById('statusFilter').value;
             const unreadOnly = document.getElementById('unreadOnly').checked;
 
-            if (isDemo) {
-                setTimeout(() => {
-                    loading.style.display = 'none';
-                    let filtered = [...demoTickets];
-                    if (statusFilter !== 'all') filtered = filtered.filter(t => t.status === statusFilter);
-                    if (unreadOnly) filtered = filtered.filter(t => t.unread_count > 0);
+            if (loading) loading.style.display = 'none';
 
-                    if (filtered.length === 0) {
-                        emptyState.style.display = 'block';
-                        ticketList.innerHTML = '';
-                        return;
-                    }
-                    emptyState.style.display = 'none';
-                    renderTickets(filtered);
-                }, 500);
+            let filtered = tickets;
+            if (statusFilter !== 'all') {
+                filtered = filtered.filter(t => t.status === statusFilter);
+            }
+            if (unreadOnly) {
+                filtered = filtered.filter(t => t.unread_count > 0);
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = '';
+                emptyState.style.display = 'block';
                 return;
             }
 
-            try {
-                const response = await fetch(`${API_BASE}/support/tickets?status=${statusFilter}&unread=${unreadOnly}`, { credentials: 'include' });
-                const data = await response.json();
-                loading.style.display = 'none';
-
-                if (data.success && data.tickets.length > 0) {
-                    emptyState.style.display = 'none';
-                    renderTickets(data.tickets);
-                } else {
-                    emptyState.style.display = 'block';
-                    ticketList.innerHTML = '';
-                }
-            } catch (error) {
-                console.error('Load tickets error:', error);
-                loading.style.display = 'none';
-                emptyState.style.display = 'block';
-            }
-        }
-
-        function renderTickets(tickets) {
-            const ticketList = document.getElementById('ticketList');
-            const statusLabels = getStatusLabels();
-            const priorityLabels = { urgent: t('support.tickets.priorities.urgent'), high: t('support.tickets.priorities.high'), normal: t('support.tickets.priorities.normal'), low: t('support.tickets.priorities.low') };
-
-            ticketList.innerHTML = tickets.map(ticket => `
-                <div class="card ticket-card ${ticket.unread_count > 0 ? 'has-unread' : ''}" onclick="openTicket(${ticket.id})">
+            emptyState.style.display = 'none';
+            container.innerHTML = filtered.map(ticket => `
+                <div class="card ticket-card ${ticket.unread_count > 0 ? 'has-unread' : ''}" onclick="openTicketDetail(${ticket.id})">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
                             <div>
-                                <h6 class="mb-1">${ticket.subject}</h6>
-                                <small class="ticket-number">${ticket.ticket_number}</small>
+                                <span class="ticket-number">${ticket.ticket_number}</span>
+                                ${ticket.unread_count > 0 ? `<span class="badge bg-danger ms-2">${ticket.unread_count} ${getL(uiText.unreadMessages)}</span>` : ''}
                             </div>
-                            <span class="status-badge status-${ticket.status}">${statusLabels[ticket.status] || ticket.status}</span>
+                            <span class="status-badge status-${ticket.status}">${getStatusLabel(ticket.status)}</span>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <small class="text-muted">
-                                <i class="far fa-clock me-1"></i>${formatDate(ticket.updated_at)}
-                                ${ticket.unread_count > 0 ? `<span class="badge bg-danger ms-2">${ticket.unread_count} ${t('support.tickets.unread')}</span>` : ''}
-                            </small>
-                            <small class="priority-${ticket.priority}">${priorityLabels[ticket.priority] || ticket.priority}</small>
+                        <h5 class="mb-2">${ticket.subject}</h5>
+                        <div class="d-flex justify-content-between text-muted small">
+                            <span><i class="fas fa-clock me-1"></i>${getL(uiText.created)}: ${formatDate(ticket.created_at)}</span>
+                            <span><i class="fas fa-sync-alt me-1"></i>${getL(uiText.updated)}: ${formatDate(ticket.updated_at)}</span>
                         </div>
                     </div>
                 </div>
             `).join('');
         }
 
-        async function openTicket(ticketId) {
-            if (isDemo) {
-                const ticket = demoTickets.find(t => t.id === ticketId);
-                if (ticket) {
-                    currentTicket = ticket;
-                    showTicketModal(ticket, demoMessages[ticketId] || []);
-                }
-                return;
-            }
-            
-            try {
-                const response = await fetch(`${API_BASE}/support/tickets/${ticketId}`, { credentials: 'include' });
-                const data = await response.json();
-                if (data.success) {
-                    currentTicket = data.ticket;
-                    showTicketModal(data.ticket, data.messages);
-                } else {
-                    alert(data.error || t('support.tickets.loadError'));
-                }
-            } catch (error) {
-                console.error('Ticket detail error:', error);
-                alert(t('support.tickets.loadError'));
-            }
-        }
+        function openTicketDetail(ticketId) {
+            currentTicket = tickets.find(t => t.id === ticketId);
+            if (!currentTicket) return;
 
-        function showTicketModal(ticket, messages) {
-            const statusLabels = getStatusLabels();
-            
-            document.getElementById('modalTicketSubject').textContent = ticket.subject;
-            document.getElementById('modalTicketNumber').textContent = ticket.ticket_number;
-            document.getElementById('modalTicketStatus').textContent = statusLabels[ticket.status] || ticket.status;
-            document.getElementById('modalTicketStatus').className = `status-badge status-${ticket.status}`;
-            document.getElementById('modalTicketDate').textContent = `${t('support.tickets.created')}: ${formatDate(ticket.created_at)}`;
+            document.getElementById('modalTicketSubject').textContent = currentTicket.subject;
+            document.getElementById('modalTicketNumber').textContent = currentTicket.ticket_number;
+            document.getElementById('modalTicketStatus').textContent = getStatusLabel(currentTicket.status);
+            document.getElementById('modalTicketStatus').className = `status-badge status-${currentTicket.status}`;
+            document.getElementById('modalTicketDate').textContent = `${getL(uiText.created)}: ${formatDate(currentTicket.created_at)}`;
 
+            // Render messages
             const messageList = document.getElementById('messageList');
-            messageList.innerHTML = messages.map(msg => `
+            messageList.innerHTML = (currentTicket.messages || []).map(msg => `
                 <div class="message-item ${msg.sender_type}">
-                    <div class="message-bubble">${escapeHtml(msg.message).replace(/\n/g, '<br>')}</div>
-                    <div class="message-meta ${msg.sender_type === 'user' ? 'text-end' : ''}">
-                        ${msg.sender_type === 'admin' ? '<i class="fas fa-headset"></i> ' + t('support.tickets.supportTeam') + ' · ' : ''}
-                        ${msg.sender_type === 'system' ? '' : formatDateTime(msg.created_at)}
-                    </div>
+                    <div class="message-bubble">${msg.message}</div>
+                    <div class="message-meta ${msg.sender_type === 'user' ? 'text-end' : ''}">${formatDate(msg.created_at)}</div>
                 </div>
             `).join('');
             messageList.scrollTop = messageList.scrollHeight;
 
-            const actionsContainer = document.getElementById('ticketActions');
-            actionsContainer.innerHTML = ticket.status !== 'closed' ? 
-                `<button class="btn btn-outline-secondary btn-sm" onclick="closeTicket()"><i class="fas fa-times me-1"></i> ${t('support.tickets.close')}</button>` : '';
+            // Show/hide reply form and rating
+            const replyForm = document.getElementById('replyForm');
+            const ratingForm = document.getElementById('ratingForm');
+            if (currentTicket.status === 'closed') {
+                replyForm.style.display = 'none';
+                ratingForm.style.display = 'none';
+            } else if (currentTicket.status === 'resolved') {
+                replyForm.style.display = 'none';
+                ratingForm.style.display = 'block';
+            } else {
+                replyForm.style.display = 'block';
+                ratingForm.style.display = 'none';
+            }
 
-            document.getElementById('replyForm').style.display = ticket.status === 'closed' ? 'none' : 'block';
-            document.getElementById('ratingForm').style.display = (ticket.status === 'resolved' || ticket.status === 'closed') ? 'block' : 'none';
+            // Actions
+            const actionsDiv = document.getElementById('ticketActions');
+            if (currentTicket.status === 'resolved') {
+                actionsDiv.innerHTML = `<button class="btn btn-sm btn-success" onclick="closeTicket()">${getL(uiText.filterClosed)}</button>`;
+            } else {
+                actionsDiv.innerHTML = '';
+            }
 
-            new bootstrap.Modal(document.getElementById('ticketModal')).show();
+            // Mark as read
+            currentTicket.unread_count = 0;
+
+            const modal = new bootstrap.Modal(document.getElementById('ticketModal'));
+            modal.show();
         }
 
         async function sendReply() {
             const message = document.getElementById('replyMessage').value.trim();
-            if (!message) { alert(t('support.tickets.enterMessage')); return; }
-
-            // デモモードの場合
-            if (isDemo) {
-                alert(t('support.tickets.demoModeMessage'));
-                return;
-            }
-
-            const btn = document.getElementById('sendReplyBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+            if (!message) return;
 
             try {
-                const response = await fetch(`${API_BASE}/support/tickets/${currentTicket.id}/messages`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include', body: JSON.stringify({ message })
+                const token = localStorage.getItem('token');
+                await fetch(`${API_BASE}/support/tickets/${currentTicket.id}/messages`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ message })
                 });
-                const data = await response.json();
-
-                if (data.success) {
-                    document.getElementById('replyMessage').value = '';
-                    await openTicket(currentTicket.id);
-                    loadTickets();
-                } else {
-                    alert(data.error || t('support.tickets.sendError'));
-                }
             } catch (error) {
-                console.error('Reply error:', error);
-                alert(t('support.tickets.sendError'));
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-paper-plane me-1"></i> ' + t('support.tickets.send');
+                console.log('Demo mode: message added locally');
             }
+
+            // Add to local state
+            const newMsg = { id: Date.now(), sender_type: 'user', message, created_at: new Date().toISOString() };
+            currentTicket.messages.push(newMsg);
+            currentTicket.status = 'waiting_admin';
+            currentTicket.updated_at = new Date().toISOString();
+
+            document.getElementById('replyMessage').value = '';
+            openTicketDetail(currentTicket.id);
+            renderTickets();
         }
 
         async function closeTicket() {
-            if (!confirm(t('support.tickets.closeConfirm'))) return;
-            
-            // デモモードの場合
-            if (isDemo) {
-                alert(t('support.tickets.demoModeMessage'));
-                return;
-            }
-            
-            try {
-                const response = await fetch(`${API_BASE}/support/tickets/${currentTicket.id}/close`, {
-                    method: 'POST', credentials: 'include'
-                });
-                const data = await response.json();
-                if (data.success) {
-                    bootstrap.Modal.getInstance(document.getElementById('ticketModal')).hide();
-                    loadTickets();
-                    alert(t('support.tickets.closedSuccess'));
-                } else {
-                    alert(data.error || t('support.tickets.closeError'));
-                }
-            } catch (error) {
-                console.error('Close error:', error);
-                alert(t('support.tickets.closeError'));
+            if (currentTicket) {
+                currentTicket.status = 'closed';
+                currentTicket.updated_at = new Date().toISOString();
+                renderTickets();
+                bootstrap.Modal.getInstance(document.getElementById('ticketModal')).hide();
             }
         }
 
-        function updateRatingStars() {
-            document.querySelectorAll('#ratingStars .bi-star-fill').forEach((star, i) => {
-                star.classList.toggle('active', i < selectedRating);
-            });
-        }
-
-        function highlightStars(rating) {
-            document.querySelectorAll('#ratingStars .bi-star-fill').forEach((star, i) => {
-                star.classList.toggle('active', i < rating);
-            });
-        }
-
-        async function submitRating() {
-            if (selectedRating === 0) { alert(t('support.tickets.selectRating')); return; }
-            
-            // デモモードの場合
-            if (isDemo) {
-                alert(t('support.tickets.demoModeMessage'));
-                return;
-            }
-            
-            const comment = document.getElementById('ratingComment').value.trim();
-            const btn = document.getElementById('submitRatingBtn');
-            btn.disabled = true;
-
-            try {
-                const response = await fetch(`${API_BASE}/support/tickets/${currentTicket.id}/rate`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include', body: JSON.stringify({ rating: selectedRating, comment })
-                });
-                const data = await response.json();
-
-                if (data.success) {
-                    alert(t('support.tickets.ratingThanks'));
-                    document.getElementById('ratingForm').innerHTML = `
-                        <div class="text-center text-success">
-                            <i class="fas fa-check-circle" style="font-size: 2rem;"></i>
-                            <p class="mt-2 mb-0">${t('support.tickets.ratingSubmitted')}</p>
-                        </div>
-                    `;
-                } else {
-                    alert(data.error || t('support.tickets.ratingError'));
-                    btn.disabled = false;
-                }
-            } catch (error) {
-                console.error('Rating error:', error);
-                alert(t('support.tickets.ratingError'));
-                btn.disabled = false;
-            }
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        function formatDate(dateStr) {
-            const lang = getCurrentLanguage();
-            const locale = lang === 'ja' ? 'ja-JP' : lang === 'zh' ? 'zh-CN' : lang === 'ko' ? 'ko-KR' : lang === 'ar' ? 'ar-SA' : 'en-US';
-            return new Date(dateStr).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' });
-        }
-
-        function formatDateTime(dateStr) {
-            const lang = getCurrentLanguage();
-            const locale = lang === 'ja' ? 'ja-JP' : lang === 'zh' ? 'zh-CN' : lang === 'ko' ? 'ko-KR' : lang === 'ar' ? 'ar-SA' : 'en-US';
-            return new Date(dateStr).toLocaleString(locale, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-        }
-
-        // Initialize
+        // ========== Pattern C + Tickets: DOMContentLoaded ==========
         document.addEventListener('DOMContentLoaded', function() {
-            // --- Pattern C Navbar init ---
+            // --- Pattern C: 言語セレクター同期 ---
             const desktopSelector = document.getElementById('languageSelector');
             const mobileSelector = document.getElementById('languageSelectorMobile');
-            
+
             if (desktopSelector && mobileSelector) {
                 const savedLang = localStorage.getItem('preferredLanguage') || 'en';
                 desktopSelector.value = savedLang;
                 mobileSelector.value = savedLang;
-                
+
                 mobileSelector.addEventListener('change', function() {
                     desktopSelector.value = this.value;
                     if (typeof changeLanguage === 'function') changeLanguage(this.value);
-                    currentLang = this.value;
                     updateUIText();
-                    loadTickets();
+                    renderTickets();
                 });
-                
+
                 desktopSelector.addEventListener('change', function() {
                     mobileSelector.value = this.value;
-                    currentLang = this.value;
                     updateUIText();
-                    loadTickets();
+                    renderTickets();
                 });
             }
-            
+
+            // --- Pattern C: UI初期化 ---
             updateUIText();
             setTimeout(updateUIText, 100);
-            loadUserInfo();
-            
-            // Close user menu when clicking outside
+
+            // --- Pattern C: ドロップダウン外クリックで閉じる ---
             document.addEventListener('click', function(e) {
                 if (!e.target.closest('.user-dropdown')) {
                     const dropdown = document.getElementById('userDropdown');
@@ -1529,11 +882,11 @@
                     if (dropdownMenu) dropdownMenu.classList.remove('show');
                 }
             });
-            
-            // Navbar overlay control
+
+            // --- Pattern C: ハンバーガーメニュー & オーバーレイ ---
             const navbarCollapse = document.getElementById('navbarNav');
             const navbarOverlay = document.getElementById('navbarOverlay');
-            
+
             if (navbarCollapse) {
                 navbarCollapse.addEventListener('show.bs.collapse', function() {
                     document.body.classList.add('menu-open');
@@ -1544,66 +897,72 @@
                     if (navbarOverlay) navbarOverlay.classList.remove('show');
                 });
             }
-            
+
             if (navbarOverlay) {
                 navbarOverlay.addEventListener('click', function() {
                     const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
                     if (bsCollapse) bsCollapse.hide();
                 });
             }
-            
+
+            // --- Pattern C: 言語変更イベント ---
             document.addEventListener('languageChanged', function(e) {
-                const lang = e.detail?.language || e.detail?.lang;
-                if (lang) {
-                    currentLang = lang;
-                    if (desktopSelector) desktopSelector.value = lang;
-                    if (mobileSelector) mobileSelector.value = lang;
-                    updateUIText();
-                    loadTickets();
-                }
+                updateUIText();
+                renderTickets();
             });
-            
-            // --- Page-specific init ---
-            // Check demo mode
-            isDemo = new URLSearchParams(window.location.search).has('demo');
-            
-            // Load tickets
-            loadTickets();
-            
-            // Filter event listeners
-            document.getElementById('statusFilter').addEventListener('change', loadTickets);
-            document.getElementById('unreadOnly').addEventListener('change', loadTickets);
-            
-            // Rating stars event listeners
-            document.querySelectorAll('#ratingStars .bi-star-fill').forEach(star => {
+
+            // --- Tickets固有: フィルター ---
+            document.getElementById('statusFilter').addEventListener('change', renderTickets);
+            document.getElementById('unreadOnly').addEventListener('change', renderTickets);
+
+            // --- Tickets固有: 返信送信 ---
+            document.getElementById('sendReplyBtn').addEventListener('click', sendReply);
+
+            // --- Tickets固有: 評価 ---
+            const ratingStars = document.querySelectorAll('#ratingStars .bi-star-fill');
+            let selectedRating = 0;
+            ratingStars.forEach(star => {
                 star.addEventListener('click', function() {
                     selectedRating = parseInt(this.dataset.rating);
-                    updateRatingStars();
+                    ratingStars.forEach((s, i) => {
+                        s.classList.toggle('active', i < selectedRating);
+                    });
                 });
                 star.addEventListener('mouseover', function() {
-                    highlightStars(parseInt(this.dataset.rating));
+                    const rating = parseInt(this.dataset.rating);
+                    ratingStars.forEach((s, i) => {
+                        s.style.color = i < rating ? '#ffc107' : '#dee2e6';
+                    });
                 });
                 star.addEventListener('mouseout', function() {
-                    updateRatingStars();
+                    ratingStars.forEach((s, i) => {
+                        s.style.color = i < selectedRating ? '#ffc107' : '#dee2e6';
+                    });
                 });
             });
-            
-            // Reply button event listener
-            document.getElementById('sendReplyBtn').addEventListener('click', sendReply);
-            document.getElementById('submitRatingBtn').addEventListener('click', submitRating);
-            
-            // Listen for storage changes (language changed in another tab)
-            window.addEventListener('storage', function(e) {
-                if (e.key === 'preferredLanguage') {
-                    currentLang = e.newValue || 'en';
-                    if (desktopSelector) desktopSelector.value = currentLang;
-                    if (mobileSelector) mobileSelector.value = currentLang;
-                    updateUIText();
-                    loadTickets();
+
+            document.getElementById('submitRatingBtn').addEventListener('click', async function() {
+                if (selectedRating === 0) return;
+                const comment = document.getElementById('ratingComment').value.trim();
+                try {
+                    const token = localStorage.getItem('token');
+                    await fetch(`${API_BASE}/support/tickets/${currentTicket.id}/rating`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ rating: selectedRating, comment })
+                    });
+                } catch (error) {
+                    console.log('Demo mode: rating submitted locally');
                 }
+                currentTicket.status = 'closed';
+                currentTicket.updated_at = new Date().toISOString();
+                renderTickets();
+                bootstrap.Modal.getInstance(document.getElementById('ticketModal')).hide();
             });
+
+            // --- Tickets固有: データ読み込み ---
+            loadTickets();
         });
     </script>
-    <script src="../../js/header-notification.js"></script>
 </body>
 </html>

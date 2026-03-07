@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
     <title data-i18n="support.troubleshoot.pageTitle">Troubleshooting - Publisher</title>
     
     <!-- Google Fonts -->
@@ -17,270 +18,10 @@
     <!-- Custom Styles -->
     <link href="../../css/style-new.css" rel="stylesheet">
     <link href="../../css/mobile-fixes.css" rel="stylesheet">
-    
+    <link href="../../css/navbar.css" rel="stylesheet">
+
+    <!-- Troubleshoot Page Styles -->
     <style>
-        /* ========== Mobile Language Selector ========== */
-        .navbar-lang-selector {
-            display: flex;
-            align-items: center;
-            margin-right: 0.5rem;
-        }
-        
-        @media (max-width: 991.98px) {
-            .navbar-lang-selector {
-                order: 1;
-            }
-            .navbar-toggler {
-                order: 2;
-            }
-        }
-        
-        /* ========== PC Navbar - 横並び維持 ========== */
-        @media (min-width: 992px) {
-            .navbar-nav {
-                flex-wrap: nowrap !important;
-                flex-direction: row !important;
-            }
-            .navbar-nav .nav-item {
-                white-space: nowrap !important;
-            }
-            .navbar-nav .nav-link {
-                white-space: nowrap !important;
-                padding: 0.5rem 0.6rem !important;
-                font-size: 0.9rem;
-            }
-            .navbar-collapse .d-flex {
-                flex-wrap: nowrap !important;
-            }
-            .dropdown-menu {
-                white-space: nowrap;
-            }
-            .navbar-buttons-guest {
-                display: flex !important;
-                flex-wrap: nowrap !important;
-                gap: 0.5rem;
-            }
-            .navbar-buttons-guest .btn {
-                white-space: nowrap !important;
-                flex-shrink: 0;
-            }
-        }
-        
-        /* ========== Auth Visibility Control ========== */
-        .auth-only {
-            display: none !important;
-        }
-        .guest-only {
-            display: block;
-        }
-        body.logged-in .auth-only {
-            display: block !important;
-        }
-        body.logged-in .auth-only.nav-item {
-            display: list-item !important;
-        }
-        body.logged-in .auth-only.dropdown {
-            display: block !important;
-        }
-        body.logged-in .guest-only {
-            display: none !important;
-        }
-        @media (min-width: 992px) {
-            body.logged-in .navbar-buttons-guest {
-                display: none !important;
-            }
-        }
-        
-        /* ========== User Dropdown Menu ========== */
-        .user-dropdown {
-            position: relative;
-        }
-        .user-dropdown-toggle {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: transparent;
-            border: 1px solid var(--color-border);
-            border-radius: 25px;
-            padding: 0.4rem 0.75rem;
-            cursor: pointer;
-            color: var(--color-text);
-            transition: all 0.2s;
-        }
-        .user-dropdown-toggle:hover {
-            border-color: var(--color-accent);
-            background: rgba(139, 115, 85, 0.05);
-        }
-        .user-dropdown-toggle i:first-child {
-            font-size: 1.25rem;
-            color: var(--color-accent);
-        }
-        .user-name {
-            font-weight: 500;
-            font-size: 0.9rem;
-            max-width: 120px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .user-chevron {
-            font-size: 0.7rem;
-            color: var(--color-text-secondary);
-            transition: transform 0.2s;
-        }
-        .user-dropdown.open .user-chevron {
-            transform: rotate(180deg);
-        }
-        .user-menu {
-            position: absolute;
-            top: calc(100% + 0.5rem);
-            right: 0;
-            background: var(--color-bg-card);
-            border: 1px solid var(--color-border);
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            min-width: 240px;
-            z-index: 1001;
-            display: none;
-            overflow: hidden;
-        }
-        .user-menu.show {
-            display: block;
-        }
-        .user-menu-header {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 1rem;
-            background: var(--color-bg-main);
-        }
-        .user-avatar {
-            font-size: 2.5rem;
-            color: var(--color-accent);
-        }
-        .user-info {
-            flex: 1;
-            min-width: 0;
-        }
-        .user-display-name {
-            font-weight: 600;
-            font-size: 0.95rem;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .user-email {
-            font-size: 0.8rem;
-            color: var(--color-text-secondary);
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .user-menu-divider {
-            height: 1px;
-            background: var(--color-border);
-        }
-        .user-menu-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
-            color: var(--color-text);
-            text-decoration: none;
-            font-size: 0.9rem;
-            cursor: pointer;
-            border: none;
-            background: transparent;
-            width: 100%;
-            text-align: left;
-        }
-        .user-menu-item:hover {
-            background: var(--color-bg-hover);
-            color: var(--color-accent);
-        }
-        .user-menu-item i {
-            width: 20px;
-            text-align: center;
-            color: var(--color-text-secondary);
-        }
-        .user-menu-item:hover i {
-            color: var(--color-accent);
-        }
-        .logout-btn {
-            color: var(--color-error);
-        }
-        .logout-btn i {
-            color: var(--color-error);
-        }
-        .logout-btn:hover {
-            background: rgba(199, 93, 93, 0.1);
-            color: var(--color-error);
-        }
-        
-        /* ========== Navbar Overlay ========== */
-        .navbar-overlay {
-            display: none;
-            position: fixed;
-            top: 56px;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1040;
-        }
-        .navbar-overlay.show {
-            display: block;
-        }
-        
-        /* ========== Mobile Adjustments ========== */
-        @media (max-width: 991.98px) {
-            .user-dropdown {
-                order: 3;
-                margin-left: 0.5rem;
-            }
-            .user-dropdown-toggle {
-                padding: 0.3rem;
-                border-radius: 50%;
-                width: 38px;
-                height: 38px;
-                justify-content: center;
-            }
-            .user-menu {
-                position: fixed;
-                top: 56px;
-                right: 10px;
-                left: auto;
-                min-width: 260px;
-                max-width: calc(100vw - 20px);
-                z-index: 9999;
-            }
-            .navbar-collapse {
-                max-height: 70vh;
-                overflow-y: auto;
-                overscroll-behavior: contain;
-                -webkit-overflow-scrolling: touch;
-            }
-            .navbar-collapse.show,
-            .navbar-collapse.collapsing {
-                position: fixed;
-                top: 56px;
-                left: 0;
-                right: 0;
-                background: #FFFFFF;
-                border-bottom: 1px solid var(--color-border);
-                box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-                z-index: 1045;
-                padding: 0.5rem 1rem;
-            }
-            body.menu-open {
-                overflow: hidden;
-            }
-            .navbar-custom {
-                z-index: 1050 !important;
-                background: #FFFFFF !important;
-            }
-        }
-        
         /* Troubleshoot Hero */
         .troubleshoot-hero {
             background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
@@ -288,24 +29,15 @@
             color: white;
             text-align: center;
         }
-        
-        .troubleshoot-hero h1 {
-            color: white;
-            font-size: var(--font-size-3xl);
-            margin-bottom: var(--spacing-sm);
-        }
-        
-        .troubleshoot-hero p {
-            color: rgba(255, 255, 255, 0.9);
-        }
-        
+        .troubleshoot-hero h1 { color: white; font-size: var(--font-size-3xl); margin-bottom: var(--spacing-sm); }
+        .troubleshoot-hero p { color: rgba(255, 255, 255, 0.9); }
+
         /* Wizard Progress */
         .wizard-progress {
             background: var(--color-cream);
             padding: 1.5rem 0;
             border-bottom: 1px solid var(--color-border);
         }
-        
         .progress-steps {
             display: flex;
             justify-content: center;
@@ -314,7 +46,6 @@
             max-width: 600px;
             margin: 0 auto;
         }
-        
         .progress-step {
             display: flex;
             align-items: center;
@@ -322,16 +53,8 @@
             color: var(--color-text-muted);
             font-size: 0.9rem;
         }
-        
-        .progress-step.active {
-            color: var(--color-accent);
-            font-weight: 500;
-        }
-        
-        .progress-step.completed {
-            color: var(--color-success);
-        }
-        
+        .progress-step.active { color: var(--color-accent); font-weight: 500; }
+        .progress-step.completed { color: var(--color-success); }
         .step-number {
             width: 28px;
             height: 28px;
@@ -343,72 +66,42 @@
             font-weight: 600;
             font-size: 0.85rem;
         }
-        
-        .progress-step.active .step-number {
-            background: var(--color-accent);
-            color: white;
-        }
-        
-        .progress-step.completed .step-number {
-            background: var(--color-success);
-            color: white;
-        }
-        
+        .progress-step.active .step-number { background: var(--color-accent); color: white; }
+        .progress-step.completed .step-number { background: var(--color-success); color: white; }
         .progress-line {
             width: 60px;
             height: 2px;
             background: var(--color-border);
             margin: 0 0.5rem;
         }
-        
-        .progress-line.completed {
-            background: var(--color-success);
-        }
-        
+        .progress-line.completed { background: var(--color-success); }
+
         /* Wizard Content */
         .wizard-content {
             max-width: 800px;
             margin: 2rem auto;
             padding: 0 1rem;
         }
-        
-        .wizard-step {
-            display: none;
-        }
-        
-        .wizard-step.active {
-            display: block;
-        }
-        
-        .wizard-question {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        
+        .wizard-step { display: none; }
+        .wizard-step.active { display: block; }
+        .wizard-question { text-align: center; margin-bottom: 2rem; }
         .wizard-question h2 {
             font-family: var(--font-heading);
             font-size: 1.5rem;
             color: var(--color-text);
             margin-bottom: 0.5rem;
         }
-        
-        .wizard-question p {
-            color: var(--color-text-muted);
-        }
-        
+        .wizard-question p { color: var(--color-text-muted); }
+
         /* Option Grid */
         .option-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 1rem;
         }
-        
         @media (max-width: 576px) {
-            .option-grid {
-                grid-template-columns: 1fr;
-            }
+            .option-grid { grid-template-columns: 1fr; }
         }
-        
         .option-card {
             background: white;
             border: 2px solid var(--color-border);
@@ -418,37 +111,16 @@
             transition: all 0.2s ease;
             text-align: center;
         }
-        
         .option-card:hover {
             border-color: var(--color-accent);
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        
-        .option-card.selected {
-            border-color: var(--color-accent);
-            background: var(--color-cream);
-        }
-        
-        .option-card i {
-            font-size: 2rem;
-            color: var(--color-accent);
-            margin-bottom: 0.75rem;
-        }
-        
-        .option-card h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-            color: var(--color-text);
-        }
-        
-        .option-card p {
-            font-size: 0.85rem;
-            color: var(--color-text-muted);
-            margin: 0;
-        }
-        
+        .option-card.selected { border-color: var(--color-accent); background: var(--color-cream); }
+        .option-card i { font-size: 2rem; color: var(--color-accent); margin-bottom: 0.75rem; }
+        .option-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem; color: var(--color-text); }
+        .option-card p { font-size: 0.85rem; color: var(--color-text-muted); margin: 0; }
+
         /* Solution Card */
         .solution-card {
             background: white;
@@ -456,7 +128,6 @@
             padding: 2rem;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        
         .solution-header {
             display: flex;
             align-items: center;
@@ -465,22 +136,9 @@
             padding-bottom: 1rem;
             border-bottom: 1px solid var(--color-border);
         }
-        
-        .solution-header i {
-            font-size: 2.5rem;
-            color: var(--color-accent);
-        }
-        
-        .solution-header h3 {
-            font-family: var(--font-heading);
-            font-size: 1.25rem;
-            margin: 0;
-        }
-        
-        .solution-steps {
-            margin-bottom: 1.5rem;
-        }
-        
+        .solution-header i { font-size: 2.5rem; color: var(--color-accent); }
+        .solution-header h3 { font-family: var(--font-heading); font-size: 1.25rem; margin: 0; }
+        .solution-steps { margin-bottom: 1.5rem; }
         .solution-step {
             display: flex;
             gap: 1rem;
@@ -489,7 +147,6 @@
             background: var(--color-cream);
             border-radius: 8px;
         }
-        
         .solution-step-number {
             width: 28px;
             height: 28px;
@@ -503,24 +160,10 @@
             font-size: 0.85rem;
             flex-shrink: 0;
         }
-        
-        .solution-step-content h4 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-        }
-        
-        .solution-step-content p {
-            font-size: 0.9rem;
-            color: var(--color-text-muted);
-            margin: 0;
-        }
-        
-        .solution-action {
-            display: inline-block;
-            margin-top: 0.5rem;
-        }
-        
+        .solution-step-content h4 { font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem; }
+        .solution-step-content p { font-size: 0.9rem; color: var(--color-text-muted); margin: 0; }
+        .solution-action { display: inline-block; margin-top: 0.5rem; }
+
         /* Resolution Check */
         .resolution-check {
             background: var(--color-cream);
@@ -529,19 +172,13 @@
             text-align: center;
             margin-top: 1.5rem;
         }
-        
-        .resolution-check h4 {
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-        }
-        
+        .resolution-check h4 { font-size: 1.1rem; margin-bottom: 1rem; }
         .resolution-buttons {
             display: flex;
             justify-content: center;
             gap: 1rem;
             flex-wrap: wrap;
         }
-        
         .btn-resolved {
             background: var(--color-success);
             color: white;
@@ -552,11 +189,7 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        
-        .btn-resolved:hover {
-            background: #2e7d32;
-        }
-        
+        .btn-resolved:hover { background: #2e7d32; }
         .btn-not-resolved {
             background: white;
             color: var(--color-text);
@@ -567,21 +200,11 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        
-        .btn-not-resolved:hover {
-            border-color: var(--color-accent);
-        }
-        
+        .btn-not-resolved:hover { border-color: var(--color-accent); }
+
         /* Related FAQs */
-        .related-faqs {
-            margin-top: 2rem;
-            display: none;
-        }
-        
-        .related-faqs.show {
-            display: block;
-        }
-        
+        .related-faqs { margin-top: 2rem; display: none; }
+        .related-faqs.show { display: block; }
         .related-faqs h4 {
             font-size: 1.1rem;
             margin-bottom: 1rem;
@@ -589,11 +212,7 @@
             align-items: center;
             gap: 0.5rem;
         }
-        
-        .related-faqs h4 i {
-            color: var(--color-accent);
-        }
-        
+        .related-faqs h4 i { color: var(--color-accent); }
         .faq-mini-card {
             background: white;
             border: 1px solid var(--color-border);
@@ -603,17 +222,8 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        
-        .faq-mini-card:hover {
-            border-color: var(--color-accent);
-        }
-        
-        .faq-mini-card h5 {
-            font-size: 0.95rem;
-            margin: 0;
-            color: var(--color-text);
-        }
-        
+        .faq-mini-card:hover { border-color: var(--color-accent); }
+        .faq-mini-card h5 { font-size: 0.95rem; margin: 0; color: var(--color-text); }
         .faq-mini-card .faq-answer {
             display: none;
             margin-top: 0.75rem;
@@ -622,21 +232,11 @@
             font-size: 0.9rem;
             color: var(--color-text-muted);
         }
-        
-        .faq-mini-card.expanded .faq-answer {
-            display: block;
-        }
-        
+        .faq-mini-card.expanded .faq-answer { display: block; }
+
         /* Contact Section */
-        .contact-section {
-            margin-top: 2rem;
-            display: none;
-        }
-        
-        .contact-section.show {
-            display: block;
-        }
-        
+        .contact-section { margin-top: 2rem; display: none; }
+        .contact-section.show { display: block; }
         .contact-card {
             background: linear-gradient(135deg, var(--color-accent), var(--color-accent-light));
             color: white;
@@ -644,34 +244,13 @@
             padding: 2rem;
             text-align: center;
         }
-        
-        .contact-card h4 {
-            font-family: var(--font-heading);
-            font-size: 1.25rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .contact-card p {
-            opacity: 0.9;
-            margin-bottom: 1.5rem;
-        }
-        
-        .contact-card .btn {
-            background: white;
-            color: var(--color-accent);
-            font-weight: 600;
-        }
-        
-        .contact-card .btn:hover {
-            background: var(--color-cream);
-        }
-        
+        .contact-card h4 { font-family: var(--font-heading); font-size: 1.25rem; margin-bottom: 0.5rem; }
+        .contact-card p { opacity: 0.9; margin-bottom: 1.5rem; }
+        .contact-card .btn { background: white; color: var(--color-accent); font-weight: 600; }
+        .contact-card .btn:hover { background: var(--color-cream); }
+
         /* Success Screen */
-        .success-screen {
-            text-align: center;
-            padding: 3rem 1rem;
-        }
-        
+        .success-screen { text-align: center; padding: 3rem 1rem; }
         .success-icon {
             width: 80px;
             height: 80px;
@@ -684,18 +263,9 @@
             font-size: 2.5rem;
             margin: 0 auto 1.5rem;
         }
-        
-        .success-screen h2 {
-            font-family: var(--font-heading);
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .success-screen p {
-            color: var(--color-text-muted);
-            margin-bottom: 2rem;
-        }
-        
+        .success-screen h2 { font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .success-screen p { color: var(--color-text-muted); margin-bottom: 2rem; }
+
         /* Wizard Nav */
         .wizard-nav {
             display: flex;
@@ -704,7 +274,6 @@
             padding-top: 1.5rem;
             border-top: 1px solid var(--color-border);
         }
-        
         .btn-back {
             background: transparent;
             color: var(--color-text-muted);
@@ -716,10 +285,7 @@
             align-items: center;
             gap: 0.5rem;
         }
-        
-        .btn-back:hover {
-            color: var(--color-text);
-        }
+        .btn-back:hover { color: var(--color-text); }
     </style>
 </head>
 <body>
@@ -772,6 +338,10 @@
                         <i class="fas fa-th-large"></i>
                         <span id="menuDashboard">Dashboard</span>
                     </a>
+                    <a href="../my-works.html" class="user-menu-item">
+                        <i class="fas fa-book"></i>
+                        <span id="menuMyWorks">My Works</span>
+                    </a>
                     <a href="../account-settings.html" class="user-menu-item">
                         <i class="fas fa-cog"></i>
                         <span id="menuAccountSettings">Account Settings</span>
@@ -799,11 +369,6 @@
                     <li class="nav-item">
                         <a class="nav-link" href="../browse.html">
                             <i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../genres.html">
-                            <i class="fas fa-layer-group me-1"></i> <span data-i18n="nav.genres">Genres</span>
                         </a>
                     </li>
                     <!-- Auth: Library -->
@@ -860,11 +425,6 @@
                     <li class="nav-item">
                         <a class="nav-link" href="../browse.html">
                             <i class="fas fa-compass me-2"></i> <span data-i18n="nav.browse">Browse</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../genres.html">
-                            <i class="fas fa-layer-group me-2"></i> <span data-i18n="nav.genres">Genres</span>
                         </a>
                     </li>
                     <!-- Auth: Library -->
@@ -1096,7 +656,7 @@
     <footer class="footer-custom">
         <div class="container">
             <div class="d-flex flex-wrap justify-content-between align-items-center">
-                <p class="small mb-0">&copy; 2024 Publisher. All rights reserved.</p>
+                <p class="small mb-0">&copy; 2025 Publisher. All rights reserved.</p>
                 <div class="d-flex gap-3">
                     <a href="faq.html" data-i18n="support.faq.title">FAQ</a>
                     <a href="troubleshoot.html" class="text-accent" data-i18n="support.troubleshoot.title">Troubleshooting</a>
@@ -1422,11 +982,7 @@
         /**
          * Get current language from localStorage
          */
-        function getCurrentLang() {
-            return localStorage.getItem('preferredLanguage') || 'en';
-        }
-        
-        /**
+/**
          * Get localized text from object with language suffix
          */
         function getLocalizedText(item, field) {
@@ -1713,23 +1269,20 @@
                 en: 'Are you sure you want to log out?', ja: 'ログアウトしますか？', zh: '确定要退出登录吗？',
                 es: '¿Estás seguro de que quieres cerrar sesión?', fr: 'Êtes-vous sûr de vouloir vous déconnecter?', de: 'Sind Sie sicher, dass Sie sich abmelden möchten?',
                 ko: '로그아웃 하시겠습니까?', ar: 'هل أنت متأكد أنك تريد تسجيل الخروج؟', pt: 'Tem certeza que deseja sair?'
+            },
+            myWorks: {
+                en: 'My Works', ja: 'マイ作品', zh: '我的作品',
+                es: 'Mis Obras', fr: 'Mes Œuvres', de: 'Meine Werke',
+                ko: '내 작품', ar: 'أعمالي', pt: 'Minhas Obras'
             }
         };
-        
-        function getCurrentLanguage() {
-            return localStorage.getItem('preferredLanguage') || 'en';
-        }
-        
-        function getL(obj) {
-            const lang = getCurrentLanguage();
-            return obj[lang] || obj.en || '';
-        }
-        
-        function updateNavbarText() {
+function updateNavbarText() {
             const menuDashboard = document.getElementById('menuDashboard');
+            const menuMyWorks = document.getElementById('menuMyWorks');
             const menuAccountSettings = document.getElementById('menuAccountSettings');
             const menuLogout = document.getElementById('menuLogout');
             if (menuDashboard) menuDashboard.textContent = getL(navbarUiText.dashboard);
+            if (menuMyWorks) menuMyWorks.textContent = getL(navbarUiText.myWorks);
             if (menuAccountSettings) menuAccountSettings.textContent = getL(navbarUiText.accountSettings);
             if (menuLogout) menuLogout.textContent = getL(navbarUiText.logout);
             
@@ -1747,48 +1300,6 @@
                 if (el) el.textContent = getL(els[id]);
             });
         }
-        
-        function toggleUserDropdown(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            const dropdown = document.getElementById('userDropdown');
-            const dropdownMenu = document.getElementById('userMenu');
-            dropdown.classList.toggle('open');
-            dropdownMenu.classList.toggle('show');
-        }
-        
-        function handleLogout() {
-            if (confirm(getL(navbarUiText.logOutConfirm))) {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                window.location.reload();
-            }
-        }
-        
-        function loadUserInfo() {
-            const userStr = localStorage.getItem('user');
-            const token = localStorage.getItem('token');
-            const isLoggedIn = !!(userStr && token);
-            
-            if (isLoggedIn) {
-                try {
-                    const user = JSON.parse(userStr);
-                    const displayName = user.display_name || user.firstName || user.email || 'User';
-                    const userNameEl = document.getElementById('userName');
-                    const userDisplayNameEl = document.getElementById('userDisplayName');
-                    const userEmailEl = document.getElementById('userEmail');
-                    if (userNameEl) userNameEl.textContent = displayName;
-                    if (userDisplayNameEl) userDisplayNameEl.textContent = displayName;
-                    if (userEmailEl) userEmailEl.textContent = user.email || '';
-                    document.body.classList.add('logged-in');
-                } catch (e) {
-                    document.body.classList.remove('logged-in');
-                }
-            } else {
-                document.body.classList.remove('logged-in');
-            }
-        }
-        
         document.addEventListener('DOMContentLoaded', function() {
             const desktopSelector = document.getElementById('languageSelector');
             const mobileSelector = document.getElementById('languageSelectorMobile');
@@ -1812,8 +1323,6 @@
             
             updateNavbarText();
             setTimeout(updateNavbarText, 100);
-            loadUserInfo();
-            
             document.addEventListener('click', function(e) {
                 if (!e.target.closest('.user-dropdown')) {
                     const dropdown = document.getElementById('userDropdown');
@@ -1850,5 +1359,6 @@
         });
     </script>
     <script src="../../js/header-notification.js"></script>
+    <script src="../../js/navbar.js"></script>
 </body>
 </html>
