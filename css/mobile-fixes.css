@@ -7,6 +7,32 @@
 
 /* ===== Global Mobile Improvements ===== */
 
+/* Remove Bootstrap 5 dropdown gap (default margin-top: 0.125rem causes a gap below navbar) */
+.navbar .dropdown-menu {
+    --bs-dropdown-spacer: 0;
+    margin-top: 0;
+}
+
+/* Fix mobile navbar element order: Brand | LangSelector | Hamburger | AccountIcon */
+@media (max-width: 991.98px) {
+    .user-dropdown {
+        order: 3;
+        margin-left: 0.5rem;
+    }
+}
+
+/* Prevent horizontal scroll on all pages */
+html {
+    overflow-x: hidden;
+}
+body {
+    overflow-x: hidden; /* Fallback for older browsers */
+    overflow-x: clip;   /* Modern browsers: visually clips overflow WITHOUT creating a scroll
+                           container, so position: sticky (navbar sticky-top) keeps working */
+    max-width: 100%;
+    position: relative; /* Required for iOS Safari overflow-x: hidden fallback */
+}
+
 /* Ensure minimum touch target size (44px) */
 @media (max-width: 768px) {
     .btn,
@@ -1402,6 +1428,19 @@
 /* Native lazy loading support indicator */
 img[loading="lazy"] {
     /* Modern browsers support native lazy loading */
+}
+
+/* ===== RTL (Arabic) Support for Pattern C Navbar ===== */
+[dir="rtl"] .user-menu {
+    right: auto;
+    left: 0;
+}
+
+@media (max-width: 991.98px) {
+    [dir="rtl"] .user-menu {
+        right: auto;
+        left: 10px;
+    }
 }
 
 /* ===== Print Styles ===== */
