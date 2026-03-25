@@ -61,7 +61,7 @@ router.post('/create-checkout-session', authenticate, async (req, res) => {
         },
       ],
       mode: 'payment',
-      success_url: `${process.env.FRONTEND_URL}/pages/payment-success.html?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${process.env.FRONTEND_URL}/pages/payment-success.html?session_id={CHECKOUT_SESSION_ID}&work_id=${workId}&title=${encodeURIComponent(work.title)}&amount=${work.price}`,
       cancel_url: `${process.env.FRONTEND_URL}/pages/payment-cancel.html`,
       metadata: {
         work_id: workId,
