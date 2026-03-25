@@ -1360,6 +1360,7 @@
             saveNotifs(notifs);
             renderNotificationList();
             updateNotifBadge();
+            if (typeof updateMessageBadge === 'function') updateMessageBadge();
         }
 
         // ========== Handle Notification Click ==========
@@ -1370,6 +1371,7 @@
                 n.is_read = true;
                 saveNotifs(notifs);
                 updateNotifBadge();
+                if (typeof updateMessageBadge === 'function') updateMessageBadge();
                 const link = NOTIFICATION_LINKS[n.type] || '';
                 if (link) {
                     window.location.href = link;
@@ -1396,15 +1398,34 @@
         function loadConversations() {
             const saved = localStorage.getItem('publisher_messages');
             if (saved) {
-                try { return JSON.parse(saved); } catch(e) { /* fall through */ }
+                try {
+                    var convs = JSON.parse(saved);
+                    syncUnreadCount();
+                    return convs;
+                } catch(e) { /* fall through */ }
             }
             // First time: save demo data
             localStorage.setItem('publisher_messages', JSON.stringify(demoConversations));
+            syncUnreadCount();
             return demoConversations;
         }
 
         function saveConversations(convs) {
             localStorage.setItem('publisher_messages', JSON.stringify(convs));
+            syncUnreadCount();
+        }
+
+        // Sync unread count to localStorage for navbar badge
+        function syncUnreadCount() {
+            try {
+                var convs = JSON.parse(localStorage.getItem('publisher_messages') || '[]');
+                var unreadConvs = 0;
+                for (var i = 0; i < convs.length; i++) {
+                    if (convs[i].unread && convs[i].unread > 0) unreadConvs += convs[i].unread;
+                }
+                localStorage.setItem('publisher_unread_conversations', String(unreadConvs));
+                if (typeof updateMessageBadge === 'function') updateMessageBadge();
+            } catch(e) {}
         }
 
         // ========== Render Conversation List ==========

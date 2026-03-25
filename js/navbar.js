@@ -775,21 +775,44 @@ function _getUnreadCount() {
     // Method 1: Check API (when backend is connected)
     // For now, use localStorage-based count
 
+    var token = localStorage.getItem('token');
+    var user = localStorage.getItem('user');
+    if (!token && !user) return 0; // Not logged in
+
     // Count unread conversations
     var convCount = 0;
     try {
-        var conversations = JSON.parse(localStorage.getItem('msg_conversations') || '[]');
-        for (var i = 0; i < conversations.length; i++) {
-            if (conversations[i].unread) convCount++;
+        var storedCount = localStorage.getItem('publisher_unread_conversations');
+        if (storedCount !== null) {
+            convCount = parseInt(storedCount, 10) || 0;
+        } else {
+            // First visit: check publisher_messages for demo data
+            var msgs = localStorage.getItem('publisher_messages');
+            if (msgs) {
+                var convs = JSON.parse(msgs);
+                for (var i = 0; i < convs.length; i++) {
+                    if (convs[i].unread && convs[i].unread > 0) convCount += convs[i].unread;
+                }
+                localStorage.setItem('publisher_unread_conversations', String(convCount));
+            } else {
+                // Demo default: 3 unread messages (Sarah 2 + Yuki 1)
+                convCount = 3;
+                localStorage.setItem('publisher_unread_conversations', '3');
+            }
         }
     } catch(e) {}
 
     // Count unread notifications
     var notifCount = 0;
     try {
-        var notifs = JSON.parse(localStorage.getItem('msg_notifications') || '[]');
-        for (var j = 0; j < notifs.length; j++) {
-            if (!notifs[j].is_read) notifCount++;
+        var notifs = JSON.parse(localStorage.getItem('publisher_msg_notifs') || '[]');
+        if (notifs.length > 0) {
+            for (var j = 0; j < notifs.length; j++) {
+                if (!notifs[j].is_read) notifCount++;
+            }
+        } else {
+            // Demo default: 4 unread notifications
+            notifCount = 4;
         }
     } catch(e) {}
 
