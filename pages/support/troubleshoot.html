@@ -1172,7 +1172,6 @@
         // Handle language change event
         document.addEventListener('languageChanged', function(e) {
             updateUIText();
-            updateNavbarText();
             regenerateWizardContent();
         });
 
@@ -1249,38 +1248,25 @@
             }
         };
         
-        function updateNavbarText() {
-
-            const els = {
-
-            Object.keys(els).forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.textContent = getL(els[id]);
-            });
-        }
         document.addEventListener('DOMContentLoaded', function() {
             const desktopSelector = document.getElementById('languageSelector');
             const mobileSelector = document.getElementById('languageSelectorMobile');
-            
+
             if (desktopSelector && mobileSelector) {
                 const savedLang = localStorage.getItem('preferredLanguage') || 'en';
                 desktopSelector.value = savedLang;
                 mobileSelector.value = savedLang;
-                
+
                 mobileSelector.addEventListener('change', function() {
                     desktopSelector.value = this.value;
                     if (typeof changeLanguage === 'function') changeLanguage(this.value);
-                    updateNavbarText();
                 });
-                
+
                 desktopSelector.addEventListener('change', function() {
                     mobileSelector.value = this.value;
-                    updateNavbarText();
                 });
             }
-            
-            updateNavbarText();
-            setTimeout(updateNavbarText, 100);
+
             document.addEventListener('click', function(e) {
                 if (!e.target.closest('.user-dropdown')) {
                     const dropdown = document.getElementById('userDropdown');
@@ -1309,9 +1295,6 @@
                 });
             }
             
-            document.addEventListener('languageChanged', function() {
-                updateNavbarText();
-            });
         });
     </script>
 </body>

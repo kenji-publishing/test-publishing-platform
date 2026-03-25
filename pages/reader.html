@@ -896,7 +896,6 @@ function getL(obj, replacements = {}) {
             renderNotes();
 
             // Navbarテキストも連動更新
-            if (typeof updateNavbarText === 'function') updateNavbarText();
         }
 
         // Get work info from URL parameters
@@ -1397,22 +1396,6 @@ function getL(obj, replacements = {}) {
         }
     };
 
-    // ========== Navbarテキスト更新 ==========
-    function updateNavbarText() {
-        var lang = currentLang || localStorage.getItem('preferredLanguage') || 'en';
-        function getNL(obj) { return (obj && (obj[lang] || obj.en)) || ''; }
-
-        // User dropdown menu
-
-        // PC & Mobile nav links
-        var els = {
-
-        Object.keys(els).forEach(function(id) {
-            var el = document.getElementById(id);
-            if (el) el.textContent = getNL(els[id]);
-        });
-    }
-
     // ========== User Dropdown ==========
 // ========== Logout ==========
 // ========== User Info Load ==========
@@ -1430,20 +1413,14 @@ function getL(obj, replacements = {}) {
             mobileSelector.addEventListener('change', function() {
                 if (desktopSelector) desktopSelector.value = this.value;
                 if (typeof changeLanguage === 'function') changeLanguage(this.value);
-                updateNavbarText();
             });
         }
         if (desktopSelector) {
             desktopSelector.addEventListener('change', function() {
                 if (mobileSelector) mobileSelector.value = this.value;
                 if (typeof changeLanguage === 'function') changeLanguage(this.value);
-                updateNavbarText();
             });
         }
-
-        // Navbar初期テキスト更新
-        updateNavbarText();
-        setTimeout(updateNavbarText, 100);
 
         // User情報読み込み
         loadUserInfoNav();
@@ -1478,10 +1455,6 @@ function getL(obj, replacements = {}) {
             });
         }
 
-        // 言語変更イベントでnavbarも更新
-        document.addEventListener('languageChanged', function() {
-            updateNavbarText();
-        });
     });
     </script>
 
