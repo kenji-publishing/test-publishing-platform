@@ -1414,52 +1414,9 @@ function getL(obj, replacements = {}) {
     }
 
     // ========== User Dropdown ==========
-    function toggleUserDropdownNav(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        var dropdown = document.getElementById('userDropdown');
-        var dropdownMenu = document.getElementById('userMenuNav');
-        dropdown.classList.toggle('open');
-        dropdownMenu.classList.toggle('show');
-    }
-
-    // ========== Logout ==========
-    function handleLogoutNav() {
-        var lang = currentLang || localStorage.getItem('preferredLanguage') || 'en';
-        var msg = (navbarUiText.logOutConfirm && (navbarUiText.logOutConfirm[lang] || navbarUiText.logOutConfirm.en)) || 'Are you sure you want to log out?';
-        if (confirm(msg)) {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.reload();
-        }
-    }
-
-    // ========== User Info Load ==========
-    function loadUserInfoNav() {
-        var userStr = localStorage.getItem('user');
-        var token = localStorage.getItem('token');
-        var isLoggedIn = !!(userStr && token);
-
-        if (isLoggedIn) {
-            try {
-                var user = JSON.parse(userStr);
-                var displayName = user.display_name || user.firstName || user.email || 'User';
-                var userNameEl = document.getElementById('userNameNav');
-                var userDisplayNameEl = document.getElementById('userDisplayNameNav');
-                var userEmailEl = document.getElementById('userEmailNav');
-                if (userNameEl) userNameEl.textContent = displayName;
-                if (userDisplayNameEl) userDisplayNameEl.textContent = displayName;
-                if (userEmailEl) userEmailEl.textContent = user.email || '';
-                document.body.classList.add('logged-in');
-            } catch (e) {
-                document.body.classList.remove('logged-in');
-            }
-        } else {
-            document.body.classList.remove('logged-in');
-        }
-    }
-
-    // ========== Navbar初期化 ==========
+// ========== Logout ==========
+// ========== User Info Load ==========
+// ========== Navbar初期化 ==========
     document.addEventListener('DOMContentLoaded', function() {
         // Language selector同期（navbar PC ⇔ Mobile）
         var desktopSelector = document.getElementById('languageSelector');
