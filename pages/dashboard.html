@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <title data-i18n="dashboard.title">Dashboard - Publisher</title>
@@ -14,12 +15,17 @@
     <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <!-- Custom Styles -->
+    <link href="../css/variables.css" rel="stylesheet">
     <link href="../css/style-new.css" rel="stylesheet">
+    <link href="../css/components.css" rel="stylesheet">
+    <link href="../css/navbar.css" rel="stylesheet">
     <link href="../css/mobile-fixes.css" rel="stylesheet">
     <link href="../css/navbar.css" rel="stylesheet">
     
@@ -62,6 +68,9 @@
         
         
         /* User Dropdown - Mobile adjustments */
+        @media (max-width: 991.98px) {
+
+        }
 
         .dashboard-container { padding: var(--spacing-xl) 0; }
         .welcome-banner {
@@ -145,8 +154,206 @@
             margin-top: 0.5rem;
         }
         
+        /* ===== Analytics Charts ===== */
+        .analytics-section { margin-bottom: var(--spacing-xl); }
+        .analytics-section-header { display: flex; align-items: center; gap: var(--spacing-sm); margin-bottom: var(--spacing-lg); }
+        .analytics-section-header h2 { font-size: var(--font-size-lg); margin: 0; }
+        .chart-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-lg); height: 100%; }
+        .chart-card h3 { font-size: var(--font-size-base); font-weight: 600; margin-bottom: var(--spacing-md); display: flex; align-items: center; gap: var(--spacing-sm); color: var(--color-text-primary); }
+        .chart-card h3 i { color: var(--color-accent); }
+        .chart-wrapper { position: relative; }
+        .top-works-table { width: 100%; border-collapse: collapse; }
+        .top-works-table th { font-weight: 500; color: var(--color-text-secondary); font-size: var(--font-size-xs); padding: var(--spacing-sm) var(--spacing-xs); border-bottom: 2px solid var(--color-border); text-align: left; }
+        .top-works-table td { padding: var(--spacing-sm) var(--spacing-xs); border-bottom: 1px solid var(--color-border); font-size: var(--font-size-sm); vertical-align: middle; }
+        .top-works-table tr:last-child td { border-bottom: none; }
+        .top-works-table tr:hover td { background: var(--color-bg-hover); }
+        .top-works-table .td-right { text-align: right; }
+        .top-works-rank { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--color-bg-hover); font-size: var(--font-size-xs); font-weight: 600; color: var(--color-text-secondary); margin-right: var(--spacing-xs); }
+        .top-works-rank.gold { background: rgba(212,168,83,0.15); color: var(--color-warning); }
+        .top-works-rank.silver { background: rgba(160,160,160,0.15); color: #888; }
+        .top-works-rank.bronze { background: rgba(184,115,51,0.15); color: #b27340; }
+        .chart-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 180px; color: var(--color-text-secondary); font-size: var(--font-size-sm); gap: var(--spacing-sm); }
+        .chart-empty i { font-size: 2rem; color: var(--color-border); }
+
+        /* ===== Dashboard Tab Styles ===== */
+        #dashboardTabs .btn-custom {
+            background: var(--color-accent);
+            color: #fff;
+            border: 1px solid var(--color-accent);
+        }
+        #dashboardTabs .btn-soft-custom {
+            background: transparent;
+            color: var(--color-accent);
+            border: 1px solid var(--color-border);
+        }
+        #dashboardTabs .btn-soft-custom:hover {
+            background: rgba(139,115,85,0.08);
+            border-color: var(--color-accent);
+        }
+
+        /* ===== Collaboration Card Styles ===== */
+        .collab-card {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+            transition: all var(--transition-fast);
+        }
+        .collab-card:hover {
+            box-shadow: var(--shadow-md);
+        }
+        .collab-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-sm);
+        }
+        .collab-card-icon {
+            font-size: 1.5rem;
+            color: var(--color-accent);
+            flex-shrink: 0;
+        }
+        .collab-card-title {
+            font-weight: 600;
+            font-size: var(--font-size-base);
+            color: var(--color-text-primary);
+        }
+        .collab-card-meta {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            margin-bottom: var(--spacing-xs);
+        }
+        .collab-card-meta span {
+            margin-right: var(--spacing-md);
+        }
+        .collab-status-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-xs);
+            font-weight: 500;
+        }
+        .collab-status-badge.in-progress {
+            background: rgba(93,139,199,0.1);
+            color: var(--color-info);
+        }
+        .collab-status-badge.completed {
+            background: rgba(93,156,89,0.1);
+            color: var(--color-success);
+        }
+        .collab-card-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-md);
+        }
+        .collab-card-actions .btn {
+            font-size: var(--font-size-sm);
+        }
+
+        /* ===== Collaboration Revenue Styles ===== */
+        .collab-revenue-item {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+        }
+        .collab-revenue-title {
+            font-weight: 600;
+            color: var(--color-text-primary);
+            margin-bottom: var(--spacing-xs);
+        }
+        .collab-revenue-meta {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            margin-bottom: var(--spacing-sm);
+        }
+        .collab-revenue-bar {
+            height: 10px;
+            background: var(--color-border);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: var(--spacing-xs);
+        }
+        .collab-revenue-bar-fill {
+            height: 100%;
+            background: var(--color-accent);
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+        .collab-revenue-target {
+            font-size: var(--font-size-xs);
+            color: var(--color-text-secondary);
+            text-align: right;
+        }
+
+        /* ===== Progress Modal Styles ===== */
+        .progress-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        .progress-modal-overlay.show {
+            display: flex;
+        }
+        .progress-modal {
+            background: var(--color-bg-card);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+        .progress-modal h3 {
+            margin-bottom: var(--spacing-lg);
+            font-size: var(--font-size-lg);
+        }
+        .progress-modal label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: var(--spacing-xs);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-primary);
+        }
+        .progress-modal select,
+        .progress-modal textarea,
+        .progress-modal input[type="range"] {
+            width: 100%;
+            margin-bottom: var(--spacing-md);
+        }
+        .progress-modal select,
+        .progress-modal textarea {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-sm);
+            background: var(--color-bg-main);
+        }
+        .progress-modal textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .progress-modal .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-md);
+        }
+        .progress-range-value {
+            text-align: center;
+            font-weight: 600;
+            color: var(--color-accent);
+            font-size: var(--font-size-lg);
+            margin-bottom: var(--spacing-sm);
+        }
+
         @media (max-width: 992px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .quick-actions { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 768px) { .translation-item { flex-wrap: wrap; gap: 0.5rem; } .translation-item .translation-info { flex: 1; min-width: calc(100% - 60px); } .translation-item .status-badge { margin-left: auto; } }
+        @media (max-width: 768px) { .translation-item { flex-wrap: wrap; gap: 0.5rem; } .translation-item .translation-info { flex: 1; min-width: calc(100% - 60px); } .translation-item .status-badge { margin-left: auto; } .collab-card-actions { flex-wrap: wrap; } }
         @media (max-width: 576px) { .stats-grid { grid-template-columns: 1fr 1fr; gap: 0.5rem; } .stat-card { padding: var(--spacing-md); } .stat-card .stat-icon { width: 36px; height: 36px; margin-bottom: var(--spacing-sm); } .stat-card .stat-value { font-size: var(--font-size-lg); } .stat-card .stat-label { font-size: var(--font-size-xs); } .stat-card .stat-change { display: none; } .quick-actions { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; } .action-card { padding: var(--spacing-md); } .action-card i { font-size: 1.5rem; } .welcome-banner { text-align: center; padding: var(--spacing-lg); } .welcome-banner h1 { font-size: var(--font-size-lg); } .welcome-banner .d-flex { flex-direction: column; gap: var(--spacing-md); } .work-item { flex-wrap: wrap; } .work-item .work-cover { width: 50px; height: 65px; } .work-item .work-info { flex: 1; min-width: calc(100% - 70px); } .work-item .work-title { white-space: normal; font-size: var(--font-size-sm); } .work-item .work-stats { width: 100%; text-align: left; margin-top: var(--spacing-sm); padding-top: var(--spacing-sm); border-top: 1px solid var(--color-border); display: flex; justify-content: space-between; } .section-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; } .section-header h2 { font-size: var(--font-size-base); } .usage-card { padding: var(--spacing-md); } .usage-count { font-size: var(--font-size-2xl); } }
 
         /* ===== Analytics Section Styles ===== */
@@ -176,186 +383,9 @@
 </head>
 <body>
     <!-- Navbar Overlay -->
-    <div class="navbar-overlay d-lg-none" id="navbarOverlay"></div>
-    
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
-        <div class="container">
-            <a class="navbar-brand" href="../index.html">
-                <i class="fas fa-book-open"></i>
-                Publisher
-            </a>
-            
-            <!-- Language Selector (モバイル用 - ハンバーガーメニュー横) -->
-            <div class="navbar-lang-selector d-lg-none">
-                <select class="language-selector" id="languageSelectorMobile">
-                    <option value="en">🇬🇧 EN</option>
-                    <option value="ja">🇯🇵 日本語</option>
-                    <option value="zh">🇨🇳 中文</option>
-                    <option value="es">🇪🇸 ES</option>
-                    <option value="fr">🇫🇷 FR</option>
-                    <option value="de">🇩🇪 DE</option>
-                    <option value="ko">🇰🇷 한국어</option>
-                    <option value="ar">🇸🇦 عربي</option>
-                    <option value="pt">🇧🇷 PT</option>
-                </select>
-            </div>
-            
-            <!-- User Dropdown (outside collapse) -->
-            <div class="user-dropdown" id="userDropdown">
-                <button type="button" class="user-dropdown-toggle" id="userDropdownBtn" onclick="toggleUserDropdown(event)">
-                    <i class="fas fa-user-circle"></i>
-                    <span class="user-name d-none d-lg-inline" id="userName">User</span>
-                    <i class="fas fa-chevron-down user-chevron d-none d-lg-inline"></i>
-                </button>
-                <div class="user-menu" id="userMenu">
-                    <div class="user-menu-header">
-                        <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
-                        <div class="user-info">
-                            <div class="user-display-name" id="userDisplayName">User</div>
-                            <div class="user-email" id="userEmail">user@example.com</div>
-                        </div>
-                    </div>
-                    <div class="user-menu-divider"></div>
-                    <a href="my-works.html" class="user-menu-item">
-                        <i class="fas fa-book"></i>
-                        <span id="menuMyWorks" data-i18n="nav.myWorks">My Works</span>
-                    </a>
-                    <a href="profile.html" class="user-menu-item">
-                        <i class="fas fa-user"></i>
-                        <span id="menuProfile" data-i18n="nav.profile">Profile</span>
-                    </a>
-                    <a href="account-settings.html" class="user-menu-item">
-                        <i class="fas fa-cog"></i>
-                        <span id="menuAccountSettings" data-i18n="nav.accountSettings">Account Settings</span>
-                    </a>
-                    <div class="user-menu-divider"></div>
-                    <button class="user-menu-item logout-btn" onclick="handleLogout()">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span id="menuLogout" data-i18n="nav.logout">Log Out</span>
-                    </button>
-                </div>
-            </div>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <!-- PC Navigation -->
-                <ul class="navbar-nav me-auto d-none d-lg-flex">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="dashboard.html">
-                            <i class="fas fa-th-large me-1"></i> <span data-i18n="nav.dashboard">Dashboard</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="browse.html">
-                            <i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span>
-                        </a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-language me-1"></i> <span data-i18n="nav.translationTools">Translation Tools</span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="manga-translator.html"><i class="fas fa-image me-2"></i><span data-i18n="nav.mangaTranslator">Manga Translator</span></a></li>
-                            <li><a class="dropdown-item" href="translation-status.html"><i class="fas fa-tasks me-2"></i><span data-i18n="nav.translationStatus">Translation Status</span></a></li>
-                            <li><a class="dropdown-item" href="translators/index.html"><i class="fas fa-users me-2"></i><span data-i18n="nav.findTranslators">Find Translators</span></a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-headset me-1"></i> <span data-i18n="nav.support">Support</span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="support/faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
-                            <li><a class="dropdown-item" href="support/troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
-                            <li><a class="dropdown-item" href="support/contact.html"><i class="fas fa-envelope me-2"></i><span data-i18n="nav.contact">Contact</span></a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
-                        </ul>
-                    </li>
-                </ul>
-                
-                <!-- Mobile Hamburger Menu -->
-                <ul class="navbar-nav d-lg-none">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="dashboard.html">
-                            <i class="fas fa-th-large me-2"></i> <span data-i18n="nav.dashboard">Dashboard</span>
-                        </a>
-                    </li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="browse.html">
-                            <i class="fas fa-compass me-2"></i> <span data-i18n="nav.browse">Browse</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="upload.html">
-                            <i class="fas fa-upload me-2"></i> <span data-i18n="nav.upload">Upload</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" data-bs-toggle="collapse" href="#translationToolsMenu" role="button">
-                            <i class="fas fa-language me-2"></i> <span data-i18n="nav.translationTools">Translation Tools</span>
-                            <i class="fas fa-chevron-down ms-auto small"></i>
-                        </a>
-                        <div class="collapse ps-4" id="translationToolsMenu">
-                            <a class="nav-link" href="manga-translator.html">
-                                <i class="fas fa-image me-2"></i> <span data-i18n="nav.mangaTranslator">Manga Translator</span>
-                            </a>
-                            <a class="nav-link" href="translation-status.html">
-                                <i class="fas fa-tasks me-2"></i> <span data-i18n="nav.translationStatus">Translation Status</span>
-                            </a>
-                            <a class="nav-link" href="translators/index.html">
-                                <i class="fas fa-users me-2"></i> <span data-i18n="nav.findTranslators">Find Translators</span>
-                            </a>
-                        </div>
-                    </li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="support/faq.html">
-                            <i class="fas fa-question-circle me-2"></i> <span data-i18n="support.faq.title">FAQ</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="support/contact.html">
-                            <i class="fas fa-envelope me-2"></i> <span data-i18n="nav.contact">Contact</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="support/tickets.html">
-                            <i class="fas fa-ticket-alt me-2"></i> <span data-i18n="support.tickets.title">My Tickets</span>
-                        </a>
-                    </li>
-                </ul>
-                
-                <div class="d-flex align-items-center gap-3">
-                    <!-- Notification Bell (PC) -->
-                    <a href="notifications.html" class="btn btn-link position-relative d-none d-lg-block" title="Notifications">
-                        <i class="fas fa-bell fs-5"></i>
-                        <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; display: none;">0</span>
-                    </a>
-                    
-                    <!-- Language Selector (デスクトップ用) -->
-                    <select class="language-selector d-none d-lg-block" id="languageSelector">
-                        <option value="en">🇬🇧 EN</option>
-                        <option value="ja">🇯🇵 日本語</option>
-                        <option value="zh">🇨🇳 中文</option>
-                        <option value="es">🇪🇸 ES</option>
-                        <option value="fr">🇫🇷 FR</option>
-                        <option value="de">🇩🇪 DE</option>
-                        <option value="ko">🇰🇷 한국어</option>
-                        <option value="ar">🇸🇦 عربي</option>
-                        <option value="pt">🇧🇷 PT</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-    </nav>
+    <div id="navbar-container"></div>
 
-    <!-- Main Content -->
+<!-- Main Content -->
     <main class="dashboard-container">
         <div class="container">
             <!-- Welcome Banner -->
@@ -370,6 +400,19 @@
                     </a>
                 </div>
             </div>
+
+            <!-- Dashboard Tabs -->
+            <div class="d-flex gap-2 mb-4" id="dashboardTabs">
+                <button class="btn btn-custom btn-sm active" id="tabMyWorks" onclick="switchDashTab('myworks')">
+                    <i class="fas fa-pen-fancy me-1"></i><span id="tabMyWorksLabel" data-i18n="dashboard.tabMyWorks">My Works</span>
+                </button>
+                <button class="btn btn-soft-custom btn-sm" id="tabCollaborations" onclick="switchDashTab('collabs')">
+                    <i class="fas fa-users me-1"></i><span id="tabCollabsLabel" data-i18n="dashboard.tabCollabs">Collaborations</span>
+                </button>
+            </div>
+
+            <!-- My Works Tab Content -->
+            <div id="myworksContent">
 
             <!-- Stats Grid -->
             <div class="stats-grid fade-in" id="statsGrid">
@@ -399,56 +442,75 @@
                 </div>
             </div>
 
-
-            <!-- ===== Analytics Section ===== -->
+            <!-- Analytics Charts Section -->
             <div class="analytics-section fade-in">
-                <div class="period-selector d-flex align-items-center justify-content-between flex-wrap gap-2">
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="text-muted me-2" data-i18n="analytics.period">Period:</span>
-                        <button class="period-btn" data-period="7" data-i18n="analytics.days7">7 days</button>
-                        <button class="period-btn active" data-period="30" data-i18n="analytics.days30">30 days</button>
-                        <button class="period-btn" data-period="90" data-i18n="analytics.days90">90 days</button>
-                    </div>
-                    <div class="text-muted small"><i class="fas fa-sync-alt me-1"></i><span data-i18n="analytics.lastUpdate">Last update</span>: <span id="analyticsLastUpdated">--</span></div>
+                <div class="analytics-section-header">
+                    <h2><i class="fas fa-chart-line text-accent me-2"></i><span id="analyticsTitle" data-i18n="dashboard.analyticsTitle">Analytics</span></h2>
                 </div>
-
                 <div class="row g-4 mb-4">
+                    <!-- Views Trend Chart -->
                     <div class="col-lg-8">
                         <div class="chart-card">
-                            <h3><i class="fas fa-chart-area"></i> <span data-i18n="analytics.viewsTrend">Views Trend</span></h3>
-                            <div style="height:300px;"><canvas id="viewsChart"></canvas></div>
+                            <h3><i class="fas fa-chart-area"></i><span id="chartViewsTitle" data-i18n="dashboard.chartViewsTitle">Views Trend (30 days)</span></h3>
+                            <div class="chart-wrapper">
+                                <canvas id="viewsTrendChart" height="110"></canvas>
+                                <div class="chart-empty" id="viewsTrendEmpty" style="display:none;">
+                                    <i class="fas fa-chart-area"></i>
+                                    <span id="chartNoData" data-i18n="dashboard.chartNoData">No data yet</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    <!-- Reader Language Distribution -->
                     <div class="col-lg-4">
                         <div class="chart-card">
-                            <h3><i class="fas fa-heart"></i> <span data-i18n="analytics.engagement">Engagement</span></h3>
-                            <div class="engagement-grid" id="engagementStats">
-                                <div class="engagement-item"><i class="fas fa-heart text-danger"></i><div class="eng-value" id="engLikes">--</div><div class="eng-label" data-i18n="analytics.likes">Likes</div></div>
-                                <div class="engagement-item"><i class="fas fa-comment text-primary"></i><div class="eng-value" id="engComments">--</div><div class="eng-label" data-i18n="analytics.comments">Comments</div></div>
-                                <div class="engagement-item"><i class="fas fa-bookmark text-warning"></i><div class="eng-value" id="engBookmarks">--</div><div class="eng-label" data-i18n="analytics.bookmarks">Bookmarks</div></div>
-                                <div class="engagement-item"><i class="fas fa-download text-success"></i><div class="eng-value" id="engDownloads">--</div><div class="eng-label" data-i18n="analytics.downloads">Downloads</div></div>
+                            <h3><i class="fas fa-globe"></i><span id="chartLangTitle" data-i18n="dashboard.chartLangTitle">Readers by Language</span></h3>
+                            <div class="chart-wrapper">
+                                <canvas id="langDistChart" height="180"></canvas>
+                                <div class="chart-empty" id="langDistEmpty" style="display:none;">
+                                    <i class="fas fa-globe"></i>
+                                    <span id="chartNoDataLang" data-i18n="dashboard.chartNoData">No data yet</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="chart-card">
-                    <h3><i class="fas fa-trophy"></i> <span data-i18n="analytics.topWorks">Top Works</span></h3>
-                    <div class="table-responsive">
-                        <table class="top-works-table" id="topWorksTable">
-                            <thead>
-                                <tr>
-                                    <th style="width:50px;">#</th>
-                                    <th data-i18n="analytics.workTitle">Title</th>
-                                    <th class="text-end" data-i18n="analytics.views">Views</th>
-                                    <th class="text-end" data-i18n="analytics.readers">Readers</th>
-                                    <th class="text-end" data-i18n="analytics.revenue">Revenue</th>
-                                </tr>
-                            </thead>
-                            <tbody id="topWorksBody">
-                                <tr><td colspan="5" class="text-center text-muted py-4"><i class="fas fa-chart-bar fa-2x mb-2 d-block text-muted"></i><span data-i18n="analytics.noData">No analytics data yet</span></td></tr>
-                            </tbody>
-                        </table>
+                <div class="row g-4 mb-4">
+                    <!-- Revenue by Work Chart -->
+                    <div class="col-lg-6">
+                        <div class="chart-card">
+                            <h3><i class="fas fa-dollar-sign"></i><span id="chartRevenueTitle" data-i18n="dashboard.chartRevenueTitle">Revenue by Work</span></h3>
+                            <div class="chart-wrapper">
+                                <canvas id="revenueChart" height="160"></canvas>
+                                <div class="chart-empty" id="revenueEmpty" style="display:none;">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    <span id="chartNoDataRevenue" data-i18n="dashboard.chartNoData">No data yet</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Top Works Table -->
+                    <div class="col-lg-6">
+                        <div class="chart-card">
+                            <h3><i class="fas fa-trophy"></i><span id="chartTopWorksTitle" data-i18n="dashboard.chartTopWorksTitle">Top Works</span></h3>
+                            <div id="topWorksTableWrap">
+                                <table class="top-works-table" id="topWorksTable">
+                                    <thead>
+                                        <tr>
+                                            <th id="thWork" data-i18n="dashboard.thWork">Work</th>
+                                            <th class="td-right" id="thViews" data-i18n="dashboard.thViews">Views</th>
+                                            <th class="td-right" id="thRevenue" data-i18n="dashboard.thRevenue">Revenue</th>
+                                            <th class="td-right" id="thTrans" data-i18n="dashboard.thTrans">Translations</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="topWorksBody"></tbody>
+                                </table>
+                            </div>
+                            <div class="chart-empty" id="topWorksEmpty" style="display:none;">
+                                <i class="fas fa-trophy"></i>
+                                <span id="chartNoDataWorks" data-i18n="dashboard.chartNoData">No data yet</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -466,10 +528,10 @@
                             <!-- Empty State (shown when no works) -->
                             <div class="empty-state" id="emptyWorksState">
                                 <i class="fas fa-book-open d-block"></i>
-                                <h4 id="emptyWorksTitle">No works yet</h4>
-                                <p id="emptyWorksDesc">Start by uploading your first work to share with the world.</p>
+                                <h4 id="emptyWorksTitle" data-i18n="dashboard.emptyWorksTitle">No works yet</h4>
+                                <p id="emptyWorksDesc" data-i18n="dashboard.emptyWorksDesc">Start by uploading your first work to share with the world.</p>
                                 <a href="upload.html" class="btn btn-accent">
-                                    <i class="fas fa-plus me-2"></i><span id="emptyWorksBtn">Upload Your First Work</span>
+                                    <i class="fas fa-plus me-2"></i><span id="emptyWorksBtn" data-i18n="dashboard.emptyWorksBtn">Upload Your First Work</span>
                                 </a>
                             </div>
                             <!-- Works List (hidden when empty) -->
@@ -489,8 +551,8 @@
                             <!-- Empty State (shown when no translations) -->
                             <div class="empty-state" id="emptyTranslationsState">
                                 <i class="fas fa-language d-block"></i>
-                                <h4 id="emptyTranslationsTitle">No translations yet</h4>
-                                <p id="emptyTranslationsDesc">Upload a work first, then you can translate it to reach a global audience.</p>
+                                <h4 id="emptyTranslationsTitle" data-i18n="dashboard.emptyTranslationsTitle">No translations yet</h4>
+                                <p id="emptyTranslationsDesc" data-i18n="dashboard.emptyTranslationsDesc">Upload a work first, then you can translate it to reach a global audience.</p>
                             </div>
                             <!-- Translations List (hidden when empty) -->
                             <div id="translationsList" style="display: none;">
@@ -541,27 +603,69 @@
                             <div class="action-title" data-i18n="dashboard.actions.reader">Reader</div>
                             <div class="action-desc" data-i18n="dashboard.actions.preview">Preview</div>
                         </a>
-                    </div>                
+                    </div>
                 </div>
             </div>
+
+            </div><!-- /myworksContent -->
+
+            <!-- Collaborations Tab Content -->
+            <div id="collabsContent" style="display:none;">
+
+                <!-- Active Collaborations -->
+                <div class="dashboard-section fade-in mb-4">
+                    <div class="section-header">
+                        <h2><i class="fas fa-users me-2 text-accent"></i><span id="collabActiveTitle" data-i18n="dashboard.collabActiveTitle">Active Collaborations</span></h2>
+                    </div>
+                    <div class="section-body" id="collabList">
+                        <!-- Collaboration cards rendered by JS -->
+                    </div>
+                </div>
+
+                <!-- Collaboration Revenue -->
+                <div class="dashboard-section fade-in mb-4">
+                    <div class="section-header">
+                        <h2><i class="fas fa-coins me-2 text-accent"></i><span id="collabRevenueTitle" data-i18n="dashboard.collabRevenueTitle">Collaboration Revenue</span></h2>
+                    </div>
+                    <div class="section-body" id="collabRevenueList">
+                        <!-- Revenue items rendered by JS -->
+                    </div>
+                </div>
+
+            </div><!-- /collabsContent -->
+
+            <!-- Progress Report Modal -->
+            <div class="progress-modal-overlay" id="progressModalOverlay">
+                <div class="progress-modal">
+                    <h3 id="progressModalTitle"><i class="fas fa-tasks me-2 text-accent"></i>Update Progress</h3>
+                    <input type="hidden" id="progressCollabId" value="">
+                    <label id="progressStatusLabel" data-i18n="dashboard.progressStatusLabel">Status</label>
+                    <select id="progressStatus">
+                        <option value="on-track" id="optOnTrack" data-i18n="dashboard.optOnTrack">On Track</option>
+                        <option value="slightly-behind" id="optBehind" data-i18n="dashboard.optBehind">Slightly Behind</option>
+                        <option value="need-help" id="optNeedHelp" data-i18n="dashboard.optNeedHelp">Need Help</option>
+                    </select>
+                    <label id="progressPercentLabel" data-i18n="dashboard.progressPercentLabel">Progress</label>
+                    <div class="progress-range-value" id="progressRangeValue">50%</div>
+                    <input type="range" id="progressRange" min="0" max="100" value="50" oninput="document.getElementById('progressRangeValue').textContent = this.value + '%'">
+                    <label id="progressCommentLabel" data-i18n="dashboard.progressCommentLabel">Comment</label>
+                    <textarea id="progressComment" rows="3" placeholder="Add a note..."></textarea>
+                    <div class="modal-actions">
+                        <button class="btn btn-soft-custom btn-sm" onclick="closeProgressModal()" id="progressCancelBtn" data-i18n="dashboard.progressCancel">Cancel</button>
+                        <button class="btn btn-custom btn-sm" onclick="submitProgressReport()" id="progressSubmitBtn" data-i18n="dashboard.progressSubmit">Submit</button>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </main>
 
     <!-- Footer -->
-    <footer class="footer-custom">
-        <div class="container">
-            <div class="d-flex flex-wrap justify-content-between align-items-center">
-                <p class="small mb-0">&copy; 2024 Publisher. All rights reserved.</p>
-                <div class="d-flex gap-3">
-                    <a href="support/faq.html" class="text-secondary" data-i18n="footer.help">Help</a>
-                    <a href="terms.html" class="text-secondary" data-i18n="footer.terms">Terms</a>
-                    <a href="privacy.html" class="text-secondary" data-i18n="footer.privacy">Privacy</a>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/i18n.js"></script>
+    <script src="../js/navbar.js"></script>
     <!-- 言語ファイル（9言語） -->
     <script src="../js/lang/ja.js"></script>
     <script src="../js/lang/en.js"></script>
@@ -619,6 +723,17 @@
                 ko: '로그아웃',
                 ar: 'تسجيل الخروج',
                 pt: 'Sair'
+            },
+            library: {
+                en: 'Library',
+                ja: 'ライブラリ',
+                zh: '书库',
+                es: 'Biblioteca',
+                fr: 'Bibliothèque',
+                de: 'Bibliothek',
+                ko: '라이브러리',
+                ar: 'المكتبة',
+                pt: 'Biblioteca'
             },
             emptyWorksTitle: {
                 en: 'No works yet',
@@ -696,7 +811,46 @@
                 ko: '로그아웃 하시겠습니까?',
                 ar: 'هل أنت متأكد أنك تريد تسجيل الخروج؟',
                 pt: 'Tem certeza que deseja sair?'
-            }
+            },
+            analyticsTitle: { en: 'Analytics', ja: 'アナリティクス', zh: '数据分析', es: 'Analíticas', fr: 'Analytiques', de: 'Analysen', ko: '분석', ar: 'التحليلات', pt: 'Análises' },
+            chartViewsTitle: { en: 'Views Trend (30 days)', ja: '閲覧数トレンド（30日間）', zh: '浏览量趋势（30天）', es: 'Tendencia de vistas (30 días)', fr: 'Tendance des vues (30 jours)', de: 'Aufrufe-Trend (30 Tage)', ko: '조회수 트렌드 (30일)', ar: 'اتجاه المشاهدات (30 يوم)', pt: 'Tendência de visualizações (30 dias)' },
+            chartLangTitle: { en: 'Readers by Language', ja: '言語別読者数', zh: '按语言划分的读者', es: 'Lectores por idioma', fr: 'Lecteurs par langue', de: 'Leser nach Sprache', ko: '언어별 독자', ar: 'القراء حسب اللغة', pt: 'Leitores por idioma' },
+            chartRevenueTitle: { en: 'Revenue by Work', ja: '作品別収益', zh: '各作品收益', es: 'Ingresos por obra', fr: 'Revenus par œuvre', de: 'Einnahmen nach Werk', ko: '작품별 수익', ar: 'الإيرادات حسب العمل', pt: 'Receita por obra' },
+            chartTopWorksTitle: { en: 'Top Works', ja: '上位作品', zh: '热门作品', es: 'Obras principales', fr: 'Meilleures œuvres', de: 'Top-Werke', ko: '상위 작품', ar: 'أفضل الأعمال', pt: 'Principais obras' },
+            chartNoData: { en: 'No data yet', ja: 'データがありません', zh: '暂无数据', es: 'Sin datos aún', fr: 'Pas encore de données', de: 'Noch keine Daten', ko: '데이터 없음', ar: 'لا توجد بيانات بعد', pt: 'Sem dados ainda' },
+            thWork: { en: 'Work', ja: '作品', zh: '作品', es: 'Obra', fr: 'Œuvre', de: 'Werk', ko: '작품', ar: 'العمل', pt: 'Obra' },
+            thViews: { en: 'Views', ja: '閲覧数', zh: '浏览量', es: 'Vistas', fr: 'Vues', de: 'Aufrufe', ko: '조회수', ar: 'المشاهدات', pt: 'Visualizações' },
+            thRevenue: { en: 'Revenue', ja: '収益', zh: '收益', es: 'Ingresos', fr: 'Revenus', de: 'Einnahmen', ko: '수익', ar: 'الإيرادات', pt: 'Receita' },
+            thTrans: { en: 'Langs', ja: '言語数', zh: '语言数', es: 'Idiomas', fr: 'Langues', de: 'Sprachen', ko: '언어', ar: 'اللغات', pt: 'Idiomas' },
+            // Collaboration tab translations
+            tabMyWorks: { en: 'My Works', ja: 'マイ作品', zh: '我的作品', es: 'Mis obras', fr: 'Mes œuvres', de: 'Meine Werke', ko: '내 작품', ar: 'أعمالي', pt: 'Minhas obras' },
+            tabCollabs: { en: 'Collaborations', ja: 'コラボレーション', zh: '协作', es: 'Colaboraciones', fr: 'Collaborations', de: 'Zusammenarbeit', ko: '협업', ar: 'التعاون', pt: 'Colaborações' },
+            collabActiveTitle: { en: 'Active Collaborations', ja: 'アクティブなコラボレーション', zh: '进行中的协作', es: 'Colaboraciones activas', fr: 'Collaborations actives', de: 'Aktive Zusammenarbeit', ko: '진행 중인 협업', ar: 'التعاون النشط', pt: 'Colaborações ativas' },
+            collabRevenueTitle: { en: 'Collaboration Revenue', ja: 'コラボレーション収益', zh: '协作收益', es: 'Ingresos de colaboración', fr: 'Revenus de collaboration', de: 'Zusammenarbeit-Einnahmen', ko: '협업 수익', ar: 'إيرادات التعاون', pt: 'Receita de colaboração' },
+            collabRole: { en: 'Role', ja: '役割', zh: '角色', es: 'Rol', fr: 'Rôle', de: 'Rolle', ko: '역할', ar: 'الدور', pt: 'Função' },
+            collabAuthor: { en: 'Author', ja: '著者', zh: '作者', es: 'Autor', fr: 'Auteur', de: 'Autor', ko: '저자', ar: 'المؤلف', pt: 'Autor' },
+            collabStatus: { en: 'Status', ja: 'ステータス', zh: '状态', es: 'Estado', fr: 'Statut', de: 'Status', ko: '상태', ar: 'الحالة', pt: 'Status' },
+            collabDue: { en: 'Due', ja: '期限', zh: '截止日期', es: 'Fecha límite', fr: 'Échéance', de: 'Fällig', ko: '마감', ar: 'الموعد', pt: 'Prazo' },
+            collabInProgress: { en: 'In Progress', ja: '進行中', zh: '进行中', es: 'En progreso', fr: 'En cours', de: 'In Bearbeitung', ko: '진행 중', ar: 'قيد التنفيذ', pt: 'Em andamento' },
+            collabUpdateProgress: { en: 'Update Progress', ja: '進捗を更新', zh: '更新进度', es: 'Actualizar progreso', fr: 'Mettre à jour', de: 'Fortschritt aktualisieren', ko: '진행률 업데이트', ar: 'تحديث التقدم', pt: 'Atualizar progresso' },
+            collabViewAgreement: { en: 'View Agreement', ja: '契約を表示', zh: '查看协议', es: 'Ver acuerdo', fr: 'Voir l\'accord', de: 'Vereinbarung anzeigen', ko: '계약서 보기', ar: 'عرض الاتفاقية', pt: 'Ver acordo' },
+            collabTranslator: { en: 'Translator', ja: '翻訳者', zh: '译者', es: 'Traductor', fr: 'Traducteur', de: 'Übersetzer', ko: '번역가', ar: 'مترجم', pt: 'Tradutor' },
+            collabEditor: { en: 'Editor', ja: '編集者', zh: '编辑', es: 'Editor', fr: 'Éditeur', de: 'Lektor', ko: '편집자', ar: 'محرر', pt: 'Editor' },
+            collabSales: { en: 'Sales', ja: '販売数', zh: '销售量', es: 'Ventas', fr: 'Ventes', de: 'Verkäufe', ko: '판매', ar: 'المبيعات', pt: 'Vendas' },
+            collabYourRevenue: { en: 'Your Revenue', ja: 'あなたの収益', zh: '您的收益', es: 'Tu ingreso', fr: 'Vos revenus', de: 'Ihr Umsatz', ko: '내 수익', ar: 'إيراداتك', pt: 'Sua receita' },
+            collabOfTarget: { en: 'of target', ja: '目標達成率', zh: '目标完成', es: 'del objetivo', fr: 'de l\'objectif', de: 'vom Ziel', ko: '목표 대비', ar: 'من الهدف', pt: 'da meta' },
+            progressModalTitle: { en: 'Update Progress', ja: '進捗を更新', zh: '更新进度', es: 'Actualizar progreso', fr: 'Mettre à jour le progrès', de: 'Fortschritt aktualisieren', ko: '진행률 업데이트', ar: 'تحديث التقدم', pt: 'Atualizar progresso' },
+            progressStatusLabel: { en: 'Status', ja: 'ステータス', zh: '状态', es: 'Estado', fr: 'Statut', de: 'Status', ko: '상태', ar: 'الحالة', pt: 'Status' },
+            progressPercentLabel: { en: 'Progress', ja: '進捗率', zh: '进度', es: 'Progreso', fr: 'Progrès', de: 'Fortschritt', ko: '진행률', ar: 'التقدم', pt: 'Progresso' },
+            progressCommentLabel: { en: 'Comment', ja: 'コメント', zh: '评论', es: 'Comentario', fr: 'Commentaire', de: 'Kommentar', ko: '코멘트', ar: 'تعليق', pt: 'Comentário' },
+            progressCancel: { en: 'Cancel', ja: 'キャンセル', zh: '取消', es: 'Cancelar', fr: 'Annuler', de: 'Abbrechen', ko: '취소', ar: 'إلغاء', pt: 'Cancelar' },
+            progressSubmit: { en: 'Submit', ja: '送信', zh: '提交', es: 'Enviar', fr: 'Soumettre', de: 'Einreichen', ko: '제출', ar: 'إرسال', pt: 'Enviar' },
+            optOnTrack: { en: 'On Track', ja: '順調', zh: '进展顺利', es: 'En camino', fr: 'En bonne voie', de: 'Auf Kurs', ko: '순조로움', ar: 'على المسار', pt: 'No caminho' },
+            optBehind: { en: 'Slightly Behind', ja: 'やや遅れ', zh: '略有延迟', es: 'Ligeramente atrasado', fr: 'Légèrement en retard', de: 'Leicht verzögert', ko: '약간 지연', ar: 'متأخر قليلاً', pt: 'Levemente atrasado' },
+            optNeedHelp: { en: 'Need Help', ja: 'ヘルプが必要', zh: '需要帮助', es: 'Necesito ayuda', fr: 'Besoin d\'aide', de: 'Hilfe benötigt', ko: '도움 필요', ar: 'أحتاج مساعدة', pt: 'Preciso de ajuda' },
+            progressSaved: { en: 'Progress report saved!', ja: '進捗レポートを保存しました！', zh: '进度报告已保存！', es: '¡Informe de progreso guardado!', fr: 'Rapport de progrès enregistré !', de: 'Fortschrittsbericht gespeichert!', ko: '진행 보고서가 저장되었습니다!', ar: 'تم حفظ تقرير التقدم!', pt: 'Relatório de progresso salvo!' },
+            collabEnTranslation: { en: 'English Translation', ja: '英語翻訳', zh: '英文翻译', es: 'Traducción al inglés', fr: 'Traduction anglaise', de: 'Englische Übersetzung', ko: '영어 번역', ar: 'الترجمة الإنجليزية', pt: 'Tradução para inglês' },
+            collabEditing: { en: 'Editing', ja: '編集', zh: '编辑', es: 'Edición', fr: 'Édition', de: 'Bearbeitung', ko: '편집', ar: 'التحرير', pt: 'Edição' }
         };
         
         // Get current language
@@ -739,18 +893,12 @@
         // Update UI text based on current language
         function updateUIText() {
             const lang = getCurrentLanguage();
+            if (typeof i18n !== 'undefined') i18n.applyToDOM();
             
             // Update user menu items
-            const menuProfile = document.getElementById('menuProfile');
-            const menuAccountSettings = document.getElementById('menuAccountSettings');
-            const menuLogout = document.getElementById('menuLogout');
-            
-            if (menuProfile) menuProfile.textContent = getL(uiText.profile);
-            const menuMyWorks = document.getElementById('menuMyWorks');
-            if (menuMyWorks) menuMyWorks.textContent = getL(uiText.myWorks);
-            if (menuAccountSettings) menuAccountSettings.textContent = getL(uiText.accountSettings);
-            if (menuLogout) menuLogout.textContent = getL(uiText.logout);
-            
+
+            // Navbar links
+
             // Update empty state texts
             const emptyWorksTitle = document.getElementById('emptyWorksTitle');
             const emptyWorksDesc = document.getElementById('emptyWorksDesc');
@@ -763,9 +911,32 @@
             if (emptyWorksBtn) emptyWorksBtn.textContent = getL(uiText.emptyWorksBtn);
             if (emptyTranslationsTitle) emptyTranslationsTitle.textContent = getL(uiText.emptyTranslationsTitle);
             if (emptyTranslationsDesc) emptyTranslationsDesc.textContent = getL(uiText.emptyTranslationsDesc);
+
+            // Update collaboration UI text
+            updateCollabUIText();
         }
         
         // Load user info
+        function loadUserInfo() {
+            const userStr = localStorage.getItem('user');
+            const token = localStorage.getItem('token');
+            
+            if (userStr && token) {
+                try {
+                    document.body.classList.add('logged-in');
+                    const user = JSON.parse(userStr);
+                    const displayName = user.display_name || user.firstName || user.email || 'User';
+
+                    document.getElementById('userName').textContent = displayName;
+                    document.getElementById('welcomeName').textContent = displayName;
+                    document.getElementById('userDisplayName').textContent = displayName;
+                    document.getElementById('userEmail').textContent = user.email || '';
+                } catch (e) {
+                    console.error('Error parsing user data:', e);
+                }
+            }
+        }
+        
         // Load dashboard data (demo - replace with API calls)
         function loadDashboardData() {
             // This is demo mode - in production, this would fetch from API
@@ -872,98 +1043,309 @@
                 document.getElementById('aiUsageRemaining').textContent = getL(uiText.freeRemaining).replace('{count}', '5');
             }
         }
-        
 
-        // ===== Analytics Functions =====
-        let currentPeriod = 30;
-        let viewsChart = null;
+        // ===== Analytics Charts =====
+        let viewsChart = null, langChart = null, revenueChart = null;
 
-        function loadAnalyticsDemoData() {
-            document.getElementById('engLikes').textContent = '2,456';
-            document.getElementById('engComments').textContent = '389';
-            document.getElementById('engBookmarks').textContent = '1,234';
-            document.getElementById('engDownloads').textContent = '567';
-            document.getElementById('analyticsLastUpdated').textContent = new Date().toLocaleTimeString();
+        function initCharts(isDemo) {
+            const accentColor = '#8B7355';
+            const accentLight = 'rgba(139,115,85,0.15)';
+            const gridColor = 'rgba(0,0,0,0.06)';
+            const textColor = '#6b7280';
 
-            var ctx = document.getElementById('viewsChart');
-            if (ctx) {
-                var labels = [];
-                var viewsData = [];
-                var readersData = [];
-                var days = currentPeriod;
-                for (var i = days - 1; i >= 0; i--) {
-                    var d = new Date();
-                    d.setDate(d.getDate() - i);
-                    labels.push((d.getMonth() + 1) + '/' + d.getDate());
-                    viewsData.push(Math.floor(Math.random() * 300) + 100);
-                    readersData.push(Math.floor(Math.random() * 100) + 30);
-                }
-                if (viewsChart) viewsChart.destroy();
-                viewsChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Views',
-                            data: viewsData,
-                            borderColor: '#3b82f6',
-                            backgroundColor: 'rgba(59,130,246,0.1)',
-                            fill: true,
-                            tension: 0.3
-                        }, {
-                            label: 'Readers',
-                            data: readersData,
-                            borderColor: '#10b981',
-                            backgroundColor: 'transparent',
-                            borderDash: [5, 5],
-                            tension: 0.3
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { position: 'top', align: 'end' } },
-                        scales: {
-                            x: { grid: { display: false } },
-                            y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }
-                        },
-                        interaction: { intersect: false, mode: 'index' }
-                    }
-                });
+            // Update chart labels from uiText
+            document.getElementById('analyticsTitle').textContent = getL(uiText.analyticsTitle);
+            document.getElementById('chartViewsTitle').textContent = getL(uiText.chartViewsTitle);
+            document.getElementById('chartLangTitle').textContent = getL(uiText.chartLangTitle);
+            document.getElementById('chartRevenueTitle').textContent = getL(uiText.chartRevenueTitle);
+            document.getElementById('chartTopWorksTitle').textContent = getL(uiText.chartTopWorksTitle);
+            document.getElementById('thWork').textContent = getL(uiText.thWork);
+            document.getElementById('thViews').textContent = getL(uiText.thViews);
+            document.getElementById('thRevenue').textContent = getL(uiText.thRevenue);
+            document.getElementById('thTrans').textContent = getL(uiText.thTrans);
+            ['chartNoData','chartNoDataLang','chartNoDataRevenue','chartNoDataWorks'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = getL(uiText.chartNoData);
+            });
+
+            if (!isDemo) {
+                // Show empty states
+                document.getElementById('viewsTrendChart').style.display = 'none';
+                document.getElementById('viewsTrendEmpty').style.display = 'flex';
+                document.getElementById('langDistChart').style.display = 'none';
+                document.getElementById('langDistEmpty').style.display = 'flex';
+                document.getElementById('revenueChart').style.display = 'none';
+                document.getElementById('revenueEmpty').style.display = 'flex';
+                document.getElementById('topWorksTableWrap').style.display = 'none';
+                document.getElementById('topWorksEmpty').style.display = 'flex';
+                return;
             }
 
-            var topWorksBody = document.getElementById('topWorksBody');
-            if (topWorksBody) {
-                var demoWorks = [
-                    { title: 'The Adventure of Magic Academy', views: 1234, readers: 456, revenue: 234.50 },
-                    { title: 'Whispers of Tomorrow', views: 892, readers: 234, revenue: 156.00 },
-                    { title: 'Digital Dreams: A Cyberpunk Story', views: 567, readers: 189, revenue: 89.25 },
-                    { title: 'Moonlit Serenade', views: 345, readers: 123, revenue: 67.80 },
-                    { title: 'Chronicles of the Lost Kingdom', views: 234, readers: 98, revenue: 45.00 }
-                ];
-                topWorksBody.innerHTML = demoWorks.map(function(w, i) {
-                    return '<tr>' +
-                    '<td><span class="work-rank ' + (i < 3 ? 'rank-' + (i + 1) : '') + '">' + (i + 1) + '</span></td>' +
-                    '<td>' + w.title + '</td>' +
-                    '<td class="text-end">' + w.views.toLocaleString() + '</td>' +
-                    '<td class="text-end">' + w.readers.toLocaleString() + '</td>' +
-                    '<td class="text-end">$' + w.revenue.toFixed(2) + '</td>' +
-                    '</tr>';
-                }).join('');
+            // Demo data
+            const days = [];
+            for (let i = 29; i >= 0; i--) {
+                const d = new Date(); d.setDate(d.getDate() - i);
+                days.push((d.getMonth()+1) + '/' + d.getDate());
+            }
+            const viewsData = [120,145,132,180,165,210,198,230,215,245,260,242,280,295,310,298,320,340,315,355,370,348,390,410,395,425,440,415,460,480];
+
+            // Views Trend Chart
+            if (viewsChart) viewsChart.destroy();
+            viewsChart = new Chart(document.getElementById('viewsTrendChart'), {
+                type: 'line',
+                data: {
+                    labels: days,
+                    datasets: [{
+                        label: getL(uiText.thViews),
+                        data: viewsData,
+                        borderColor: accentColor,
+                        backgroundColor: accentLight,
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: gridColor }, ticks: { color: textColor, maxTicksLimit: 8, font: { size: 11 } } },
+                        y: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 11 } }, beginAtZero: true }
+                    }
+                }
+            });
+
+            // Language Distribution Doughnut
+            if (langChart) langChart.destroy();
+            langChart = new Chart(document.getElementById('langDistChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['English','日本語','中文','Español','한국어','Others'],
+                    datasets: [{
+                        data: [38, 22, 15, 10, 8, 7],
+                        backgroundColor: ['#8B7355','#b8956a','#d4a87a','#e8c9a0','#f0dfc0','#e0d5c5'],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 8, color: textColor } }
+                    },
+                    cutout: '60%'
+                }
+            });
+
+            // Revenue by Work Bar Chart
+            const workNames = ['Magic Academy', 'Whispers', 'Cyberpunk'];
+            if (revenueChart) revenueChart.destroy();
+            revenueChart = new Chart(document.getElementById('revenueChart'), {
+                type: 'bar',
+                data: {
+                    labels: workNames,
+                    datasets: [{
+                        label: getL(uiText.thRevenue),
+                        data: [234.50, 156.00, 89.25],
+                        backgroundColor: [accentColor, '#b8956a', '#d4a87a'],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: textColor, font: { size: 11 } } },
+                        y: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 11 }, callback: v => '$'+v }, beginAtZero: true }
+                    }
+                }
+            });
+
+            // Top Works Table
+            const topWorks = [
+                { title: 'The Adventure of Magic Academy', views: 1234, revenue: '$234.50', langs: 5 },
+                { title: 'Whispers of Tomorrow', views: 892, revenue: '$156.00', langs: 3 },
+                { title: 'Digital Dreams: Cyberpunk', views: 567, revenue: '$89.25', langs: 7 }
+            ];
+            const rankClasses = ['gold','silver','bronze'];
+            document.getElementById('topWorksBody').innerHTML = topWorks.map((w, i) =>
+                `<tr>
+                    <td><span class="top-works-rank ${rankClasses[i]}">${i+1}</span>${w.title}</td>
+                    <td class="td-right">${w.views.toLocaleString()}</td>
+                    <td class="td-right">${w.revenue}</td>
+                    <td class="td-right">${w.langs}</td>
+                </tr>`
+            ).join('');
+        }
+        
+        // ===== Collaboration Features =====
+        const demoCollabs = [
+            {
+                id: 'collab1',
+                titleKey: null,
+                title: '"Magic Academy"',
+                descKey: 'collabEnTranslation',
+                role: 'collabTranslator',
+                rolePercent: '20%',
+                author: 'Sarah Chen',
+                status: 'collabInProgress',
+                due: '2026-06-15',
+                sales: 128,
+                revenue: 127.74,
+                targetPercent: 64
+            },
+            {
+                id: 'collab2',
+                titleKey: null,
+                title: '"月光の庭"',
+                descKey: 'collabEditing',
+                role: 'collabEditor',
+                rolePercent: '10%',
+                author: 'Yuki Tanaka',
+                status: 'collabInProgress',
+                due: '2026-09-01',
+                sales: 45,
+                revenue: 22.50,
+                targetPercent: 30
+            }
+        ];
+
+        function switchDashTab(tab) {
+            const myworksContent = document.getElementById('myworksContent');
+            const collabsContent = document.getElementById('collabsContent');
+            const tabMyWorks = document.getElementById('tabMyWorks');
+            const tabCollaborations = document.getElementById('tabCollaborations');
+
+            if (tab === 'myworks') {
+                myworksContent.style.display = '';
+                collabsContent.style.display = 'none';
+                tabMyWorks.className = 'btn btn-custom btn-sm active';
+                tabCollaborations.className = 'btn btn-soft-custom btn-sm';
+            } else {
+                myworksContent.style.display = 'none';
+                collabsContent.style.display = '';
+                tabMyWorks.className = 'btn btn-soft-custom btn-sm';
+                tabCollaborations.className = 'btn btn-custom btn-sm active';
+                renderCollaborations();
             }
         }
 
-        // Period selector events
-        document.querySelectorAll('.period-btn').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.period-btn').forEach(function(b) { b.classList.remove('active'); });
-                this.classList.add('active');
-                currentPeriod = parseInt(this.dataset.period);
-                if (new URLSearchParams(window.location.search).has('demo')) {
-                    loadAnalyticsDemoData();
-                }
-            });
-        });
+        function renderCollaborations() {
+            const listEl = document.getElementById('collabList');
+            const revenueEl = document.getElementById('collabRevenueList');
+
+            // Render active collaboration cards
+            listEl.innerHTML = demoCollabs.map(c => `
+                <div class="collab-card">
+                    <div class="collab-card-header">
+                        <div class="collab-card-icon"><i class="fas fa-book-open"></i></div>
+                        <div>
+                            <div class="collab-card-title">${c.title} ${getL(uiText[c.descKey])}</div>
+                            <div class="collab-card-meta">
+                                <span><strong>${getL(uiText.collabRole)}:</strong> ${getL(uiText[c.role])}</span>
+                                <span><strong>${getL(uiText.collabAuthor)}:</strong> ${c.author}</span>
+                            </div>
+                            <div class="collab-card-meta">
+                                <span><strong>${getL(uiText.collabStatus)}:</strong> <span class="collab-status-badge in-progress">${getL(uiText[c.status])}</span></span>
+                                <span><strong>${getL(uiText.collabDue)}:</strong> ${c.due}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="collab-card-actions">
+                        <button class="btn btn-custom btn-sm" onclick="openProgressModal('${c.id}')">
+                            <i class="fas fa-tasks me-1"></i>${getL(uiText.collabUpdateProgress)}
+                        </button>
+                        <a href="agreements.html" class="btn btn-soft-custom btn-sm">
+                            <i class="fas fa-file-contract me-1"></i>${getL(uiText.collabViewAgreement)}
+                        </a>
+                    </div>
+                </div>
+            `).join('');
+
+            // Render revenue items
+            revenueEl.innerHTML = demoCollabs.map(c => `
+                <div class="collab-revenue-item">
+                    <div class="collab-revenue-title">${c.title} (${getL(uiText[c.role])} ${c.rolePercent})</div>
+                    <div class="collab-revenue-meta">
+                        ${getL(uiText.collabSales)}: ${c.sales} | ${getL(uiText.collabYourRevenue)}: $${c.revenue.toFixed(2)}
+                    </div>
+                    <div class="collab-revenue-bar">
+                        <div class="collab-revenue-bar-fill" style="width: ${c.targetPercent}%"></div>
+                    </div>
+                    <div class="collab-revenue-target">${c.targetPercent}% ${getL(uiText.collabOfTarget)}</div>
+                </div>
+            `).join('');
+        }
+
+        function openProgressModal(collabId) {
+            document.getElementById('progressCollabId').value = collabId;
+            document.getElementById('progressRange').value = 50;
+            document.getElementById('progressRangeValue').textContent = '50%';
+            document.getElementById('progressStatus').value = 'on-track';
+            document.getElementById('progressComment').value = '';
+            document.getElementById('progressModalOverlay').classList.add('show');
+        }
+
+        function closeProgressModal() {
+            document.getElementById('progressModalOverlay').classList.remove('show');
+        }
+
+        function submitProgressReport() {
+            const collabId = document.getElementById('progressCollabId').value;
+            const status = document.getElementById('progressStatus').value;
+            const percent = document.getElementById('progressRange').value;
+            const comment = document.getElementById('progressComment').value;
+
+            const report = {
+                collabId: collabId,
+                status: status,
+                percent: parseInt(percent),
+                comment: comment,
+                timestamp: new Date().toISOString()
+            };
+
+            // Save to localStorage
+            const reports = JSON.parse(localStorage.getItem('collabProgressReports') || '[]');
+            reports.push(report);
+            localStorage.setItem('collabProgressReports', JSON.stringify(reports));
+
+            closeProgressModal();
+            alert(getL(uiText.progressSaved));
+        }
+
+        function updateCollabUIText() {
+            // Tab labels
+            const tabMyWorksLabel = document.getElementById('tabMyWorksLabel');
+            const tabCollabsLabel = document.getElementById('tabCollabsLabel');
+            if (tabMyWorksLabel) tabMyWorksLabel.textContent = getL(uiText.tabMyWorks);
+            if (tabCollabsLabel) tabCollabsLabel.textContent = getL(uiText.tabCollabs);
+
+            // Section titles
+            const collabActiveTitle = document.getElementById('collabActiveTitle');
+            const collabRevenueTitle = document.getElementById('collabRevenueTitle');
+            if (collabActiveTitle) collabActiveTitle.textContent = getL(uiText.collabActiveTitle);
+            if (collabRevenueTitle) collabRevenueTitle.textContent = getL(uiText.collabRevenueTitle);
+
+            // Modal texts
+            const progressModalTitle = document.getElementById('progressModalTitle');
+            if (progressModalTitle) progressModalTitle.innerHTML = '<i class="fas fa-tasks me-2 text-accent"></i>' + getL(uiText.progressModalTitle);
+            const el = (id, key) => { const e = document.getElementById(id); if (e) e.textContent = getL(uiText[key]); };
+            el('progressStatusLabel', 'progressStatusLabel');
+            el('progressPercentLabel', 'progressPercentLabel');
+            el('progressCommentLabel', 'progressCommentLabel');
+            el('progressCancelBtn', 'progressCancel');
+            el('progressSubmitBtn', 'progressSubmit');
+            el('optOnTrack', 'optOnTrack');
+            el('optBehind', 'optBehind');
+            el('optNeedHelp', 'optNeedHelp');
+
+            // Re-render if collabs tab is visible
+            if (document.getElementById('collabsContent').style.display !== 'none') {
+                renderCollaborations();
+            }
+        }
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -981,6 +1363,10 @@
             // Load user info
             // Load dashboard data
             loadDashboardData();
+
+            // Init analytics charts
+            const isDemo = new URLSearchParams(window.location.search).has('demo');
+            initCharts(isDemo);
             
             // Close user menu when clicking outside
             document.addEventListener('click', function(e) {
@@ -998,12 +1384,10 @@
             
             if (navbarCollapse) {
                 navbarCollapse.addEventListener('show.bs.collapse', function() {
-                    document.body.classList.add('menu-open');
                     if (navbarOverlay) navbarOverlay.classList.add('show');
                 });
-                
+
                 navbarCollapse.addEventListener('hide.bs.collapse', function() {
-                    document.body.classList.remove('menu-open');
                     if (navbarOverlay) navbarOverlay.classList.remove('show');
                 });
             }
@@ -1017,6 +1401,11 @@
                 });
             }
             
+            // Close progress modal when clicking overlay background
+            document.getElementById('progressModalOverlay').addEventListener('click', function(e) {
+                if (e.target === this) closeProgressModal();
+            });
+
             // Listen for language change events
             document.addEventListener('languageChanged', function(e) {
                 const lang = e.detail?.language || e.detail?.lang;
@@ -1025,7 +1414,57 @@
                     loadDashboardData(); // Reload to update dynamic text
                 }
             });
+
+            // i18n engine language change
+            if (typeof i18n !== 'undefined') {
+                i18n.onLanguageChange(function() {
+                    if (typeof i18n !== 'undefined') i18n.applyToDOM();
+                    updateUIText();
+                });
+            }
         });
+
+        // ========== Notification Bell Dropdown ==========
+        var NOTIF_DEMO = [
+            { type: 'sale', icon: 'fa-dollar-sign', color: 'var(--color-success)', title: 'Work purchased!', msg: 'Magic Academy Adventure was purchased. You earned $9.80.', time: new Date(Date.now()-30*60000).toISOString(), read: false },
+            { type: 'deadline_warning', icon: 'fa-exclamation-triangle', color: 'var(--color-warning)', title: 'Deadline approaching', msg: 'Deadline for "Magic Academy" is in 3 days.', time: new Date(Date.now()-60*60000).toISOString(), read: false },
+            { type: 'message_received', icon: 'fa-envelope', color: 'var(--color-accent)', title: 'New message', msg: 'New message from Yuki Tanaka.', time: new Date(Date.now()-2*60*60000).toISOString(), read: false },
+            { type: 'agreement_signed', icon: 'fa-check-circle', color: 'var(--color-success)', title: 'Agreement signed', msg: 'Tanaka Yuki signed the agreement for "Digital Dreams".', time: new Date(Date.now()-3*60*60000).toISOString(), read: true },
+            { type: 'progress_report', icon: 'fa-tasks', color: 'var(--color-info)', title: 'Progress report', msg: 'Sophie Martin submitted a progress report: 75% complete.', time: new Date(Date.now()-4*60*60000).toISOString(), read: true }
+        ];
+        var NOTIF_LINKS = { sale:'dashboard.html', deadline_warning:'dashboard.html?tab=collabs', message_received:'messages.html', agreement_signed:'agreements.html', progress_report:'dashboard.html?tab=collabs', translation_request:'messages.html', editing_request:'messages.html' };
+
+        function toggleNotifDropdown(e) {
+            e.preventDefault(); e.stopPropagation();
+            var dd = document.getElementById('notifDropdown');
+            dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+            if (dd.style.display === 'block') renderNotifDropdown();
+        }
+        function renderNotifDropdown() {
+            var list = document.getElementById('notifDropdownList');
+            if (!NOTIF_DEMO.length) { list.innerHTML = '<div style="padding:1rem;text-align:center;color:var(--color-text-secondary);font-size:var(--font-size-sm);">No notifications</div>'; return; }
+            list.innerHTML = NOTIF_DEMO.slice(0,5).map(function(n) {
+                var ago = Math.round((Date.now() - new Date(n.time).getTime()) / 60000);
+                var agoStr = ago < 60 ? ago + 'm' : Math.round(ago/60) + 'h';
+                return '<a href="' + (NOTIF_LINKS[n.type] || 'messages.html') + '" style="display:flex;gap:0.5rem;padding:0.6rem 1rem;text-decoration:none;color:inherit;border-bottom:1px solid var(--color-border);' + (!n.read ? 'background:rgba(139,115,85,0.05);' : '') + '">' +
+                    '<div style="width:28px;height:28px;border-radius:50%;background:' + n.color + ';color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.7rem;"><i class="fas ' + n.icon + '"></i></div>' +
+                    '<div style="flex:1;min-width:0;"><div style="font-size:var(--font-size-xs);font-weight:' + (!n.read ? '600' : '400') + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + n.title + '</div>' +
+                    '<div style="font-size:var(--font-size-xs);color:var(--color-text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + n.msg + '</div></div>' +
+                    '<div style="font-size:var(--font-size-xs);color:var(--color-text-secondary);flex-shrink:0;">' + agoStr + '</div></a>';
+            }).join('');
+        }
+        document.addEventListener('click', function(e) {
+            var wrapper = document.getElementById('notifDropdownWrapper');
+            if (wrapper && !wrapper.contains(e.target)) {
+                document.getElementById('notifDropdown').style.display = 'none';
+            }
+        });
+        // Update badge
+        (function() {
+            var unread = NOTIF_DEMO.filter(function(n) { return !n.read; }).length;
+            var badge = document.getElementById('notificationBadge');
+            if (badge && unread > 0) { badge.textContent = unread; badge.style.display = 'inline-block'; }
+        })();
     </script>
 </body>
 </html>

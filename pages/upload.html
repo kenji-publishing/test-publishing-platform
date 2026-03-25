@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <title>Upload Work - Publisher</title>
@@ -10,8 +11,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="../css/variables.css" rel="stylesheet">
     <link href="../css/style-new.css" rel="stylesheet">
+    <link href="../css/components.css" rel="stylesheet">
     <link href="../css/navbar.css" rel="stylesheet">
+    <link href="../css/mobile-fixes.css" rel="stylesheet">
     <style>
         /* ========== Upload Page Specific Styles ========== */
         .upload-container { padding: var(--spacing-xl) 0; }
@@ -27,304 +31,133 @@
         .content-type-btn:hover { border-color: var(--color-accent); }
         .content-type-btn.active { border-color: var(--color-accent); background: rgba(139, 115, 85, 0.1); }
         .content-type-btn i { font-size: 2rem; display: block; margin-bottom: var(--spacing-sm); color: var(--color-accent); }
-        .lang-selection-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-sm); margin: var(--spacing-md) 0; padding: var(--spacing-md); background: var(--color-bg-hover); border-radius: var(--radius-md); }
-        @media (max-width: 576px) { .lang-selection-grid { grid-template-columns: repeat(2, 1fr); } }
-        .lang-checkbox { display: flex; align-items: center; gap: var(--spacing-xs); padding: var(--spacing-xs) var(--spacing-sm); border-radius: var(--radius-sm); transition: background var(--transition-fast); }
-        .lang-checkbox:hover { background: rgba(139, 115, 85, 0.1); }
-        .lang-checkbox.disabled { opacity: 0.5; pointer-events: none; }
-        .translation-hint { background: rgba(139, 115, 85, 0.1); border-left: 3px solid var(--color-accent); padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--radius-sm); font-size: var(--font-size-sm); margin-top: var(--spacing-sm); }
-        .translation-hint i { color: var(--color-accent); margin-right: var(--spacing-xs); }
-        .selected-count { font-weight: 600; color: var(--color-accent); }
+        .price-input-group { display: flex; gap: 0; }
+        .price-input-group .currency-select { width: 110px; flex-shrink: 0; background-color: var(--color-bg-main); border: 1px solid var(--color-border); border-right: none; border-radius: var(--radius-md) 0 0 var(--radius-md); padding: var(--spacing-sm); font-size: 14px; font-weight: 500; color: var(--color-text-primary); cursor: pointer; appearance: auto; }
+        .price-input-group .currency-select:focus { border-color: var(--color-accent); box-shadow: 0 0 0 3px rgba(139,115,85,0.1); outline: none; z-index: 1; }
+        .price-input-group .form-control { border-radius: 0 var(--radius-md) var(--radius-md) 0; flex: 1; }
 
         /* ========== Pattern C: Mobile Language Selector ========== */
         
         
         /* ========== Pattern C: PC Navbar - 横並び維持 ========== */
+        @media (min-width: 992px) {
+            .navbar-nav {
+                flex-wrap: nowrap !important;
+                flex-direction: row !important;
+            }
+            .navbar-nav .nav-item {
+                white-space: nowrap !important;
+            }
+            .navbar-nav .nav-link {
+                white-space: nowrap !important;
+                padding: 0.5rem 0.6rem !important;
+                font-size: 0.9rem;
+            }
+
+            .dropdown-menu {
+                white-space: nowrap;
+            }
+            .navbar-buttons-guest {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                gap: 0.5rem;
+            }
+            .navbar-buttons-guest .btn {
+                white-space: nowrap !important;
+                flex-shrink: 0;
+            }
+        }
         
         /* ========== Pattern C: Auth Visibility Control ========== */
         
         /* ========== Pattern C: User Dropdown Menu ========== */
         
         /* ========== Pattern C: Navbar Overlay ========== */
-        
+
         /* ========== Pattern C: Mobile Adjustments ========== */
+        @media (max-width: 991.98px) {
+
+        }
     </style>
 </head>
 <body>
     <!-- ========== NAVBAR HTML START (Pattern C) ========== -->
 
     <!-- Navbar Overlay -->
-    <div class="navbar-overlay" id="navbarOverlay"></div>
-
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
-        <div class="container">
-            <!-- Brand -->
-            <a class="navbar-brand" href="../index.html">
-                <i class="fas fa-book-open"></i>
-                Publisher
-            </a>
-            
-            <!-- Language Selector Mobile -->
-            <div class="navbar-lang-selector d-lg-none">
-                <select class="language-selector" id="languageSelectorMobile">
-                    <option value="en">🇬🇧 EN</option>
-                    <option value="ja">🇯🇵 日本語</option>
-                    <option value="zh">🇨🇳 中文</option>
-                    <option value="es">🇪🇸 ES</option>
-                    <option value="fr">🇫🇷 FR</option>
-                    <option value="de">🇩🇪 DE</option>
-                    <option value="ko">🇰🇷 한국어</option>
-                    <option value="ar">🇸🇦 عربي</option>
-                    <option value="pt">🇧🇷 PT</option>
-                </select>
-            </div>
-            
-            <!-- User Dropdown (auth-only) -->
-            <div class="user-dropdown auth-only" id="userDropdown">
-                <button type="button" class="user-dropdown-toggle" id="userDropdownBtn" onclick="toggleUserDropdown(event)">
-                    <i class="fas fa-user-circle"></i>
-                    <span class="user-name d-none d-lg-inline" id="userName">User</span>
-                    <i class="fas fa-chevron-down user-chevron d-none d-lg-inline"></i>
-                </button>
-                <div class="user-menu" id="userMenu">
-                    <div class="user-menu-header">
-                        <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
-                        <div class="user-info">
-                            <div class="user-display-name" id="userDisplayName">User</div>
-                            <div class="user-email" id="userEmail">user@example.com</div>
-                        </div>
-                    </div>
-                    <div class="user-menu-divider"></div>
-                    <a href="dashboard.html" class="user-menu-item">
-                        <i class="fas fa-th-large"></i>
-                        <span id="menuDashboard">Dashboard</span>
-                    </a>
-                    <a href="my-works.html" class="user-menu-item">
-                        <i class="fas fa-book"></i>
-                        <span id="menuMyWorks">My Works</span>
-                    </a>
-                    <a href="account-settings.html" class="user-menu-item">
-                        <i class="fas fa-cog"></i>
-                        <span id="menuAccountSettings">Account Settings</span>
-                    </a>
-                    <div class="user-menu-divider"></div>
-                    <button class="user-menu-item logout-btn" onclick="handleLogout()">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span id="menuLogout">Log Out</span>
-                    </button>
-                </div>
-            </div>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <!-- ========== PC Navigation (Pattern C) ========== -->
-                <ul class="navbar-nav me-auto d-none d-lg-flex">
-                    <!-- Home -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="../index.html">
-                            <i class="fas fa-home me-1"></i> <span data-i18n="nav.home">Home</span>
-                        </a>
-                    </li>
-                    <!-- Browse -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="browse.html">
-                            <i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span>
-                        </a>
-                    </li>
-                    <!-- Genres -->
-                    <!-- Auth: Library -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" href="library.html">
-                            <i class="fas fa-book-reader me-1"></i> <span id="navLibraryPC">Library</span>
-                        </a>
-                    </li>
-                    <!-- Auth: Dashboard -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" href="dashboard.html">
-                            <i class="fas fa-th-large me-1"></i> <span id="navDashboardPC">Dashboard</span>
-                        </a>
-                    </li>
-                    <!-- Auth: Upload ★ACTIVE★ -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link active" href="upload.html">
-                            <i class="fas fa-upload me-1"></i> <span data-i18n="nav.upload">Upload</span>
-                        </a>
-                    </li>
-                    <!-- Auth: Translation Tools Dropdown -->
-                    <li class="nav-item dropdown auth-only">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-language me-1"></i> <span id="navTranslationToolsPC">Translation Tools</span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="manga-translator.html"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorPC">Manga Translator</span></a></li>
-                            <li><a class="dropdown-item" href="translation-status.html"><i class="fas fa-tasks me-2"></i><span id="navTranslationStatusPC">Translation Status</span></a></li>
-                            <li><a class="dropdown-item" href="translators/index.html"><i class="fas fa-users me-2"></i><span id="navFindTranslatorsPC">Find Translators</span></a></li>
-                        </ul>
-                    </li>
-                    <!-- Support Dropdown -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-headset me-1"></i> <span data-i18n="nav.support">Support</span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="support/faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
-                            <li><a class="dropdown-item" href="support/troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
-                            <li><a class="dropdown-item" href="support/contact.html"><i class="fas fa-envelope me-2"></i><span id="navContactPC">Contact</span></a></li>
-                            <li class="auth-only"><hr class="dropdown-divider"></li>
-                            <li class="auth-only"><a class="dropdown-item" href="support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
-                        </ul>
-                    </li>
-                </ul>
-                
-                <!-- ========== Mobile Navigation (Pattern C) ========== -->
-                <ul class="navbar-nav d-lg-none">
-                    <!-- Home -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="../index.html">
-                            <i class="fas fa-home me-2"></i> <span data-i18n="nav.home">Home</span>
-                        </a>
-                    </li>
-                    <!-- Browse -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="browse.html">
-                            <i class="fas fa-compass me-2"></i> <span data-i18n="nav.browse">Browse</span>
-                        </a>
-                    </li>
-                    <!-- Genres -->
-                    <!-- Auth: Library -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" href="library.html">
-                            <i class="fas fa-book-reader me-2"></i> <span id="navLibraryMobile">Library</span>
-                        </a>
-                    </li>
-                    <li class="auth-only"><hr class="dropdown-divider"></li>
-                    <!-- Auth: Dashboard -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" href="dashboard.html">
-                            <i class="fas fa-th-large me-2"></i> <span id="navDashboardMobile">Dashboard</span>
-                        </a>
-                    </li>
-                    <!-- Auth: Upload ★ACTIVE★ -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link active" href="upload.html">
-                            <i class="fas fa-upload me-2"></i> <span data-i18n="nav.upload">Upload</span>
-                        </a>
-                    </li>
-                    <!-- Auth: Translation Tools -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" data-bs-toggle="collapse" href="#translationToolsMenu" role="button">
-                            <i class="fas fa-language me-2"></i> <span id="navTranslationToolsMobile">Translation Tools</span>
-                            <i class="fas fa-chevron-down ms-auto small"></i>
-                        </a>
-                        <div class="collapse ps-4" id="translationToolsMenu">
-                            <a class="nav-link" href="manga-translator.html">
-                                <i class="fas fa-image me-2"></i> <span id="navMangaTranslatorMobile">Manga Translator</span>
-                            </a>
-                            <a class="nav-link" href="translation-status.html">
-                                <i class="fas fa-tasks me-2"></i> <span id="navTranslationStatusMobile">Translation Status</span>
-                            </a>
-                            <a class="nav-link" href="translators/index.html">
-                                <i class="fas fa-users me-2"></i> <span id="navFindTranslatorsMobile">Find Translators</span>
-                            </a>
-                        </div>
-                    </li>
-                    <li><hr class="dropdown-divider"></li>
-                    <!-- Support -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="support/faq.html">
-                            <i class="fas fa-question-circle me-2"></i> <span data-i18n="support.faq.title">FAQ</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="support/troubleshoot.html">
-                            <i class="fas fa-tools me-2"></i> <span data-i18n="support.troubleshoot.title">Troubleshooting</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="support/contact.html">
-                            <i class="fas fa-envelope me-2"></i> <span id="navContactMobile">Contact</span>
-                        </a>
-                    </li>
-                    <!-- Auth: My Tickets -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" href="support/tickets.html">
-                            <i class="fas fa-ticket-alt me-2"></i> <span data-i18n="support.tickets.title">My Tickets</span>
-                        </a>
-                    </li>
-                    <li><hr class="dropdown-divider"></li>
-                    <!-- Guest: Sign In -->
-                    <li class="nav-item guest-only">
-                        <a class="nav-link" href="login.html">
-                            <i class="fas fa-sign-in-alt me-2"></i> <span data-i18n="nav.login">Sign In</span>
-                        </a>
-                    </li>
-                    <!-- Guest: Register -->
-                    <li class="nav-item guest-only">
-                        <a class="nav-link" href="register.html">
-                            <i class="fas fa-user-plus me-2"></i> <span data-i18n="nav.getStarted">Get Started</span>
-                        </a>
-                    </li>
-                </ul>
-                
-                <div class="d-flex align-items-center gap-3">
-                    <!-- Language Selector Desktop -->
-                    <select class="language-selector d-none d-lg-block" id="languageSelector">
-                        <option value="en">🇬🇧 EN</option>
-                        <option value="ja">🇯🇵 日本語</option>
-                        <option value="zh">🇨🇳 中文</option>
-                        <option value="es">🇪🇸 ES</option>
-                        <option value="fr">🇫🇷 FR</option>
-                        <option value="de">🇩🇪 DE</option>
-                        <option value="ko">🇰🇷 한국어</option>
-                        <option value="ar">🇸🇦 عربي</option>
-                        <option value="pt">🇧🇷 PT</option>
-                    </select>
-                    
-                    <!-- Guest Buttons (PC) -->
-                    <div class="navbar-buttons-guest guest-only d-none d-lg-flex">
-                        <a href="login.html" class="btn btn-soft-custom">
-                            <span data-i18n="nav.login">Sign In</span>
-                        </a>
-                        <a href="register.html" class="btn btn-primary-custom">
-                            <span data-i18n="nav.getStarted">Get Started</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- ========== NAVBAR HTML END ========== -->
+    <div id="navbar-container"></div>
 
     <main class="upload-container">
         <div class="container">
             <div class="row">
                 <div class="col-lg-8 mx-auto">
                     <div class="page-header">
-                        <h1><i class="fas fa-cloud-upload-alt me-2 text-accent"></i><span id="pageTitle">Upload Your Work</span></h1>
-                        <p id="pageSubtitle">Share your creation with readers worldwide</p>
+                        <h1><i class="fas fa-cloud-upload-alt me-2 text-accent"></i><span id="pageTitle" data-i18n="upload.pageTitle">Upload Your Work</span></h1>
+                        <p id="pageSubtitle" data-i18n="upload.pageSubtitle">Share your creation with readers worldwide</p>
                     </div>
                     
                     <form id="uploadForm">
+                        <!-- Upload Route Selection -->
+                        <div class="form-card">
+                            <h5><i class="fas fa-route me-2"></i><span id="sectionUploadRoute" data-i18n="upload.sectionUploadRoute">Upload Type</span></h5>
+                            <div class="d-flex gap-3 flex-wrap">
+                                <div class="content-type-btn active" id="routeNew" onclick="selectUploadRoute('new')">
+                                    <i class="fas fa-plus-circle"></i>
+                                    <span id="routeNewLabel" data-i18n="upload.routeNewLabel">New Original Work</span>
+                                </div>
+                                <div class="content-type-btn" id="routeTranslation" onclick="selectUploadRoute('translation')">
+                                    <i class="fas fa-language"></i>
+                                    <span id="routeTranslationLabel" data-i18n="upload.routeTranslationLabel">Translation of Existing Work</span>
+                                </div>
+                            </div>
+                            <input type="hidden" id="uploadRoute" value="new">
+                        </div>
+
+                        <!-- Original Work Selector (Translation route only) -->
+                        <div class="form-card" id="originalWorkSection" style="display: none;">
+                            <h5><i class="fas fa-link me-2"></i><span id="sectionOriginalWork" data-i18n="upload.sectionOriginalWork">Select Original Work</span></h5>
+                            <p class="text-secondary small mb-3" id="originalWorkDesc" data-i18n="upload.originalWorkDesc">Select the work you are translating. Basic info will be inherited.</p>
+                            <select class="form-select mb-3" id="originalWorkSelect">
+                                <option value="" id="optSelectOriginalWork" data-i18n="upload.optSelectOriginalWork">-- Select original work --</option>
+                            </select>
+                            <div id="originalWorkInfo" style="display: none; padding: 0.75rem; background: var(--color-bg-hover); border-radius: var(--radius-md);">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <i class="fas fa-book text-accent"></i>
+                                    <strong id="originalWorkTitle"></strong>
+                                </div>
+                                <small class="text-secondary" id="originalWorkMeta"></small>
+                            </div>
+                            <div class="mb-3 mt-3">
+                                <label class="form-label" id="labelTranslationLangUpload" data-i18n="upload.labelTranslationLangUpload">Translation Language *</label>
+                                <select class="form-select" id="translationLangUpload" required>
+                                    <option value="">-- Select --</option>
+                                    <option value="en">English</option>
+                                    <option value="ja">日本語</option>
+                                    <option value="zh">中文</option>
+                                    <option value="es">Español</option>
+                                    <option value="fr">Français</option>
+                                    <option value="de">Deutsch</option>
+                                    <option value="ko">한국어</option>
+                                    <option value="ar">العربية</option>
+                                    <option value="pt">Português</option>
+                                </select>
+                            </div>
+                        </div>
+
                         <!-- Content Type -->
                         <div class="form-card">
-                            <h5><span id="sectionContentType">Content Type</span> *</h5>
+                            <h5><span id="sectionContentType" data-i18n="upload.sectionContentType">Content Type</span> *</h5>
                             <div class="d-flex gap-3 flex-wrap">
                                 <div class="content-type-btn active" onclick="selectContentType('text', this)">
                                     <i class="fas fa-file-alt"></i>
-                                    <span id="typeText">Text/Novel</span>
+                                    <span id="typeText" data-i18n="upload.typeText">Text/Novel</span>
                                 </div>
                                 <div class="content-type-btn" onclick="selectContentType('manga', this)">
                                     <i class="fas fa-book-open"></i>
-                                    <span id="typeManga">Manga/Comics</span>
+                                    <span id="typeManga" data-i18n="upload.typeManga">Manga/Comics</span>
                                 </div>
                                 <div class="content-type-btn" onclick="selectContentType('art', this)">
                                     <i class="fas fa-palette"></i>
-                                    <span id="typeArt">Artwork</span>
+                                    <span id="typeArt" data-i18n="upload.typeArt">Artwork</span>
                                 </div>
                             </div>
                             <input type="hidden" id="contentType" value="text">
@@ -332,24 +165,24 @@
 
                         <!-- Work Details -->
                         <div class="form-card">
-                            <h5 id="sectionDetails">Work Details</h5>
-                            
+                            <h5 id="sectionDetails" data-i18n="upload.sectionDetails">Work Details</h5>
+
                             <div class="mb-3">
-                                <label for="workTitle" class="form-label"><span id="labelTitle">Title</span> *</label>
+                                <label for="workTitle" class="form-label"><span id="labelTitle" data-i18n="upload.labelTitle">Title</span> *</label>
                                 <input type="text" class="form-control" id="workTitle" required>
                             </div>
 
                             <div class="mb-3">
-                                <label for="workDescription" class="form-label"><span id="labelDescription">Description</span> *</label>
+                                <label for="workDescription" class="form-label"><span id="labelDescription" data-i18n="upload.labelDescription">Description</span> *</label>
                                 <textarea class="form-control" id="workDescription" rows="4" required></textarea>
-                                <small class="text-secondary" id="hintDescription">Brief summary of your work (max 500 characters)</small>
+                                <small class="text-secondary" id="hintDescription" data-i18n="upload.hintDescription">Brief summary of your work (max 500 characters)</small>
                             </div>
 
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label for="workLanguage" class="form-label"><span id="labelLanguage">Original Language</span> *</label>
+                                    <label for="workLanguage" class="form-label"><span id="labelLanguage" data-i18n="upload.labelLanguage">Original Language</span> *</label>
                                     <select class="form-select" id="workLanguage" required onchange="updateTranslationLanguages()">
-                                        <option value="" id="optSelectLang">Select language</option>
+                                        <option value="" id="optSelectLang" data-i18n="upload.optSelectLang">Select language</option>
                                         <option value="en">English</option>
                                         <option value="ja">日本語</option>
                                         <option value="zh">中文</option>
@@ -362,41 +195,41 @@
                                     </select>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="workGenre" class="form-label"><span id="labelGenre">Genre</span> *</label>
+                                    <label for="workGenre" class="form-label"><span id="labelGenre" data-i18n="upload.labelGenre">Genre</span> *</label>
                                     <select class="form-select" id="workGenre" required>
-                                        <option value="" id="optSelectGenre">Select genre</option>
-                                        <option value="fiction" id="genreFiction">Fiction</option>
-                                        <option value="nonfiction" id="genreNonfiction">Non-Fiction</option>
-                                        <option value="manga" id="genreManga">Manga</option>
-                                        <option value="poetry" id="genrePoetry">Poetry</option>
-                                        <option value="scifi" id="genreScifi">Science Fiction</option>
-                                        <option value="fantasy" id="genreFantasy">Fantasy</option>
-                                        <option value="romance" id="genreRomance">Romance</option>
-                                        <option value="mystery" id="genreMystery">Mystery</option>
-                                        <option value="horror" id="genreHorror">Horror</option>
+                                        <option value="" id="optSelectGenre" data-i18n="upload.optSelectGenre">Select genre</option>
+                                        <option value="fiction" id="genreFiction" data-i18n="upload.genreFiction">Fiction</option>
+                                        <option value="nonfiction" id="genreNonfiction" data-i18n="upload.genreNonfiction">Non-Fiction</option>
+                                        <option value="manga" id="genreManga" data-i18n="upload.genreManga">Manga</option>
+                                        <option value="poetry" id="genrePoetry" data-i18n="upload.genrePoetry">Poetry</option>
+                                        <option value="scifi" id="genreScifi" data-i18n="upload.genreScifi">Science Fiction</option>
+                                        <option value="fantasy" id="genreFantasy" data-i18n="upload.genreFantasy">Fantasy</option>
+                                        <option value="romance" id="genreRomance" data-i18n="upload.genreRomance">Romance</option>
+                                        <option value="mystery" id="genreMystery" data-i18n="upload.genreMystery">Mystery</option>
+                                        <option value="horror" id="genreHorror" data-i18n="upload.genreHorror">Horror</option>
                                     </select>
                                 </div>
                             </div>
 
                             <div class="mb-3">
-                                <label for="tags" class="form-label" id="labelTags">Tags (Optional)</label>
+                                <label for="tags" class="form-label" id="labelTags" data-i18n="upload.labelTags">Tags (Optional)</label>
                                 <input type="text" class="form-control" id="tags" placeholder="">
                             </div>
                         </div>
 
                         <!-- File Upload -->
                         <div class="form-card">
-                            <h5 id="sectionUpload">Upload Files</h5>
-                            
+                            <h5 id="sectionUpload" data-i18n="upload.sectionUpload">Upload Files</h5>
+
                             <div class="upload-area" id="uploadArea">
                                 <i class="fas fa-cloud-upload-alt fa-4x text-accent mb-3"></i>
-                                <h5 id="uploadDragText">Drag & Drop Files Here</h5>
-                                <p class="text-secondary" id="uploadOrText">or click to browse</p>
+                                <h5 id="uploadDragText" data-i18n="upload.uploadDragText">Drag & Drop Files Here</h5>
+                                <p class="text-secondary" id="uploadOrText" data-i18n="upload.uploadOrText">or click to browse</p>
                                 <input type="file" id="fileInput" class="d-none" multiple accept=".txt,.doc,.docx,.pdf,.jpg,.jpeg,.png,.gif">
                                 <button type="button" class="btn btn-custom" onclick="document.getElementById('fileInput').click()">
-                                    <i class="fas fa-folder-open me-2"></i><span id="btnBrowseFiles">Browse Files</span>
+                                    <i class="fas fa-folder-open me-2"></i><span id="btnBrowseFiles" data-i18n="upload.btnBrowseFiles">Browse Files</span>
                                 </button>
-                                <p class="mt-3 small text-secondary" id="uploadFormats">Supported formats: TXT, DOC, DOCX, PDF (text) | JPG, PNG, GIF (images/manga)</p>
+                                <p class="mt-3 small text-secondary" id="uploadFormats" data-i18n="upload.uploadFormats">Supported formats: TXT, DOC, DOCX, PDF (text) | JPG, PNG, GIF (images/manga)</p>
                             </div>
 
                             <div id="fileList" class="mt-4"></div>
@@ -405,134 +238,199 @@
 
                         <!-- Cover Image -->
                         <div class="form-card">
-                            <h5 id="sectionCover">Cover Image (Optional)</h5>
+                            <h5 id="sectionCover" data-i18n="upload.sectionCover">Cover Image (Optional)</h5>
                             <input type="file" class="form-control" id="coverImage" accept=".jpg,.jpeg,.png">
-                            <small class="text-secondary" id="hintCover">Recommended size: 600x900px</small>
+                            <small class="text-secondary" id="hintCover" data-i18n="upload.hintCover">Recommended size: 600x900px</small>
                         </div>
 
-                        <!-- Translation Options -->
+                        <!-- AI Usage Disclosure -->
                         <div class="form-card">
-                            <h5><i class="fas fa-language me-2"></i><span id="sectionTranslation">Translation Options</span></h5>
-                            
-                            <!-- AI Translation -->
-                            <div class="form-check mb-3">
-                                <input class="form-check-input" type="checkbox" id="useAiTranslation" onchange="toggleAiTranslation()">
-                                <label class="form-check-label" for="useAiTranslation">
-                                    <strong id="optAiTranslation">Enable AI Translation</strong><br>
-                                    <small class="text-secondary" id="optAiTranslationDesc">Select target languages for automatic translation</small>
-                                </label>
+                            <h5><i class="fas fa-robot me-2"></i><span id="sectionAiDisclosure" data-i18n="upload.sectionAiDisclosure">AI Usage Disclosure</span></h5>
+                            <p class="text-secondary small mb-3" id="aiDisclosureDesc" data-i18n="upload.aiDisclosureDesc">Please disclose any AI tools used in creating this work. This information will be displayed to readers.</p>
+
+                            <!-- Text/Content AI -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold" id="labelAiText" data-i18n="upload.labelAiText"><i class="fas fa-pen-fancy me-1"></i> Text / Content</label>
+                                <select class="form-select" id="aiTextUsage">
+                                    <option value="none" id="aiOptNone" data-i18n="upload.aiOptNone">No AI used (fully self-written)</option>
+                                    <option value="assisted" id="aiOptAssisted" data-i18n="upload.aiOptAssisted">AI-Assisted (AI support during writing)</option>
+                                    <option value="generated" id="aiOptGenerated" data-i18n="upload.aiOptGenerated">AI-Generated (primarily AI-written, human edited)</option>
+                                    <option value="full_ai" id="aiOptFullAi" data-i18n="upload.aiOptFullAi">Fully AI-Generated</option>
+                                </select>
                             </div>
 
-                            <!-- Language Selection (shown when AI translation enabled) -->
-                            <div id="langSelectionArea" style="display: none;">
-                                <label class="form-label" id="labelSelectTargetLangs">Select target languages:</label>
-                                <div class="lang-selection-grid" id="langSelectionGrid">
-                                    <label class="lang-checkbox" data-lang="en">
-                                        <input type="checkbox" class="form-check-input" name="targetLang" value="en">
-                                        <span>🇬🇧 English</span>
-                                    </label>
-                                    <label class="lang-checkbox" data-lang="ja">
-                                        <input type="checkbox" class="form-check-input" name="targetLang" value="ja">
-                                        <span>🇯🇵 日本語</span>
-                                    </label>
-                                    <label class="lang-checkbox" data-lang="zh">
-                                        <input type="checkbox" class="form-check-input" name="targetLang" value="zh">
-                                        <span>🇨🇳 中文</span>
-                                    </label>
-                                    <label class="lang-checkbox" data-lang="es">
-                                        <input type="checkbox" class="form-check-input" name="targetLang" value="es">
-                                        <span>🇪🇸 Español</span>
-                                    </label>
-                                    <label class="lang-checkbox" data-lang="fr">
-                                        <input type="checkbox" class="form-check-input" name="targetLang" value="fr">
-                                        <span>🇫🇷 Français</span>
-                                    </label>
-                                    <label class="lang-checkbox" data-lang="de">
-                                        <input type="checkbox" class="form-check-input" name="targetLang" value="de">
-                                        <span>🇩🇪 Deutsch</span>
-                                    </label>
-                                    <label class="lang-checkbox" data-lang="ko">
-                                        <input type="checkbox" class="form-check-input" name="targetLang" value="ko">
-                                        <span>🇰🇷 한국어</span>
-                                    </label>
-                                    <label class="lang-checkbox" data-lang="ar">
-                                        <input type="checkbox" class="form-check-input" name="targetLang" value="ar">
-                                        <span>🇸🇦 العربية</span>
-                                    </label>
-                                    <label class="lang-checkbox" data-lang="pt">
-                                        <input type="checkbox" class="form-check-input" name="targetLang" value="pt">
-                                        <span>🇧🇷 Português</span>
-                                    </label>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="text-secondary small"><span id="selectedCountLabel">Selected:</span> <span class="selected-count" id="selectedLangCount">0</span> <span id="languagesLabel">languages</span></span>
-                                    <button type="button" class="btn btn-sm btn-soft-custom" onclick="selectAllLanguages()" id="btnSelectAll">Select All</button>
-                                </div>
-                                <div class="translation-hint">
-                                    <i class="fas fa-lightbulb"></i>
-                                    <span id="translationHint">Recommendation: English + Japanese covers the largest reader base</span>
-                                </div>
+                            <!-- Cover/Illustration AI -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold" id="labelAiCover" data-i18n="upload.labelAiCover"><i class="fas fa-image me-1"></i> Cover / Illustrations</label>
+                                <select class="form-select" id="aiCoverUsage">
+                                    <option value="none" id="aiCoverOptNone" data-i18n="upload.aiCoverOptNone">No AI used (original artwork)</option>
+                                    <option value="assisted" id="aiCoverOptAssisted" data-i18n="upload.aiCoverOptAssisted">AI-Assisted (AI draft, human finished)</option>
+                                    <option value="generated" id="aiCoverOptGenerated" data-i18n="upload.aiCoverOptGenerated">AI-Generated image</option>
+                                </select>
                             </div>
 
-                            <hr class="my-3">
-
-                            <!-- Human Translation -->
-                            <div class="form-check mb-3">
-                                <input class="form-check-input" type="checkbox" id="requestHumanTranslation">
-                                <label class="form-check-label" for="requestHumanTranslation">
-                                    <strong id="optHumanTranslation">Request Human Translation</strong><br>
-                                    <small class="text-secondary" id="optHumanTranslationDesc">Professional translators will be notified (20% revenue share)</small>
-                                </label>
+                            <!-- Translation AI -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold" id="labelAiTranslation" data-i18n="upload.labelAiTranslation"><i class="fas fa-language me-1"></i> Translation</label>
+                                <select class="form-select" id="aiTranslationUsage">
+                                    <option value="na" id="aiTransOptNA" data-i18n="upload.aiTransOptNA">Not applicable (original language only)</option>
+                                    <option value="none" id="aiTransOptNone" data-i18n="upload.aiTransOptNone">No AI used (human translation)</option>
+                                    <option value="assisted" id="aiTransOptAssisted" data-i18n="upload.aiTransOptAssisted">AI-Assisted (AI translation, human proofread)</option>
+                                    <option value="full_ai" id="aiTransOptFullAi" data-i18n="upload.aiTransOptFullAi">Fully AI-Translated</option>
+                                </select>
                             </div>
 
-                            <!-- Self Translation -->
-                            <div class="form-check mb-3">
-                                <input class="form-check-input" type="checkbox" id="selfTranslate">
-                                <label class="form-check-label" for="selfTranslate">
-                                    <strong id="optSelfTranslation">I'll Translate It Myself</strong><br>
-                                    <small class="text-secondary" id="optSelfTranslationDesc">Earn additional 20% (total 60%)</small>
+                            <!-- AI Service Used -->
+                            <div class="mb-3" id="aiServiceDiv" style="display: none;">
+                                <label class="form-label fw-semibold" id="labelAiService" data-i18n="upload.labelAiService"><i class="fas fa-microchip me-1"></i> AI Service(s) Used</label>
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;">
+                                    <label class="form-check"><input class="form-check-input" type="checkbox" name="aiService" value="claude"> Claude (Anthropic)</label>
+                                    <label class="form-check"><input class="form-check-input" type="checkbox" name="aiService" value="chatgpt"> ChatGPT (OpenAI)</label>
+                                    <label class="form-check"><input class="form-check-input" type="checkbox" name="aiService" value="midjourney"> Midjourney</label>
+                                    <label class="form-check"><input class="form-check-input" type="checkbox" name="aiService" value="stable_diffusion"> Stable Diffusion</label>
+                                    <label class="form-check"><input class="form-check-input" type="checkbox" name="aiService" value="dalle"> DALL-E</label>
+                                    <label class="form-check"><input class="form-check-input" type="checkbox" name="aiService" value="deepl"> DeepL</label>
+                                </div>
+                                <div class="mt-2">
+                                    <label class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="aiService" value="other" id="aiServiceOther">
+                                        <span id="aiOptOther" data-i18n="upload.aiOptOther">Other:</span>
+                                    </label>
+                                    <input type="text" class="form-control form-control-sm mt-1" id="aiServiceOtherName" placeholder="Service name" style="display: none;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Collaborators -->
+                        <div class="form-card">
+                            <h5><i class="fas fa-users me-2"></i><span id="sectionCollaborators" data-i18n="upload.sectionCollaborators">Collaborators</span></h5>
+                            <p class="text-secondary small mb-3" id="collabDesc" data-i18n="upload.collabDesc">Add editors or translators who collaborated on this work. They will receive a collaboration agreement to sign.</p>
+
+                            <!-- Has Editor -->
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="hasEditor" onchange="toggleCollabSection('editor')">
+                                <label class="form-check-label" for="hasEditor">
+                                    <strong id="labelHasEditor" data-i18n="upload.labelHasEditor">This work has an editor</strong>
+                                    <small class="text-secondary d-block" id="labelEditorRevenue" data-i18n="upload.labelEditorRevenue">Editor receives 10% of revenue</small>
                                 </label>
+                            </div>
+                            <div id="editorSection" style="display: none; padding: 0.75rem; margin-bottom: 1rem; background: var(--color-bg-hover); border-radius: var(--radius-md);">
+                                <div class="row g-2 mb-2">
+                                    <div class="col-sm-6">
+                                        <label class="form-label small" id="labelEditorName" data-i18n="upload.labelEditorName">Editor Name</label>
+                                        <input type="text" class="form-control form-control-sm" id="editorName" placeholder="">
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label class="form-label small" id="labelEditorEmail" data-i18n="upload.labelEditorEmail">Editor Email or Username</label>
+                                        <input type="text" class="form-control form-control-sm" id="editorEmail" placeholder="">
+                                    </div>
+                                </div>
+                                <small class="text-secondary" id="editorNote" data-i18n="upload.editorNote">An agreement will be sent for the editor to review and sign.</small>
+                            </div>
+
+                            <!-- Has Translator -->
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="hasTranslator" onchange="toggleCollabSection('translator')">
+                                <label class="form-check-label" for="hasTranslator">
+                                    <strong id="labelHasTranslator" data-i18n="upload.labelHasTranslator">This work has a translator</strong>
+                                    <small class="text-secondary d-block" id="labelTranslatorRevenue" data-i18n="upload.labelTranslatorRevenue">Translator receives 20% of revenue</small>
+                                </label>
+                            </div>
+                            <div id="translatorSection" style="display: none; padding: 0.75rem; margin-bottom: 1rem; background: var(--color-bg-hover); border-radius: var(--radius-md);">
+                                <div class="row g-2 mb-2">
+                                    <div class="col-sm-6">
+                                        <label class="form-label small" id="labelTranslatorName" data-i18n="upload.labelTranslatorName">Translator Name</label>
+                                        <input type="text" class="form-control form-control-sm" id="translatorName" placeholder="">
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label class="form-label small" id="labelTranslatorEmail" data-i18n="upload.labelTranslatorEmail">Translator Email or Username</label>
+                                        <input type="text" class="form-control form-control-sm" id="translatorEmail" placeholder="">
+                                    </div>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small" id="labelTranslationLang" data-i18n="upload.labelTranslationLang">Translation Language</label>
+                                    <select class="form-select form-select-sm" id="translationLang">
+                                        <option value="en">English</option>
+                                        <option value="ja">日本語</option>
+                                        <option value="zh">中文</option>
+                                        <option value="es">Español</option>
+                                        <option value="fr">Français</option>
+                                        <option value="de">Deutsch</option>
+                                        <option value="ko">한국어</option>
+                                        <option value="ar">العربية</option>
+                                        <option value="pt">Português</option>
+                                    </select>
+                                </div>
+                                <small class="text-secondary" id="translatorNote" data-i18n="upload.translatorNote">An agreement will be sent for the translator to review and sign.</small>
+                            </div>
+
+                            <!-- Revenue Preview with Collaborators -->
+                            <div id="collabRevenuePreview" style="display: none; padding: 0.75rem; background: rgba(139,115,85,0.05); border-radius: var(--radius-md); border: 1px dashed var(--color-accent);">
+                                <h6 class="small fw-semibold mb-2"><i class="fas fa-chart-pie me-1" style="color: var(--color-accent);"></i> <span id="collabRevTitle" data-i18n="upload.collabRevTitle">Revenue Split Preview</span></h6>
+                                <div id="collabRevDetails" style="font-size: var(--font-size-sm);"></div>
                             </div>
                         </div>
 
                         <!-- Rights & Pricing -->
                         <div class="form-card">
-                            <h5><i class="fas fa-copyright me-2"></i><span id="sectionRights">Rights & Pricing</span></h5>
-                            
+                            <h5><i class="fas fa-copyright me-2"></i><span id="sectionRights" data-i18n="upload.sectionRights">Rights & Pricing</span></h5>
+
                             <div class="form-check mb-3">
                                 <input class="form-check-input" type="checkbox" id="rightsConfirm" required>
-                                <label class="form-check-label" for="rightsConfirm" id="labelRightsConfirm">
+                                <label class="form-check-label" for="rightsConfirm" id="labelRightsConfirm" data-i18n="upload.labelRightsConfirm">
                                     I confirm that I own all rights to this work and have the authority to publish it *
                                 </label>
                             </div>
 
-                            <div class="mb-3">
-                                <label for="pricing" class="form-label"><span id="labelPricing">Pricing Model</span> *</label>
-                                <select class="form-select" id="pricing" required>
-                                    <option value="" id="optSelectPricing">Select pricing model</option>
-                                    <option value="free" id="priceFree">Free (Ad-supported)</option>
-                                    <option value="0.99">$0.99</option>
-                                    <option value="1.99">$1.99</option>
-                                    <option value="2.99">$2.99</option>
-                                    <option value="4.99">$4.99</option>
-                                    <option value="9.99">$9.99</option>
-                                    <option value="custom" id="priceCustom">Custom Price</option>
-                                </select>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="isFree" onchange="togglePriceInput()">
+                                <label class="form-check-label" for="isFree" id="labelFree">
+                                    <strong id="priceFree" data-i18n="upload.priceFree">Free</strong>
+                                </label>
                             </div>
 
-                            <div class="mb-3" id="customPriceDiv" style="display: none;">
-                                <label for="customPrice" class="form-label" id="labelCustomPrice">Custom Price ($)</label>
-                                <input type="number" class="form-control" id="customPrice" step="0.01" min="0">
+                            <div class="mb-3" id="priceInputDiv">
+                                <label for="customPrice" class="form-label" id="labelPrice" data-i18n="upload.labelPrice">Price *</label>
+                                <div class="price-input-group">
+                                    <select class="currency-select" id="currencySelect">
+                                        <option value="USD" data-symbol="$" data-step="0.01" data-placeholder="9.99">$ USD</option>
+                                        <option value="JPY" data-symbol="¥" data-step="1" data-placeholder="1500">¥ JPY</option>
+                                        <option value="EUR" data-symbol="€" data-step="0.01" data-placeholder="8.99">€ EUR</option>
+                                        <option value="GBP" data-symbol="£" data-step="0.01" data-placeholder="7.99">£ GBP</option>
+                                        <option value="KRW" data-symbol="₩" data-step="1" data-placeholder="12000">₩ KRW</option>
+                                        <option value="CNY" data-symbol="¥" data-step="0.01" data-placeholder="65.00">¥ CNY</option>
+                                        <option value="BRL" data-symbol="R$" data-step="0.01" data-placeholder="49.90">R$ BRL</option>
+                                        <option value="SAR" data-symbol="﷼" data-step="0.01" data-placeholder="34.99">﷼ SAR</option>
+                                    </select>
+                                    <input type="number" class="form-control" id="customPrice" placeholder="9.99" min="0.01" step="0.01" required>
+                                </div>
+                            </div>
+
+                            <!-- Revenue Preview -->
+                            <div id="revenuePreview" style="display: none; margin-top: 1rem; padding: 1rem; background: var(--color-bg-hover); border-radius: var(--radius-md); border-left: 3px solid var(--color-accent);">
+                                <h6 style="font-weight: 600; margin-bottom: 0.75rem;"><i class="fas fa-chart-pie me-1" style="color: var(--color-accent);"></i> <span id="revenuePreviewTitle" data-i18n="upload.revenuePreviewTitle">Revenue Preview</span></h6>
+                                <div style="display: grid; grid-template-columns: 1fr auto; gap: 0.25rem 1rem; font-size: var(--font-size-sm);">
+                                    <span id="revLabelAuthor" data-i18n="upload.revLabelAuthor">Author (70%)</span>
+                                    <strong id="revAuthor">-</strong>
+                                    <span id="revLabelPlatform" data-i18n="upload.revLabelPlatform">Platform (30%)</span>
+                                    <strong id="revPlatform">-</strong>
+                                </div>
+                                <hr style="margin: 0.5rem 0;">
+                                <div style="display: grid; grid-template-columns: 1fr auto; gap: 0.25rem 1rem; font-size: var(--font-size-sm);">
+                                    <span id="revLabelTotal" data-i18n="upload.revLabelTotal">Total Price</span>
+                                    <strong id="revTotal" style="color: var(--color-accent);">-</strong>
+                                </div>
+                                <small class="text-secondary" id="revNote" data-i18n="upload.revNote" style="display: block; margin-top: 0.5rem;">* Revenue split changes when collaborators (editor, translator) are added.</small>
                             </div>
                         </div>
 
                         <!-- Submit -->
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-custom btn-lg">
-                                <i class="fas fa-upload me-2"></i><span id="btnPublish">Publish Work</span>
+                                <i class="fas fa-upload me-2"></i><span id="btnPublish" data-i18n="upload.btnPublish">Publish Work</span>
                             </button>
                             <button type="button" class="btn btn-soft-custom" onclick="history.back()">
-                                <i class="fas fa-arrow-left me-2"></i><span id="btnCancel">Cancel</span>
+                                <i class="fas fa-arrow-left me-2"></i><span id="btnCancel" data-i18n="upload.btnCancel">Cancel</span>
                             </button>
                         </div>
                     </form>
@@ -541,20 +439,11 @@
         </div>
     </main>
 
-    <footer class="footer-custom">
-        <div class="container">
-            <div class="d-flex flex-wrap justify-content-between align-items-center">
-                <p class="small mb-0">&copy; 2024 Publisher. All rights reserved.</p>
-                <div class="d-flex gap-3">
-                    <a href="support/faq.html" class="text-secondary" id="footerHelp">Help</a>
-                    <a href="terms.html" class="text-secondary" id="footerTerms">Terms</a>
-                    <a href="privacy.html" class="text-secondary" id="footerPrivacy">Privacy</a>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/i18n.js"></script>
+    <script src="../js/navbar.js"></script>
     <script src="../js/lang/ja.js"></script>
     <script src="../js/lang/en.js"></script>
     <script src="../js/lang/zh.js"></script>
@@ -571,8 +460,7 @@
         // ========== Pattern C: Navbar 多言語対応テキスト（9言語）==========
         const uiText = {
             // --- Pattern C Navbar ---
-            translationTools: {
-                en: 'Translation Tools', ja: '翻訳ツール', zh: '翻译工具',
+            translationTools: { en: 'Tools', ja: '翻訳ツール', zh: '翻译工具',
                 es: 'Herramientas de traducción', fr: 'Outils de traduction', de: 'Übersetzungstools',
                 ko: '번역 도구', ar: 'أدوات الترجمة', pt: 'Ferramentas de tradução'
             },
@@ -580,6 +468,11 @@
                 en: 'Manga Translator', ja: 'マンガ翻訳', zh: '漫画翻译',
                 es: 'Traductor de Manga', fr: 'Traducteur de Manga', de: 'Manga-Übersetzer',
                 ko: '만화 번역기', ar: 'مترجم المانجا', pt: 'Tradutor de Mangá'
+            },
+            novelTranslator: {
+                en: 'Novel Translator', ja: '小説翻訳', zh: '小说翻译',
+                es: 'Traductor de Novela', fr: 'Traducteur de Roman', de: 'Roman-Übersetzer',
+                ko: '소설 번역기', ar: 'مترجم الروايات', pt: 'Tradutor de Romance'
             },
             translationStatus: {
                 en: 'Translation Status', ja: '翻訳状況', zh: '翻译状态',
@@ -659,25 +552,58 @@
             uploadFormats: { en: 'Supported formats: TXT, DOC, DOCX, PDF (text) | JPG, PNG, GIF (images/manga)', ja: '対応形式: TXT, DOC, DOCX, PDF（テキスト）| JPG, PNG, GIF（画像/マンガ）', zh: '支持格式：TXT, DOC, DOCX, PDF（文本）| JPG, PNG, GIF（图片/漫画）', es: 'Formatos soportados: TXT, DOC, DOCX, PDF (texto) | JPG, PNG, GIF (imágenes/manga)', fr: 'Formats pris en charge : TXT, DOC, DOCX, PDF (texte) | JPG, PNG, GIF (images/manga)', de: 'Unterstützte Formate: TXT, DOC, DOCX, PDF (Text) | JPG, PNG, GIF (Bilder/Manga)', ko: '지원 형식: TXT, DOC, DOCX, PDF (텍스트) | JPG, PNG, GIF (이미지/만화)', ar: 'الصيغ المدعومة: TXT, DOC, DOCX, PDF (نص) | JPG, PNG, GIF (صور/مانغا)', pt: 'Formatos suportados: TXT, DOC, DOCX, PDF (texto) | JPG, PNG, GIF (imagens/mangá)' },
             sectionCover: { en: 'Cover Image (Optional)', ja: 'カバー画像（任意）', zh: '封面图片（可选）', es: 'Imagen de portada (opcional)', fr: 'Image de couverture (optionnel)', de: 'Coverbild (optional)', ko: '커버 이미지 (선택)', ar: 'صورة الغلاف (اختياري)', pt: 'Imagem de capa (opcional)' },
             hintCover: { en: 'Recommended size: 600x900px', ja: '推奨サイズ: 600x900px', zh: '推荐尺寸：600x900px', es: 'Tamaño recomendado: 600x900px', fr: 'Taille recommandée : 600x900px', de: 'Empfohlene Größe: 600x900px', ko: '권장 크기: 600x900px', ar: 'الحجم الموصى به: 600×900 بكسل', pt: 'Tamanho recomendado: 600x900px' },
-            sectionTranslation: { en: 'Translation Options', ja: '翻訳オプション', zh: '翻译选项', es: 'Opciones de traducción', fr: 'Options de traduction', de: 'Übersetzungsoptionen', ko: '번역 옵션', ar: 'خيارات الترجمة', pt: 'Opções de tradução' },
-            optAiTranslation: { en: 'Enable AI Translation', ja: 'AI翻訳を有効にする', zh: '启用AI翻译', es: 'Habilitar traducción IA', fr: 'Activer la traduction IA', de: 'KI-Übersetzung aktivieren', ko: 'AI 번역 활성화', ar: 'تفعيل الترجمة الآلية', pt: 'Ativar tradução por IA' },
-            optAiTranslationDesc: { en: 'Select target languages for automatic translation', ja: '自動翻訳の対象言語を選択', zh: '选择自动翻译的目标语言', es: 'Seleccionar idiomas de destino para traducción automática', fr: 'Sélectionner les langues cibles pour la traduction automatique', de: 'Zielsprachen für automatische Übersetzung auswählen', ko: '자동 번역 대상 언어 선택', ar: 'اختر اللغات المستهدفة للترجمة الآلية', pt: 'Selecionar idiomas de destino para tradução automática' },
-            labelSelectTargetLangs: { en: 'Select target languages:', ja: '対象言語を選択:', zh: '选择目标语言：', es: 'Seleccionar idiomas de destino:', fr: 'Sélectionner les langues cibles :', de: 'Zielsprachen auswählen:', ko: '대상 언어 선택:', ar: 'اختر اللغات المستهدفة:', pt: 'Selecionar idiomas de destino:' },
-            selectedCountLabel: { en: 'Selected:', ja: '選択済み:', zh: '已选择：', es: 'Seleccionados:', fr: 'Sélectionnés :', de: 'Ausgewählt:', ko: '선택됨:', ar: 'المحدد:', pt: 'Selecionados:' },
-            languagesLabel: { en: 'languages', ja: '言語', zh: '种语言', es: 'idiomas', fr: 'langues', de: 'Sprachen', ko: '개 언어', ar: 'لغات', pt: 'idiomas' },
-            btnSelectAll: { en: 'Select All', ja: 'すべて選択', zh: '全选', es: 'Seleccionar todo', fr: 'Tout sélectionner', de: 'Alle auswählen', ko: '모두 선택', ar: 'تحديد الكل', pt: 'Selecionar tudo' },
-            translationHint: { en: 'Recommendation: English + Japanese covers the largest reader base', ja: 'おすすめ: 英語＋日本語で最大の読者層をカバー', zh: '建议：英语+日语覆盖最大读者群', es: 'Recomendación: Inglés + Japonés cubre la mayor base de lectores', fr: 'Recommandation : Anglais + Japonais couvre la plus grande base de lecteurs', de: 'Empfehlung: Englisch + Japanisch deckt die größte Leserschaft ab', ko: '추천: 영어 + 일본어로 가장 많은 독자층 확보', ar: 'توصية: الإنجليزية + اليابانية تغطي أكبر قاعدة قراء', pt: 'Recomendação: Inglês + Japonês cobre a maior base de leitores' },
-            optHumanTranslation: { en: 'Request Human Translation', ja: '人力翻訳をリクエスト', zh: '申请人工翻译', es: 'Solicitar traducción humana', fr: 'Demander une traduction humaine', de: 'Menschliche Übersetzung anfordern', ko: '전문 번역가 요청', ar: 'طلب ترجمة بشرية', pt: 'Solicitar tradução humana' },
-            optHumanTranslationDesc: { en: 'Professional translators will be notified (20% revenue share)', ja: 'プロの翻訳者に通知されます（収益の20%）', zh: '专业翻译将收到通知（收益分成20%）', es: 'Se notificará a traductores profesionales (20% de participación en ingresos)', fr: 'Les traducteurs professionnels seront notifiés (20% de partage des revenus)', de: 'Professionelle Übersetzer werden benachrichtigt (20% Umsatzbeteiligung)', ko: '전문 번역가에게 알림 (수익의 20% 공유)', ar: 'سيتم إخطار المترجمين المحترفين (حصة 20% من الإيرادات)', pt: 'Tradutores profissionais serão notificados (20% de participação na receita)' },
-            optSelfTranslation: { en: "I'll Translate It Myself", ja: '自分で翻訳する', zh: '我自己翻译', es: 'Lo traduciré yo mismo', fr: 'Je le traduirai moi-même', de: 'Ich übersetze es selbst', ko: '직접 번역하기', ar: 'سأترجمها بنفسي', pt: 'Eu mesmo vou traduzir' },
-            optSelfTranslationDesc: { en: 'Earn additional 20% (total 60%)', ja: '追加で20%獲得（合計60%）', zh: '额外获得20%（共60%）', es: 'Gana 20% adicional (total 60%)', fr: 'Gagnez 20% supplémentaire (total 60%)', de: 'Verdienen Sie zusätzlich 20% (insgesamt 60%)', ko: '추가 20% 수익 (총 60%)', ar: 'اكسب 20% إضافية (إجمالي 60%)', pt: 'Ganhe 20% adicional (total 60%)' },
+            // AI Usage Disclosure
+            sectionAiDisclosure: { en: 'AI Usage Disclosure', ja: 'AI使用の明記', zh: 'AI使用声明', es: 'Declaración de uso de IA', fr: 'Déclaration d\'utilisation de l\'IA', de: 'KI-Nutzungserklärung', ko: 'AI 사용 공개', ar: 'إفصاح استخدام الذكاء الاصطناعي', pt: 'Declaração de uso de IA' },
+            aiDisclosureDesc: { en: 'Please disclose any AI tools used in creating this work. This information will be displayed to readers.', ja: 'この作品の制作に使用したAIツールを明記してください。この情報は読者に表示されます。', zh: '请说明创作本作品时使用的AI工具。此信息将向读者展示。', es: 'Por favor, declare las herramientas de IA utilizadas. Esta información se mostrará a los lectores.', fr: 'Veuillez déclarer les outils d\'IA utilisés. Cette information sera affichée aux lecteurs.', de: 'Bitte geben Sie verwendete KI-Tools an. Diese Information wird den Lesern angezeigt.', ko: 'AI 도구 사용 여부를 공개해 주세요. 이 정보는 독자에게 표시됩니다.', ar: 'يرجى الإفصاح عن أدوات الذكاء الاصطناعي المستخدمة. سيتم عرض هذه المعلومات للقراء.', pt: 'Declare as ferramentas de IA utilizadas. Esta informação será exibida aos leitores.' },
+            labelAiText: { en: 'Text / Content', ja: '本文 / コンテンツ', zh: '文本/内容', es: 'Texto / Contenido', fr: 'Texte / Contenu', de: 'Text / Inhalt', ko: '텍스트 / 콘텐츠', ar: 'النص / المحتوى', pt: 'Texto / Conteúdo' },
+            labelAiCover: { en: 'Cover / Illustrations', ja: '表紙 / イラスト', zh: '封面/插图', es: 'Portada / Ilustraciones', fr: 'Couverture / Illustrations', de: 'Cover / Illustrationen', ko: '표지 / 일러스트', ar: 'الغلاف / الرسوم', pt: 'Capa / Ilustrações' },
+            labelAiTranslation: { en: 'Translation', ja: '翻訳', zh: '翻译', es: 'Traducción', fr: 'Traduction', de: 'Übersetzung', ko: '번역', ar: 'الترجمة', pt: 'Tradução' },
+            labelAiService: { en: 'AI Service(s) Used', ja: '使用したAIサービス', zh: '使用的AI服务', es: 'Servicio(s) de IA utilizado(s)', fr: 'Service(s) d\'IA utilisé(s)', de: 'Verwendete KI-Dienste', ko: '사용한 AI 서비스', ar: 'خدمة(خدمات) الذكاء الاصطناعي المستخدمة', pt: 'Serviço(s) de IA utilizado(s)' },
+            aiOptNone: { en: 'No AI used (fully self-written)', ja: 'AI不使用（完全に自作）', zh: '未使用AI（完全自写）', es: 'Sin IA (escrito por mí)', fr: 'Pas d\'IA (entièrement écrit)', de: 'Kein KI (vollständig selbst geschrieben)', ko: 'AI 미사용 (완전 자작)', ar: 'بدون ذكاء اصطناعي (مكتوب بالكامل)', pt: 'Sem IA (totalmente escrito por mim)' },
+            aiOptAssisted: { en: 'AI-Assisted (AI support during writing)', ja: 'AIアシスト（AIの補助を受けて執筆）', zh: 'AI辅助（写作时AI支持）', es: 'Asistido por IA', fr: 'Assisté par IA', de: 'KI-unterstützt', ko: 'AI 어시스트 (AI 보조 작성)', ar: 'بمساعدة الذكاء الاصطناعي', pt: 'Assistido por IA' },
+            aiOptGenerated: { en: 'AI-Generated (primarily AI-written, human edited)', ja: 'AI生成（主にAIが生成、人間が編集）', zh: 'AI生成（主要AI写作，人工编辑）', es: 'Generado por IA (editado por humano)', fr: 'Généré par IA (édité par humain)', de: 'KI-generiert (menschlich bearbeitet)', ko: 'AI 생성 (AI 작성, 사람 편집)', ar: 'مولد بالذكاء الاصطناعي (تحرير بشري)', pt: 'Gerado por IA (editado por humano)' },
+            aiOptFullAi: { en: 'Fully AI-Generated', ja: '完全AI生成', zh: '完全AI生成', es: 'Totalmente generado por IA', fr: 'Entièrement généré par IA', de: 'Vollständig KI-generiert', ko: '완전 AI 생성', ar: 'مولد بالكامل بالذكاء الاصطناعي', pt: 'Totalmente gerado por IA' },
+            aiCoverOptNone: { en: 'No AI used (original artwork)', ja: 'AI不使用（オリジナル作品）', zh: '未使用AI（原创作品）', es: 'Sin IA (obra original)', fr: 'Pas d\'IA (œuvre originale)', de: 'Kein KI (Originalwerk)', ko: 'AI 미사용 (원본 아트워크)', ar: 'بدون ذكاء اصطناعي (عمل فني أصلي)', pt: 'Sem IA (arte original)' },
+            aiCoverOptAssisted: { en: 'AI-Assisted (AI draft, human finished)', ja: 'AIアシスト（AI下書き→人間が仕上げ）', zh: 'AI辅助（AI草稿，人工完成）', es: 'Asistido por IA', fr: 'Assisté par IA', de: 'KI-unterstützt', ko: 'AI 어시스트 (AI 초안, 사람 완성)', ar: 'بمساعدة الذكاء الاصطناعي', pt: 'Assistido por IA' },
+            aiCoverOptGenerated: { en: 'AI-Generated image', ja: 'AI生成画像', zh: 'AI生成图片', es: 'Imagen generada por IA', fr: 'Image générée par IA', de: 'KI-generiertes Bild', ko: 'AI 생성 이미지', ar: 'صورة مولدة بالذكاء الاصطناعي', pt: 'Imagem gerada por IA' },
+            aiTransOptNA: { en: 'Not applicable (original language only)', ja: '該当なし（原作言語のみ）', zh: '不适用（仅原始语言）', es: 'No aplica (solo idioma original)', fr: 'Non applicable (langue originale uniquement)', de: 'Nicht zutreffend (nur Originalsprache)', ko: '해당 없음 (원본 언어만)', ar: 'لا ينطبق (اللغة الأصلية فقط)', pt: 'Não aplicável (apenas idioma original)' },
+            aiTransOptNone: { en: 'No AI used (human translation)', ja: 'AI不使用（人間が翻訳）', zh: '未使用AI（人工翻译）', es: 'Sin IA (traducción humana)', fr: 'Pas d\'IA (traduction humaine)', de: 'Kein KI (menschliche Übersetzung)', ko: 'AI 미사용 (인간 번역)', ar: 'بدون ذكاء اصطناعي (ترجمة بشرية)', pt: 'Sem IA (tradução humana)' },
+            aiTransOptAssisted: { en: 'AI-Assisted (AI translation, human proofread)', ja: 'AIアシスト（AI翻訳→人間が校正）', zh: 'AI辅助（AI翻译，人工校对）', es: 'Asistido por IA (IA tradujo, humano revisó)', fr: 'Assisté par IA (IA traduit, humain relit)', de: 'KI-unterstützt (KI übersetzt, Mensch liest Korrektur)', ko: 'AI 어시스트 (AI 번역, 사람 교정)', ar: 'بمساعدة الذكاء الاصطناعي (ترجمة آلية، مراجعة بشرية)', pt: 'Assistido por IA (IA traduziu, humano revisou)' },
+            aiTransOptFullAi: { en: 'Fully AI-Translated', ja: '完全AI翻訳', zh: '完全AI翻译', es: 'Traducido completamente por IA', fr: 'Entièrement traduit par IA', de: 'Vollständig KI-übersetzt', ko: '완전 AI 번역', ar: 'ترجمة كاملة بالذكاء الاصطناعي', pt: 'Totalmente traduzido por IA' },
+            aiOptOther: { en: 'Other:', ja: 'その他:', zh: '其他：', es: 'Otro:', fr: 'Autre :', de: 'Andere:', ko: '기타:', ar: 'أخرى:', pt: 'Outro:' },
+            // Revenue Preview
+            revenuePreviewTitle: { en: 'Revenue Preview', ja: '収益プレビュー', zh: '收益预览', es: 'Vista previa de ingresos', fr: 'Aperçu des revenus', de: 'Umsatzvorschau', ko: '수익 미리보기', ar: 'معاينة الإيرادات', pt: 'Prévia de receita' },
+            revLabelAuthor: { en: 'Author (70%)', ja: '著者 (70%)', zh: '作者 (70%)', es: 'Autor (70%)', fr: 'Auteur (70%)', de: 'Autor (70%)', ko: '저자 (70%)', ar: 'المؤلف (70%)', pt: 'Autor (70%)' },
+            revLabelPlatform: { en: 'Platform (30%)', ja: 'プラットフォーム (30%)', zh: '平台 (30%)', es: 'Plataforma (30%)', fr: 'Plateforme (30%)', de: 'Plattform (30%)', ko: '플랫폼 (30%)', ar: 'المنصة (30%)', pt: 'Plataforma (30%)' },
+            revLabelTotal: { en: 'Total Price', ja: '合計価格', zh: '总价', es: 'Precio total', fr: 'Prix total', de: 'Gesamtpreis', ko: '총 가격', ar: 'السعر الإجمالي', pt: 'Preço total' },
+            revNote: { en: '* Revenue split changes when collaborators (editor, translator) are added.', ja: '※ コラボレーター（編集者、翻訳者）が追加されると収益配分が変わります。', zh: '※ 添加协作者（编辑、翻译）时收益分配会发生变化。', es: '* La distribución de ingresos cambia al agregar colaboradores.', fr: '* La répartition des revenus change avec l\'ajout de collaborateurs.', de: '* Die Umsatzaufteilung ändert sich bei Mitarbeitern.', ko: '※ 공동 작업자가 추가되면 수익 배분이 변경됩니다.', ar: '* يتغير توزيع الإيرادات عند إضافة متعاونين.', pt: '* A distribuição de receita muda ao adicionar colaboradores.' },
+            // Collaborators
+            // Upload Route
+            sectionUploadRoute: { en: 'Upload Type', ja: 'アップロード種別', zh: '上传类型', es: 'Tipo de carga', fr: "Type d'envoi", de: 'Upload-Typ', ko: '업로드 유형', ar: 'نوع الرفع', pt: 'Tipo de envio' },
+            routeNewLabel: { en: 'New Original Work', ja: '新規オリジナル作品', zh: '新原创作品', es: 'Nueva obra original', fr: 'Nouvelle œuvre originale', de: 'Neues Originalwerk', ko: '새 원본 작품', ar: 'عمل أصلي جديد', pt: 'Nova obra original' },
+            routeTranslationLabel: { en: 'Translation of Existing Work', ja: '既存作品の翻訳版', zh: '现有作品的翻译', es: 'Traducción de obra existente', fr: "Traduction d'une œuvre existante", de: 'Übersetzung eines vorhandenen Werks', ko: '기존 작품의 번역판', ar: 'ترجمة لعمل موجود', pt: 'Tradução de obra existente' },
+            sectionOriginalWork: { en: 'Select Original Work', ja: '原作を選択', zh: '选择原作', es: 'Seleccionar obra original', fr: "Sélectionner l'œuvre originale", de: 'Originalwerk auswählen', ko: '원작 선택', ar: 'اختر العمل الأصلي', pt: 'Selecionar obra original' },
+            originalWorkDesc: { en: 'Select the work you are translating. Basic info will be inherited.', ja: '翻訳する作品を選択してください。基本情報が引き継がれます。', zh: '选择您要翻译的作品。基本信息将被继承。', es: 'Seleccione la obra que está traduciendo. La información básica se heredará.', fr: "Sélectionnez l'œuvre que vous traduisez. Les informations de base seront héritées.", de: 'Wählen Sie das Werk, das Sie übersetzen. Grundlegende Informationen werden übernommen.', ko: '번역할 작품을 선택하세요. 기본 정보가 상속됩니다.', ar: 'اختر العمل الذي تترجمه. سيتم وراثة المعلومات الأساسية.', pt: 'Selecione a obra que está traduzindo. As informações básicas serão herdadas.' },
+            optSelectOriginalWork: { en: '-- Select original work --', ja: '-- 原作を選択 --', zh: '-- 选择原作 --', es: '-- Seleccionar obra --', fr: "-- Sélectionner l'œuvre --", de: '-- Originalwerk wählen --', ko: '-- 원작 선택 --', ar: '-- اختر العمل الأصلي --', pt: '-- Selecionar obra --' },
+            labelTranslationLangUpload: { en: 'Translation Language', ja: '翻訳言語', zh: '翻译语言', es: 'Idioma de traducción', fr: 'Langue de traduction', de: 'Übersetzungssprache', ko: '번역 언어', ar: 'لغة الترجمة', pt: 'Idioma de tradução' },
+            sectionCollaborators: { en: 'Collaborators', ja: 'コラボレーター', zh: '协作者', es: 'Colaboradores', fr: 'Collaborateurs', de: 'Mitarbeiter', ko: '공동 작업자', ar: 'المتعاونون', pt: 'Colaboradores' },
+            collabDesc: { en: 'Add editors or translators who collaborated on this work. They will receive a collaboration agreement to sign.', ja: 'この作品に携わった編集者や翻訳者を追加してください。同意書が送信されます。', zh: '添加参与此作品的编辑或翻译。他们将收到协作协议。', es: 'Agregue editores o traductores que colaboraron. Recibirán un acuerdo para firmar.', fr: 'Ajoutez les éditeurs ou traducteurs. Ils recevront un accord à signer.', de: 'Fügen Sie Mitarbeiter hinzu. Sie erhalten eine Vereinbarung zur Unterschrift.', ko: '공동 작업한 편집자나 번역가를 추가하세요. 동의서가 전송됩니다.', ar: 'أضف المحررين أو المترجمين. سيتلقون اتفاقية للتوقيع.', pt: 'Adicione editores ou tradutores. Eles receberão um acordo para assinar.' },
+            labelHasEditor: { en: 'This work has an editor', ja: 'この作品には編集者がいる', zh: '此作品有编辑', es: 'Esta obra tiene editor', fr: 'Cette œuvre a un éditeur', de: 'Dieses Werk hat einen Lektor', ko: '이 작품에는 편집자가 있습니다', ar: 'هذا العمل لديه محرر', pt: 'Esta obra tem um editor' },
+            labelEditorRevenue: { en: 'Editor receives 10% of revenue', ja: '編集者は収益の10%を受け取ります', zh: '编辑获得10%收益', es: 'El editor recibe 10% de ingresos', fr: "L'éditeur reçoit 10% des revenus", de: 'Lektor erhält 10% der Einnahmen', ko: '편집자는 수익의 10%를 받습니다', ar: 'يحصل المحرر على 10% من الإيرادات', pt: 'O editor recebe 10% da receita' },
+            labelEditorName: { en: 'Editor Name', ja: '編集者の名前', zh: '编辑姓名', es: 'Nombre del editor', fr: "Nom de l'éditeur", de: 'Lektorname', ko: '편집자 이름', ar: 'اسم المحرر', pt: 'Nome do editor' },
+            labelEditorEmail: { en: 'Editor Email or Username', ja: '編集者のメールまたはユーザー名', zh: '编辑邮箱或用户名', es: 'Email o usuario del editor', fr: "Email ou nom d'utilisateur de l'éditeur", de: 'E-Mail oder Benutzername des Lektors', ko: '편집자 이메일 또는 사용자명', ar: 'بريد أو اسم المحرر', pt: 'Email ou nome de usuário do editor' },
+            editorNote: { en: 'An agreement will be sent for the editor to review and sign.', ja: '編集者に同意書が送信されます。', zh: '将向编辑发送协议供审阅和签署。', es: 'Se enviará un acuerdo para que el editor revise y firme.', fr: "Un accord sera envoyé à l'éditeur pour examen et signature.", de: 'Eine Vereinbarung wird dem Lektor zur Prüfung zugesandt.', ko: '편집자에게 동의서가 발송됩니다.', ar: 'سيتم إرسال اتفاقية للمحرر للمراجعة والتوقيع.', pt: 'Um acordo será enviado para o editor revisar e assinar.' },
+            labelHasTranslator: { en: 'This work has a translator', ja: 'この作品には翻訳者がいる', zh: '此作品有翻译', es: 'Esta obra tiene traductor', fr: 'Cette œuvre a un traducteur', de: 'Dieses Werk hat einen Übersetzer', ko: '이 작품에는 번역가가 있습니다', ar: 'هذا العمل لديه مترجم', pt: 'Esta obra tem um tradutor' },
+            labelTranslatorRevenue: { en: 'Translator receives 20% of revenue', ja: '翻訳者は収益の20%を受け取ります', zh: '翻译获得20%收益', es: 'El traductor recibe 20% de ingresos', fr: 'Le traducteur reçoit 20% des revenus', de: 'Übersetzer erhält 20% der Einnahmen', ko: '번역가는 수익의 20%를 받습니다', ar: 'يحصل المترجم على 20% من الإيرادات', pt: 'O tradutor recebe 20% da receita' },
+            labelTranslatorName: { en: 'Translator Name', ja: '翻訳者の名前', zh: '翻译姓名', es: 'Nombre del traductor', fr: 'Nom du traducteur', de: 'Übersetzername', ko: '번역가 이름', ar: 'اسم المترجم', pt: 'Nome do tradutor' },
+            labelTranslatorEmail: { en: 'Translator Email or Username', ja: '翻訳者のメールまたはユーザー名', zh: '翻译邮箱或用户名', es: 'Email o usuario del traductor', fr: "Email ou nom d'utilisateur du traducteur", de: 'E-Mail oder Benutzername des Übersetzers', ko: '번역가 이메일 또는 사용자명', ar: 'بريد أو اسم المترجم', pt: 'Email ou nome de usuário do tradutor' },
+            labelTranslationLang: { en: 'Translation Language', ja: '翻訳言語', zh: '翻译语言', es: 'Idioma de traducción', fr: 'Langue de traduction', de: 'Übersetzungssprache', ko: '번역 언어', ar: 'لغة الترجمة', pt: 'Idioma de tradução' },
+            translatorNote: { en: 'An agreement will be sent for the translator to review and sign.', ja: '翻訳者に同意書が送信されます。', zh: '将向翻译发送协议供审阅和签署。', es: 'Se enviará un acuerdo para que el traductor revise y firme.', fr: 'Un accord sera envoyé au traducteur pour examen et signature.', de: 'Eine Vereinbarung wird dem Übersetzer zur Prüfung zugesandt.', ko: '번역가에게 동의서가 발송됩니다.', ar: 'سيتم إرسال اتفاقية للمترجم للمراجعة والتوقيع.', pt: 'Um acordo será enviado para o tradutor revisar e assinar.' },
+            collabRevTitle: { en: 'Revenue Split Preview', ja: '収益配分プレビュー', zh: '收益分配预览', es: 'Vista previa de distribución', fr: 'Aperçu de la répartition', de: 'Umsatzaufteilung Vorschau', ko: '수익 분배 미리보기', ar: 'معاينة توزيع الإيرادات', pt: 'Prévia da distribuição' },
             sectionRights: { en: 'Rights & Pricing', ja: '権利と価格', zh: '权利和定价', es: 'Derechos y precios', fr: 'Droits et tarification', de: 'Rechte & Preise', ko: '권리 및 가격', ar: 'الحقوق والتسعير', pt: 'Direitos e preços' },
             labelRightsConfirm: { en: 'I confirm that I own all rights to this work and have the authority to publish it *', ja: 'この作品のすべての権利を所有し、出版する権限があることを確認します *', zh: '我确认拥有本作品的所有权利并有权发布 *', es: 'Confirmo que soy dueño de todos los derechos de esta obra y tengo autoridad para publicarla *', fr: 'Je confirme que je possède tous les droits sur cette œuvre et que j\'ai l\'autorité de la publier *', de: 'Ich bestätige, dass ich alle Rechte an diesem Werk besitze und befugt bin, es zu veröffentlichen *', ko: '본 작품에 대한 모든 권리를 보유하고 있으며 출판할 권한이 있음을 확인합니다 *', ar: 'أؤكد أنني أملك جميع الحقوق على هذا العمل ولدي السلطة لنشره *', pt: 'Confirmo que possuo todos os direitos desta obra e tenho autoridade para publicá-la *' },
-            labelPricing: { en: 'Pricing Model', ja: '価格モデル', zh: '定价模式', es: 'Modelo de precios', fr: 'Modèle de tarification', de: 'Preismodell', ko: '가격 모델', ar: 'نموذج التسعير', pt: 'Modelo de preços' },
-            optSelectPricing: { en: 'Select pricing model', ja: '価格モデルを選択', zh: '选择定价模式', es: 'Seleccionar modelo de precios', fr: 'Sélectionner le modèle de tarification', de: 'Preismodell auswählen', ko: '가격 모델 선택', ar: 'اختر نموذج التسعير', pt: 'Selecionar modelo de preços' },
-            priceFree: { en: 'Free (Ad-supported)', ja: '無料（広告付き）', zh: '免费（含广告）', es: 'Gratis (con publicidad)', fr: 'Gratuit (avec publicité)', de: 'Kostenlos (werbefinanziert)', ko: '무료 (광고 포함)', ar: 'مجاني (مدعوم بالإعلانات)', pt: 'Grátis (com anúncios)' },
-            priceCustom: { en: 'Custom Price', ja: 'カスタム価格', zh: '自定义价格', es: 'Precio personalizado', fr: 'Prix personnalisé', de: 'Benutzerdefinierter Preis', ko: '사용자 지정 가격', ar: 'سعر مخصص', pt: 'Preço personalizado' },
-            labelCustomPrice: { en: 'Custom Price ($)', ja: 'カスタム価格（$）', zh: '自定义价格（$）', es: 'Precio personalizado ($)', fr: 'Prix personnalisé ($)', de: 'Benutzerdefinierter Preis ($)', ko: '사용자 지정 가격 ($)', ar: 'السعر المخصص ($)', pt: 'Preço personalizado ($)' },
+            priceFree: { en: 'Free', ja: '無料', zh: '免费', es: 'Gratis', fr: 'Gratuit', de: 'Kostenlos', ko: '무료', ar: 'مجاني', pt: 'Grátis' },
+            labelPrice: { en: 'Price', ja: '価格', zh: '价格', es: 'Precio', fr: 'Prix', de: 'Preis', ko: '가격', ar: 'السعر', pt: 'Preço' },
             btnPublish: { en: 'Publish Work', ja: '作品を公開', zh: '发布作品', es: 'Publicar obra', fr: 'Publier l\'œuvre', de: 'Werk veröffentlichen', ko: '작품 게시', ar: 'نشر العمل', pt: 'Publicar obra' },
             btnCancel: { en: 'Cancel', ja: 'キャンセル', zh: '取消', es: 'Cancelar', fr: 'Annuler', de: 'Abbrechen', ko: '취소', ar: 'إلغاء', pt: 'Cancelar' },
             footerHelp: { en: 'Help', ja: 'ヘルプ', zh: '帮助', es: 'Ayuda', fr: 'Aide', de: 'Hilfe', ko: '도움말', ar: 'مساعدة', pt: 'Ajuda' },
@@ -690,23 +616,9 @@
         // ========== Pattern C: 共通関数 ==========
 // ========== Pattern C: Navbar テキスト更新 ==========
         function updateUIText() {
-            const menuDashboard = document.getElementById('menuDashboard');
-            const menuMyWorks = document.getElementById('menuMyWorks');
-            const menuAccountSettings = document.getElementById('menuAccountSettings');
-            const menuLogout = document.getElementById('menuLogout');
-            if (menuDashboard) menuDashboard.textContent = getL(uiText.dashboard);
-            if (menuMyWorks) menuMyWorks.textContent = getL(uiText.myWorks);
-            if (menuAccountSettings) menuAccountSettings.textContent = getL(uiText.accountSettings);
-            if (menuLogout) menuLogout.textContent = getL(uiText.logout);
 
             const els = {
-                navLibraryPC: uiText.library, navDashboardPC: uiText.dashboard,
-                navTranslationToolsPC: uiText.translationTools, navMangaTranslatorPC: uiText.mangaTranslator,
-                navTranslationStatusPC: uiText.translationStatus, navFindTranslatorsPC: uiText.findTranslators,
-                navContactPC: uiText.contact, navLibraryMobile: uiText.library, navDashboardMobile: uiText.dashboard,
-                navTranslationToolsMobile: uiText.translationTools, navMangaTranslatorMobile: uiText.mangaTranslator,
-                navTranslationStatusMobile: uiText.translationStatus, navFindTranslatorsMobile: uiText.findTranslators,
-                navContactMobile: uiText.contact
+
             };
             Object.keys(els).forEach(id => {
                 const el = document.getElementById(id);
@@ -716,9 +628,15 @@
 
         // ========== Upload Page: テキスト更新 ==========
         function updatePageText() {
+            if (typeof i18n !== 'undefined') i18n.applyToDOM();
             document.title = getL(uiText.pageTitle) + ' - Publisher';
             const pageEls = {
                 pageTitle: uiText.pageTitle, pageSubtitle: uiText.pageSubtitle,
+                // Upload Route
+                sectionUploadRoute: uiText.sectionUploadRoute, routeNewLabel: uiText.routeNewLabel,
+                routeTranslationLabel: uiText.routeTranslationLabel,
+                sectionOriginalWork: uiText.sectionOriginalWork, originalWorkDesc: uiText.originalWorkDesc,
+                optSelectOriginalWork: uiText.optSelectOriginalWork, labelTranslationLangUpload: uiText.labelTranslationLangUpload,
                 sectionContentType: uiText.sectionContentType, typeText: uiText.typeText,
                 typeManga: uiText.typeManga, typeArt: uiText.typeArt,
                 sectionDetails: uiText.sectionDetails, labelTitle: uiText.labelTitle,
@@ -733,17 +651,34 @@
                 sectionUpload: uiText.sectionUpload, uploadDragText: uiText.uploadDragText,
                 uploadOrText: uiText.uploadOrText, btnBrowseFiles: uiText.btnBrowseFiles,
                 uploadFormats: uiText.uploadFormats, sectionCover: uiText.sectionCover,
-                hintCover: uiText.hintCover, sectionTranslation: uiText.sectionTranslation,
-                optAiTranslation: uiText.optAiTranslation, optAiTranslationDesc: uiText.optAiTranslationDesc,
-                labelSelectTargetLangs: uiText.labelSelectTargetLangs,
-                selectedCountLabel: uiText.selectedCountLabel, languagesLabel: uiText.languagesLabel,
-                btnSelectAll: uiText.btnSelectAll, translationHint: uiText.translationHint,
-                optHumanTranslation: uiText.optHumanTranslation, optHumanTranslationDesc: uiText.optHumanTranslationDesc,
-                optSelfTranslation: uiText.optSelfTranslation, optSelfTranslationDesc: uiText.optSelfTranslationDesc,
+                hintCover: uiText.hintCover,
+                // AI Disclosure
+                sectionAiDisclosure: uiText.sectionAiDisclosure, aiDisclosureDesc: uiText.aiDisclosureDesc,
+                labelAiText: uiText.labelAiText, labelAiCover: uiText.labelAiCover,
+                labelAiTranslation: uiText.labelAiTranslation, labelAiService: uiText.labelAiService,
+                aiOptNone: uiText.aiOptNone, aiOptAssisted: uiText.aiOptAssisted,
+                aiOptGenerated: uiText.aiOptGenerated, aiOptFullAi: uiText.aiOptFullAi,
+                aiCoverOptNone: uiText.aiCoverOptNone, aiCoverOptAssisted: uiText.aiCoverOptAssisted,
+                aiCoverOptGenerated: uiText.aiCoverOptGenerated,
+                aiTransOptNA: uiText.aiTransOptNA, aiTransOptNone: uiText.aiTransOptNone,
+                aiTransOptAssisted: uiText.aiTransOptAssisted, aiTransOptFullAi: uiText.aiTransOptFullAi,
+                aiOptOther: uiText.aiOptOther,
+                // Collaborators
+                sectionCollaborators: uiText.sectionCollaborators, collabDesc: uiText.collabDesc,
+                labelHasEditor: uiText.labelHasEditor, labelEditorRevenue: uiText.labelEditorRevenue,
+                labelEditorName: uiText.labelEditorName, labelEditorEmail: uiText.labelEditorEmail,
+                editorNote: uiText.editorNote,
+                labelHasTranslator: uiText.labelHasTranslator, labelTranslatorRevenue: uiText.labelTranslatorRevenue,
+                labelTranslatorName: uiText.labelTranslatorName, labelTranslatorEmail: uiText.labelTranslatorEmail,
+                labelTranslationLang: uiText.labelTranslationLang, translatorNote: uiText.translatorNote,
+                collabRevTitle: uiText.collabRevTitle,
+                // Revenue Preview
+                revenuePreviewTitle: uiText.revenuePreviewTitle, revLabelAuthor: uiText.revLabelAuthor,
+                revLabelPlatform: uiText.revLabelPlatform, revLabelTotal: uiText.revLabelTotal,
+                revNote: uiText.revNote,
+                // Rights & Pricing
                 sectionRights: uiText.sectionRights, labelRightsConfirm: uiText.labelRightsConfirm,
-                labelPricing: uiText.labelPricing, optSelectPricing: uiText.optSelectPricing,
-                priceFree: uiText.priceFree, priceCustom: uiText.priceCustom,
-                labelCustomPrice: uiText.labelCustomPrice,
+                priceFree: uiText.priceFree, labelPrice: uiText.labelPrice,
                 btnPublish: uiText.btnPublish, btnCancel: uiText.btnCancel,
                 footerHelp: uiText.footerHelp, footerTerms: uiText.footerTerms, footerPrivacy: uiText.footerPrivacy
             };
@@ -757,52 +692,64 @@
 
         // ========== Pattern C: User Dropdown ==========
         // ========== Upload Page: 固有機能 ==========
+        // Upload Route Selection
+        function selectUploadRoute(route) {
+            document.getElementById('uploadRoute').value = route;
+            document.getElementById('routeNew').classList.toggle('active', route === 'new');
+            document.getElementById('routeTranslation').classList.toggle('active', route === 'translation');
+            document.getElementById('originalWorkSection').style.display = route === 'translation' ? 'block' : 'none';
+            // 翻訳版ルートではタイトル・言語が自動入力されるため、一部フィールドの必須を変更
+            var titleInput = document.getElementById('workTitle');
+            if (route === 'translation') {
+                loadOriginalWorks();
+                document.getElementById('translationLangUpload').required = true;
+            } else {
+                document.getElementById('translationLangUpload').required = false;
+            }
+        }
+
+        function loadOriginalWorks() {
+            // デモモード: ダミーの自作品リスト
+            var select = document.getElementById('originalWorkSelect');
+            if (select.options.length > 1) return; // already loaded
+            var demoWorks = [
+                { id: 1, title: 'The Adventure of Magic Academy', lang: 'en', genre: 'Fiction' },
+                { id: 2, title: '月光の庭', lang: 'ja', genre: 'Literary Fiction' },
+                { id: 3, title: 'Midnight Stories', lang: 'en', genre: 'Mystery' }
+            ];
+            demoWorks.forEach(function(w) {
+                var opt = document.createElement('option');
+                opt.value = w.id;
+                opt.textContent = w.title + ' (' + w.lang.toUpperCase() + ')';
+                opt.dataset.title = w.title;
+                opt.dataset.lang = w.lang;
+                opt.dataset.genre = w.genre;
+                select.appendChild(opt);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var origSelect = document.getElementById('originalWorkSelect');
+            if (origSelect) {
+                origSelect.addEventListener('change', function() {
+                    var opt = this.options[this.selectedIndex];
+                    var infoDiv = document.getElementById('originalWorkInfo');
+                    if (this.value) {
+                        infoDiv.style.display = 'block';
+                        document.getElementById('originalWorkTitle').textContent = opt.dataset.title || '';
+                        document.getElementById('originalWorkMeta').textContent = 'Language: ' + (opt.dataset.lang || '').toUpperCase() + ' | Genre: ' + (opt.dataset.genre || '');
+                    } else {
+                        infoDiv.style.display = 'none';
+                    }
+                });
+            }
+        });
+
         function selectContentType(type, btn) {
             document.querySelectorAll('.content-type-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             document.getElementById('contentType').value = type;
         }
-
-        function toggleAiTranslation() {
-            const enabled = document.getElementById('useAiTranslation').checked;
-            document.getElementById('langSelectionArea').style.display = enabled ? 'block' : 'none';
-            if (enabled) updateTranslationLanguages();
-        }
-
-        function updateTranslationLanguages() {
-            const originalLang = document.getElementById('workLanguage').value;
-            document.querySelectorAll('.lang-checkbox').forEach(label => {
-                const lang = label.dataset.lang;
-                const checkbox = label.querySelector('input');
-                if (lang === originalLang) {
-                    label.classList.add('disabled');
-                    checkbox.checked = false;
-                    checkbox.disabled = true;
-                } else {
-                    label.classList.remove('disabled');
-                    checkbox.disabled = false;
-                }
-            });
-            updateSelectedCount();
-        }
-
-        function updateSelectedCount() {
-            const count = document.querySelectorAll('input[name="targetLang"]:checked').length;
-            document.getElementById('selectedLangCount').textContent = count;
-        }
-
-        function selectAllLanguages() {
-            const originalLang = document.getElementById('workLanguage').value;
-            document.querySelectorAll('input[name="targetLang"]').forEach(cb => {
-                if (cb.value !== originalLang) cb.checked = true;
-            });
-            updateSelectedCount();
-        }
-
-        // Language checkbox listeners
-        document.querySelectorAll('input[name="targetLang"]').forEach(cb => {
-            cb.addEventListener('change', updateSelectedCount);
-        });
 
         // Drag and drop functionality
         const uploadArea = document.getElementById('uploadArea');
@@ -838,18 +785,163 @@
             }
         }
 
-        // Show custom price input
-        document.getElementById('pricing').addEventListener('change', function() {
-            document.getElementById('customPriceDiv').style.display = this.value === 'custom' ? 'block' : 'none';
+        // Free checkbox toggle
+        // Collaborator toggle
+        function toggleCollabSection(type) {
+            if (type === 'editor') {
+                document.getElementById('editorSection').style.display =
+                    document.getElementById('hasEditor').checked ? 'block' : 'none';
+            } else if (type === 'translator') {
+                document.getElementById('translatorSection').style.display =
+                    document.getElementById('hasTranslator').checked ? 'block' : 'none';
+            }
+            updateCollabRevenue();
+            updateRevenuePreview();
+        }
+
+        function updateCollabRevenue() {
+            var hasEd = document.getElementById('hasEditor').checked;
+            var hasTr = document.getElementById('hasTranslator').checked;
+            var preview = document.getElementById('collabRevenuePreview');
+            if (!hasEd && !hasTr) { preview.style.display = 'none'; return; }
+            preview.style.display = 'block';
+            var author = 70, editor = 0, translator = 0, platform = 30;
+            if (hasEd) { editor = 10; author -= 10; }
+            if (hasTr) { translator = 20; author -= 20; }
+            var html = '<div style="display:grid;grid-template-columns:1fr auto;gap:0.2rem 1rem;">';
+            html += '<span>' + getL(uiText.revLabelAuthor).replace(/\d+%/, author + '%') + '</span><strong>' + author + '%</strong>';
+            if (hasEd) html += '<span>' + getL(uiText.labelHasEditor).replace(/^.*$/, getL(uiText.labelEditorName)) + '</span><strong>10%</strong>';
+            if (hasTr) html += '<span>' + getL(uiText.labelTranslatorName) + '</span><strong>20%</strong>';
+            html += '<span>Platform</span><strong>30%</strong>';
+            html += '</div>';
+            document.getElementById('collabRevDetails').innerHTML = html;
+        }
+
+        function togglePriceInput() {
+            var isFree = document.getElementById('isFree').checked;
+            document.getElementById('priceInputDiv').style.display = isFree ? 'none' : 'block';
+            document.getElementById('customPrice').required = !isFree;
+            updateRevenuePreview();
+        }
+
+        // Currency selector
+        var currencySelect = document.getElementById('currencySelect');
+        var customPriceInput = document.getElementById('customPrice');
+        if (currencySelect && customPriceInput) {
+            currencySelect.addEventListener('change', function() {
+                var opt = this.options[this.selectedIndex];
+                customPriceInput.placeholder = opt.dataset.placeholder || '0';
+                customPriceInput.step = opt.dataset.step || '0.01';
+                customPriceInput.value = '';
+                updateRevenuePreview();
+            });
+            customPriceInput.addEventListener('input', updateRevenuePreview);
+        }
+
+        // Revenue Preview
+        function updateRevenuePreview() {
+            var preview = document.getElementById('revenuePreview');
+            if (document.getElementById('isFree').checked) {
+                preview.style.display = 'none';
+                return;
+            }
+            var price = parseFloat(document.getElementById('customPrice').value) || 0;
+            if (price <= 0) { preview.style.display = 'none'; return; }
+            var cs = document.getElementById('currencySelect');
+            var symbol = cs.options[cs.selectedIndex].dataset.symbol || '$';
+            preview.style.display = 'block';
+            var authorPct = 0.70, platformPct = 0.30;
+            var isInt = (symbol === '¥' || symbol === '₩');
+            var fmt = function(v) { return isInt ? symbol + Math.round(v) : symbol + v.toFixed(2); };
+            document.getElementById('revAuthor').textContent = fmt(price * authorPct);
+            document.getElementById('revPlatform').textContent = fmt(price * platformPct);
+            document.getElementById('revTotal').textContent = fmt(price);
+            document.getElementById('revLabelAuthor').textContent = getL(uiText.revLabelAuthor || { en: 'Author (70%)' });
+            document.getElementById('revLabelPlatform').textContent = getL(uiText.revLabelPlatform || { en: 'Platform (30%)' });
+        }
+
+        // AI Usage Disclosure - show/hide AI service section
+        function updateAiServiceVisibility() {
+            var t = document.getElementById('aiTextUsage').value;
+            var c = document.getElementById('aiCoverUsage').value;
+            var tr = document.getElementById('aiTranslationUsage').value;
+            var anyAi = (t !== 'none') || (c !== 'none') || (tr !== 'none' && tr !== 'na');
+            document.getElementById('aiServiceDiv').style.display = anyAi ? 'block' : 'none';
+        }
+        document.getElementById('aiTextUsage').addEventListener('change', updateAiServiceVisibility);
+        document.getElementById('aiCoverUsage').addEventListener('change', updateAiServiceVisibility);
+        document.getElementById('aiTranslationUsage').addEventListener('change', updateAiServiceVisibility);
+
+        // AI Service "Other" toggle
+        document.getElementById('aiServiceOther').addEventListener('change', function() {
+            document.getElementById('aiServiceOtherName').style.display = this.checked ? 'block' : 'none';
         });
 
         // Form submission
         document.getElementById('uploadForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const selectedLangs = Array.from(document.querySelectorAll('input[name="targetLang"]:checked')).map(cb => cb.value);
-            console.log('Selected translation languages:', selectedLangs);
+            var workTitle = document.getElementById('workTitle').value || 'Untitled';
+            // コラボレーター通知（メッセージ + メール）
+            notifyCollaborators(workTitle);
             alert(getL(uiText.alertSuccess));
         });
+
+        // コラボレーターにメッセージ＋メール通知を送信
+        function notifyCollaborators(workTitle) {
+            var hasEd = document.getElementById('hasEditor').checked;
+            var hasTr = document.getElementById('hasTranslator').checked;
+            if (!hasEd && !hasTr) return;
+
+            var convs = [];
+            try { convs = JSON.parse(localStorage.getItem('publisher_messages') || '[]'); } catch(e) { convs = []; }
+            var notifications = [];
+
+            if (hasEd) {
+                var edName = document.getElementById('editorName').value || 'Editor';
+                var edEmail = document.getElementById('editorEmail').value || '';
+                var msgText = '--- Collaboration Agreement ---\n';
+                msgText += getL(uiText.editorNote) + '\n\n';
+                msgText += 'Work: ' + workTitle + '\nRole: Editor (10%)\n';
+                msgText += 'Please review and sign the agreement: agreements.html';
+                convs.unshift({
+                    id: 'conv_collab_ed_' + Date.now(),
+                    name: edName,
+                    role: 'editor',
+                    initial: edName.charAt(0).toUpperCase(),
+                    unread: 0,
+                    messages: [{ id: 'm1', text: msgText, sent: true, time: new Date().toISOString() }]
+                });
+                notifications.push({ name: edName, email: edEmail, role: 'Editor' });
+            }
+
+            if (hasTr) {
+                var trName = document.getElementById('translatorName').value || 'Translator';
+                var trEmail = document.getElementById('translatorEmail').value || '';
+                var trLang = document.getElementById('translationLang').value || '';
+                var langNames = { ja: '日本語', en: 'English', zh: '中文', es: 'Español', fr: 'Français', de: 'Deutsch', ko: '한국어', ar: 'العربية', pt: 'Português' };
+                var msgText2 = '--- Collaboration Agreement ---\n';
+                msgText2 += getL(uiText.translatorNote) + '\n\n';
+                msgText2 += 'Work: ' + workTitle + '\nRole: Translator (20%)\n';
+                msgText2 += 'Language: ' + (langNames[trLang] || trLang) + '\n';
+                msgText2 += 'Please review and sign the agreement: agreements.html';
+                convs.unshift({
+                    id: 'conv_collab_tr_' + Date.now(),
+                    name: trName,
+                    role: 'translator',
+                    initial: trName.charAt(0).toUpperCase(),
+                    unread: 0,
+                    messages: [{ id: 'm1', text: msgText2, sent: true, time: new Date().toISOString() }]
+                });
+                notifications.push({ name: trName, email: trEmail, role: 'Translator' });
+            }
+
+            localStorage.setItem('publisher_messages', JSON.stringify(convs));
+
+            // メール通知（デモモード：コンソールにログ出力）
+            notifications.forEach(function(n) {
+                console.log('[Email Notification] To: ' + n.email + ' (' + n.name + ') - Collaboration agreement for "' + workTitle + '" as ' + n.role);
+            });
+        }
 
         // ========== Pattern C: DOMContentLoaded ==========
         document.addEventListener('DOMContentLoaded', function() {
@@ -894,11 +986,9 @@
 
             if (navbarCollapse) {
                 navbarCollapse.addEventListener('show.bs.collapse', function() {
-                    document.body.classList.add('menu-open');
                     if (navbarOverlay) navbarOverlay.classList.add('show');
                 });
                 navbarCollapse.addEventListener('hide.bs.collapse', function() {
-                    document.body.classList.remove('menu-open');
                     if (navbarOverlay) navbarOverlay.classList.remove('show');
                 });
             }
@@ -915,6 +1005,14 @@
                 updateUIText();
                 updatePageText();
             });
+
+            // i18n engine language change
+            if (typeof i18n !== 'undefined') {
+                i18n.onLanguageChange(function() {
+                    if (typeof i18n !== 'undefined') i18n.applyToDOM();
+                    updatePageText();
+                });
+            }
         });
     </script>
 </body>

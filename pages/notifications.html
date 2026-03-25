@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <title data-i18n="notifications.title">Notification Center - Publisher</title>
@@ -11,10 +12,218 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="../css/variables.css" rel="stylesheet">
     <link href="../css/style-new.css" rel="stylesheet">
-    <link href="../css/mobile-fixes.css" rel="stylesheet">
+    <link href="../css/components.css" rel="stylesheet">
     <link href="../css/navbar.css" rel="stylesheet">
-<!-- Notifications Page Styles -->
+    <link href="../css/mobile-fixes.css" rel="stylesheet">
+    <!-- Pattern C Navbar Styles -->
+    <style>
+        /* ========== Mobile Language Selector ========== */
+        .navbar-lang-selector {
+            display: flex;
+            align-items: center;
+            margin-right: 0.5rem;
+        }
+        
+        @media (max-width: 991.98px) {
+            .navbar-lang-selector {
+                order: 1;
+            }
+            .navbar-toggler {
+                order: 2;
+            }
+        }
+        
+        /* ========== PC Navbar - 横並び維持 ========== */
+        @media (min-width: 992px) {
+            .navbar-nav {
+                flex-wrap: nowrap !important;
+                flex-direction: row !important;
+            }
+            .navbar-nav .nav-item {
+                white-space: nowrap !important;
+            }
+            .navbar-nav .nav-link {
+                white-space: nowrap !important;
+                padding: 0.5rem 0.6rem !important;
+                font-size: 0.9rem;
+            }
+
+            .dropdown-menu {
+                white-space: nowrap;
+            }
+            .navbar-buttons-guest {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                gap: 0.5rem;
+            }
+            .navbar-buttons-guest .btn {
+                white-space: nowrap !important;
+                flex-shrink: 0;
+            }
+        }
+        
+        /* ========== Auth Visibility Control ========== */
+        .auth-only {
+            display: none !important;
+        }
+        .guest-only {
+            display: block;
+        }
+        body.logged-in .auth-only {
+            display: block !important;
+        }
+        body.logged-in .auth-only.nav-item {
+            display: list-item !important;
+        }
+        body.logged-in .auth-only.dropdown {
+            display: block !important;
+        }
+        body.logged-in .guest-only {
+            display: none !important;
+        }
+        @media (min-width: 992px) {
+            body.logged-in .navbar-buttons-guest {
+                display: none !important;
+            }
+        }
+        
+        /* ========== User Dropdown Menu ========== */
+        .user-dropdown {
+            position: relative;
+        }
+        .user-dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: transparent;
+            border: 1px solid var(--color-border);
+            border-radius: 25px;
+            padding: 0.4rem 0.75rem;
+            cursor: pointer;
+            color: var(--color-text);
+            transition: all 0.2s;
+        }
+        .user-dropdown-toggle:hover {
+            border-color: var(--color-accent);
+            background: rgba(139, 115, 85, 0.05);
+        }
+        .user-dropdown-toggle i:first-child {
+            font-size: 1.25rem;
+            color: var(--color-accent);
+        }
+        .user-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-chevron {
+            font-size: 0.7rem;
+            color: var(--color-text-secondary);
+            transition: transform 0.2s;
+        }
+        .user-dropdown.open .user-chevron {
+            transform: rotate(180deg);
+        }
+        .user-menu {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            right: 0;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            min-width: 240px;
+            z-index: 1055;
+            display: none;
+            overflow: hidden;
+        }
+        .user-menu.show {
+            display: block;
+        }
+        .user-menu-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--color-bg-main);
+        }
+        .user-avatar {
+            font-size: 2.5rem;
+            color: var(--color-accent);
+        }
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .user-display-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-email {
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-menu-divider {
+            height: 1px;
+            background: var(--color-border);
+        }
+        .user-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--color-text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+        .user-menu-item:hover {
+            background: var(--color-bg-hover);
+            color: var(--color-accent);
+        }
+        .user-menu-item i {
+            width: 20px;
+            text-align: center;
+            color: var(--color-text-secondary);
+        }
+        .user-menu-item:hover i {
+            color: var(--color-accent);
+        }
+        .logout-btn {
+            color: var(--color-error);
+        }
+        .logout-btn i {
+            color: var(--color-error);
+        }
+        .logout-btn:hover {
+            background: rgba(199, 93, 93, 0.1);
+            color: var(--color-error);
+        }
+        
+        /* ========== Navbar Overlay ========== */
+
+        /* ========== Mobile Menu ========== */
+        @media (max-width: 991.98px) {
+
+        }
+    </style>
+    
+    <!-- Notifications Page Styles -->
     <style>
         .notification-container { padding: var(--spacing-xl) 0; min-height: calc(100vh - 200px); }
         .page-header { margin-bottom: var(--spacing-xl); }
@@ -50,6 +259,15 @@
         .type-badge.comment { background: rgba(139, 115, 85, 0.1); color: var(--color-accent); }
         .type-badge.feedback { background: rgba(212, 168, 83, 0.1); color: var(--color-warning); }
         .type-badge.system { background: rgba(108, 117, 125, 0.1); color: var(--color-text-secondary); }
+        .type-badge.agreement_request { background: rgba(139, 115, 85, 0.1); color: var(--color-accent); }
+        .type-badge.agreement_signed { background: rgba(93, 156, 89, 0.1); color: var(--color-success); }
+        .type-badge.agreement_expired { background: rgba(212, 168, 83, 0.1); color: var(--color-warning); }
+        .type-badge.progress_report { background: rgba(93, 139, 199, 0.1); color: var(--color-info); }
+        .type-badge.deadline_warning { background: rgba(212, 168, 83, 0.1); color: var(--color-warning); }
+        .type-badge.message_received { background: rgba(139, 115, 85, 0.1); color: var(--color-accent); }
+        .type-badge.price_changed { background: rgba(93, 139, 199, 0.1); color: var(--color-info); }
+        .type-badge.translation_request { background: rgba(139, 115, 85, 0.1); color: var(--color-accent); }
+        .type-badge.editing_request { background: rgba(139, 115, 85, 0.1); color: var(--color-accent); }
         .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--spacing-md); margin-bottom: var(--spacing-xl); }
         .stat-mini { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--spacing-md); text-align: center; }
         .stat-mini .stat-value { font-size: var(--font-size-xl); font-weight: 700; color: var(--color-accent); }
@@ -77,220 +295,7 @@
     </script>
 </head>
 <body>
-<!-- ========== NAVBAR PATTERN C (pages/ 階層) ========== -->
-<nav class="navbar navbar-expand-lg navbar-custom sticky-top">
-    <div class="container">
-        <!-- Brand -->
-        <a class="navbar-brand" href="../index.html">
-            <i class="fas fa-book-open"></i>
-            Publisher
-        </a>
-        
-        <!-- Language Selector Mobile -->
-        <div class="navbar-lang-selector d-lg-none">
-            <select class="language-selector" id="languageSelectorMobile">
-                <option value="en">🇬🇧 EN</option>
-                <option value="ja">🇯🇵 日本語</option>
-                <option value="zh">🇨🇳 中文</option>
-                <option value="es">🇪🇸 ES</option>
-                <option value="fr">🇫🇷 FR</option>
-                <option value="de">🇩🇪 DE</option>
-                <option value="ko">🇰🇷 한국어</option>
-                <option value="ar">🇸🇦 عربي</option>
-                <option value="pt">🇧🇷 PT</option>
-            </select>
-        </div>
-        
-        <!-- User Dropdown (auth-only) -->
-        <div class="user-dropdown auth-only" id="userDropdown">
-            <button type="button" class="user-dropdown-toggle" id="userDropdownBtn" onclick="toggleUserDropdown(event)">
-                <i class="fas fa-user-circle"></i>
-                <span class="user-name d-none d-lg-inline" id="userName">User</span>
-                <i class="fas fa-chevron-down user-chevron d-none d-lg-inline"></i>
-            </button>
-            <div class="user-menu" id="userMenu">
-                <div class="user-menu-header">
-                    <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
-                    <div class="user-info">
-                        <div class="user-display-name" id="userDisplayName">User</div>
-                        <div class="user-email" id="userEmail">user@example.com</div>
-                    </div>
-                </div>
-                <div class="user-menu-divider"></div>
-                <a href="dashboard.html" class="user-menu-item">
-                    <i class="fas fa-th-large"></i>
-                    <span id="menuDashboard">Dashboard</span>
-                </a>
-                <a href="my-works.html" class="user-menu-item">
-                    <i class="fas fa-book"></i>
-                    <span id="menuMyWorks">My Works</span>
-                </a>
-                <a href="account-settings.html" class="user-menu-item">
-                    <i class="fas fa-cog"></i>
-                    <span id="menuAccountSettings">Account Settings</span>
-                </a>
-                <div class="user-menu-divider"></div>
-                <button class="user-menu-item logout-btn" onclick="handleLogout()">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span id="menuLogout">Log Out</span>
-                </button>
-            </div>
-        </div>
-        
-        <!-- Hamburger -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        
-        <!-- Navbar Overlay -->
-        <div class="navbar-overlay d-lg-none" id="navbarOverlay"></div>
-        
-        <!-- Navbar Content -->
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <!-- PC Navigation -->
-            <ul class="navbar-nav me-auto d-none d-lg-flex">
-                <!-- Browse: 共通 -->
-                <li class="nav-item">
-                    <a class="nav-link" href="browse.html">
-                        <i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span>
-                    </a>
-                </li>
-                <!-- Auth: Library -->
-                <li class="nav-item auth-only">
-                    <a class="nav-link" href="library.html">
-                        <i class="fas fa-book-reader me-1"></i> <span id="navLibraryPC">Library</span>
-                    </a>
-                </li>
-                <!-- Auth: Dashboard -->
-                <li class="nav-item auth-only">
-                    <a class="nav-link" href="dashboard.html">
-                        <i class="fas fa-th-large me-1"></i> <span id="navDashboardPC">Dashboard</span>
-                    </a>
-                </li>
-                <!-- Auth: Upload -->
-                <li class="nav-item auth-only">
-                    <a class="nav-link" href="upload.html">
-                        <i class="fas fa-upload me-1"></i> <span data-i18n="nav.upload">Upload</span>
-                    </a>
-                </li>
-                <!-- Auth: Translation Tools Dropdown -->
-                <li class="nav-item dropdown auth-only">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-language me-1"></i> <span id="navTranslationToolsPC">Translation Tools</span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="manga-translator.html"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorPC">Manga Translator</span></a></li>
-                        <li><a class="dropdown-item" href="translation-status.html"><i class="fas fa-tasks me-2"></i><span id="navTranslationStatusPC">Translation Status</span></a></li>
-                        <li><a class="dropdown-item" href="translators/index.html"><i class="fas fa-users me-2"></i><span id="navFindTranslatorsPC">Find Translators</span></a></li>
-                    </ul>
-                </li>
-                <!-- Support Dropdown: 共通 -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-headset me-1"></i> <span data-i18n="nav.support">Support</span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item active" href="support/faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
-                        <li><a class="dropdown-item" href="support/troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
-                        <li><a class="dropdown-item" href="support/contact.html"><i class="fas fa-envelope me-2"></i><span id="navContactPC">Contact</span></a></li>
-                        <li class="auth-only"><hr class="dropdown-divider"></li>
-                        <li class="auth-only"><a class="dropdown-item" href="support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
-                    </ul>
-                </li>
-            </ul>
-            
-            <!-- Mobile Navigation -->
-            <ul class="navbar-nav d-lg-none">
-                <!-- Browse -->
-                <li class="nav-item">
-                    <a class="nav-link" href="browse.html">
-                        <i class="fas fa-compass me-2"></i><span data-i18n="nav.browse">Browse</span>
-                    </a>
-                </li>
-                <!-- Auth: Library -->
-                <li class="nav-item auth-only">
-                    <a class="nav-link" href="library.html">
-                        <i class="fas fa-book-reader me-2"></i><span id="navLibraryMobile">Library</span>
-                    </a>
-                </li>
-                <!-- Auth: Dashboard -->
-                <li class="nav-item auth-only">
-                    <a class="nav-link" href="dashboard.html">
-                        <i class="fas fa-th-large me-2"></i><span id="navDashboardMobile">Dashboard</span>
-                    </a>
-                </li>
-                <!-- Auth: Upload -->
-                <li class="nav-item auth-only">
-                    <a class="nav-link" href="upload.html">
-                        <i class="fas fa-upload me-2"></i><span data-i18n="nav.upload">Upload</span>
-                    </a>
-                </li>
-                <!-- Auth: Translation Tools -->
-                <li class="nav-item dropdown auth-only">
-                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                        <i class="fas fa-language me-2"></i><span id="navTranslationToolsMobile">Translation Tools</span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="manga-translator.html"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorMobile">Manga Translator</span></a></li>
-                        <li><a class="dropdown-item" href="translation-status.html"><i class="fas fa-tasks me-2"></i><span id="navTranslationStatusMobile">Translation Status</span></a></li>
-                        <li><a class="dropdown-item" href="translators/index.html"><i class="fas fa-users me-2"></i><span id="navFindTranslatorsMobile">Find Translators</span></a></li>
-                    </ul>
-                </li>
-                <!-- Support -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle active" href="#" data-bs-toggle="dropdown">
-                        <i class="fas fa-headset me-2"></i><span data-i18n="nav.support">Support</span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item active" href="support/faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
-                        <li><a class="dropdown-item" href="support/troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
-                        <li><a class="dropdown-item" href="support/contact.html"><i class="fas fa-envelope me-2"></i><span id="navContactMobile">Contact</span></a></li>
-                        <li class="auth-only"><hr class="dropdown-divider"></li>
-                        <li class="auth-only"><a class="dropdown-item" href="support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
-                    </ul>
-                </li>
-                <!-- Guest: Mobile Auth Buttons -->
-                <li class="nav-item guest-only border-top mt-2 pt-2">
-                    <a class="nav-link" href="login.html">
-                        <i class="fas fa-sign-in-alt me-2"></i><span data-i18n="nav.login">Sign In</span>
-                    </a>
-                </li>
-                <li class="nav-item guest-only">
-                    <a class="nav-link text-accent fw-bold" href="register.html">
-                        <i class="fas fa-user-plus me-2"></i><span data-i18n="nav.getStarted">Get Started</span>
-                    </a>
-                </li>
-            </ul>
-            
-            <!-- Right Side (PC) -->
-            <div class="d-none d-lg-flex align-items-center gap-3">
-                <!-- Language Selector PC -->
-                <select class="language-selector" id="languageSelector">
-                    <option value="en">🇬🇧 EN</option>
-                    <option value="ja">🇯🇵 日本語</option>
-                    <option value="zh">🇨🇳 中文</option>
-                    <option value="es">🇪🇸 ES</option>
-                    <option value="fr">🇫🇷 FR</option>
-                    <option value="de">🇩🇪 DE</option>
-                    <option value="ko">🇰🇷 한국어</option>
-                    <option value="ar">🇸🇦 عربي</option>
-                    <option value="pt">🇧🇷 PT</option>
-                </select>
-                
-                <!-- Guest Buttons (PC) -->
-                <div class="navbar-buttons-guest guest-only d-none d-lg-flex">
-                    <a href="login.html" class="btn btn-soft-custom">
-                        <span data-i18n="nav.login">Sign In</span>
-                    </a>
-                    <a href="register.html" class="btn btn-primary-custom">
-                        <span data-i18n="nav.getStarted">Get Started</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</nav>
-<!-- ========== NAVBAR PATTERN C END ========== -->
+<div id="navbar-container"></div>
     <main class="notification-container">
         <div class="container">
             <div class="page-header">
@@ -319,6 +324,15 @@
                         <option value="ticket_reply">🎧 Support</option>
                         <option value="system">🔔 System</option>
                         <option value="account">👤 Account</option>
+                        <option value="agreement_request">📝 Agreement Request</option>
+                        <option value="agreement_signed">✅ Agreement Signed</option>
+                        <option value="agreement_expired">⏰ Agreement Expired</option>
+                        <option value="progress_report">📋 Progress Report</option>
+                        <option value="deadline_warning">⚠️ Deadline</option>
+                        <option value="message_received">✉️ Message</option>
+                        <option value="price_changed">🏷️ Price</option>
+                        <option value="translation_request">🌐 Translation Request</option>
+                        <option value="editing_request">✏️ Editing Request</option>
                     </select>
                     <div class="form-check"><input class="form-check-input" type="checkbox" id="unreadOnly"><label class="form-check-label" for="unreadOnly" data-i18n="notifications.unreadOnly">Unread only</label></div>
                 </div>
@@ -343,19 +357,10 @@
             </div>
         </div>
     </main>
-    <footer class="footer-custom">
-        <div class="container">
-            <div class="d-flex flex-wrap justify-content-between align-items-center">
-                <p class="small mb-0">&copy; 2024 Publisher. All rights reserved.</p>
-                <div class="d-flex gap-3">
-                    <a href="support/faq.html" class="text-secondary" data-i18n="footer.help">Help</a>
-                    <a href="terms.html" class="text-secondary" data-i18n="footer.terms">Terms</a>
-                    <a href="privacy.html" class="text-secondary" data-i18n="footer.privacy">Privacy</a>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <div id="footer-container"></div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/i18n.js"></script>
+    <script src="../js/navbar.js"></script>
     <!-- 言語ファイル（9言語） -->
     <script src="../js/lang/ja.js"></script>
     <script src="../js/lang/en.js"></script>
@@ -372,7 +377,167 @@
     <script src="../js/language-switcher.js"></script>
     <script src="../js/navbar.js"></script>
     
-<!-- Notifications Page Script -->
+    <!-- Pattern C Navbar Script -->
+    <script>
+        // ========== 多言語対応テキスト（9言語）==========
+        const navText = {
+            translationTools: { en: 'Tools', ja: '翻訳ツール', zh: '翻译工具',
+                es: 'Herramientas de traducción', fr: 'Outils de traduction', de: 'Übersetzungstools',
+                ko: '번역 도구', ar: 'أدوات الترجمة', pt: 'Ferramentas de tradução'
+            },
+            mangaTranslator: {
+                en: 'Manga Translator', ja: 'マンガ翻訳', zh: '漫画翻译',
+                es: 'Traductor de Manga', fr: 'Traducteur de Manga', de: 'Manga-Übersetzer',
+                ko: '만화 번역기', ar: 'مترجم المانجا', pt: 'Tradutor de Mangá'
+            },
+            novelTranslator: {
+                en: 'Novel Translator', ja: '小説翻訳', zh: '小说翻译',
+                es: 'Traductor de Novela', fr: 'Traducteur de Roman', de: 'Roman-Übersetzer',
+                ko: '소설 번역기', ar: 'مترجم الروايات', pt: 'Tradutor de Romance'
+            },
+            translationStatus: {
+                en: 'Translation Status', ja: '翻訳状況', zh: '翻译状态',
+                es: 'Estado de traducción', fr: 'Statut de traduction', de: 'Übersetzungsstatus',
+                ko: '번역 상태', ar: 'حالة الترجمة', pt: 'Status da tradução'
+            },
+            findTranslators: {
+                en: 'Find Translators', ja: '翻訳者を探す', zh: '寻找翻译',
+                es: 'Buscar traductores', fr: 'Trouver des traducteurs', de: 'Übersetzer finden',
+                ko: '번역가 찾기', ar: 'البحث عن مترجمين', pt: 'Encontrar tradutores'
+            },
+            contact: {
+                en: 'Contact', ja: 'お問い合わせ', zh: '联系我们',
+                es: 'Contacto', fr: 'Contact', de: 'Kontakt',
+                ko: '문의', ar: 'اتصل بنا', pt: 'Contato'
+            },
+            library: {
+                en: 'Library', ja: 'ライブラリ', zh: '书库',
+                es: 'Biblioteca', fr: 'Bibliothèque', de: 'Bibliothek',
+                ko: '라이브러리', ar: 'المكتبة', pt: 'Biblioteca'
+            },
+            dashboard: {
+                en: 'Dashboard', ja: 'ダッシュボード', zh: '控制台',
+                es: 'Panel', fr: 'Tableau de bord', de: 'Dashboard',
+                ko: '대시보드', ar: 'لوحة التحكم', pt: 'Painel'
+            },
+            accountSettings: {
+                en: 'Account Settings', ja: 'アカウント設定', zh: '账户设置',
+                es: 'Configuración de cuenta', fr: 'Paramètres du compte', de: 'Kontoeinstellungen',
+                ko: '계정 설정', ar: 'إعدادات الحساب', pt: 'Configurações da conta'
+            },
+            logout: {
+                en: 'Log Out', ja: 'ログアウト', zh: '退出登录',
+                es: 'Cerrar sesión', fr: 'Déconnexion', de: 'Abmelden',
+                ko: '로그아웃', ar: 'تسجيل الخروج', pt: 'Sair'
+            },
+            logOutConfirm: {
+                en: 'Are you sure you want to log out?', ja: 'ログアウトしますか？', zh: '确定要退出登录吗？',
+                es: '¿Estás seguro de que quieres cerrar sesión?', fr: 'Êtes-vous sûr de vouloir vous déconnecter?', de: 'Sind Sie sicher, dass Sie sich abmelden möchten?',
+                ko: '로그아웃 하시겠습니까?', ar: 'هل أنت متأكد أنك تريد تسجيل الخروج؟', pt: 'Tem certeza que deseja sair?'
+            }
+        };
+        
+        function getNavL(obj) {
+            const lang = localStorage.getItem('preferredLanguage') || 'en';
+            return obj[lang] || obj.en || '';
+        }
+        
+        function updateNavUIText() {
+
+            const els = {
+
+            };
+            Object.keys(els).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = getNavL(els[id]);
+            });
+        }
+        
+        function toggleUserDropdown(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const dropdown = document.getElementById('userDropdown');
+            const dropdownMenu = document.getElementById('userMenu');
+            dropdown.classList.toggle('open');
+            dropdownMenu.classList.toggle('show');
+        }
+        
+        function handleLogout() {
+            if (confirm(getNavL(navText.logOutConfirm))) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
+            }
+        }
+        
+        function loadUserInfo() {
+            const userStr = localStorage.getItem('user');
+            const token = localStorage.getItem('token');
+            const isLoggedIn = !!(userStr && token);
+            
+            if (isLoggedIn) {
+                try {
+                    const user = JSON.parse(userStr);
+                    const displayName = user.display_name || user.firstName || user.email || 'User';
+                    const userNameEl = document.getElementById('userName');
+                    const userDisplayNameEl = document.getElementById('userDisplayName');
+                    const userEmailEl = document.getElementById('userEmail');
+                    if (userNameEl) userNameEl.textContent = displayName;
+                    if (userDisplayNameEl) userDisplayNameEl.textContent = displayName;
+                    if (userEmailEl) userEmailEl.textContent = user.email || '';
+                    document.body.classList.add('logged-in');
+                } catch (e) {
+                    document.body.classList.remove('logged-in');
+                }
+            } else {
+                document.body.classList.remove('logged-in');
+            }
+        }
+        
+        // Navbar initialization
+        (function() {
+            document.addEventListener('DOMContentLoaded', function() {
+                updateNavUIText();
+                loadUserInfo();
+                
+                // User dropdown close on outside click
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('.user-dropdown')) {
+                        const dropdown = document.getElementById('userDropdown');
+                        const dropdownMenu = document.getElementById('userMenu');
+                        if (dropdown) dropdown.classList.remove('open');
+                        if (dropdownMenu) dropdownMenu.classList.remove('show');
+                    }
+                });
+                
+                // Mobile overlay
+                const navbarCollapse = document.getElementById('navbarNav');
+                const navbarOverlay = document.getElementById('navbarOverlay');
+                
+                if (navbarCollapse) {
+                    navbarCollapse.addEventListener('show.bs.collapse', function() {
+                        if (navbarOverlay) navbarOverlay.classList.add('show');
+                    });
+                    navbarCollapse.addEventListener('hide.bs.collapse', function() {
+                        if (navbarOverlay) navbarOverlay.classList.remove('show');
+                    });
+                }
+                
+                if (navbarOverlay) {
+                    navbarOverlay.addEventListener('click', function() {
+                        const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                        if (bsCollapse) bsCollapse.hide();
+                    });
+                }
+            });
+            
+            document.addEventListener('languageChanged', function() {
+                updateNavUIText();
+            });
+        })();
+    </script>
+    
+    <!-- Notifications Page Script -->
     <script>
         // ========== ページ固有の翻訳テキスト ==========
         const pageText = {
@@ -494,6 +659,168 @@
                     ar: 'حسابك جاهز. ابدأ الاستكشاف!',
                     pt: 'Sua conta está pronta. Comece a explorar!'
                 }
+            },
+            agreement_request: {
+                title: {
+                    en: 'Collaboration agreement request', ja: 'コラボレーション契約リクエスト', zh: '合作协议请求',
+                    es: 'Solicitud de acuerdo de colaboración', fr: 'Demande d\'accord de collaboration', de: 'Kooperationsvereinbarungsanfrage',
+                    ko: '협업 계약 요청', ar: 'طلب اتفاقية تعاون', pt: 'Solicitação de acordo de colaboração'
+                },
+                message: {
+                    en: 'You received a collaboration agreement for \'{work}\' as {role}.',
+                    ja: '「{work}」の{role}としてコラボレーション契約を受け取りました。',
+                    zh: '您收到了作为{role}参与《{work}》的合作协议。',
+                    es: 'Recibiste un acuerdo de colaboración para \'{work}\' como {role}.',
+                    fr: 'Vous avez reçu un accord de collaboration pour « {work} » en tant que {role}.',
+                    de: 'Sie haben eine Kooperationsvereinbarung für „{work}" als {role} erhalten.',
+                    ko: '「{work}」의 {role}로서 협업 계약을 받았습니다.',
+                    ar: 'لقد تلقيت اتفاقية تعاون لـ \'{work}\' بصفتك {role}.',
+                    pt: 'Você recebeu um acordo de colaboração para \'{work}\' como {role}.'
+                }
+            },
+            agreement_signed: {
+                title: {
+                    en: 'Agreement signed', ja: '契約が署名されました', zh: '协议已签署',
+                    es: 'Acuerdo firmado', fr: 'Accord signé', de: 'Vereinbarung unterzeichnet',
+                    ko: '계약 서명 완료', ar: 'تم توقيع الاتفاقية', pt: 'Acordo assinado'
+                },
+                message: {
+                    en: '{name} has signed the agreement for \'{work}\'.',
+                    ja: '{name}が「{work}」の契約に署名しました。',
+                    zh: '{name}已签署《{work}》的协议。',
+                    es: '{name} ha firmado el acuerdo para \'{work}\'.',
+                    fr: '{name} a signé l\'accord pour « {work} ».',
+                    de: '{name} hat die Vereinbarung für „{work}" unterzeichnet.',
+                    ko: '{name}이(가) 「{work}」의 계약에 서명했습니다.',
+                    ar: 'وقّع {name} على اتفاقية \'{work}\'.',
+                    pt: '{name} assinou o acordo para \'{work}\'.'
+                }
+            },
+            agreement_expired: {
+                title: {
+                    en: 'Agreement expired', ja: '契約が期限切れです', zh: '协议已过期',
+                    es: 'Acuerdo expirado', fr: 'Accord expiré', de: 'Vereinbarung abgelaufen',
+                    ko: '계약 만료', ar: 'انتهت صلاحية الاتفاقية', pt: 'Acordo expirado'
+                },
+                message: {
+                    en: 'The agreement for \'{work}\' with {name} has expired.',
+                    ja: '{name}との「{work}」の契約が期限切れになりました。',
+                    zh: '与{name}关于《{work}》的协议已过期。',
+                    es: 'El acuerdo para \'{work}\' con {name} ha expirado.',
+                    fr: 'L\'accord pour « {work} » avec {name} a expiré.',
+                    de: 'Die Vereinbarung für „{work}" mit {name} ist abgelaufen.',
+                    ko: '{name}과(와)의 「{work}」 계약이 만료되었습니다.',
+                    ar: 'انتهت صلاحية اتفاقية \'{work}\' مع {name}.',
+                    pt: 'O acordo para \'{work}\' com {name} expirou.'
+                }
+            },
+            progress_report: {
+                title: {
+                    en: 'Progress report received', ja: '進捗レポートを受信しました', zh: '收到进度报告',
+                    es: 'Informe de progreso recibido', fr: 'Rapport de progression reçu', de: 'Fortschrittsbericht erhalten',
+                    ko: '진행 보고서 수신', ar: 'تم استلام تقرير التقدم', pt: 'Relatório de progresso recebido'
+                },
+                message: {
+                    en: '{name} submitted a progress report for \'{work}\': {status}',
+                    ja: '{name}が「{work}」の進捗レポートを提出しました：{status}',
+                    zh: '{name}提交了《{work}》的进度报告：{status}',
+                    es: '{name} envió un informe de progreso para \'{work}\': {status}',
+                    fr: '{name} a soumis un rapport de progression pour « {work} » : {status}',
+                    de: '{name} hat einen Fortschrittsbericht für „{work}" eingereicht: {status}',
+                    ko: '{name}이(가) 「{work}」의 진행 보고서를 제출했습니다: {status}',
+                    ar: 'قدّم {name} تقرير تقدم لـ \'{work}\': {status}',
+                    pt: '{name} enviou um relatório de progresso para \'{work}\': {status}'
+                }
+            },
+            deadline_warning: {
+                title: {
+                    en: 'Deadline approaching', ja: '締め切りが近づいています', zh: '截止日期临近',
+                    es: 'Fecha límite próxima', fr: 'Date limite approche', de: 'Frist nähert sich',
+                    ko: '마감일 임박', ar: 'اقتراب الموعد النهائي', pt: 'Prazo se aproximando'
+                },
+                message: {
+                    en: 'Deadline for \'{work}\' is in {days} days.',
+                    ja: '「{work}」の締め切りまであと{days}日です。',
+                    zh: '《{work}》的截止日期还有{days}天。',
+                    es: 'La fecha límite para \'{work}\' es en {days} días.',
+                    fr: 'La date limite pour « {work} » est dans {days} jours.',
+                    de: 'Die Frist für „{work}" ist in {days} Tagen.',
+                    ko: '「{work}」의 마감일이 {days}일 남았습니다.',
+                    ar: 'الموعد النهائي لـ \'{work}\' بعد {days} أيام.',
+                    pt: 'O prazo para \'{work}\' é em {days} dias.'
+                }
+            },
+            message_received: {
+                title: {
+                    en: 'New message', ja: '新しいメッセージ', zh: '新消息',
+                    es: 'Nuevo mensaje', fr: 'Nouveau message', de: 'Neue Nachricht',
+                    ko: '새 메시지', ar: 'رسالة جديدة', pt: 'Nova mensagem'
+                },
+                message: {
+                    en: 'New message from {name}.',
+                    ja: '{name}からの新しいメッセージ。',
+                    zh: '来自{name}的新消息。',
+                    es: 'Nuevo mensaje de {name}.',
+                    fr: 'Nouveau message de {name}.',
+                    de: 'Neue Nachricht von {name}.',
+                    ko: '{name}의 새 메시지.',
+                    ar: 'رسالة جديدة من {name}.',
+                    pt: 'Nova mensagem de {name}.'
+                }
+            },
+            price_changed: {
+                title: {
+                    en: 'Price updated', ja: '価格が更新されました', zh: '价格已更新',
+                    es: 'Precio actualizado', fr: 'Prix mis à jour', de: 'Preis aktualisiert',
+                    ko: '가격 업데이트', ar: 'تم تحديث السعر', pt: 'Preço atualizado'
+                },
+                message: {
+                    en: 'Price for \'{work}\' has been updated to {price}.',
+                    ja: '「{work}」の価格が{price}に更新されました。',
+                    zh: '《{work}》的价格已更新为{price}。',
+                    es: 'El precio de \'{work}\' se actualizó a {price}.',
+                    fr: 'Le prix de « {work} » a été mis à jour à {price}.',
+                    de: 'Der Preis für „{work}" wurde auf {price} aktualisiert.',
+                    ko: '「{work}」의 가격이 {price}로 업데이트되었습니다.',
+                    ar: 'تم تحديث سعر \'{work}\' إلى {price}.',
+                    pt: 'O preço de \'{work}\' foi atualizado para {price}.'
+                }
+            },
+            translation_request: {
+                title: {
+                    en: 'Translation request', ja: '翻訳リクエスト', zh: '翻译请求',
+                    es: 'Solicitud de traducción', fr: 'Demande de traduction', de: 'Übersetzungsanfrage',
+                    ko: '번역 요청', ar: 'طلب ترجمة', pt: 'Solicitação de tradução'
+                },
+                message: {
+                    en: '{name} wants to translate \'{work}\'.',
+                    ja: '{name}が「{work}」の翻訳を希望しています。',
+                    zh: '{name}想要翻译《{work}》。',
+                    es: '{name} quiere traducir \'{work}\'.',
+                    fr: '{name} souhaite traduire « {work} ».',
+                    de: '{name} möchte „{work}" übersetzen.',
+                    ko: '{name}이(가) 「{work}」을(를) 번역하고 싶어합니다.',
+                    ar: 'يريد {name} ترجمة \'{work}\'.',
+                    pt: '{name} quer traduzir \'{work}\'.'
+                }
+            },
+            editing_request: {
+                title: {
+                    en: 'Editing request', ja: '編集リクエスト', zh: '编辑请求',
+                    es: 'Solicitud de edición', fr: 'Demande d\'édition', de: 'Bearbeitungsanfrage',
+                    ko: '편집 요청', ar: 'طلب تحرير', pt: 'Solicitação de edição'
+                },
+                message: {
+                    en: '{name} wants to edit \'{work}\'.',
+                    ja: '{name}が「{work}」の編集を希望しています。',
+                    zh: '{name}想要编辑《{work}》。',
+                    es: '{name} quiere editar \'{work}\'.',
+                    fr: '{name} souhaite éditer « {work} ».',
+                    de: '{name} möchte „{work}" bearbeiten.',
+                    ko: '{name}이(가) 「{work}」을(를) 편집하고 싶어합니다.',
+                    ar: 'يريد {name} تحرير \'{work}\'.',
+                    pt: '{name} quer editar \'{work}\'.'
+                }
             }
         };
         
@@ -503,7 +830,16 @@
             translation_complete: { en: '🌐 Translation', ja: '🌐 翻訳', zh: '🌐 翻译', es: '🌐 Traducción', fr: '🌐 Traduction', de: '🌐 Übersetzung', ko: '🌐 번역', ar: '🌐 ترجمة', pt: '🌐 Tradução' },
             comment: { en: '💬 Comment', ja: '💬 コメント', zh: '💬 评论', es: '💬 Comentario', fr: '💬 Commentaire', de: '💬 Kommentar', ko: '💬 댓글', ar: '💬 تعليق', pt: '💬 Comentário' },
             feedback: { en: '⭐ Feedback', ja: '⭐ フィードバック', zh: '⭐ 反馈', es: '⭐ Feedback', fr: '⭐ Retour', de: '⭐ Feedback', ko: '⭐ 피드백', ar: '⭐ تعليق', pt: '⭐ Feedback' },
-            system: { en: '🔔 System', ja: '🔔 システム', zh: '🔔 系统', es: '🔔 Sistema', fr: '🔔 Système', de: '🔔 System', ko: '🔔 시스템', ar: '🔔 نظام', pt: '🔔 Sistema' }
+            system: { en: '🔔 System', ja: '🔔 システム', zh: '🔔 系统', es: '🔔 Sistema', fr: '🔔 Système', de: '🔔 System', ko: '🔔 시스템', ar: '🔔 نظام', pt: '🔔 Sistema' },
+            agreement_request: { en: '📝 Agreement', ja: '📝 契約', zh: '📝 协议', es: '📝 Acuerdo', fr: '📝 Accord', de: '📝 Vereinbarung', ko: '📝 계약', ar: '📝 اتفاقية', pt: '📝 Acordo' },
+            agreement_signed: { en: '✅ Signed', ja: '✅ 署名済', zh: '✅ 已签署', es: '✅ Firmado', fr: '✅ Signé', de: '✅ Unterzeichnet', ko: '✅ 서명됨', ar: '✅ موقّع', pt: '✅ Assinado' },
+            agreement_expired: { en: '⏰ Expired', ja: '⏰ 期限切れ', zh: '⏰ 已过期', es: '⏰ Expirado', fr: '⏰ Expiré', de: '⏰ Abgelaufen', ko: '⏰ 만료', ar: '⏰ منتهي', pt: '⏰ Expirado' },
+            progress_report: { en: '📋 Progress', ja: '📋 進捗', zh: '📋 进度', es: '📋 Progreso', fr: '📋 Progrès', de: '📋 Fortschritt', ko: '📋 진행', ar: '📋 تقدم', pt: '📋 Progresso' },
+            deadline_warning: { en: '⚠️ Deadline', ja: '⚠️ 締め切り', zh: '⚠️ 截止', es: '⚠️ Plazo', fr: '⚠️ Échéance', de: '⚠️ Frist', ko: '⚠️ 마감', ar: '⚠️ موعد', pt: '⚠️ Prazo' },
+            message_received: { en: '✉️ Message', ja: '✉️ メッセージ', zh: '✉️ 消息', es: '✉️ Mensaje', fr: '✉️ Message', de: '✉️ Nachricht', ko: '✉️ 메시지', ar: '✉️ رسالة', pt: '✉️ Mensagem' },
+            price_changed: { en: '🏷️ Price', ja: '🏷️ 価格', zh: '🏷️ 价格', es: '🏷️ Precio', fr: '🏷️ Prix', de: '🏷️ Preis', ko: '🏷️ 가격', ar: '🏷️ سعر', pt: '🏷️ Preço' },
+            translation_request: { en: '🌐 Trans. Request', ja: '🌐 翻訳依頼', zh: '🌐 翻译请求', es: '🌐 Solicitud', fr: '🌐 Demande', de: '🌐 Anfrage', ko: '🌐 번역 요청', ar: '🌐 طلب ترجمة', pt: '🌐 Solicitação' },
+            editing_request: { en: '✏️ Edit Request', ja: '✏️ 編集依頼', zh: '✏️ 编辑请求', es: '✏️ Solicitud', fr: '✏️ Demande', de: '✏️ Anfrage', ko: '✏️ 편집 요청', ar: '✏️ طلب تحرير', pt: '✏️ Solicitação' }
         };
         
         // ========== 時間表示の翻訳（9言語）==========
@@ -568,7 +904,7 @@
         
         const API_BASE = 'http://localhost:3000/api/notifications';
         let currentPage = 1, totalPages = 1, currentFilter = { type: '', unreadOnly: false };
-        let isDemo = new URLSearchParams(window.location.search).get('demo') === 'true';
+        let isDemo = true; // デモモード: バックエンド接続時はfalseに変更
         
         // デモ通知データ（パラメータ形式）
         const DEMO_NOTIFICATIONS = [
@@ -576,7 +912,16 @@
             { notification_id: '2', notification_type: 'translation_complete', params: { work: 'Digital Dreams', language: 'English' }, icon: 'fa-language', icon_color: 'info', is_read: false, created_at: new Date(Date.now() - 2*60*60*1000).toISOString() },
             { notification_id: '3', notification_type: 'feedback', params: { work: 'Starlight Symphony', rating: '5' }, icon: 'fa-star', icon_color: 'warning', is_read: false, created_at: new Date(Date.now() - 5*60*60*1000).toISOString() },
             { notification_id: '4', notification_type: 'comment', params: { work: 'Digital Dreams' }, icon: 'fa-comment', icon_color: 'primary', is_read: true, created_at: new Date(Date.now() - 24*60*60*1000).toISOString() },
-            { notification_id: '5', notification_type: 'system', params: {}, icon: 'fa-rocket', icon_color: 'primary', is_read: true, created_at: new Date(Date.now() - 7*24*60*60*1000).toISOString() }
+            { notification_id: '5', notification_type: 'system', params: {}, icon: 'fa-rocket', icon_color: 'primary', is_read: true, created_at: new Date(Date.now() - 7*24*60*60*1000).toISOString() },
+            { notification_id: '6', notification_type: 'agreement_request', params: { work: 'Magic Academy Adventure', role: 'Translator' }, icon: 'fa-file-signature', icon_color: 'primary', is_read: false, created_at: new Date(Date.now() - 45*60*1000).toISOString() },
+            { notification_id: '7', notification_type: 'agreement_signed', params: { name: 'Tanaka Yuki', work: 'Digital Dreams' }, icon: 'fa-check-circle', icon_color: 'success', is_read: false, created_at: new Date(Date.now() - 3*60*60*1000).toISOString() },
+            { notification_id: '8', notification_type: 'agreement_expired', params: { name: 'Carlos Rivera', work: 'Starlight Symphony' }, icon: 'fa-clock', icon_color: 'warning', is_read: true, created_at: new Date(Date.now() - 2*24*60*60*1000).toISOString() },
+            { notification_id: '9', notification_type: 'progress_report', params: { name: 'Sophie Martin', work: 'Digital Dreams', status: '75% complete' }, icon: 'fa-tasks', icon_color: 'info', is_read: false, created_at: new Date(Date.now() - 4*60*60*1000).toISOString() },
+            { notification_id: '10', notification_type: 'deadline_warning', params: { work: 'Magic Academy Adventure', days: '3' }, icon: 'fa-exclamation-triangle', icon_color: 'warning', is_read: false, created_at: new Date(Date.now() - 1*60*60*1000).toISOString() },
+            { notification_id: '11', notification_type: 'message_received', params: { name: 'Tanaka Yuki' }, icon: 'fa-envelope', icon_color: 'primary', is_read: false, created_at: new Date(Date.now() - 15*60*1000).toISOString() },
+            { notification_id: '12', notification_type: 'price_changed', params: { work: 'Starlight Symphony', price: '$12.99' }, icon: 'fa-tag', icon_color: 'info', is_read: true, created_at: new Date(Date.now() - 3*24*60*60*1000).toISOString() },
+            { notification_id: '13', notification_type: 'translation_request', params: { name: 'Hans Mueller', work: 'Digital Dreams' }, icon: 'fa-language', icon_color: 'primary', is_read: false, created_at: new Date(Date.now() - 6*60*60*1000).toISOString() },
+            { notification_id: '14', notification_type: 'editing_request', params: { name: 'Emily Chen', work: 'Magic Academy Adventure' }, icon: 'fa-pen', icon_color: 'primary', is_read: false, created_at: new Date(Date.now() - 8*60*60*1000).toISOString() }
         ];
         
         // 初期化（遅延実行で言語設定の読み込みを待つ）
@@ -659,6 +1004,7 @@
                         <div class="notification-meta">
                             <span class="type-badge ${n.notification_type}">${getTypeLabel(n.notification_type)}</span>
                             <span><i class="fas fa-clock me-1"></i>${formatTimeAgo(n.created_at)}</span>
+                            ${NOTIFICATION_LINKS[n.notification_type] ? '<span style="color:var(--color-accent);"><i class="fas fa-external-link-alt me-1"></i>' + getNotificationLinkLabel(n.notification_type) + '</span>' : ''}
                         </div>
                     </div>
                     <div class="notification-actions">
@@ -684,7 +1030,56 @@
             const u = document.getElementById('unreadCount'); 
             if (u) u.textContent = count; 
         }
-        function handleNotificationClick(id) { markAsRead(id); }
+        // 通知クリック時の移動先ラベル（9言語）
+        var linkLabels = {
+            dashboard: { en: 'Dashboard', ja: 'ダッシュボード', zh: '控制台', es: 'Panel', fr: 'Tableau de bord', de: 'Dashboard', ko: '대시보드', ar: 'لوحة التحكم', pt: 'Painel' },
+            messages: { en: 'Messages', ja: 'メッセージ', zh: '消息', es: 'Mensajes', fr: 'Messages', de: 'Nachrichten', ko: '메시지', ar: 'الرسائل', pt: 'Mensagens' },
+            agreements: { en: 'Agreements', ja: '同意書', zh: '协议', es: 'Acuerdos', fr: 'Accords', de: 'Vereinbarungen', ko: '동의서', ar: 'الاتفاقيات', pt: 'Acordos' },
+            workDetail: { en: 'Work Detail', ja: '作品詳細', zh: '作品详情', es: 'Detalle de obra', fr: "Détail de l'œuvre", de: 'Werkdetails', ko: '작품 상세', ar: 'تفاصيل العمل', pt: 'Detalhes da obra' }
+        };
+        var linkTypeMap = {
+            sale: 'dashboard', translation_complete: 'dashboard',
+            feedback: 'workDetail', comment: 'workDetail',
+            agreement_request: 'agreements', agreement_signed: 'agreements', agreement_expired: 'agreements',
+            progress_report: 'dashboard', deadline_warning: 'dashboard',
+            message_received: 'messages', price_changed: 'dashboard',
+            translation_request: 'messages', editing_request: 'messages'
+        };
+        function getNotificationLinkLabel(type) {
+            var key = linkTypeMap[type];
+            if (!key || !linkLabels[key]) return '';
+            var lang = (localStorage.getItem('preferredLanguage') || 'en');
+            return linkLabels[key][lang] || linkLabels[key]['en'] || '';
+        }
+
+        // 通知タイプ → 移動先のマッピング
+        var NOTIFICATION_LINKS = {
+            sale: 'dashboard.html',
+            translation_complete: 'dashboard.html',
+            feedback: 'work-detail.html?id={workId}',
+            comment: 'work-detail.html?id={workId}',
+            system: '',
+            agreement_request: 'agreements.html',
+            agreement_signed: 'agreements.html',
+            agreement_expired: 'agreements.html',
+            progress_report: 'dashboard.html?tab=collabs',
+            deadline_warning: 'dashboard.html?tab=collabs',
+            message_received: 'messages.html',
+            price_changed: 'dashboard.html',
+            translation_request: 'messages.html',
+            editing_request: 'messages.html'
+        };
+
+        function handleNotificationClick(id) {
+            var n = DEMO_NOTIFICATIONS.find(function(item) { return item.notification_id === id; });
+            markAsRead(id);
+            if (n) {
+                var link = NOTIFICATION_LINKS[n.notification_type] || '';
+                if (link) {
+                    window.location.href = link;
+                }
+            }
+        }
         async function markAsRead(id) { if (isDemo) { const n = DEMO_NOTIFICATIONS.find(n => n.notification_id === id); if (n) n.is_read = true; loadNotifications(); loadUnreadCount(); return; } const token = localStorage.getItem('token'); if (!token) return; try { await fetch(`${API_BASE}/${id}/read`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` } }); loadNotifications(); loadUnreadCount(); } catch (e) {} }
         async function markAllAsRead() { if (isDemo) { DEMO_NOTIFICATIONS.forEach(n => n.is_read = true); loadNotifications(); loadUnreadCount(); showToast('All marked as read'); return; } const token = localStorage.getItem('token'); if (!token) return; try { await fetch(`${API_BASE}/read-all`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` } }); loadNotifications(); loadUnreadCount(); showToast('All marked as read'); } catch (e) {} }
         async function deleteNotification(id) { if (!confirm('Delete?')) return; if (isDemo) { const i = DEMO_NOTIFICATIONS.findIndex(n => n.notification_id === id); if (i > -1) DEMO_NOTIFICATIONS.splice(i, 1); loadNotifications(); loadUnreadCount(); showToast('Deleted'); return; } const token = localStorage.getItem('token'); if (!token) return; try { await fetch(`${API_BASE}/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } }); loadNotifications(); loadUnreadCount(); showToast('Deleted'); } catch (e) {} }

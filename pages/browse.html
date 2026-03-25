@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <title>Browse Works - Publisher</title>
@@ -10,10 +11,218 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="../css/variables.css" rel="stylesheet">
     <link href="../css/style-new.css" rel="stylesheet">
-    <link href="../css/mobile-fixes.css" rel="stylesheet">
+    <link href="../css/components.css" rel="stylesheet">
     <link href="../css/navbar.css" rel="stylesheet">
-<!-- Browse Page Styles -->
+    <link href="../css/mobile-fixes.css" rel="stylesheet">
+    <!-- Pattern C Navbar Styles -->
+    <style>
+        /* ========== Mobile Language Selector ========== */
+        .navbar-lang-selector {
+            display: flex;
+            align-items: center;
+            margin-right: 0.5rem;
+        }
+        
+        @media (max-width: 991.98px) {
+            .navbar-lang-selector {
+                order: 1;
+            }
+            .navbar-toggler {
+                order: 2;
+            }
+        }
+        
+        /* ========== PC Navbar - 横並び維持 ========== */
+        @media (min-width: 992px) {
+            .navbar-nav {
+                flex-wrap: nowrap !important;
+                flex-direction: row !important;
+            }
+            .navbar-nav .nav-item {
+                white-space: nowrap !important;
+            }
+            .navbar-nav .nav-link {
+                white-space: nowrap !important;
+                padding: 0.5rem 0.6rem !important;
+                font-size: 0.9rem;
+            }
+
+            .dropdown-menu {
+                white-space: nowrap;
+            }
+            .navbar-buttons-guest {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                gap: 0.5rem;
+            }
+            .navbar-buttons-guest .btn {
+                white-space: nowrap !important;
+                flex-shrink: 0;
+            }
+        }
+        
+        /* ========== Auth Visibility Control ========== */
+        .auth-only {
+            display: none !important;
+        }
+        .guest-only {
+            display: block;
+        }
+        body.logged-in .auth-only {
+            display: block !important;
+        }
+        body.logged-in .auth-only.nav-item {
+            display: list-item !important;
+        }
+        body.logged-in .auth-only.dropdown {
+            display: block !important;
+        }
+        body.logged-in .guest-only {
+            display: none !important;
+        }
+        @media (min-width: 992px) {
+            body.logged-in .navbar-buttons-guest {
+                display: none !important;
+            }
+        }
+        
+        /* ========== User Dropdown Menu ========== */
+        .user-dropdown {
+            position: relative;
+        }
+        .user-dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: transparent;
+            border: 1px solid var(--color-border);
+            border-radius: 25px;
+            padding: 0.4rem 0.75rem;
+            cursor: pointer;
+            color: var(--color-text);
+            transition: all 0.2s;
+        }
+        .user-dropdown-toggle:hover {
+            border-color: var(--color-accent);
+            background: rgba(139, 115, 85, 0.05);
+        }
+        .user-dropdown-toggle i:first-child {
+            font-size: 1.25rem;
+            color: var(--color-accent);
+        }
+        .user-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-chevron {
+            font-size: 0.7rem;
+            color: var(--color-text-secondary);
+            transition: transform 0.2s;
+        }
+        .user-dropdown.open .user-chevron {
+            transform: rotate(180deg);
+        }
+        .user-menu {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            right: 0;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            min-width: 240px;
+            z-index: 1055;
+            display: none;
+            overflow: hidden;
+        }
+        .user-menu.show {
+            display: block;
+        }
+        .user-menu-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--color-bg-main);
+        }
+        .user-avatar {
+            font-size: 2.5rem;
+            color: var(--color-accent);
+        }
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .user-display-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-email {
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-menu-divider {
+            height: 1px;
+            background: var(--color-border);
+        }
+        .user-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--color-text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+        .user-menu-item:hover {
+            background: var(--color-bg-hover);
+            color: var(--color-accent);
+        }
+        .user-menu-item i {
+            width: 20px;
+            text-align: center;
+            color: var(--color-text-secondary);
+        }
+        .user-menu-item:hover i {
+            color: var(--color-accent);
+        }
+        .logout-btn {
+            color: var(--color-error);
+        }
+        .logout-btn i {
+            color: var(--color-error);
+        }
+        .logout-btn:hover {
+            background: rgba(199, 93, 93, 0.1);
+            color: var(--color-error);
+        }
+        
+        /* ========== Navbar Overlay ========== */
+
+        /* ========== Mobile Menu ========== */
+        @media (max-width: 991.98px) {
+
+        }
+    </style>
+    
+    <!-- Browse Page Styles -->
     <style>
         .browse-container { padding: var(--spacing-xl) 0; }
         .page-header { margin-bottom: var(--spacing-xl); }
@@ -39,244 +248,38 @@
     </style>
 </head>
 <body>
-<!-- ========== NAVBAR PATTERN C (pages/ 階層) ========== -->
-<nav class="navbar navbar-expand-lg navbar-custom sticky-top">
-    <div class="container">
-        <!-- Brand -->
-        <a class="navbar-brand" href="../index.html">
-            <i class="fas fa-book-open"></i>
-            Publisher
-        </a>
-        
-        <!-- Language Selector Mobile -->
-        <div class="navbar-lang-selector d-lg-none">
-            <select class="language-selector" id="languageSelectorMobile">
-                <option value="en">🇬🇧 EN</option>
-                <option value="ja">🇯🇵 日本語</option>
-                <option value="zh">🇨🇳 中文</option>
-                <option value="es">🇪🇸 ES</option>
-                <option value="fr">🇫🇷 FR</option>
-                <option value="de">🇩🇪 DE</option>
-                <option value="ko">🇰🇷 한국어</option>
-                <option value="ar">🇸🇦 عربي</option>
-                <option value="pt">🇧🇷 PT</option>
-            </select>
-        </div>
-        
-        <!-- User Dropdown (auth-only) -->
-        <div class="user-dropdown auth-only" id="userDropdown">
-            <button type="button" class="user-dropdown-toggle" id="userDropdownBtn" onclick="toggleUserDropdown(event)">
-                <i class="fas fa-user-circle"></i>
-                <span class="user-name d-none d-lg-inline" id="userName">User</span>
-                <i class="fas fa-chevron-down user-chevron d-none d-lg-inline"></i>
-            </button>
-            <div class="user-menu" id="userMenu">
-                <div class="user-menu-header">
-                    <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
-                    <div class="user-info">
-                        <div class="user-display-name" id="userDisplayName">User</div>
-                        <div class="user-email" id="userEmail">user@example.com</div>
-                    </div>
-                </div>
-                <div class="user-menu-divider"></div>
-                <a href="dashboard.html" class="user-menu-item">
-                    <i class="fas fa-th-large"></i>
-                    <span id="menuDashboard">Dashboard</span>
-                </a>
-                <a href="my-works.html" class="user-menu-item">
-                    <i class="fas fa-book"></i>
-                    <span id="menuMyWorks">My Works</span>
-                </a>
-                <a href="account-settings.html" class="user-menu-item">
-                    <i class="fas fa-cog"></i>
-                    <span id="menuAccountSettings">Account Settings</span>
-                </a>
-                <div class="user-menu-divider"></div>
-                <button class="user-menu-item logout-btn" onclick="handleLogout()">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span id="menuLogout">Log Out</span>
-                </button>
-            </div>
-        </div>
-        
-        <!-- Hamburger -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        
-        <!-- Navbar Overlay -->
-        <div class="navbar-overlay d-lg-none" id="navbarOverlay"></div>
-        
-        <!-- Navbar Content -->
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <!-- PC Navigation -->
-            <ul class="navbar-nav me-auto d-none d-lg-flex">
-                <!-- Browse: 共通 -->
-                <li class="nav-item">
-                    <a class="nav-link" href="browse.html">
-                        <i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span>
-                    </a>
-                </li>
-                <!-- Auth: Library -->
-                <li class="nav-item auth-only">
-                    <a class="nav-link" href="library.html">
-                        <i class="fas fa-book-reader me-1"></i> <span id="navLibraryPC">Library</span>
-                    </a>
-                </li>
-                <!-- Auth: Dashboard -->
-                <li class="nav-item auth-only">
-                    <a class="nav-link" href="dashboard.html">
-                        <i class="fas fa-th-large me-1"></i> <span id="navDashboardPC">Dashboard</span>
-                    </a>
-                </li>
-                <!-- Auth: Upload -->
-                <li class="nav-item auth-only">
-                    <a class="nav-link" href="upload.html">
-                        <i class="fas fa-upload me-1"></i> <span data-i18n="nav.upload">Upload</span>
-                    </a>
-                </li>
-                <!-- Auth: Translation Tools Dropdown -->
-                <li class="nav-item dropdown auth-only">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-language me-1"></i> <span id="navTranslationToolsPC">Translation Tools</span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="manga-translator.html"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorPC">Manga Translator</span></a></li>
-                        <li><a class="dropdown-item" href="translation-status.html"><i class="fas fa-tasks me-2"></i><span id="navTranslationStatusPC">Translation Status</span></a></li>
-                        <li><a class="dropdown-item" href="translators/index.html"><i class="fas fa-users me-2"></i><span id="navFindTranslatorsPC">Find Translators</span></a></li>
-                    </ul>
-                </li>
-                <!-- Support Dropdown: 共通 -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-headset me-1"></i> <span data-i18n="nav.support">Support</span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item active" href="support/faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
-                        <li><a class="dropdown-item" href="support/troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
-                        <li><a class="dropdown-item" href="support/contact.html"><i class="fas fa-envelope me-2"></i><span id="navContactPC">Contact</span></a></li>
-                        <li class="auth-only"><hr class="dropdown-divider"></li>
-                        <li class="auth-only"><a class="dropdown-item" href="support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
-                    </ul>
-                </li>
-            </ul>
-            
-            <!-- Mobile Navigation -->
-            <ul class="navbar-nav d-lg-none">
-                <!-- Browse -->
-                <li class="nav-item">
-                    <a class="nav-link" href="browse.html">
-                        <i class="fas fa-compass me-2"></i><span data-i18n="nav.browse">Browse</span>
-                    </a>
-                </li>
-                <!-- Auth: Library -->
-                <li class="nav-item auth-only">
-                    <a class="nav-link" href="library.html">
-                        <i class="fas fa-book-reader me-2"></i><span id="navLibraryMobile">Library</span>
-                    </a>
-                </li>
-                <!-- Auth: Dashboard -->
-                <li class="nav-item auth-only">
-                    <a class="nav-link" href="dashboard.html">
-                        <i class="fas fa-th-large me-2"></i><span id="navDashboardMobile">Dashboard</span>
-                    </a>
-                </li>
-                <!-- Auth: Upload -->
-                <li class="nav-item auth-only">
-                    <a class="nav-link" href="upload.html">
-                        <i class="fas fa-upload me-2"></i><span data-i18n="nav.upload">Upload</span>
-                    </a>
-                </li>
-                <!-- Auth: Translation Tools -->
-                <li class="nav-item dropdown auth-only">
-                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                        <i class="fas fa-language me-2"></i><span id="navTranslationToolsMobile">Translation Tools</span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="manga-translator.html"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorMobile">Manga Translator</span></a></li>
-                        <li><a class="dropdown-item" href="translation-status.html"><i class="fas fa-tasks me-2"></i><span id="navTranslationStatusMobile">Translation Status</span></a></li>
-                        <li><a class="dropdown-item" href="translators/index.html"><i class="fas fa-users me-2"></i><span id="navFindTranslatorsMobile">Find Translators</span></a></li>
-                    </ul>
-                </li>
-                <!-- Support -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle active" href="#" data-bs-toggle="dropdown">
-                        <i class="fas fa-headset me-2"></i><span data-i18n="nav.support">Support</span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item active" href="support/faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
-                        <li><a class="dropdown-item" href="support/troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
-                        <li><a class="dropdown-item" href="support/contact.html"><i class="fas fa-envelope me-2"></i><span id="navContactMobile">Contact</span></a></li>
-                        <li class="auth-only"><hr class="dropdown-divider"></li>
-                        <li class="auth-only"><a class="dropdown-item" href="support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
-                    </ul>
-                </li>
-                <!-- Guest: Mobile Auth Buttons -->
-                <li class="nav-item guest-only border-top mt-2 pt-2">
-                    <a class="nav-link" href="login.html">
-                        <i class="fas fa-sign-in-alt me-2"></i><span data-i18n="nav.login">Sign In</span>
-                    </a>
-                </li>
-                <li class="nav-item guest-only">
-                    <a class="nav-link text-accent fw-bold" href="register.html">
-                        <i class="fas fa-user-plus me-2"></i><span data-i18n="nav.getStarted">Get Started</span>
-                    </a>
-                </li>
-            </ul>
-            
-            <!-- Right Side (PC) -->
-            <div class="d-none d-lg-flex align-items-center gap-3">
-                <!-- Language Selector PC -->
-                <select class="language-selector" id="languageSelector">
-                    <option value="en">🇬🇧 EN</option>
-                    <option value="ja">🇯🇵 日本語</option>
-                    <option value="zh">🇨🇳 中文</option>
-                    <option value="es">🇪🇸 ES</option>
-                    <option value="fr">🇫🇷 FR</option>
-                    <option value="de">🇩🇪 DE</option>
-                    <option value="ko">🇰🇷 한국어</option>
-                    <option value="ar">🇸🇦 عربي</option>
-                    <option value="pt">🇧🇷 PT</option>
-                </select>
-                
-                <!-- Guest Buttons (PC) -->
-                <div class="navbar-buttons-guest guest-only d-none d-lg-flex">
-                    <a href="login.html" class="btn btn-soft-custom">
-                        <span data-i18n="nav.login">Sign In</span>
-                    </a>
-                    <a href="register.html" class="btn btn-primary-custom">
-                        <span data-i18n="nav.getStarted">Get Started</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</nav>
-<!-- ========== NAVBAR PATTERN C END ========== -->
+<div id="navbar-container"></div>
 
     <main class="browse-container">
         <div class="container">
             <div class="page-header">
-                <h1><i class="fas fa-compass me-2 text-accent"></i><span id="pageTitle">Browse Works</span></h1>
-                <p id="pageSubtitle">Discover amazing stories from creators worldwide</p>
+                <h1><i class="fas fa-compass me-2 text-accent"></i><span id="pageTitle" data-i18n="browse.pageTitle">Browse Works</span></h1>
+                <p id="pageSubtitle" data-i18n="browse.pageSubtitle">Discover amazing stories from creators worldwide</p>
             </div>
             <div class="row">
                 <div class="col-lg-3 col-md-4">
                     <div class="filter-sidebar">
                         <div class="filter-section">
-                            <h3 id="filterCategory">Category</h3>
+                            <h3 id="filterSearch" data-i18n="browse.filterSearch">Search</h3>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="searchInput" data-i18n-placeholder="browse.searchPlaceholder" placeholder="Title or author..." onkeyup="if(event.key==='Enter')applyFilters()">
+                                <button class="btn btn-custom" onclick="applyFilters()"><i class="fas fa-search"></i></button>
+                            </div>
+                        </div>
+                        <div class="filter-section">
+                            <h3 id="filterCategory" data-i18n="browse.filterCategory">Category</h3>
                             <select class="form-select" id="categoryFilter">
-                                <option value="" id="optAllCategories">All Categories</option>
-                                <option value="fiction" id="optFiction">Fiction</option>
-                                <option value="non-fiction" id="optNonFiction">Non-Fiction</option>
-                                <option value="manga" id="optManga">Manga</option>
-                                <option value="poetry" id="optPoetry">Poetry</option>
+                                <option value="" id="optAllCategories" data-i18n="browse.optAllCategories">All Categories</option>
+                                <option value="fiction" id="optFiction" data-i18n="browse.optFiction">Fiction</option>
+                                <option value="non-fiction" id="optNonFiction" data-i18n="browse.optNonFiction">Non-Fiction</option>
+                                <option value="manga" id="optManga" data-i18n="browse.optManga">Manga</option>
+                                <option value="poetry" id="optPoetry" data-i18n="browse.optPoetry">Poetry</option>
                             </select>
                         </div>
                         <div class="filter-section">
-                            <h3 id="filterLanguage">Language</h3>
+                            <h3 id="filterLanguage" data-i18n="browse.filterLanguage">Language</h3>
                             <select class="form-select" id="languageFilter">
-                                <option value="" id="optAllLanguages">All Languages</option>
+                                <option value="" id="optAllLanguages" data-i18n="browse.optAllLanguages">All Languages</option>
                                 <option value="en">English</option>
                                 <option value="ja">日本語</option>
                                 <option value="zh">中文</option>
@@ -289,43 +292,42 @@
                             </select>
                         </div>
                         <div class="filter-section">
-                            <h3 id="filterSortBy">Sort By</h3>
+                            <h3 id="filterSortBy" data-i18n="browse.filterSortBy">Sort By</h3>
                             <select class="form-select" id="sortFilter">
-                                <option value="popular" id="optPopular">Most Popular</option>
-                                <option value="newest" id="optNewest">Newest</option>
-                                <option value="rating" id="optRating">Highest Rated</option>
-                                <option value="price-low" id="optPriceLow">Price: Low to High</option>
+                                <option value="popular" id="optPopular" data-i18n="browse.optPopular">Most Popular</option>
+                                <option value="newest" id="optNewest" data-i18n="browse.optNewest">Newest</option>
+                                <option value="rating" id="optRating" data-i18n="browse.optRating">Highest Rated</option>
+                                <option value="price-low" id="optPriceLow" data-i18n="browse.optPriceLow">Price: Low to High</option>
                             </select>
                         </div>
-                        <button class="btn btn-custom w-100" onclick="applyFilters()" id="btnApplyFilters">Apply Filters</button>
+                        <button class="btn btn-custom w-100 mb-2" onclick="applyFilters()" id="btnApplyFilters" data-i18n="browse.btnApplyFilters">Apply Filters</button>
+                        <button class="btn btn-outline-custom w-100" onclick="showRecommended()" id="btnRecommended">
+                            <i class="fas fa-magic me-1"></i><span id="btnRecommendedText" data-i18n="browse.btnRecommended">Recommended for You</span>
+                        </button>
                     </div>
                 </div>
                 <div class="col-lg-9 col-md-8">
-                    <div class="results-count"><span id="resultsCount">0</span> <span id="worksFoundLabel">works found</span></div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="results-count"><span id="resultsCount">0</span> <span id="worksFoundLabel" data-i18n="browse.worksFound">works found</span></div>
+                        <div id="recommendedBadge" style="display:none;">
+                            <span class="badge bg-accent text-white"><i class="fas fa-magic me-1"></i><span id="recommendedLabel">Recommended for You</span></span>
+                        </div>
+                    </div>
                     <div class="work-grid" id="workGrid"></div>
                     <div class="no-results" id="noResults" style="display:none;">
                         <i class="fas fa-search fa-3x mb-3"></i>
-                        <p id="noResultsText">No works found matching your criteria</p>
+                        <p id="noResultsText" data-i18n="browse.noResults">No works found matching your criteria</p>
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <footer class="footer-custom">
-        <div class="container">
-            <div class="d-flex flex-wrap justify-content-between align-items-center">
-                <p class="small mb-0">&copy; 2026 Publisher. All rights reserved.</p>
-                <div class="d-flex gap-3">
-                    <a href="support/faq.html" class="text-secondary" id="footerHelp">Help</a>
-                    <a href="terms.html" class="text-secondary" id="footerTerms">Terms</a>
-                    <a href="privacy.html" class="text-secondary" id="footerPrivacy">Privacy</a>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/i18n.js"></script>
+    <script src="../js/navbar.js"></script>
     <script src="../js/lang/ja.js"></script>
     <script src="../js/lang/en.js"></script>
     <script src="../js/lang/zh.js"></script>
@@ -337,16 +339,176 @@
     <script src="../js/lang/pt.js"></script>
     <script src="../js/lang/translations-base.js"></script>
     <script src="../js/language-switcher.js"></script>
-    <script src="../js/header-notification.js"></script>
-    <script src="../js/navbar.js"></script>
     
-<!-- Browse Page Script -->
+    <!-- Pattern C Navbar Script -->
+    <script>
+        // ========== 多言語対応テキスト（9言語）==========
+        const navText = {
+            translationTools: { en: 'Tools', ja: '翻訳ツール', zh: '翻译工具',
+                es: 'Herramientas de traducción', fr: 'Outils de traduction', de: 'Übersetzungstools',
+                ko: '번역 도구', ar: 'أدوات الترجمة', pt: 'Ferramentas de tradução'
+            },
+            mangaTranslator: {
+                en: 'Manga Translator', ja: 'マンガ翻訳', zh: '漫画翻译',
+                es: 'Traductor de Manga', fr: 'Traducteur de Manga', de: 'Manga-Übersetzer',
+                ko: '만화 번역기', ar: 'مترجم المانجا', pt: 'Tradutor de Mangá'
+            },
+            novelTranslator: {
+                en: 'Novel Translator', ja: '小説翻訳', zh: '小说翻译',
+                es: 'Traductor de Novela', fr: 'Traducteur de Roman', de: 'Roman-Übersetzer',
+                ko: '소설 번역기', ar: 'مترجم الروايات', pt: 'Tradutor de Romance'
+            },
+            translationStatus: {
+                en: 'Translation Status', ja: '翻訳状況', zh: '翻译状态',
+                es: 'Estado de traducción', fr: 'Statut de traduction', de: 'Übersetzungsstatus',
+                ko: '번역 상태', ar: 'حالة الترجمة', pt: 'Status da tradução'
+            },
+            findTranslators: {
+                en: 'Find Translators', ja: '翻訳者を探す', zh: '寻找翻译',
+                es: 'Buscar traductores', fr: 'Trouver des traducteurs', de: 'Übersetzer finden',
+                ko: '번역가 찾기', ar: 'البحث عن مترجمين', pt: 'Encontrar tradutores'
+            },
+            contact: {
+                en: 'Contact', ja: 'お問い合わせ', zh: '联系我们',
+                es: 'Contacto', fr: 'Contact', de: 'Kontakt',
+                ko: '문의', ar: 'اتصل بنا', pt: 'Contato'
+            },
+            library: {
+                en: 'Library', ja: 'ライブラリ', zh: '书库',
+                es: 'Biblioteca', fr: 'Bibliothèque', de: 'Bibliothek',
+                ko: '라이브러리', ar: 'المكتبة', pt: 'Biblioteca'
+            },
+            dashboard: {
+                en: 'Dashboard', ja: 'ダッシュボード', zh: '控制台',
+                es: 'Panel', fr: 'Tableau de bord', de: 'Dashboard',
+                ko: '대시보드', ar: 'لوحة التحكم', pt: 'Painel'
+            },
+            accountSettings: {
+                en: 'Account Settings', ja: 'アカウント設定', zh: '账户设置',
+                es: 'Configuración de cuenta', fr: 'Paramètres du compte', de: 'Kontoeinstellungen',
+                ko: '계정 설정', ar: 'إعدادات الحساب', pt: 'Configurações da conta'
+            },
+            logout: {
+                en: 'Log Out', ja: 'ログアウト', zh: '退出登录',
+                es: 'Cerrar sesión', fr: 'Déconnexion', de: 'Abmelden',
+                ko: '로그아웃', ar: 'تسجيل الخروج', pt: 'Sair'
+            },
+            logOutConfirm: {
+                en: 'Are you sure you want to log out?', ja: 'ログアウトしますか？', zh: '确定要退出登录吗？',
+                es: '¿Estás seguro de que quieres cerrar sesión?', fr: 'Êtes-vous sûr de vouloir vous déconnecter?', de: 'Sind Sie sicher, dass Sie sich abmelden möchten?',
+                ko: '로그아웃 하시겠습니까?', ar: 'هل أنت متأكد أنك تريد تسجيل الخروج؟', pt: 'Tem certeza que deseja sair?'
+            }
+        };
+        
+        function getNavL(obj) {
+            const lang = localStorage.getItem('preferredLanguage') || 'en';
+            return obj[lang] || obj.en || '';
+        }
+        
+        function updateNavUIText() {
+
+            const els = {
+
+            };
+            Object.keys(els).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = getNavL(els[id]);
+            });
+        }
+        
+        function toggleUserDropdown(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const dropdown = document.getElementById('userDropdown');
+            const dropdownMenu = document.getElementById('userMenu');
+            dropdown.classList.toggle('open');
+            dropdownMenu.classList.toggle('show');
+        }
+        
+        function handleLogout() {
+            if (confirm(getNavL(navText.logOutConfirm))) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
+            }
+        }
+        
+        function loadUserInfo() {
+            const userStr = localStorage.getItem('user');
+            const token = localStorage.getItem('token');
+            const isLoggedIn = !!(userStr && token);
+            
+            if (isLoggedIn) {
+                try {
+                    const user = JSON.parse(userStr);
+                    const displayName = user.display_name || user.firstName || user.email || 'User';
+                    const userNameEl = document.getElementById('userName');
+                    const userDisplayNameEl = document.getElementById('userDisplayName');
+                    const userEmailEl = document.getElementById('userEmail');
+                    if (userNameEl) userNameEl.textContent = displayName;
+                    if (userDisplayNameEl) userDisplayNameEl.textContent = displayName;
+                    if (userEmailEl) userEmailEl.textContent = user.email || '';
+                    document.body.classList.add('logged-in');
+                } catch (e) {
+                    document.body.classList.remove('logged-in');
+                }
+            } else {
+                document.body.classList.remove('logged-in');
+            }
+        }
+        
+        // Navbar initialization
+        (function() {
+            document.addEventListener('DOMContentLoaded', function() {
+                updateNavUIText();
+                loadUserInfo();
+                
+                // User dropdown close on outside click
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('.user-dropdown')) {
+                        const dropdown = document.getElementById('userDropdown');
+                        const dropdownMenu = document.getElementById('userMenu');
+                        if (dropdown) dropdown.classList.remove('open');
+                        if (dropdownMenu) dropdownMenu.classList.remove('show');
+                    }
+                });
+                
+                // Mobile overlay
+                const navbarCollapse = document.getElementById('navbarNav');
+                const navbarOverlay = document.getElementById('navbarOverlay');
+                
+                if (navbarCollapse) {
+                    navbarCollapse.addEventListener('show.bs.collapse', function() {
+                        if (navbarOverlay) navbarOverlay.classList.add('show');
+                    });
+                    navbarCollapse.addEventListener('hide.bs.collapse', function() {
+                        if (navbarOverlay) navbarOverlay.classList.remove('show');
+                    });
+                }
+                
+                if (navbarOverlay) {
+                    navbarOverlay.addEventListener('click', function() {
+                        const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                        if (bsCollapse) bsCollapse.hide();
+                    });
+                }
+            });
+            
+            document.addEventListener('languageChanged', function() {
+                updateNavUIText();
+            });
+        })();
+    </script>
+    
+    <!-- Browse Page Script -->
     <script>
         const API_BASE = 'http://localhost:3000/api';
 
         const uiText = {
             pageTitle: { en: 'Browse Works', ja: '作品を探す', zh: '浏览作品', es: 'Explorar Obras', fr: 'Parcourir les œuvres', de: 'Werke durchsuchen', ko: '작품 둘러보기', ar: 'تصفح الأعمال', pt: 'Explorar Obras' },
             pageSubtitle: { en: 'Discover amazing stories from creators worldwide', ja: '世界中のクリエイターの素晴らしい作品を発見しよう', zh: '发现来自全球创作者的精彩故事', es: 'Descubre historias increíbles de creadores de todo el mundo', fr: 'Découvrez des histoires incroyables de créateurs du monde entier', de: 'Entdecken Sie erstaunliche Geschichten von Schöpfern weltweit', ko: '전 세계 크리에이터들의 놀라운 이야기를 발견하세요', ar: 'اكتشف قصصًا رائعة من المبدعين في جميع أنحاء العالم', pt: 'Descubra histórias incríveis de criadores de todo o mundo' },
+            filterSearch: { en: 'Search', ja: '検索', zh: '搜索', es: 'Buscar', fr: 'Rechercher', de: 'Suche', ko: '검색', ar: 'بحث', pt: 'Buscar' },
+            searchPlaceholder: { en: 'Title or author...', ja: 'タイトルまたは著者名...', zh: '标题或作者...', es: 'Título o autor...', fr: 'Titre ou auteur...', de: 'Titel oder Autor...', ko: '제목 또는 저자...', ar: 'العنوان أو المؤلف...', pt: 'Título ou autor...' },
             filterCategory: { en: 'Category', ja: 'カテゴリ', zh: '类别', es: 'Categoría', fr: 'Catégorie', de: 'Kategorie', ko: '카테고리', ar: 'الفئة', pt: 'Categoria' },
             optAllCategories: { en: 'All Categories', ja: 'すべてのカテゴリ', zh: '所有类别', es: 'Todas las categorías', fr: 'Toutes les catégories', de: 'Alle Kategorien', ko: '모든 카테고리', ar: 'جميع الفئات', pt: 'Todas as categorias' },
             optFiction: { en: 'Fiction', ja: '小説', zh: '小说', es: 'Ficción', fr: 'Fiction', de: 'Belletristik', ko: '소설', ar: 'خيال', pt: 'Ficção' },
@@ -361,6 +523,8 @@
             optRating: { en: 'Highest Rated', ja: '評価順', zh: '评分最高', es: 'Mejor calificado', fr: 'Mieux noté', de: 'Bestbewertet', ko: '평점순', ar: 'الأعلى تقييمًا', pt: 'Mais bem avaliado' },
             optPriceLow: { en: 'Price: Low to High', ja: '価格: 安い順', zh: '价格：从低到高', es: 'Precio: de menor a mayor', fr: 'Prix: croissant', de: 'Preis: aufsteigend', ko: '가격: 낮은순', ar: 'السعر: من الأقل للأعلى', pt: 'Preço: menor para maior' },
             btnApplyFilters: { en: 'Apply Filters', ja: 'フィルター適用', zh: '应用筛选', es: 'Aplicar filtros', fr: 'Appliquer les filtres', de: 'Filter anwenden', ko: '필터 적용', ar: 'تطبيق المرشحات', pt: 'Aplicar filtros' },
+            btnRecommended: { en: 'Recommended for You', ja: 'あなたへのおすすめ', zh: '为你推荐', es: 'Recomendado para ti', fr: 'Recommandé pour vous', de: 'Empfohlen für dich', ko: '당신을 위한 추천', ar: 'موصى به لك', pt: 'Recomendado para você' },
+            publisherPicks: { en: "Publisher's Picks", ja: 'Publisherのおすすめ', zh: '平台精选', es: 'Selección del editor', fr: 'Sélection de Publisher', de: 'Publisher-Auswahl', ko: 'Publisher 추천', ar: 'اختيارات الناشر', pt: 'Escolhas do Publisher' },
             worksFound: { en: 'works found', ja: '件の作品', zh: '个作品', es: 'obras encontradas', fr: 'œuvres trouvées', de: 'Werke gefunden', ko: '개의 작품', ar: 'عمل تم العثور عليه', pt: 'obras encontradas' },
             noResults: { en: 'No works found matching your criteria', ja: '条件に一致する作品が見つかりませんでした', zh: '没有找到符合条件的作品', es: 'No se encontraron obras que coincidan con sus criterios', fr: 'Aucune œuvre trouvée correspondant à vos critères', de: 'Keine Werke gefunden, die Ihren Kriterien entsprechen', ko: '조건에 맞는 작품을 찾을 수 없습니다', ar: 'لم يتم العثور على أعمال تطابق معاييرك', pt: 'Nenhuma obra encontrada correspondendo aos seus critérios' },
             by: { en: 'by', ja: '著者:', zh: '作者:', es: 'por', fr: 'par', de: 'von', ko: '저자:', ar: 'بواسطة', pt: 'por' },
@@ -377,36 +541,22 @@
 
         // Sample works data
         const sampleWorks = [
-            { id: 1, title: 'The Adventure of Magic Academy', author: 'Sarah Chen', price: 4.99, rating: 4.8, category: 'fiction', language: 'en' },
-            { id: 2, title: 'Whispers of Tomorrow', author: 'James Miller', price: 3.99, rating: 4.6, category: 'fiction', language: 'en' },
-            { id: 3, title: 'Digital Dreams', author: 'Yuki Tanaka', price: 5.99, rating: 4.9, category: 'manga', language: 'ja' },
-            { id: 4, title: 'The Last Kingdom', author: 'Maria Garcia', price: 2.99, rating: 4.5, category: 'fiction', language: 'es' },
-            { id: 5, title: '月光の詩', author: '田中花子', price: 0, rating: 4.7, category: 'poetry', language: 'ja' },
-            { id: 6, title: 'Le Monde Nouveau', author: 'Pierre Dubois', price: 3.49, rating: 4.4, category: 'non-fiction', language: 'fr' }
+            { id: 1, title: 'The Adventure of Magic Academy', author: 'Sarah Chen', price: 4.99, rating: 4.8, category: 'fiction', language: 'en', tags: ['fantasy', 'adventure', 'magic'], description: 'A young wizard enrolls in a prestigious magic academy where she discovers hidden powers and ancient secrets. A thrilling fantasy adventure about friendship, courage, and destiny.', reviews: 'Absolutely captivating! The world-building is incredible. Best fantasy novel I have read this year. The magic system is unique and well thought out.' },
+            { id: 2, title: 'Whispers of Tomorrow', author: 'James Miller', price: 3.99, rating: 4.6, category: 'fiction', language: 'en', tags: ['sci-fi', 'dystopia', 'thriller'], description: 'In a dystopian future, a journalist uncovers a conspiracy that could change humanity forever. A gripping sci-fi thriller exploring technology, surveillance, and freedom.', reviews: 'A thought-provoking dystopian tale. The plot twists kept me on edge. Reminds me of Orwell. Excellent writing style with deep character development.' },
+            { id: 3, title: 'Digital Dreams', author: 'Yuki Tanaka', price: 5.99, rating: 4.9, category: 'manga', language: 'ja', tags: ['cyberpunk', 'ai', 'action'], description: 'サイバーパンクの世界で、天才ハッカーの少女が仮想現実と現実の境界を越える冒険に挑む。AIと人間の共存をテーマにした近未来SFマンガ。', reviews: '作画が美しく、ストーリーも深い。サイバーパンク好きにはたまらない作品。キャラクターデザインが素晴らしい。The art style is breathtaking.' },
+            { id: 4, title: 'The Last Kingdom', author: 'Maria Garcia', price: 2.99, rating: 4.5, category: 'fiction', language: 'es', tags: ['historical', 'romance', 'medieval'], description: 'Una épica historia medieval sobre el último reino que resiste la invasión. Amor, traición y valentía se entrelazan en esta saga histórica llena de batallas y romance.', reviews: 'Historia épica con personajes memorables. Great historical fiction with vivid battle scenes. Medieval romance at its finest. La mejor novela histórica del año.' },
+            { id: 5, title: '月光の詩', author: '田中花子', price: 0, rating: 4.7, category: 'poetry', language: 'ja', tags: ['nature', 'love', 'seasons'], description: '四季の移ろいと人生の美しさを詠んだ現代詩集。月の光に照らされた日本の風景と心の機微を繊細な言葉で紡ぐ。自然、愛、孤独をテーマにした珠玉の詩篇。', reviews: '心に染みる美しい詩集。読むたびに新しい発見がある。日本語の美しさを再認識させてくれる。Hauntingly beautiful poetry collection.' },
+            { id: 6, title: 'Le Monde Nouveau', author: 'Pierre Dubois', price: 3.49, rating: 4.4, category: 'non-fiction', language: 'fr', tags: ['philosophy', 'society', 'climate'], description: 'Une exploration fascinante de la mondialisation et son impact sur les cultures locales. Essai philosophique sur le changement climatique, la technologie et l\'avenir de l\'humanité.', reviews: 'Brillante analyse sociologique. Eye-opening perspective on globalization. Un essai incontournable pour comprendre notre époque. Climate change discussion is particularly compelling.' },
+            { id: 7, title: 'Shadows of the Empire', author: 'David Park', price: 6.99, rating: 4.7, category: 'fiction', language: 'en', tags: ['fantasy', 'war', 'politics'], description: 'An epic tale of warring kingdoms, political intrigue, and forbidden magic. When a young general discovers a power that could end all wars, she must choose between duty and conscience.', reviews: 'Game of Thrones meets Avatar. Incredible world-building and complex characters. The battle scenes are breathtaking.' },
+            { id: 8, title: '星降る夜に', author: '佐藤美咲', price: 4.49, rating: 4.8, category: 'fiction', language: 'ja', tags: ['romance', 'drama', 'slice-of-life'], description: '東京の小さな書店を舞台に、失恋した女性と謎めいた常連客が織りなす心温まるラブストーリー。日常の中にある小さな奇跡を描く。', reviews: '心が温まる素敵な物語。キャラクターに共感できる。東京の情景描写が美しい。A beautiful love story set in Tokyo.' },
+            { id: 9, title: 'Code of Honor', author: 'Robert Kim', price: 0, rating: 4.3, category: 'non-fiction', language: 'en', tags: ['technology', 'ethics', 'ai'], description: 'A compelling exploration of AI ethics and the future of technology. From autonomous weapons to algorithmic bias, this book examines the moral challenges of our digital age.', reviews: 'Essential reading for anyone in tech. Thought-provoking and well-researched. Changed my perspective on AI development.' },
+            { id: 10, title: 'Flores del Viento', author: 'Isabella Torres', price: 3.99, rating: 4.6, category: 'poetry', language: 'es', tags: ['nature', 'love', 'latin-america'], description: 'Una colección de poemas que celebra la naturaleza latinoamericana y el amor en todas sus formas. Versos llenos de color, pasión y la brisa del Caribe.', reviews: 'Poesía que te transporta. Beautiful imagery and emotional depth. Los mejores poemas en español que he leído.' },
+            { id: 11, title: 'Neon Samurai', author: 'Hiroshi Kato', price: 7.99, rating: 4.9, category: 'manga', language: 'ja', tags: ['cyberpunk', 'samurai', 'action'], description: 'ネオ東京を舞台に、最後の侍がサイバー犯罪組織に立ち向かう。伝統と未来が交差するアクションマンガの傑作。', reviews: '圧倒的な画力とストーリー。サイバーパンクと侍の融合が新鮮。A masterpiece of manga storytelling.' },
+            { id: 12, title: 'The Mindful Writer', author: 'Emma Clarke', price: 2.49, rating: 4.2, category: 'non-fiction', language: 'en', tags: ['writing', 'creativity', 'mindfulness'], description: 'A guide to finding your creative voice through mindfulness practices. Learn how meditation and awareness can transform your writing and unlock your full potential.', reviews: 'Changed my writing process completely. Practical and inspiring. Great for overcoming writer\'s block.' }
         ];
 function updateAllText() {
             document.title = getL(uiText.pageTitle) + ' - Publisher';
-            document.getElementById('pageTitle').textContent = getL(uiText.pageTitle);
-            document.getElementById('pageSubtitle').textContent = getL(uiText.pageSubtitle);
-            document.getElementById('filterCategory').textContent = getL(uiText.filterCategory);
-            document.getElementById('optAllCategories').textContent = getL(uiText.optAllCategories);
-            document.getElementById('optFiction').textContent = getL(uiText.optFiction);
-            document.getElementById('optNonFiction').textContent = getL(uiText.optNonFiction);
-            document.getElementById('optManga').textContent = getL(uiText.optManga);
-            document.getElementById('optPoetry').textContent = getL(uiText.optPoetry);
-            document.getElementById('filterLanguage').textContent = getL(uiText.filterLanguage);
-            document.getElementById('optAllLanguages').textContent = getL(uiText.optAllLanguages);
-            document.getElementById('filterSortBy').textContent = getL(uiText.filterSortBy);
-            document.getElementById('optPopular').textContent = getL(uiText.optPopular);
-            document.getElementById('optNewest').textContent = getL(uiText.optNewest);
-            document.getElementById('optRating').textContent = getL(uiText.optRating);
-            document.getElementById('optPriceLow').textContent = getL(uiText.optPriceLow);
-            document.getElementById('btnApplyFilters').textContent = getL(uiText.btnApplyFilters);
-            document.getElementById('worksFoundLabel').textContent = getL(uiText.worksFound);
-            document.getElementById('noResultsText').textContent = getL(uiText.noResults);
-            document.getElementById('footerHelp').textContent = getL(uiText.footerHelp);
-            document.getElementById('footerTerms').textContent = getL(uiText.footerTerms);
-            document.getElementById('footerPrivacy').textContent = getL(uiText.footerPrivacy);
+            if (typeof i18n !== 'undefined') i18n.applyToDOM();
             // Re-render works to update "by" and "Free" text
             applyFilters();
         }
@@ -442,23 +592,72 @@ function updateAllText() {
         }
 
         function applyFilters() {
+            document.getElementById('recommendedBadge').style.display = 'none';
+            const searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
             const category = document.getElementById('categoryFilter').value;
             const language = document.getElementById('languageFilter').value;
             const sort = document.getElementById('sortFilter').value;
-            
+
             let filtered = [...sampleWorks];
-            
+
+            if (searchQuery) filtered = filtered.filter(w =>
+                w.title.toLowerCase().includes(searchQuery) ||
+                w.author.toLowerCase().includes(searchQuery) ||
+                (w.description && w.description.toLowerCase().includes(searchQuery)) ||
+                (w.reviews && w.reviews.toLowerCase().includes(searchQuery))
+            );
             if (category) filtered = filtered.filter(w => w.category === category);
             if (language) filtered = filtered.filter(w => w.language === language);
-            
+
             switch(sort) {
                 case 'newest': filtered.reverse(); break;
                 case 'rating': filtered.sort((a, b) => b.rating - a.rating); break;
                 case 'price-low': filtered.sort((a, b) => a.price - b.price); break;
                 default: filtered.sort((a, b) => b.rating - a.rating);
             }
-            
+
             renderWorks(filtered);
+        }
+
+        function showRecommended() {
+            // Reset filters
+            document.getElementById('searchInput').value = '';
+            document.getElementById('categoryFilter').value = '';
+            document.getElementById('languageFilter').value = '';
+            document.getElementById('sortFilter').value = 'popular';
+
+            const isLoggedIn = document.body.classList.contains('logged-in');
+            const badge = document.getElementById('recommendedBadge');
+            const label = document.getElementById('recommendedLabel');
+
+            if (isLoggedIn) {
+                // Logged in: personalized recommendations based on user preferences
+                const userLang = getCurrentLang();
+                const userPrefs = JSON.parse(localStorage.getItem('userPreferences') || '{}');
+                const favCategories = userPrefs.categories || ['fiction', 'manga'];
+                const favTags = userPrefs.tags || ['fantasy', 'adventure', 'cyberpunk'];
+
+                let scored = sampleWorks.map(w => {
+                    let score = 0;
+                    if (favCategories.includes(w.category)) score += 3;
+                    if (w.language === userLang) score += 2;
+                    if (w.tags) w.tags.forEach(t => { if (favTags.includes(t)) score += 2; });
+                    score += w.rating;
+                    return { ...w, score };
+                });
+                scored.sort((a, b) => b.score - a.score);
+
+                label.textContent = getL(uiText.btnRecommended);
+                badge.style.display = 'block';
+                renderWorks(scored);
+            } else {
+                // Not logged in: Publisher's random picks
+                let shuffled = [...sampleWorks].sort(() => Math.random() - 0.5);
+
+                label.textContent = getL(uiText.publisherPicks);
+                badge.style.display = 'block';
+                renderWorks(shuffled);
+            }
         }
 
         function viewWork(id) {
@@ -473,6 +672,7 @@ function updateAllText() {
 
         document.addEventListener('DOMContentLoaded', function() {
             updateAllText();
+            applyFilters();
         });
 
         document.addEventListener('languageChanged', function(e) {
@@ -480,6 +680,13 @@ function updateAllText() {
             if (l) { const d = document.getElementById('languageSelector'), m = document.getElementById('languageSelectorMobile'); if (d) d.value = l; if (m) m.value = l; }
             updateAllText();
         });
+
+        if (typeof i18n !== 'undefined') {
+            i18n.onLanguageChange(function() {
+                i18n.applyToDOM();
+                applyFilters();
+            });
+        }
     </script>
 </body>
 </html>

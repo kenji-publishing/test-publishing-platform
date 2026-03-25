@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
     <title>Translation Feedback - Publisher</title>
@@ -11,264 +12,273 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="../../css/variables.css" rel="stylesheet">
     <link href="../../css/style-new.css" rel="stylesheet">
+    <link href="../../css/components.css" rel="stylesheet">
     <link href="../../css/navbar.css" rel="stylesheet">
-    
+    <link href="../../css/mobile-fixes.css" rel="stylesheet">
+
+    <style>
+        /* ========== Mobile Language Selector ========== */
+        .navbar-lang-selector {
+            display: flex;
+            align-items: center;
+            margin-right: 0.5rem;
+        }
+        
+        @media (max-width: 991.98px) {
+            .navbar-lang-selector {
+                order: 1;
+            }
+            .navbar-toggler {
+                order: 2;
+            }
+        }
+        
+        /* ========== PC Navbar - 横並び維持 ========== */
+        @media (min-width: 992px) {
+            .navbar-nav {
+                flex-wrap: nowrap !important;
+                flex-direction: row !important;
+            }
+            .navbar-nav .nav-item {
+                white-space: nowrap !important;
+            }
+            .navbar-nav .nav-link {
+                white-space: nowrap !important;
+                padding: 0.5rem 0.6rem !important;
+                font-size: 0.9rem;
+            }
+
+            .dropdown-menu {
+                white-space: nowrap;
+            }
+            .navbar-buttons-guest {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                gap: 0.5rem;
+            }
+            .navbar-buttons-guest .btn {
+                white-space: nowrap !important;
+                flex-shrink: 0;
+            }
+        }
+        
+        /* ========== Auth Visibility Control ========== */
+        .auth-only {
+            display: none !important;
+        }
+        .guest-only {
+            display: block;
+        }
+        body.logged-in .auth-only {
+            display: block !important;
+        }
+        body.logged-in .auth-only.nav-item {
+            display: list-item !important;
+        }
+        body.logged-in .auth-only.dropdown {
+            display: block !important;
+        }
+        body.logged-in .guest-only {
+            display: none !important;
+        }
+        @media (min-width: 992px) {
+            body.logged-in .navbar-buttons-guest {
+                display: none !important;
+            }
+        }
+        
+        /* ========== User Dropdown Menu ========== */
+        .user-dropdown {
+            position: relative;
+        }
+        .user-dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: transparent;
+            border: 1px solid var(--color-border);
+            border-radius: 25px;
+            padding: 0.4rem 0.75rem;
+            cursor: pointer;
+            color: var(--color-text);
+            transition: all 0.2s;
+        }
+        .user-dropdown-toggle:hover {
+            border-color: var(--color-accent);
+            background: rgba(139, 115, 85, 0.05);
+        }
+        .user-dropdown-toggle i:first-child {
+            font-size: 1.25rem;
+            color: var(--color-accent);
+        }
+        .user-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-chevron {
+            font-size: 0.7rem;
+            color: var(--color-text-secondary);
+            transition: transform 0.2s;
+        }
+        .user-dropdown.open .user-chevron {
+            transform: rotate(180deg);
+        }
+        .user-menu {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            right: 0;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            min-width: 240px;
+            z-index: 1001;
+            display: none;
+            overflow: hidden;
+        }
+        .user-menu.show {
+            display: block;
+        }
+        .user-menu-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--color-bg-main);
+        }
+        .user-avatar {
+            font-size: 2.5rem;
+            color: var(--color-accent);
+        }
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .user-display-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-email {
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-menu-divider {
+            height: 1px;
+            background: var(--color-border);
+        }
+        .user-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--color-text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+        .user-menu-item:hover {
+            background: var(--color-bg-hover);
+            color: var(--color-accent);
+        }
+        .user-menu-item i {
+            width: 20px;
+            text-align: center;
+            color: var(--color-text-secondary);
+        }
+        .user-menu-item:hover i {
+            color: var(--color-accent);
+        }
+        .logout-btn {
+            color: var(--color-error);
+        }
+        .logout-btn i {
+            color: var(--color-error);
+        }
+        .logout-btn:hover {
+            background: rgba(199, 93, 93, 0.1);
+            color: var(--color-error);
+        }
+        
+        /* ========== Navbar Overlay ========== */
+
+        /* ========== Mobile Adjustments ========== */
+        @media (max-width: 991.98px) {
+
+        }
+
+        /* ========== Page Specific Styles ========== */
+        .page-header { background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%); color: white; padding: var(--spacing-xl) 0; margin-bottom: var(--spacing-xl); }
+        .page-header h1 { color: white; font-size: var(--font-size-2xl); margin-bottom: var(--spacing-xs); }
+        .page-header p { color: rgba(255,255,255,0.9); margin: 0; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--spacing-md); margin-bottom: var(--spacing-xl); }
+        .stat-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-lg); text-align: center; }
+        .stat-card .stat-value { font-family: var(--font-heading); font-size: var(--font-size-2xl); font-weight: 700; color: var(--color-text-primary); }
+        .stat-card .stat-label { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+        .stat-card.warning .stat-value { color: var(--color-warning); }
+        .stat-card.success .stat-value { color: var(--color-success); }
+        .feedback-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-lg); margin-bottom: var(--spacing-md); transition: all var(--transition-fast); }
+        .feedback-card:hover { box-shadow: var(--shadow-md); }
+        .feedback-card.high-priority { border-left: 4px solid var(--color-warning); }
+        .feedback-text { background: var(--color-bg-hover); border-radius: var(--radius-md); padding: var(--spacing-md); margin: var(--spacing-md) 0; font-family: var(--font-body); }
+        .feedback-text .original { color: var(--color-text-secondary); font-size: var(--font-size-sm); margin-bottom: var(--spacing-sm); }
+        .feedback-text .translated { color: var(--color-text-primary); border-left: 3px solid var(--color-warning); padding-left: var(--spacing-sm); }
+        .category-badge { display: inline-block; padding: 4px 12px; border-radius: var(--radius-full); font-size: var(--font-size-xs); font-weight: 500; }
+        .category-badge.mistranslation { background: rgba(231, 76, 60, 0.1); color: #e74c3c; }
+        .category-badge.unnatural { background: rgba(241, 196, 15, 0.1); color: #f1c40f; }
+        .category-badge.unclear { background: rgba(52, 152, 219, 0.1); color: #3498db; }
+        .category-badge.typo { background: rgba(155, 89, 182, 0.1); color: #9b59b6; }
+        .category-badge.cultural { background: rgba(230, 126, 34, 0.1); color: #e67e22; }
+        .category-badge.other { background: rgba(149, 165, 166, 0.1); color: #95a5a6; }
+        .status-badge { display: inline-block; padding: 4px 12px; border-radius: var(--radius-full); font-size: var(--font-size-xs); font-weight: 500; }
+        .status-badge.pending { background: rgba(241, 196, 15, 0.1); color: #f1c40f; }
+        .status-badge.reviewing { background: rgba(52, 152, 219, 0.1); color: #3498db; }
+        .status-badge.accepted { background: rgba(46, 204, 113, 0.1); color: #2ecc71; }
+        .status-badge.rejected { background: rgba(231, 76, 60, 0.1); color: #e74c3c; }
+        .status-badge.fixed { background: rgba(46, 204, 113, 0.1); color: #2ecc71; }
+        .agree-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 16px; border-radius: var(--radius-full); font-size: var(--font-size-sm); cursor: pointer; transition: all var(--transition-fast); border: 1px solid var(--color-border); background: var(--color-bg-card); color: var(--color-text-secondary); }
+        .agree-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
+        .agree-btn.agreed { background: rgba(139, 115, 85, 0.1); border-color: var(--color-accent); color: var(--color-accent); }
+        .agree-btn .count { font-weight: 600; }
+        .filter-bar { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-md); margin-bottom: var(--spacing-lg); }
+        .empty-state { text-align: center; padding: var(--spacing-2xl); color: var(--color-text-secondary); }
+        .empty-state i { font-size: 4rem; margin-bottom: var(--spacing-md); opacity: 0.3; }
+        @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+    </style>
 </head>
 <body>
     <!-- Navbar Overlay -->
-    <div class="navbar-overlay" id="navbarOverlay"></div>
+    <div id="navbar-container"></div>
 
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+<div class="page-header">
         <div class="container">
-            <!-- Brand -->
-            <a class="navbar-brand" href="../../index.html">
-                <i class="fas fa-book-open"></i>
-                Publisher
-            </a>
-            
-            <!-- Language Selector Mobile -->
-            <div class="navbar-lang-selector d-lg-none">
-                <select class="language-selector" id="languageSelectorMobile">
-                    <option value="en">🇬🇧 EN</option>
-                    <option value="ja">🇯🇵 日本語</option>
-                    <option value="zh">🇨🇳 中文</option>
-                    <option value="es">🇪🇸 ES</option>
-                    <option value="fr">🇫🇷 FR</option>
-                    <option value="de">🇩🇪 DE</option>
-                    <option value="ko">🇰🇷 한국어</option>
-                    <option value="ar">🇸🇦 عربي</option>
-                    <option value="pt">🇧🇷 PT</option>
-                </select>
-            </div>
-            
-            <!-- User Dropdown (auth-only) -->
-            <div class="user-dropdown auth-only" id="userDropdown">
-                <button type="button" class="user-dropdown-toggle" id="userDropdownBtn" onclick="toggleUserDropdown(event)">
-                    <i class="fas fa-user-circle"></i>
-                    <span class="user-name d-none d-lg-inline" id="userName">User</span>
-                    <i class="fas fa-chevron-down user-chevron d-none d-lg-inline"></i>
-                </button>
-                <div class="user-menu" id="userMenu">
-                    <div class="user-menu-header">
-                        <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
-                        <div class="user-info">
-                            <div class="user-display-name" id="userDisplayName">User</div>
-                            <div class="user-email" id="userEmail">user@example.com</div>
-                        </div>
-                    </div>
-                    <div class="user-menu-divider"></div>
-                    <a href="../dashboard.html" class="user-menu-item">
-                        <i class="fas fa-th-large"></i>
-                        <span id="menuDashboard">Dashboard</span>
-                    </a>
-                    <a href="../my-works.html" class="user-menu-item">
-                        <i class="fas fa-book"></i>
-                        <span id="menuMyWorks">My Works</span>
-                    </a>
-                    <a href="../account-settings.html" class="user-menu-item">
-                        <i class="fas fa-cog"></i>
-                        <span id="menuAccountSettings">Account Settings</span>
-                    </a>
-                    <div class="user-menu-divider"></div>
-                    <button class="user-menu-item logout-btn" onclick="handleLogout()">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span id="menuLogout">Log Out</span>
-                    </button>
-                </div>
-            </div>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <!-- ========== PC Navigation ========== -->
-                <ul class="navbar-nav me-auto d-none d-lg-flex">
-                    <li class="nav-item">
-                        <a class="nav-link" href="../../index.html">
-                            <i class="fas fa-home me-1"></i> <span data-i18n="nav.home">Home</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../browse.html">
-                            <i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span>
-                        </a>
-                    </li>
-                    <!-- Auth: Library -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" href="../library.html">
-                            <i class="fas fa-book-reader me-1"></i> <span id="navLibraryPC">Library</span>
-                        </a>
-                    </li>
-                    <!-- Auth: Dashboard -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" href="../dashboard.html">
-                            <i class="fas fa-th-large me-1"></i> <span id="navDashboardPC">Dashboard</span>
-                        </a>
-                    </li>
-                    <!-- Auth: Upload -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" href="../upload.html">
-                            <i class="fas fa-upload me-1"></i> <span data-i18n="nav.upload">Upload</span>
-                        </a>
-                    </li>
-                    <!-- Auth: Translation Tools -->
-                    <li class="nav-item dropdown auth-only">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-language me-1"></i> <span id="navTranslationToolsPC">Translation Tools</span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="../manga-translator.html"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorPC">Manga Translator</span></a></li>
-                            <li><a class="dropdown-item" href="../translation-status.html"><i class="fas fa-tasks me-2"></i><span id="navTranslationStatusPC">Translation Status</span></a></li>
-                            <li><a class="dropdown-item" href="../translators/index.html"><i class="fas fa-users me-2"></i><span id="navFindTranslatorsPC">Find Translators</span></a></li>
-                        </ul>
-                    </li>
-                    <!-- Support Dropdown -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-headset me-1"></i> <span data-i18n="nav.support">Support</span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="../support/faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
-                            <li><a class="dropdown-item" href="../support/troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
-                            <li><a class="dropdown-item" href="../support/contact.html"><i class="fas fa-envelope me-2"></i><span id="navContactPC">Contact</span></a></li>
-                            <li class="auth-only"><hr class="dropdown-divider"></li>
-                            <li class="auth-only"><a class="dropdown-item" href="../support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
-                        </ul>
-                    </li>
-                </ul>
-                
-                <!-- ========== Mobile Navigation ========== -->
-                <ul class="navbar-nav d-lg-none">
-                    <li class="nav-item">
-                        <a class="nav-link" href="../../index.html">
-                            <i class="fas fa-home me-2"></i> <span data-i18n="nav.home">Home</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../browse.html">
-                            <i class="fas fa-compass me-2"></i> <span data-i18n="nav.browse">Browse</span>
-                        </a>
-                    </li>
-                    <!-- Auth: Library -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" href="../library.html">
-                            <i class="fas fa-book-reader me-2"></i> <span id="navLibraryMobile">Library</span>
-                        </a>
-                    </li>
-                    <li class="auth-only"><hr class="dropdown-divider"></li>
-                    <!-- Auth: Dashboard -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" href="../dashboard.html">
-                            <i class="fas fa-th-large me-2"></i> <span id="navDashboardMobile">Dashboard</span>
-                        </a>
-                    </li>
-                    <!-- Auth: Upload -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" href="../upload.html">
-                            <i class="fas fa-upload me-2"></i> <span data-i18n="nav.upload">Upload</span>
-                        </a>
-                    </li>
-                    <!-- Auth: Translation Tools -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" data-bs-toggle="collapse" href="#translationToolsMenu" role="button">
-                            <i class="fas fa-language me-2"></i> <span id="navTranslationToolsMobile">Translation Tools</span>
-                            <i class="fas fa-chevron-down ms-auto small"></i>
-                        </a>
-                        <div class="collapse ps-4" id="translationToolsMenu">
-                            <a class="nav-link" href="../manga-translator.html">
-                                <i class="fas fa-image me-2"></i> <span id="navMangaTranslatorMobile">Manga Translator</span>
-                            </a>
-                            <a class="nav-link" href="../translation-status.html">
-                                <i class="fas fa-tasks me-2"></i> <span id="navTranslationStatusMobile">Translation Status</span>
-                            </a>
-                            <a class="nav-link" href="../translators/index.html">
-                                <i class="fas fa-users me-2"></i> <span id="navFindTranslatorsMobile">Find Translators</span>
-                            </a>
-                        </div>
-                    </li>
-                    <li><hr class="dropdown-divider"></li>
-                    <!-- Support -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="../support/faq.html">
-                            <i class="fas fa-question-circle me-2"></i> <span data-i18n="support.faq.title">FAQ</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../support/troubleshoot.html">
-                            <i class="fas fa-tools me-2"></i> <span data-i18n="support.troubleshoot.title">Troubleshooting</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../support/contact.html">
-                            <i class="fas fa-envelope me-2"></i> <span id="navContactMobile">Contact</span>
-                        </a>
-                    </li>
-                    <!-- Auth: My Tickets -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" href="../support/tickets.html">
-                            <i class="fas fa-ticket-alt me-2"></i> <span data-i18n="support.tickets.title">My Tickets</span>
-                        </a>
-                    </li>
-                    <li><hr class="dropdown-divider"></li>
-                    <!-- Guest: Sign In -->
-                    <li class="nav-item guest-only">
-                        <a class="nav-link" href="../login.html">
-                            <i class="fas fa-sign-in-alt me-2"></i> <span data-i18n="nav.login">Sign In</span>
-                        </a>
-                    </li>
-                    <!-- Guest: Register -->
-                    <li class="nav-item guest-only">
-                        <a class="nav-link" href="../register.html">
-                            <i class="fas fa-user-plus me-2"></i> <span data-i18n="nav.getStarted">Get Started</span>
-                        </a>
-                    </li>
-                </ul>
-                
-                <div class="d-flex align-items-center gap-3">
-                    <!-- Language Selector Desktop -->
-                    <select class="language-selector d-none d-lg-block" id="languageSelector">
-                        <option value="en">🇬🇧 EN</option>
-                        <option value="ja">🇯🇵 日本語</option>
-                        <option value="zh">🇨🇳 中文</option>
-                        <option value="es">🇪🇸 ES</option>
-                        <option value="fr">🇫🇷 FR</option>
-                        <option value="de">🇩🇪 DE</option>
-                        <option value="ko">🇰🇷 한국어</option>
-                        <option value="ar">🇸🇦 عربي</option>
-                        <option value="pt">🇧🇷 PT</option>
-                    </select>
-                    
-                    <!-- Guest Buttons (PC) -->
-                    <div class="navbar-buttons-guest guest-only d-none d-lg-flex">
-                        <a href="../login.html" class="btn btn-soft-custom">
-                            <span data-i18n="nav.login">Sign In</span>
-                        </a>
-                        <a href="../register.html" class="btn btn-primary-custom">
-                            <span data-i18n="nav.getStarted">Get Started</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <div class="page-header">
-        <div class="container">
-            <h1><i class="fas fa-comments me-2"></i><span id="pageTitle">Translation Feedback</span></h1>
-            <p id="pageSubtitle">Review and manage translation feedback from readers</p>
+            <h1><i class="fas fa-comments me-2"></i><span id="pageTitle" data-i18n="feedback.pageTitle">Translation Feedback</span></h1>
+            <p id="pageSubtitle" data-i18n="feedback.pageSubtitle">Review and manage translation feedback from readers</p>
         </div>
     </div>
 
     <div class="container mb-5">
         <div class="filter-bar">
             <div class="row align-items-center">
-                <div class="col-md-4"><label class="form-label mb-0" id="labelSelectWork">Select Work</label></div>
+                <div class="col-md-4"><label class="form-label mb-0" id="labelSelectWork" data-i18n="feedback.labelSelectWork">Select Work</label></div>
                 <div class="col-md-8">
                     <select class="form-select" id="work-select" onchange="loadFeedback()">
-                        <option value="" id="optSelectWork">Select a work</option>
+                        <option value="" id="optSelectWork" data-i18n="feedback.optSelectWork">Select a work</option>
                     </select>
                 </div>
             </div>
@@ -277,19 +287,19 @@
         <div class="stats-grid" id="stats-grid" style="display: none;">
             <div class="stat-card">
                 <div class="stat-value" id="stat-total">0</div>
-                <div class="stat-label" id="labelTotalFeedback">Total Feedback</div>
+                <div class="stat-label" id="labelTotalFeedback" data-i18n="feedback.labelTotalFeedback">Total Feedback</div>
             </div>
             <div class="stat-card warning">
                 <div class="stat-value" id="stat-priority">0</div>
-                <div class="stat-label" id="labelNeedsAction">Needs Action (3+ agrees)</div>
+                <div class="stat-label" id="labelNeedsAction" data-i18n="feedback.labelNeedsAction">Needs Action (3+ agrees)</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value" id="stat-pending">0</div>
-                <div class="stat-label" id="labelPending">Pending</div>
+                <div class="stat-label" id="labelPending" data-i18n="feedback.labelPending">Pending</div>
             </div>
             <div class="stat-card success">
                 <div class="stat-value" id="stat-fixed">0</div>
-                <div class="stat-label" id="labelFixed">Fixed</div>
+                <div class="stat-label" id="labelFixed" data-i18n="feedback.labelFixed">Fixed</div>
             </div>
         </div>
 
@@ -297,35 +307,35 @@
             <div class="row g-3 align-items-center">
                 <div class="col-md-3">
                     <select class="form-select" id="filter-status" onchange="loadFeedback()">
-                        <option value="" id="optAllStatuses">All Statuses</option>
-                        <option value="pending" id="optPending">Pending</option>
-                        <option value="reviewing" id="optReviewing">Reviewing</option>
-                        <option value="accepted" id="optAccepted">Accepted</option>
-                        <option value="fixed" id="optFixed">Fixed</option>
-                        <option value="rejected" id="optRejected">Rejected</option>
+                        <option value="" id="optAllStatuses" data-i18n="feedback.optAllStatuses">All Statuses</option>
+                        <option value="pending" id="optPending" data-i18n="feedback.optPending">Pending</option>
+                        <option value="reviewing" id="optReviewing" data-i18n="feedback.optReviewing">Reviewing</option>
+                        <option value="accepted" id="optAccepted" data-i18n="feedback.optAccepted">Accepted</option>
+                        <option value="fixed" id="optFixed" data-i18n="feedback.optFixed">Fixed</option>
+                        <option value="rejected" id="optRejected" data-i18n="feedback.optRejected">Rejected</option>
                     </select>
                 </div>
                 <div class="col-md-3">
                     <select class="form-select" id="filter-category" onchange="loadFeedback()">
-                        <option value="" id="optAllCategories">All Categories</option>
-                        <option value="mistranslation" id="optMistranslation">Mistranslation</option>
-                        <option value="unnatural" id="optUnnatural">Unnatural</option>
-                        <option value="unclear" id="optUnclear">Unclear</option>
-                        <option value="typo" id="optTypo">Typo</option>
-                        <option value="cultural" id="optCultural">Cultural Issue</option>
-                        <option value="other" id="optOther">Other</option>
+                        <option value="" id="optAllCategories" data-i18n="feedback.optAllCategories">All Categories</option>
+                        <option value="mistranslation" id="optMistranslation" data-i18n="feedback.optMistranslation">Mistranslation</option>
+                        <option value="unnatural" id="optUnnatural" data-i18n="feedback.optUnnatural">Unnatural</option>
+                        <option value="unclear" id="optUnclear" data-i18n="feedback.optUnclear">Unclear</option>
+                        <option value="typo" id="optTypo" data-i18n="feedback.optTypo">Typo</option>
+                        <option value="cultural" id="optCultural" data-i18n="feedback.optCultural">Cultural Issue</option>
+                        <option value="other" id="optOther" data-i18n="feedback.optOther">Other</option>
                     </select>
                 </div>
                 <div class="col-md-3">
                     <select class="form-select" id="filter-sort" onchange="loadFeedback()">
-                        <option value="newest" id="optNewest">Newest First</option>
-                        <option value="oldest" id="optOldest">Oldest First</option>
-                        <option value="agrees" id="optAgrees">Most Agrees</option>
+                        <option value="newest" id="optNewest" data-i18n="feedback.optNewest">Newest First</option>
+                        <option value="oldest" id="optOldest" data-i18n="feedback.optOldest">Oldest First</option>
+                        <option value="agrees" id="optAgrees" data-i18n="feedback.optAgrees">Most Agrees</option>
                     </select>
                 </div>
                 <div class="col-md-3 text-end">
                     <button class="btn btn-soft-custom" onclick="resetFilters()">
-                        <i class="fas fa-redo me-1"></i><span id="btnReset">Reset</span>
+                        <i class="fas fa-redo me-1"></i><span id="btnReset" data-i18n="feedback.btnReset">Reset</span>
                     </button>
                 </div>
             </div>
@@ -335,8 +345,8 @@
 
         <div id="empty-state" class="empty-state" style="display: none;">
             <i class="fas fa-check-circle"></i>
-            <h4 id="emptyTitle">No feedback</h4>
-            <p id="emptyDesc">No translation feedback has been reported for this work</p>
+            <h4 id="emptyTitle" data-i18n="feedback.emptyTitle">No feedback</h4>
+            <p id="emptyDesc" data-i18n="feedback.emptyDesc">No translation feedback has been reported for this work</p>
         </div>
 
         <div id="loading" class="text-center py-5" style="display: none;">
@@ -350,23 +360,23 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-comment-alt me-2"></i><span id="modalTitle">Feedback Details</span></h5>
+                    <h5 class="modal-title"><i class="fas fa-comment-alt me-2"></i><span id="modalTitle" data-i18n="feedback.modalTitle">Feedback Details</span></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" id="feedback-detail-content">
                     <div class="text-center py-4"><div class="spinner-border text-accent"></div></div>
                 </div>
                 <div class="modal-footer" id="feedback-modal-footer" style="display: none;">
-                    <button type="button" class="btn btn-soft-custom" data-bs-dismiss="modal" id="btnClose">Close</button>
+                    <button type="button" class="btn btn-soft-custom" data-bs-dismiss="modal" id="btnClose" data-i18n="feedback.btnClose">Close</button>
                     <div class="btn-group" id="resolve-buttons">
                         <button class="btn btn-outline-secondary" onclick="resolveFeedback('reviewing')">
-                            <i class="fas fa-eye me-1"></i><span id="btnReviewing">Reviewing</span>
+                            <i class="fas fa-eye me-1"></i><span id="btnReviewing" data-i18n="feedback.btnReviewing">Reviewing</span>
                         </button>
                         <button class="btn btn-outline-success" onclick="resolveFeedback('fixed')">
-                            <i class="fas fa-check me-1"></i><span id="btnFixed">Fixed</span>
+                            <i class="fas fa-check me-1"></i><span id="btnFixed" data-i18n="feedback.btnFixed">Fixed</span>
                         </button>
                         <button class="btn btn-outline-danger" onclick="resolveFeedback('rejected')">
-                            <i class="fas fa-times me-1"></i><span id="btnRejected">Reject</span>
+                            <i class="fas fa-times me-1"></i><span id="btnRejected" data-i18n="feedback.btnRejected">Reject</span>
                         </button>
                     </div>
                 </div>
@@ -374,20 +384,11 @@
         </div>
     </div>
 
-    <footer class="footer-custom">
-        <div class="container">
-            <div class="d-flex flex-wrap justify-content-between align-items-center">
-                <p class="small mb-0">&copy; 2024 Publisher. All rights reserved.</p>
-                <div class="d-flex gap-3">
-                    <a href="../support/faq.html" class="text-secondary" id="footerHelp">Help</a>
-                    <a href="../terms.html" class="text-secondary" id="footerTerms">Terms</a>
-                    <a href="../privacy.html" class="text-secondary" id="footerPrivacy">Privacy</a>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../js/i18n.js"></script>
+    <script src="../../js/navbar.js"></script>
     <script src="../../js/translations.js"></script>
     <script src="../../js/language-switcher.js"></script>
     <script>
@@ -475,6 +476,7 @@ function getCatName(cat) { return CATEGORY_NAMES[cat] ? getL(CATEGORY_NAMES[cat]
 
         function updateAllText() {
             document.title = getL(uiText.pageTitle) + ' - Publisher';
+            if (typeof i18n !== 'undefined') { i18n.applyToDOM(); return; }
             document.getElementById('pageTitle').textContent = getL(uiText.pageTitle);
             document.getElementById('pageSubtitle').textContent = getL(uiText.pageSubtitle);
             document.getElementById('labelSelectWork').textContent = getL(uiText.labelSelectWork);
@@ -512,8 +514,24 @@ function getCatName(cat) { return CATEGORY_NAMES[cat] ? getL(CATEGORY_NAMES[cat]
             document.getElementById('footerPrivacy').textContent = getL(uiText.footerPrivacy);
         }
         document.addEventListener('DOMContentLoaded', async () => {
-            updateAllText();
-            await loadUserWorks();
+            try {
+                syncSelectors();
+                updateAllText();
+                await loadUserWorks();
+            } catch (e) {
+                console.error('Init error:', e);
+                // Force demo mode on any init error
+                isDemo = true;
+                const select = document.getElementById('work-select');
+                if (select && select.options.length <= 1) {
+                    DEMO_WORKS.forEach(work => {
+                        const option = document.createElement('option');
+                        option.value = work.work_id;
+                        option.textContent = work.title;
+                        select.appendChild(option);
+                    });
+                }
+            }
         });
 
         document.addEventListener('languageChanged', function(e) {
@@ -523,11 +541,30 @@ function getCatName(cat) { return CATEGORY_NAMES[cat] ? getL(CATEGORY_NAMES[cat]
             if (currentWorkId) loadFeedback();
         });
 
+        let isDemo = false;
+
+        const DEMO_WORKS = [
+            { work_id: 'demo-1', title: 'The Silent Garden (静かな庭)' },
+            { work_id: 'demo-2', title: 'Moonlit Warrior (月光の戦士)' },
+            { work_id: 'demo-3', title: 'Digital Hearts (デジタルハーツ)' }
+        ];
+
+        const DEMO_FEEDBACK = [
+            { feedback_id: 'fb-1', category: 'mistranslation', status: 'pending', original_text: 'She walked through the silent garden at dawn.', translated_text: '彼女は夜明けに静かな公園を歩いた。', description: '"garden" should be "庭" not "公園" (park). The title of the work is "The Silent Garden" so consistency is important.', suggested_correction: '彼女は夜明けに静かな庭を歩いた。', agree_count: 5, hasUserAgreed: false, reporter_name: 'Yuki T.', created_at: '2026-03-10T14:30:00Z' },
+            { feedback_id: 'fb-2', category: 'unnatural', status: 'pending', original_text: 'He could not help but smile.', translated_text: '彼は笑顔にならないことができなかった。', description: 'The translation is grammatically correct but sounds very unnatural in Japanese. A more natural expression would be better.', suggested_correction: '彼は思わず微笑んだ。', agree_count: 3, hasUserAgreed: true, reporter_name: 'Kenji M.', created_at: '2026-03-09T10:15:00Z' },
+            { feedback_id: 'fb-3', category: 'cultural', status: 'reviewing', original_text: 'She bowed and said goodbye.', translated_text: '彼女はお辞儀をして別れを告げた。', description: 'The level of politeness in the bow should match the relationship between the characters. In this scene they are close friends, so a casual nod would be more appropriate.', agree_count: 1, hasUserAgreed: false, reporter_name: null, created_at: '2026-03-08T08:45:00Z' },
+            { feedback_id: 'fb-4', category: 'typo', status: 'fixed', original_text: 'The moonlight illuminated the path.', translated_text: '月光が道を照らしいた。', description: 'Typo: 照らしいた should be 照らしていた', suggested_correction: '月光が道を照らしていた。', agree_count: 2, hasUserAgreed: false, reporter_name: 'Aoi S.', created_at: '2026-03-07T16:20:00Z', resolved_by: 'translator-1', resolver_name: 'Hana K.', resolved_at: '2026-03-08T09:00:00Z' },
+            { feedback_id: 'fb-5', category: 'unclear', status: 'pending', original_text: 'The device hummed with an otherworldly energy.', translated_text: 'デバイスは異世界のエネルギーでハミングした。', description: '"hummed" here means vibrating/buzzing, not the musical meaning. Also "otherworldly" is more like 不思議な or 異様な in this sci-fi context.', suggested_correction: 'その装置は不思議なエネルギーを帯びて低く唸っていた。', agree_count: 4, hasUserAgreed: false, reporter_name: 'Takeshi R.', created_at: '2026-03-06T12:00:00Z' },
+            { feedback_id: 'fb-6', category: 'mistranslation', status: 'rejected', original_text: 'He felt blue.', translated_text: '彼は憂鬱だった。', description: 'Should be translated as 青く感じた', agree_count: 0, hasUserAgreed: false, reporter_name: 'Guest User', created_at: '2026-03-05T09:30:00Z', resolved_by: 'translator-1', resolver_name: 'Hana K.', resolved_at: '2026-03-06T11:00:00Z', resolution_note: '"Felt blue" is an idiom meaning feeling sad/depressed. 憂鬱 is the correct translation.' }
+        ];
+
         async function loadUserWorks() {
             const userId = localStorage.getItem('userId');
-            if (!userId) return;
             try {
-                const response = await fetch(`${API_BASE}/works?author_id=${userId}`);
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 2000);
+                const response = await fetch(`${API_BASE}/works?author_id=${userId || 'demo'}`, { signal: controller.signal });
+                clearTimeout(timeout);
                 const data = await response.json();
                 const select = document.getElementById('work-select');
                 if (data.works && data.works.length > 0) {
@@ -537,8 +574,18 @@ function getCatName(cat) { return CATEGORY_NAMES[cat] ? getL(CATEGORY_NAMES[cat]
                         option.textContent = work.title;
                         select.appendChild(option);
                     });
+                    return;
                 }
-            } catch (error) { console.error('Failed to load works:', error); }
+            } catch (error) { console.log('API unavailable, switching to demo mode'); }
+            // Demo mode fallback
+            isDemo = true;
+            const select = document.getElementById('work-select');
+            DEMO_WORKS.forEach(work => {
+                const option = document.createElement('option');
+                option.value = work.work_id;
+                option.textContent = work.title;
+                select.appendChild(option);
+            });
         }
 
         async function loadFeedback(page = 1) {
@@ -554,6 +601,12 @@ function getCatName(cat) { return CATEGORY_NAMES[cat] ? getL(CATEGORY_NAMES[cat]
             document.getElementById('loading').style.display = 'block';
             document.getElementById('feedback-list').innerHTML = '';
             document.getElementById('empty-state').style.display = 'none';
+
+            if (isDemo) {
+                loadDemoFeedback();
+                return;
+            }
+
             await loadStats();
             const status = document.getElementById('filter-status').value;
             const category = document.getElementById('filter-category').value;
@@ -575,8 +628,45 @@ function getCatName(cat) { return CATEGORY_NAMES[cat] ? getL(CATEGORY_NAMES[cat]
                 }
             } catch (error) {
                 console.error('Failed to load feedback:', error);
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('feedback-list').innerHTML = '<div class="alert alert-danger">' + getL(uiText.loadFailed) + '</div>';
+                // Fallback to demo
+                isDemo = true;
+                loadDemoFeedback();
+            }
+        }
+
+        function loadDemoFeedback() {
+            const statusFilter = document.getElementById('filter-status').value;
+            const categoryFilter = document.getElementById('filter-category').value;
+            const sortVal = document.getElementById('filter-sort').value;
+
+            let filtered = DEMO_FEEDBACK.slice();
+            if (statusFilter) filtered = filtered.filter(f => f.status === statusFilter);
+            if (categoryFilter) filtered = filtered.filter(f => f.category === categoryFilter);
+
+            if (sortVal === 'oldest') filtered.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+            else if (sortVal === 'agrees') filtered.sort((a, b) => b.agree_count - a.agree_count);
+            else filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+            const total = DEMO_FEEDBACK.length;
+            const pending = DEMO_FEEDBACK.filter(f => f.status === 'pending').length;
+            const fixed = DEMO_FEEDBACK.filter(f => f.status === 'fixed').length;
+            const priority = DEMO_FEEDBACK.filter(f => f.agree_count >= 3 && f.status === 'pending').length;
+
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-priority').textContent = priority;
+            document.getElementById('stat-pending').textContent = pending;
+            document.getElementById('stat-fixed').textContent = fixed;
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('stats-grid').style.display = 'grid';
+            document.getElementById('filter-bar').style.display = 'block';
+
+            if (filtered.length > 0) {
+                document.getElementById('feedback-list').innerHTML = filtered.map(f => renderFeedbackCard(f)).join('');
+                document.getElementById('pagination').innerHTML = '';
+            } else {
+                document.getElementById('empty-state').style.display = 'block';
+                document.getElementById('pagination').innerHTML = '';
             }
         }
 
@@ -624,6 +714,17 @@ function getCatName(cat) { return CATEGORY_NAMES[cat] ? getL(CATEGORY_NAMES[cat]
         }
 
         async function toggleAgree(feedbackId, btn) {
+            if (isDemo) {
+                const isAgreed = btn.classList.contains('agreed');
+                const countEl = btn.querySelector('.count');
+                let count = parseInt(countEl.textContent);
+                count = isAgreed ? count - 1 : count + 1;
+                countEl.textContent = count;
+                btn.classList.toggle('agreed');
+                const df = DEMO_FEEDBACK.find(f => f.feedback_id === feedbackId);
+                if (df) { df.agree_count = count; df.hasUserAgreed = !isAgreed; }
+                return;
+            }
             const userId = localStorage.getItem('userId');
             if (!userId) { alert(getL(uiText.alertLogin)); return; }
             const isAgreed = btn.classList.contains('agreed');
@@ -643,33 +744,60 @@ function getCatName(cat) { return CATEGORY_NAMES[cat] ? getL(CATEGORY_NAMES[cat]
             content.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-accent"></div></div>';
             footer.style.display = 'none';
             modal.show();
+
+            if (isDemo) {
+                const f = DEMO_FEEDBACK.find(fb => fb.feedback_id === feedbackId);
+                if (!f) { content.innerHTML = '<div class="alert alert-danger">Not found</div>'; return; }
+                const workTitle = DEMO_WORKS.find(w => w.work_id === currentWorkId)?.title || '';
+                renderDetailModal(f, workTitle, content, footer);
+                return;
+            }
+
             try {
                 const userId = localStorage.getItem('userId');
                 const response = await fetch(`${API_BASE}/feedback/${feedbackId}`, { headers: userId ? { 'X-User-ID': userId } : {} });
                 const data = await response.json();
                 const f = data.feedback;
-                content.innerHTML = `
-                    <div class="mb-4"><span class="category-badge ${f.category}">${getCatName(f.category)}</span><span class="status-badge ${f.status} ms-2">${getStatusName(f.status)}</span></div>
-                    <h6>${getL(uiText.work)}</h6><p>${escapeHtml(f.work_title)}${f.chapter_title ? ` - ${escapeHtml(f.chapter_title)}` : ''}</p>
-                    <h6>${getL(uiText.translation)}</h6>
-                    <div class="feedback-text">
-                        ${f.original_text ? `<div class="original"><strong>${getL(uiText.original)}:</strong> ${escapeHtml(f.original_text)}</div>` : ''}
-                        <div class="translated"><strong>${getL(uiText.translation)}:</strong> ${escapeHtml(f.translated_text)}</div>
-                    </div>
-                    ${f.description ? `<h6>${getL(uiText.description)}</h6><p>${escapeHtml(f.description)}</p>` : ''}
-                    ${f.suggested_correction ? `<h6>${getL(uiText.suggestion)}</h6><p class="text-success">${escapeHtml(f.suggested_correction)}</p>` : ''}
-                    <div class="row mt-4"><div class="col-6"><h6>${getL(uiText.reporter)}</h6><p>${escapeHtml(f.reporter_name || getL(uiText.anonymous))}</p></div><div class="col-6"><h6>${getL(uiText.reportedAt)}</h6><p>${new Date(f.created_at).toLocaleString()}</p></div></div>
-                    <div class="d-flex align-items-center mt-3">
-                        <button class="agree-btn ${f.hasUserAgreed ? 'agreed' : ''}" onclick="toggleAgree('${f.feedback_id}', this)"><i class="fas fa-thumbs-up"></i><span class="count">${f.agree_count}</span> ${getL(uiText.agree)}</button>
-                        <span class="text-secondary ms-3">${f.agreers?.length > 0 ? f.agreers.map(a => a.pen_name).join(', ') + ' ' + getL(uiText.agreedBy) : ''}</span>
-                    </div>
-                    ${f.resolved_by ? `<div class="alert alert-info mt-4"><strong>${getL(uiText.resolved)}:</strong> ${escapeHtml(f.resolver_name)} (${new Date(f.resolved_at).toLocaleString()})${f.resolution_note ? `<br><small>${escapeHtml(f.resolution_note)}</small>` : ''}</div>` : ''}
-                `;
-                if (f.status === 'pending' || f.status === 'reviewing') footer.style.display = 'flex';
+                const workTitle = f.work_title || '';
+                renderDetailModal(f, workTitle, content, footer);
             } catch (error) { content.innerHTML = '<div class="alert alert-danger">' + getL(uiText.loadFailed) + '</div>'; }
         }
 
+        function renderDetailModal(f, workTitle, content, footer) {
+            content.innerHTML = `
+                <div class="mb-4"><span class="category-badge ${f.category}">${getCatName(f.category)}</span><span class="status-badge ${f.status} ms-2">${getStatusName(f.status)}</span></div>
+                <h6>${getL(uiText.work)}</h6><p>${escapeHtml(workTitle)}${f.chapter_title ? ` - ${escapeHtml(f.chapter_title)}` : ''}</p>
+                <h6>${getL(uiText.translation)}</h6>
+                <div class="feedback-text">
+                    ${f.original_text ? `<div class="original"><strong>${getL(uiText.original)}:</strong> ${escapeHtml(f.original_text)}</div>` : ''}
+                    <div class="translated"><strong>${getL(uiText.translation)}:</strong> ${escapeHtml(f.translated_text)}</div>
+                </div>
+                ${f.description ? `<h6>${getL(uiText.description)}</h6><p>${escapeHtml(f.description)}</p>` : ''}
+                ${f.suggested_correction ? `<h6>${getL(uiText.suggestion)}</h6><p class="text-success">${escapeHtml(f.suggested_correction)}</p>` : ''}
+                <div class="row mt-4"><div class="col-6"><h6>${getL(uiText.reporter)}</h6><p>${escapeHtml(f.reporter_name || getL(uiText.anonymous))}</p></div><div class="col-6"><h6>${getL(uiText.reportedAt)}</h6><p>${new Date(f.created_at).toLocaleString()}</p></div></div>
+                <div class="d-flex align-items-center mt-3">
+                    <button class="agree-btn ${f.hasUserAgreed ? 'agreed' : ''}" onclick="toggleAgree('${f.feedback_id}', this)"><i class="fas fa-thumbs-up"></i><span class="count">${f.agree_count}</span> ${getL(uiText.agree)}</button>
+                    <span class="text-secondary ms-3">${f.agreers?.length > 0 ? f.agreers.map(a => a.pen_name).join(', ') + ' ' + getL(uiText.agreedBy) : ''}</span>
+                </div>
+                ${f.resolved_by ? `<div class="alert alert-info mt-4"><strong>${getL(uiText.resolved)}:</strong> ${escapeHtml(f.resolver_name)} (${new Date(f.resolved_at).toLocaleString()})${f.resolution_note ? `<br><small>${escapeHtml(f.resolution_note)}</small>` : ''}</div>` : ''}
+            `;
+            if (f.status === 'pending' || f.status === 'reviewing') footer.style.display = 'flex';
+        }
+
         async function resolveFeedback(status) {
+            if (isDemo) {
+                const df = DEMO_FEEDBACK.find(f => f.feedback_id === currentFeedbackId);
+                if (df) {
+                    df.status = status;
+                    if (status === 'rejected') df.resolution_note = prompt(getL(uiText.promptReject)) || '';
+                    df.resolved_by = 'demo-user';
+                    df.resolver_name = 'Demo User';
+                    df.resolved_at = new Date().toISOString();
+                }
+                bootstrap.Modal.getInstance(document.getElementById('feedbackModal')).hide();
+                loadFeedback(currentPage);
+                return;
+            }
             const userId = localStorage.getItem('userId');
             if (!userId || !currentFeedbackId) return;
             const note = status === 'rejected' ? prompt(getL(uiText.promptReject)) : null;
@@ -712,7 +840,179 @@ function getCatName(cat) { return CATEGORY_NAMES[cat] ? getL(CATEGORY_NAMES[cat]
     </script>
 
     <!-- ========== Pattern C Navbar JavaScript ========== -->
-<script src="../../js/header-notification.js"></script>
-    <script src="../../js/navbar.js"></script>
+    <script>
+    // ========== 多言語対応テキスト（9言語）==========
+    const navUiText = {
+        translationTools: { en: 'Tools', ja: '翻訳ツール', zh: '翻译工具',
+            es: 'Herramientas de traducción', fr: 'Outils de traduction', de: 'Übersetzungstools',
+            ko: '번역 도구', ar: 'أدوات الترجمة', pt: 'Ferramentas de tradução'
+        },
+        mangaTranslator: {
+            en: 'Manga Translator', ja: 'マンガ翻訳', zh: '漫画翻译',
+            es: 'Traductor de Manga', fr: 'Traducteur de Manga', de: 'Manga-Übersetzer',
+            ko: '만화 번역기', ar: 'مترجم المانجا', pt: 'Tradutor de Mangá'
+        },
+            novelTranslator: {
+                en: 'Novel Translator', ja: '小説翻訳', zh: '小说翻译',
+                es: 'Traductor de Novela', fr: 'Traducteur de Roman', de: 'Roman-Übersetzer',
+                ko: '소설 번역기', ar: 'مترجم الروايات', pt: 'Tradutor de Romance'
+            },
+        translationStatus: {
+            en: 'Translation Status', ja: '翻訳状況', zh: '翻译状态',
+            es: 'Estado de traducción', fr: 'Statut de traduction', de: 'Übersetzungsstatus',
+            ko: '번역 상태', ar: 'حالة الترجمة', pt: 'Status da tradução'
+        },
+        findTranslators: {
+            en: 'Find Translators', ja: '翻訳者を探す', zh: '寻找翻译',
+            es: 'Buscar traductores', fr: 'Trouver des traducteurs', de: 'Übersetzer finden',
+            ko: '번역가 찾기', ar: 'البحث عن مترجمين', pt: 'Encontrar tradutores'
+        },
+        contact: {
+            en: 'Contact', ja: 'お問い合わせ', zh: '联系我们',
+            es: 'Contacto', fr: 'Contact', de: 'Kontakt',
+            ko: '문의', ar: 'اتصل بنا', pt: 'Contato'
+        },
+        library: {
+            en: 'Library', ja: 'ライブラリ', zh: '书库',
+            es: 'Biblioteca', fr: 'Bibliothèque', de: 'Bibliothek',
+            ko: '라이브러리', ar: 'المكتبة', pt: 'Biblioteca'
+        },
+        dashboard: {
+            en: 'Dashboard', ja: 'ダッシュボード', zh: '控制台',
+            es: 'Panel', fr: 'Tableau de bord', de: 'Dashboard',
+            ko: '대시보드', ar: 'لوحة التحكم', pt: 'Painel'
+        },
+        accountSettings: {
+            en: 'Account Settings', ja: 'アカウント設定', zh: '账户设置',
+            es: 'Configuración de cuenta', fr: 'Paramètres du compte', de: 'Kontoeinstellungen',
+            ko: '계정 설정', ar: 'إعدادات الحساب', pt: 'Configurações da conta'
+        },
+        logout: {
+            en: 'Log Out', ja: 'ログアウト', zh: '退出登录',
+            es: 'Cerrar sesión', fr: 'Déconnexion', de: 'Abmelden',
+            ko: '로그아웃', ar: 'تسجيل الخروج', pt: 'Sair'
+        },
+        logOutConfirm: {
+            en: 'Are you sure you want to log out?', ja: 'ログアウトしますか？', zh: '确定要退出登录吗？',
+            es: '¿Estás seguro de que quieres cerrar sesión?', fr: 'Êtes-vous sûr de vouloir vous déconnecter?', de: 'Sind Sie sicher, dass Sie sich abmelden möchten?',
+            ko: '로그아웃 하시겠습니까?', ar: 'هل أنت متأكد أنك تريد تسجيل الخروج؟', pt: 'Tem certeza que deseja sair?'
+        }
+    };
+
+    function getNavL(obj) {
+        const lang = localStorage.getItem('preferredLanguage') || 'en';
+        return obj[lang] || obj.en || '';
+    }
+
+    function updateUIText() {
+
+        const els = {
+
+        };
+        Object.keys(els).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = getNavL(els[id]);
+        });
+    }
+
+    function toggleUserDropdown(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const dropdown = document.getElementById('userDropdown');
+        const dropdownMenu = document.getElementById('userMenu');
+        dropdown.classList.toggle('open');
+        dropdownMenu.classList.toggle('show');
+    }
+
+    function handleLogout() {
+        if (confirm(getNavL(navUiText.logOutConfirm))) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.reload();
+        }
+    }
+
+    function loadUserInfo() {
+        const userStr = localStorage.getItem('user');
+        const token = localStorage.getItem('token');
+        const isLoggedIn = !!(userStr && token);
+
+        if (isLoggedIn) {
+            try {
+                const user = JSON.parse(userStr);
+                const displayName = user.display_name || user.firstName || user.email || 'User';
+                const userNameEl = document.getElementById('userName');
+                const userDisplayNameEl = document.getElementById('userDisplayName');
+                const userEmailEl = document.getElementById('userEmail');
+                if (userNameEl) userNameEl.textContent = displayName;
+                if (userDisplayNameEl) userDisplayNameEl.textContent = displayName;
+                if (userEmailEl) userEmailEl.textContent = user.email || '';
+                document.body.classList.add('logged-in');
+            } catch (e) {
+                document.body.classList.remove('logged-in');
+            }
+        } else {
+            document.body.classList.remove('logged-in');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const desktopSelector = document.getElementById('languageSelector');
+        const mobileSelector = document.getElementById('languageSelectorMobile');
+
+        if (desktopSelector && mobileSelector) {
+            const savedLang = localStorage.getItem('preferredLanguage') || 'en';
+            desktopSelector.value = savedLang;
+            mobileSelector.value = savedLang;
+
+            mobileSelector.addEventListener('change', function() {
+                desktopSelector.value = this.value;
+                if (typeof changeLanguage === 'function') changeLanguage(this.value);
+                updateUIText();
+            });
+
+            desktopSelector.addEventListener('change', function() {
+                mobileSelector.value = this.value;
+                updateUIText();
+            });
+        }
+
+        updateUIText();
+        setTimeout(updateUIText, 100);
+        loadUserInfo();
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.user-dropdown')) {
+                const dropdown = document.getElementById('userDropdown');
+                const dropdownMenu = document.getElementById('userMenu');
+                if (dropdown) dropdown.classList.remove('open');
+                if (dropdownMenu) dropdownMenu.classList.remove('show');
+            }
+        });
+
+        const navbarCollapse = document.getElementById('navbarNav');
+        const navbarOverlay = document.getElementById('navbarOverlay');
+
+        if (navbarCollapse) {
+            navbarCollapse.addEventListener('show.bs.collapse', function() {
+                if (navbarOverlay) navbarOverlay.classList.add('show');
+            });
+            navbarCollapse.addEventListener('hide.bs.collapse', function() {
+                if (navbarOverlay) navbarOverlay.classList.remove('show');
+            });
+        }
+
+        if (navbarOverlay) {
+            navbarOverlay.addEventListener('click', function() {
+                const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                if (bsCollapse) bsCollapse.hide();
+            });
+        }
+
+        document.addEventListener('languageChanged', function() {
+            updateUIText();
+        });
+    });
+    </script>
 </body>
 </html>

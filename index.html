@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <title>Publisher - Discover Stories from Around the World</title>
@@ -16,256 +17,223 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <!-- Custom Styles -->
+    <link href="css/variables.css" rel="stylesheet">
     <link href="css/style-new.css" rel="stylesheet">
+    <link href="css/components.css" rel="stylesheet">
+    <link href="css/navbar.css" rel="stylesheet">
     <link href="css/mobile-fixes.css" rel="stylesheet">
     <link href="css/navbar.css" rel="stylesheet">
     
+    <style>
+    /* ========== Mobile Language Selector ========== */
+    .navbar-lang-selector {
+        display: flex;
+        align-items: center;
+        margin-right: 0.5rem;
+    }
+    
+    @media (max-width: 991.98px) {
+        .navbar-lang-selector {
+            order: 1;
+        }
+        .navbar-toggler {
+            order: 2;
+        }
+    }
+    
+    /* ========== PC Navbar - 横並び維持 ========== */
+    @media (min-width: 992px) {
+        .navbar-nav {
+            flex-wrap: nowrap !important;
+            flex-direction: row !important;
+        }
+        .navbar-nav .nav-item {
+            white-space: nowrap !important;
+        }
+        .navbar-nav .nav-link {
+            white-space: nowrap !important;
+            padding: 0.5rem 0.6rem !important;
+            font-size: 0.9rem;
+        }
+
+        .dropdown-menu {
+            white-space: nowrap;
+        }
+        .navbar-buttons-guest {
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            gap: 0.5rem;
+        }
+        .navbar-buttons-guest .btn {
+            white-space: nowrap !important;
+            flex-shrink: 0;
+        }
+    }
+    
+    /* ========== Auth Visibility Control ========== */
+    .auth-only {
+        display: none !important;
+    }
+    .guest-only {
+        display: block;
+    }
+    body.logged-in .auth-only {
+        display: block !important;
+    }
+    body.logged-in .auth-only.nav-item {
+        display: list-item !important;
+    }
+    body.logged-in .auth-only.dropdown {
+        display: block !important;
+    }
+    body.logged-in .guest-only {
+        display: none !important;
+    }
+    @media (min-width: 992px) {
+        body.logged-in .navbar-buttons-guest {
+            display: none !important;
+        }
+    }
+    
+    /* ========== User Dropdown Menu ========== */
+    .user-dropdown {
+        position: relative;
+    }
+    .user-dropdown-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: transparent;
+        border: 1px solid var(--color-border);
+        border-radius: 25px;
+        padding: 0.4rem 0.75rem;
+        cursor: pointer;
+        color: var(--color-text);
+        transition: all 0.2s;
+    }
+    .user-dropdown-toggle:hover {
+        border-color: var(--color-accent);
+        background: rgba(139, 115, 85, 0.05);
+    }
+    .user-dropdown-toggle i:first-child {
+        font-size: 1.25rem;
+        color: var(--color-accent);
+    }
+    .user-name {
+        font-weight: 500;
+        font-size: 0.9rem;
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .user-chevron {
+        font-size: 0.7rem;
+        color: var(--color-text-secondary);
+        transition: transform 0.2s;
+    }
+    .user-dropdown.open .user-chevron {
+        transform: rotate(180deg);
+    }
+    .user-menu {
+        position: absolute;
+        top: calc(100% + 0.5rem);
+        right: 0;
+        background: var(--color-bg-card);
+        border: 1px solid var(--color-border);
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        min-width: 240px;
+        z-index: 1001;
+        display: none;
+        overflow: hidden;
+    }
+    .user-menu.show {
+        display: block;
+    }
+    .user-menu-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: var(--color-bg-main);
+    }
+    .user-avatar {
+        font-size: 2.5rem;
+        color: var(--color-accent);
+    }
+    .user-info {
+        flex: 1;
+        min-width: 0;
+    }
+    .user-display-name {
+        font-weight: 600;
+        font-size: 0.95rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .user-email {
+        font-size: 0.8rem;
+        color: var(--color-text-secondary);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .user-menu-divider {
+        height: 1px;
+        background: var(--color-border);
+    }
+    .user-menu-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        color: var(--color-text);
+        text-decoration: none;
+        font-size: 0.9rem;
+        cursor: pointer;
+        border: none;
+        background: transparent;
+        width: 100%;
+        text-align: left;
+    }
+    .user-menu-item:hover {
+        background: var(--color-bg-hover);
+        color: var(--color-accent);
+    }
+    .user-menu-item i {
+        width: 20px;
+        text-align: center;
+        color: var(--color-text-secondary);
+    }
+    .user-menu-item:hover i {
+        color: var(--color-accent);
+    }
+    .logout-btn {
+        color: var(--color-error);
+    }
+    .logout-btn i {
+        color: var(--color-error);
+    }
+    .logout-btn:hover {
+        background: rgba(199, 93, 93, 0.1);
+        color: var(--color-error);
+    }
+    
+    /* ========== Navbar Overlay ========== */
+
+    /* ========== Mobile Adjustments ========== */
+    @media (max-width: 991.98px) {
+
+    }
+    </style>
 </head>
 <body>
 <!-- ========== NAVBAR HTML START ========== -->
 
 <!-- Navbar Overlay -->
-<div class="navbar-overlay" id="navbarOverlay"></div>
-
-<!-- Navigation -->
-<nav class="navbar navbar-expand-lg navbar-custom sticky-top">
-    <div class="container">
-        <!-- ブランドリンク -->
-        <a class="navbar-brand" href="index.html">
-            <i class="fas fa-book-open"></i>
-            Publisher
-        </a>
-        
-        <!-- Language Selector Mobile -->
-        <div class="navbar-lang-selector d-lg-none">
-            <select class="language-selector" id="languageSelectorMobile">
-                <option value="en">🇬🇧 EN</option>
-                <option value="ja">🇯🇵 日本語</option>
-                <option value="zh">🇨🇳 中文</option>
-                <option value="es">🇪🇸 ES</option>
-                <option value="fr">🇫🇷 FR</option>
-                <option value="de">🇩🇪 DE</option>
-                <option value="ko">🇰🇷 한국어</option>
-                <option value="ar">🇸🇦 عربي</option>
-                <option value="pt">🇧🇷 PT</option>
-            </select>
-        </div>
-        
-        <!-- User Dropdown (auth-only) -->
-        <div class="user-dropdown auth-only" id="userDropdown">
-            <button type="button" class="user-dropdown-toggle" id="userDropdownBtn" onclick="toggleUserDropdown(event)">
-                <i class="fas fa-user-circle"></i>
-                <span class="user-name d-none d-lg-inline" id="userName">User</span>
-                <i class="fas fa-chevron-down user-chevron d-none d-lg-inline"></i>
-            </button>
-            <div class="user-menu" id="userMenu">
-                <div class="user-menu-header">
-                    <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
-                    <div class="user-info">
-                        <div class="user-display-name" id="userDisplayName">User</div>
-                        <div class="user-email" id="userEmail">user@example.com</div>
-                    </div>
-                </div>
-                <div class="user-menu-divider"></div>
-                <a href="pages/dashboard.html" class="user-menu-item">
-                    <i class="fas fa-th-large"></i>
-                    <span id="menuDashboard">Dashboard</span>
-                </a>
-                <a href="pages/my-works.html" class="user-menu-item">
-                    <i class="fas fa-book"></i>
-                    <span id="menuMyWorks">My Works</span>
-                </a>
-                <a href="pages/account-settings.html" class="user-menu-item">
-                    <i class="fas fa-cog"></i>
-                    <span id="menuAccountSettings">Account Settings</span>
-                </a>
-                <div class="user-menu-divider"></div>
-                <button class="user-menu-item logout-btn" onclick="handleLogout()">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span id="menuLogout">Log Out</span>
-                </button>
-            </div>
-        </div>
-        
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <!-- ========== PC Navigation ========== -->
-            <ul class="navbar-nav me-auto d-none d-lg-flex">
-                <!-- ★ACTIVE★ Home -->
-                <li class="nav-item">
-                    <a class="nav-link active" href="index.html">
-                        <i class="fas fa-home me-1"></i> <span data-i18n="nav.home">Home</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="pages/browse.html">
-                        <i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span>
-                    </a>
-                </li>
-                <!-- Auth: Library -->
-                <li class="nav-item auth-only">
-                    <a class="nav-link" href="pages/library.html">
-                        <i class="fas fa-book-reader me-1"></i> <span id="navLibraryPC">Library</span>
-                    </a>
-                </li>
-                <!-- Auth: Dashboard -->
-                <li class="nav-item auth-only">
-                    <a class="nav-link" href="pages/dashboard.html">
-                        <i class="fas fa-th-large me-1"></i> <span id="navDashboardPC">Dashboard</span>
-                    </a>
-                </li>
-                <!-- Auth: Upload -->
-                <li class="nav-item auth-only">
-                    <a class="nav-link" href="pages/upload.html">
-                        <i class="fas fa-upload me-1"></i> <span data-i18n="nav.upload">Upload</span>
-                    </a>
-                </li>
-                <!-- Auth: Translation Tools -->
-                <li class="nav-item dropdown auth-only">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-language me-1"></i> <span id="navTranslationToolsPC">Translation Tools</span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="pages/manga-translator.html"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorPC">Manga Translator</span></a></li>
-                        <li><a class="dropdown-item" href="pages/translation-status.html"><i class="fas fa-tasks me-2"></i><span id="navTranslationStatusPC">Translation Status</span></a></li>
-                        <li><a class="dropdown-item" href="pages/translators/index.html"><i class="fas fa-users me-2"></i><span id="navFindTranslatorsPC">Find Translators</span></a></li>
-                    </ul>
-                </li>
-                <!-- Support Dropdown -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-headset me-1"></i> <span data-i18n="nav.support">Support</span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="pages/support/faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
-                        <li><a class="dropdown-item" href="pages/support/troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
-                        <li><a class="dropdown-item" href="pages/support/contact.html"><i class="fas fa-envelope me-2"></i><span id="navContactPC">Contact</span></a></li>
-                        <li class="auth-only"><hr class="dropdown-divider"></li>
-                        <li class="auth-only"><a class="dropdown-item" href="pages/support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
-                    </ul>
-                </li>
-            </ul>
-            
-            <!-- ========== Mobile Navigation ========== -->
-            <ul class="navbar-nav d-lg-none">
-                <!-- ★ACTIVE★ Home -->
-                <li class="nav-item">
-                    <a class="nav-link active" href="index.html">
-                        <i class="fas fa-home me-2"></i> <span data-i18n="nav.home">Home</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="pages/browse.html">
-                        <i class="fas fa-compass me-2"></i> <span data-i18n="nav.browse">Browse</span>
-                    </a>
-                </li>
-                <!-- Auth: Library -->
-                <li class="nav-item auth-only">
-                    <a class="nav-link" href="pages/library.html">
-                        <i class="fas fa-book-reader me-2"></i> <span id="navLibraryMobile">Library</span>
-                    </a>
-                </li>
-                <li class="auth-only"><hr class="dropdown-divider"></li>
-                <!-- Auth: Dashboard -->
-                <li class="nav-item auth-only">
-                    <a class="nav-link" href="pages/dashboard.html">
-                        <i class="fas fa-th-large me-2"></i> <span id="navDashboardMobile">Dashboard</span>
-                    </a>
-                </li>
-                <!-- Auth: Upload -->
-                <li class="nav-item auth-only">
-                    <a class="nav-link" href="pages/upload.html">
-                        <i class="fas fa-upload me-2"></i> <span data-i18n="nav.upload">Upload</span>
-                    </a>
-                </li>
-                <!-- Auth: Translation Tools -->
-                <li class="nav-item auth-only">
-                    <a class="nav-link" data-bs-toggle="collapse" href="#translationToolsMenu" role="button">
-                        <i class="fas fa-language me-2"></i> <span id="navTranslationToolsMobile">Translation Tools</span>
-                        <i class="fas fa-chevron-down ms-auto small"></i>
-                    </a>
-                    <div class="collapse ps-4" id="translationToolsMenu">
-                        <a class="nav-link" href="pages/manga-translator.html">
-                            <i class="fas fa-image me-2"></i> <span id="navMangaTranslatorMobile">Manga Translator</span>
-                        </a>
-                        <a class="nav-link" href="pages/translation-status.html">
-                            <i class="fas fa-tasks me-2"></i> <span id="navTranslationStatusMobile">Translation Status</span>
-                        </a>
-                        <a class="nav-link" href="pages/translators/index.html">
-                            <i class="fas fa-users me-2"></i> <span id="navFindTranslatorsMobile">Find Translators</span>
-                        </a>
-                    </div>
-                </li>
-                <li><hr class="dropdown-divider"></li>
-                <!-- Support -->
-                <li class="nav-item">
-                    <a class="nav-link" href="pages/support/faq.html">
-                        <i class="fas fa-question-circle me-2"></i> <span data-i18n="support.faq.title">FAQ</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="pages/support/troubleshoot.html">
-                        <i class="fas fa-tools me-2"></i> <span data-i18n="support.troubleshoot.title">Troubleshooting</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="pages/support/contact.html">
-                        <i class="fas fa-envelope me-2"></i> <span id="navContactMobile">Contact</span>
-                    </a>
-                </li>
-                <!-- Auth: My Tickets -->
-                <li class="nav-item auth-only">
-                    <a class="nav-link" href="pages/support/tickets.html">
-                        <i class="fas fa-ticket-alt me-2"></i> <span data-i18n="support.tickets.title">My Tickets</span>
-                    </a>
-                </li>
-                <li><hr class="dropdown-divider"></li>
-                <!-- Guest: Sign In -->
-                <li class="nav-item guest-only">
-                    <a class="nav-link" href="pages/login.html">
-                        <i class="fas fa-sign-in-alt me-2"></i> <span data-i18n="nav.login">Sign In</span>
-                    </a>
-                </li>
-                <!-- Guest: Register -->
-                <li class="nav-item guest-only">
-                    <a class="nav-link" href="pages/register.html">
-                        <i class="fas fa-user-plus me-2"></i> <span data-i18n="nav.getStarted">Get Started</span>
-                    </a>
-                </li>
-            </ul>
-            
-            <div class="d-flex align-items-center gap-3">
-                <!-- Language Selector Desktop -->
-                <select class="language-selector d-none d-lg-block" id="languageSelector">
-                    <option value="en">🇬🇧 EN</option>
-                    <option value="ja">🇯🇵 日本語</option>
-                    <option value="zh">🇨🇳 中文</option>
-                    <option value="es">🇪🇸 ES</option>
-                    <option value="fr">🇫🇷 FR</option>
-                    <option value="de">🇩🇪 DE</option>
-                    <option value="ko">🇰🇷 한국어</option>
-                    <option value="ar">🇸🇦 عربي</option>
-                    <option value="pt">🇧🇷 PT</option>
-                </select>
-                
-                <!-- Guest Buttons (PC) -->
-                <div class="navbar-buttons-guest guest-only d-none d-lg-flex">
-                    <a href="pages/login.html" class="btn btn-soft-custom">
-                        <span data-i18n="nav.login">Sign In</span>
-                    </a>
-                    <a href="pages/register.html" class="btn btn-primary-custom">
-                        <span data-i18n="nav.getStarted">Get Started</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</nav>
-
-<!-- ========== NAVBAR HTML END ========== -->
+<div id="navbar-container"></div>
 
     <!-- Hero Section -->
     <section class="hero-section">
@@ -308,80 +276,15 @@
     <!-- Featured Works Section -->
     <section class="py-5">
         <div class="container">
-            <div class="section-header">
-                <h2 data-i18n="home.featured.title">Featured Works</h2>
+            <div class="section-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h2 id="featuredTitle" data-i18n="home.featured.title">Featured Works</h2>
+                <button class="btn btn-outline-custom btn-sm" onclick="toggleRecommended()" id="btnHomeRecommended">
+                    <i class="fas fa-magic me-1"></i><span id="btnHomeRecommendedText">Recommended for You</span>
+                </button>
             </div>
-            
-            <div class="row g-4">
-                <!-- Book 1 -->
-                <div class="col-6 col-md-4 col-lg-3">
-                    <div class="book-card">
-                        <div class="book-cover">
-                            <i class="fas fa-book"></i>
-                        </div>
-                        <div class="book-info">
-                            <h3 class="book-title">The Adventure of Magic Academy</h3>
-                            <p class="book-author">by Tanaka Kenji</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="book-price">$9.99</span>
-                                <span class="badge badge-soft">Fiction</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Book 2 -->
-                <div class="col-6 col-md-4 col-lg-3">
-                    <div class="book-card">
-                        <div class="book-cover">
-                            <i class="fas fa-book"></i>
-                        </div>
-                        <div class="book-info">
-                            <h3 class="book-title">Whispers of Tomorrow</h3>
-                            <p class="book-author">by Maria Garcia</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="book-price">$12.99</span>
-                                <span class="badge badge-soft">Romance</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Book 3 -->
-                <div class="col-6 col-md-4 col-lg-3">
-                    <div class="book-card">
-                        <div class="book-cover">
-                            <i class="fas fa-book"></i>
-                        </div>
-                        <div class="book-info">
-                            <h3 class="book-title">Digital Dreams</h3>
-                            <p class="book-author">by Alex Chen</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="book-price free" data-i18n="common.free">Free</span>
-                                <span class="badge badge-soft">Sci-Fi</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Book 4 -->
-                <div class="col-6 col-md-4 col-lg-3">
-                    <div class="book-card">
-                        <div class="book-cover">
-                            <i class="fas fa-book"></i>
-                        </div>
-                        <div class="book-info">
-                            <h3 class="book-title">The Last Samurai's Tale</h3>
-                            <p class="book-author">by Yamamoto Hiro</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="book-price">$14.99</span>
-                                <span class="badge badge-soft">Historical</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
+
+            <div class="row g-4" id="featuredGrid"></div>
+
             <div class="text-center mt-4">
                 <a href="pages/browse.html" class="btn btn-outline-custom">
                     <span data-i18n="home.featured.viewAll">View All Works</span> <i class="fas fa-arrow-right ms-2"></i>
@@ -577,56 +480,12 @@
     </section>
 
     <!-- Footer -->
-    <footer class="footer-custom">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4 mb-4 mb-md-0">
-                    <h5 class="text-accent mb-3">
-                        <i class="fas fa-book-open me-2"></i>Publisher
-                    </h5>
-                    <p class="text-secondary small" data-i18n="footer.tagline">
-                        A multilingual publishing platform connecting 
-                        authors, translators, and readers worldwide.
-                    </p>
-                </div>
-                <div class="col-md-2 mb-4 mb-md-0">
-                    <h6 class="mb-3" data-i18n="footer.explore">Explore</h6>
-                    <ul class="list-unstyled">
-                        <li><a href="pages/browse.html" data-i18n="nav.browse">Browse</a></li>
-                        <li><a href="pages/authors.html" data-i18n="footer.authors">Authors</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-2 mb-4 mb-md-0">
-                    <h6 class="mb-3" data-i18n="footer.creators">Creators</h6>
-                    <ul class="list-unstyled">
-                        <li><a href="pages/register-author.html" data-i18n="footer.write">Write</a></li>
-                        <li><a href="pages/register-translator.html" data-i18n="footer.translate">Translate</a></li>
-                        <li><a href="pages/pricing.html" data-i18n="footer.pricing">Pricing</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-2 mb-4 mb-md-0">
-                    <h6 class="mb-3" data-i18n="nav.support">Support</h6>
-                    <ul class="list-unstyled">
-                        <li><a href="pages/support/faq.html" data-i18n="support.faq.title">FAQ</a></li>
-                        <li><a href="pages/support/contact.html" data-i18n="footer.contact">Contact</a></li>
-                        <li><a href="pages/support/troubleshoot.html" data-i18n="support.troubleshoot.title">Troubleshooting</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-2">
-                    <h6 class="mb-3" data-i18n="footer.legal">Legal</h6>
-                    <ul class="list-unstyled">
-                        <li><a href="pages/terms.html" data-i18n="footer.terms">Terms</a></li>
-                        <li><a href="pages/privacy.html" data-i18n="footer.privacy">Privacy</a></li>
-                    </ul>
-                </div>
-            </div>
-            <hr class="my-4" style="border-color: var(--color-border);">
-            <p class="small mb-0 text-center">&copy; 2024 Publisher. All rights reserved.</p>
-        </div>
-    </footer>
+    <div id="footer-container"></div>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/navbar.js"></script>
     <script src="js/lang/ja.js"></script>
     <script src="js/lang/en.js"></script>
     <script src="js/lang/zh.js"></script>
@@ -638,6 +497,280 @@
     <script src="js/lang/pt.js"></script>
     <script src="js/lang/translations-base.js"></script>
     <script src="js/language-switcher.js"></script>
-    <script src="js/navbar.js"></script>
+    <script>
+    // ========== 多言語対応テキスト（9言語）==========
+    const uiText = {
+        translationTools: { en: 'Tools', ja: '翻訳ツール', zh: '翻译工具',
+            es: 'Herramientas de traducción', fr: 'Outils de traduction', de: 'Übersetzungstools',
+            ko: '번역 도구', ar: 'أدوات الترجمة', pt: 'Ferramentas de tradução'
+        },
+        mangaTranslator: {
+            en: 'Manga Translator', ja: 'マンガ翻訳', zh: '漫画翻译',
+            es: 'Traductor de Manga', fr: 'Traducteur de Manga', de: 'Manga-Übersetzer',
+            ko: '만화 번역기', ar: 'مترجم المانجا', pt: 'Tradutor de Mangá'
+        },
+        novelTranslator: {
+            en: 'Novel Translator', ja: '小説翻訳', zh: '小说翻译',
+            es: 'Traductor de Novela', fr: 'Traducteur de Roman', de: 'Roman-Übersetzer',
+            ko: '소설 번역기', ar: 'مترجم الروايات', pt: 'Tradutor de Romance'
+        },
+        translationStatus: {
+            en: 'Translation Status', ja: '翻訳状況', zh: '翻译状态',
+            es: 'Estado de traducción', fr: 'Statut de traduction', de: 'Übersetzungsstatus',
+            ko: '번역 상태', ar: 'حالة الترجمة', pt: 'Status da tradução'
+        },
+        findTranslators: {
+            en: 'Find Translators', ja: '翻訳者を探す', zh: '寻找翻译',
+            es: 'Buscar traductores', fr: 'Trouver des traducteurs', de: 'Übersetzer finden',
+            ko: '번역가 찾기', ar: 'البحث عن مترجمين', pt: 'Encontrar tradutores'
+        },
+        contact: {
+            en: 'Contact', ja: 'お問い合わせ', zh: '联系我们',
+            es: 'Contacto', fr: 'Contact', de: 'Kontakt',
+            ko: '문의', ar: 'اتصل بنا', pt: 'Contato'
+        },
+        library: {
+            en: 'Library', ja: 'ライブラリ', zh: '书库',
+            es: 'Biblioteca', fr: 'Bibliothèque', de: 'Bibliothek',
+            ko: '라이브러리', ar: 'المكتبة', pt: 'Biblioteca'
+        },
+        dashboard: {
+            en: 'Dashboard', ja: 'ダッシュボード', zh: '控制台',
+            es: 'Panel', fr: 'Tableau de bord', de: 'Dashboard',
+            ko: '대시보드', ar: 'لوحة التحكم', pt: 'Painel'
+        },
+        goToDashboard: {
+            en: 'Go to Dashboard', ja: 'ダッシュボードへ', zh: '前往控制台',
+            es: 'Ir al Panel', fr: 'Aller au tableau de bord', de: 'Zum Dashboard',
+            ko: '대시보드로 이동', ar: 'الذهاب إلى لوحة التحكم', pt: 'Ir para o Painel'
+        },
+        accountSettings: {
+            en: 'Account Settings', ja: 'アカウント設定', zh: '账户设置',
+            es: 'Configuración de cuenta', fr: 'Paramètres du compte', de: 'Kontoeinstellungen',
+            ko: '계정 설정', ar: 'إعدادات الحساب', pt: 'Configurações da conta'
+        },
+        logout: {
+            en: 'Log Out', ja: 'ログアウト', zh: '退出登录',
+            es: 'Cerrar sesión', fr: 'Déconnexion', de: 'Abmelden',
+            ko: '로그아웃', ar: 'تسجيل الخروج', pt: 'Sair'
+        },
+        logOutConfirm: {
+            en: 'Are you sure you want to log out?', ja: 'ログアウトしますか？', zh: '确定要退出登录吗？',
+            es: '¿Estás seguro de que quieres cerrar sesión?', fr: 'Êtes-vous sûr de vouloir vous déconnecter?', de: 'Sind Sie sicher, dass Sie sich abmelden möchten?',
+            ko: '로그아웃 하시겠습니까?', ar: 'هل أنت متأكد أنك تريد تسجيل الخروج؟', pt: 'Tem certeza que deseja sair?'
+        }
+    };
+    
+    function getCurrentLanguage() {
+        return localStorage.getItem('preferredLanguage') || 'en';
+    }
+    
+    function getL(obj) {
+        const lang = getCurrentLanguage();
+        return obj[lang] || obj.en || '';
+    }
+    
+    function updateUIText() {
+
+        const els = {
+
+            ctaDashboard: uiText.goToDashboard, ctaDashboard2: uiText.goToDashboard
+        };
+        Object.keys(els).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = getL(els[id]);
+        });
+    }
+    
+    function toggleUserDropdown(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const dropdown = document.getElementById('userDropdown');
+        const dropdownMenu = document.getElementById('userMenu');
+        dropdown.classList.toggle('open');
+        dropdownMenu.classList.toggle('show');
+    }
+    
+    function handleLogout() {
+        if (confirm(getL(uiText.logOutConfirm))) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.reload();
+        }
+    }
+    
+    function loadUserInfo() {
+        const userStr = localStorage.getItem('user');
+        const token = localStorage.getItem('token');
+        const isLoggedIn = !!(userStr && token);
+        
+        if (isLoggedIn) {
+            try {
+                const user = JSON.parse(userStr);
+                const displayName = user.display_name || user.firstName || user.email || 'User';
+                const userNameEl = document.getElementById('userName');
+                const userDisplayNameEl = document.getElementById('userDisplayName');
+                const userEmailEl = document.getElementById('userEmail');
+                if (userNameEl) userNameEl.textContent = displayName;
+                if (userDisplayNameEl) userDisplayNameEl.textContent = displayName;
+                if (userEmailEl) userEmailEl.textContent = user.email || '';
+                document.body.classList.add('logged-in');
+            } catch (e) {
+                document.body.classList.remove('logged-in');
+            }
+        } else {
+            document.body.classList.remove('logged-in');
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const desktopSelector = document.getElementById('languageSelector');
+        const mobileSelector = document.getElementById('languageSelectorMobile');
+        
+        if (desktopSelector && mobileSelector) {
+            const savedLang = localStorage.getItem('preferredLanguage') || 'en';
+            desktopSelector.value = savedLang;
+            mobileSelector.value = savedLang;
+            
+            mobileSelector.addEventListener('change', function() {
+                desktopSelector.value = this.value;
+                if (typeof changeLanguage === 'function') changeLanguage(this.value);
+                updateUIText();
+            });
+            
+            desktopSelector.addEventListener('change', function() {
+                mobileSelector.value = this.value;
+                updateUIText();
+            });
+        }
+        
+        updateUIText();
+        setTimeout(updateUIText, 100);
+        loadUserInfo();
+        renderFeaturedWorks();
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.user-dropdown')) {
+                const dropdown = document.getElementById('userDropdown');
+                const dropdownMenu = document.getElementById('userMenu');
+                if (dropdown) dropdown.classList.remove('open');
+                if (dropdownMenu) dropdownMenu.classList.remove('show');
+            }
+        });
+        
+        const navbarCollapse = document.getElementById('navbarNav');
+        const navbarOverlay = document.getElementById('navbarOverlay');
+        
+        if (navbarCollapse) {
+            navbarCollapse.addEventListener('show.bs.collapse', function() {
+                if (navbarOverlay) navbarOverlay.classList.add('show');
+            });
+            navbarCollapse.addEventListener('hide.bs.collapse', function() {
+                if (navbarOverlay) navbarOverlay.classList.remove('show');
+            });
+        }
+        
+        if (navbarOverlay) {
+            navbarOverlay.addEventListener('click', function() {
+                const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                if (bsCollapse) bsCollapse.hide();
+            });
+        }
+        
+        document.addEventListener('languageChanged', function() {
+            updateUIText();
+            renderFeaturedWorks();
+        });
+    });
+
+    // Featured works data
+    const featuredWorks = [
+        { id: 1, title: 'The Adventure of Magic Academy', author: 'Sarah Chen', price: 9.99, category: 'Fiction', language: 'en', tags: ['fantasy', 'adventure'] },
+        { id: 2, title: 'Whispers of Tomorrow', author: 'Maria Garcia', price: 12.99, category: 'Romance', language: 'en', tags: ['romance', 'drama'] },
+        { id: 3, title: 'Digital Dreams', author: 'Alex Chen', price: 0, category: 'Sci-Fi', language: 'en', tags: ['sci-fi', 'cyberpunk'] },
+        { id: 4, title: "The Last Samurai's Tale", author: 'Yamamoto Hiro', price: 14.99, category: 'Historical', language: 'ja', tags: ['historical', 'samurai'] },
+        { id: 5, title: '星降る夜に', author: '佐藤美咲', price: 4.49, category: 'Fiction', language: 'ja', tags: ['romance', 'slice-of-life'] },
+        { id: 6, title: 'Shadows of the Empire', author: 'David Park', price: 6.99, category: 'Fantasy', language: 'en', tags: ['fantasy', 'war'] },
+        { id: 7, title: 'Neon Samurai', author: 'Hiroshi Kato', price: 7.99, category: 'Manga', language: 'ja', tags: ['cyberpunk', 'action'] },
+        { id: 8, title: 'Code of Honor', author: 'Robert Kim', price: 0, category: 'Non-Fiction', language: 'en', tags: ['technology', 'ai'] },
+        { id: 9, title: 'Flores del Viento', author: 'Isabella Torres', price: 3.99, category: 'Poetry', language: 'es', tags: ['nature', 'love'] },
+        { id: 10, title: 'Le Monde Nouveau', author: 'Pierre Dubois', price: 3.49, category: 'Non-Fiction', language: 'fr', tags: ['philosophy', 'society'] },
+        { id: 11, title: 'The Mindful Writer', author: 'Emma Clarke', price: 2.49, category: 'Non-Fiction', language: 'en', tags: ['writing', 'creativity'] },
+        { id: 12, title: '月光の詩', author: '田中花子', price: 0, category: 'Poetry', language: 'ja', tags: ['nature', 'seasons'] }
+    ];
+
+    let showingRecommended = false;
+
+    function renderFeaturedWorks() {
+        const grid = document.getElementById('featuredGrid');
+        const titleEl = document.getElementById('featuredTitle');
+        const btnText = document.getElementById('btnHomeRecommendedText');
+        const lang = localStorage.getItem('preferredLanguage') || 'en';
+        const isLoggedIn = document.body.classList.contains('logged-in');
+
+        const t = {
+            featured: { en: 'Featured Works', ja: '注目の作品', zh: '精选作品', es: 'Obras Destacadas', fr: 'Œuvres en vedette', de: 'Ausgewählte Werke', ko: '추천 작품', ar: 'أعمال مميزة', pt: 'Obras em Destaque' },
+            recommended: { en: 'Recommended for You', ja: 'あなたへのおすすめ', zh: '为你推荐', es: 'Recomendado para ti', fr: 'Recommandé pour vous', de: 'Empfohlen für dich', ko: '당신을 위한 추천', ar: 'موصى به لك', pt: 'Recomendado para você' },
+            publisherPicks: { en: "Publisher's Picks", ja: 'Publisherのおすすめ', zh: '平台精选', es: 'Selección del editor', fr: 'Sélection de Publisher', de: 'Publisher-Auswahl', ko: 'Publisher 추천', ar: 'اختيارات الناشر', pt: 'Escolhas do Publisher' },
+            showRecommended: { en: 'Recommended for You', ja: 'あなたへのおすすめ', zh: '为你推荐', es: 'Recomendado para ti', fr: 'Recommandé pour vous', de: 'Empfohlen für dich', ko: '당신을 위한 추천', ar: 'موصى به لك', pt: 'Recomendado para você' },
+            showFeatured: { en: 'Featured Works', ja: '注目の作品', zh: '精选作品', es: 'Obras Destacadas', fr: 'Œuvres en vedette', de: 'Ausgewählte Werke', ko: '추천 작품', ar: 'أعمال مميزة', pt: 'Obras em Destaque' },
+            by: { en: 'by', ja: '著者:', zh: '作者:', es: 'por', fr: 'par', de: 'von', ko: '저자:', ar: 'بواسطة', pt: 'por' },
+            free: { en: 'Free', ja: '無料', zh: '免费', es: 'Gratis', fr: 'Gratuit', de: 'Kostenlos', ko: '무료', ar: 'مجاني', pt: 'Grátis' }
+        };
+        const gl = (obj) => obj[lang] || obj['en'] || '';
+
+        let works;
+        if (showingRecommended) {
+            if (isLoggedIn) {
+                const userPrefs = JSON.parse(localStorage.getItem('userPreferences') || '{}');
+                const favTags = userPrefs.tags || ['fantasy', 'adventure', 'cyberpunk'];
+                let scored = featuredWorks.map(w => {
+                    let score = 0;
+                    if (w.language === lang) score += 2;
+                    if (w.tags) w.tags.forEach(tag => { if (favTags.includes(tag)) score += 2; });
+                    return { ...w, score };
+                });
+                scored.sort((a, b) => b.score - a.score);
+                works = scored.slice(0, 4);
+                titleEl.textContent = gl(t.recommended);
+            } else {
+                works = [...featuredWorks].sort(() => Math.random() - 0.5).slice(0, 4);
+                titleEl.textContent = gl(t.publisherPicks);
+            }
+            btnText.textContent = gl(t.showFeatured);
+        } else {
+            works = featuredWorks.slice(0, 4);
+            titleEl.textContent = gl(t.featured);
+            btnText.textContent = gl(t.showRecommended);
+        }
+
+        grid.innerHTML = works.map(w => `
+            <div class="col-6 col-md-4 col-lg-3">
+                <div class="book-card" onclick="location.href='pages/work-detail.html?id=${w.id}'" style="cursor:pointer">
+                    <div class="book-cover"><i class="fas fa-book"></i></div>
+                    <div class="book-info">
+                        <h3 class="book-title">${escapeH(w.title)}</h3>
+                        <p class="book-author">${gl(t.by)} ${escapeH(w.author)}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="book-price ${w.price === 0 ? 'free' : ''}">${w.price === 0 ? gl(t.free) : '$' + w.price.toFixed(2)}</span>
+                            <span class="badge badge-soft">${escapeH(w.category)}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function toggleRecommended() {
+        showingRecommended = !showingRecommended;
+        renderFeaturedWorks();
+    }
+
+    function escapeH(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    </script>
 </body>
 </html>

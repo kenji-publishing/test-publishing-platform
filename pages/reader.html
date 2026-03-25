@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <title>Reader - Publisher</title>
@@ -15,6 +16,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="../css/navbar.css" rel="stylesheet">
+    <link href="../css/mobile-fixes.css" rel="stylesheet">
 
     <style>
         :root {
@@ -43,7 +45,7 @@
             background: var(--reader-bg);
             color: var(--reader-text);
             transition: all 0.3s ease;
-            overflow-x: hidden;
+            overflow-x: clip;
         }
 
         .reader-toolbar {
@@ -401,6 +403,31 @@
         transition: all 150ms ease;
     }
     .language-selector:hover { border-color: var(--reader-accent); }
+    .navbar-lang-selector { display: flex; align-items: center; margin-right: 0.5rem; }
+    @media (max-width: 991.98px) {
+        .navbar-lang-selector { order: 1; }
+        .navbar-toggler { order: 2; }
+    }
+    @media (min-width: 992px) {
+        .navbar-nav { flex-wrap: nowrap !important; flex-direction: row !important; }
+        .navbar-nav .nav-item { white-space: nowrap !important; }
+        .navbar-nav .nav-link { white-space: nowrap !important; padding: 0.5rem 0.6rem !important; font-size: 0.9rem; }
+
+        .dropdown-menu { white-space: nowrap; }
+        .navbar-buttons-guest { display: flex !important; flex-wrap: nowrap !important; gap: 0.5rem; }
+        .navbar-buttons-guest .btn { white-space: nowrap !important; flex-shrink: 0; }
+    }
+    .auth-only { display: none !important; }
+    .guest-only { display: block; }
+    body.logged-in .auth-only { display: block !important; }
+    body.logged-in .auth-only.nav-item { display: list-item !important; }
+    body.logged-in .auth-only.dropdown { display: block !important; }
+    body.logged-in .guest-only { display: none !important; }
+    @media (min-width: 992px) { body.logged-in .navbar-buttons-guest { display: none !important; } }
+    .user-dropdown { position: relative; }
+    .user-dropdown-toggle { display: flex; align-items: center; gap: 0.5rem; background: transparent; border: 1px solid var(--reader-border); border-radius: 25px; padding: 0.4rem 0.75rem; cursor: pointer; color: var(--reader-text); transition: all 0.2s; }
+    .user-dropdown-toggle:hover { border-color: var(--reader-accent); background: rgba(139, 115, 85, 0.05); }
+    .user-dropdown-toggle i:first-child { font-size: 1.25rem; color: var(--reader-accent); }
     .user-name-nav { font-weight: 500; font-size: 0.9rem; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .user-menu-nav { position: absolute; top: calc(100% + 0.5rem); right: 0; background: var(--reader-bg); border: 1px solid var(--reader-border); border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); min-width: 240px; z-index: 1001; display: none; overflow: hidden; }
     .user-menu-nav.show { display: block; }
@@ -411,138 +438,120 @@
     .logout-btn-nav { color: #C75D5D; }
     .logout-btn-nav i { color: #C75D5D; }
     .logout-btn-nav:hover { background: rgba(199, 93, 93, 0.1); color: #C75D5D; }
+
+    @media (max-width: 991.98px) {
+
+        .user-menu-nav { position: fixed; top: 66px; right: 10px; left: auto; min-width: 260px; max-width: calc(100vw - 20px); z-index: 9999; }
+
+    }
+
+    /* ========== Manga Viewer Mode ========== */
+    body.manga-mode { overflow: hidden; }
+    #textModeUI { display: block; }
+    #mangaModeUI { display: none; }
+    .viewer-toolbar {
+        position: fixed; top: 66px; left: 0; right: 0;
+        background: var(--reader-bg);
+        border-bottom: 1px solid var(--reader-border);
+        padding: 0.5rem 1rem;
+        display: flex; justify-content: space-between; align-items: center;
+        z-index: 1000;
+    }
+    .viewer-toolbar .toolbar-left { display: flex; align-items: center; gap: 0.5rem; }
+    .viewer-toolbar .toolbar-right { display: flex; align-items: center; gap: 0.5rem; }
+    .viewer-toolbar .toolbar-divider { color: var(--reader-border); }
+    .viewer-toolbar .work-author { font-size: 0.8rem; color: var(--reader-secondary); }
+    .viewer-container {
+        position: fixed; top: 116px; left: 0; right: 0; bottom: 0;
+        display: flex; flex-direction: column;
+    }
+    .viewer-content {
+        flex: 1; display: flex; align-items: center; justify-content: center;
+        overflow: hidden; position: relative; background: #EDEAE5;
+    }
+    .manga-img { max-width: 100%; max-height: calc(100vh - 258px); object-fit: contain; cursor: pointer; transition: transform 0.2s; }
+    .viewer-controls {
+        background: var(--reader-bg); padding: 0.75rem 1rem;
+        border-top: 1px solid var(--reader-border);
+        display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;
+    }
+    .reading-mode-switch { display: flex; gap: 0.5rem; }
+    .mode-btn {
+        padding: 0.4rem 0.8rem; border: 1px solid var(--reader-border);
+        background: var(--reader-bg); color: var(--reader-text);
+        cursor: pointer; transition: all 0.2s; border-radius: 6px; font-size: 0.85rem;
+    }
+    .mode-btn:hover { border-color: var(--reader-accent); background: rgba(139,115,85,0.05); }
+    .mode-btn.active { background: var(--reader-accent); border-color: var(--reader-accent); color: #fff; }
+    .page-nav { display: flex; gap: 0.75rem; align-items: center; }
+    .page-counter { font-size: 1rem; font-weight: 600; color: var(--reader-text); }
+    .btn-page {
+        background: var(--reader-bg); border: 1px solid var(--reader-border);
+        color: var(--reader-text); border-radius: 6px; padding: 0.4rem 0.6rem; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-page:hover { background: var(--reader-accent); border-color: var(--reader-accent); color: #fff; }
+    .thumbnail-strip {
+        position: absolute; bottom: 80px; left: 0; right: 0;
+        background: rgba(255,255,255,0.95); border-top: 1px solid var(--reader-border);
+        padding: 0.75rem; display: none; overflow-x: auto; white-space: nowrap;
+    }
+    .thumbnail-strip.show { display: block; }
+    .thumb-item {
+        display: inline-block; width: 70px; height: 100px; margin: 0 4px;
+        cursor: pointer; border: 2px solid var(--reader-border); border-radius: 4px;
+        transition: all 0.2s; background: #F5F2ED; overflow: hidden; vertical-align: top;
+    }
+    .thumb-item:hover, .thumb-item.active { border-color: var(--reader-accent); box-shadow: 0 2px 8px rgba(139,115,85,0.3); }
+    .thumb-item img { width: 100%; height: 100%; object-fit: cover; }
+    .page-loading {
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center;
+    }
+    .page-loading .spinner {
+        width: 40px; height: 40px; border: 3px solid var(--reader-border);
+        border-top-color: var(--reader-accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 0.75rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .page-loading p { color: var(--reader-secondary); font-size: 0.85rem; }
+    .preload-progress {
+        position: fixed; top: 0; left: 0; height: 3px;
+        background: linear-gradient(90deg, var(--reader-accent), #b8956a);
+        transition: width 0.3s ease; z-index: 2000;
+    }
+    .btn-nav-arrow {
+        background: rgba(255,255,255,0.85); border: 1px solid var(--reader-border);
+        color: var(--reader-text); border-radius: 6px; padding: 0.5rem 0.75rem; cursor: pointer;
+        transition: all 0.2s; opacity: 0.8;
+    }
+    .btn-nav-arrow:hover { background: var(--reader-accent); border-color: var(--reader-accent); color: #fff; opacity: 1; }
+    @media (max-width: 768px) {
+        .viewer-toolbar .work-author, .viewer-toolbar .toolbar-divider { display: none; }
+        .viewer-controls { flex-direction: column; gap: 0.5rem; padding: 0.5rem; }
+        .reading-mode-switch { justify-content: center; flex-wrap: wrap; }
+        .mode-btn { padding: 0.3rem 0.5rem; font-size: 0.75rem; }
+    }
     </style>
 </head>
 <body class="theme-light text-medium">
 
     <!-- ========== PATTERN C NAVBAR START ========== -->
-    <div class="navbar-overlay" id="navbarOverlay"></div>
-    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
-        <div class="container">
-            <a class="navbar-brand" href="../index.html"><i class="fas fa-book-open"></i> Publisher</a>
-            <div class="navbar-lang-selector d-lg-none">
-                <select class="language-selector" id="languageSelectorMobile">
-                    <option value="en">🇬🇧 EN</option>
-                    <option value="ja">🇯🇵 日本語</option>
-                    <option value="zh">🇨🇳 中文</option>
-                    <option value="es">🇪🇸 ES</option>
-                    <option value="fr">🇫🇷 FR</option>
-                    <option value="de">🇩🇪 DE</option>
-                    <option value="ko">🇰🇷 한국어</option>
-                    <option value="ar">🇸🇦 عربي</option>
-                    <option value="pt">🇧🇷 PT</option>
-                </select>
-            </div>
-            <div class="user-dropdown auth-only" id="userDropdown">
-                <button type="button" class="user-dropdown-toggle" id="userDropdownBtn" onclick="toggleUserDropdownNav(event)">
-                    <i class="fas fa-user-circle"></i>
-                    <span class="user-name-nav d-none d-lg-inline" id="userNameNav">User</span>
-                    <i class="fas fa-chevron-down user-chevron d-none d-lg-inline"></i>
-                </button>
-                <div class="user-menu-nav" id="userMenuNav">
-                    <div class="user-menu-header">
-                        <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
-                        <div class="user-info">
-                            <div class="user-display-name" id="userDisplayNameNav">User</div>
-                            <div class="user-email" id="userEmailNav">user@example.com</div>
-                        </div>
-                    </div>
-                    <div class="user-menu-divider"></div>
-                    <a href="dashboard.html" class="user-menu-item-nav"><i class="fas fa-th-large"></i><span id="menuDashboard">Dashboard</span></a>
-                    <a href="my-works.html" class="user-menu-item-nav"><i class="fas fa-book"></i><span id="menuMyWorks">My Works</span></a>
-                    <a href="account-settings.html" class="user-menu-item-nav"><i class="fas fa-cog"></i><span id="menuAccountSettings">Account Settings</span></a>
-                    <div class="user-menu-divider"></div>
-                    <button class="user-menu-item-nav logout-btn-nav" onclick="handleLogoutNav()"><i class="fas fa-sign-out-alt"></i><span id="menuLogout">Log Out</span></button>
-                </div>
-            </div>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <!-- PC Navigation -->
-                <ul class="navbar-nav me-auto d-none d-lg-flex">
-                    <li class="nav-item"><a class="nav-link" href="../index.html"><i class="fas fa-home me-1"></i> <span data-i18n="nav.home">Home</span></a></li>
-                    <li class="nav-item"><a class="nav-link" href="browse.html"><i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span></a></li>
-                    <li class="nav-item auth-only"><a class="nav-link" href="library.html"><i class="fas fa-book-reader me-1"></i> <span id="navLibraryPC">Library</span></a></li>
-                    <li class="nav-item auth-only"><a class="nav-link" href="dashboard.html"><i class="fas fa-th-large me-1"></i> <span id="navDashboardPC">Dashboard</span></a></li>
-                    <li class="nav-item auth-only"><a class="nav-link" href="upload.html"><i class="fas fa-upload me-1"></i> <span data-i18n="nav.upload">Upload</span></a></li>
-                    <li class="nav-item dropdown auth-only">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"><i class="fas fa-language me-1"></i> <span id="navTranslationToolsPC">Translation Tools</span></a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="manga-translator.html"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorPC">Manga Translator</span></a></li>
-                            <li><a class="dropdown-item" href="translation-status.html"><i class="fas fa-tasks me-2"></i><span id="navTranslationStatusPC">Translation Status</span></a></li>
-                            <li><a class="dropdown-item" href="translators/index.html"><i class="fas fa-users me-2"></i><span id="navFindTranslatorsPC">Find Translators</span></a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown"><i class="fas fa-headset me-1"></i> <span data-i18n="nav.support">Support</span></a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item active" href="support/faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
-                            <li><a class="dropdown-item" href="support/troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
-                            <li><a class="dropdown-item" href="support/contact.html"><i class="fas fa-envelope me-2"></i><span id="navContactPC">Contact</span></a></li>
-                            <li class="auth-only"><hr class="dropdown-divider"></li>
-                            <li class="auth-only"><a class="dropdown-item" href="support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
-                        </ul>
-                    </li>
-                </ul>
-                <!-- Mobile Navigation -->
-                <ul class="navbar-nav d-lg-none">
-                    <li class="nav-item"><a class="nav-link" href="../index.html"><i class="fas fa-home me-2"></i> <span data-i18n="nav.home">Home</span></a></li>
-                    <li class="nav-item"><a class="nav-link" href="browse.html"><i class="fas fa-compass me-2"></i> <span data-i18n="nav.browse">Browse</span></a></li>
-                    <li class="nav-item auth-only"><a class="nav-link" href="library.html"><i class="fas fa-book-reader me-2"></i> <span id="navLibraryMobile">Library</span></a></li>
-                    <li class="auth-only"><hr class="dropdown-divider"></li>
-                    <li class="nav-item auth-only"><a class="nav-link" href="dashboard.html"><i class="fas fa-th-large me-2"></i> <span id="navDashboardMobile">Dashboard</span></a></li>
-                    <li class="nav-item auth-only"><a class="nav-link" href="upload.html"><i class="fas fa-upload me-2"></i> <span data-i18n="nav.upload">Upload</span></a></li>
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" data-bs-toggle="collapse" href="#translationToolsMenu" role="button"><i class="fas fa-language me-2"></i> <span id="navTranslationToolsMobile">Translation Tools</span> <i class="fas fa-chevron-down ms-auto small"></i></a>
-                        <div class="collapse ps-4" id="translationToolsMenu">
-                            <a class="nav-link" href="manga-translator.html"><i class="fas fa-image me-2"></i> <span id="navMangaTranslatorMobile">Manga Translator</span></a>
-                            <a class="nav-link" href="translation-status.html"><i class="fas fa-tasks me-2"></i> <span id="navTranslationStatusMobile">Translation Status</span></a>
-                            <a class="nav-link" href="translators/index.html"><i class="fas fa-users me-2"></i> <span id="navFindTranslatorsMobile">Find Translators</span></a>
-                        </div>
-                    </li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li class="nav-item"><a class="nav-link active" href="support/faq.html"><i class="fas fa-question-circle me-2"></i> <span data-i18n="support.faq.title">FAQ</span></a></li>
-                    <li class="nav-item"><a class="nav-link" href="support/troubleshoot.html"><i class="fas fa-tools me-2"></i> <span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
-                    <li class="nav-item"><a class="nav-link" href="support/contact.html"><i class="fas fa-envelope me-2"></i> <span id="navContactMobile">Contact</span></a></li>
-                    <li class="nav-item auth-only"><a class="nav-link" href="support/tickets.html"><i class="fas fa-ticket-alt me-2"></i> <span data-i18n="support.tickets.title">My Tickets</span></a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li class="nav-item guest-only"><a class="nav-link" href="login.html"><i class="fas fa-sign-in-alt me-2"></i> <span data-i18n="nav.login">Sign In</span></a></li>
-                    <li class="nav-item guest-only"><a class="nav-link" href="register.html"><i class="fas fa-user-plus me-2"></i> <span data-i18n="nav.getStarted">Get Started</span></a></li>
-                </ul>
-                <div class="d-flex align-items-center gap-3">
-                    <select class="language-selector d-none d-lg-block" id="languageSelector">
-                        <option value="en">🇬🇧 EN</option>
-                        <option value="ja">🇯🇵 日本語</option>
-                        <option value="zh">🇨🇳 中文</option>
-                        <option value="es">🇪🇸 ES</option>
-                        <option value="fr">🇫🇷 FR</option>
-                        <option value="de">🇩🇪 DE</option>
-                        <option value="ko">🇰🇷 한국어</option>
-                        <option value="ar">🇸🇦 عربي</option>
-                        <option value="pt">🇧🇷 PT</option>
-                    </select>
-                    <div class="navbar-buttons-guest guest-only d-none d-lg-flex">
-                        <a href="login.html" class="btn btn-soft-custom"><span data-i18n="nav.login">Sign In</span></a>
-                        <a href="register.html" class="btn btn-primary-custom"><span data-i18n="nav.getStarted">Get Started</span></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
-    <!-- ========== PATTERN C NAVBAR END ========== -->
+    <div id="navbar-container"></div>
+
+    <!-- ===== Text Reader UI (default) ===== -->
+    <div id="textModeUI">
 
     <div class="swipe-indicator left" id="swipeLeft"><i class="fas fa-chevron-left"></i></div>
     <div class="swipe-indicator right" id="swipeRight"><i class="fas fa-chevron-right"></i></div>
 
     <div class="touch-hint" id="touchHint">
         <i class="fas fa-hand-pointer me-2"></i>
-        <span id="touchHintText">Swipe left/right to turn pages • Long press to highlight</span>
+        <span id="touchHintText" data-i18n="reader.touchHint">Swipe left/right to turn pages • Long press to highlight</span>
     </div>
 
     <div class="reader-toolbar">
         <div class="toolbar-left">
             <a href="library.html" class="back-link" id="backLink" title="Back to Library">
                 <i class="fas fa-arrow-left"></i>
-                <span id="backLinkText">Library</span>
+                <span id="backLinkText" data-i18n="reader.backToLibrary">Library</span>
             </a>
             <span class="work-title" id="workTitle">Sample Story</span>
         </div>
@@ -554,13 +563,11 @@
         </div>
         
         <div class="toolbar-right">
-            <a href="notifications.html" class="btn-toolbar position-relative" title="Notifications" id="notificationBellContainer"><i class="fas fa-bell"></i><span id="notificationBadge" class="position-absolute badge rounded-pill bg-danger" style="font-size: 0.55rem; display: none; top: -2px; right: -6px; padding: 2px 5px;">0</span></a>
-            
             <!-- Desktop: Show all buttons -->
-            <button class="btn-toolbar desktop-only" onclick="toggleSearch()" id="btnSearch" title="Search"><i class="fas fa-search"></i></button>
-            <button class="btn-toolbar desktop-only" onclick="toggleBookmarks()" id="btnBookmarks" title="Bookmarks"><i class="fas fa-bookmark"></i></button>
-            <button class="btn-toolbar desktop-only" onclick="addBookmark()" id="btnAddBookmark" title="Add Bookmark"><i class="fas fa-plus"></i></button>
-            <button class="btn-toolbar desktop-only" onclick="toggleSettings()" id="btnSettings" title="Settings"><i class="fas fa-cog"></i></button>
+            <button class="btn-toolbar desktop-only" onclick="toggleSearch()" id="btnSearch" data-i18n-title="reader.search" title="Search"><i class="fas fa-search"></i></button>
+            <button class="btn-toolbar desktop-only" onclick="toggleBookmarks()" id="btnBookmarks" data-i18n-title="reader.bookmarks" title="Bookmarks"><i class="fas fa-bookmark"></i></button>
+            <button class="btn-toolbar desktop-only" onclick="addBookmark()" id="btnAddBookmark" data-i18n-title="reader.addBookmark" title="Add Bookmark"><i class="fas fa-plus"></i></button>
+            <button class="btn-toolbar desktop-only" onclick="toggleSettings()" id="btnSettings" data-i18n-title="reader.settings" title="Settings"><i class="fas fa-cog"></i></button>
             
             <!-- Mobile: Show dropdown menu -->
             <div class="mobile-menu-dropdown mobile-only">
@@ -569,16 +576,16 @@
                 </button>
                 <div class="mobile-menu" id="mobileMenu">
                     <button class="mobile-menu-item" onclick="toggleSearch(); toggleMobileMenu();">
-                        <i class="fas fa-search"></i> <span id="mobileSearchText">Search</span>
+                        <i class="fas fa-search"></i> <span id="mobileSearchText" data-i18n="reader.toolbar.search">Search</span>
                     </button>
                     <button class="mobile-menu-item" onclick="toggleBookmarks(); toggleMobileMenu();">
-                        <i class="fas fa-bookmark"></i> <span id="mobileBookmarksText">Bookmarks</span>
+                        <i class="fas fa-bookmark"></i> <span id="mobileBookmarksText" data-i18n="reader.toolbar.bookmarks">Bookmarks</span>
                     </button>
                     <button class="mobile-menu-item" onclick="addBookmark(); toggleMobileMenu();">
-                        <i class="fas fa-plus"></i> <span id="mobileAddBookmarkText">Add Bookmark</span>
+                        <i class="fas fa-plus"></i> <span id="mobileAddBookmarkText" data-i18n="reader.addBookmark">Add Bookmark</span>
                     </button>
                     <button class="mobile-menu-item" onclick="toggleSettings(); toggleMobileMenu();">
-                        <i class="fas fa-cog"></i> <span id="mobileSettingsText">Settings</span>
+                        <i class="fas fa-cog"></i> <span id="mobileSettingsText" data-i18n="reader.toolbar.settings">Settings</span>
                     </button>
                 </div>
             </div>
@@ -587,7 +594,7 @@
 
     <div class="settings-panel" id="settingsPanel">
         <div class="settings-section">
-            <div class="settings-label"><i class="fas fa-text-height me-1"></i> <span id="labelTextSize">Text Size</span></div>
+            <div class="settings-label"><i class="fas fa-text-height me-1"></i> <span id="labelTextSize" data-i18n="reader.textSize">Text Size</span></div>
             <div class="settings-row">
                 <button class="settings-btn" onclick="setTextSize('small')" id="sizeS">S</button>
                 <button class="settings-btn active" onclick="setTextSize('medium')" id="sizeM">M</button>
@@ -596,32 +603,32 @@
             </div>
         </div>
         <div class="settings-section">
-            <div class="settings-label"><i class="fas fa-palette me-1"></i> <span id="labelTheme">Theme</span></div>
+            <div class="settings-label"><i class="fas fa-palette me-1"></i> <span id="labelTheme" data-i18n="reader.theme">Theme</span></div>
             <div class="settings-row">
                 <button class="settings-btn theme-btn active" onclick="setTheme('light')">
-                    <div class="theme-preview light"></div><span id="themeLight">Light</span>
+                    <div class="theme-preview light"></div><span id="themeLight" data-i18n="reader.light">Light</span>
                 </button>
                 <button class="settings-btn theme-btn" onclick="setTheme('dark')">
-                    <div class="theme-preview dark"></div><span id="themeDark">Dark</span>
+                    <div class="theme-preview dark"></div><span id="themeDark" data-i18n="reader.dark">Dark</span>
                 </button>
                 <button class="settings-btn theme-btn" onclick="setTheme('sepia')">
-                    <div class="theme-preview sepia"></div><span id="themeSepia">Sepia</span>
+                    <div class="theme-preview sepia"></div><span id="themeSepia" data-i18n="reader.sepia">Sepia</span>
                 </button>
             </div>
         </div>
         <div class="settings-section">
-            <div class="settings-label"><i class="fas fa-align-left me-1"></i> <span id="labelDirection">Direction</span></div>
+            <div class="settings-label"><i class="fas fa-align-left me-1"></i> <span id="labelDirection" data-i18n="reader.direction">Direction</span></div>
             <div class="settings-row">
-                <button class="settings-btn active" onclick="setWritingMode('horizontal')" id="dirHorizontal">Horizontal</button>
-                <button class="settings-btn" onclick="setWritingMode('vertical')" id="dirVertical">Vertical</button>
-                <button class="settings-btn" onclick="setWritingMode('rtl')" id="dirRtl">RTL</button>
+                <button class="settings-btn active" onclick="setWritingMode('horizontal')" id="dirHorizontal" data-i18n="reader.horizontal">Horizontal</button>
+                <button class="settings-btn" onclick="setWritingMode('vertical')" id="dirVertical" data-i18n="reader.vertical">Vertical</button>
+                <button class="settings-btn" onclick="setWritingMode('rtl')" id="dirRtl" data-i18n="reader.rtl">RTL</button>
             </div>
         </div>
     </div>
 
     <div class="search-panel" id="searchPanel">
         <div class="search-input-row">
-            <input type="text" class="search-input" id="searchInput" placeholder="Search...">
+            <input type="text" class="search-input" id="searchInput" placeholder="Search..." data-i18n-placeholder="reader.searchPlaceholder">
             <button class="btn-toolbar" onclick="searchText()"><i class="fas fa-search"></i></button>
             <button class="btn-toolbar" onclick="clearSearch()"><i class="fas fa-times"></i></button>
         </div>
@@ -630,11 +637,11 @@
 
     <div class="bookmarks-panel" id="bookmarksPanel">
         <div class="bookmarks-header">
-            <span><i class="fas fa-bookmark me-2"></i><span id="bookmarksTitle">Bookmarks</span></span>
+            <span><i class="fas fa-bookmark me-2"></i><span id="bookmarksTitle" data-i18n="reader.toolbar.bookmarks">Bookmarks</span></span>
             <button class="btn-toolbar" onclick="toggleBookmarks()" style="padding: 0.2rem 0.4rem;"><i class="fas fa-times"></i></button>
         </div>
         <div class="bookmarks-list" id="bookmarksList">
-            <p style="text-align: center; color: var(--reader-secondary); padding: 1rem; font-size: 0.85rem;" id="noBookmarksText">No bookmarks yet</p>
+            <p style="text-align: center; color: var(--reader-secondary); padding: 1rem; font-size: 0.85rem;" id="noBookmarksText" data-i18n="reader.noBookmarks">No bookmarks yet</p>
         </div>
     </div>
 
@@ -687,13 +694,13 @@
 
     <div class="notes-section" id="notesSection">
         <div class="notes-header" onclick="toggleNotes()">
-            <h4><i class="fas fa-sticky-note"></i> <span id="notesTitle">Notes</span> <span id="notesCount" style="font-weight: normal; color: var(--reader-secondary);">(0)</span></h4>
+            <h4><i class="fas fa-sticky-note"></i> <span id="notesTitle" data-i18n="reader.notes.title">Notes</span> <span id="notesCount" style="font-weight: normal; color: var(--reader-secondary);">(0)</span></h4>
             <button class="notes-toggle" id="notesToggleBtn"><i class="fas fa-chevron-up"></i></button>
         </div>
         <div class="notes-content" id="notesContent">
             <div class="notes-inner">
                 <div class="note-input-row">
-                    <textarea class="note-input" id="noteInput" rows="2" placeholder="Add a note..."></textarea>
+                    <textarea class="note-input" id="noteInput" rows="2" placeholder="Add a note..." data-i18n-placeholder="reader.addNotePlaceholder"></textarea>
                     <button class="btn-add-note" onclick="addNote()"><i class="fas fa-plus"></i></button>
                 </div>
                 <div class="notes-list" id="notesList"></div>
@@ -705,8 +712,99 @@
             </div>
         </div>
     </div>
+    </div><!-- end textModeUI -->
+
+    <!-- ===== Manga Viewer UI ===== -->
+    <div id="mangaModeUI">
+        <!-- Preload Progress -->
+        <div class="preload-progress" id="mangaPreloadProgress" style="width:0%"></div>
+
+        <!-- Viewer Toolbar -->
+        <div class="viewer-toolbar">
+            <div class="toolbar-left">
+                <a href="dashboard.html" class="back-link" id="mangaBackLink">
+                    <i class="fas fa-arrow-left"></i>
+                    <span id="mangaBackText">Dashboard</span>
+                </a>
+                <span class="toolbar-divider">|</span>
+                <span class="work-title" id="mangaWorkTitle">Manga Title</span>
+                <span class="work-author" id="mangaWorkAuthor"></span>
+            </div>
+            <div class="toolbar-right">
+                <button class="btn-toolbar" onclick="mangaShowThumbnails()" id="mangaBtnPages">
+                    <i class="fas fa-th"></i> <span class="d-none d-md-inline" id="mangaPagesText">Pages</span>
+                </button>
+                <button class="btn-toolbar" onclick="mangaToggleFullscreen()">
+                    <i class="fas fa-expand"></i> <span class="d-none d-md-inline" id="mangaFullscreenText">Fullscreen</span>
+                </button>
+                <a href="dashboard.html" class="btn-toolbar">
+                    <i class="fas fa-times"></i> <span class="d-none d-md-inline" id="mangaCloseText">Close</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Viewer Container -->
+        <div class="viewer-container">
+            <div class="viewer-content" id="mangaViewerContent">
+                <div class="page-loading" id="mangaPageLoading">
+                    <div class="spinner"></div>
+                    <p id="mangaLoadingText">Loading page...</p>
+                </div>
+                <img src="" class="manga-img" id="mangaPageImg" alt="Manga Page" onclick="mangaNextPage()" style="display:none">
+                <button class="btn-nav-arrow position-absolute start-0 top-50 translate-middle-y ms-3" onclick="mangaPrevPage()">
+                    <i class="fas fa-chevron-left fa-lg"></i>
+                </button>
+                <button class="btn-nav-arrow position-absolute end-0 top-50 translate-middle-y me-3" onclick="mangaNextPage()">
+                    <i class="fas fa-chevron-right fa-lg"></i>
+                </button>
+            </div>
+
+            <!-- Thumbnail Strip -->
+            <div class="thumbnail-strip" id="mangaThumbnailStrip"></div>
+
+            <!-- Controls -->
+            <div class="viewer-controls">
+                <div class="reading-mode-switch">
+                    <button class="mode-btn active" id="ltrBtn" onclick="mangaSetReadingMode('ltr')">
+                        <i class="fas fa-arrow-right"></i> <span class="d-none d-sm-inline" id="mangaLtrText">Left to Right</span>
+                    </button>
+                    <button class="mode-btn" id="rtlBtn" onclick="mangaSetReadingMode('rtl')">
+                        <i class="fas fa-arrow-left"></i> <span class="d-none d-sm-inline" id="mangaRtlText">Right to Left</span>
+                    </button>
+                    <button class="mode-btn" id="verticalBtn" onclick="mangaSetReadingMode('vertical')">
+                        <i class="fas fa-arrow-down"></i> <span class="d-none d-sm-inline" id="mangaVerticalText">Vertical</span>
+                    </button>
+                </div>
+                <div class="page-nav">
+                    <button class="btn-page" onclick="mangaPrevPage()"><i class="fas fa-chevron-left"></i></button>
+                    <span class="page-counter"><span id="mangaCurrentPageNum">1</span> / <span id="mangaTotalPagesNum">1</span></span>
+                    <button class="btn-page" onclick="mangaNextPage()"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn-page" onclick="mangaZoomIn()"><i class="fas fa-search-plus"></i></button>
+                    <button class="btn-page" onclick="mangaZoomOut()"><i class="fas fa-search-minus"></i></button>
+                    <button class="btn-page" onclick="mangaResetZoom()"><i class="fas fa-redo"></i></button>
+                </div>
+            </div>
+        </div>
+    </div><!-- end mangaModeUI -->
+
+    <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/i18n.js"></script>
+    <script src="../js/navbar.js"></script>
+    <script src="../js/translations.js"></script>
+    <script src="../js/lazy-loader.js"></script>
+    <script>
+        // ===== Mode Detection =====
+        const isManga = new URLSearchParams(window.location.search).get('type') === 'manga';
+        if (isManga) {
+            document.body.classList.add('manga-mode');
+            document.getElementById('textModeUI').style.display = 'none';
+            document.getElementById('mangaModeUI').style.display = 'block';
+        }
+    </script>
     <script>
         // UI Text for 9 languages
         const uiText = {
@@ -740,6 +838,13 @@
             selectText: { en: 'Please select text first', ja: 'テキストを選択してください', zh: '请先选择文本', es: 'Por favor selecciona texto primero', fr: 'Veuillez d\'abord sélectionner du texte', de: 'Bitte wählen Sie zuerst Text aus', ko: '텍스트를 먼저 선택해주세요', ar: 'يرجى تحديد النص أولاً', pt: 'Por favor, selecione o texto primeiro' },
             cannotHighlight: { en: 'Cannot highlight across elements', ja: '要素をまたいでハイライトできません', zh: '无法跨元素高亮', es: 'No se puede resaltar entre elementos', fr: 'Impossible de surligner entre les éléments', de: 'Kann nicht über Elemente hinweg markieren', ko: '요소 간 하이라이트 불가', ar: 'لا يمكن التمييز عبر العناصر', pt: 'Não é possível destacar entre elementos' },
             notes: { en: 'Notes', ja: 'ノート', zh: '笔记', es: 'Notas', fr: 'Notes', de: 'Notizen', ko: '노트', ar: 'ملاحظات', pt: 'Notas' },
+            navHome: { en: 'Home', ja: 'ホーム', zh: '首页', es: 'Inicio', fr: 'Accueil', de: 'Startseite', ko: '홈', ar: 'الرئيسية', pt: 'Início' },
+            navBrowse: { en: 'Browse', ja: '作品を探す', zh: '浏览', es: 'Explorar', fr: 'Parcourir', de: 'Durchsuchen', ko: '둘러보기', ar: 'تصفح', pt: 'Explorar' },
+            navUpload: { en: 'Upload Work', ja: '作品アップロード', zh: '上传作品', es: 'Subir obra', fr: 'Télécharger une œuvre', de: 'Werk hochladen', ko: '작품 업로드', ar: 'رفع عمل', pt: 'Enviar obra' },
+            navSupport: { en: 'Support', ja: 'サポート', zh: '支持', es: 'Soporte', fr: 'Support', de: 'Support', ko: '지원', ar: 'الدعم', pt: 'Suporte' },
+            navFaq: { en: 'FAQ', ja: 'FAQ', zh: '常见问题', es: 'Preguntas frecuentes', fr: 'FAQ', de: 'FAQ', ko: '자주 묻는 질문', ar: 'الأسئلة الشائعة', pt: 'Perguntas frequentes' },
+            navTroubleshoot: { en: 'Troubleshooting', ja: 'トラブルシューティング', zh: '故障排除', es: 'Solución de problemas', fr: 'Dépannage', de: 'Fehlerbehebung', ko: '문제 해결', ar: 'استكشاف الأخطاء', pt: 'Solução de problemas' },
+            navMyTickets: { en: 'My Tickets', ja: 'マイチケット', zh: '我的工单', es: 'Mis tickets', fr: 'Mes tickets', de: 'Meine Tickets', ko: '내 티켓', ar: 'تذاكري', pt: 'Meus tickets' },
             addNotePlaceholder: { en: 'Add a note...', ja: 'ノートを追加...', zh: '添加笔记...', es: 'Añadir una nota...', fr: 'Ajouter une note...', de: 'Notiz hinzufügen...', ko: '노트 추가...', ar: 'أضف ملاحظة...', pt: 'Adicionar uma nota...' },
             noNotes: { en: 'No notes to export', ja: 'エクスポートするノートがありません', zh: '没有可导出的笔记', es: 'No hay notas para exportar', fr: 'Pas de notes à exporter', de: 'Keine Notizen zum Exportieren', ko: '내보낼 노트 없음', ar: 'لا توجد ملاحظات للتصدير', pt: 'Sem notas para exportar' },
             exported: { en: 'Exported', ja: 'エクスポート日時', zh: '导出时间', es: 'Exportado', fr: 'Exporté', de: 'Exportiert', ko: '내보낸 날짜', ar: 'تم التصدير', pt: 'Exportado' },
@@ -769,40 +874,12 @@ function getL(obj, replacements = {}) {
         }
 
         function updateAllText() {
-            document.title = getL(uiText.notes) + ' - Publisher';
-            
-            // Update back link
-            document.getElementById('backLinkText').textContent = getL(uiText.backToLibrary);
-            document.getElementById('backLink').title = getL(uiText.backToLibrary);
-            
-            // Update touch hint
-            document.getElementById('touchHintText').textContent = getL(uiText.touchHint);
-            
-            // Update toolbar buttons titles
+            if (typeof i18n !== 'undefined') { i18n.applyToDOM(); }
+
+            // Update toolbar button titles (data-i18n-title属性で対応)
             document.getElementById('btnPrev').title = getL(uiText.previous);
             document.getElementById('btnNext').title = getL(uiText.next);
-            document.getElementById('btnSearch').title = getL(uiText.search);
-            document.getElementById('btnBookmarks').title = getL(uiText.bookmarks);
-            document.getElementById('btnAddBookmark').title = getL(uiText.addBookmark);
-            document.getElementById('btnSettings').title = getL(uiText.settings);
-            
-            // Update settings panel labels
-            document.getElementById('labelTextSize').textContent = getL(uiText.textSize);
-            document.getElementById('labelTheme').textContent = getL(uiText.theme);
-            document.getElementById('themeLight').textContent = getL(uiText.light);
-            document.getElementById('themeDark').textContent = getL(uiText.dark);
-            document.getElementById('themeSepia').textContent = getL(uiText.sepia);
-            document.getElementById('labelDirection').textContent = getL(uiText.direction);
-            document.getElementById('dirHorizontal').textContent = getL(uiText.horizontal);
-            document.getElementById('dirVertical').textContent = getL(uiText.vertical);
-            document.getElementById('dirRtl').textContent = getL(uiText.rtl);
-            
-            // Update bookmarks panel
-            document.getElementById('bookmarksTitle').textContent = getL(uiText.bookmarks);
-            
-            // Update notes section
-            document.getElementById('notesTitle').textContent = getL(uiText.notes);
-            
+
             // Update highlight toolbar titles
             document.getElementById('hlYellow').title = getL(uiText.yellow);
             document.getElementById('hlGreen').title = getL(uiText.green);
@@ -810,17 +887,10 @@ function getL(obj, replacements = {}) {
             document.getElementById('hlPink').title = getL(uiText.pink);
             document.getElementById('hlRemove').title = getL(uiText.remove);
             document.getElementById('hlReport').title = getL(uiText.reportIssue);
-            
-            // Update mobile menu text
-            document.getElementById('mobileSearchText').textContent = getL(uiText.search);
-            document.getElementById('mobileBookmarksText').textContent = getL(uiText.bookmarks);
-            document.getElementById('mobileAddBookmarkText').textContent = getL(uiText.addBookmark);
-            document.getElementById('mobileSettingsText').textContent = getL(uiText.settings);
-            
-            // Update placeholders directly
-            document.getElementById('noteInput').placeholder = getL(uiText.addNotePlaceholder);
-            document.getElementById('searchInput').placeholder = getL(uiText.searchPlaceholder);
-            
+
+            // data-i18nで対応できない要素のみ直接設定
+            document.getElementById('backLink').title = getL(uiText.backToLibrary);
+
             renderBookmarks();
             renderNotes();
 
@@ -1269,8 +1339,7 @@ function getL(obj, replacements = {}) {
     <script>
     // ========== Navbar多言語テキスト（9言語）==========
     const navbarUiText = {
-        translationTools: {
-            en: 'Translation Tools', ja: '翻訳ツール', zh: '翻译工具',
+        translationTools: { en: 'Tools', ja: '翻訳ツール', zh: '翻译工具',
             es: 'Herramientas de traducción', fr: 'Outils de traduction', de: 'Übersetzungstools',
             ko: '번역 도구', ar: 'أدوات الترجمة', pt: 'Ferramentas de tradução'
         },
@@ -1279,6 +1348,11 @@ function getL(obj, replacements = {}) {
             es: 'Traductor de Manga', fr: 'Traducteur de Manga', de: 'Manga-Übersetzer',
             ko: '만화 번역기', ar: 'مترجم المانجا', pt: 'Tradutor de Mangá'
         },
+            novelTranslator: {
+                en: 'Novel Translator', ja: '小説翻訳', zh: '小说翻译',
+                es: 'Traductor de Novela', fr: 'Traducteur de Roman', de: 'Roman-Übersetzer',
+                ko: '소설 번역기', ar: 'مترجم الروايات', pt: 'Tradutor de Romance'
+            },
         translationStatus: {
             en: 'Translation Status', ja: '翻訳状況', zh: '翻译状态',
             es: 'Estado de traducción', fr: 'Statut de traduction', de: 'Übersetzungsstatus',
@@ -1328,25 +1402,10 @@ function getL(obj, replacements = {}) {
         function getNL(obj) { return (obj && (obj[lang] || obj.en)) || ''; }
 
         // User dropdown menu
-        var menuDashboard = document.getElementById('menuDashboard');
-        var menuAccountSettings = document.getElementById('menuAccountSettings');
-        var menuLogout = document.getElementById('menuLogout');
-        if (menuDashboard) menuDashboard.textContent = getNL(navbarUiText.dashboard);
-        var menuMyWorks = document.getElementById('menuMyWorks');
-        if (menuMyWorks) menuMyWorks.textContent = getNL(navbarUiText.myWorks);
-        if (menuAccountSettings) menuAccountSettings.textContent = getNL(navbarUiText.accountSettings);
-        if (menuLogout) menuLogout.textContent = getNL(navbarUiText.logout);
 
         // PC & Mobile nav links
         var els = {
-            navLibraryPC: navbarUiText.library, navDashboardPC: navbarUiText.dashboard,
-            navTranslationToolsPC: navbarUiText.translationTools, navMangaTranslatorPC: navbarUiText.mangaTranslator,
-            navTranslationStatusPC: navbarUiText.translationStatus, navFindTranslatorsPC: navbarUiText.findTranslators,
-            navContactPC: navbarUiText.contact, navLibraryMobile: navbarUiText.library, navDashboardMobile: navbarUiText.dashboard,
-            navTranslationToolsMobile: navbarUiText.translationTools, navMangaTranslatorMobile: navbarUiText.mangaTranslator,
-            navTranslationStatusMobile: navbarUiText.translationStatus, navFindTranslatorsMobile: navbarUiText.findTranslators,
-            navContactMobile: navbarUiText.contact
-        };
+
         Object.keys(els).forEach(function(id) {
             var el = document.getElementById(id);
             if (el) el.textContent = getNL(els[id]);
@@ -1447,11 +1506,9 @@ function getL(obj, replacements = {}) {
 
         if (navbarCollapse) {
             navbarCollapse.addEventListener('show.bs.collapse', function() {
-                document.body.classList.add('menu-open');
                 if (navbarOverlay) navbarOverlay.classList.add('show');
             });
             navbarCollapse.addEventListener('hide.bs.collapse', function() {
-                document.body.classList.remove('menu-open');
                 if (navbarOverlay) navbarOverlay.classList.remove('show');
             });
         }
@@ -1476,7 +1533,172 @@ function getL(obj, replacements = {}) {
     </div>
 
     <!-- Notification Badge -->
-    <script src="../js/header-notification.js"></script>
-    <script src="../js/navbar.js"></script>
+
+    <!-- ===== Manga Viewer Script ===== -->
+    <script>
+    if (isManga) {
+        // ---- Manga State ----
+        let mangaCurrentPage = 1;
+        let mangaTotalPages = 10;
+        let mangaReadingMode = 'ltr';
+        let mangaZoomLevel = 1;
+        const mangaPreloadedPages = new Map();
+
+        // Demo page URLs (replace with API data in production)
+        const mangaPageUrls = Array.from({length: mangaTotalPages}, (_, i) =>
+            `https://via.placeholder.com/800x1200/2D2A26/FFFFFF?text=Page+${i+1}`
+        );
+        const mangaThumbUrls = Array.from({length: mangaTotalPages}, (_, i) =>
+            `https://via.placeholder.com/80x120/2D2A26/FFFFFF?text=${i+1}`
+        );
+
+        // ---- UI Text ----
+        const mangaUiText = {
+            backToDashboard: { en:'Dashboard', ja:'ダッシュボード', zh:'控制台', es:'Panel', fr:'Tableau de bord', de:'Dashboard', ko:'대시보드', ar:'لوحة التحكم', pt:'Painel' },
+            pagesBtn:        { en:'Pages', ja:'ページ一覧', zh:'页面', es:'Páginas', fr:'Pages', de:'Seiten', ko:'페이지', ar:'الصفحات', pt:'Páginas' },
+            fullscreen:      { en:'Fullscreen', ja:'全画面', zh:'全屏', es:'Pantalla completa', fr:'Plein écran', de:'Vollbild', ko:'전체화면', ar:'ملء الشاشة', pt:'Tela cheia' },
+            close:           { en:'Close', ja:'閉じる', zh:'关闭', es:'Cerrar', fr:'Fermer', de:'Schließen', ko:'닫기', ar:'إغلاق', pt:'Fechar' },
+            loadingPage:     { en:'Loading page...', ja:'ページを読み込み中...', zh:'加载页面中...', es:'Cargando página...', fr:'Chargement de la page...', de:'Seite wird geladen...', ko:'페이지 로딩 중...', ar:'جارٍ تحميل الصفحة...', pt:'Carregando página...' },
+            leftToRight:     { en:'Left to Right', ja:'左→右', zh:'从左到右', es:'Izquierda a derecha', fr:'Gauche à droite', de:'Links nach rechts', ko:'왼쪽→오른쪽', ar:'من اليسار إلى اليمين', pt:'Esquerda para direita' },
+            rightToLeft:     { en:'Right to Left', ja:'右→左', zh:'从右到左', es:'Derecha a izquierda', fr:'Droite à gauche', de:'Rechts nach links', ko:'오른쪽→왼쪽', ar:'من اليمين إلى اليسار', pt:'Direita para esquerda' },
+            vertical:        { en:'Vertical', ja:'縦読み', zh:'竖排', es:'Vertical', fr:'Vertical', de:'Vertikal', ko:'세로', ar:'عمودي', pt:'Vertical' },
+            verticalSoon:    { en:'Vertical mode coming soon!', ja:'縦読みは近日公開予定！', zh:'竖排模式即将推出！', es:'¡Modo vertical próximamente!', fr:'Mode vertical bientôt disponible !', de:'Vertikaler Modus kommt bald!', ko:'세로 모드 곧 출시!', ar:'وضع عمودي قريباً!', pt:'Modo vertical em breve!' }
+        };
+        function mangaGetL(obj) { const lang = localStorage.getItem('preferredLanguage') || 'en'; return obj[lang] || obj.en || ''; }
+
+        // ---- Init ----
+        function mangaInit() {
+            document.getElementById('mangaBackText').textContent     = mangaGetL(mangaUiText.backToDashboard);
+            document.getElementById('mangaPagesText').textContent    = mangaGetL(mangaUiText.pagesBtn);
+            document.getElementById('mangaFullscreenText').textContent = mangaGetL(mangaUiText.fullscreen);
+            document.getElementById('mangaCloseText').textContent    = mangaGetL(mangaUiText.close);
+            document.getElementById('mangaLoadingText').textContent  = mangaGetL(mangaUiText.loadingPage);
+            document.getElementById('mangaLtrText').textContent      = mangaGetL(mangaUiText.leftToRight);
+            document.getElementById('mangaRtlText').textContent      = mangaGetL(mangaUiText.rightToLeft);
+            document.getElementById('mangaVerticalText').textContent = mangaGetL(mangaUiText.vertical);
+            document.getElementById('mangaTotalPagesNum').textContent = mangaTotalPages;
+            mangaInitThumbnails();
+            mangaLoadPage(1);
+        }
+
+        // ---- Load Page ----
+        function mangaLoadPage(pageNum) {
+            const img = document.getElementById('mangaPageImg');
+            const loading = document.getElementById('mangaPageLoading');
+            loading.style.display = 'block';
+            img.style.display = 'none';
+            const url = mangaPageUrls[pageNum - 1];
+            if (mangaPreloadedPages.has(pageNum)) {
+                img.src = url; img.style.display = 'block'; loading.style.display = 'none';
+            } else {
+                const tmp = new Image();
+                tmp.onload = () => { img.src = url; img.style.display = 'block'; loading.style.display = 'none'; mangaPreloadedPages.set(pageNum, true); mangaUpdatePreloadProgress(); };
+                tmp.onerror = () => { loading.style.display = 'none'; };
+                tmp.src = url;
+            }
+            mangaCurrentPage = pageNum;
+            document.getElementById('mangaCurrentPageNum').textContent = pageNum;
+            mangaUpdateThumbnailActive(pageNum);
+            mangaPreloadPages(pageNum);
+        }
+
+        function mangaPreloadPages(current) {
+            for (let i = 1; i <= 3; i++) {
+                const next = current + i;
+                if (next <= mangaTotalPages && !mangaPreloadedPages.has(next)) {
+                    const img = new Image();
+                    img.onload = () => { mangaPreloadedPages.set(next, true); mangaUpdatePreloadProgress(); };
+                    img.src = mangaPageUrls[next - 1];
+                }
+            }
+        }
+
+        function mangaUpdatePreloadProgress() {
+            const pct = (mangaPreloadedPages.size / mangaTotalPages) * 100;
+            const bar = document.getElementById('mangaPreloadProgress');
+            bar.style.width = pct + '%';
+            if (pct >= 100) setTimeout(() => { bar.style.opacity = '0'; }, 500);
+        }
+
+        // ---- Thumbnails ----
+        function mangaInitThumbnails() {
+            const strip = document.getElementById('mangaThumbnailStrip');
+            strip.innerHTML = '';
+            for (let i = 1; i <= mangaTotalPages; i++) {
+                const div = document.createElement('div');
+                div.className = 'thumb-item' + (i === 1 ? ' active' : '');
+                div.innerHTML = `<img src="${mangaThumbUrls[i-1]}" alt="Page ${i}" loading="lazy">`;
+                div.onclick = () => mangaGoToPage(i);
+                strip.appendChild(div);
+            }
+        }
+
+        function mangaUpdateThumbnailActive(pageNum) {
+            document.querySelectorAll('.thumb-item').forEach((t, i) => { t.classList.toggle('active', i + 1 === pageNum); });
+            const active = document.querySelector('.thumb-item.active');
+            if (active) active.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+
+        function mangaShowThumbnails() { document.getElementById('mangaThumbnailStrip').classList.toggle('show'); }
+
+        // ---- Navigation ----
+        function mangaGoToPage(page) {
+            if (page >= 1 && page <= mangaTotalPages) { mangaLoadPage(page); document.getElementById('mangaThumbnailStrip').classList.remove('show'); }
+        }
+
+        function mangaNextPage() {
+            if (mangaReadingMode === 'rtl') { if (mangaCurrentPage > 1) mangaLoadPage(mangaCurrentPage - 1); }
+            else { if (mangaCurrentPage < mangaTotalPages) mangaLoadPage(mangaCurrentPage + 1); }
+        }
+
+        function mangaPrevPage() {
+            if (mangaReadingMode === 'rtl') { if (mangaCurrentPage < mangaTotalPages) mangaLoadPage(mangaCurrentPage + 1); }
+            else { if (mangaCurrentPage > 1) mangaLoadPage(mangaCurrentPage - 1); }
+        }
+
+        // ---- Reading Mode ----
+        function mangaSetReadingMode(mode) {
+            mangaReadingMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(mode + 'Btn').classList.add('active');
+            if (mode === 'vertical') alert(mangaGetL(mangaUiText.verticalSoon));
+        }
+
+        // ---- Zoom ----
+        function mangaZoomIn()    { mangaZoomLevel = Math.min(mangaZoomLevel + 0.1, 3); mangaApplyZoom(); }
+        function mangaZoomOut()   { mangaZoomLevel = Math.max(mangaZoomLevel - 0.1, 0.5); mangaApplyZoom(); }
+        function mangaResetZoom() { mangaZoomLevel = 1; mangaApplyZoom(); }
+        function mangaApplyZoom() { document.getElementById('mangaPageImg').style.transform = `scale(${mangaZoomLevel})`; }
+
+        // ---- Fullscreen ----
+        function mangaToggleFullscreen() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        }
+
+        // ---- Keyboard ----
+        document.addEventListener('keydown', (e) => {
+            if (!isManga) return;
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') mangaNextPage();
+            else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') mangaPrevPage();
+            else if (e.key === 'f') mangaToggleFullscreen();
+            else if (e.key === '+' || e.key === '=') mangaZoomIn();
+            else if (e.key === '-') mangaZoomOut();
+            else if (e.key === '0') mangaResetZoom();
+            else if (e.key === 'Escape') document.getElementById('mangaThumbnailStrip').classList.remove('show');
+        });
+
+        // ---- Touch Swipe ----
+        let mangaTouchStartX = 0;
+        document.getElementById('mangaViewerContent').addEventListener('touchstart', e => { mangaTouchStartX = e.changedTouches[0].screenX; }, { passive: true });
+        document.getElementById('mangaViewerContent').addEventListener('touchend', e => {
+            const diff = e.changedTouches[0].screenX - mangaTouchStartX;
+            if (Math.abs(diff) > 50) { if (diff > 0) mangaPrevPage(); else mangaNextPage(); }
+        }, { passive: true });
+
+        // ---- Start ----
+        document.addEventListener('DOMContentLoaded', mangaInit);
+    }
+    </script>
 </body>
 </html>

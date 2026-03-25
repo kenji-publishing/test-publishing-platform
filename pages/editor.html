@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <title>Editor - Publisher</title>
@@ -18,162 +19,186 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Platform CSS -->
+    <link href="../css/variables.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/style-new.css">
+    <link href="../css/components.css" rel="stylesheet">
     <link href="../css/navbar.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/mobile-fixes.css">
 
+    <style>
+        /* ========== Mobile Language Selector ========== */
+        .navbar-lang-selector {
+            display: flex;
+            align-items: center;
+            margin-right: 0.5rem;
+        }
+        @media (max-width: 991.98px) {
+            .navbar-lang-selector { order: 1; }
+            .navbar-toggler { order: 2; }
+        }
+
+        /* ========== PC Navbar ========== */
+        @media (min-width: 992px) {
+            .navbar-nav { flex-wrap: nowrap !important; flex-direction: row !important; }
+            .navbar-nav .nav-item { white-space: nowrap !important; }
+            .navbar-nav .nav-link { white-space: nowrap !important; padding: 0.5rem 0.6rem !important; font-size: 0.9rem; }
+
+            .dropdown-menu { white-space: nowrap; }
+            .navbar-buttons-guest { display: flex !important; flex-wrap: nowrap !important; gap: 0.5rem; }
+            .navbar-buttons-guest .btn { white-space: nowrap !important; flex-shrink: 0; }
+        }
+
+        /* ========== Auth Visibility Control ========== */
+        .auth-only { display: none !important; }
+        .guest-only { display: block; }
+        body.logged-in .auth-only { display: block !important; }
+        body.logged-in .auth-only.nav-item { display: list-item !important; }
+        body.logged-in .auth-only.dropdown { display: block !important; }
+        body.logged-in .guest-only { display: none !important; }
+        @media (min-width: 992px) {
+            body.logged-in .navbar-buttons-guest { display: none !important; }
+        }
+
+        /* ========== User Dropdown Menu ========== */
+        .user-dropdown { position: relative; }
+        .user-dropdown-toggle {
+            display: flex; align-items: center; gap: 0.5rem;
+            background: transparent; border: 1px solid var(--color-border);
+            border-radius: 25px; padding: 0.4rem 0.75rem;
+            cursor: pointer; color: var(--color-text); transition: all 0.2s;
+        }
+        .user-dropdown-toggle:hover { border-color: var(--color-accent); background: rgba(139, 115, 85, 0.05); }
+        .user-dropdown-toggle i:first-child { font-size: 1.25rem; color: var(--color-accent); }
+        .user-name { font-weight: 500; font-size: 0.9rem; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .user-chevron { font-size: 0.7rem; color: var(--color-text-secondary); transition: transform 0.2s; }
+        .user-dropdown.open .user-chevron { transform: rotate(180deg); }
+        .user-menu {
+            position: absolute; top: calc(100% + 0.5rem); right: 0;
+            background: var(--color-bg-card); border: 1px solid var(--color-border);
+            border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            min-width: 240px; z-index: 1001; display: none; overflow: hidden;
+        }
+        .user-menu.show { display: block; }
+        .user-menu-header { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; background: var(--color-bg-main); }
+        .user-avatar { font-size: 2.5rem; color: var(--color-accent); }
+        .user-info { flex: 1; min-width: 0; }
+        .user-display-name { font-weight: 600; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .user-email { font-size: 0.8rem; color: var(--color-text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .user-menu-divider { height: 1px; background: var(--color-border); }
+        .user-menu-item {
+            display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem;
+            color: var(--color-text); text-decoration: none; font-size: 0.9rem;
+            cursor: pointer; border: none; background: transparent; width: 100%; text-align: left;
+        }
+        .user-menu-item:hover { background: var(--color-bg-hover); color: var(--color-accent); }
+        .user-menu-item i { width: 20px; text-align: center; color: var(--color-text-secondary); }
+        .user-menu-item:hover i { color: var(--color-accent); }
+        .logout-btn { color: var(--color-error); }
+        .logout-btn i { color: var(--color-error); }
+        .logout-btn:hover { background: rgba(199, 93, 93, 0.1); color: var(--color-error); }
+
+        /* ========== Navbar Overlay ========== */
+
+        /* ========== Mobile Adjustments ========== */
+        @media (max-width: 991.98px) {
+
+        }
+
+        /* ========================================================
+           EDITOR STYLES
+           ======================================================== */
+        /* ===== Editor Mobile Responsive ===== */
+        @media (max-width: 991.98px) {
+            .editor-content-area { padding: 1rem 0.5rem; }
+            .editor-paper { padding: 1.5rem 1rem; max-width: 100%; word-wrap: break-word; }
+            .editor-toolbar { padding: 0.4rem 0.25rem; }
+            .secondary-toolbar { padding: 0.5rem 0.5rem; }
+            .editor-footer { padding: 0.4rem 0.5rem; }
+            .editor-main { max-width: 100%; }
+        }
+        /* Ensure navbar stays above overlay */
+        .navbar-custom { z-index: 1050; }
+
+        .editor-toolbar {
+            position: sticky; top: 56px; z-index: 1030; background: #fff;
+            border-bottom: 1px solid #dee2e6; padding: 0.4rem 1rem;
+            display: flex; align-items: center; flex-wrap: wrap; gap: 0.25rem;
+            max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
+        }
+        .toolbar-group {
+            display: flex; align-items: center; gap: 2px;
+            padding: 0 0.4rem; border-right: 1px solid #e0e0e0;
+        }
+        .toolbar-group:last-child { border-right: none; }
+        .toolbar-btn {
+            width: 32px; height: 32px; border: none; background: none; border-radius: 4px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            color: #555; font-size: 0.85rem; transition: background 0.15s, color 0.15s;
+        }
+        .toolbar-btn:hover { background: #e9ecef; color: #333; }
+        .toolbar-btn.active { background: #d4edda; color: #155724; }
+        .toolbar-select {
+            height: 32px; font-size: 0.8rem; border: 1px solid #dee2e6;
+            border-radius: 4px; padding: 0 0.5rem; background: #fff; cursor: pointer;
+        }
+
+        .secondary-toolbar {
+            position: sticky; top: 100px; z-index: 1029; background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6; padding: 0.5rem 1rem;
+            display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+            overflow: hidden; max-width: 100%; box-sizing: border-box;
+        }
+        .title-input {
+            flex: 1; min-width: 0; border: 1px solid transparent; background: transparent;
+            font-size: 1rem; font-weight: 600; padding: 0.3rem 0.5rem; border-radius: 4px;
+            outline: none; transition: border-color 0.2s;
+        }
+        .title-input:focus { border-color: #8B7355; background: #fff; }
+        .save-status { font-size: 0.8rem; color: #6c757d; white-space: nowrap; }
+        .save-status i { margin-right: 4px; }
+        .save-status.saved { color: #28a745; }
+        .save-status.saving { color: #ffc107; }
+        .save-status.error { color: #dc3545; }
+
+        .editor-main { display: flex; flex: 1; max-width: 100%; overflow: hidden; }
+        .editor-content-area { flex: 1; padding: 2rem; max-width: 100%; min-width: 0; }
+        .editor-paper {
+            max-width: 800px; margin: 0 auto; background: #fff; border: 1px solid #dee2e6;
+            border-radius: 8px; padding: 3rem 2.5rem; min-height: 600px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06); outline: none;
+            font-family: 'Noto Serif JP', serif; font-size: 1.05rem; line-height: 1.8; color: #333;
+        }
+        .editor-paper:focus { border-color: #8B7355; box-shadow: 0 0 0 2px rgba(139, 115, 85, 0.15); }
+        .editor-paper:empty::before { content: attr(data-placeholder); color: #adb5bd; pointer-events: none; }
+
+        .editor-footer { background: #fff; border-top: 1px solid #dee2e6; padding: 0.4rem 1rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: #6c757d; overflow: hidden; }
+        .footer-stats { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+
+        @media (max-width: 991.98px) {
+            .editor-paper { padding: 1.5rem 1rem; }
+            .toolbar-group { padding: 0 0.2rem; }
+        }
+        @media (max-width: 575.98px) {
+            .secondary-toolbar { flex-direction: column; align-items: stretch; }
+            .title-input { min-width: auto; }
+        }
+
+        @keyframes pulse-save { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .save-status.saving i { animation: pulse-save 1s infinite; }
+    </style>
 </head>
 <body>
     <!-- ========== NAVBAR OVERLAY ========== -->
-    <div class="navbar-overlay" id="navbarOverlay"></div>
+    <div id="navbar-container"></div>
 
-    <!-- ========== PATTERN C NAVBAR (pages/ hierarchy) ========== -->
-    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
-        <div class="container">
-            <a class="navbar-brand" href="../index.html">
-                <i class="fas fa-book-open"></i> Publisher
-            </a>
-
-            <!-- Language Selector Mobile -->
-            <div class="navbar-lang-selector d-lg-none">
-                <select class="language-selector" id="languageSelectorMobile">
-                    <option value="en">&#127468;&#127463; EN</option>
-                    <option value="ja">&#127471;&#127477; &#26085;&#26412;&#35486;</option>
-                    <option value="zh">&#127464;&#127475; &#20013;&#25991;</option>
-                    <option value="es">&#127466;&#127480; ES</option>
-                    <option value="fr">&#127467;&#127479; FR</option>
-                    <option value="de">&#127465;&#127466; DE</option>
-                    <option value="ko">&#127472;&#127479; &#54620;&#44397;&#50612;</option>
-                    <option value="ar">&#127480;&#127462; &#1593;&#1585;&#1576;&#1610;</option>
-                    <option value="pt">&#127463;&#127479; PT</option>
-                </select>
-            </div>
-
-            <!-- User Dropdown (auth-only) -->
-            <div class="user-dropdown auth-only" id="userDropdown">
-                <button type="button" class="user-dropdown-toggle" id="userDropdownBtn" onclick="toggleUserDropdown(event)">
-                    <i class="fas fa-user-circle"></i>
-                    <span class="user-name d-none d-lg-inline" id="userName">User</span>
-                    <i class="fas fa-chevron-down user-chevron d-none d-lg-inline"></i>
-                </button>
-                <div class="user-menu" id="userMenu">
-                    <div class="user-menu-header">
-                        <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
-                        <div class="user-info">
-                            <div class="user-display-name" id="userDisplayName">User</div>
-                            <div class="user-email" id="userEmail">user@example.com</div>
-                        </div>
-                    </div>
-                    <div class="user-menu-divider"></div>
-                    <a href="dashboard.html" class="user-menu-item">
-                        <i class="fas fa-th-large"></i>
-                        <span id="menuDashboard">Dashboard</span>
-                    </a>
-                    <a href="my-works.html" class="user-menu-item">
-                        <i class="fas fa-book"></i>
-                        <span id="menuMyWorks">My Works</span>
-                    </a>
-                    <a href="account-settings.html" class="user-menu-item">
-                        <i class="fas fa-cog"></i>
-                        <span id="menuAccountSettings">Account Settings</span>
-                    </a>
-                    <div class="user-menu-divider"></div>
-                    <button class="user-menu-item logout-btn" onclick="handleLogout()">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span id="menuLogout">Log Out</span>
-                    </button>
-                </div>
-            </div>
-
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <!-- PC Navigation -->
-                <ul class="navbar-nav me-auto d-none d-lg-flex">
-                    <li class="nav-item"><a class="nav-link" href="../index.html"><i class="fas fa-home me-1"></i> <span data-i18n="nav.home">Home</span></a></li>
-                    <li class="nav-item"><a class="nav-link" href="browse.html"><i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span></a></li>
-                    <li class="nav-item auth-only"><a class="nav-link" href="library.html"><i class="fas fa-book-reader me-1"></i> <span id="navLibraryPC">Library</span></a></li>
-                    <li class="nav-item auth-only"><a class="nav-link" href="dashboard.html"><i class="fas fa-th-large me-1"></i> <span id="navDashboardPC">Dashboard</span></a></li>
-                    <li class="nav-item auth-only"><a class="nav-link" href="upload.html"><i class="fas fa-upload me-1"></i> <span data-i18n="nav.upload">Upload</span></a></li>
-                    <li class="nav-item dropdown auth-only">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"><i class="fas fa-language me-1"></i> <span id="navTranslationToolsPC">Translation Tools</span></a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="manga-translator.html"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorPC">Manga Translator</span></a></li>
-                            <li><a class="dropdown-item" href="translation-status.html"><i class="fas fa-tasks me-2"></i><span id="navTranslationStatusPC">Translation Status</span></a></li>
-                            <li><a class="dropdown-item" href="translators/index.html"><i class="fas fa-users me-2"></i><span id="navFindTranslatorsPC">Find Translators</span></a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"><i class="fas fa-headset me-1"></i> <span data-i18n="nav.support">Support</span></a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="support/faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
-                            <li><a class="dropdown-item" href="support/troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
-                            <li><a class="dropdown-item" href="support/contact.html"><i class="fas fa-envelope me-2"></i><span id="navContactPC">Contact</span></a></li>
-                            <li class="auth-only"><hr class="dropdown-divider"></li>
-                            <li class="auth-only"><a class="dropdown-item" href="support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
-                        </ul>
-                    </li>
-                </ul>
-
-                <!-- Mobile Navigation -->
-                <ul class="navbar-nav d-lg-none">
-                    <li class="nav-item"><a class="nav-link" href="../index.html"><i class="fas fa-home me-2"></i> <span data-i18n="nav.home">Home</span></a></li>
-                    <li class="nav-item"><a class="nav-link" href="browse.html"><i class="fas fa-compass me-2"></i> <span data-i18n="nav.browse">Browse</span></a></li>
-                    <li class="nav-item auth-only"><a class="nav-link" href="library.html"><i class="fas fa-book-reader me-2"></i> <span id="navLibraryMobile">Library</span></a></li>
-                    <li class="auth-only"><hr class="dropdown-divider"></li>
-                    <li class="nav-item auth-only"><a class="nav-link" href="dashboard.html"><i class="fas fa-th-large me-2"></i> <span id="navDashboardMobile">Dashboard</span></a></li>
-                    <li class="nav-item auth-only"><a class="nav-link" href="upload.html"><i class="fas fa-upload me-2"></i> <span data-i18n="nav.upload">Upload</span></a></li>
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" data-bs-toggle="collapse" href="#translationToolsMenu" role="button">
-                            <i class="fas fa-language me-2"></i> <span id="navTranslationToolsMobile">Translation Tools</span>
-                            <i class="fas fa-chevron-down ms-auto small"></i>
-                        </a>
-                        <div class="collapse ps-4" id="translationToolsMenu">
-                            <a class="nav-link" href="manga-translator.html"><i class="fas fa-image me-2"></i> <span id="navMangaTranslatorMobile">Manga Translator</span></a>
-                            <a class="nav-link" href="translation-status.html"><i class="fas fa-tasks me-2"></i> <span id="navTranslationStatusMobile">Translation Status</span></a>
-                            <a class="nav-link" href="translators/index.html"><i class="fas fa-users me-2"></i> <span id="navFindTranslatorsMobile">Find Translators</span></a>
-                        </div>
-                    </li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li class="nav-item"><a class="nav-link" href="support/faq.html"><i class="fas fa-question-circle me-2"></i> <span data-i18n="support.faq.title">FAQ</span></a></li>
-                    <li class="nav-item"><a class="nav-link" href="support/troubleshoot.html"><i class="fas fa-tools me-2"></i> <span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
-                    <li class="nav-item"><a class="nav-link" href="support/contact.html"><i class="fas fa-envelope me-2"></i> <span id="navContactMobile">Contact</span></a></li>
-                    <li class="nav-item auth-only"><a class="nav-link" href="support/tickets.html"><i class="fas fa-ticket-alt me-2"></i> <span data-i18n="support.tickets.title">My Tickets</span></a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li class="nav-item guest-only"><a class="nav-link" href="login.html"><i class="fas fa-sign-in-alt me-2"></i> <span data-i18n="nav.login">Sign In</span></a></li>
-                    <li class="nav-item guest-only"><a class="nav-link" href="register.html"><i class="fas fa-user-plus me-2"></i> <span data-i18n="nav.getStarted">Get Started</span></a></li>
-                </ul>
-
-                <div class="d-flex align-items-center gap-3">
-                    <select class="language-selector d-none d-lg-block" id="languageSelector">
-                        <option value="en">&#127468;&#127463; EN</option>
-                        <option value="ja">&#127471;&#127477; &#26085;&#26412;&#35486;</option>
-                        <option value="zh">&#127464;&#127475; &#20013;&#25991;</option>
-                        <option value="es">&#127466;&#127480; ES</option>
-                        <option value="fr">&#127467;&#127479; FR</option>
-                        <option value="de">&#127465;&#127466; DE</option>
-                        <option value="ko">&#127472;&#127479; &#54620;&#44397;&#50612;</option>
-                        <option value="ar">&#127480;&#127462; &#1593;&#1585;&#1576;&#1610;</option>
-                        <option value="pt">&#127463;&#127479; PT</option>
-                    </select>
-                    <div class="navbar-buttons-guest guest-only d-none d-lg-flex">
-                        <a href="login.html" class="btn btn-soft-custom"><span data-i18n="nav.login">Sign In</span></a>
-                        <a href="register.html" class="btn btn-primary-custom"><span data-i18n="nav.getStarted">Get Started</span></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- ========== EDITOR TOOLBAR (onclick direct binding) ========== -->
+<!-- ========== EDITOR TOOLBAR (onclick direct binding) ========== -->
     <div class="editor-toolbar" id="editorToolbar">
         <div class="toolbar-group">
             <select class="toolbar-select" id="headingSelect" title="Heading" onchange="execCmd('formatBlock', this.value)">
-                <option value="p" id="opt-paragraph">Paragraph</option>
-                <option value="h1" id="opt-h1">Heading 1</option>
-                <option value="h2" id="opt-h2">Heading 2</option>
-                <option value="h3" id="opt-h3">Heading 3</option>
+                <option value="p" id="opt-paragraph" data-i18n="editor.paragraph">Paragraph</option>
+                <option value="h1" id="opt-h1" data-i18n="editor.h1">Heading 1</option>
+                <option value="h2" id="opt-h2" data-i18n="editor.h2">Heading 2</option>
+                <option value="h3" id="opt-h3" data-i18n="editor.h3">Heading 3</option>
             </select>
         </div>
         <div class="toolbar-group">
@@ -207,11 +232,11 @@
     <div class="secondary-toolbar" id="secondaryToolbar">
         <input type="text" class="title-input" id="workTitle" placeholder="Untitled" value="">
         <span class="save-status saved" id="saveStatus">
-            <i class="fas fa-check-circle"></i> <span id="saveStatusText">Saved</span>
+            <i class="fas fa-check-circle"></i> <span id="saveStatusText" data-i18n="editor.saved">Saved</span>
         </span>
         <div class="d-flex gap-2">
-            <button class="btn btn-outline-secondary btn-sm" onclick="doExportTXT()" id="btnExport"><i class="fas fa-file-export me-1"></i><span>Export</span></button>
-            <button class="btn btn-primary-custom btn-sm" onclick="doPublish()" id="btnPublish"><i class="fas fa-paper-plane me-1"></i><span>Publish</span></button>
+            <button class="btn btn-outline-secondary btn-sm" onclick="doExportTXT()" id="btnExport"><i class="fas fa-file-export me-1"></i><span data-i18n="editor.exportBtn">Export</span></button>
+            <button class="btn btn-primary-custom btn-sm" onclick="doPublish()" id="btnPublish"><i class="fas fa-paper-plane me-1"></i><span data-i18n="editor.publishBtn">Publish</span></button>
         </div>
     </div>
 
@@ -225,15 +250,19 @@
     <!-- ========== EDITOR FOOTER ========== -->
     <div class="editor-footer" id="editorFooter">
         <div class="footer-stats">
-            <span><span id="labelChars">Characters</span>: <strong id="charCount">0</strong></span>
-            <span><span id="labelWords">Words</span>: <strong id="wordCount">0</strong></span>
-            <span><span id="labelPages">Pages</span>: <strong id="pageCount">0</strong></span>
+            <span><span id="labelChars" data-i18n="editor.characters">Characters</span>: <strong id="charCount">0</strong></span>
+            <span><span id="labelWords" data-i18n="editor.words">Words</span>: <strong id="wordCount">0</strong></span>
+            <span><span id="labelPages" data-i18n="editor.pages">Pages</span>: <strong id="pageCount">0</strong></span>
         </div>
-        <span id="labelLastEdit">Last edit: just now</span>
+        <span id="labelLastEdit" data-i18n="editor.lastEdit">Last edit: just now</span>
     </div>
+
+    <div id="footer-container"></div>
 
     <!-- ========== EXTERNAL SCRIPTS ========== -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/i18n.js"></script>
+    <script src="../js/navbar.js"></script>
     <script src="../js/lang/ja.js"></script>
     <script src="../js/lang/en.js"></script>
     <script src="../js/lang/zh.js"></script>
@@ -251,8 +280,13 @@
     <!-- ========== NAVBAR SCRIPT (Pattern C) ========== -->
     <script>
     var navUiText = {
-        translationTools: { en: 'Translation Tools', ja: '\u7FFB\u8A33\u30C4\u30FC\u30EB', zh: '\u7FFB\u8BD1\u5DE5\u5177', es: 'Herramientas de traducci\u00F3n', fr: 'Outils de traduction', de: '\u00DCbersetzungstools', ko: '\uBC88\uC5ED \uB3C4\uAD6C', ar: '\u0623\u062F\u0648\u0627\u062A \u0627\u0644\u062A\u0631\u062C\u0645\u0629', pt: 'Ferramentas de tradu\u00E7\u00E3o' },
+        translationTools: { en: 'Tools', ja: '\u7FFB\u8A33\u30C4\u30FC\u30EB', zh: '\u7FFB\u8BD1\u5DE5\u5177', es: 'Herramientas de traducci\u00F3n', fr: 'Outils de traduction', de: '\u00DCbersetzungstools', ko: '\uBC88\uC5ED \uB3C4\uAD6C', ar: '\u0623\u062F\u0648\u0627\u062A \u0627\u0644\u062A\u0631\u062C\u0645\u0629', pt: 'Ferramentas de tradu\u00E7\u00E3o' },
         mangaTranslator: { en: 'Manga Translator', ja: '\u30DE\u30F3\u30AC\u7FFB\u8A33', zh: '\u6F2B\u753B\u7FFB\u8BD1', es: 'Traductor de Manga', fr: 'Traducteur de Manga', de: 'Manga-\u00DCbersetzer', ko: '\uB9CC\uD654 \uBC88\uC5ED\uAE30', ar: '\u0645\u062A\u0631\u062C\u0645 \u0627\u0644\u0645\u0627\u0646\u062C\u0627', pt: 'Tradutor de Mang\u00E1' },
+            novelTranslator: {
+                en: 'Novel Translator', ja: '小説翻訳', zh: '小说翻译',
+                es: 'Traductor de Novela', fr: 'Traducteur de Roman', de: 'Roman-Übersetzer',
+                ko: '소설 번역기', ar: 'مترجم الروايات', pt: 'Tradutor de Romance'
+            },
         translationStatus: { en: 'Translation Status', ja: '\u7FFB\u8A33\u72B6\u6CC1', zh: '\u7FFB\u8BD1\u72B6\u6001', es: 'Estado de traducci\u00F3n', fr: 'Statut de traduction', de: '\u00DCbersetzungsstatus', ko: '\uBC88\uC5ED \uC0C1\uD0DC', ar: '\u062D\u0627\u0644\u0629 \u0627\u0644\u062A\u0631\u062C\u0645\u0629', pt: 'Status da tradu\u00E7\u00E3o' },
         findTranslators: { en: 'Find Translators', ja: '\u7FFB\u8A33\u8005\u3092\u63A2\u3059', zh: '\u5BFB\u627E\u7FFB\u8BD1', es: 'Buscar traductores', fr: 'Trouver des traducteurs', de: '\u00DCbersetzer finden', ko: '\uBC88\uC5ED\uAC00 \uCC3E\uAE30', ar: '\u0627\u0644\u0628\u062D\u062B \u0639\u0646 \u0645\u062A\u0631\u062C\u0645\u064A\u0646', pt: 'Encontrar tradutores' },
         contact: { en: 'Contact', ja: '\u304A\u554F\u3044\u5408\u308F\u305B', zh: '\u8054\u7CFB\u6211\u4EEC', es: 'Contacto', fr: 'Contact', de: 'Kontakt', ko: '\uBB38\uC758', ar: '\u0627\u062A\u0635\u0644 \u0628\u0646\u0627', pt: 'Contato' },
@@ -275,13 +309,7 @@ function getNavL(obj) { var lang = getCurrentLanguage(); return obj[lang] || obj
         if (ma) ma.textContent = getNavL(navUiText.accountSettings);
         if (ml) ml.textContent = getNavL(navUiText.logout);
         var map = {
-            navLibraryPC: 'library', navDashboardPC: 'dashboard',
-            navTranslationToolsPC: 'translationTools', navMangaTranslatorPC: 'mangaTranslator',
-            navTranslationStatusPC: 'translationStatus', navFindTranslatorsPC: 'findTranslators',
-            navContactPC: 'contact', navLibraryMobile: 'library', navDashboardMobile: 'dashboard',
-            navTranslationToolsMobile: 'translationTools', navMangaTranslatorMobile: 'mangaTranslator',
-            navTranslationStatusMobile: 'translationStatus', navFindTranslatorsMobile: 'findTranslators',
-            navContactMobile: 'contact'
+
         };
         var ids = Object.keys(map);
         for (var i = 0; i < ids.length; i++) {
@@ -302,8 +330,8 @@ function getNavL(obj) { var lang = getCurrentLanguage(); return obj[lang] || obj
         var nc = document.getElementById('navbarNav');
         var no = document.getElementById('navbarOverlay');
         if (nc) {
-            nc.addEventListener('show.bs.collapse', function() { document.body.classList.add('menu-open'); if (no) no.classList.add('show'); });
-            nc.addEventListener('hide.bs.collapse', function() { document.body.classList.remove('menu-open'); if (no) no.classList.remove('show'); });
+            nc.addEventListener('show.bs.collapse', function() { if (no) no.classList.add('show'); });
+            nc.addEventListener('hide.bs.collapse', function() { if (no) no.classList.remove('show'); });
         }
         if (no) { no.addEventListener('click', function() { var bc = bootstrap.Collapse.getInstance(nc); if (bc) bc.hide(); }); }
         document.addEventListener('languageChanged', function() { updateNavUIText(); });
@@ -337,23 +365,11 @@ function getNavL(obj) { var lang = getCurrentLanguage(); return obj[lang] || obj
     /* ===== getL: Get Localized text ===== */
 /* ===== Apply Editor Translations ===== */
     function applyEditorTranslations() {
-        var s = function(id, obj) { var el = document.getElementById(id); if (el) el.textContent = getL(obj); };
-
         document.title = getL(editorText.editorTitle);
-        s('opt-paragraph', editorText.paragraph);
-        s('opt-h1', editorText.h1);
-        s('opt-h2', editorText.h2);
-        s('opt-h3', editorText.h3);
-        var expSpan = document.querySelector('#btnExport span');
-        if (expSpan) expSpan.textContent = getL(editorText.exportBtn);
-        var pubSpan = document.querySelector('#btnPublish span');
-        if (pubSpan) pubSpan.textContent = getL(editorText.publishBtn);
+        if (typeof i18n !== 'undefined') { i18n.applyToDOM(); }
+        // data-placeholder属性はdata-i18nでは対応できないため直接設定
         var ea = document.getElementById('editorArea');
         if (ea) ea.setAttribute('data-placeholder', getL(editorText.placeholder));
-        s('labelChars', editorText.characters);
-        s('labelWords', editorText.words);
-        s('labelPages', editorText.pages);
-        s('labelLastEdit', editorText.lastEdit);
     }
 
     /* ===== changeLanguage: called by navbar selectors ===== */

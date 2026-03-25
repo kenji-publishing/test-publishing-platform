@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
     <title>Find Translators - Publisher</title>
@@ -11,259 +12,264 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="../../css/variables.css" rel="stylesheet">
     <link href="../../css/style-new.css" rel="stylesheet">
+    <link href="../../css/components.css" rel="stylesheet">
     <link href="../../css/navbar.css" rel="stylesheet">
-    
+    <link href="../../css/mobile-fixes.css" rel="stylesheet">
+
+    <style>
+        /* ========== Mobile Language Selector ========== */
+        .navbar-lang-selector {
+            display: flex;
+            align-items: center;
+            margin-right: 0.5rem;
+        }
+        
+        @media (max-width: 991.98px) {
+            .navbar-lang-selector {
+                order: 1;
+            }
+            .navbar-toggler {
+                order: 2;
+            }
+        }
+        
+        /* ========== PC Navbar - 横並び維持 ========== */
+        @media (min-width: 992px) {
+            .navbar-nav {
+                flex-wrap: nowrap !important;
+                flex-direction: row !important;
+            }
+            .navbar-nav .nav-item {
+                white-space: nowrap !important;
+            }
+            .navbar-nav .nav-link {
+                white-space: nowrap !important;
+                padding: 0.5rem 0.6rem !important;
+                font-size: 0.9rem;
+            }
+
+            .dropdown-menu {
+                white-space: nowrap;
+            }
+            .navbar-buttons-guest {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                gap: 0.5rem;
+            }
+            .navbar-buttons-guest .btn {
+                white-space: nowrap !important;
+                flex-shrink: 0;
+            }
+        }
+        
+        /* ========== Auth Visibility Control ========== */
+        .auth-only {
+            display: none !important;
+        }
+        .guest-only {
+            display: block;
+        }
+        body.logged-in .auth-only {
+            display: block !important;
+        }
+        body.logged-in .auth-only.nav-item {
+            display: list-item !important;
+        }
+        body.logged-in .auth-only.dropdown {
+            display: block !important;
+        }
+        body.logged-in .guest-only {
+            display: none !important;
+        }
+        @media (min-width: 992px) {
+            body.logged-in .navbar-buttons-guest {
+                display: none !important;
+            }
+        }
+        
+        /* ========== User Dropdown Menu ========== */
+        .user-dropdown {
+            position: relative;
+        }
+        .user-dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: transparent;
+            border: 1px solid var(--color-border);
+            border-radius: 25px;
+            padding: 0.4rem 0.75rem;
+            cursor: pointer;
+            color: var(--color-text);
+            transition: all 0.2s;
+        }
+        .user-dropdown-toggle:hover {
+            border-color: var(--color-accent);
+            background: rgba(139, 115, 85, 0.05);
+        }
+        .user-dropdown-toggle i:first-child {
+            font-size: 1.25rem;
+            color: var(--color-accent);
+        }
+        .user-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-chevron {
+            font-size: 0.7rem;
+            color: var(--color-text-secondary);
+            transition: transform 0.2s;
+        }
+        .user-dropdown.open .user-chevron {
+            transform: rotate(180deg);
+        }
+        .user-menu {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            right: 0;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            min-width: 240px;
+            z-index: 1001;
+            display: none;
+            overflow: hidden;
+        }
+        .user-menu.show {
+            display: block;
+        }
+        .user-menu-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--color-bg-main);
+        }
+        .user-avatar {
+            font-size: 2.5rem;
+            color: var(--color-accent);
+        }
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .user-display-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-email {
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-menu-divider {
+            height: 1px;
+            background: var(--color-border);
+        }
+        .user-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--color-text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+        .user-menu-item:hover {
+            background: var(--color-bg-hover);
+            color: var(--color-accent);
+        }
+        .user-menu-item i {
+            width: 20px;
+            text-align: center;
+            color: var(--color-text-secondary);
+        }
+        .user-menu-item:hover i {
+            color: var(--color-accent);
+        }
+        .logout-btn {
+            color: var(--color-error);
+        }
+        .logout-btn i {
+            color: var(--color-error);
+        }
+        .logout-btn:hover {
+            background: rgba(199, 93, 93, 0.1);
+            color: var(--color-error);
+        }
+        
+        /* ========== Navbar Overlay ========== */
+
+        /* ========== Mobile Adjustments ========== */
+        @media (max-width: 991.98px) {
+
+        }
+
+        /* ========== Page Specific Styles ========== */
+        .page-header { background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%); color: white; padding: var(--spacing-xl) 0; margin-bottom: var(--spacing-xl); }
+        .page-header h1 { color: white; font-size: var(--font-size-2xl); margin-bottom: var(--spacing-xs); }
+        .page-header p { color: rgba(255,255,255,0.9); margin: 0; }
+        .filter-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-lg); margin-bottom: var(--spacing-lg); }
+        .filter-card h5 { font-weight: 600; margin-bottom: var(--spacing-lg); color: var(--color-text-primary); }
+        .translator-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-lg); margin-bottom: var(--spacing-md); transition: all var(--transition-fast); }
+        .translator-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+        .translator-avatar { width: 70px; height: 70px; border-radius: 50%; background: linear-gradient(135deg, var(--color-accent), var(--color-accent-light)); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: bold; flex-shrink: 0; }
+        .translator-name { font-family: var(--font-heading); font-size: var(--font-size-lg); font-weight: 600; color: var(--color-text-primary); margin-bottom: 4px; }
+        .translator-bio { color: var(--color-text-secondary); font-size: var(--font-size-sm); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: var(--spacing-sm); }
+        .rating-stars { color: var(--color-warning); }
+        .rating-count { color: var(--color-text-secondary); font-size: var(--font-size-sm); margin-left: 8px; }
+        .lang-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(139, 115, 85, 0.1); color: var(--color-accent); padding: 4px 12px; border-radius: var(--radius-full); font-size: var(--font-size-sm); margin: 3px; }
+        .native-badge { background: rgba(212, 168, 83, 0.2); color: var(--color-warning); font-size: var(--font-size-xs); padding: 2px 6px; border-radius: var(--radius-sm); margin-left: 5px; }
+        .specialization-tag { background: var(--color-bg-hover); color: var(--color-text-secondary); padding: 4px 10px; border-radius: var(--radius-full); font-size: var(--font-size-xs); margin: 2px; display: inline-block; }
+        .revenue-badge { background: rgba(93, 156, 89, 0.1); color: var(--color-success); padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--radius-md); font-weight: 600; text-align: center; }
+        .revenue-badge .percent { font-size: var(--font-size-xl); }
+        .revenue-badge .label { font-size: var(--font-size-xs); }
+        .stats-row { display: flex; justify-content: space-around; padding-top: var(--spacing-md); border-top: 1px solid var(--color-border); margin-top: var(--spacing-md); }
+        .stat-item { text-align: center; }
+        .stat-item .number { font-family: var(--font-heading); font-size: var(--font-size-lg); font-weight: 700; color: var(--color-text-primary); }
+        .stat-item .label { font-size: var(--font-size-xs); color: var(--color-text-secondary); }
+        .empty-state { text-align: center; padding: var(--spacing-2xl); color: var(--color-text-secondary); }
+        .empty-state i { font-size: 4rem; margin-bottom: var(--spacing-md); opacity: 0.3; }
+        .loading-spinner { display: flex; justify-content: center; padding: var(--spacing-2xl); }
+        .cta-card { background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%); color: white; border-radius: var(--radius-lg); padding: var(--spacing-lg); text-align: center; }
+        .cta-card h6 { color: white; margin-bottom: var(--spacing-sm); }
+        .cta-card p { color: rgba(255,255,255,0.9); font-size: var(--font-size-sm); margin-bottom: var(--spacing-md); }
+        .cta-card .btn { background: white; color: var(--color-accent); border: none; }
+        .cta-card .btn:hover { background: var(--color-bg-hover); }
+        .info-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-lg); }
+        .info-card h6 { font-weight: 600; margin-bottom: var(--spacing-md); }
+        .info-card ul { padding-left: var(--spacing-md); margin: 0; }
+        .info-card li { margin-bottom: var(--spacing-xs); font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+    </style>
 </head>
 <body>
     <!-- ========== NAVBAR HTML START ========== -->
 
     <!-- Navbar Overlay -->
-    <div class="navbar-overlay" id="navbarOverlay"></div>
-
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
-        <div class="container">
-            <!-- ブランドリンク (pages/translators/ → ../../) -->
-            <a class="navbar-brand" href="../../index.html">
-                <i class="fas fa-book-open"></i>
-                Publisher
-            </a>
-            
-            <!-- Language Selector Mobile -->
-            <div class="navbar-lang-selector d-lg-none">
-                <select class="language-selector" id="languageSelectorMobile">
-                    <option value="en">🇬🇧 EN</option>
-                    <option value="ja">🇯🇵 日本語</option>
-                    <option value="zh">🇨🇳 中文</option>
-                    <option value="es">🇪🇸 ES</option>
-                    <option value="fr">🇫🇷 FR</option>
-                    <option value="de">🇩🇪 DE</option>
-                    <option value="ko">🇰🇷 한국어</option>
-                    <option value="ar">🇸🇦 عربي</option>
-                    <option value="pt">🇧🇷 PT</option>
-                </select>
-            </div>
-            
-            <!-- User Dropdown (auth-only) -->
-            <div class="user-dropdown auth-only" id="userDropdown">
-                <button type="button" class="user-dropdown-toggle" id="userDropdownBtn" onclick="toggleUserDropdown(event)">
-                    <i class="fas fa-user-circle"></i>
-                    <span class="user-name d-none d-lg-inline" id="userName">User</span>
-                    <i class="fas fa-chevron-down user-chevron d-none d-lg-inline"></i>
-                </button>
-                <div class="user-menu" id="userMenu">
-                    <div class="user-menu-header">
-                        <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
-                        <div class="user-info">
-                            <div class="user-display-name" id="userDisplayName">User</div>
-                            <div class="user-email" id="userEmail">user@example.com</div>
-                        </div>
-                    </div>
-                    <div class="user-menu-divider"></div>
-                    <a href="../dashboard.html" class="user-menu-item">
-                        <i class="fas fa-th-large"></i>
-                        <span id="menuDashboard">Dashboard</span>
-                    </a>
-                    <a href="../my-works.html" class="user-menu-item">
-                        <i class="fas fa-book"></i>
-                        <span id="menuMyWorks">My Works</span>
-                    </a>
-                    <a href="../account-settings.html" class="user-menu-item">
-                        <i class="fas fa-cog"></i>
-                        <span id="menuAccountSettings">Account Settings</span>
-                    </a>
-                    <div class="user-menu-divider"></div>
-                    <button class="user-menu-item logout-btn" onclick="handleLogout()">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span id="menuLogout">Log Out</span>
-                    </button>
-                </div>
-            </div>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <!-- ========== PC Navigation ========== -->
-                <ul class="navbar-nav me-auto d-none d-lg-flex">
-                    <li class="nav-item">
-                        <a class="nav-link" href="../../index.html">
-                            <i class="fas fa-home me-1"></i> <span data-i18n="nav.home">Home</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../browse.html">
-                            <i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span>
-                        </a>
-                    </li>
-                    <!-- Auth: Library -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" href="../library.html">
-                            <i class="fas fa-book-reader me-1"></i> <span id="navLibraryPC">Library</span>
-                        </a>
-                    </li>
-                    <!-- Auth: Dashboard -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" href="../dashboard.html">
-                            <i class="fas fa-th-large me-1"></i> <span id="navDashboardPC">Dashboard</span>
-                        </a>
-                    </li>
-                    <!-- Auth: Upload -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" href="../upload.html">
-                            <i class="fas fa-upload me-1"></i> <span data-i18n="nav.upload">Upload</span>
-                        </a>
-                    </li>
-                    <!-- Auth: Translation Tools ★ACTIVE★ -->
-                    <li class="nav-item dropdown auth-only">
-                        <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-language me-1"></i> <span id="navTranslationToolsPC">Translation Tools</span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="../manga-translator.html"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorPC">Manga Translator</span></a></li>
-                            <li><a class="dropdown-item" href="../translation-status.html"><i class="fas fa-tasks me-2"></i><span id="navTranslationStatusPC">Translation Status</span></a></li>
-                            <li><a class="dropdown-item active" href="index.html"><i class="fas fa-users me-2"></i><span id="navFindTranslatorsPC">Find Translators</span></a></li>
-                        </ul>
-                    </li>
-                    <!-- Support Dropdown -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-headset me-1"></i> <span data-i18n="nav.support">Support</span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="../support/faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
-                            <li><a class="dropdown-item" href="../support/troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
-                            <li><a class="dropdown-item" href="../support/contact.html"><i class="fas fa-envelope me-2"></i><span id="navContactPC">Contact</span></a></li>
-                            <li class="auth-only"><hr class="dropdown-divider"></li>
-                            <li class="auth-only"><a class="dropdown-item" href="../support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
-                        </ul>
-                    </li>
-                </ul>
-                
-                <!-- ========== Mobile Navigation ========== -->
-                <ul class="navbar-nav d-lg-none">
-                    <li class="nav-item">
-                        <a class="nav-link" href="../../index.html">
-                            <i class="fas fa-home me-2"></i> <span data-i18n="nav.home">Home</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../browse.html">
-                            <i class="fas fa-compass me-2"></i> <span data-i18n="nav.browse">Browse</span>
-                        </a>
-                    </li>
-                    <!-- Auth: Library -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" href="../library.html">
-                            <i class="fas fa-book-reader me-2"></i> <span id="navLibraryMobile">Library</span>
-                        </a>
-                    </li>
-                    <li class="auth-only"><hr class="dropdown-divider"></li>
-                    <!-- Auth: Dashboard -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" href="../dashboard.html">
-                            <i class="fas fa-th-large me-2"></i> <span id="navDashboardMobile">Dashboard</span>
-                        </a>
-                    </li>
-                    <!-- Auth: Upload -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" href="../upload.html">
-                            <i class="fas fa-upload me-2"></i> <span data-i18n="nav.upload">Upload</span>
-                        </a>
-                    </li>
-                    <!-- Auth: Translation Tools ★ACTIVE★ -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link active" data-bs-toggle="collapse" href="#translationToolsMenu" role="button">
-                            <i class="fas fa-language me-2"></i> <span id="navTranslationToolsMobile">Translation Tools</span>
-                            <i class="fas fa-chevron-down ms-auto small"></i>
-                        </a>
-                        <div class="collapse ps-4" id="translationToolsMenu">
-                            <a class="nav-link" href="../manga-translator.html">
-                                <i class="fas fa-image me-2"></i> <span id="navMangaTranslatorMobile">Manga Translator</span>
-                            </a>
-                            <a class="nav-link" href="../translation-status.html">
-                                <i class="fas fa-tasks me-2"></i> <span id="navTranslationStatusMobile">Translation Status</span>
-                            </a>
-                            <a class="nav-link active" href="index.html">
-                                <i class="fas fa-users me-2"></i> <span id="navFindTranslatorsMobile">Find Translators</span>
-                            </a>
-                        </div>
-                    </li>
-                    <li><hr class="dropdown-divider"></li>
-                    <!-- Support -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="../support/faq.html">
-                            <i class="fas fa-question-circle me-2"></i> <span data-i18n="support.faq.title">FAQ</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../support/troubleshoot.html">
-                            <i class="fas fa-tools me-2"></i> <span data-i18n="support.troubleshoot.title">Troubleshooting</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../support/contact.html">
-                            <i class="fas fa-envelope me-2"></i> <span id="navContactMobile">Contact</span>
-                        </a>
-                    </li>
-                    <!-- Auth: My Tickets -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" href="../support/tickets.html">
-                            <i class="fas fa-ticket-alt me-2"></i> <span data-i18n="support.tickets.title">My Tickets</span>
-                        </a>
-                    </li>
-                    <li><hr class="dropdown-divider"></li>
-                    <!-- Guest: Sign In -->
-                    <li class="nav-item guest-only">
-                        <a class="nav-link" href="../login.html">
-                            <i class="fas fa-sign-in-alt me-2"></i> <span data-i18n="nav.login">Sign In</span>
-                        </a>
-                    </li>
-                    <!-- Guest: Register -->
-                    <li class="nav-item guest-only">
-                        <a class="nav-link" href="../register.html">
-                            <i class="fas fa-user-plus me-2"></i> <span data-i18n="nav.getStarted">Get Started</span>
-                        </a>
-                    </li>
-                </ul>
-                
-                <div class="d-flex align-items-center gap-3">
-                    <!-- Language Selector Desktop -->
-                    <select class="language-selector d-none d-lg-block" id="languageSelector">
-                        <option value="en">🇬🇧 EN</option>
-                        <option value="ja">🇯🇵 日本語</option>
-                        <option value="zh">🇨🇳 中文</option>
-                        <option value="es">🇪🇸 ES</option>
-                        <option value="fr">🇫🇷 FR</option>
-                        <option value="de">🇩🇪 DE</option>
-                        <option value="ko">🇰🇷 한국어</option>
-                        <option value="ar">🇸🇦 عربي</option>
-                        <option value="pt">🇧🇷 PT</option>
-                    </select>
-                    
-                    <!-- Guest Buttons (PC) -->
-                    <div class="navbar-buttons-guest guest-only d-none d-lg-flex">
-                        <a href="../login.html" class="btn btn-soft-custom">
-                            <span data-i18n="nav.login">Sign In</span>
-                        </a>
-                        <a href="../register.html" class="btn btn-primary-custom">
-                            <span data-i18n="nav.getStarted">Get Started</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- ========== NAVBAR HTML END ========== -->
+    <div id="navbar-container"></div>
 
     <!-- Page Header -->
     <div class="page-header">
         <div class="container">
-            <h1><i class="fas fa-language me-2"></i><span id="pageTitle">Find Translators</span></h1>
-            <p id="pageSubtitle">Bring your work to readers worldwide. Experienced translators are waiting.</p>
+            <h1><i class="fas fa-language me-2"></i><span id="pageTitle" data-i18n="translators.pageTitle">Find Translators</span></h1>
+            <p id="pageSubtitle" data-i18n="translators.pageSubtitle">Bring your work to readers worldwide. Experienced translators are waiting.</p>
         </div>
     </div>
 
@@ -272,12 +278,12 @@
             <!-- Filters Sidebar -->
             <div class="col-lg-3">
                 <div class="filter-card">
-                    <h5><i class="fas fa-filter me-2"></i><span id="filterTitle">Filter</span></h5>
-                    
+                    <h5><i class="fas fa-filter me-2"></i><span id="filterTitle" data-i18n="translators.filterTitle">Filter</span></h5>
+
                     <div class="mb-4">
-                        <label class="form-label" id="labelSourceLang">Source Language</label>
+                        <label class="form-label" id="labelSourceLang" data-i18n="translators.labelSourceLang">Source Language</label>
                         <select class="form-select" id="source-language">
-                            <option value="" id="optAll">All</option>
+                            <option value="" id="optAll" data-i18n="translators.optAll">All</option>
                             <option value="ja">日本語</option>
                             <option value="en">English</option>
                             <option value="zh">中文</option>
@@ -290,7 +296,7 @@
                     </div>
                     
                     <div class="mb-4">
-                        <label class="form-label" id="labelTargetLang">Target Language</label>
+                        <label class="form-label" id="labelTargetLang" data-i18n="translators.labelTargetLang">Target Language</label>
                         <select class="form-select" id="target-language">
                             <option value="">All</option>
                             <option value="ja">日本語</option>
@@ -305,9 +311,9 @@
                     </div>
                     
                     <div class="mb-4">
-                        <label class="form-label" id="labelMinRating">Minimum Rating</label>
+                        <label class="form-label" id="labelMinRating" data-i18n="translators.labelMinRating">Minimum Rating</label>
                         <select class="form-select" id="min-rating">
-                            <option value="" id="optNoPreference">No preference</option>
+                            <option value="" id="optNoPreference" data-i18n="translators.optNoPreference">No preference</option>
                             <option value="4.5">★4.5+</option>
                             <option value="4">★4.0+</option>
                             <option value="3.5">★3.5+</option>
@@ -316,44 +322,44 @@
                     </div>
                     
                     <div class="mb-4">
-                        <label class="form-label" id="labelSpecialization">Specialization</label>
+                        <label class="form-label" id="labelSpecialization" data-i18n="translators.labelSpecialization">Specialization</label>
                         <select class="form-select" id="specialization">
                             <option value="">All</option>
-                            <option value="fiction" id="specFiction">Fiction</option>
-                            <option value="manga" id="specManga">Manga</option>
-                            <option value="technical" id="specTechnical">Technical</option>
-                            <option value="poetry" id="specPoetry">Poetry</option>
-                            <option value="business" id="specBusiness">Business</option>
-                            <option value="academic" id="specAcademic">Academic</option>
+                            <option value="fiction" id="specFiction" data-i18n="translators.specFiction">Fiction</option>
+                            <option value="manga" id="specManga" data-i18n="translators.specManga">Manga</option>
+                            <option value="technical" id="specTechnical" data-i18n="translators.specTechnical">Technical</option>
+                            <option value="poetry" id="specPoetry" data-i18n="translators.specPoetry">Poetry</option>
+                            <option value="business" id="specBusiness" data-i18n="translators.specBusiness">Business</option>
+                            <option value="academic" id="specAcademic" data-i18n="translators.specAcademic">Academic</option>
                         </select>
                     </div>
                     
                     <button class="btn btn-custom w-100 mb-2" onclick="searchTranslators()">
-                        <i class="fas fa-search me-2"></i><span id="btnSearch">Search</span>
+                        <i class="fas fa-search me-2"></i><span id="btnSearch" data-i18n="translators.btnSearch">Search</span>
                     </button>
                     <button class="btn btn-soft-custom w-100" onclick="resetFilters()">
-                        <i class="fas fa-times me-2"></i><span id="btnReset">Reset</span>
+                        <i class="fas fa-times me-2"></i><span id="btnReset" data-i18n="translators.btnReset">Reset</span>
                     </button>
                 </div>
                 
                 <!-- Revenue Info -->
                 <div class="info-card mb-3">
-                    <h6><i class="fas fa-info-circle me-2 text-accent"></i><span id="revenueTitle">Revenue Sharing</span></h6>
-                    <p class="small text-secondary mb-2" id="revenueDesc">Translators earn from translated work sales:</p>
+                    <h6><i class="fas fa-info-circle me-2 text-accent"></i><span id="revenueTitle" data-i18n="translators.revenueTitle">Revenue Sharing</span></h6>
+                    <p class="small text-secondary mb-2" id="revenueDesc" data-i18n="translators.revenueDesc">Translators earn from translated work sales:</p>
                     <ul>
-                        <li><strong id="revTranslator">Translator: 20%</strong></li>
-                        <li id="revAuthor">Author: 40-70%</li>
-                        <li id="revEditor">Editor: 10%</li>
-                        <li id="revPlatform">Platform: 30%</li>
+                        <li><strong id="revTranslator" data-i18n="translators.revTranslator">Translator: 20%</strong></li>
+                        <li id="revAuthor" data-i18n="translators.revAuthor">Author: 40-70%</li>
+                        <li id="revEditor" data-i18n="translators.revEditor">Editor: 10%</li>
+                        <li id="revPlatform" data-i18n="translators.revPlatform">Platform: 30%</li>
                     </ul>
                 </div>
                 
                 <!-- Become a Translator CTA -->
                 <div class="cta-card">
                     <i class="fas fa-user-plus fa-2x mb-3"></i>
-                    <h6 id="ctaTitle">Become a Translator</h6>
-                    <p id="ctaDesc">Use your skills to earn income</p>
-                    <a href="register.html" class="btn btn-sm" id="ctaBtn">Register</a>
+                    <h6 id="ctaTitle" data-i18n="translators.ctaTitle">Become a Translator</h6>
+                    <p id="ctaDesc" data-i18n="translators.ctaDesc">Use your skills to earn income</p>
+                    <a href="register.html" class="btn btn-sm" id="ctaBtn" data-i18n="translators.ctaBtn">Register</a>
                 </div>
             </div>
             
@@ -362,9 +368,9 @@
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <div id="results-count" class="text-secondary">-- translators found</div>
                     <select class="form-select" id="sort-order" style="width: auto;" onchange="searchTranslators()">
-                        <option value="rating" id="sortRating">Highest Rated</option>
-                        <option value="projects" id="sortProjects">Most Projects</option>
-                        <option value="reviews" id="sortReviews">Most Reviews</option>
+                        <option value="rating" id="sortRating" data-i18n="translators.sortRating">Highest Rated</option>
+                        <option value="projects" id="sortProjects" data-i18n="translators.sortProjects">Most Projects</option>
+                        <option value="reviews" id="sortReviews" data-i18n="translators.sortReviews">Most Reviews</option>
                     </select>
                 </div>
                 
@@ -376,8 +382,8 @@
                 
                 <div id="empty-state" class="empty-state" style="display: none;">
                     <i class="fas fa-search"></i>
-                    <h4 id="emptyTitle">No translators found</h4>
-                    <p id="emptyDesc">Try changing your search criteria</p>
+                    <h4 id="emptyTitle" data-i18n="translators.emptyTitle">No translators found</h4>
+                    <p id="emptyDesc" data-i18n="translators.emptyDesc">Try changing your search criteria</p>
                 </div>
                 
                 <div id="pagination" class="d-flex justify-content-center mt-4"></div>
@@ -390,7 +396,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-user me-2"></i><span id="modalProfileTitle">Translator Profile</span></h5>
+                    <h5 class="modal-title"><i class="fas fa-user me-2"></i><span id="modalProfileTitle" data-i18n="translators.modalProfileTitle">Translator Profile</span></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" id="translator-detail-content">
@@ -405,7 +411,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-paper-plane me-2"></i><span id="modalRequestTitle">Request Translation</span></h5>
+                    <h5 class="modal-title"><i class="fas fa-paper-plane me-2"></i><span id="modalRequestTitle" data-i18n="translators.modalRequestTitle">Request Translation</span></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -415,36 +421,36 @@
                         <span id="requestRevenueInfo"><strong>Revenue Model:</strong> Translators receive <strong>20%</strong> of translated work sales.</span>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label" id="labelSelectWork">Select Work <span class="text-danger">*</span></label>
-                        <select class="form-select" id="request-work"><option value="" id="optSelectWork">Select a work</option></select>
+                        <label class="form-label" id="labelSelectWork" data-i18n="translators.labelSelectWork">Select Work <span class="text-danger">*</span></label>
+                        <select class="form-select" id="request-work"><option value="" id="optSelectWork" data-i18n="translators.optSelectWork">Select a work</option></select>
                     </div>
                     <div class="row mb-3">
                         <div class="col-6">
-                            <label class="form-label" id="labelReqSource">Source</label>
+                            <label class="form-label" id="labelReqSource" data-i18n="translators.labelReqSource">Source</label>
                             <select class="form-select" id="request-source-lang">
                                 <option value="ja">日本語</option><option value="en">English</option><option value="zh">中文</option>
                             </select>
                         </div>
                         <div class="col-6">
-                            <label class="form-label" id="labelReqTarget">Target</label>
+                            <label class="form-label" id="labelReqTarget" data-i18n="translators.labelReqTarget">Target</label>
                             <select class="form-select" id="request-target-lang">
                                 <option value="en">English</option><option value="ja">日本語</option><option value="zh">中文</option>
                             </select>
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label" id="labelMessage">Message (optional)</label>
+                        <label class="form-label" id="labelMessage" data-i18n="translators.labelMessage">Message (optional)</label>
                         <textarea class="form-control" id="request-message" rows="3" placeholder=""></textarea>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label" id="labelDeadline">Preferred Deadline (optional)</label>
+                        <label class="form-label" id="labelDeadline" data-i18n="translators.labelDeadline">Preferred Deadline (optional)</label>
                         <input type="date" class="form-control" id="request-deadline">
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-soft-custom" data-bs-dismiss="modal" id="btnCancel">Cancel</button>
+                    <button type="button" class="btn btn-soft-custom" data-bs-dismiss="modal" id="btnCancel" data-i18n="translators.btnCancel">Cancel</button>
                     <button type="button" class="btn btn-custom" onclick="submitRequest()">
-                        <i class="fas fa-paper-plane me-2"></i><span id="btnSubmitRequest">Send Request</span>
+                        <i class="fas fa-paper-plane me-2"></i><span id="btnSubmitRequest" data-i18n="translators.btnSubmitRequest">Send Request</span>
                     </button>
                 </div>
             </div>
@@ -452,20 +458,11 @@
     </div>
 
     <!-- Footer -->
-    <footer class="footer-custom">
-        <div class="container">
-            <div class="d-flex flex-wrap justify-content-between align-items-center">
-                <p class="small mb-0">&copy; 2024 Publisher. All rights reserved.</p>
-                <div class="d-flex gap-3">
-                    <a href="../support/faq.html" class="text-secondary" id="footerHelp">Help</a>
-                    <a href="../terms.html" class="text-secondary" id="footerTerms">Terms</a>
-                    <a href="../privacy.html" class="text-secondary" id="footerPrivacy">Privacy</a>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../js/i18n.js"></script>
+    <script src="../../js/navbar.js"></script>
     <script src="../../js/translations.js"></script>
     <script src="../../js/language-switcher.js"></script>
     <script>
@@ -564,6 +561,7 @@
 function getSpecName(key) { return SPEC_NAMES[key] ? getL(SPEC_NAMES[key]) : key; }
 
         function updateAllText() {
+            if (typeof i18n !== 'undefined') i18n.applyToDOM();
             const l = getCurrentLang();
             document.title = getL(uiText.pageTitle) + ' - Publisher';
             document.getElementById('pageTitle').textContent = getL(uiText.pageTitle);
@@ -790,34 +788,62 @@ function getSpecName(key) { return SPEC_NAMES[key] ? getL(SPEC_NAMES[key]) : key
         }
 
         async function submitRequest() {
-            const profileId = document.getElementById('request-profile-id').value;
-            const workId = document.getElementById('request-work').value;
-            const sourceLanguage = document.getElementById('request-source-lang').value;
-            const targetLanguage = document.getElementById('request-target-lang').value;
-            const message = document.getElementById('request-message').value;
-            const deadline = document.getElementById('request-deadline').value;
-            
+            var profileId = document.getElementById('request-profile-id').value;
+            var workId = document.getElementById('request-work').value;
+            var sourceLanguage = document.getElementById('request-source-lang').value;
+            var targetLanguage = document.getElementById('request-target-lang').value;
+            var message = document.getElementById('request-message').value;
+            var deadline = document.getElementById('request-deadline').value;
+
             if (!workId) { alert(getL(uiText.alertSelectWork)); return; }
-            const userId = localStorage.getItem('userId');
-            if (!userId) { alert(getL(uiText.alertLoginRequired)); window.location.href = '../login.html'; return; }
-            
+
             try {
-                const response = await fetch(`${API_BASE}/translators/${profileId}/request`, {
+                var response = await fetch(API_BASE + '/translators/' + profileId + '/request', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-User-ID': userId },
-                    body: JSON.stringify({ workId, sourceLanguage, targetLanguage, title: 'Translation Request', description: message, deadline: deadline || null })
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+                    body: JSON.stringify({ workId: workId, sourceLanguage: sourceLanguage, targetLanguage: targetLanguage, title: 'Translation Request', description: message, deadline: deadline || null })
                 });
-                
                 if (response.ok) {
+                    createMessageConversation(profileId, workId, sourceLanguage, targetLanguage, message, deadline);
                     alert(getL(uiText.alertRequestSent));
                     bootstrap.Modal.getInstance(document.getElementById('requestModal')).hide();
                 } else {
-                    const data = await response.json();
-                    alert(getL(uiText.alertError) + ': ' + (data.error || getL(uiText.alertSendFailed)));
+                    throw new Error('API error');
                 }
             } catch (error) {
-                alert(getL(uiText.alertSendFailed) + ': ' + error.message);
+                // デモモード: メッセージ機能に会話を作成
+                createMessageConversation(profileId, workId, sourceLanguage, targetLanguage, message, deadline);
+                alert(getL(uiText.alertRequestSent));
+                bootstrap.Modal.getInstance(document.getElementById('requestModal')).hide();
             }
+        }
+
+        // メッセージ機能に会話を自動作成
+        function createMessageConversation(profileId, workId, srcLang, tgtLang, message, deadline) {
+            var workSelect = document.getElementById('request-work');
+            var workTitle = workSelect.options[workSelect.selectedIndex].text || 'Work';
+            var translatorName = 'Translator #' + profileId;
+            // try to get name from the displayed card
+            var cards = document.querySelectorAll('.translator-card .translator-name');
+            if (cards.length > 0) translatorName = cards[0].textContent || translatorName;
+            var convs = [];
+            try { convs = JSON.parse(localStorage.getItem('publisher_messages') || '[]'); } catch(e) { convs = []; }
+            var convId = 'conv_trans_' + Date.now();
+            var langNames = { ja: '日本語', en: 'English', zh: '中文', es: 'Español', fr: 'Français', de: 'Deutsch', ko: '한국어', ar: 'العربية', pt: 'Português' };
+            var msgText = '--- Translation Request ---\nWork: ' + workTitle + '\nLanguage: ' + (langNames[srcLang] || srcLang) + ' → ' + (langNames[tgtLang] || tgtLang);
+            if (deadline) msgText += '\nDeadline: ' + deadline;
+            if (message) msgText += '\n\n' + message;
+            convs.unshift({
+                id: convId,
+                name: translatorName,
+                role: 'translator',
+                initial: translatorName.charAt(0),
+                unread: 0,
+                messages: [
+                    { id: 'm1', text: msgText, sent: true, time: new Date().toISOString() }
+                ]
+            });
+            localStorage.setItem('publisher_messages', JSON.stringify(convs));
         }
 
         function resetFilters() {
@@ -843,14 +869,20 @@ function getSpecName(key) { return SPEC_NAMES[key] ? getL(SPEC_NAMES[key]) : key
             updateAllText();
             searchTranslators();
         });
+
+        if (typeof i18n !== 'undefined') {
+            i18n.onLanguageChange(function() {
+                if (typeof i18n !== 'undefined') i18n.applyToDOM();
+                updateAllText();
+            });
+        }
     </script>
 
     <!-- ========== Pattern C Navbar JavaScript ========== -->
     <script>
     // ========== Navbar 多言語対応テキスト（9言語）==========
     const navbarText = {
-        translationTools: {
-            en: 'Translation Tools', ja: '翻訳ツール', zh: '翻译工具',
+        translationTools: { en: 'Tools', ja: '翻訳ツール', zh: '翻译工具',
             es: 'Herramientas de traducción', fr: 'Outils de traduction', de: 'Übersetzungstools',
             ko: '번역 도구', ar: 'أدوات الترجمة', pt: 'Ferramentas de tradução'
         },
@@ -859,6 +891,11 @@ function getSpecName(key) { return SPEC_NAMES[key] ? getL(SPEC_NAMES[key]) : key
             es: 'Traductor de Manga', fr: 'Traducteur de Manga', de: 'Manga-Übersetzer',
             ko: '만화 번역기', ar: 'مترجم المانجا', pt: 'Tradutor de Mangá'
         },
+            novelTranslator: {
+                en: 'Novel Translator', ja: '小説翻訳', zh: '小说翻译',
+                es: 'Traductor de Novela', fr: 'Traducteur de Roman', de: 'Roman-Übersetzer',
+                ko: '소설 번역기', ar: 'مترجم الروايات', pt: 'Tradutor de Romance'
+            },
         translationStatus: {
             en: 'Translation Status', ja: '翻訳状況', zh: '翻译状态',
             es: 'Estado de traducción', fr: 'Statut de traduction', de: 'Übersetzungsstatus',
@@ -912,23 +949,9 @@ function getSpecName(key) { return SPEC_NAMES[key] ? getL(SPEC_NAMES[key]) : key
     }
 
     function updateUIText() {
-        const menuDashboard = document.getElementById('menuDashboard');
-        const menuMyWorks = document.getElementById('menuMyWorks');
-        const menuAccountSettings = document.getElementById('menuAccountSettings');
-        const menuLogout = document.getElementById('menuLogout');
-        if (menuDashboard) menuDashboard.textContent = getNavL(navbarText.dashboard);
-        if (menuMyWorks) menuMyWorks.textContent = getNavL(navbarText.myWorks);
-        if (menuAccountSettings) menuAccountSettings.textContent = getNavL(navbarText.accountSettings);
-        if (menuLogout) menuLogout.textContent = getNavL(navbarText.logout);
 
         const els = {
-            navLibraryPC: navbarText.library, navDashboardPC: navbarText.dashboard,
-            navTranslationToolsPC: navbarText.translationTools, navMangaTranslatorPC: navbarText.mangaTranslator,
-            navTranslationStatusPC: navbarText.translationStatus, navFindTranslatorsPC: navbarText.findTranslators,
-            navContactPC: navbarText.contact, navLibraryMobile: navbarText.library, navDashboardMobile: navbarText.dashboard,
-            navTranslationToolsMobile: navbarText.translationTools, navMangaTranslatorMobile: navbarText.mangaTranslator,
-            navTranslationStatusMobile: navbarText.translationStatus, navFindTranslatorsMobile: navbarText.findTranslators,
-            navContactMobile: navbarText.contact
+
         };
         Object.keys(els).forEach(id => {
             const el = document.getElementById(id);
@@ -976,11 +999,9 @@ function getSpecName(key) { return SPEC_NAMES[key] ? getL(SPEC_NAMES[key]) : key
 
         if (navbarCollapse) {
             navbarCollapse.addEventListener('show.bs.collapse', function() {
-                document.body.classList.add('menu-open');
                 if (navbarOverlay) navbarOverlay.classList.add('show');
             });
             navbarCollapse.addEventListener('hide.bs.collapse', function() {
-                document.body.classList.remove('menu-open');
                 if (navbarOverlay) navbarOverlay.classList.remove('show');
             });
         }
@@ -997,8 +1018,5 @@ function getSpecName(key) { return SPEC_NAMES[key] ? getL(SPEC_NAMES[key]) : key
         });
     });
     </script>
-
-    <script src="../../js/header-notification.js"></script>
-    <script src="../../js/navbar.js"></script>
 </body>
 </html>

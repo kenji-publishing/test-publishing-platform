@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <title>Library - Publisher</title>
@@ -16,9 +17,12 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <!-- Platform CSS -->
+    <link href="../css/variables.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/style-new.css">
+    <link href="../css/components.css" rel="stylesheet">
     <link href="../css/navbar.css" rel="stylesheet">
-    
+    <link rel="stylesheet" href="../css/mobile-fixes.css">
+
     <style>
         :root {
             --color-bg: #FAF8F5;
@@ -46,10 +50,43 @@
 
         
         
+        /* ========== PC Navbar - 横並び維持 ========== */
+        @media (min-width: 992px) {
+            .navbar-nav {
+                flex-wrap: nowrap !important;
+                flex-direction: row !important;
+            }
+            .navbar-nav .nav-item {
+                white-space: nowrap !important;
+            }
+            .navbar-nav .nav-link {
+                white-space: nowrap !important;
+                padding: 0.5rem 0.6rem !important;
+                font-size: 0.9rem;
+            }
+
+            .dropdown-menu {
+                white-space: nowrap;
+            }
+            .navbar-buttons-guest {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                gap: 0.5rem;
+            }
+            .navbar-buttons-guest .btn {
+                white-space: nowrap !important;
+                flex-shrink: 0;
+            }
+        }
         
         
         
-        
+        /* ========== Navbar Overlay ========== */
+
+        /* ========== Mobile Adjustments ========== */
+        @media (max-width: 991.98px) {
+
+        }
         
         /* Main Content */
         .main-container {
@@ -353,322 +390,74 @@
 <!-- ========== NAVBAR HTML START ========== -->
 
 <!-- Navbar Overlay -->
-<div class="navbar-overlay" id="navbarOverlay"></div>
-
-<!-- Navigation -->
-<nav class="navbar navbar-expand-lg navbar-custom sticky-top">
-    <div class="container">
-        <a class="navbar-brand" href="../index.html">
-            <i class="fas fa-book-open"></i>
-            Publisher
-        </a>
-        
-        <!-- Language Selector Mobile -->
-        <div class="navbar-lang-selector d-lg-none">
-            <select class="language-selector" id="languageSelectorMobile">
-                <option value="en">🇬🇧 EN</option>
-                <option value="ja">🇯🇵 日本語</option>
-                <option value="zh">🇨🇳 中文</option>
-                <option value="es">🇪🇸 ES</option>
-                <option value="fr">🇫🇷 FR</option>
-                <option value="de">🇩🇪 DE</option>
-                <option value="ko">🇰🇷 한국어</option>
-                <option value="ar">🇸🇦 عربي</option>
-                <option value="pt">🇧🇷 PT</option>
-            </select>
-        </div>
-        
-        <!-- User Dropdown (auth-only) -->
-        <div class="user-dropdown auth-only" id="userDropdown">
-            <button type="button" class="user-dropdown-toggle" id="userDropdownBtn" onclick="toggleUserDropdown(event)">
-                <i class="fas fa-user-circle"></i>
-                <span class="user-name d-none d-lg-inline" id="userName">User</span>
-                <i class="fas fa-chevron-down user-chevron d-none d-lg-inline"></i>
-            </button>
-            <div class="user-menu" id="userMenu">
-                <div class="user-menu-header">
-                    <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
-                    <div class="user-info">
-                        <div class="user-display-name" id="userDisplayName">User</div>
-                        <div class="user-email" id="userEmail">user@example.com</div>
-                    </div>
-                </div>
-                <div class="user-menu-divider"></div>
-                <a href="dashboard.html" class="user-menu-item">
-                    <i class="fas fa-th-large"></i>
-                    <span id="menuDashboard">Dashboard</span>
-                </a>
-                <a href="my-works.html" class="user-menu-item">
-                    <i class="fas fa-book"></i>
-                    <span id="menuMyWorks">My Works</span>
-                </a>
-                <a href="account-settings.html" class="user-menu-item">
-                    <i class="fas fa-cog"></i>
-                    <span id="menuAccountSettings">Account Settings</span>
-                </a>
-                <div class="user-menu-divider"></div>
-                <button class="user-menu-item logout-btn" onclick="handleLogout()">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span id="menuLogout">Log Out</span>
-                </button>
-            </div>
-        </div>
-        
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <!-- ========== PC Navigation ========== -->
-            <ul class="navbar-nav me-auto d-none d-lg-flex">
-                <li class="nav-item">
-                    <a class="nav-link" href="../index.html">
-                        <i class="fas fa-home me-1"></i> <span id="navHomePC">Home</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="browse.html">
-                        <i class="fas fa-compass me-1"></i> <span id="navBrowsePC">Browse</span>
-                    </a>
-                </li>
-                <!-- Auth: Library -->
-                <li class="nav-item auth-only">
-                    <a class="nav-link active" href="library.html">
-                        <i class="fas fa-book-reader me-1"></i> <span id="navLibraryPC">Library</span>
-                    </a>
-                </li>
-                <!-- Auth: Dashboard -->
-                <li class="nav-item auth-only">
-                    <a class="nav-link" href="dashboard.html">
-                        <i class="fas fa-th-large me-1"></i> <span id="navDashboardPC">Dashboard</span>
-                    </a>
-                </li>
-                <!-- Auth: Upload -->
-                <li class="nav-item auth-only">
-                    <a class="nav-link" href="upload.html">
-                        <i class="fas fa-upload me-1"></i> <span id="navUploadPC">Upload</span>
-                    </a>
-                </li>
-                <!-- Auth: Translation Tools -->
-                <li class="nav-item dropdown auth-only">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-language me-1"></i> <span id="navTranslationToolsPC">Translation Tools</span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="manga-translator.html"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorPC">Manga Translator</span></a></li>
-                        <li><a class="dropdown-item" href="translation-status.html"><i class="fas fa-tasks me-2"></i><span id="navTranslationStatusPC">Translation Status</span></a></li>
-                        <li><a class="dropdown-item" href="translators/index.html"><i class="fas fa-users me-2"></i><span id="navFindTranslatorsPC">Find Translators</span></a></li>
-                    </ul>
-                </li>
-                <!-- Support Dropdown -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-headset me-1"></i> <span id="navSupportPC">Support</span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="support/faq.html"><i class="fas fa-question-circle me-2"></i><span id="navFaqPC">FAQ</span></a></li>
-                        <li><a class="dropdown-item" href="support/troubleshoot.html"><i class="fas fa-tools me-2"></i><span id="navTroubleshootPC">Troubleshooting</span></a></li>
-                        <li><a class="dropdown-item" href="support/contact.html"><i class="fas fa-envelope me-2"></i><span id="navContactPC">Contact</span></a></li>
-                        <li class="auth-only"><hr class="dropdown-divider"></li>
-                        <li class="auth-only"><a class="dropdown-item" href="support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span id="navMyTicketsPC">My Tickets</span></a></li>
-                    </ul>
-                </li>
-            </ul>
-            
-            <!-- ========== Mobile Navigation ========== -->
-            <ul class="navbar-nav d-lg-none">
-                <li class="nav-item">
-                    <a class="nav-link" href="../index.html">
-                        <i class="fas fa-home me-2"></i> <span id="navHomeMobile">Home</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="browse.html">
-                        <i class="fas fa-compass me-2"></i> <span id="navBrowseMobile">Browse</span>
-                    </a>
-                </li>
-                <!-- Auth: Library -->
-                <li class="nav-item auth-only">
-                    <a class="nav-link active" href="library.html">
-                        <i class="fas fa-book-reader me-2"></i> <span id="navLibraryMobile">Library</span>
-                    </a>
-                </li>
-                <li class="auth-only"><hr class="dropdown-divider"></li>
-                <!-- Auth: Dashboard -->
-                <li class="nav-item auth-only">
-                    <a class="nav-link" href="dashboard.html">
-                        <i class="fas fa-th-large me-2"></i> <span id="navDashboardMobile">Dashboard</span>
-                    </a>
-                </li>
-                <!-- Auth: Upload -->
-                <li class="nav-item auth-only">
-                    <a class="nav-link" href="upload.html">
-                        <i class="fas fa-upload me-2"></i> <span id="navUploadMobile">Upload</span>
-                    </a>
-                </li>
-                <!-- Auth: Translation Tools -->
-                <li class="nav-item auth-only">
-                    <a class="nav-link" data-bs-toggle="collapse" href="#translationToolsMenu" role="button">
-                        <i class="fas fa-language me-2"></i> <span id="navTranslationToolsMobile">Translation Tools</span>
-                        <i class="fas fa-chevron-down ms-auto small"></i>
-                    </a>
-                    <div class="collapse ps-4" id="translationToolsMenu">
-                        <a class="nav-link" href="manga-translator.html">
-                            <i class="fas fa-image me-2"></i> <span id="navMangaTranslatorMobile">Manga Translator</span>
-                        </a>
-                        <a class="nav-link" href="translation-status.html">
-                            <i class="fas fa-tasks me-2"></i> <span id="navTranslationStatusMobile">Translation Status</span>
-                        </a>
-                        <a class="nav-link" href="translators/index.html">
-                            <i class="fas fa-users me-2"></i> <span id="navFindTranslatorsMobile">Find Translators</span>
-                        </a>
-                    </div>
-                </li>
-                <li><hr class="dropdown-divider"></li>
-                <!-- Support -->
-                <li class="nav-item">
-                    <a class="nav-link" href="support/faq.html">
-                        <i class="fas fa-question-circle me-2"></i> <span id="navFaqMobile">FAQ</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="support/troubleshoot.html">
-                        <i class="fas fa-tools me-2"></i> <span id="navTroubleshootMobile">Troubleshooting</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="support/contact.html">
-                        <i class="fas fa-envelope me-2"></i> <span id="navContactMobile">Contact</span>
-                    </a>
-                </li>
-                <!-- Auth: My Tickets -->
-                <li class="nav-item auth-only">
-                    <a class="nav-link" href="support/tickets.html">
-                        <i class="fas fa-ticket-alt me-2"></i> <span id="navMyTicketsMobile">My Tickets</span>
-                    </a>
-                </li>
-                <li><hr class="dropdown-divider"></li>
-                <!-- Guest: Sign In -->
-                <li class="nav-item guest-only">
-                    <a class="nav-link" href="login.html">
-                        <i class="fas fa-sign-in-alt me-2"></i> <span id="navSignInMobile">Sign In</span>
-                    </a>
-                </li>
-                <!-- Guest: Register -->
-                <li class="nav-item guest-only">
-                    <a class="nav-link" href="register.html">
-                        <i class="fas fa-user-plus me-2"></i> <span id="navGetStartedMobile">Get Started</span>
-                    </a>
-                </li>
-            </ul>
-            
-            <div class="d-flex align-items-center gap-3">
-                <!-- Language Selector Desktop -->
-                <select class="language-selector d-none d-lg-block" id="languageSelector">
-                    <option value="en">🇬🇧 EN</option>
-                    <option value="ja">🇯🇵 日本語</option>
-                    <option value="zh">🇨🇳 中文</option>
-                    <option value="es">🇪🇸 ES</option>
-                    <option value="fr">🇫🇷 FR</option>
-                    <option value="de">🇩🇪 DE</option>
-                    <option value="ko">🇰🇷 한국어</option>
-                    <option value="ar">🇸🇦 عربي</option>
-                    <option value="pt">🇧🇷 PT</option>
-                </select>
-                
-                <!-- Guest Buttons (PC) -->
-                <div class="navbar-buttons-guest guest-only d-none d-lg-flex">
-                    <a href="login.html" class="btn btn-soft-custom">
-                        <span id="navSignInPC">Sign In</span>
-                    </a>
-                    <a href="register.html" class="btn btn-primary-custom">
-                        <span id="navGetStartedPC">Get Started</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</nav>
-
-<!-- ========== NAVBAR HTML END ========== -->
+<div id="navbar-container"></div>
 
     <div class="main-container">
         <!-- Page Header -->
         <div class="page-header">
-            <h1 class="page-title"><i class="fas fa-book-reader me-2"></i><span id="pageTitle">My Library</span></h1>
+            <h1 class="page-title"><i class="fas fa-book-reader me-2"></i><span id="pageTitle" data-i18n="library.myLibrary">My Library</span></h1>
         </div>
-        
+
         <!-- Search & Filter -->
         <div class="search-filter-bar">
             <div class="search-input-wrapper">
                 <i class="fas fa-search search-icon"></i>
-                <input type="text" class="search-input" id="searchInput" placeholder="Search your library..." oninput="filterBooks()">
+                <input type="text" class="search-input" id="searchInput" data-i18n-placeholder="library.searchLibrary" placeholder="Search your library..." oninput="filterBooks()">
             </div>
             <select class="filter-select" id="sortSelect" onchange="sortBooks()">
-                <option value="recent" id="sortRecent">Recently Read</option>
-                <option value="title" id="sortTitle">Title A-Z</option>
-                <option value="author" id="sortAuthor">Author A-Z</option>
-                <option value="added" id="sortAdded">Date Added</option>
+                <option value="recent" id="sortRecent" data-i18n="library.recentlyRead">Recently Read</option>
+                <option value="title" id="sortTitle" data-i18n="library.titleAZ">Title A-Z</option>
+                <option value="author" id="sortAuthor" data-i18n="library.authorAZ">Author A-Z</option>
+                <option value="added" id="sortAdded" data-i18n="library.dateAdded">Date Added</option>
             </select>
         </div>
-        
+
         <!-- Tabs -->
         <div class="library-tabs">
             <button class="tab-btn active" onclick="showTab('all')" id="tabAll">
-                <i class="fas fa-book me-1"></i><span id="tabAllText">All</span>
+                <i class="fas fa-book me-1"></i><span id="tabAllText" data-i18n="library.all">All</span>
                 <span class="tab-count" id="countAll">0</span>
             </button>
             <button class="tab-btn" onclick="showTab('reading')" id="tabReading">
-                <i class="fas fa-bookmark me-1"></i><span id="tabReadingText">Reading</span>
+                <i class="fas fa-bookmark me-1"></i><span id="tabReadingText" data-i18n="library.reading">Reading</span>
                 <span class="tab-count" id="countReading">0</span>
             </button>
             <button class="tab-btn" onclick="showTab('completed')" id="tabCompleted">
-                <i class="fas fa-check-circle me-1"></i><span id="tabCompletedText">Completed</span>
+                <i class="fas fa-check-circle me-1"></i><span id="tabCompletedText" data-i18n="library.completed">Completed</span>
                 <span class="tab-count" id="countCompleted">0</span>
             </button>
             <button class="tab-btn" onclick="showTab('favorites')" id="tabFavorites">
-                <i class="fas fa-heart me-1"></i><span id="tabFavoritesText">Favorites</span>
+                <i class="fas fa-heart me-1"></i><span id="tabFavoritesText" data-i18n="library.favorites">Favorites</span>
                 <span class="tab-count" id="countFavorites">0</span>
             </button>
             <button class="tab-btn" onclick="showTab('wishlist')" id="tabWishlist">
-                <i class="fas fa-star me-1"></i><span id="tabWishlistText">Wishlist</span>
+                <i class="fas fa-star me-1"></i><span id="tabWishlistText" data-i18n="library.wishlist">Wishlist</span>
                 <span class="tab-count" id="countWishlist">0</span>
             </button>
         </div>
-        
+
         <!-- Books Grid -->
         <div class="books-grid" id="booksGrid">
             <!-- Books will be rendered here -->
         </div>
-        
+
         <!-- Empty State -->
         <div class="empty-state" id="emptyState" style="display: none;">
             <i class="fas fa-books"></i>
-            <h3 id="emptyTitle">No books yet</h3>
-            <p id="emptyText">Start exploring and add books to your library</p>
+            <h3 id="emptyTitle" data-i18n="library.noBooksYet">No books yet</h3>
+            <p id="emptyText" data-i18n="library.startExploring">Start exploring and add books to your library</p>
             <a href="browse.html" class="btn-primary" id="emptyBtn">
-                <i class="fas fa-search me-2"></i><span id="emptyBtnText">Browse Books</span>
+                <i class="fas fa-search me-2"></i><span id="emptyBtnText" data-i18n="library.browseBooks">Browse Books</span>
             </a>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="footer-custom">
-        <div class="container">
-            <div class="d-flex flex-wrap justify-content-between align-items-center">
-                <p class="small mb-0">&copy; 2026 Publisher. All rights reserved.</p>
-                <div class="d-flex gap-3">
-                    <a href="support/faq.html" class="text-secondary" id="footerHelp">Help</a>
-                    <a href="terms.html" class="text-secondary" id="footerTerms">Terms</a>
-                    <a href="privacy.html" class="text-secondary" id="footerPrivacy">Privacy</a>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/i18n.js"></script>
     <script src="../js/navbar.js"></script>
-    
+
     <!-- ========== Library Page Script ========== -->
     <script>
         // ========== UI Text (9 languages) - Library Page ==========
@@ -705,9 +494,9 @@
                 ko: '둘러보기', ar: 'تصفح', pt: 'Explorar'
             },
             upload: {
-                en: 'Upload', ja: 'アップロード', zh: '上传',
-                es: 'Subir', fr: 'Télécharger', de: 'Hochladen',
-                ko: '업로드', ar: 'رفع', pt: 'Enviar'
+                en: 'Upload Work', ja: '作品アップロード', zh: '上传作品',
+                es: 'Subir obra', fr: 'Télécharger une œuvre', de: 'Werk hochladen',
+                ko: '작품 업로드', ar: 'رفع عمل', pt: 'Enviar obra'
             },
             support: {
                 en: 'Support', ja: 'サポート', zh: '支持',
@@ -715,7 +504,7 @@
                 ko: '지원', ar: 'الدعم', pt: 'Suporte'
             },
             faq: {
-                en: 'FAQ', ja: 'よくある質問', zh: '常见问题',
+                en: 'FAQ', ja: 'FAQ', zh: '常见问题',
                 es: 'Preguntas frecuentes', fr: 'FAQ', de: 'FAQ',
                 ko: '자주 묻는 질문', ar: 'الأسئلة الشائعة', pt: 'Perguntas frequentes'
             },
@@ -739,8 +528,7 @@
                 es: 'Comenzar', fr: 'Commencer', de: 'Loslegen',
                 ko: '시작하기', ar: 'ابدأ الآن', pt: 'Começar'
             },
-            translationTools: {
-                en: 'Translation Tools', ja: '翻訳ツール', zh: '翻译工具',
+            translationTools: { en: 'Tools', ja: '翻訳ツール', zh: '翻译工具',
                 es: 'Herramientas de traducción', fr: 'Outils de traduction', de: 'Übersetzungstools',
                 ko: '번역 도구', ar: 'أدوات الترجمة', pt: 'Ferramentas de tradução'
             },
@@ -748,6 +536,11 @@
                 en: 'Manga Translator', ja: 'マンガ翻訳', zh: '漫画翻译',
                 es: 'Traductor de Manga', fr: 'Traducteur de Manga', de: 'Manga-Übersetzer',
                 ko: '만화 번역기', ar: 'مترجم المانجا', pt: 'Tradutor de Mangá'
+            },
+            novelTranslator: {
+                en: 'Novel Translator', ja: '小説翻訳', zh: '小说翻译',
+                es: 'Traductor de Novela', fr: 'Traducteur de Roman', de: 'Roman-Übersetzer',
+                ko: '소설 번역기', ar: 'مترجم الروايات', pt: 'Tradutor de Romance'
             },
             translationStatus: {
                 en: 'Translation Status', ja: '翻訳状況', zh: '翻译状态',
@@ -838,35 +631,9 @@ function getL(obj, replacements = {}) {
         
         // ========== Navbar Functions (Pattern C) ==========
         function updateUIText() {
-            const menuDashboard = document.getElementById('menuDashboard');
-            const menuAccountSettings = document.getElementById('menuAccountSettings');
-            const menuLogout = document.getElementById('menuLogout');
-            if (menuDashboard) menuDashboard.textContent = getL(uiText.dashboard);
-            const menuMyWorks = document.getElementById("menuMyWorks");
-            if (menuMyWorks) menuMyWorks.textContent = getL(uiText.myWorks);
-            if (menuAccountSettings) menuAccountSettings.textContent = getL(uiText.accountSettings);
-            if (menuLogout) menuLogout.textContent = getL(uiText.logout);
-            
+
             const els = {
-                // PC Navigation
-                navHomePC: uiText.home, navBrowsePC: uiText.browse,
-                navUploadPC: uiText.upload,
-                navLibraryPC: uiText.library, navDashboardPC: uiText.dashboard,
-                navTranslationToolsPC: uiText.translationTools, navMangaTranslatorPC: uiText.mangaTranslator,
-                navTranslationStatusPC: uiText.translationStatus, navFindTranslatorsPC: uiText.findTranslators,
-                navSupportPC: uiText.support, navFaqPC: uiText.faq,
-                navTroubleshootPC: uiText.troubleshoot, navContactPC: uiText.contact,
-                navMyTicketsPC: uiText.myTickets,
-                navSignInPC: uiText.signIn, navGetStartedPC: uiText.getStarted,
-                // Mobile Navigation
-                navHomeMobile: uiText.home, navBrowseMobile: uiText.browse,
-                navUploadMobile: uiText.upload,
-                navLibraryMobile: uiText.library, navDashboardMobile: uiText.dashboard,
-                navTranslationToolsMobile: uiText.translationTools, navMangaTranslatorMobile: uiText.mangaTranslator,
-                navTranslationStatusMobile: uiText.translationStatus, navFindTranslatorsMobile: uiText.findTranslators,
-                navFaqMobile: uiText.faq, navTroubleshootMobile: uiText.troubleshoot,
-                navContactMobile: uiText.contact, navMyTicketsMobile: uiText.myTickets,
-                navSignInMobile: uiText.signIn, navGetStartedMobile: uiText.getStarted
+
             };
             Object.keys(els).forEach(id => {
                 const el = document.getElementById(id);
@@ -888,47 +655,7 @@ function getL(obj, replacements = {}) {
         
         function updateAllText() {
             document.title = getL(uiText.myLibrary) + ' - Publisher';
-            const pageTitle = document.getElementById('pageTitle');
-            if (pageTitle) pageTitle.textContent = getL(uiText.myLibrary);
-            
-            const searchInput = document.getElementById('searchInput');
-            if (searchInput) searchInput.placeholder = getL(uiText.searchLibrary);
-            
-            const sortRecent = document.getElementById('sortRecent');
-            const sortTitle = document.getElementById('sortTitle');
-            const sortAuthor = document.getElementById('sortAuthor');
-            const sortAdded = document.getElementById('sortAdded');
-            if (sortRecent) sortRecent.textContent = getL(uiText.recentlyRead);
-            if (sortTitle) sortTitle.textContent = getL(uiText.titleAZ);
-            if (sortAuthor) sortAuthor.textContent = getL(uiText.authorAZ);
-            if (sortAdded) sortAdded.textContent = getL(uiText.dateAdded);
-            
-            const tabAllText = document.getElementById('tabAllText');
-            const tabReadingText = document.getElementById('tabReadingText');
-            const tabCompletedText = document.getElementById('tabCompletedText');
-            const tabFavoritesText = document.getElementById('tabFavoritesText');
-            const tabWishlistText = document.getElementById('tabWishlistText');
-            if (tabAllText) tabAllText.textContent = getL(uiText.all);
-            if (tabReadingText) tabReadingText.textContent = getL(uiText.reading);
-            if (tabCompletedText) tabCompletedText.textContent = getL(uiText.completed);
-            if (tabFavoritesText) tabFavoritesText.textContent = getL(uiText.favorites);
-            if (tabWishlistText) tabWishlistText.textContent = getL(uiText.wishlist);
-            
-            const emptyTitle = document.getElementById('emptyTitle');
-            const emptyText = document.getElementById('emptyText');
-            const emptyBtnText = document.getElementById('emptyBtnText');
-            if (emptyTitle) emptyTitle.textContent = getL(uiText.noBooksYet);
-            if (emptyText) emptyText.textContent = getL(uiText.startExploring);
-            if (emptyBtnText) emptyBtnText.textContent = getL(uiText.browseBooks);
-
-            // Footer
-            const footerHelp = document.getElementById('footerHelp');
-            const footerTerms = document.getElementById('footerTerms');
-            const footerPrivacy = document.getElementById('footerPrivacy');
-            if (footerHelp) footerHelp.textContent = getL(uiText.footerHelp);
-            if (footerTerms) footerTerms.textContent = getL(uiText.footerTerms);
-            if (footerPrivacy) footerPrivacy.textContent = getL(uiText.footerPrivacy);
-
+            if (typeof i18n !== 'undefined') i18n.applyToDOM();
             renderBooks();
         }
         
@@ -1102,11 +829,9 @@ function getL(obj, replacements = {}) {
             
             if (navbarCollapse) {
                 navbarCollapse.addEventListener('show.bs.collapse', function() {
-                    document.body.classList.add('menu-open');
                     if (navbarOverlay) navbarOverlay.classList.add('show');
                 });
                 navbarCollapse.addEventListener('hide.bs.collapse', function() {
-                    document.body.classList.remove('menu-open');
                     if (navbarOverlay) navbarOverlay.classList.remove('show');
                 });
             }
@@ -1123,6 +848,13 @@ function getL(obj, replacements = {}) {
                 updateUIText();
                 updateAllText();
             });
+
+            if (typeof i18n !== 'undefined') {
+                i18n.onLanguageChange(function() {
+                    i18n.applyToDOM();
+                    renderBooks();
+                });
+            }
         });
     </script>
 </body>

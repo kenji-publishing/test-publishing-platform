@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
     <title>Register as Translator - Publisher</title>
@@ -11,259 +12,254 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="../../css/variables.css" rel="stylesheet">
     <link href="../../css/style-new.css" rel="stylesheet">
+    <link href="../../css/components.css" rel="stylesheet">
     <link href="../../css/navbar.css" rel="stylesheet">
-    
+    <link href="../../css/mobile-fixes.css" rel="stylesheet">
+
+    <style>
+        /* ========== Mobile Language Selector ========== */
+        .navbar-lang-selector {
+            display: flex;
+            align-items: center;
+            margin-right: 0.5rem;
+        }
+        
+        @media (max-width: 991.98px) {
+            .navbar-lang-selector {
+                order: 1;
+            }
+            .navbar-toggler {
+                order: 2;
+            }
+        }
+        
+        /* ========== PC Navbar - 横並び維持 ========== */
+        @media (min-width: 992px) {
+            .navbar-nav {
+                flex-wrap: nowrap !important;
+                flex-direction: row !important;
+            }
+            .navbar-nav .nav-item {
+                white-space: nowrap !important;
+            }
+            .navbar-nav .nav-link {
+                white-space: nowrap !important;
+                padding: 0.5rem 0.6rem !important;
+                font-size: 0.9rem;
+            }
+
+            .dropdown-menu {
+                white-space: nowrap;
+            }
+            .navbar-buttons-guest {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                gap: 0.5rem;
+            }
+            .navbar-buttons-guest .btn {
+                white-space: nowrap !important;
+                flex-shrink: 0;
+            }
+        }
+        
+        /* ========== Auth Visibility Control ========== */
+        .auth-only {
+            display: none !important;
+        }
+        .guest-only {
+            display: block;
+        }
+        body.logged-in .auth-only {
+            display: block !important;
+        }
+        body.logged-in .auth-only.nav-item {
+            display: list-item !important;
+        }
+        body.logged-in .auth-only.dropdown {
+            display: block !important;
+        }
+        body.logged-in .guest-only {
+            display: none !important;
+        }
+        @media (min-width: 992px) {
+            body.logged-in .navbar-buttons-guest {
+                display: none !important;
+            }
+        }
+        
+        /* ========== User Dropdown Menu ========== */
+        .user-dropdown {
+            position: relative;
+        }
+        .user-dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: transparent;
+            border: 1px solid var(--color-border);
+            border-radius: 25px;
+            padding: 0.4rem 0.75rem;
+            cursor: pointer;
+            color: var(--color-text);
+            transition: all 0.2s;
+        }
+        .user-dropdown-toggle:hover {
+            border-color: var(--color-accent);
+            background: rgba(139, 115, 85, 0.05);
+        }
+        .user-dropdown-toggle i:first-child {
+            font-size: 1.25rem;
+            color: var(--color-accent);
+        }
+        .user-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-chevron {
+            font-size: 0.7rem;
+            color: var(--color-text-secondary);
+            transition: transform 0.2s;
+        }
+        .user-dropdown.open .user-chevron {
+            transform: rotate(180deg);
+        }
+        .user-menu {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            right: 0;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            min-width: 240px;
+            z-index: 1001;
+            display: none;
+            overflow: hidden;
+        }
+        .user-menu.show {
+            display: block;
+        }
+        .user-menu-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--color-bg-main);
+        }
+        .user-avatar {
+            font-size: 2.5rem;
+            color: var(--color-accent);
+        }
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .user-display-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-email {
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-menu-divider {
+            height: 1px;
+            background: var(--color-border);
+        }
+        .user-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--color-text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+        .user-menu-item:hover {
+            background: var(--color-bg-hover);
+            color: var(--color-accent);
+        }
+        .user-menu-item i {
+            width: 20px;
+            text-align: center;
+            color: var(--color-text-secondary);
+        }
+        .user-menu-item:hover i {
+            color: var(--color-accent);
+        }
+        .logout-btn {
+            color: var(--color-error);
+        }
+        .logout-btn i {
+            color: var(--color-error);
+        }
+        .logout-btn:hover {
+            background: rgba(199, 93, 93, 0.1);
+            color: var(--color-error);
+        }
+        
+        /* ========== Navbar Overlay ========== */
+
+        /* ========== Mobile Adjustments ========== */
+        @media (max-width: 991.98px) {
+
+        }
+
+        /* ========== Page Specific Styles ========== */
+        .page-header { background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%); color: white; padding: var(--spacing-xl) 0; margin-bottom: var(--spacing-xl); }
+        .page-header h1 { color: white; font-size: var(--font-size-2xl); margin-bottom: var(--spacing-xs); }
+        .page-header p { color: rgba(255,255,255,0.9); margin: 0; }
+        .form-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-xl); margin-bottom: var(--spacing-lg); }
+        .form-card h4 { font-family: var(--font-heading); color: var(--color-text-primary); margin-bottom: var(--spacing-lg); padding-bottom: var(--spacing-md); border-bottom: 1px solid var(--color-border); }
+        .step-indicator { display: flex; justify-content: center; margin-bottom: var(--spacing-xl); gap: var(--spacing-sm); }
+        .step { display: flex; align-items: center; gap: var(--spacing-sm); }
+        .step-num { width: 36px; height: 36px; border-radius: 50%; background: var(--color-bg-hover); color: var(--color-text-secondary); display: flex; align-items: center; justify-content: center; font-weight: 600; transition: all var(--transition-fast); }
+        .step.active .step-num { background: var(--color-accent); color: white; }
+        .step.completed .step-num { background: var(--color-success); color: white; }
+        .step-label { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+        .step.active .step-label { color: var(--color-text-primary); font-weight: 500; }
+        .step-line { width: 40px; height: 2px; background: var(--color-border); margin: 0 var(--spacing-xs); }
+        .lang-pair-item { background: var(--color-bg-hover); border-radius: var(--radius-md); padding: var(--spacing-md); margin-bottom: var(--spacing-sm); display: flex; align-items: center; gap: var(--spacing-md); flex-wrap: wrap; }
+        .lang-pair-item .form-select { flex: 1; min-width: 120px; }
+        .info-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-lg); margin-bottom: var(--spacing-lg); }
+        .info-card h5 { font-weight: 600; margin-bottom: var(--spacing-md); color: var(--color-text-primary); }
+        .benefits-list { list-style: none; padding: 0; margin: 0; }
+        .benefits-list li { padding: var(--spacing-sm) 0; display: flex; align-items: center; gap: var(--spacing-sm); color: var(--color-text-secondary); }
+        .benefits-list li i { color: var(--color-success); }
+        .revenue-highlight { background: linear-gradient(135deg, rgba(93, 156, 89, 0.1), rgba(93, 156, 89, 0.05)); border: 1px solid rgba(93, 156, 89, 0.3); border-radius: var(--radius-lg); padding: var(--spacing-lg); text-align: center; margin-bottom: var(--spacing-lg); }
+        .revenue-highlight .percent { font-family: var(--font-heading); font-size: var(--font-size-3xl); font-weight: 700; color: var(--color-success); }
+        .revenue-highlight .label { color: var(--color-text-secondary); font-size: var(--font-size-sm); }
+        .success-icon { font-size: 5rem; color: var(--color-success); margin-bottom: var(--spacing-lg); }
+    </style>
 </head>
 <body>
     <!-- ========== NAVBAR HTML START ========== -->
 
     <!-- Navbar Overlay -->
-    <div class="navbar-overlay" id="navbarOverlay"></div>
-
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
-        <div class="container">
-            <!-- Brand -->
-            <a class="navbar-brand" href="../../index.html">
-                <i class="fas fa-book-open"></i>
-                Publisher
-            </a>
-            
-            <!-- Language Selector Mobile -->
-            <div class="navbar-lang-selector d-lg-none">
-                <select class="language-selector" id="languageSelectorMobile">
-                    <option value="en">🇬🇧 EN</option>
-                    <option value="ja">🇯🇵 日本語</option>
-                    <option value="zh">🇨🇳 中文</option>
-                    <option value="es">🇪🇸 ES</option>
-                    <option value="fr">🇫🇷 FR</option>
-                    <option value="de">🇩🇪 DE</option>
-                    <option value="ko">🇰🇷 한국어</option>
-                    <option value="ar">🇸🇦 عربي</option>
-                    <option value="pt">🇧🇷 PT</option>
-                </select>
-            </div>
-            
-            <!-- User Dropdown (auth-only) -->
-            <div class="user-dropdown auth-only" id="userDropdown">
-                <button type="button" class="user-dropdown-toggle" id="userDropdownBtn" onclick="toggleUserDropdown(event)">
-                    <i class="fas fa-user-circle"></i>
-                    <span class="user-name d-none d-lg-inline" id="userName">User</span>
-                    <i class="fas fa-chevron-down user-chevron d-none d-lg-inline"></i>
-                </button>
-                <div class="user-menu" id="userMenu">
-                    <div class="user-menu-header">
-                        <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
-                        <div class="user-info">
-                            <div class="user-display-name" id="userDisplayName">User</div>
-                            <div class="user-email" id="userEmail">user@example.com</div>
-                        </div>
-                    </div>
-                    <div class="user-menu-divider"></div>
-                    <a href="../dashboard.html" class="user-menu-item">
-                        <i class="fas fa-th-large"></i>
-                        <span id="menuDashboard">Dashboard</span>
-                    </a>
-                    <a href="../my-works.html" class="user-menu-item">
-                        <i class="fas fa-book"></i>
-                        <span id="menuMyWorks">My Works</span>
-                    </a>
-                    <a href="../account-settings.html" class="user-menu-item">
-                        <i class="fas fa-cog"></i>
-                        <span id="menuAccountSettings">Account Settings</span>
-                    </a>
-                    <div class="user-menu-divider"></div>
-                    <button class="user-menu-item logout-btn" onclick="handleLogout()">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span id="menuLogout">Log Out</span>
-                    </button>
-                </div>
-            </div>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <!-- ========== PC Navigation ========== -->
-                <ul class="navbar-nav me-auto d-none d-lg-flex">
-                    <li class="nav-item">
-                        <a class="nav-link" href="../../index.html">
-                            <i class="fas fa-home me-1"></i> <span data-i18n="nav.home">Home</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../browse.html">
-                            <i class="fas fa-compass me-1"></i> <span data-i18n="nav.browse">Browse</span>
-                        </a>
-                    </li>
-                    <!-- Auth: Library -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" href="../library.html">
-                            <i class="fas fa-book-reader me-1"></i> <span id="navLibraryPC">Library</span>
-                        </a>
-                    </li>
-                    <!-- Auth: Dashboard -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" href="../dashboard.html">
-                            <i class="fas fa-th-large me-1"></i> <span id="navDashboardPC">Dashboard</span>
-                        </a>
-                    </li>
-                    <!-- Auth: Upload -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" href="../upload.html">
-                            <i class="fas fa-upload me-1"></i> <span data-i18n="nav.upload">Upload</span>
-                        </a>
-                    </li>
-                    <!-- Auth: Translation Tools -->
-                    <li class="nav-item dropdown auth-only">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-language me-1"></i> <span id="navTranslationToolsPC">Translation Tools</span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="../manga-translator.html"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorPC">Manga Translator</span></a></li>
-                            <li><a class="dropdown-item" href="../translation-status.html"><i class="fas fa-tasks me-2"></i><span id="navTranslationStatusPC">Translation Status</span></a></li>
-                            <li><a class="dropdown-item" href="index.html"><i class="fas fa-users me-2"></i><span id="navFindTranslatorsPC">Find Translators</span></a></li>
-                        </ul>
-                    </li>
-                    <!-- Support Dropdown -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-headset me-1"></i> <span data-i18n="nav.support">Support</span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="../support/faq.html"><i class="fas fa-question-circle me-2"></i><span data-i18n="support.faq.title">FAQ</span></a></li>
-                            <li><a class="dropdown-item" href="../support/troubleshoot.html"><i class="fas fa-tools me-2"></i><span data-i18n="support.troubleshoot.title">Troubleshooting</span></a></li>
-                            <li><a class="dropdown-item" href="../support/contact.html"><i class="fas fa-envelope me-2"></i><span id="navContactPC">Contact</span></a></li>
-                            <li class="auth-only"><hr class="dropdown-divider"></li>
-                            <li class="auth-only"><a class="dropdown-item" href="../support/tickets.html"><i class="fas fa-ticket-alt me-2"></i><span data-i18n="support.tickets.title">My Tickets</span></a></li>
-                        </ul>
-                    </li>
-                </ul>
-                
-                <!-- ========== Mobile Navigation ========== -->
-                <ul class="navbar-nav d-lg-none">
-                    <li class="nav-item">
-                        <a class="nav-link" href="../../index.html">
-                            <i class="fas fa-home me-2"></i> <span data-i18n="nav.home">Home</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../browse.html">
-                            <i class="fas fa-compass me-2"></i> <span data-i18n="nav.browse">Browse</span>
-                        </a>
-                    </li>
-                    <!-- Auth: Library -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" href="../library.html">
-                            <i class="fas fa-book-reader me-2"></i> <span id="navLibraryMobile">Library</span>
-                        </a>
-                    </li>
-                    <li class="auth-only"><hr class="dropdown-divider"></li>
-                    <!-- Auth: Dashboard -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" href="../dashboard.html">
-                            <i class="fas fa-th-large me-2"></i> <span id="navDashboardMobile">Dashboard</span>
-                        </a>
-                    </li>
-                    <!-- Auth: Upload -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" href="../upload.html">
-                            <i class="fas fa-upload me-2"></i> <span data-i18n="nav.upload">Upload</span>
-                        </a>
-                    </li>
-                    <!-- Auth: Translation Tools -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" data-bs-toggle="collapse" href="#translationToolsMenu" role="button">
-                            <i class="fas fa-language me-2"></i> <span id="navTranslationToolsMobile">Translation Tools</span>
-                            <i class="fas fa-chevron-down ms-auto small"></i>
-                        </a>
-                        <div class="collapse ps-4" id="translationToolsMenu">
-                            <a class="nav-link" href="../manga-translator.html">
-                                <i class="fas fa-image me-2"></i> <span id="navMangaTranslatorMobile">Manga Translator</span>
-                            </a>
-                            <a class="nav-link" href="../translation-status.html">
-                                <i class="fas fa-tasks me-2"></i> <span id="navTranslationStatusMobile">Translation Status</span>
-                            </a>
-                            <a class="nav-link" href="index.html">
-                                <i class="fas fa-users me-2"></i> <span id="navFindTranslatorsMobile">Find Translators</span>
-                            </a>
-                        </div>
-                    </li>
-                    <li><hr class="dropdown-divider"></li>
-                    <!-- Support -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="../support/faq.html">
-                            <i class="fas fa-question-circle me-2"></i> <span data-i18n="support.faq.title">FAQ</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../support/troubleshoot.html">
-                            <i class="fas fa-tools me-2"></i> <span data-i18n="support.troubleshoot.title">Troubleshooting</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../support/contact.html">
-                            <i class="fas fa-envelope me-2"></i> <span id="navContactMobile">Contact</span>
-                        </a>
-                    </li>
-                    <!-- Auth: My Tickets -->
-                    <li class="nav-item auth-only">
-                        <a class="nav-link" href="../support/tickets.html">
-                            <i class="fas fa-ticket-alt me-2"></i> <span data-i18n="support.tickets.title">My Tickets</span>
-                        </a>
-                    </li>
-                    <li><hr class="dropdown-divider"></li>
-                    <!-- Guest: Sign In -->
-                    <li class="nav-item guest-only">
-                        <a class="nav-link" href="../login.html">
-                            <i class="fas fa-sign-in-alt me-2"></i> <span data-i18n="nav.login">Sign In</span>
-                        </a>
-                    </li>
-                    <!-- Guest: Register -->
-                    <li class="nav-item guest-only">
-                        <a class="nav-link" href="../register.html">
-                            <i class="fas fa-user-plus me-2"></i> <span data-i18n="nav.getStarted">Get Started</span>
-                        </a>
-                    </li>
-                </ul>
-                
-                <div class="d-flex align-items-center gap-3">
-                    <!-- Language Selector Desktop -->
-                    <select class="language-selector d-none d-lg-block" id="languageSelector">
-                        <option value="en">🇬🇧 EN</option>
-                        <option value="ja">🇯🇵 日本語</option>
-                        <option value="zh">🇨🇳 中文</option>
-                        <option value="es">🇪🇸 ES</option>
-                        <option value="fr">🇫🇷 FR</option>
-                        <option value="de">🇩🇪 DE</option>
-                        <option value="ko">🇰🇷 한국어</option>
-                        <option value="ar">🇸🇦 عربي</option>
-                        <option value="pt">🇧🇷 PT</option>
-                    </select>
-                    
-                    <!-- Guest Buttons (PC) -->
-                    <div class="navbar-buttons-guest guest-only d-none d-lg-flex">
-                        <a href="../login.html" class="btn btn-soft-custom">
-                            <span data-i18n="nav.login">Sign In</span>
-                        </a>
-                        <a href="../register.html" class="btn btn-primary-custom">
-                            <span data-i18n="nav.getStarted">Get Started</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- ========== NAVBAR HTML END ========== -->
+    <div id="navbar-container"></div>
 
     <!-- Page Header -->
     <div class="page-header">
         <div class="container">
-            <h1><i class="fas fa-user-plus me-2"></i><span id="pageTitle">Register as Translator</span></h1>
-            <p id="pageSubtitle">Use your language skills to earn income</p>
+            <h1><i class="fas fa-user-plus me-2"></i><span id="pageTitle" data-i18n="translatorsRegister.pageTitle">Register as Translator</span></h1>
+            <p id="pageSubtitle" data-i18n="translatorsRegister.pageSubtitle">Use your language skills to earn income</p>
         </div>
     </div>
 
@@ -274,124 +270,124 @@
                 <div class="step-indicator">
                     <div class="step active" id="step1-indicator">
                         <div class="step-num">1</div>
-                        <span class="step-label" id="stepLabel1">Basic Info</span>
+                        <span class="step-label" id="stepLabel1" data-i18n="translatorsRegister.stepLabel1">Basic Info</span>
                     </div>
                     <div class="step-line"></div>
                     <div class="step" id="step2-indicator">
                         <div class="step-num">2</div>
-                        <span class="step-label" id="stepLabel2">Languages</span>
+                        <span class="step-label" id="stepLabel2" data-i18n="translatorsRegister.stepLabel2">Languages</span>
                     </div>
                     <div class="step-line"></div>
                     <div class="step" id="step3-indicator">
                         <div class="step-num">3</div>
-                        <span class="step-label" id="stepLabel3">Complete</span>
+                        <span class="step-label" id="stepLabel3" data-i18n="translatorsRegister.stepLabel3">Complete</span>
                     </div>
                 </div>
 
                 <!-- Step 1: Basic Info -->
                 <div id="step1" class="form-card">
-                    <h4><i class="fas fa-user me-2 text-accent"></i><span id="formTitle1">Basic Information</span></h4>
-                    
+                    <h4><i class="fas fa-user me-2 text-accent"></i><span id="formTitle1" data-i18n="translatorsRegister.formTitle1">Basic Information</span></h4>
+
                     <div class="mb-3">
-                        <label class="form-label" id="labelDisplayName">Display Name <span class="text-danger">*</span></label>
+                        <label class="form-label" id="labelDisplayName" data-i18n="translatorsRegister.labelDisplayName">Display Name <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="display-name" placeholder="">
-                        <small class="text-secondary" id="hintDisplayName">This name will be shown to authors</small>
+                        <small class="text-secondary" id="hintDisplayName" data-i18n="translatorsRegister.hintDisplayName">This name will be shown to authors</small>
                     </div>
-                    
+
                     <div class="mb-3">
-                        <label class="form-label" id="labelBio">Bio <span class="text-danger">*</span></label>
+                        <label class="form-label" id="labelBio" data-i18n="translatorsRegister.labelBio">Bio <span class="text-danger">*</span></label>
                         <textarea class="form-control" id="bio" rows="4" placeholder=""></textarea>
                     </div>
                     
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label" id="labelYearsExp">Years of Experience</label>
+                            <label class="form-label" id="labelYearsExp" data-i18n="translatorsRegister.labelYearsExp">Years of Experience</label>
                             <input type="number" class="form-control" id="years-experience" min="0" max="50" value="0">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label" id="labelResponseTime">Avg Response Time (hours)</label>
+                            <label class="form-label" id="labelResponseTime" data-i18n="translatorsRegister.labelResponseTime">Avg Response Time (hours)</label>
                             <input type="number" class="form-control" id="response-hours" min="1" max="168" value="24">
                         </div>
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label" id="labelSpecialization">Specializations (select multiple)</label>
+                        <label class="form-label" id="labelSpecialization" data-i18n="translatorsRegister.labelSpecialization">Specializations (select multiple)</label>
                         <div class="row">
                             <div class="col-6 col-md-4">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" value="fiction" id="spec-fiction">
-                                    <label class="form-check-label" for="spec-fiction" id="specFiction">Fiction</label>
+                                    <label class="form-check-label" for="spec-fiction" id="specFiction" data-i18n="translatorsRegister.specFiction">Fiction</label>
                                 </div>
                             </div>
                             <div class="col-6 col-md-4">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" value="manga" id="spec-manga">
-                                    <label class="form-check-label" for="spec-manga" id="specManga">Manga</label>
+                                    <label class="form-check-label" for="spec-manga" id="specManga" data-i18n="translatorsRegister.specManga">Manga</label>
                                 </div>
                             </div>
                             <div class="col-6 col-md-4">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" value="technical" id="spec-technical">
-                                    <label class="form-check-label" for="spec-technical" id="specTechnical">Technical</label>
+                                    <label class="form-check-label" for="spec-technical" id="specTechnical" data-i18n="translatorsRegister.specTechnical">Technical</label>
                                 </div>
                             </div>
                             <div class="col-6 col-md-4">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" value="poetry" id="spec-poetry">
-                                    <label class="form-check-label" for="spec-poetry" id="specPoetry">Poetry</label>
+                                    <label class="form-check-label" for="spec-poetry" id="specPoetry" data-i18n="translatorsRegister.specPoetry">Poetry</label>
                                 </div>
                             </div>
                             <div class="col-6 col-md-4">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" value="business" id="spec-business">
-                                    <label class="form-check-label" for="spec-business" id="specBusiness">Business</label>
+                                    <label class="form-check-label" for="spec-business" id="specBusiness" data-i18n="translatorsRegister.specBusiness">Business</label>
                                 </div>
                             </div>
                             <div class="col-6 col-md-4">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" value="academic" id="spec-academic">
-                                    <label class="form-check-label" for="spec-academic" id="specAcademic">Academic</label>
+                                    <label class="form-check-label" for="spec-academic" id="specAcademic" data-i18n="translatorsRegister.specAcademic">Academic</label>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label" id="labelCertifications">Certifications (optional)</label>
+                        <label class="form-label" id="labelCertifications" data-i18n="translatorsRegister.labelCertifications">Certifications (optional)</label>
                         <input type="text" class="form-control" id="certifications" placeholder="">
                     </div>
                     
                     <div class="mb-4">
-                        <label class="form-label" id="labelPortfolio">Portfolio URL (optional)</label>
+                        <label class="form-label" id="labelPortfolio" data-i18n="translatorsRegister.labelPortfolio">Portfolio URL (optional)</label>
                         <input type="url" class="form-control" id="portfolio-url" placeholder="https://...">
                     </div>
                     
                     <div class="d-flex justify-content-end">
                         <button class="btn btn-custom" onclick="goToStep(2)">
-                            <span id="btnNextLang">Next: Languages</span> <i class="fas fa-arrow-right ms-2"></i>
+                            <span id="btnNextLang" data-i18n="translatorsRegister.btnNextLang">Next: Languages</span> <i class="fas fa-arrow-right ms-2"></i>
                         </button>
                     </div>
                 </div>
 
                 <!-- Step 2: Languages -->
                 <div id="step2" class="form-card" style="display: none;">
-                    <h4><i class="fas fa-language me-2 text-accent"></i><span id="formTitle2">Language Pairs</span></h4>
-                    <p class="text-secondary mb-4" id="langPairHint">Add the language pairs you can translate. At least one is required.</p>
+                    <h4><i class="fas fa-language me-2 text-accent"></i><span id="formTitle2" data-i18n="translatorsRegister.formTitle2">Language Pairs</span></h4>
+                    <p class="text-secondary mb-4" id="langPairHint" data-i18n="translatorsRegister.langPairHint">Add the language pairs you can translate. At least one is required.</p>
                     
                     <div id="language-pairs"></div>
                     
                     <button class="btn btn-soft-custom mt-3" onclick="addLanguagePair()">
-                        <i class="fas fa-plus me-2"></i><span id="btnAddPair">Add Language Pair</span>
+                        <i class="fas fa-plus me-2"></i><span id="btnAddPair" data-i18n="translatorsRegister.btnAddPair">Add Language Pair</span>
                     </button>
                     
                     <hr class="my-4">
                     
                     <div class="d-flex justify-content-between">
                         <button class="btn btn-soft-custom" onclick="goToStep(1)">
-                            <i class="fas fa-arrow-left me-2"></i><span id="btnBack">Back</span>
+                            <i class="fas fa-arrow-left me-2"></i><span id="btnBack" data-i18n="translatorsRegister.btnBack">Back</span>
                         </button>
                         <button class="btn btn-custom" onclick="submitRegistration()">
-                            <i class="fas fa-check me-2"></i><span id="btnComplete">Complete Registration</span>
+                            <i class="fas fa-check me-2"></i><span id="btnComplete" data-i18n="translatorsRegister.btnComplete">Complete Registration</span>
                         </button>
                     </div>
                 </div>
@@ -399,15 +395,15 @@
                 <!-- Step 3: Complete -->
                 <div id="step3" class="form-card text-center" style="display: none;">
                     <i class="fas fa-check-circle success-icon"></i>
-                    <h3 style="font-family: var(--font-heading);" id="successTitle">Registration Complete!</h3>
-                    <p class="text-secondary mb-4" id="successMessage">You can now start working as a translator. Wait for requests from authors.</p>
-                    
+                    <h3 style="font-family: var(--font-heading);" id="successTitle" data-i18n="translatorsRegister.successTitle">Registration Complete!</h3>
+                    <p class="text-secondary mb-4" id="successMessage" data-i18n="translatorsRegister.successMessage">You can now start working as a translator. Wait for requests from authors.</p>
+
                     <div class="d-flex justify-content-center gap-3 flex-wrap">
                         <a href="index.html" class="btn btn-soft-custom">
-                            <i class="fas fa-search me-2"></i><span id="btnViewMarket">View Marketplace</span>
+                            <i class="fas fa-search me-2"></i><span id="btnViewMarket" data-i18n="translatorsRegister.btnViewMarket">View Marketplace</span>
                         </a>
                         <a href="../dashboard.html" class="btn btn-custom">
-                            <i class="fas fa-home me-2"></i><span id="btnGoDashboard">Go to Dashboard</span>
+                            <i class="fas fa-home me-2"></i><span id="btnGoDashboard" data-i18n="translatorsRegister.btnGoDashboard">Go to Dashboard</span>
                         </a>
                     </div>
                 </div>
@@ -417,30 +413,30 @@
                 <!-- Revenue Model -->
                 <div class="revenue-highlight">
                     <div class="percent">20%</div>
-                    <div class="label" id="revenueLabel">of translated work sales become your earnings</div>
+                    <div class="label" id="revenueLabel" data-i18n="translatorsRegister.revenueLabel">of translated work sales become your earnings</div>
                 </div>
                 
                 <!-- Benefits -->
                 <div class="info-card">
-                    <h5><i class="fas fa-star me-2 text-warning"></i><span id="benefitsTitle">Translator Benefits</span></h5>
+                    <h5><i class="fas fa-star me-2 text-warning"></i><span id="benefitsTitle" data-i18n="translatorsRegister.benefitsTitle">Translator Benefits</span></h5>
                     <ul class="benefits-list">
-                        <li><i class="fas fa-check-circle"></i><span id="benefit1">Work at your own pace</span></li>
-                        <li><i class="fas fa-check-circle"></i><span id="benefit2">Earn 20% of translation sales</span></li>
-                        <li><i class="fas fa-check-circle"></i><span id="benefit3">Connect with global authors</span></li>
-                        <li><i class="fas fa-check-circle"></i><span id="benefit4">More income from popular works</span></li>
-                        <li><i class="fas fa-check-circle"></i><span id="benefit5">Build reputation with reviews</span></li>
+                        <li><i class="fas fa-check-circle"></i><span id="benefit1" data-i18n="translatorsRegister.benefit1">Work at your own pace</span></li>
+                        <li><i class="fas fa-check-circle"></i><span id="benefit2" data-i18n="translatorsRegister.benefit2">Earn 20% of translation sales</span></li>
+                        <li><i class="fas fa-check-circle"></i><span id="benefit3" data-i18n="translatorsRegister.benefit3">Connect with global authors</span></li>
+                        <li><i class="fas fa-check-circle"></i><span id="benefit4" data-i18n="translatorsRegister.benefit4">More income from popular works</span></li>
+                        <li><i class="fas fa-check-circle"></i><span id="benefit5" data-i18n="translatorsRegister.benefit5">Build reputation with reviews</span></li>
                     </ul>
                 </div>
                 
                 <!-- Revenue Model Info -->
                 <div class="info-card">
-                    <h5><i class="fas fa-info-circle me-2 text-accent"></i><span id="revenueModelTitle">Revenue Sharing Model</span></h5>
-                    <p class="small text-secondary mb-3" id="revenueModelDesc">When a work sells, revenue is distributed as follows:</p>
+                    <h5><i class="fas fa-info-circle me-2 text-accent"></i><span id="revenueModelTitle" data-i18n="translatorsRegister.revenueModelTitle">Revenue Sharing Model</span></h5>
+                    <p class="small text-secondary mb-3" id="revenueModelDesc" data-i18n="translatorsRegister.revenueModelDesc">When a work sells, revenue is distributed as follows:</p>
                     <table class="table table-sm mb-0">
-                        <tr><td id="revAuthor">Author</td><td class="text-end"><strong>40-70%</strong></td></tr>
-                        <tr><td id="revTranslator">Translator</td><td class="text-end text-success"><strong>20%</strong></td></tr>
-                        <tr><td id="revEditor">Editor</td><td class="text-end">10%</td></tr>
-                        <tr><td id="revPlatform">Platform</td><td class="text-end">30%</td></tr>
+                        <tr><td id="revAuthor" data-i18n="translatorsRegister.revAuthor">Author</td><td class="text-end"><strong>40-70%</strong></td></tr>
+                        <tr><td id="revTranslator" data-i18n="translatorsRegister.revTranslator">Translator</td><td class="text-end text-success"><strong>20%</strong></td></tr>
+                        <tr><td id="revEditor" data-i18n="translatorsRegister.revEditor">Editor</td><td class="text-end">10%</td></tr>
+                        <tr><td id="revPlatform" data-i18n="translatorsRegister.revPlatform">Platform</td><td class="text-end">30%</td></tr>
                     </table>
                 </div>
             </div>
@@ -448,20 +444,11 @@
     </div>
 
     <!-- Footer -->
-    <footer class="footer-custom">
-        <div class="container">
-            <div class="d-flex flex-wrap justify-content-between align-items-center">
-                <p class="small mb-0">&copy; 2024 Publisher. All rights reserved.</p>
-                <div class="d-flex gap-3">
-                    <a href="../support/faq.html" class="text-secondary" id="footerHelp">Help</a>
-                    <a href="../terms.html" class="text-secondary" id="footerTerms">Terms</a>
-                    <a href="../privacy.html" class="text-secondary" id="footerPrivacy">Privacy</a>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../js/i18n.js"></script>
+    <script src="../../js/navbar.js"></script>
     <script src="../../js/translations.js"></script>
     <script src="../../js/language-switcher.js"></script>
 
@@ -469,8 +456,7 @@
     <script>
         // Navbar UI text (9 languages) - renamed to avoid conflict with page uiText
         const navUiText = {
-            translationTools: {
-                en: 'Translation Tools', ja: '翻訳ツール', zh: '翻译工具',
+            translationTools: { en: 'Tools', ja: '翻訳ツール', zh: '翻译工具',
                 es: 'Herramientas de traducción', fr: 'Outils de traduction', de: 'Übersetzungstools',
                 ko: '번역 도구', ar: 'أدوات الترجمة', pt: 'Ferramentas de tradução'
             },
@@ -478,6 +464,11 @@
                 en: 'Manga Translator', ja: 'マンガ翻訳', zh: '漫画翻译',
                 es: 'Traductor de Manga', fr: 'Traducteur de Manga', de: 'Manga-Übersetzer',
                 ko: '만화 번역기', ar: 'مترجم المانجا', pt: 'Tradutor de Mangá'
+            },
+            novelTranslator: {
+                en: 'Novel Translator', ja: '小説翻訳', zh: '小说翻译',
+                es: 'Traductor de Novela', fr: 'Traducteur de Roman', de: 'Roman-Übersetzer',
+                ko: '소설 번역기', ar: 'مترجم الروايات', pt: 'Tradutor de Romance'
             },
             translationStatus: {
                 en: 'Translation Status', ja: '翻訳状況', zh: '翻译状态',
@@ -536,23 +527,9 @@
         }
 
         function updateNavUIText() {
-            const menuDashboard = document.getElementById('menuDashboard');
-            const menuMyWorks = document.getElementById('menuMyWorks');
-            const menuAccountSettings = document.getElementById('menuAccountSettings');
-            const menuLogout = document.getElementById('menuLogout');
-            if (menuDashboard) menuDashboard.textContent = navGetL(navUiText.dashboard);
-            if (menuMyWorks) menuMyWorks.textContent = navGetL(navUiText.myWorks);
-            if (menuAccountSettings) menuAccountSettings.textContent = navGetL(navUiText.accountSettings);
-            if (menuLogout) menuLogout.textContent = navGetL(navUiText.logout);
 
             const els = {
-                navLibraryPC: navUiText.library, navDashboardPC: navUiText.dashboard,
-                navTranslationToolsPC: navUiText.translationTools, navMangaTranslatorPC: navUiText.mangaTranslator,
-                navTranslationStatusPC: navUiText.translationStatus, navFindTranslatorsPC: navUiText.findTranslators,
-                navContactPC: navUiText.contact, navLibraryMobile: navUiText.library, navDashboardMobile: navUiText.dashboard,
-                navTranslationToolsMobile: navUiText.translationTools, navMangaTranslatorMobile: navUiText.mangaTranslator,
-                navTranslationStatusMobile: navUiText.translationStatus, navFindTranslatorsMobile: navUiText.findTranslators,
-                navContactMobile: navUiText.contact
+
             };
             Object.keys(els).forEach(id => {
                 const el = document.getElementById(id);
@@ -599,11 +576,9 @@
 
             if (navbarCollapse) {
                 navbarCollapse.addEventListener('show.bs.collapse', function() {
-                    document.body.classList.add('menu-open');
                     if (navbarOverlay) navbarOverlay.classList.add('show');
                 });
                 navbarCollapse.addEventListener('hide.bs.collapse', function() {
-                    document.body.classList.remove('menu-open');
                     if (navbarOverlay) navbarOverlay.classList.remove('show');
                 });
             }
@@ -685,7 +660,12 @@
             alertAtLeastOnePair: { en: 'Please add at least one language pair', ja: '最低1つの言語ペアを設定してください', zh: '请至少添加一个语言对', es: 'Por favor agregue al menos un par de idiomas', fr: 'Veuillez ajouter au moins une paire de langues', de: 'Bitte fügen Sie mindestens ein Sprachpaar hinzu', ko: '최소 1개의 언어 쌍을 추가해주세요', ar: 'يرجى إضافة زوج لغات واحد على الأقل', pt: 'Por favor adicione pelo menos um par de idiomas' },
             alertRegFailed: { en: 'Registration failed', ja: '登録に失敗しました', zh: '注册失败', es: 'Registro fallido', fr: "L'inscription a échoué", de: 'Registrierung fehlgeschlagen', ko: '등록 실패', ar: 'فشل التسجيل', pt: 'Registro falhou' }
         };
-function updateAllText() {
+
+        function getCurrentLang() { return localStorage.getItem('preferredLanguage') || 'en'; }
+        function getL(obj) { if (!obj) return ''; const l = getCurrentLang(); return obj[l] || obj['en'] || ''; }
+
+        function updateAllText() {
+            if (typeof i18n !== 'undefined') i18n.applyToDOM();
             const l = getCurrentLang();
             document.title = getL(uiText.pageTitle) + ' - Publisher';
             document.getElementById('pageTitle').textContent = getL(uiText.pageTitle);
@@ -751,7 +731,6 @@ function updateAllText() {
                 if (nativeLabel) nativeLabel.textContent = getL(uiText.native);
             });
         }
-
 
         function goToStep(step) {
             if (step === 2 && currentStep === 1) {
@@ -907,8 +886,13 @@ function updateAllText() {
             updateRemoveButtons();
             updateAllText();
         });
+
+        if (typeof i18n !== 'undefined') {
+            i18n.onLanguageChange(function() {
+                if (typeof i18n !== 'undefined') i18n.applyToDOM();
+                updateAllText();
+            });
+        }
     </script>
-    <script src="../../js/header-notification.js"></script>
-    <script src="../../js/navbar.js"></script>
 </body>
 </html>
