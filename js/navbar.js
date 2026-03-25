@@ -175,6 +175,10 @@ var _langOptions = [
 // ========== Core functions ==========
 
 function getCurrentLanguage() {
+    // Check i18n engine first, then localStorage
+    if (typeof i18n !== 'undefined' && i18n.getCurrentLanguage) {
+        return i18n.getCurrentLanguage();
+    }
     return localStorage.getItem('preferredLanguage') || 'en';
 }
 var getCurrentLang = getCurrentLanguage;
@@ -744,13 +748,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 8. Listen for language change events from language-switcher.js
+    // 8. Listen for language change events
     document.addEventListener('languageChanged', function() {
         updateNavText();
     });
 
+    // 8.5. Register with i18n engine for reliable language sync
+    if (typeof i18n !== 'undefined' && i18n.onLanguageChange) {
+        i18n.onLanguageChange(function() {
+            updateNavText();
+        });
+    }
+
     // 9. Initialize unread message badge
     updateMessageBadge();
+
+    // 10. Delayed navbar text update (ensures i18n has finished loading)
+    setTimeout(function() {
+        updateNavText();
+    }, 500);
 });
 
 // ========== Message Badge ==========

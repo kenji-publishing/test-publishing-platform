@@ -43,7 +43,9 @@
     // ========== 内部状態 ==========
 
     var _translations = {};  // { 'en': { browse: { pageTitle: 'Browse Works' } }, 'ja': {...} }
-    var _currentLang = DEFAULT_LANGUAGE;
+    // Set current language immediately from localStorage (before DOMContentLoaded)
+    var _savedLang = (typeof localStorage !== 'undefined') ? localStorage.getItem(STORAGE_KEY) : null;
+    var _currentLang = (_savedLang && SUPPORTED_LANGUAGES[_savedLang]) ? _savedLang : DEFAULT_LANGUAGE;
     var _loaded = {};  // loaded language codes
     var _listeners = [];  // language change callbacks
     var _basePath = '';  // path to js/lang/ directory
