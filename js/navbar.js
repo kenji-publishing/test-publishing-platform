@@ -24,137 +24,137 @@ var navText = {
     browse: {
         en: 'Browse', ja: '作品を探す', zh: '浏览',
         es: 'Explorar', fr: 'Parcourir', de: 'Durchsuchen',
-        ko: '둘러보기', ar: 'تصفح', pt: 'Explorar'
+        ko: '둘러보기', ar: 'تصفح', pt: 'Explorar', it: 'Esplora'
     },
     library: {
         en: 'Library', ja: 'ライブラリ', zh: '书库',
         es: 'Biblioteca', fr: 'Biblioth\u00e8que', de: 'Bibliothek',
-        ko: '라이브러리', ar: 'المكتبة', pt: 'Biblioteca'
+        ko: '라이브러리', ar: 'المكتبة', pt: 'Biblioteca', it: 'Libreria'
     },
     dashboard: {
         en: 'Dashboard', ja: 'ダッシュボード', zh: '控制台',
         es: 'Panel', fr: 'Tableau de bord', de: 'Dashboard',
-        ko: '대시보드', ar: 'لوحة التحكم', pt: 'Painel'
+        ko: '대시보드', ar: 'لوحة التحكم', pt: 'Painel', it: 'Pannello'
     },
     tools: {
         en: 'Tools', ja: 'ツール', zh: '工具',
         es: 'Herramientas', fr: 'Outils', de: 'Werkzeuge',
-        ko: '도구', ar: 'أدوات', pt: 'Ferramentas'
+        ko: '도구', ar: 'أدوات', pt: 'Ferramentas', it: 'Strumenti'
     },
     uploadWork: {
         en: 'Upload Work', ja: '作品アップロード', zh: '上传作品',
         es: 'Subir obra', fr: 'T\u00e9l\u00e9charger', de: 'Werk hochladen',
-        ko: '작품 업로드', ar: 'رفع عمل', pt: 'Enviar obra'
+        ko: '작품 업로드', ar: 'رفع عمل', pt: 'Enviar obra', it: 'Carica opera'
     },
     translationTools: {
         en: 'Translation Tools', ja: '翻訳ツール', zh: '翻译工具',
         es: 'Herramientas de traducci\u00f3n', fr: 'Outils de traduction', de: '\u00dcbersetzungstools',
-        ko: '번역 도구', ar: 'أدوات الترجمة', pt: 'Ferramentas de tradu\u00e7\u00e3o'
+        ko: '번역 도구', ar: 'أدوات الترجمة', pt: 'Ferramentas de tradu\u00e7\u00e3o', it: 'Strumenti di traduzione'
     },
     mangaTranslator: {
         en: 'Manga Translator', ja: 'マンガ翻訳', zh: '漫画翻译',
         es: 'Traductor de Manga', fr: 'Traducteur de Manga', de: 'Manga-\u00dcbersetzer',
-        ko: '만화 번역기', ar: 'مترجم المانجا', pt: 'Tradutor de Mang\u00e1'
+        ko: '만화 번역기', ar: 'مترجم المانجا', pt: 'Tradutor de Mang\u00e1', it: 'Traduttore Manga'
     },
     novelTranslator: {
         en: 'Novel Translator', ja: '小説翻訳', zh: '小说翻译',
         es: 'Traductor de Novela', fr: 'Traducteur de Roman', de: 'Roman-\u00dcbersetzer',
-        ko: '소설 번역기', ar: 'مترجم الروايات', pt: 'Tradutor de Romance'
+        ko: '소설 번역기', ar: 'مترجم الروايات', pt: 'Tradutor de Romance', it: 'Traduttore Romanzi'
     },
     translationStatus: {
         en: 'Translation Status', ja: '翻訳状況', zh: '翻译状态',
         es: 'Estado de traducci\u00f3n', fr: 'Statut de traduction', de: '\u00dcbersetzungsstatus',
-        ko: '번역 상태', ar: 'حالة الترجمة', pt: 'Status da tradu\u00e7\u00e3o'
+        ko: '번역 상태', ar: 'حالة الترجمة', pt: 'Status da tradu\u00e7\u00e3o', it: 'Stato traduzione'
     },
     findTranslators: {
         en: 'Find Translators', ja: '翻訳者を探す', zh: '寻找翻译',
         es: 'Buscar traductores', fr: 'Trouver des traducteurs', de: '\u00dcbersetzer finden',
-        ko: '번역가 찾기', ar: 'البحث عن مترجمين', pt: 'Encontrar tradutores'
+        ko: '번역가 찾기', ar: 'البحث عن مترجمين', pt: 'Encontrar tradutores', it: 'Trova traduttori'
     },
     findEditors: {
         en: 'Find Editors', ja: '編集者を探す', zh: '寻找编辑',
         es: 'Buscar editores', fr: 'Trouver des \u00e9diteurs', de: 'Editoren finden',
-        ko: '편집자 찾기', ar: 'البحث عن محررين', pt: 'Encontrar editores'
+        ko: '편집자 찾기', ar: 'البحث عن محررين', pt: 'Encontrar editores', it: 'Trova redattori'
     },
     messages: {
         en: 'Messages', ja: 'メッセージ', zh: '消息',
         es: 'Mensajes', fr: 'Messages', de: 'Nachrichten',
-        ko: '메시지', ar: 'الرسائل', pt: 'Mensagens'
+        ko: '메시지', ar: 'الرسائل', pt: 'Mensagens', it: 'Messaggi'
     },
     support: {
         en: 'Support', ja: 'サポート', zh: '支持',
         es: 'Soporte', fr: 'Support', de: 'Support',
-        ko: '지원', ar: 'الدعم', pt: 'Suporte'
+        ko: '지원', ar: 'الدعم', pt: 'Suporte', it: 'Supporto'
     },
     faq: {
         en: 'FAQ', ja: 'よくある質問', zh: '常见问题',
         es: 'Preguntas frecuentes', fr: 'FAQ', de: 'FAQ',
-        ko: '자주 묻는 질문', ar: 'الأسئلة الشائعة', pt: 'Perguntas frequentes'
+        ko: '자주 묻는 질문', ar: 'الأسئلة الشائعة', pt: 'Perguntas frequentes', it: 'FAQ'
     },
     troubleshooting: {
         en: 'Troubleshooting', ja: 'トラブルシューティング', zh: '故障排除',
         es: 'Soluci\u00f3n de problemas', fr: 'D\u00e9pannage', de: 'Fehlerbehebung',
-        ko: '문제 해결', ar: 'استكشاف الأخطاء', pt: 'Solu\u00e7\u00e3o de problemas'
+        ko: '문제 해결', ar: 'استكشاف الأخطاء', pt: 'Solu\u00e7\u00e3o de problemas', it: 'Risoluzione problemi'
     },
     contact: {
         en: 'Contact', ja: 'お問い合わせ', zh: '联系我们',
         es: 'Contacto', fr: 'Contact', de: 'Kontakt',
-        ko: '문의', ar: 'اتصل بنا', pt: 'Contato'
+        ko: '문의', ar: 'اتصل بنا', pt: 'Contato', it: 'Contatti'
     },
     signIn: {
         en: 'Sign In', ja: 'ログイン', zh: '登录',
         es: 'Iniciar sesi\u00f3n', fr: 'Se connecter', de: 'Anmelden',
-        ko: '로그인', ar: 'تسجيل الدخول', pt: 'Entrar'
+        ko: '로그인', ar: 'تسجيل الدخول', pt: 'Entrar', it: 'Accedi'
     },
     getStarted: {
         en: 'Get Started', ja: '始める', zh: '开始',
         es: 'Comenzar', fr: 'Commencer', de: 'Loslegen',
-        ko: '시작하기', ar: 'ابدأ', pt: 'Come\u00e7ar'
+        ko: '시작하기', ar: 'ابدأ', pt: 'Come\u00e7ar', it: 'Inizia'
     },
     profile: {
         en: 'Profile', ja: 'プロフィール', zh: '个人资料',
         es: 'Perfil', fr: 'Profil', de: 'Profil',
-        ko: '프로필', ar: 'الملف الشخصي', pt: 'Perfil'
+        ko: '프로필', ar: 'الملف الشخصي', pt: 'Perfil', it: 'Profilo'
     },
     myWorks: {
         en: 'My Works', ja: 'マイ作品', zh: '我的作品',
         es: 'Mis obras', fr: 'Mes \u0153uvres', de: 'Meine Werke',
-        ko: '내 작품', ar: 'أعمالي', pt: 'Minhas obras'
+        ko: '내 작품', ar: 'أعمالي', pt: 'Minhas obras', it: 'Le mie opere'
     },
     accountSettings: {
         en: 'Account Settings', ja: 'アカウント設定', zh: '账户设置',
         es: 'Configuraci\u00f3n de cuenta', fr: 'Param\u00e8tres du compte', de: 'Kontoeinstellungen',
-        ko: '계정 설정', ar: 'إعدادات الحساب', pt: 'Configura\u00e7\u00f5es da conta'
+        ko: '계정 설정', ar: 'إعدادات الحساب', pt: 'Configura\u00e7\u00f5es da conta', it: 'Impostazioni account'
     },
     logout: {
         en: 'Log Out', ja: 'ログアウト', zh: '退出登录',
         es: 'Cerrar sesi\u00f3n', fr: 'D\u00e9connexion', de: 'Abmelden',
-        ko: '로그아웃', ar: 'تسجيل الخروج', pt: 'Sair'
+        ko: '로그아웃', ar: 'تسجيل الخروج', pt: 'Sair', it: 'Esci'
     },
     logOutConfirm: {
         en: 'Are you sure you want to log out?', ja: 'ログアウトしますか？', zh: '确定要退出登录吗？',
         es: '\u00bfEst\u00e1s seguro de que quieres cerrar sesi\u00f3n?', fr: '\u00cates-vous s\u00fbr de vouloir vous d\u00e9connecter?', de: 'Sind Sie sicher, dass Sie sich abmelden m\u00f6chten?',
-        ko: '로그아웃 하시겠습니까?', ar: 'هل أنت متأكد أنك تريد تسجيل الخروج؟', pt: 'Tem certeza que deseja sair?'
+        ko: '로그아웃 하시겠습니까?', ar: 'هل أنت متأكد أنك تريد تسجيل الخروج؟', pt: 'Tem certeza que deseja sair?', it: 'Sei sicuro di voler uscire?'
     },
     help: {
         en: 'Help', ja: 'ヘルプ', zh: '帮助',
         es: 'Ayuda', fr: 'Aide', de: 'Hilfe',
-        ko: '도움말', ar: 'مساعدة', pt: 'Ajuda'
+        ko: '도움말', ar: 'مساعدة', pt: 'Ajuda', it: 'Aiuto'
     },
     terms: {
         en: 'Terms', ja: '利用規約', zh: '条款',
         es: 'T\u00e9rminos', fr: 'Conditions', de: 'Nutzungsbedingungen',
-        ko: '이용약관', ar: 'الشروط', pt: 'Termos'
+        ko: '이용약관', ar: 'الشروط', pt: 'Termos', it: 'Termini'
     },
     privacy: {
         en: 'Privacy', ja: 'プライバシー', zh: '隐私',
         es: 'Privacidad', fr: 'Confidentialit\u00e9', de: 'Datenschutz',
-        ko: '개인정보', ar: 'الخصوصية', pt: 'Privacidade'
+        ko: '개인정보', ar: 'الخصوصية', pt: 'Privacidade', it: 'Privacy'
     },
     allRights: {
         en: 'All rights reserved.', ja: '全著作権所有。', zh: '保留所有权利。',
         es: 'Todos los derechos reservados.', fr: 'Tous droits r\u00e9serv\u00e9s.', de: 'Alle Rechte vorbehalten.',
-        ko: '모든 권리 보유.', ar: 'جميع الحقوق محفوظة.', pt: 'Todos os direitos reservados.'
+        ko: '모든 권리 보유.', ar: 'جميع الحقوق محفوظة.', pt: 'Todos os direitos reservados.', it: 'Tutti i diritti riservati.'
     }
 };
 
@@ -168,7 +168,8 @@ var _langOptions = [
     { value: 'de', label: '\ud83c\udde9\ud83c\uddea DE' },
     { value: 'ko', label: '\ud83c\uddf0\ud83c\uddf7 \ud55c\uad6d\uc5b4' },
     { value: 'ar', label: '\ud83c\uddf8\ud83c\udde6 \u0639\u0631\u0628\u064a' },
-    { value: 'pt', label: '\ud83c\udde7\ud83c\uddf7 PT' }
+    { value: 'pt', label: '\ud83c\udde7\ud83c\uddf7 PT' },
+    { value: 'it', label: '🇮🇹 IT' }
 ];
 
 // ========== Core functions ==========

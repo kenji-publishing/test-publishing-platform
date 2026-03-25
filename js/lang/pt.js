@@ -38,10 +38,10 @@ window.translations.pt = {
     home: {
         hero: {
             title: 'Descubra Histórias de Todo o Mundo',
-            subtitle: 'Leia e publique histórias em 9 idiomas.',
+            subtitle: 'Leia e publique histórias em 10 idiomas.',
             startReading: 'Começar a Ler',
             startWriting: 'Começar a Escrever',
-            availableIn: 'Disponível em 9 idiomas'
+            availableIn: 'Disponível em 10 idiomas'
         },
         featured: {
             title: 'Obras em Destaque',
@@ -55,7 +55,7 @@ window.translations.pt = {
             },
             step2: {
                 title: 'Tradução IA',
-                desc: 'IA traduz para 9 idiomas.'
+                desc: 'IA traduz para 10 idiomas.'
             },
             step3: {
                 title: 'Ganhe Receita',

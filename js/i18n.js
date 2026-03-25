@@ -33,7 +33,8 @@
         de: { name: 'Deutsch', flag: '🇩🇪', rtl: false },
         ko: { name: '한국어', flag: '🇰🇷', rtl: false },
         ar: { name: 'عربي', flag: '🇸🇦', rtl: true },
-        pt: { name: 'Português', flag: '🇧🇷', rtl: false }
+        pt: { name: 'Português', flag: '🇧🇷', rtl: false },
+        it: { name: 'Italiano', flag: '🇮🇹', rtl: false }
     };
 
     var DEFAULT_LANGUAGE = 'en';

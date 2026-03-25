@@ -38,10 +38,10 @@ window.translations.ko = {
     home: {
         hero: {
             title: '전 세계의 이야기를 발견하세요',
-            subtitle: '9개 언어로 이야기를 읽고 출판하세요.',
+            subtitle: '10개 언어로 이야기를 읽고 출판하세요.',
             startReading: '읽기 시작',
             startWriting: '쓰기 시작',
-            availableIn: '9개 언어 지원'
+            availableIn: '10개 언어 지원'
         },
         featured: {
             title: '주목 작품',
@@ -55,7 +55,7 @@ window.translations.ko = {
             },
             step2: {
                 title: 'AI 번역',
-                desc: 'AI가 9개 언어로 번역합니다.'
+                desc: 'AI가 10개 언어로 번역합니다.'
             },
             step3: {
                 title: '수익 창출',

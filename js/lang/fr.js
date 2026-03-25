@@ -38,10 +38,10 @@ window.translations.fr = {
     home: {
         hero: {
             title: 'Découvrez des Histoires du Monde Entier',
-            subtitle: 'Lisez et publiez des histoires en 9 langues.',
+            subtitle: 'Lisez et publiez des histoires en 10 langues.',
             startReading: 'Commencer à Lire',
             startWriting: 'Commencer à Écrire',
-            availableIn: 'Disponible en 9 langues'
+            availableIn: 'Disponible en 10 langues'
         },
         featured: {
             title: 'Œuvres en Vedette',
@@ -55,7 +55,7 @@ window.translations.fr = {
             },
             step2: {
                 title: 'Traduction IA',
-                desc: 'L\'IA traduit en 9 langues.'
+                desc: 'L\'IA traduit en 10 langues.'
             },
             step3: {
                 title: 'Gagnez des Revenus',

@@ -38,10 +38,10 @@ window.translations.ja = {
     home: {
         hero: {
             title: '世界中の物語を発見しよう',
-            subtitle: '9言語で物語を読んで出版',
+            subtitle: '10言語で物語を読んで出版',
             startReading: '読み始める',
             startWriting: '書き始める',
-            availableIn: '9言語に対応'
+            availableIn: '10言語に対応'
         },
         featured: {
             title: '注目の作品',
@@ -55,7 +55,7 @@ window.translations.ja = {
             },
             step2: {
                 title: 'AI翻訳',
-                desc: '9言語に即座翻訳'
+                desc: '10言語に即座翻訳'
             },
             step3: {
                 title: '収益を得る',

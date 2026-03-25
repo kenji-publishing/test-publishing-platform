@@ -38,10 +38,10 @@ window.translations.ar = {
     home: {
         hero: {
             title: 'اكتشف قصصاً من جميع أنحاء العالم',
-            subtitle: 'اقرأ وانشر القصص بـ 9 لغات.',
+            subtitle: 'اقرأ وانشر القصص بـ 10 لغات.',
             startReading: 'ابدأ القراءة',
             startWriting: 'ابدأ الكتابة',
-            availableIn: 'متاح بـ 9 لغات'
+            availableIn: 'متاح بـ 10 لغات'
         },
         featured: {
             title: 'أعمال مميزة',
@@ -55,7 +55,7 @@ window.translations.ar = {
             },
             step2: {
                 title: 'ترجمة الذكاء الاصطناعي',
-                desc: 'الذكاء الاصطناعي يترجم إلى 9 لغات.'
+                desc: 'الذكاء الاصطناعي يترجم إلى 10 لغات.'
             },
             step3: {
                 title: 'اكسب الإيرادات',

@@ -38,10 +38,10 @@ window.translations.en = {
     home: {
         hero: {
             title: 'Discover Stories from Around the World',
-            subtitle: 'Read and publish stories in 9 languages.',
+            subtitle: 'Read and publish stories in 10 languages.',
             startReading: 'Start Reading',
             startWriting: 'Start Writing',
-            availableIn: 'Available in 9 languages'
+            availableIn: 'Available in 10 languages'
         },
         featured: {
             title: 'Featured Works',
@@ -55,7 +55,7 @@ window.translations.en = {
             },
             step2: {
                 title: 'AI Translation',
-                desc: 'AI translates to 9 languages.'
+                desc: 'AI translates to 10 languages.'
             },
             step3: {
                 title: 'Earn Revenue',

@@ -38,10 +38,10 @@ window.translations.de = {
     home: {
         hero: {
             title: 'Entdecken Sie Geschichten aus aller Welt',
-            subtitle: 'Lesen und veröffentlichen Sie Geschichten in 9 Sprachen.',
+            subtitle: 'Lesen und veröffentlichen Sie Geschichten in 10 Sprachen.',
             startReading: 'Jetzt Lesen',
             startWriting: 'Jetzt Schreiben',
-            availableIn: 'Verfügbar in 9 Sprachen'
+            availableIn: 'Verfügbar in 10 Sprachen'
         },
         featured: {
             title: 'Ausgewählte Werke',
@@ -55,7 +55,7 @@ window.translations.de = {
             },
             step2: {
                 title: 'KI-Übersetzung',
-                desc: 'KI übersetzt in 9 Sprachen.'
+                desc: 'KI übersetzt in 10 Sprachen.'
             },
             step3: {
                 title: 'Einnahmen Erzielen',
