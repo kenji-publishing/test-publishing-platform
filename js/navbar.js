@@ -382,10 +382,12 @@ function renderNavbar(options) {
     html += '<li><a class="dropdown-item" href="' + p('support/troubleshoot.html') + '"><i class="fas fa-tools me-2"></i><span id="navTroubleshootPC">' + getL(navText.troubleshooting) + '</span></a></li>';
     html += '</ul></li>';
 
-    // Messages (auth)
+    // Messages (auth) with unread badge
     html += '<li class="nav-item auth-only">';
-    html += '<a class="nav-link' + ac('messages') + '" href="' + p('messages.html') + '">';
-    html += '<i class="fas fa-envelope me-1"></i> <span id="navMessagesPC">' + getL(navText.messages) + '</span></a></li>';
+    html += '<a class="nav-link' + ac('messages') + ' position-relative" href="' + p('messages.html') + '">';
+    html += '<i class="fas fa-envelope me-1"></i> <span id="navMessagesPC">' + getL(navText.messages) + '</span>';
+    html += '<span class="msg-badge" id="msgBadgePC" style="display:none;"></span>';
+    html += '</a></li>';
 
     html += '</ul>';
 
@@ -448,10 +450,12 @@ function renderNavbar(options) {
 
     html += '<li><hr class="dropdown-divider"></li>';
 
-    // Messages (auth, mobile)
+    // Messages (auth, mobile) with unread badge
     html += '<li class="nav-item auth-only">';
-    html += '<a class="nav-link' + ac('messages') + '" href="' + p('messages.html') + '">';
-    html += '<i class="fas fa-envelope me-2"></i> <span id="navMessagesMobile">' + getL(navText.messages) + '</span></a></li>';
+    html += '<a class="nav-link' + ac('messages') + ' position-relative" href="' + p('messages.html') + '">';
+    html += '<i class="fas fa-envelope me-2"></i> <span id="navMessagesMobile">' + getL(navText.messages) + '</span>';
+    html += '<span class="msg-badge" id="msgBadgeMobile" style="display:none;"></span>';
+    html += '</a></li>';
 
     html += '</ul>';
 
@@ -743,4 +747,54 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('languageChanged', function() {
         updateNavText();
     });
+
+    // 9. Initialize unread message badge
+    updateMessageBadge();
 });
+
+// ========== Message Badge ==========
+
+/**
+ * 未読メッセージ数をバッジに表示
+ * localStorageから未読数を取得、またはAPIから取得
+ */
+function updateMessageBadge() {
+    var count = _getUnreadCount();
+    var badges = document.querySelectorAll('.msg-badge');
+    for (var i = 0; i < badges.length; i++) {
+        if (count > 0) {
+            badges[i].textContent = count > 99 ? '99+' : count;
+            badges[i].style.display = 'inline-flex';
+        } else {
+            badges[i].style.display = 'none';
+        }
+    }
+}
+
+function _getUnreadCount() {
+    // Method 1: Check API (when backend is connected)
+    // For now, use localStorage-based count
+
+    // Count unread conversations
+    var convCount = 0;
+    try {
+        var conversations = JSON.parse(localStorage.getItem('msg_conversations') || '[]');
+        for (var i = 0; i < conversations.length; i++) {
+            if (conversations[i].unread) convCount++;
+        }
+    } catch(e) {}
+
+    // Count unread notifications
+    var notifCount = 0;
+    try {
+        var notifs = JSON.parse(localStorage.getItem('msg_notifications') || '[]');
+        for (var j = 0; j < notifs.length; j++) {
+            if (!notifs[j].is_read) notifCount++;
+        }
+    } catch(e) {}
+
+    return convCount + notifCount;
+}
+
+// Expose globally so pages can trigger updates
+window.updateMessageBadge = updateMessageBadge;
