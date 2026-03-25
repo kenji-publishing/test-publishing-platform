@@ -23,7 +23,8 @@ const availableLanguages = {
     de: { name: 'German', nativeName: 'Deutsch', flag: '🇩🇪', rtl: false },
     ko: { name: 'Korean', nativeName: '한국어', flag: '🇰🇷', rtl: false },
     ar: { name: 'Arabic', nativeName: 'العربية', flag: '🇸🇦', rtl: true },
-    pt: { name: 'Portuguese', nativeName: 'Português', flag: '🇧🇷', rtl: false }
+    pt: { name: 'Portuguese', nativeName: 'Português', flag: '🇧🇷', rtl: false },
+    it: { name: 'Italian', nativeName: 'Italiano', flag: '🇮🇹', rtl: false }
 };
 
 // ============================================
