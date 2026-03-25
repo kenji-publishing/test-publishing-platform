@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Editors - Publisher</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="../../css/variables.css" rel="stylesheet">
+    <link href="../../css/style-new.css" rel="stylesheet">
+    <link href="../../css/components.css" rel="stylesheet">
+    <link href="../../css/mobile-fixes.css" rel="stylesheet">
+    <link href="../../css/navbar.css" rel="stylesheet">
+
+    <style>
+        /* ========== Mobile Language Selector ========== */
+        .navbar-lang-selector {
+            display: flex;
+            align-items: center;
+            margin-right: 0.5rem;
+        }
+
+        @media (max-width: 991.98px) {
+            .navbar-lang-selector {
+                order: 1;
+            }
+            .navbar-toggler {
+                order: 2;
+            }
+        }
+
+        /* ========== PC Navbar - 横並び維持 ========== */
+        @media (min-width: 992px) {
+            .navbar-nav {
+                flex-wrap: nowrap !important;
+                flex-direction: row !important;
+            }
+            .navbar-nav .nav-item {
+                white-space: nowrap !important;
+            }
+            .navbar-nav .nav-link {
+                white-space: nowrap !important;
+                padding: 0.5rem 0.6rem !important;
+                font-size: 0.9rem;
+            }
+
+            .dropdown-menu {
+                white-space: nowrap;
+            }
+            .navbar-buttons-guest {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                gap: 0.5rem;
+            }
+            .navbar-buttons-guest .btn {
+                white-space: nowrap !important;
+                flex-shrink: 0;
+            }
+        }
+
+        /* ========== Auth Visibility Control ========== */
+        .auth-only {
+            display: none !important;
+        }
+        .guest-only {
+            display: block;
+        }
+        body.logged-in .auth-only {
+            display: block !important;
+        }
+        body.logged-in .auth-only.nav-item {
+            display: list-item !important;
+        }
+        body.logged-in .auth-only.dropdown {
+            display: block !important;
+        }
+        body.logged-in .guest-only {
+            display: none !important;
+        }
+        @media (min-width: 992px) {
+            body.logged-in .navbar-buttons-guest {
+                display: none !important;
+            }
+        }
+
+        /* ========== User Dropdown Menu ========== */
+        .user-dropdown {
+            position: relative;
+        }
+        .user-dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: transparent;
+            border: 1px solid var(--color-border);
+            border-radius: 25px;
+            padding: 0.4rem 0.75rem;
+            cursor: pointer;
+            color: var(--color-text);
+            transition: all 0.2s;
+        }
+        .user-dropdown-toggle:hover {
+            border-color: var(--color-accent);
+            background: rgba(139, 115, 85, 0.05);
+        }
+        .user-dropdown-toggle i:first-child {
+            font-size: 1.25rem;
+            color: var(--color-accent);
+        }
+        .user-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-chevron {
+            font-size: 0.7rem;
+            color: var(--color-text-secondary);
+            transition: transform 0.2s;
+        }
+        .user-dropdown.open .user-chevron {
+            transform: rotate(180deg);
+        }
+        .user-menu {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            right: 0;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            min-width: 240px;
+            z-index: 1001;
+            display: none;
+            overflow: hidden;
+        }
+        .user-menu.show {
+            display: block;
+        }
+        .user-menu-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--color-bg-main);
+        }
+        .user-avatar {
+            font-size: 2.5rem;
+            color: var(--color-accent);
+        }
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .user-display-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-email {
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .user-menu-divider {
+            height: 1px;
+            background: var(--color-border);
+        }
+        .user-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--color-text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+        .user-menu-item:hover {
+            background: var(--color-bg-hover);
+            color: var(--color-accent);
+        }
+        .user-menu-item i {
+            width: 20px;
+            text-align: center;
+            color: var(--color-text-secondary);
+        }
+        .user-menu-item:hover i {
+            color: var(--color-accent);
+        }
+        .logout-btn {
+            color: var(--color-error);
+        }
+        .logout-btn i {
+            color: var(--color-error);
+        }
+        .logout-btn:hover {
+            background: rgba(199, 93, 93, 0.1);
+            color: var(--color-error);
+        }
+
+        /* ========== Navbar Overlay ========== */
+
+        /* ========== Mobile Adjustments ========== */
+        @media (max-width: 991.98px) {
+
+        }
+
+        /* ========== Page Specific Styles ========== */
+        .page-header { background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%); color: white; padding: var(--spacing-xl) 0; margin-bottom: var(--spacing-xl); }
+        .page-header h1 { color: white; font-size: var(--font-size-2xl); margin-bottom: var(--spacing-xs); }
+        .page-header p { color: rgba(255,255,255,0.9); margin: 0; }
+        .filter-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-lg); margin-bottom: var(--spacing-lg); }
+        .filter-card h5 { font-weight: 600; margin-bottom: var(--spacing-lg); color: var(--color-text-primary); }
+        .editor-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-lg); margin-bottom: var(--spacing-md); transition: all var(--transition-fast); }
+        .editor-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+        .editor-avatar { width: 70px; height: 70px; border-radius: 50%; background: linear-gradient(135deg, var(--color-accent), var(--color-accent-light)); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: bold; flex-shrink: 0; }
+        .editor-name { font-family: var(--font-heading); font-size: var(--font-size-lg); font-weight: 600; color: var(--color-text-primary); margin-bottom: 4px; }
+        .editor-bio { color: var(--color-text-secondary); font-size: var(--font-size-sm); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: var(--spacing-sm); }
+        .rating-stars { color: var(--color-warning); }
+        .rating-count { color: var(--color-text-secondary); font-size: var(--font-size-sm); margin-left: 8px; }
+        .lang-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(139, 115, 85, 0.1); color: var(--color-accent); padding: 4px 12px; border-radius: var(--radius-full); font-size: var(--font-size-sm); margin: 3px; }
+        .native-badge { background: rgba(212, 168, 83, 0.2); color: var(--color-warning); font-size: var(--font-size-xs); padding: 2px 6px; border-radius: var(--radius-sm); margin-left: 5px; }
+        .specialization-tag { background: var(--color-bg-hover); color: var(--color-text-secondary); padding: 4px 10px; border-radius: var(--radius-full); font-size: var(--font-size-xs); margin: 2px; display: inline-block; }
+        .revenue-badge { background: rgba(93, 156, 89, 0.1); color: var(--color-success); padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--radius-md); font-weight: 600; text-align: center; }
+        .revenue-badge .percent { font-size: var(--font-size-xl); }
+        .revenue-badge .label { font-size: var(--font-size-xs); }
+        .stats-row { display: flex; justify-content: space-around; padding-top: var(--spacing-md); border-top: 1px solid var(--color-border); margin-top: var(--spacing-md); }
+        .stat-item { text-align: center; }
+        .stat-item .number { font-family: var(--font-heading); font-size: var(--font-size-lg); font-weight: 700; color: var(--color-text-primary); }
+        .stat-item .label { font-size: var(--font-size-xs); color: var(--color-text-secondary); }
+        .empty-state { text-align: center; padding: var(--spacing-2xl); color: var(--color-text-secondary); }
+        .empty-state i { font-size: 4rem; margin-bottom: var(--spacing-md); opacity: 0.3; }
+        .loading-spinner { display: flex; justify-content: center; padding: var(--spacing-2xl); }
+        .cta-card { background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%); color: white; border-radius: var(--radius-lg); padding: var(--spacing-lg); text-align: center; }
+        .cta-card h6 { color: white; margin-bottom: var(--spacing-sm); }
+        .cta-card p { color: rgba(255,255,255,0.9); font-size: var(--font-size-sm); margin-bottom: var(--spacing-md); }
+        .cta-card .btn { background: white; color: var(--color-accent); border: none; }
+        .cta-card .btn:hover { background: var(--color-bg-hover); }
+        .info-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--spacing-lg); }
+        .info-card h6 { font-weight: 600; margin-bottom: var(--spacing-md); }
+        .info-card ul { padding-left: var(--spacing-md); margin: 0; }
+        .info-card li { margin-bottom: var(--spacing-xs); font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+    </style>
+</head>
+<body>
+    <!-- ========== NAVBAR HTML START ========== -->
+
+    <!-- Navbar Overlay -->
+    <div id="navbar-container"></div>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="container">
+            <h1><i class="fas fa-pen-fancy me-2"></i><span id="pageTitle" data-i18n="editors.pageTitle">Find Editors</span></h1>
+            <p id="pageSubtitle" data-i18n="editors.pageSubtitle">Polish your manuscript to perfection. Experienced editors are waiting.</p>
+        </div>
+    </div>
+
+    <div class="container mb-5">
+        <div class="row">
+            <!-- Filters Sidebar -->
+            <div class="col-lg-3">
+                <div class="filter-card">
+                    <h5><i class="fas fa-filter me-2"></i><span id="filterTitle" data-i18n="editors.filterTitle">Filter</span></h5>
+
+                    <div class="mb-4">
+                        <label class="form-label" id="labelSourceLang" data-i18n="editors.labelSourceLang">Language</label>
+                        <select class="form-select" id="source-language">
+                            <option value="" id="optAll" data-i18n="editors.optAll">All</option>
+                            <option value="ja">日本語</option>
+                            <option value="en">English</option>
+                            <option value="zh">中文</option>
+                            <option value="es">Espanol</option>
+                            <option value="fr">Francais</option>
+                            <option value="de">Deutsch</option>
+                            <option value="ko">한국어</option>
+                            <option value="ar">العربية</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label" id="labelTargetLang" data-i18n="editors.labelTargetLang">Secondary Language</label>
+                        <select class="form-select" id="target-language">
+                            <option value="">All</option>
+                            <option value="ja">日本語</option>
+                            <option value="en">English</option>
+                            <option value="zh">中文</option>
+                            <option value="es">Espanol</option>
+                            <option value="fr">Francais</option>
+                            <option value="de">Deutsch</option>
+                            <option value="ko">한국어</option>
+                            <option value="ar">العربية</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label" id="labelMinRating" data-i18n="editors.labelMinRating">Minimum Rating</label>
+                        <select class="form-select" id="min-rating">
+                            <option value="" id="optNoPreference" data-i18n="editors.optNoPreference">No preference</option>
+                            <option value="4.5">&#9733;4.5+</option>
+                            <option value="4">&#9733;4.0+</option>
+                            <option value="3.5">&#9733;3.5+</option>
+                            <option value="3">&#9733;3.0+</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label" id="labelSpecialization" data-i18n="editors.labelSpecialization">Specialization</label>
+                        <select class="form-select" id="specialization">
+                            <option value="">All</option>
+                            <option value="fiction" id="specFiction" data-i18n="editors.specFiction">Fiction</option>
+                            <option value="manga" id="specManga" data-i18n="editors.specManga">Manga</option>
+                            <option value="nonfiction" id="specNonFiction" data-i18n="editors.specNonFiction">Non-Fiction</option>
+                            <option value="poetry" id="specPoetry" data-i18n="editors.specPoetry">Poetry</option>
+                            <option value="academic" id="specAcademic2" data-i18n="editors.specAcademic2">Academic</option>
+                            <option value="childrens" id="specChildrens" data-i18n="editors.specChildrens">Children's</option>
+                        </select>
+                    </div>
+
+                    <button class="btn btn-custom w-100 mb-2" onclick="searchEditors()">
+                        <i class="fas fa-search me-2"></i><span id="btnSearch" data-i18n="editors.btnSearch">Search</span>
+                    </button>
+                    <button class="btn btn-soft-custom w-100" onclick="resetFilters()">
+                        <i class="fas fa-times me-2"></i><span id="btnReset" data-i18n="editors.btnReset">Reset</span>
+                    </button>
+                </div>
+
+                <!-- Revenue Info -->
+                <div class="info-card mb-3">
+                    <h6><i class="fas fa-info-circle me-2 text-accent"></i><span id="revenueTitle" data-i18n="editors.revenueTitle">Revenue Sharing</span></h6>
+                    <p class="small text-secondary mb-2" id="revenueDesc" data-i18n="editors.revenueDesc">Editors earn from edited work sales:</p>
+                    <ul>
+                        <li id="revTranslator" data-i18n="editors.revTranslator">Translator: 20%</li>
+                        <li id="revAuthor" data-i18n="editors.revAuthor">Author: 40-70%</li>
+                        <li><strong id="revEditor" data-i18n="editors.revEditor">Editor: 10%</strong></li>
+                        <li id="revPlatform" data-i18n="editors.revPlatform">Platform: 30%</li>
+                    </ul>
+                </div>
+
+                <!-- Become an Editor CTA -->
+                <div class="cta-card">
+                    <i class="fas fa-user-plus fa-2x mb-3"></i>
+                    <h6 id="ctaTitle" data-i18n="editors.ctaTitle">Become an Editor</h6>
+                    <p id="ctaDesc" data-i18n="editors.ctaDesc">Use your skills to earn income</p>
+                    <a href="../register-editor.html" class="btn btn-sm" id="ctaBtn" data-i18n="editors.ctaBtn">Register</a>
+                </div>
+            </div>
+
+            <!-- Editors List -->
+            <div class="col-lg-9">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div id="results-count" class="text-secondary">-- editors found</div>
+                    <select class="form-select" id="sort-order" style="width: auto;" onchange="searchEditors()">
+                        <option value="rating" id="sortRating" data-i18n="editors.sortRating">Highest Rated</option>
+                        <option value="projects" id="sortProjects" data-i18n="editors.sortProjects">Most Projects</option>
+                        <option value="reviews" id="sortReviews" data-i18n="editors.sortReviews">Most Reviews</option>
+                    </select>
+                </div>
+
+                <div id="loading" class="loading-spinner">
+                    <div class="spinner-border text-accent" role="status"><span class="visually-hidden">Loading...</span></div>
+                </div>
+
+                <div id="editor-list"></div>
+
+                <div id="empty-state" class="empty-state" style="display: none;">
+                    <i class="fas fa-search"></i>
+                    <h4 id="emptyTitle" data-i18n="editors.emptyTitle">No editors found</h4>
+                    <p id="emptyDesc" data-i18n="editors.emptyDesc">Try changing your search criteria</p>
+                </div>
+
+                <div id="pagination" class="d-flex justify-content-center mt-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Editor Detail Modal -->
+    <div class="modal fade" id="editorModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-user me-2"></i><span id="modalProfileTitle" data-i18n="editors.modalProfileTitle">Editor Profile</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="editor-detail-content">
+                    <div class="text-center py-4"><div class="spinner-border text-accent"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Request Editing Modal -->
+    <div class="modal fade" id="requestModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-paper-plane me-2"></i><span id="modalRequestTitle" data-i18n="editors.modalRequestTitle">Request Editing</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="request-profile-id">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <span id="requestRevenueInfo"><strong>Revenue Model:</strong> Editors receive <strong>10%</strong> of edited work sales.</span>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" id="labelSelectWork" data-i18n="editors.labelSelectWork">Select Work <span class="text-danger">*</span></label>
+                        <select class="form-select" id="request-work"><option value="" id="optSelectWork" data-i18n="editors.optSelectWork">Select a work</option></select>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="form-label" id="labelReqSource" data-i18n="editors.labelReqSource">Language</label>
+                            <select class="form-select" id="request-source-lang">
+                                <option value="ja">日本語</option><option value="en">English</option><option value="zh">中文</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label" id="labelReqTarget" data-i18n="editors.labelReqTarget">Genre</label>
+                            <select class="form-select" id="request-target-lang">
+                                <option value="en">English</option><option value="ja">日本語</option><option value="zh">中文</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" id="labelMessage" data-i18n="editors.labelMessage">Message (optional)</label>
+                        <textarea class="form-control" id="request-message" rows="3" placeholder=""></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" id="labelDeadline" data-i18n="editors.labelDeadline">Preferred Deadline (optional)</label>
+                        <input type="date" class="form-control" id="request-deadline">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-soft-custom" data-bs-dismiss="modal" id="btnCancel" data-i18n="editors.btnCancel">Cancel</button>
+                    <button type="button" class="btn btn-custom" onclick="submitRequest()">
+                        <i class="fas fa-paper-plane me-2"></i><span id="btnSubmitRequest" data-i18n="editors.btnSubmitRequest">Send Request</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div id="footer-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../js/i18n.js"></script>
+    <script src="../../js/navbar.js"></script>
+    <script src="../../js/translations.js"></script>
+    <script src="../../js/language-switcher.js"></script>
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+
+        // All UI text in 9 languages
+        const uiText = {
+            pageTitle: { en: 'Find Editors', ja: '編集者を探す', zh: '寻找编辑', es: 'Buscar Editores', fr: 'Trouver des Editeurs', de: 'Lektoren finden', ko: '편집자 찾기', ar: 'ابحث عن محررين', pt: 'Encontrar Editores' },
+            pageSubtitle: { en: 'Polish your manuscript to perfection. Experienced editors are waiting.', ja: 'あなたの原稿を完璧に磨き上げましょう。経験豊富な編集者が待っています。', zh: '将您的稿件打磨至完美。经验丰富的编辑正在等待。', es: 'Perfecciona tu manuscrito. Editores experimentados estan esperando.', fr: 'Peaufinez votre manuscrit a la perfection. Des editeurs experimentes vous attendent.', de: 'Perfektionieren Sie Ihr Manuskript. Erfahrene Lektoren warten.', ko: '원고를 완벽하게 다듬어 보세요. 경험 많은 편집자들이 기다리고 있습니다.', ar: 'صقل مخطوطتك إلى الكمال. المحررون ذوو الخبرة ينتظرون.', pt: 'Aperfeiçoe seu manuscrito. Editores experientes estao esperando.' },
+            filterTitle: { en: 'Filter', ja: '絞り込み', zh: '筛选', es: 'Filtrar', fr: 'Filtrer', de: 'Filtern', ko: '필터', ar: 'تصفية', pt: 'Filtrar' },
+            labelSourceLang: { en: 'Language', ja: '言語', zh: '语言', es: 'Idioma', fr: 'Langue', de: 'Sprache', ko: '언어', ar: 'اللغة', pt: 'Idioma' },
+            labelTargetLang: { en: 'Secondary Language', ja: '第二言語', zh: '第二语言', es: 'Segundo idioma', fr: 'Langue secondaire', de: 'Zweitsprache', ko: '제2언어', ar: 'اللغة الثانية', pt: 'Segundo idioma' },
+            labelMinRating: { en: 'Minimum Rating', ja: '最低評価', zh: '最低评分', es: 'Calificacion minima', fr: 'Note minimale', de: 'Mindestbewertung', ko: '최소 평점', ar: 'الحد الأدنى للتقييم', pt: 'Avaliacao minima' },
+            labelSpecialization: { en: 'Specialization', ja: '専門分野', zh: '专业领域', es: 'Especializacion', fr: 'Specialisation', de: 'Spezialisierung', ko: '전문 분야', ar: 'التخصص', pt: 'Especializacao' },
+            optAll: { en: 'All', ja: 'すべて', zh: '全部', es: 'Todos', fr: 'Tous', de: 'Alle', ko: '전체', ar: 'الكل', pt: 'Todos' },
+            optNoPreference: { en: 'No preference', ja: '指定なし', zh: '不限', es: 'Sin preferencia', fr: 'Pas de preference', de: 'Keine Praferenz', ko: '선호 없음', ar: 'بدون تفضيل', pt: 'Sem preferencia' },
+            specFiction: { en: 'Fiction', ja: '小説・フィクション', zh: '小说', es: 'Ficcion', fr: 'Fiction', de: 'Belletristik', ko: '소설', ar: 'خيال', pt: 'Ficcao' },
+            specManga: { en: 'Manga', ja: 'マンガ', zh: '漫画', es: 'Manga', fr: 'Manga', de: 'Manga', ko: '만화', ar: 'مانغا', pt: 'Manga' },
+            specNonFiction: { en: 'Non-Fiction', ja: 'ノンフィクション', zh: '非虚构', es: 'No ficcion', fr: 'Non-fiction', de: 'Sachbuch', ko: '논픽션', ar: 'غير خيالي', pt: 'Nao ficcao' },
+            specPoetry: { en: 'Poetry', ja: '詩・俳句', zh: '诗歌', es: 'Poesia', fr: 'Poesie', de: 'Poesie', ko: '시', ar: 'شعر', pt: 'Poesia' },
+            specAcademic2: { en: 'Academic', ja: '学術', zh: '学术', es: 'Academico', fr: 'Academique', de: 'Akademisch', ko: '학술', ar: 'أكاديمي', pt: 'Academico' },
+            specChildrens: { en: "Children's", ja: '児童書', zh: '儿童文学', es: 'Infantil', fr: 'Jeunesse', de: 'Kinderbuch', ko: '아동', ar: 'أطفال', pt: 'Infantil' },
+            btnSearch: { en: 'Search', ja: '検索', zh: '搜索', es: 'Buscar', fr: 'Rechercher', de: 'Suchen', ko: '검색', ar: 'بحث', pt: 'Buscar' },
+            btnReset: { en: 'Reset', ja: 'リセット', zh: '重置', es: 'Restablecer', fr: 'Reinitialiser', de: 'Zurucksetzen', ko: '초기화', ar: 'إعادة تعيين', pt: 'Redefinir' },
+            revenueTitle: { en: 'Revenue Sharing', ja: '収益分配について', zh: '收益分成', es: 'Reparto de ingresos', fr: 'Partage des revenus', de: 'Umsatzbeteiligung', ko: '수익 분배', ar: 'تقاسم الإيرادات', pt: 'Divisao de receita' },
+            revenueDesc: { en: 'Editors earn from edited work sales:', ja: '編集者は編集作品の収益から報酬を受け取ります：', zh: '编辑从编辑作品的销售中获得收入：', es: 'Los editores ganan de las ventas de obras editadas:', fr: 'Les editeurs gagnent des ventes des oeuvres editees :', de: 'Lektoren verdienen an lektorierten Werken:', ko: '편집자는 편집 작품 판매 수익을 받습니다:', ar: 'يكسب المحررون من مبيعات الأعمال المحررة:', pt: 'Editores ganham com vendas de obras editadas:' },
+            revTranslator: { en: 'Translator: 20%', ja: '翻訳者: 20%', zh: '翻译: 20%', es: 'Traductor: 20%', fr: 'Traducteur : 20%', de: 'Ubersetzer: 20%', ko: '번역가: 20%', ar: 'المترجم: 20%', pt: 'Tradutor: 20%' },
+            revAuthor: { en: 'Author: 40-70%', ja: '著者: 40-70%', zh: '作者: 40-70%', es: 'Autor: 40-70%', fr: 'Auteur : 40-70%', de: 'Autor: 40-70%', ko: '저자: 40-70%', ar: 'المؤلف: 40-70%', pt: 'Autor: 40-70%' },
+            revEditor: { en: 'Editor: 10%', ja: '編集者: 10%', zh: '编辑: 10%', es: 'Editor: 10%', fr: 'Editeur : 10%', de: 'Lektor: 10%', ko: '편집자: 10%', ar: 'المحرر: 10%', pt: 'Editor: 10%' },
+            revPlatform: { en: 'Platform: 30%', ja: 'プラットフォーム: 30%', zh: '平台: 30%', es: 'Plataforma: 30%', fr: 'Plateforme : 30%', de: 'Plattform: 30%', ko: '플랫폼: 30%', ar: 'المنصة: 30%', pt: 'Plataforma: 30%' },
+            ctaTitle: { en: 'Become an Editor', ja: '編集者として登録', zh: '成为编辑', es: 'Conviertete en Editor', fr: 'Devenir Editeur', de: 'Lektor werden', ko: '편집자 되기', ar: 'كن محررًا', pt: 'Torne-se Editor' },
+            ctaDesc: { en: 'Use your skills to earn income', ja: 'あなたのスキルを活かして収入を得ましょう', zh: '用您的技能赚取收入', es: 'Usa tus habilidades para ganar dinero', fr: 'Utilisez vos competences pour gagner un revenu', de: 'Nutzen Sie Ihre Fahigkeiten zum Verdienen', ko: '당신의 실력으로 수입을 올리세요', ar: 'استخدم مهاراتك لكسب الدخل', pt: 'Use suas habilidades para ganhar renda' },
+            ctaBtn: { en: 'Register', ja: '登録する', zh: '注册', es: 'Registrarse', fr: "S'inscrire", de: 'Registrieren', ko: '등록', ar: 'تسجيل', pt: 'Registrar' },
+            sortRating: { en: 'Highest Rated', ja: '評価が高い順', zh: '评分最高', es: 'Mejor valorados', fr: 'Mieux notes', de: 'Beste Bewertung', ko: '평점 높은 순', ar: 'الأعلى تقييمًا', pt: 'Mais bem avaliados' },
+            sortProjects: { en: 'Most Projects', ja: '実績が多い順', zh: '项目最多', es: 'Mas proyectos', fr: 'Plus de projets', de: 'Meiste Projekte', ko: '프로젝트 많은 순', ar: 'أكثر المشاريع', pt: 'Mais projetos' },
+            sortReviews: { en: 'Most Reviews', ja: 'レビューが多い順', zh: '评论最多', es: 'Mas resenas', fr: "Plus d'avis", de: 'Meiste Bewertungen', ko: '리뷰 많은 순', ar: 'أكثر التقييمات', pt: 'Mais avaliacoes' },
+            resultsFound: { en: '{n} editors found', ja: '{n}人の編集者が見つかりました', zh: '找到 {n} 位编辑', es: '{n} editores encontrados', fr: '{n} editeurs trouves', de: '{n} Lektoren gefunden', ko: '편집자 {n}명 검색됨', ar: 'تم العثور على {n} محرر', pt: '{n} editores encontrados' },
+            emptyTitle: { en: 'No editors found', ja: '編集者が見つかりませんでした', zh: '未找到编辑', es: 'No se encontraron editores', fr: 'Aucun editeur trouve', de: 'Keine Lektoren gefunden', ko: '편집자를 찾을 수 없습니다', ar: 'لم يتم العثور على محررين', pt: 'Nenhum editor encontrado' },
+            emptyDesc: { en: 'Try changing your search criteria', ja: '条件を変更して再検索してください', zh: '尝试更改搜索条件', es: 'Intenta cambiar los criterios de busqueda', fr: 'Essayez de modifier vos criteres de recherche', de: 'Versuchen Sie andere Suchkriterien', ko: '검색 조건을 변경해 보세요', ar: 'حاول تغيير معايير البحث', pt: 'Tente alterar os criterios de busca' },
+            btnRequest: { en: 'Request', ja: '依頼する', zh: '请求', es: 'Solicitar', fr: 'Demander', de: 'Anfragen', ko: '의뢰', ar: 'طلب', pt: 'Solicitar' },
+            btnViewProfile: { en: 'Profile', ja: 'プロフィール', zh: '资料', es: 'Perfil', fr: 'Profil', de: 'Profil', ko: '프로필', ar: 'الملف', pt: 'Perfil' },
+            revenueShare: { en: 'Revenue Share', ja: '収益分配', zh: '收益分成', es: 'Participacion', fr: 'Part des revenus', de: 'Umsatzanteil', ko: '수익 분배', ar: 'حصة الإيرادات', pt: 'Participacao' },
+            completedProjects: { en: 'Completed', ja: '完了案件', zh: '已完成', es: 'Completados', fr: 'Termines', de: 'Abgeschlossen', ko: '완료', ar: 'مكتملة', pt: 'Concluidos' },
+            yearsExp: { en: 'Experience', ja: '経験年数', zh: '经验', es: 'Experiencia', fr: 'Experience', de: 'Erfahrung', ko: '경력', ar: 'الخبرة', pt: 'Experiencia' },
+            responseTime: { en: 'Response', ja: '返答時間', zh: '响应', es: 'Respuesta', fr: 'Reponse', de: 'Antwortzeit', ko: '응답', ar: 'الاستجابة', pt: 'Resposta' },
+            noBioYet: { en: 'No bio yet', ja: '自己紹介はまだありません', zh: '暂无简介', es: 'Sin biografia', fr: 'Pas de bio', de: 'Noch keine Bio', ko: '소개 없음', ar: 'لا توجد نبذة', pt: 'Sem bio' },
+            noPairsSet: { en: 'No languages set', ja: '言語未設定', zh: '未设置语言', es: 'Sin idiomas', fr: 'Pas de langues', de: 'Keine Sprachen', ko: '언어 미설정', ar: 'لا توجد لغات', pt: 'Sem idiomas' },
+            native: { en: 'Native', ja: 'ネイティブ', zh: '母语', es: 'Nativo', fr: 'Natif', de: 'Muttersprachler', ko: '원어민', ar: 'أصلي', pt: 'Nativo' },
+            reviews: { en: 'reviews', ja: '件', zh: '条评论', es: 'resenas', fr: 'avis', de: 'Bewertungen', ko: '개 리뷰', ar: 'تقييمات', pt: 'avaliacoes' },
+            modalProfileTitle: { en: 'Editor Profile', ja: '編集者プロフィール', zh: '编辑资料', es: 'Perfil del editor', fr: "Profil de l'editeur", de: 'Lektor-Profil', ko: '편집자 프로필', ar: 'ملف المحرر', pt: 'Perfil do editor' },
+            modalRequestTitle: { en: 'Request Editing', ja: '編集を依頼', zh: '请求编辑', es: 'Solicitar edicion', fr: "Demander une edition", de: 'Lektorat anfragen', ko: '편집 의뢰', ar: 'طلب تحرير', pt: 'Solicitar edicao' },
+            requestRevenueInfo: { en: '<strong>Revenue Model:</strong> Editors receive <strong>10%</strong> of edited work sales.', ja: '<strong>収益分配モデル:</strong> 編集者は編集作品の収益の<strong>10%</strong>を受け取ります。', zh: '<strong>收益模式：</strong>编辑获得编辑作品销售额的<strong>10%</strong>。', es: '<strong>Modelo de ingresos:</strong> Los editores reciben el <strong>10%</strong> de las ventas.', fr: "<strong>Modele de revenus :</strong> Les editeurs recoivent <strong>10%</strong> des ventes.", de: '<strong>Umsatzmodell:</strong> Lektoren erhalten <strong>10%</strong> der Verkaufe.', ko: '<strong>수익 모델:</strong> 편집자는 편집 작품 판매 수익의 <strong>10%</strong>를 받습니다.', ar: '<strong>نموذج الإيرادات:</strong> يحصل المحررون على <strong>10%</strong> من مبيعات الأعمال المحررة.', pt: '<strong>Modelo de receita:</strong> Editores recebem <strong>10%</strong> das vendas.' },
+            labelSelectWork: { en: 'Select Work', ja: '作品を選択', zh: '选择作品', es: 'Seleccionar obra', fr: "Selectionner l'oeuvre", de: 'Werk auswahlen', ko: '작품 선택', ar: 'اختر العمل', pt: 'Selecionar obra' },
+            optSelectWork: { en: 'Select a work', ja: '作品を選択してください', zh: '请选择作品', es: 'Seleccione una obra', fr: 'Selectionnez une oeuvre', de: 'Wahlen Sie ein Werk', ko: '작품을 선택하세요', ar: 'اختر عملاً', pt: 'Selecione uma obra' },
+            labelReqSource: { en: 'Language', ja: '言語', zh: '语言', es: 'Idioma', fr: 'Langue', de: 'Sprache', ko: '언어', ar: 'اللغة', pt: 'Idioma' },
+            labelReqTarget: { en: 'Genre', ja: 'ジャンル', zh: '类型', es: 'Genero', fr: 'Genre', de: 'Genre', ko: '장르', ar: 'النوع', pt: 'Genero' },
+            labelMessage: { en: 'Message (optional)', ja: 'メッセージ（任意）', zh: '留言（可选）', es: 'Mensaje (opcional)', fr: 'Message (optionnel)', de: 'Nachricht (optional)', ko: '메시지 (선택)', ar: 'رسالة (اختياري)', pt: 'Mensagem (opcional)' },
+            labelDeadline: { en: 'Preferred Deadline (optional)', ja: '希望納期（任意）', zh: '期望截止日期（可选）', es: 'Fecha limite preferida (opcional)', fr: 'Date limite souhaitee (optionnel)', de: 'Gewunschte Frist (optional)', ko: '희망 마감일 (선택)', ar: 'الموعد النهائي المفضل (اختياري)', pt: 'Prazo preferido (opcional)' },
+            btnCancel: { en: 'Cancel', ja: 'キャンセル', zh: '取消', es: 'Cancelar', fr: 'Annuler', de: 'Abbrechen', ko: '취소', ar: 'إلغاء', pt: 'Cancelar' },
+            btnSubmitRequest: { en: 'Send Request', ja: '依頼を送信', zh: '发送请求', es: 'Enviar solicitud', fr: 'Envoyer la demande', de: 'Anfrage senden', ko: '의뢰 보내기', ar: 'إرسال الطلب', pt: 'Enviar solicitacao' },
+            footerHelp: { en: 'Help', ja: 'ヘルプ', zh: '帮助', es: 'Ayuda', fr: 'Aide', de: 'Hilfe', ko: '도움말', ar: 'مساعدة', pt: 'Ajuda' },
+            footerTerms: { en: 'Terms', ja: '利用規約', zh: '条款', es: 'Terminos', fr: 'Conditions', de: 'Bedingungen', ko: '약관', ar: 'الشروط', pt: 'Termos' },
+            footerPrivacy: { en: 'Privacy', ja: 'プライバシー', zh: '隐私', es: 'Privacidad', fr: 'Confidentialite', de: 'Datenschutz', ko: '개인정보', ar: 'الخصوصية', pt: 'Privacidade' },
+            profileBio: { en: 'Bio', ja: '自己紹介', zh: '简介', es: 'Biografia', fr: 'Bio', de: 'Bio', ko: '소개', ar: 'نبذة', pt: 'Bio' },
+            profileLanguages: { en: 'Languages', ja: '対応言語', zh: '语言', es: 'Idiomas', fr: 'Langues', de: 'Sprachen', ko: '언어', ar: 'اللغات', pt: 'Idiomas' },
+            profileYearsExp: { en: 'Years of Experience:', ja: '経験年数:', zh: '经验年数：', es: 'Anos de experiencia:', fr: "Annees d'experience :", de: 'Jahre Erfahrung:', ko: '경력:', ar: 'سنوات الخبرة:', pt: 'Anos de experiencia:' },
+            profileCompleted: { en: 'Completed Projects:', ja: '完了案件:', zh: '已完成项目：', es: 'Proyectos completados:', fr: 'Projets termines :', de: 'Abgeschlossene Projekte:', ko: '완료 프로젝트:', ar: 'المشاريع المكتملة:', pt: 'Projetos concluidos:' },
+            profileCertifications: { en: 'Certifications:', ja: '資格:', zh: '认证：', es: 'Certificaciones:', fr: 'Certifications :', de: 'Zertifizierungen:', ko: '자격증:', ar: 'الشهادات:', pt: 'Certificacoes:' },
+            profileReviews: { en: 'Reviews', ja: 'レビュー', zh: '评论', es: 'Resenas', fr: 'Avis', de: 'Bewertungen', ko: '리뷰', ar: 'التقييمات', pt: 'Avaliacoes' },
+            noReviewsYet: { en: 'No reviews yet', ja: 'まだレビューがありません', zh: '暂无评论', es: 'Sin resenas aun', fr: "Pas encore d'avis", de: 'Noch keine Bewertungen', ko: '아직 리뷰 없음', ar: 'لا توجد تقييمات بعد', pt: 'Sem avaliacoes ainda' },
+            anonymous: { en: 'Anonymous', ja: '匿名', zh: '匿名', es: 'Anonimo', fr: 'Anonyme', de: 'Anonym', ko: '익명', ar: 'مجهول', pt: 'Anonimo' },
+            alertSelectWork: { en: 'Please select a work', ja: '作品を選択してください', zh: '请选择作品', es: 'Por favor seleccione una obra', fr: 'Veuillez selectionner une oeuvre', de: 'Bitte wahlen Sie ein Werk', ko: '작품을 선택해주세요', ar: 'يرجى اختيار عمل', pt: 'Por favor selecione uma obra' },
+            alertLoginRequired: { en: 'Login required', ja: 'ログインが必要です', zh: '需要登录', es: 'Inicio de sesion requerido', fr: 'Connexion requise', de: 'Anmeldung erforderlich', ko: '로그인이 필요합니다', ar: 'تسجيل الدخول مطلوب', pt: 'Login necessario' },
+            alertRequestSent: { en: 'Editing request sent! Please wait for editor response.', ja: '編集依頼を送信しました！編集者からの返答をお待ちください。', zh: '编辑请求已发送！请等待编辑回复。', es: 'Solicitud enviada! Espere la respuesta del editor.', fr: "Demande envoyee ! Veuillez attendre la reponse de l'editeur.", de: 'Anfrage gesendet! Bitte warten Sie auf die Antwort.', ko: '편집 의뢰를 보냈습니다! 편집자의 응답을 기다려주세요.', ar: 'تم إرسال طلب التحرير! يرجى انتظار رد المحرر.', pt: 'Solicitacao enviada! Aguarde a resposta do editor.' },
+            alertError: { en: 'Error', ja: 'エラー', zh: '错误', es: 'Error', fr: 'Erreur', de: 'Fehler', ko: '오류', ar: 'خطأ', pt: 'Erro' },
+            alertSendFailed: { en: 'Failed to send', ja: '送信に失敗しました', zh: '发送失败', es: 'Error al enviar', fr: "Echec de l'envoi", de: 'Senden fehlgeschlagen', ko: '전송 실패', ar: 'فشل الإرسال', pt: 'Falha ao enviar' },
+            loadingWorks: { en: 'Loading...', ja: '読み込み中...', zh: '加载中...', es: 'Cargando...', fr: 'Chargement...', de: 'Laden...', ko: '로딩 중...', ar: 'جار التحميل...', pt: 'Carregando...' },
+            loadWorksFailed: { en: 'Failed to load works', ja: '作品を読み込めませんでした', zh: '加载作品失败', es: 'Error al cargar obras', fr: 'Echec du chargement', de: 'Laden fehlgeschlagen', ko: '작품 로드 실패', ar: 'فشل تحميل الأعمال', pt: 'Falha ao carregar obras' },
+            searchFailed: { en: 'Failed to search editors', ja: '編集者の検索に失敗しました', zh: '搜索编辑失败', es: 'Error al buscar editores', fr: 'Echec de la recherche', de: 'Suche fehlgeschlagen', ko: '편집자 검색 실패', ar: 'فشل البحث عن محررين', pt: 'Falha na busca' },
+            profileLoadFailed: { en: 'Failed to load profile', ja: 'プロフィールの読み込みに失敗しました', zh: '加载资料失败', es: 'Error al cargar perfil', fr: 'Echec du chargement du profil', de: 'Profil laden fehlgeschlagen', ko: '프로필 로드 실패', ar: 'فشل تحميل الملف الشخصي', pt: 'Falha ao carregar perfil' }
+        };
+
+        const SPEC_NAMES = {
+            fiction: { en: 'Fiction', ja: '小説', zh: '小说', es: 'Ficcion', fr: 'Fiction', de: 'Belletristik', ko: '소설', ar: 'خيال', pt: 'Ficcao' },
+            manga: { en: 'Manga', ja: 'マンガ', zh: '漫画', es: 'Manga', fr: 'Manga', de: 'Manga', ko: '만화', ar: 'مانغا', pt: 'Manga' },
+            nonfiction: { en: 'Non-Fiction', ja: 'ノンフィクション', zh: '非虚构', es: 'No ficcion', fr: 'Non-fiction', de: 'Sachbuch', ko: '논픽션', ar: 'غير خيالي', pt: 'Nao ficcao' },
+            poetry: { en: 'Poetry', ja: '詩', zh: '诗歌', es: 'Poesia', fr: 'Poesie', de: 'Poesie', ko: '시', ar: 'شعر', pt: 'Poesia' },
+            academic: { en: 'Academic', ja: '学術', zh: '学术', es: 'Academico', fr: 'Academique', de: 'Akademisch', ko: '학술', ar: 'أكاديمي', pt: 'Academico' },
+            childrens: { en: "Children's", ja: '児童書', zh: '儿童文学', es: 'Infantil', fr: 'Jeunesse', de: 'Kinderbuch', ko: '아동', ar: 'أطفال', pt: 'Infantil' }
+        };
+
+        const LANG_NAMES = { ja: '日本語', en: 'English', zh: '中文', es: 'Espanol', fr: 'Francais', de: 'Deutsch', ko: '한국어', ar: 'العربية', pt: 'Portugues' };
+
+        // ===== Demo Editor Data =====
+        const demoEditors = [
+            {
+                profile_id: 'editor-1',
+                display_name: 'Maria Santos',
+                bio: 'Professional fiction editor with 12 years of experience. Specializing in romance and literary fiction. Published authors trust me to polish their manuscripts while preserving their unique voice.',
+                avg_rating: 4.9,
+                total_reviews: 87,
+                language_pairs: [{source: 'pt', target: 'en', is_native: true}, {source: 'es', target: 'en', is_native: false}],
+                specializations: ['fiction', 'poetry'],
+                completed_projects: 234,
+                years_experience: 12,
+                avg_response_hours: 6
+            },
+            {
+                profile_id: 'editor-2',
+                display_name: 'James Wright',
+                bio: 'Sci-fi and fantasy editor. Former acquisitions editor at a major publishing house. I help authors build immersive worlds with tight, compelling prose.',
+                avg_rating: 4.8,
+                total_reviews: 62,
+                language_pairs: [{source: 'en', target: 'ja', is_native: true}],
+                specializations: ['fiction', 'manga'],
+                completed_projects: 189,
+                years_experience: 15,
+                avg_response_hours: 12
+            },
+            {
+                profile_id: 'editor-3',
+                display_name: 'Yuki Tanaka',
+                bio: 'Manga and light novel editor fluent in Japanese, English, and Korean. Deep understanding of manga storytelling conventions and audience expectations across Asian markets.',
+                avg_rating: 4.9,
+                total_reviews: 104,
+                language_pairs: [{source: 'ja', target: 'en', is_native: true}, {source: 'ko', target: 'en', is_native: false}],
+                specializations: ['manga', 'fiction'],
+                completed_projects: 312,
+                years_experience: 10,
+                avg_response_hours: 4
+            },
+            {
+                profile_id: 'editor-4',
+                display_name: 'Sophie Laurent',
+                bio: 'Literary fiction and poetry editor based in Paris. I bring a European sensibility to developmental and line editing. Passionate about helping emerging voices find their audience.',
+                avg_rating: 4.7,
+                total_reviews: 45,
+                language_pairs: [{source: 'fr', target: 'en', is_native: true}, {source: 'de', target: 'en', is_native: false}],
+                specializations: ['fiction', 'poetry'],
+                completed_projects: 156,
+                years_experience: 8,
+                avg_response_hours: 18
+            },
+            {
+                profile_id: 'editor-5',
+                display_name: 'Ahmed Al-Rashid',
+                bio: 'Non-fiction and academic editor with a PhD in Comparative Literature. Expert in research papers, dissertations, and scholarly publications. Rigorous attention to citations and methodology.',
+                avg_rating: 4.8,
+                total_reviews: 73,
+                language_pairs: [{source: 'ar', target: 'en', is_native: true}],
+                specializations: ['nonfiction', 'academic'],
+                completed_projects: 201,
+                years_experience: 14,
+                avg_response_hours: 8
+            },
+            {
+                profile_id: 'editor-6',
+                display_name: 'Kim Soo-jin',
+                bio: 'Manga and webtoon editor specializing in Korean and Japanese content. Expert in visual storytelling pacing and dialogue editing for digital-first formats.',
+                avg_rating: 4.9,
+                total_reviews: 91,
+                language_pairs: [{source: 'ko', target: 'ja', is_native: true}, {source: 'ko', target: 'en', is_native: false}],
+                specializations: ['manga', 'childrens'],
+                completed_projects: 278,
+                years_experience: 9,
+                avg_response_hours: 5
+            }
+        ];
+
+        function getDemoEditors(params) {
+            let filtered = [...demoEditors];
+            const source = params.get('source_language');
+            const target = params.get('target_language');
+            const minRating = parseFloat(params.get('min_rating'));
+            const spec = params.get('specialization');
+            const sort = params.get('sort') || 'rating';
+
+            if (source) filtered = filtered.filter(e => e.language_pairs.some(lp => lp.source === source));
+            if (target) filtered = filtered.filter(e => e.language_pairs.some(lp => lp.target === target));
+            if (minRating) filtered = filtered.filter(e => e.avg_rating >= minRating);
+            if (spec) filtered = filtered.filter(e => e.specializations.includes(spec));
+
+            if (sort === 'rating') filtered.sort((a, b) => b.avg_rating - a.avg_rating);
+            else if (sort === 'projects') filtered.sort((a, b) => b.completed_projects - a.completed_projects);
+            else if (sort === 'reviews') filtered.sort((a, b) => b.total_reviews - a.total_reviews);
+
+            return { editors: filtered, pagination: { total: filtered.length, page: 1, totalPages: 1, limit: 10 } };
+        }
+
+        let currentPage = 1;
+        function getCurrentLang() { return localStorage.getItem('preferredLanguage') || 'en'; }
+        function getL(obj) { if (!obj) return ''; const l = getCurrentLang(); return obj[l] || obj['en'] || ''; }
+        function getSpecName(key) { return SPEC_NAMES[key] ? getL(SPEC_NAMES[key]) : key; }
+
+        function updateAllText() {
+            if (typeof i18n !== 'undefined') i18n.applyToDOM();
+            const l = getCurrentLang();
+            document.title = getL(uiText.pageTitle) + ' - Publisher';
+            document.getElementById('pageTitle').textContent = getL(uiText.pageTitle);
+            document.getElementById('pageSubtitle').textContent = getL(uiText.pageSubtitle);
+            document.getElementById('filterTitle').textContent = getL(uiText.filterTitle);
+            document.getElementById('labelSourceLang').textContent = getL(uiText.labelSourceLang);
+            document.getElementById('labelTargetLang').textContent = getL(uiText.labelTargetLang);
+            document.getElementById('labelMinRating').textContent = getL(uiText.labelMinRating);
+            document.getElementById('labelSpecialization').textContent = getL(uiText.labelSpecialization);
+            document.getElementById('optAll').textContent = getL(uiText.optAll);
+            document.getElementById('optNoPreference').textContent = getL(uiText.optNoPreference);
+            document.getElementById('specFiction').textContent = getL(uiText.specFiction);
+            document.getElementById('specManga').textContent = getL(uiText.specManga);
+            document.getElementById('specNonFiction').textContent = getL(uiText.specNonFiction);
+            document.getElementById('specPoetry').textContent = getL(uiText.specPoetry);
+            document.getElementById('specAcademic2').textContent = getL(uiText.specAcademic2);
+            document.getElementById('specChildrens').textContent = getL(uiText.specChildrens);
+            document.getElementById('btnSearch').textContent = getL(uiText.btnSearch);
+            document.getElementById('btnReset').textContent = getL(uiText.btnReset);
+            document.getElementById('revenueTitle').textContent = getL(uiText.revenueTitle);
+            document.getElementById('revenueDesc').textContent = getL(uiText.revenueDesc);
+            document.getElementById('revTranslator').textContent = getL(uiText.revTranslator);
+            document.getElementById('revAuthor').textContent = getL(uiText.revAuthor);
+            document.getElementById('revEditor').innerHTML = '<strong>' + getL(uiText.revEditor) + '</strong>';
+            document.getElementById('revPlatform').textContent = getL(uiText.revPlatform);
+            document.getElementById('ctaTitle').textContent = getL(uiText.ctaTitle);
+            document.getElementById('ctaDesc').textContent = getL(uiText.ctaDesc);
+            document.getElementById('ctaBtn').textContent = getL(uiText.ctaBtn);
+            document.getElementById('sortRating').textContent = getL(uiText.sortRating);
+            document.getElementById('sortProjects').textContent = getL(uiText.sortProjects);
+            document.getElementById('sortReviews').textContent = getL(uiText.sortReviews);
+            document.getElementById('emptyTitle').textContent = getL(uiText.emptyTitle);
+            document.getElementById('emptyDesc').textContent = getL(uiText.emptyDesc);
+            document.getElementById('modalProfileTitle').textContent = getL(uiText.modalProfileTitle);
+            document.getElementById('modalRequestTitle').textContent = getL(uiText.modalRequestTitle);
+            document.getElementById('requestRevenueInfo').innerHTML = getL(uiText.requestRevenueInfo);
+            document.getElementById('labelSelectWork').innerHTML = getL(uiText.labelSelectWork) + ' <span class="text-danger">*</span>';
+            document.getElementById('optSelectWork').textContent = getL(uiText.optSelectWork);
+            document.getElementById('labelReqSource').textContent = getL(uiText.labelReqSource);
+            document.getElementById('labelReqTarget').textContent = getL(uiText.labelReqTarget);
+            document.getElementById('labelMessage').textContent = getL(uiText.labelMessage);
+            document.getElementById('labelDeadline').textContent = getL(uiText.labelDeadline);
+            document.getElementById('btnCancel').textContent = getL(uiText.btnCancel);
+            document.getElementById('btnSubmitRequest').textContent = getL(uiText.btnSubmitRequest);
+            document.getElementById('footerHelp').textContent = getL(uiText.footerHelp);
+            document.getElementById('footerTerms').textContent = getL(uiText.footerTerms);
+            document.getElementById('footerPrivacy').textContent = getL(uiText.footerPrivacy);
+        }
+
+        function syncSelectors() {
+            const d = document.getElementById('languageSelector'), m = document.getElementById('languageSelectorMobile'), l = getCurrentLang();
+            if (d) d.value = l; if (m) m.value = l;
+        }
+
+        async function searchEditors(page = 1) {
+            currentPage = page;
+            const loading = document.getElementById('loading'), list = document.getElementById('editor-list'), emptyState = document.getElementById('empty-state');
+            loading.style.display = 'flex'; list.innerHTML = ''; emptyState.style.display = 'none';
+
+            const params = new URLSearchParams({
+                source_language: document.getElementById('source-language').value,
+                target_language: document.getElementById('target-language').value,
+                min_rating: document.getElementById('min-rating').value,
+                specialization: document.getElementById('specialization').value,
+                sort: document.getElementById('sort-order').value,
+                page: page, limit: 10
+            });
+
+            try {
+                const response = await fetch(`${API_BASE}/editors?${params}`);
+                const data = await response.json();
+                loading.style.display = 'none';
+
+                if (data.editors && data.editors.length > 0) {
+                    document.getElementById('results-count').textContent = getL(uiText.resultsFound).replace('{n}', data.pagination.total);
+                    list.innerHTML = data.editors.map(t => renderEditorCard(t)).join('');
+                    renderPagination(data.pagination);
+                } else {
+                    document.getElementById('results-count').textContent = getL(uiText.resultsFound).replace('{n}', '0');
+                    emptyState.style.display = 'block';
+                    document.getElementById('pagination').innerHTML = '';
+                }
+            } catch (error) {
+                console.log('API unavailable, using demo data');
+                const data = getDemoEditors(params);
+                loading.style.display = 'none';
+                if (data.editors && data.editors.length > 0) {
+                    document.getElementById('results-count').textContent = getL(uiText.resultsFound).replace('{n}', data.pagination.total);
+                    list.innerHTML = data.editors.map(t => renderEditorCard(t)).join('');
+                    renderPagination(data.pagination);
+                } else {
+                    document.getElementById('results-count').textContent = getL(uiText.resultsFound).replace('{n}', '0');
+                    emptyState.style.display = 'block';
+                    document.getElementById('pagination').innerHTML = '';
+                }
+            }
+        }
+
+        function renderEditorCard(editor) {
+            const name = editor.display_name || editor.pen_name || 'Editor';
+            const initial = name.charAt(0).toUpperCase();
+            const rating = parseFloat(editor.avg_rating) || 0;
+            const stars = '\u2605'.repeat(Math.floor(rating)) + (rating % 1 >= 0.5 ? '\u2606' : '');
+
+            let langPairsHtml = '';
+            if (editor.language_pairs) {
+                const pairs = Array.isArray(editor.language_pairs) ? editor.language_pairs : [];
+                langPairsHtml = pairs.slice(0, 4).map(lp => `
+                    <span class="lang-badge">${LANG_NAMES[lp.source] || lp.source} \u2192 ${LANG_NAMES[lp.target] || lp.target}${lp.is_native ? '<span class="native-badge">' + getL(uiText.native) + '</span>' : ''}</span>
+                `).join('');
+                if (pairs.length > 4) langPairsHtml += `<span class="lang-badge">+${pairs.length - 4}</span>`;
+            }
+
+            let specsHtml = '';
+            if (editor.specializations && editor.specializations.length > 0) {
+                specsHtml = editor.specializations.map(s => `<span class="specialization-tag">${getSpecName(s)}</span>`).join('');
+            }
+
+            return `
+                <div class="editor-card">
+                    <div class="row align-items-center">
+                        <div class="col-auto"><div class="editor-avatar">${initial}</div></div>
+                        <div class="col">
+                            <div class="editor-name">${escapeHtml(name)}</div>
+                            <div class="mb-2"><span class="rating-stars">${stars || '\u2606\u2606\u2606\u2606\u2606'}</span><span class="rating-count">(${editor.total_reviews || 0} ${getL(uiText.reviews)})</span></div>
+                            <div class="editor-bio">${escapeHtml(editor.bio) || getL(uiText.noBioYet)}</div>
+                            <div class="mb-2">${langPairsHtml || '<span class="text-secondary small">' + getL(uiText.noPairsSet) + '</span>'}</div>
+                            <div>${specsHtml}</div>
+                        </div>
+                        <div class="col-auto text-center">
+                            <div class="revenue-badge mb-3"><div class="percent">10%</div><div class="label">${getL(uiText.revenueShare)}</div></div>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-custom btn-sm" onclick="openRequestModal('${editor.profile_id}')"><i class="fas fa-paper-plane me-1"></i>${getL(uiText.btnRequest)}</button>
+                                <button class="btn btn-soft-custom btn-sm" onclick="viewProfile('${editor.profile_id}')"><i class="fas fa-user me-1"></i>${getL(uiText.btnViewProfile)}</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stats-row">
+                        <div class="stat-item"><div class="number">${editor.completed_projects || 0}</div><div class="label">${getL(uiText.completedProjects)}</div></div>
+                        <div class="stat-item"><div class="number">${editor.years_experience || 0}${getCurrentLang() === 'ja' ? '\u5e74' : 'y'}</div><div class="label">${getL(uiText.yearsExp)}</div></div>
+                        <div class="stat-item"><div class="number">${editor.avg_response_hours || 24}h</div><div class="label">${getL(uiText.responseTime)}</div></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderPagination(pagination) {
+            const container = document.getElementById('pagination');
+            if (pagination.totalPages <= 1) { container.innerHTML = ''; return; }
+            let html = '<nav><ul class="pagination">';
+            html += `<li class="page-item ${pagination.page === 1 ? 'disabled' : ''}"><a class="page-link" href="#" onclick="searchEditors(${pagination.page - 1})">&laquo;</a></li>`;
+            for (let i = 1; i <= pagination.totalPages; i++) {
+                if (i === 1 || i === pagination.totalPages || (i >= pagination.page - 2 && i <= pagination.page + 2)) {
+                    html += `<li class="page-item ${i === pagination.page ? 'active' : ''}"><a class="page-link" href="#" onclick="searchEditors(${i})">${i}</a></li>`;
+                } else if (i === pagination.page - 3 || i === pagination.page + 3) {
+                    html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                }
+            }
+            html += `<li class="page-item ${pagination.page === pagination.totalPages ? 'disabled' : ''}"><a class="page-link" href="#" onclick="searchEditors(${pagination.page + 1})">&raquo;</a></li>`;
+            html += '</ul></nav>';
+            container.innerHTML = html;
+        }
+
+        async function viewProfile(profileId) {
+            // Check demo data first
+            const demoEditor = demoEditors.find(e => e.profile_id === profileId);
+            const modal = new bootstrap.Modal(document.getElementById('editorModal'));
+            const content = document.getElementById('editor-detail-content');
+            content.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-accent"></div></div>';
+            modal.show();
+
+            try {
+                const response = await fetch(`${API_BASE}/editors/${profileId}`);
+                const data = await response.json();
+                const profile = data.profile, languages = data.languages || [], reviews = data.reviews || [];
+                renderProfileContent(content, profile, languages, reviews);
+            } catch (error) {
+                if (demoEditor) {
+                    const languages = demoEditor.language_pairs.map(lp => ({source_language: lp.source, target_language: lp.target, is_native_target: lp.is_native}));
+                    renderProfileContent(content, demoEditor, languages, []);
+                } else {
+                    content.innerHTML = '<div class="alert alert-danger">' + getL(uiText.profileLoadFailed) + '</div>';
+                }
+            }
+        }
+
+        function renderProfileContent(content, profile, languages, reviews) {
+            const name = profile.display_name || profile.pen_name || 'Editor';
+            const rating = parseFloat(profile.avg_rating) || 0;
+            const stars = '\u2605'.repeat(Math.floor(rating)) + (rating % 1 >= 0.5 ? '\u2606' : '');
+
+            content.innerHTML = `
+                <div class="row">
+                    <div class="col-md-4 text-center mb-4">
+                        <div class="editor-avatar mx-auto mb-3" style="width: 100px; height: 100px; font-size: 2.5rem;">${name.charAt(0).toUpperCase()}</div>
+                        <h4 style="font-family: var(--font-heading);">${escapeHtml(name)}</h4>
+                        <div class="mb-2"><span class="rating-stars">${stars || '\u2606\u2606\u2606\u2606\u2606'}</span><span class="text-secondary">${rating.toFixed(1)}</span></div>
+                        <div class="revenue-badge d-inline-block mb-3"><div class="percent">10%</div><div class="label">${getL(uiText.revenueShare)}</div></div>
+                        <div class="d-grid"><button class="btn btn-custom" onclick="openRequestModal('${profile.profile_id}')"><i class="fas fa-paper-plane me-2"></i>${getL(uiText.btnRequest)}</button></div>
+                    </div>
+                    <div class="col-md-8">
+                        <h5>${getL(uiText.profileBio)}</h5>
+                        <p>${escapeHtml(profile.bio) || getL(uiText.noBioYet)}</p>
+                        <h5>${getL(uiText.profileLanguages)}</h5>
+                        <div class="mb-3">${languages.map(l => `<span class="lang-badge mb-2">${LANG_NAMES[l.source_language] || l.source_language} \u2192 ${LANG_NAMES[l.target_language] || l.target_language}${l.is_native_target ? '<span class="native-badge">' + getL(uiText.native) + '</span>' : ''}</span>`).join('')}</div>
+                        <div class="row mb-3">
+                            <div class="col-6"><strong>${getL(uiText.profileYearsExp)}</strong> ${profile.years_experience || 0}</div>
+                            <div class="col-6"><strong>${getL(uiText.profileCompleted)}</strong> ${profile.completed_projects || 0}</div>
+                        </div>
+                        ${profile.certifications ? `<p><strong>${getL(uiText.profileCertifications)}</strong> ${escapeHtml(profile.certifications)}</p>` : ''}
+                        <h5 class="mt-4">${getL(uiText.profileReviews)} (${reviews.length})</h5>
+                        ${reviews.length > 0 ? reviews.map(r => `
+                            <div class="p-3 mb-2" style="background: var(--color-bg-hover); border-radius: var(--radius-md);">
+                                <div class="d-flex justify-content-between"><strong>${escapeHtml(r.reviewer_name) || getL(uiText.anonymous)}</strong><span class="rating-stars">${'\u2605'.repeat(r.overall_rating)}</span></div>
+                                ${r.review_text ? `<p class="mb-1 small">${escapeHtml(r.review_text)}</p>` : ''}
+                                <small class="text-secondary">${new Date(r.created_at).toLocaleDateString()}</small>
+                            </div>
+                        `).join('') : '<p class="text-secondary">' + getL(uiText.noReviewsYet) + '</p>'}
+                    </div>
+                </div>
+            `;
+        }
+
+        async function openRequestModal(profileId) {
+            document.getElementById('request-profile-id').value = profileId;
+            document.getElementById('request-message').value = '';
+            document.getElementById('request-deadline').value = '';
+            const workSelect = document.getElementById('request-work');
+            workSelect.innerHTML = '<option value="">' + getL(uiText.loadingWorks) + '</option>';
+
+            const profileModal = bootstrap.Modal.getInstance(document.getElementById('editorModal'));
+            if (profileModal) profileModal.hide();
+
+            const modal = new bootstrap.Modal(document.getElementById('requestModal'));
+            modal.show();
+
+            try {
+                const userId = localStorage.getItem('userId');
+                if (userId) {
+                    const response = await fetch(`${API_BASE}/works?author_id=${userId}`);
+                    const data = await response.json();
+                    workSelect.innerHTML = '<option value="">' + getL(uiText.optSelectWork) + '</option>' + (data.works || []).map(w => `<option value="${w.work_id}">${escapeHtml(w.title)}</option>`).join('');
+                } else {
+                    workSelect.innerHTML = '<option value="">' + getL(uiText.alertLoginRequired) + '</option>';
+                }
+            } catch (error) {
+                workSelect.innerHTML = '<option value="">' + getL(uiText.loadWorksFailed) + '</option>';
+            }
+        }
+
+        async function submitRequest() {
+            var profileId = document.getElementById('request-profile-id').value;
+            var workId = document.getElementById('request-work').value;
+            var message = document.getElementById('request-message').value;
+            var deadline = document.getElementById('request-deadline').value;
+
+            if (!workId) { alert(getL(uiText.alertSelectWork)); return; }
+
+            try {
+                var response = await fetch(API_BASE + '/editors/' + profileId + '/request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+                    body: JSON.stringify({ workId: workId, title: 'Editing Request', description: message, deadline: deadline || null })
+                });
+                if (response.ok) {
+                    createMessageConversation(profileId, workId, message, deadline, 'editor');
+                    alert(getL(uiText.alertRequestSent));
+                    bootstrap.Modal.getInstance(document.getElementById('requestModal')).hide();
+                } else {
+                    throw new Error('API error');
+                }
+            } catch (error) {
+                // デモモード: メッセージ機能に会話を作成
+                createMessageConversation(profileId, workId, message, deadline, 'editor');
+                alert(getL(uiText.alertRequestSent));
+                bootstrap.Modal.getInstance(document.getElementById('requestModal')).hide();
+            }
+        }
+
+        // メッセージ機能に会話を自動作成
+        function createMessageConversation(profileId, workId, message, deadline, role) {
+            var editor = DEMO_EDITORS.find(function(e) { return String(e.id) === String(profileId); });
+            if (!editor) return;
+            var workSelect = document.getElementById('request-work');
+            var workTitle = workSelect.options[workSelect.selectedIndex].text || 'Work';
+            var convs = [];
+            try { convs = JSON.parse(localStorage.getItem('publisher_messages') || '[]'); } catch(e) { convs = []; }
+            var convId = 'conv_edit_' + Date.now();
+            var msgText = '--- Editing Request ---\nWork: ' + workTitle;
+            if (deadline) msgText += '\nDeadline: ' + deadline;
+            if (message) msgText += '\n\n' + message;
+            convs.unshift({
+                id: convId,
+                name: editor.name,
+                role: role,
+                initial: editor.name.charAt(0),
+                unread: 0,
+                messages: [
+                    { id: 'm1', text: msgText, sent: true, time: new Date().toISOString() }
+                ]
+            });
+            localStorage.setItem('publisher_messages', JSON.stringify(convs));
+        }
+
+        function resetFilters() {
+            document.getElementById('source-language').value = '';
+            document.getElementById('target-language').value = '';
+            document.getElementById('min-rating').value = '';
+            document.getElementById('specialization').value = '';
+            document.getElementById('sort-order').value = 'rating';
+            searchEditors();
+        }
+
+        function escapeHtml(text) { if (!text) return ''; const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            syncSelectors();
+            updateAllText();
+            searchEditors();
+        });
+
+        document.addEventListener('languageChanged', function(e) {
+            const l = e.detail.language || e.detail.lang;
+            if (l) { const d = document.getElementById('languageSelector'), m = document.getElementById('languageSelectorMobile'); if (d) d.value = l; if (m) m.value = l; }
+            updateAllText();
+            searchEditors();
+        });
+
+        if (typeof i18n !== 'undefined') {
+            i18n.onLanguageChange(function() {
+                if (typeof i18n !== 'undefined') i18n.applyToDOM();
+                updateAllText();
+            });
+        }
+    </script>
+
+    <!-- ========== Pattern C Navbar JavaScript ========== -->
+    <script>
+    // ========== Navbar multilingual text (9 languages) ==========
+    const navbarText = {
+        translationTools: { en: 'Tools', ja: '翻訳ツール', zh: '翻译工具',
+            es: 'Herramientas de traduccion', fr: 'Outils de traduction', de: 'Ubersetzungstools',
+            ko: '번역 도구', ar: 'أدوات الترجمة', pt: 'Ferramentas de traducao'
+        },
+        mangaTranslator: {
+            en: 'Manga Translator', ja: 'マンガ翻訳', zh: '漫画翻译',
+            es: 'Traductor de Manga', fr: 'Traducteur de Manga', de: 'Manga-Ubersetzer',
+            ko: '만화 번역기', ar: 'مترجم المانجا', pt: 'Tradutor de Manga'
+        },
+        novelTranslator: {
+            en: 'Novel Translator', ja: '小説翻訳', zh: '小说翻译',
+            es: 'Traductor de Novela', fr: 'Traducteur de Roman', de: 'Roman-Ubersetzer',
+            ko: '소설 번역기', ar: 'مترجم الروايات', pt: 'Tradutor de Romance'
+        },
+        translationStatus: {
+            en: 'Translation Status', ja: '翻訳状況', zh: '翻译状态',
+            es: 'Estado de traduccion', fr: 'Statut de traduction', de: 'Ubersetzungsstatus',
+            ko: '번역 상태', ar: 'حالة الترجمة', pt: 'Status da traducao'
+        },
+        findTranslators: {
+            en: 'Find Translators', ja: '翻訳者を探す', zh: '寻找翻译',
+            es: 'Buscar traductores', fr: 'Trouver des traducteurs', de: 'Ubersetzer finden',
+            ko: '번역가 찾기', ar: 'البحث عن مترجمين', pt: 'Encontrar tradutores'
+        },
+        contact: {
+            en: 'Contact', ja: 'お問い合わせ', zh: '联系我们',
+            es: 'Contacto', fr: 'Contact', de: 'Kontakt',
+            ko: '문의', ar: 'اتصل بنا', pt: 'Contato'
+        },
+        library: {
+            en: 'Library', ja: 'ライブラリ', zh: '书库',
+            es: 'Biblioteca', fr: 'Bibliotheque', de: 'Bibliothek',
+            ko: '라이브러리', ar: 'المكتبة', pt: 'Biblioteca'
+        },
+        dashboard: {
+            en: 'Dashboard', ja: 'ダッシュボード', zh: '控制台',
+            es: 'Panel', fr: 'Tableau de bord', de: 'Dashboard',
+            ko: '대시보드', ar: 'لوحة التحكم', pt: 'Painel'
+        },
+        accountSettings: {
+            en: 'Account Settings', ja: 'アカウント設定', zh: '账户设置',
+            es: 'Configuracion de cuenta', fr: 'Parametres du compte', de: 'Kontoeinstellungen',
+            ko: '계정 설정', ar: 'إعدادات الحساب', pt: 'Configuracoes da conta'
+        },
+        logout: {
+            en: 'Log Out', ja: 'ログアウト', zh: '退出登录',
+            es: 'Cerrar sesion', fr: 'Deconnexion', de: 'Abmelden',
+            ko: '로그아웃', ar: 'تسجيل الخروج', pt: 'Sair'
+        },
+        logOutConfirm: {
+            en: 'Are you sure you want to log out?', ja: 'ログアウトしますか？', zh: '确定要退出登录吗？',
+            es: 'Estas seguro de que quieres cerrar sesion?', fr: 'Etes-vous sur de vouloir vous deconnecter?', de: 'Sind Sie sicher, dass Sie sich abmelden mochten?',
+            ko: '로그아웃 하시겠습니까?', ar: 'هل أنت متأكد أنك تريد تسجيل الخروج؟', pt: 'Tem certeza que deseja sair?'
+        }
+    };
+
+    function getNavL(obj) {
+        const lang = localStorage.getItem('preferredLanguage') || 'en';
+        return obj[lang] || obj.en || '';
+    }
+
+    function updateUIText() {
+
+        const els = {
+
+        };
+        Object.keys(els).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = getNavL(els[id]);
+        });
+    }
+
+    function toggleUserDropdown(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const dropdown = document.getElementById('userDropdown');
+        const dropdownMenu = document.getElementById('userMenu');
+        dropdown.classList.toggle('open');
+        dropdownMenu.classList.toggle('show');
+    }
+
+    function handleLogout() {
+        if (confirm(getNavL(navbarText.logOutConfirm))) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.reload();
+        }
+    }
+
+    function loadUserInfo() {
+        const userStr = localStorage.getItem('user');
+        const token = localStorage.getItem('token');
+        const isLoggedIn = !!(userStr && token);
+
+        if (isLoggedIn) {
+            try {
+                const user = JSON.parse(userStr);
+                const displayName = user.display_name || user.firstName || user.email || 'User';
+                const userNameEl = document.getElementById('userName');
+                const userDisplayNameEl = document.getElementById('userDisplayName');
+                const userEmailEl = document.getElementById('userEmail');
+                if (userNameEl) userNameEl.textContent = displayName;
+                if (userDisplayNameEl) userDisplayNameEl.textContent = displayName;
+                if (userEmailEl) userEmailEl.textContent = user.email || '';
+                document.body.classList.add('logged-in');
+            } catch (e) {
+                document.body.classList.remove('logged-in');
+            }
+        } else {
+            document.body.classList.remove('logged-in');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const desktopSelector = document.getElementById('languageSelector');
+        const mobileSelector = document.getElementById('languageSelectorMobile');
+
+        if (desktopSelector && mobileSelector) {
+            const savedLang = localStorage.getItem('preferredLanguage') || 'en';
+            desktopSelector.value = savedLang;
+            mobileSelector.value = savedLang;
+
+            mobileSelector.addEventListener('change', function() {
+                desktopSelector.value = this.value;
+                if (typeof changeLanguage === 'function') changeLanguage(this.value);
+                updateUIText();
+            });
+
+            desktopSelector.addEventListener('change', function() {
+                mobileSelector.value = this.value;
+                if (typeof changeLanguage === 'function') changeLanguage(this.value);
+                updateUIText();
+            });
+        }
+
+        updateUIText();
+        setTimeout(updateUIText, 100);
+        loadUserInfo();
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.user-dropdown')) {
+                const dropdown = document.getElementById('userDropdown');
+                const dropdownMenu = document.getElementById('userMenu');
+                if (dropdown) dropdown.classList.remove('open');
+                if (dropdownMenu) dropdownMenu.classList.remove('show');
+            }
+        });
+
+        const navbarCollapse = document.getElementById('navbarNav');
+        const navbarOverlay = document.getElementById('navbarOverlay');
+
+        if (navbarCollapse) {
+            navbarCollapse.addEventListener('show.bs.collapse', function() {
+                if (navbarOverlay) navbarOverlay.classList.add('show');
+            });
+            navbarCollapse.addEventListener('hide.bs.collapse', function() {
+                if (navbarOverlay) navbarOverlay.classList.remove('show');
+            });
+        }
+
+        if (navbarOverlay) {
+            navbarOverlay.addEventListener('click', function() {
+                const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                if (bsCollapse) bsCollapse.hide();
+            });
+        }
+
+        document.addEventListener('languageChanged', function() {
+            updateUIText();
+        });
+    });
+    </script>
+</body>
+</html>

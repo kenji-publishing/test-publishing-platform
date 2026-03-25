@@ -1,0 +1,1890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Novel Translator - Publisher</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Platform CSS -->
+    <link href="../css/variables.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style-new.css">
+    <link href="../css/components.css" rel="stylesheet">
+    <link href="../css/navbar.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/mobile-fixes.css">
+
+    <!-- 言語ファイル（9言語） -->
+    <script src="../js/lang/ja.js"></script>
+    <script src="../js/lang/en.js"></script>
+    <script src="../js/lang/zh.js"></script>
+    <script src="../js/lang/es.js"></script>
+    <script src="../js/lang/fr.js"></script>
+    <script src="../js/lang/de.js"></script>
+    <script src="../js/lang/ko.js"></script>
+    <script src="../js/lang/ar.js"></script>
+    <script src="../js/lang/pt.js"></script>
+    <script src="../js/lang/translations-base.js"></script>
+
+    <style>
+        :root {
+            --color-bg: #FAF8F5;
+            --color-bg-card: #FFFFFF;
+            --color-bg-main: #FAF8F5;
+            --color-bg-hover: rgba(139, 115, 85, 0.05);
+            --color-accent: #8B7355;
+            --color-text: #2D2A26;
+            --color-text-secondary: #6B6560;
+            --color-border: #E8E4E0;
+            --color-success: #5D9C59;
+            --color-warning: #D4A853;
+            --color-error: #C75D5D;
+            --color-info: #5D8BC7;
+        }
+
+        * { box-sizing: border-box; }
+
+        /* ========== Pattern C Navbar Styles ========== */
+        .navbar-lang-selector {
+            display: flex;
+            align-items: center;
+            margin-right: 0.5rem;
+        }
+        @media (max-width: 991.98px) {
+            .navbar-lang-selector { order: 1; }
+            .navbar-toggler { order: 2; }
+        }
+        @media (min-width: 992px) {
+            .navbar-nav { flex-wrap: nowrap !important; flex-direction: row !important; }
+            .navbar-nav .nav-item { white-space: nowrap !important; }
+            .navbar-nav .nav-link { white-space: nowrap !important; padding: 0.5rem 0.6rem !important; font-size: 0.9rem; }
+            .dropdown-menu { white-space: nowrap; }
+            .navbar-buttons-guest { display: flex !important; flex-wrap: nowrap !important; gap: 0.5rem; }
+            .navbar-buttons-guest .btn { white-space: nowrap !important; flex-shrink: 0; }
+        }
+        .auth-only { display: none !important; }
+        .guest-only { display: block; }
+        body.logged-in .auth-only { display: block !important; }
+        body.logged-in .auth-only.nav-item { display: list-item !important; }
+        body.logged-in .auth-only.dropdown { display: block !important; }
+        body.logged-in .guest-only { display: none !important; }
+        @media (min-width: 992px) {
+            body.logged-in .navbar-buttons-guest { display: none !important; }
+        }
+        .user-dropdown { position: relative; }
+        .user-dropdown-toggle {
+            display: flex; align-items: center; gap: 0.5rem;
+            background: transparent; border: 1px solid var(--color-border);
+            border-radius: 25px; padding: 0.4rem 0.75rem;
+            cursor: pointer; color: var(--color-text); transition: all 0.2s;
+        }
+        .user-dropdown-toggle:hover { border-color: var(--color-accent); background: rgba(139, 115, 85, 0.05); }
+        .user-dropdown-toggle i:first-child { font-size: 1.25rem; color: var(--color-accent); }
+        .user-name { font-weight: 500; font-size: 0.9rem; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .user-chevron { font-size: 0.7rem; color: var(--color-text-secondary); transition: transform 0.2s; }
+        .user-dropdown.open .user-chevron { transform: rotate(180deg); }
+        .user-menu {
+            position: absolute; top: calc(100% + 0.5rem); right: 0;
+            background: var(--color-bg-card); border: 1px solid var(--color-border);
+            border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            min-width: 240px; z-index: 1001; display: none; overflow: hidden;
+        }
+        .user-menu.show { display: block; }
+        .user-menu-header { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; background: var(--color-bg-main); }
+        .user-avatar { font-size: 2.5rem; color: var(--color-accent); }
+        .user-info { flex: 1; min-width: 0; }
+        .user-display-name { font-weight: 600; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .user-email { font-size: 0.8rem; color: var(--color-text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .user-menu-divider { height: 1px; background: var(--color-border); }
+        .user-menu-item {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem 1rem; color: var(--color-text); text-decoration: none;
+            font-size: 0.9rem; cursor: pointer; border: none; background: transparent;
+            width: 100%; text-align: left;
+        }
+        .user-menu-item:hover { background: var(--color-bg-hover); color: var(--color-accent); }
+        .user-menu-item i { width: 20px; text-align: center; color: var(--color-text-secondary); }
+        .user-menu-item:hover i { color: var(--color-accent); }
+        .logout-btn { color: var(--color-error); }
+        .logout-btn i { color: var(--color-error); }
+        .logout-btn:hover { background: rgba(199, 93, 93, 0.1); color: var(--color-error); }
+        @media (max-width: 991.98px) {
+        }
+        /* ========== End Pattern C Navbar Styles ========== */
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            margin: 0; padding: 0;
+        }
+
+        /* ========== Page Layout ========== */
+        .page-header {
+            padding: 1.5rem 0 1rem;
+            border-bottom: 1px solid var(--color-border);
+            background: var(--color-bg-card);
+        }
+        .page-header h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--color-accent);
+            margin: 0;
+        }
+        .page-header p {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            margin: 0.25rem 0 0;
+        }
+
+        .translator-layout {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 1.25rem;
+            padding: 1.25rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 1024px) {
+            .translator-layout { grid-template-columns: 1fr; }
+        }
+
+        /* ===== AI Model Selector ===== */
+        .model-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            margin-bottom: 0.5rem;
+        }
+        .model-option { cursor: pointer; margin: 0; }
+        .model-option input[type="radio"] { display: none; }
+        .model-card {
+            border: 2px solid var(--color-border);
+            border-radius: 8px;
+            padding: 0.5rem 0.6rem;
+            transition: all 0.2s;
+            background: var(--color-bg-card);
+        }
+        .model-option input:checked + .model-card {
+            border-color: var(--color-accent);
+            background: rgba(139, 115, 85, 0.06);
+            box-shadow: 0 0 0 1px var(--color-accent);
+        }
+        .model-card:hover { border-color: var(--color-accent); }
+        .model-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.2rem;
+        }
+        .model-name { font-weight: 600; font-size: 0.85rem; }
+        .model-badge {
+            font-size: 0.6rem; font-weight: 700; padding: 0.15rem 0.4rem;
+            border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .badge-fast { background: #E8F5E9; color: #2E7D32; }
+        .badge-balanced { background: #E3F2FD; color: #1565C0; }
+        .badge-premium { background: #FFF3E0; color: #E65100; }
+        .model-desc { font-size: 0.72rem; color: var(--color-text-secondary); margin-bottom: 0.15rem; }
+        .model-price { font-size: 0.72rem; font-weight: 600; color: var(--color-accent); }
+        .cost-estimate {
+            background: rgba(139, 115, 85, 0.08);
+            border-radius: 6px; padding: 0.4rem 0.6rem;
+            font-size: 0.75rem; color: var(--color-text); margin-bottom: 0.5rem;
+        }
+        .btn-preview {
+            width: 100%;
+            background: linear-gradient(135deg, var(--color-accent), #A08B6D);
+            color: #fff; border: none; border-radius: 8px;
+            padding: 0.5rem; font-size: 0.8rem; font-weight: 600;
+            cursor: pointer; transition: all 0.2s; margin-bottom: 0.3rem;
+        }
+        .btn-preview:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-preview:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .preview-limit-info {
+            font-size: 0.7rem; color: var(--color-text-secondary);
+            text-align: center; margin-bottom: 0.5rem;
+        }
+
+        /* ===== Preview Modal ===== */
+        .preview-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6); z-index: 2000;
+            display: flex; align-items: center; justify-content: center; padding: 1rem;
+        }
+        .preview-modal {
+            background: var(--color-bg-card); border-radius: 16px;
+            width: 100%; max-width: 900px; max-height: 90vh; overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .preview-modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1rem 1.25rem; border-bottom: 1px solid var(--color-border);
+        }
+        .preview-modal-header h3 { margin: 0; font-size: 1rem; }
+        .preview-close {
+            background: none; border: none; font-size: 1.2rem;
+            color: var(--color-text-secondary); cursor: pointer; padding: 0.3rem;
+        }
+        .preview-original {
+            padding: 0.75rem 1.25rem; background: var(--color-bg);
+            font-size: 0.82rem; color: var(--color-text-secondary);
+            border-bottom: 1px solid var(--color-border);
+        }
+        .preview-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
+        }
+        .preview-card { border-right: 1px solid var(--color-border); }
+        .preview-card:last-child { border-right: none; }
+        .preview-card-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.6rem 0.75rem; background: var(--color-bg);
+            border-bottom: 1px solid var(--color-border);
+        }
+        .preview-card-body {
+            padding: 0.75rem; font-size: 0.82rem; line-height: 1.6; min-height: 120px;
+        }
+        .preview-loading {
+            display: flex; align-items: center; justify-content: center;
+            height: 80px; color: var(--color-accent); font-size: 1.2rem;
+        }
+        .preview-footer {
+            padding: 0.6rem 1.25rem; border-top: 1px solid var(--color-border); text-align: center;
+        }
+        .preview-note { font-size: 0.7rem; color: var(--color-text-secondary); }
+        @media (max-width: 600px) {
+            .preview-grid { grid-template-columns: 1fr; }
+            .preview-card { border-right: none; border-bottom: 1px solid var(--color-border); }
+        }
+
+        /* ========== Panels ========== */
+        .panel {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            padding: 0.9rem 1.1rem;
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+        .panel-header h2 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--color-text);
+        }
+        .panel-body { padding: 1rem; flex: 1; overflow-y: auto; }
+
+        /* ========== Translation Area ========== */
+        .lang-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .lang-bar select {
+            flex: 1;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            font-size: 0.88rem;
+            background: var(--color-bg);
+            color: var(--color-text);
+        }
+        .lang-bar select:focus { outline: none; border-color: var(--color-accent); }
+        .lang-swap-btn {
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            padding: 0.5rem 0.7rem;
+            cursor: pointer;
+            color: var(--color-text-secondary);
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .lang-swap-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
+
+        .text-panels {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+        @media (max-width: 768px) {
+            .text-panels { grid-template-columns: 1fr; }
+            .segment-row { grid-template-columns: 1fr; }
+            .ts-grid-2 { grid-template-columns: 1fr; }
+            .lang-bar { flex-wrap: wrap; gap: 0.4rem; }
+            .lang-bar select { min-width: 0; }
+            .translator-layout { padding: 0.75rem; }
+            .panel-header { flex-wrap: wrap; gap: 0.5rem; }
+            .panel-body { padding: 0.75rem; }
+            .action-row-right { justify-content: flex-end; }
+        }
+
+        .text-area-block { display: flex; flex-direction: column; }
+        .text-area-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.4rem;
+        }
+        .text-area-wrap { position: relative; flex: 1; }
+        .novel-textarea {
+            width: 100%;
+            min-height: 320px;
+            padding: 0.85rem;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            font-size: 0.92rem;
+            line-height: 1.8;
+            font-family: 'Noto Serif JP', serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+        .novel-textarea:focus { outline: none; border-color: var(--color-accent); }
+        .novel-textarea[readonly] { background: #f9f7f5; }
+        .char-count {
+            text-align: right;
+            font-size: 0.75rem;
+            color: var(--color-text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .btn-primary-custom {
+            background: var(--color-accent); color: white;
+            border: none; padding: 0.7rem 1.5rem;
+            border-radius: 8px; cursor: pointer; font-weight: 600;
+            font-size: 0.9rem; transition: all 0.2s;
+        }
+        .btn-primary-custom:hover { background: #7A6548; }
+        .btn-primary-custom:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .btn-secondary-custom {
+            background: transparent; color: var(--color-accent);
+            border: 1px solid var(--color-accent); padding: 0.7rem 1.2rem;
+            border-radius: 8px; cursor: pointer; font-weight: 500;
+            font-size: 0.88rem; transition: all 0.2s;
+        }
+        .btn-secondary-custom:hover { background: var(--color-accent); color: white; }
+
+        .btn-icon {
+            background: var(--color-bg); color: var(--color-text-secondary);
+            border: 1px solid var(--color-border); padding: 0.45rem 0.7rem;
+            border-radius: 6px; cursor: pointer; font-size: 0.82rem; transition: all 0.2s;
+        }
+        .btn-icon:hover { border-color: var(--color-accent); color: var(--color-accent); }
+
+        .action-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            flex-wrap: wrap;
+        }
+        .action-row-left { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+        .action-row-right { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+
+        .upload-btn-label {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            background: var(--color-bg); color: var(--color-text-secondary);
+            border: 1px solid var(--color-border); padding: 0.45rem 0.75rem;
+            border-radius: 6px; cursor: pointer; font-size: 0.82rem; transition: all 0.2s;
+        }
+        .upload-btn-label:hover { border-color: var(--color-accent); color: var(--color-accent); }
+
+        /* ========== Translation Status Bar ========== */
+        .status-bar {
+            padding: 0.6rem 1rem;
+            border-top: 1px solid var(--color-border);
+            font-size: 0.82rem;
+            color: var(--color-text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .status-bar.translating { color: var(--color-info); }
+        .status-bar.done { color: var(--color-success); }
+        .status-bar.error-state { color: var(--color-error); }
+
+        /* Spinner */
+        .spinner {
+            width: 14px; height: 14px;
+            border: 2px solid var(--color-border);
+            border-top-color: var(--color-info);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ========== Settings Panel ========== */
+        .tool-section { margin-bottom: 1.25rem; }
+        .tool-section h4 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.6rem;
+        }
+
+        .ts-row { margin-bottom: 0.6rem; }
+        .ts-label { font-size: 0.78rem; font-weight: 600; color: var(--color-text-secondary); display: block; margin-bottom: 0.25rem; }
+        .ts-select {
+            width: 100%; padding: 5px 8px;
+            border: 1px solid var(--color-border); border-radius: 6px;
+            font-size: 0.82rem; background: #fff; color: var(--color-text);
+        }
+        .ts-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.6rem; }
+        .ts-context-input {
+            width: 100%; padding: 5px 8px;
+            border: 1px solid var(--color-border); border-radius: 6px;
+            font-size: 0.78rem; resize: none; font-family: inherit; color: var(--color-text);
+        }
+
+        /* Collapsible settings */
+        .ts-settings-panel { border: 1px solid var(--color-border); border-radius: 8px; margin-bottom: 0.75rem; overflow: hidden; }
+        .ts-settings-toggle {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0.6rem 0.75rem; background: var(--color-bg-hover);
+            cursor: pointer; font-size: 0.82rem; font-weight: 600;
+            color: var(--color-accent); user-select: none;
+            border: none; width: 100%; text-align: left;
+        }
+        .ts-settings-toggle:hover { background: rgba(139,115,85,0.1); }
+        .ts-settings-body { padding: 0.75rem; display: none; border-top: 1px solid var(--color-border); background: #fff; }
+        .ts-settings-body.open { display: block; }
+        .ts-badge { font-size: 0.65rem; background: var(--color-accent); color: #fff; border-radius: 8px; padding: 1px 6px; margin-left: 4px; }
+
+        /* Glossary */
+        .glossary-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; margin-bottom: 0.5rem; }
+        .glossary-table th { background: #f5f3f0; padding: 5px 8px; text-align: left; font-weight: 600; color: var(--color-text-secondary); border-bottom: 1px solid var(--color-border); }
+        .glossary-table td { padding: 4px 6px; border-bottom: 1px solid #f0eeeb; vertical-align: middle; }
+        .glossary-table tr:last-child td { border-bottom: none; }
+        .glossary-input { border: 1px solid var(--color-border); border-radius: 4px; padding: 3px 6px; font-size: 0.78rem; width: 100%; background: #fff; }
+        .glossary-del-btn { background: none; border: none; color: var(--color-error); cursor: pointer; font-size: 0.85rem; padding: 2px 4px; }
+        .glossary-add-row { display: flex; gap: 0.4rem; align-items: center; }
+        .glossary-add-row input { flex: 1; padding: 4px 7px; border: 1px solid var(--color-border); border-radius: 5px; font-size: 0.78rem; }
+        .glossary-add-btn { white-space: nowrap; padding: 4px 10px; font-size: 0.78rem; background: var(--color-accent); color: #fff; border: none; border-radius: 5px; cursor: pointer; }
+        .glossary-add-btn:hover { opacity: 0.85; }
+
+        /* Translation Memory */
+        .tm-chip { display: inline-block; background: #f0eeeb; border: 1px solid var(--color-border); border-radius: 12px; padding: 2px 10px; font-size: 0.72rem; margin: 2px; cursor: pointer; }
+        .tm-chip:hover { background: var(--color-bg-hover); border-color: var(--color-accent); }
+        .tm-chip .tm-src { color: var(--color-text-secondary); }
+        .tm-chip .tm-arrow { color: #aaa; margin: 0 3px; }
+        .tm-chip .tm-tgt { color: var(--color-accent); font-weight: 600; }
+
+        /* Segment mode */
+        .segments-wrap { display: flex; flex-direction: column; gap: 0.6rem; }
+        .segment-row {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;
+            padding: 0.6rem; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 8px;
+        }
+        .segment-src { font-size: 0.88rem; line-height: 1.7; color: var(--color-text); }
+        .segment-tgt {
+            font-size: 0.88rem; line-height: 1.7; color: var(--color-text);
+            border: none; background: transparent; width: 100%; resize: none; font-family: inherit;
+            outline: none;
+        }
+        .segment-tgt:focus { background: rgba(139,115,85,0.04); border-radius: 4px; }
+        .segment-num { font-size: 0.7rem; color: var(--color-text-secondary); margin-bottom: 0.25rem; }
+
+        /* View tabs */
+        .view-tabs { display: flex; gap: 0.25rem; }
+        .view-tab {
+            padding: 0.3rem 0.7rem; border: 1px solid var(--color-border); border-radius: 6px;
+            font-size: 0.78rem; cursor: pointer; background: var(--color-bg); color: var(--color-text-secondary);
+            transition: all 0.2s;
+        }
+        .view-tab.active { background: var(--color-accent); color: #fff; border-color: var(--color-accent); }
+        .view-tab:hover:not(.active) { border-color: var(--color-accent); color: var(--color-accent); }
+
+        /* ===== Wizard Styles ===== */
+        .wizard-container { max-width: 960px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+        .wizard-header { text-align: center; margin-bottom: 1.5rem; }
+        .wizard-header h1 { font-size: 1.5rem; color: var(--color-accent); margin-bottom: 0.3rem; }
+        .wizard-header p { color: var(--color-text-secondary); font-size: 0.9rem; }
+
+        .steps-bar { display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 2rem; flex-wrap: nowrap; }
+        .step-indicator { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; cursor: default; }
+        .step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--color-border); color: var(--color-text-secondary); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; transition: all 0.3s; }
+        .step-label { font-size: 0.6rem; color: var(--color-text-secondary); text-align: center; max-width: 60px; }
+        .step-indicator.active .step-num { background: var(--color-accent); color: #fff; box-shadow: 0 0 0 3px rgba(139,115,85,0.2); }
+        .step-indicator.active .step-label { color: var(--color-accent); font-weight: 600; }
+        .step-indicator.completed .step-num { background: var(--color-success); color: #fff; }
+        .step-line { width: 20px; height: 2px; background: var(--color-border); margin: 0 2px; margin-bottom: 16px; }
+
+        .step-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; padding: 2rem; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+        .step-card.center-card { text-align: center; max-width: 600px; margin: 0 auto; }
+        .step-card.wide-card { max-width: 1100px; }
+        .step-desc { color: var(--color-text-secondary); font-size: 0.88rem; margin-bottom: 1.5rem; }
+        .step-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; gap: 1rem; }
+
+        .btn-wizard-primary { background: var(--color-accent); color: #fff; border: none; padding: 0.7rem 1.5rem; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-wizard-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-wizard-secondary { background: transparent; color: var(--color-text-secondary); border: 1px solid var(--color-border); padding: 0.7rem 1.5rem; border-radius: 10px; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
+        .btn-wizard-secondary:hover { border-color: var(--color-accent); color: var(--color-accent); }
+
+        /* Step 1 */
+        .notice-icon { font-size: 3rem; color: var(--color-accent); text-align: center; margin-bottom: 1rem; }
+        .pricing-table { margin: 1.5rem 0; }
+        .pricing-row { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--color-border); font-size: 0.85rem; flex-wrap: wrap; gap: 0.5rem; }
+        .pricing-model { font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
+        .pricing-info { color: var(--color-text-secondary); font-size: 0.8rem; }
+        .model-badge { font-size: 0.55rem; font-weight: 700; padding: 0.15rem 0.4rem; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .badge-fast { background: #E8F5E9; color: #2E7D32; }
+        .badge-balanced { background: #E3F2FD; color: #1565C0; }
+        .badge-premium { background: #FFF3E0; color: #E65100; }
+        .notice-min { text-align: center; font-weight: 600; color: var(--color-accent); margin-top: 1rem; font-size: 0.88rem; }
+        .currency-selector { text-align: center; margin-bottom: 1rem; }
+        .currency-selector label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--color-text-secondary); margin-bottom: 0.3rem; }
+        .currency-selector select { max-width: 320px; margin: 0 auto; }
+
+        /* Step 5 Payment Method Selector */
+        .pay-method-selector { margin-bottom: 1.5rem; }
+        .pay-method-selector > label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--color-text-secondary); margin-bottom: 0.5rem; }
+        .pay-method-options { display: flex; gap: 1rem; }
+        .pay-method-option { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.3rem; padding: 0.8rem; border: 2px solid var(--color-border); border-radius: 10px; cursor: pointer; transition: all 0.2s; text-align: center; }
+        .pay-method-option:hover { border-color: var(--color-accent); }
+        .pay-method-option.selected { border-color: var(--color-accent); background: rgba(139,115,85,0.05); }
+        .pay-method-option input[type="radio"] { display: none; }
+        .pay-method-option i { font-size: 1.5rem; color: var(--color-accent); }
+        .pay-method-option span { font-weight: 600; font-size: 0.9rem; }
+        .pay-method-note { font-size: 0.7rem; color: var(--color-text-secondary); font-weight: 400; }
+        .payment-method-label { font-size: 0.85rem; color: var(--color-text-secondary); margin-top: 0.3rem; }
+        .paypal-btn { width: 100%; justify-content: center; }
+
+        /* Step 2 */
+        .lang-bar { display: flex; align-items: flex-end; gap: 0.75rem; margin-bottom: 1.5rem; }
+        .lang-group { flex: 1; }
+        .lang-group label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--color-text-secondary); margin-bottom: 0.3rem; }
+        .lang-swap { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--color-border); background: var(--color-bg); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--color-accent); transition: all 0.2s; }
+        .lang-swap:hover { background: var(--color-accent); color: #fff; }
+        .form-select-custom { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--color-border); border-radius: 8px; font-size: 0.88rem; background: #fff; color: var(--color-text); }
+        .input-mode-tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+        .mode-tab { padding: 0.5rem 1rem; border: 1px solid var(--color-border); border-radius: 8px; font-size: 0.82rem; cursor: pointer; background: var(--color-bg); color: var(--color-text-secondary); transition: all 0.2s; }
+        .mode-tab.active { background: var(--color-accent); color: #fff; border-color: var(--color-accent); }
+        .text-input { width: 100%; padding: 1rem; border: 1px solid var(--color-border); border-radius: 10px; font-size: 0.9rem; font-family: 'Noto Sans JP', sans-serif; resize: vertical; min-height: 200px; line-height: 1.8; }
+        .text-input:focus { outline: none; border-color: var(--color-accent); }
+        .text-meta { display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.78rem; color: var(--color-text-secondary); }
+        .upload-zone { border: 2px dashed var(--color-border); border-radius: 12px; padding: 3rem; text-align: center; cursor: pointer; color: var(--color-text-secondary); transition: all 0.2s; }
+        .upload-zone:hover { border-color: var(--color-accent); color: var(--color-accent); }
+        .upload-zone i { font-size: 2.5rem; margin-bottom: 0.5rem; display: block; }
+
+        /* Step 3 */
+        .settings-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+        .setting-group label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--color-text-secondary); margin-bottom: 0.3rem; }
+        .setting-group.full-width { margin-bottom: 1rem; }
+        .form-textarea-custom { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--color-border); border-radius: 8px; font-size: 0.85rem; font-family: inherit; resize: none; }
+        .glossary-area { max-height: 200px; overflow-y: auto; }
+        .glossary-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+        .glossary-table th { background: #f5f3f0; padding: 5px 8px; text-align: left; font-weight: 600; border-bottom: 1px solid var(--color-border); }
+        .glossary-table td { padding: 4px 6px; border-bottom: 1px solid #f0eeeb; }
+        .glossary-del-btn { background: none; border: none; color: var(--color-error); cursor: pointer; }
+        .glossary-add-row { display: flex; gap: 0.4rem; margin-top: 0.5rem; }
+        .glossary-add-row input { flex: 1; padding: 5px 8px; border: 1px solid var(--color-border); border-radius: 6px; font-size: 0.82rem; }
+        .glossary-add-btn { padding: 5px 12px; background: var(--color-accent); color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+
+        /* Step 4 */
+        .preview-original-box { background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 10px; padding: 1rem; margin-bottom: 1.5rem; }
+        .preview-original-box h4 { font-size: 0.78rem; font-weight: 600; color: var(--color-text-secondary); margin-bottom: 0.5rem; }
+        .preview-original-text { font-size: 0.85rem; line-height: 1.7; color: var(--color-text); max-height: 100px; overflow-y: auto; }
+        .compare-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+        .compare-card { border: 2px solid var(--color-border); border-radius: 12px; overflow: hidden; cursor: pointer; transition: all 0.2s; }
+        .compare-card:hover { border-color: var(--color-accent); }
+        .compare-card.selected { border-color: var(--color-accent); box-shadow: 0 0 0 2px rgba(139,115,85,0.2); }
+        .compare-header { display: flex; align-items: center; gap: 0.5rem; padding: 0.6rem 0.75rem; background: var(--color-bg); border-bottom: 1px solid var(--color-border); font-size: 0.82rem; }
+        .compare-header .model-name { font-weight: 600; }
+        .compare-price { margin-left: auto; font-size: 0.72rem; color: var(--color-text-secondary); }
+        .compare-body { padding: 0.75rem; font-size: 0.82rem; line-height: 1.7; min-height: 120px; }
+        .compare-loading { display: flex; align-items: center; justify-content: center; gap: 0.5rem; height: 100px; color: var(--color-accent); }
+
+        /* Step 5 */
+        .quote-box { border: 1px solid var(--color-border); border-radius: 12px; padding: 1.5rem; max-width: 500px; margin: 0 auto 1rem; }
+        .quote-row { display: flex; justify-content: space-between; padding: 0.5rem 0; font-size: 0.88rem; }
+        .quote-value { font-weight: 600; }
+        .quote-divider { border-top: 1px solid var(--color-border); margin: 0.5rem 0; }
+        .quote-row.total { font-size: 1.1rem; font-weight: 700; color: var(--color-accent); }
+        .quote-min-note { text-align: center; font-size: 0.75rem; color: var(--color-text-secondary); margin-top: 0.5rem; }
+
+        /* Step 6 */
+        .payment-summary { text-align: center; margin-bottom: 1.5rem; }
+        .payment-amount { font-size: 2.5rem; font-weight: 700; color: var(--color-accent); }
+        .payment-methods { display: flex; gap: 1rem; justify-content: center; margin: 1.5rem 0; flex-wrap: wrap; }
+        .payment-btn { display: flex; align-items: center; gap: 0.75rem; padding: 1rem 2rem; border: 2px solid var(--color-border); border-radius: 12px; background: #fff; cursor: pointer; font-size: 1rem; font-weight: 500; transition: all 0.2s; }
+        .payment-btn:hover { border-color: var(--color-accent); background: rgba(139,115,85,0.04); }
+        .payment-btn i { font-size: 1.5rem; color: var(--color-accent); }
+        .payment-secure { text-align: center; font-size: 0.78rem; color: var(--color-text-secondary); }
+
+        /* Step 7 */
+        .translating-icon { font-size: 4rem; color: var(--color-accent); margin-bottom: 1rem; }
+        @keyframes fa-spin-slow { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .fa-spin-slow { animation: fa-spin-slow 3s linear infinite; }
+        .progress-container { max-width: 400px; margin: 1.5rem auto; }
+        .progress-bar-custom { height: 8px; background: var(--color-border); border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--color-accent), #A08B6D); border-radius: 4px; transition: width 0.1s; }
+        .progress-info { display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.78rem; color: var(--color-text-secondary); }
+        .translating-note { font-size: 0.82rem; color: var(--color-text-secondary); margin-top: 1.5rem; }
+
+        /* Step 8 */
+        .review-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+        .review-panel { border: 1px solid var(--color-border); border-radius: 10px; overflow: hidden; }
+        .review-panel-header { padding: 0.6rem 1rem; background: var(--color-bg); font-weight: 600; font-size: 0.85rem; border-bottom: 1px solid var(--color-border); }
+        .edit-hint { font-weight: 400; font-size: 0.75rem; color: var(--color-text-secondary); }
+        .review-text { padding: 1rem; font-size: 0.88rem; line-height: 1.8; min-height: 300px; max-height: 500px; overflow-y: auto; white-space: pre-wrap; }
+        .review-text.editable { width: 100%; border: none; resize: none; font-family: 'Noto Sans JP', sans-serif; outline: none; }
+        .review-text.editable:focus { background: rgba(139,115,85,0.03); }
+
+        /* Step 9 */
+        .complete-icon { font-size: 4rem; color: var(--color-success); margin-bottom: 1rem; }
+        .download-options { display: flex; gap: 1rem; justify-content: center; margin: 1.5rem 0; }
+        .download-btn { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 1.5rem 2.5rem; border: 2px solid var(--color-border); border-radius: 12px; background: #fff; cursor: pointer; transition: all 0.2s; font-size: 0.9rem; font-weight: 600; color: var(--color-text); }
+        .download-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
+        .download-btn i { font-size: 2rem; color: var(--color-accent); }
+
+        @media (max-width: 768px) {
+            .steps-bar { gap: 0; padding: 0 0.25rem; }
+            .step-label { display: none; }
+            .step-num { width: 24px; height: 24px; font-size: 0.65rem; }
+            .step-line { width: 8px; margin-bottom: 0; }
+            .settings-grid { grid-template-columns: 1fr; }
+            .compare-grid { grid-template-columns: 1fr; }
+            .review-layout { grid-template-columns: 1fr; }
+            .lang-bar { flex-direction: column; align-items: stretch; }
+            .lang-swap { align-self: center; transform: rotate(90deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar Overlay -->
+    <div id="navbar-container"></div>
+
+<!-- ===== Wizard Main Content ===== -->
+    <div class="wizard-container">
+        <div class="container">
+
+            <!-- Page Title -->
+            <div class="wizard-header">
+                <h1><i class="fas fa-book me-2"></i><span id="pageTitle">Novel Translator</span></h1>
+                <p id="pageSubtitle">AI-powered translation for novels, light novels, and long-form text</p>
+            </div>
+
+            <!-- Progress Steps Bar -->
+            <div class="steps-bar" id="stepsBar">
+                <div class="step-indicator active" data-step="1"><span class="step-num">1</span><span class="step-label" id="stepLabel1">Notice</span></div>
+                <div class="step-line"></div>
+                <div class="step-indicator" data-step="2"><span class="step-num">2</span><span class="step-label" id="stepLabel2">Input</span></div>
+                <div class="step-line"></div>
+                <div class="step-indicator" data-step="3"><span class="step-num">3</span><span class="step-label" id="stepLabel3">Settings</span></div>
+                <div class="step-line"></div>
+                <div class="step-indicator" data-step="4"><span class="step-num">4</span><span class="step-label" id="stepLabel4">Compare</span></div>
+                <div class="step-line"></div>
+                <div class="step-indicator" data-step="5"><span class="step-num">5</span><span class="step-label" id="stepLabel5">Quote</span></div>
+                <div class="step-line"></div>
+                <div class="step-indicator" data-step="6"><span class="step-num">6</span><span class="step-label" id="stepLabel6">Payment</span></div>
+                <div class="step-line"></div>
+                <div class="step-indicator" data-step="7"><span class="step-num">7</span><span class="step-label" id="stepLabel7">Translating</span></div>
+                <div class="step-line"></div>
+                <div class="step-indicator" data-step="8"><span class="step-num">8</span><span class="step-label" id="stepLabel8">Review</span></div>
+                <div class="step-line"></div>
+                <div class="step-indicator" data-step="9"><span class="step-num">9</span><span class="step-label" id="stepLabel9">Download</span></div>
+            </div>
+
+            <!-- ===== Step 1: Paid Service Notice ===== -->
+            <div class="wizard-step" id="step1">
+                <div class="step-card">
+                    <div class="notice-icon"><i class="fas fa-coins"></i></div>
+                    <h2 id="s1Title">This is a paid translation service</h2>
+                    <p id="s1Desc">Our AI translation uses Claude by Anthropic. Charges are based on the model you choose and the length of your text. Minimum charge is ¥100 (fees included).</p>
+                    <!-- Currency Selector -->
+                    <div class="currency-selector">
+                        <label id="s1CurrLabel"><i class="fas fa-coins me-1"></i> Currency</label>
+                        <select class="form-select-custom" id="currencySelect" onchange="onCurrencyChange()">
+                            <option value="JPY">JPY (¥) - Japanese Yen</option>
+                            <option value="USD">USD ($) - US Dollar</option>
+                            <option value="EUR">EUR (€) - Euro</option>
+                            <option value="GBP">GBP (£) - British Pound</option>
+                            <option value="AUD">AUD (A$) - Australian Dollar</option>
+                            <option value="CAD">CAD (C$) - Canadian Dollar</option>
+                            <option value="KRW">KRW (₩) - Korean Won</option>
+                            <option value="BRL">BRL (R$) - Brazilian Real</option>
+                        </select>
+                    </div>
+
+                    <div class="pricing-table">
+                        <div class="pricing-row">
+                            <span class="pricing-model"><span class="model-badge badge-fast">FAST</span> Haiku</span>
+                            <span class="pricing-info" id="s1PriceHaiku"></span>
+                        </div>
+                        <div class="pricing-row">
+                            <span class="pricing-model"><span class="model-badge badge-balanced">BALANCED</span> Sonnet</span>
+                            <span class="pricing-info" id="s1PriceSonnet"></span>
+                        </div>
+                        <div class="pricing-row">
+                            <span class="pricing-model"><span class="model-badge badge-premium">PREMIUM</span> Opus</span>
+                            <span class="pricing-info" id="s1PriceOpus"></span>
+                        </div>
+                    </div>
+                    <p class="notice-min" id="s1Min"></p>
+                    <div class="step-actions">
+                        <button class="btn-wizard-primary" onclick="goStep(2)" id="s1BtnAgree"><i class="fas fa-check me-1"></i> I understand, continue</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Step 2: Language & Text Input ===== -->
+            <div class="wizard-step" id="step2" style="display:none;">
+                <div class="step-card">
+                    <h2 id="s2Title">Language & Text Input</h2>
+
+                    <!-- Language Selection -->
+                    <div class="lang-bar">
+                        <div class="lang-group">
+                            <label id="s2LabelSource">Source Language</label>
+                            <select class="form-select-custom" id="sourceLang">
+                                <option value="ja">日本語</option><option value="en">English</option>
+                                <option value="zh">中文</option><option value="es">Español</option>
+                                <option value="fr">Français</option><option value="de">Deutsch</option>
+                                <option value="ko">한국어</option><option value="ar">العربية</option>
+                                <option value="pt">Português</option>
+                            </select>
+                        </div>
+                        <button class="lang-swap" onclick="swapLanguages()"><i class="fas fa-exchange-alt"></i></button>
+                        <div class="lang-group">
+                            <label id="s2LabelTarget">Target Language</label>
+                            <select class="form-select-custom" id="targetLang">
+                                <option value="en">English</option><option value="ja">日本語</option>
+                                <option value="zh">中文</option><option value="es">Español</option>
+                                <option value="fr">Français</option><option value="de">Deutsch</option>
+                                <option value="ko">한국어</option><option value="ar">العربية</option>
+                                <option value="pt">Português</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Input Mode -->
+                    <div class="input-mode-tabs">
+                        <button class="mode-tab active" onclick="setInputMode('full')" id="tabFull"><i class="fas fa-file-alt me-1"></i> <span id="tabFullLabel">Full Text</span></button>
+                        <button class="mode-tab" onclick="setInputMode('file')" id="tabFile"><i class="fas fa-upload me-1"></i> <span id="tabFileLabel">Upload File</span></button>
+                    </div>
+
+                    <!-- Full Text Input -->
+                    <div id="inputFull">
+                        <textarea class="text-input" id="sourceText" rows="12" placeholder="Paste your novel text here..."></textarea>
+                        <div class="text-meta">
+                            <span id="charCount">0 <span id="charLabel">characters</span></span>
+                            <span id="pageEstimate"></span>
+                        </div>
+                    </div>
+
+                    <!-- File Upload -->
+                    <div id="inputFile" style="display:none;">
+                        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p id="uploadText">Click or drag a file here (.txt, .docx)</p>
+                            <input type="file" id="fileInput" accept=".txt,.docx" style="display:none;" onchange="handleFileUpload(this)">
+                        </div>
+                        <div id="fileInfo" style="display:none;"></div>
+                    </div>
+
+                    <div class="step-actions">
+                        <button class="btn-wizard-secondary" onclick="goStep(1)"><i class="fas fa-arrow-left me-1"></i> <span class="back-label">Back</span></button>
+                        <button class="btn-wizard-primary" onclick="goStep(3)" id="s2BtnNext"><span class="next-label">Next</span> <i class="fas fa-arrow-right ms-1"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Step 3: Translation Settings ===== -->
+            <div class="wizard-step" id="step3" style="display:none;">
+                <div class="step-card">
+                    <h2 id="s3Title">Translation Settings</h2>
+                    <p class="step-desc" id="s3Desc">Fine-tune how your text should be translated. All settings are optional.</p>
+
+                    <div class="settings-grid">
+                        <div class="setting-group">
+                            <label id="s3LabelStyle"><i class="fas fa-pen-fancy me-1"></i> Style</label>
+                            <select class="form-select-custom" id="tsStyle">
+                                <option value="">-- Not specified --</option>
+                                <option value="formal">Formal</option>
+                                <option value="informal">Informal / Casual</option>
+                                <option value="literary">Literary</option>
+                                <option value="novel">Novel</option>
+                                <option value="lightnovel">Light Novel</option>
+                            </select>
+                        </div>
+                        <div class="setting-group">
+                            <label id="s3LabelTone"><i class="fas fa-theater-masks me-1"></i> Tone</label>
+                            <select class="form-select-custom" id="tsTone">
+                                <option value="">-- Not specified --</option>
+                                <option value="friendly">Friendly</option>
+                                <option value="neutral">Neutral</option>
+                                <option value="dramatic">Dramatic</option>
+                                <option value="romantic">Romantic</option>
+                                <option value="humorous">Humorous</option>
+                            </select>
+                        </div>
+                        <div class="setting-group">
+                            <label id="s3LabelGenre"><i class="fas fa-bookmark me-1"></i> Genre</label>
+                            <select class="form-select-custom" id="tsGenre">
+                                <option value="">-- Not specified --</option>
+                                <option value="fantasy">Fantasy</option>
+                                <option value="romance">Romance</option>
+                                <option value="scifi">Sci-Fi</option>
+                                <option value="mystery">Mystery</option>
+                                <option value="horror">Horror</option>
+                                <option value="historical">Historical</option>
+                                <option value="isekai">Isekai</option>
+                                <option value="slice">Slice of Life</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Context -->
+                    <div class="setting-group full-width">
+                        <label id="s3LabelContext"><i class="fas fa-info-circle me-1"></i> Context Note (optional)</label>
+                        <textarea class="form-textarea-custom" id="tsContext" rows="2" placeholder="e.g. A samurai story set in the Edo period"></textarea>
+                    </div>
+
+                    <!-- Glossary -->
+                    <div class="setting-group full-width">
+                        <label id="s3LabelGlossary"><i class="fas fa-book me-1"></i> Glossary (character names, terms)</label>
+                        <div class="glossary-area">
+                            <table class="glossary-table" id="glossaryTable">
+                                <thead>
+                                    <tr><th id="thSource">Source</th><th id="thTarget">Target</th><th></th></tr>
+                                </thead>
+                                <tbody id="glossaryBody"></tbody>
+                            </table>
+                            <div class="glossary-add-row">
+                                <input type="text" id="glossarySrc" placeholder="Source term">
+                                <input type="text" id="glossaryTgt" placeholder="Translation">
+                                <button class="glossary-add-btn" onclick="addGlossaryEntry()"><i class="fas fa-plus"></i></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-actions">
+                        <button class="btn-wizard-secondary" onclick="goStep(2)"><i class="fas fa-arrow-left me-1"></i> <span class="back-label">Back</span></button>
+                        <button class="btn-wizard-primary" onclick="goStep(4)"><span class="next-label">Next</span> <i class="fas fa-arrow-right ms-1"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Step 4: Model Comparison (1-page preview) ===== -->
+            <div class="wizard-step" id="step4" style="display:none;">
+                <div class="step-card">
+                    <h2 id="s4Title">Compare Translation Quality</h2>
+                    <p class="step-desc" id="s4Desc">Here is the first portion of your text translated by all 3 AI models. Compare the quality and choose one.</p>
+
+                    <div class="preview-original-box">
+                        <h4 id="s4OrigLabel">Original Text (excerpt)</h4>
+                        <div class="preview-original-text" id="previewOriginalText"></div>
+                    </div>
+
+                    <div class="compare-grid">
+                        <div class="compare-card" id="compareHaiku" onclick="selectModel('haiku')">
+                            <div class="compare-header">
+                                <span class="model-badge badge-fast">FAST</span>
+                                <span class="model-name">Haiku</span>
+                                <span class="compare-price">~¥1/1K chars</span>
+                            </div>
+                            <div class="compare-body" id="compareHaikuText">
+                                <div class="compare-loading"><i class="fas fa-spinner fa-spin"></i> <span id="s4Loading">Translating...</span></div>
+                            </div>
+                        </div>
+                        <div class="compare-card selected" id="compareSonnet" onclick="selectModel('sonnet')">
+                            <div class="compare-header">
+                                <span class="model-badge badge-balanced">BALANCED</span>
+                                <span class="model-name">Sonnet</span>
+                                <span class="compare-price">~¥3/1K chars</span>
+                            </div>
+                            <div class="compare-body" id="compareSonnetText">
+                                <div class="compare-loading"><i class="fas fa-spinner fa-spin"></i> Translating...</div>
+                            </div>
+                        </div>
+                        <div class="compare-card" id="compareOpus" onclick="selectModel('opus')">
+                            <div class="compare-header">
+                                <span class="model-badge badge-premium">PREMIUM</span>
+                                <span class="model-name">Opus</span>
+                                <span class="compare-price">~¥10/1K chars</span>
+                            </div>
+                            <div class="compare-body" id="compareOpusText">
+                                <div class="compare-loading"><i class="fas fa-spinner fa-spin"></i> Translating...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-actions">
+                        <button class="btn-wizard-secondary" onclick="goStep(3)"><i class="fas fa-arrow-left me-1"></i> <span class="back-label">Back</span></button>
+                        <button class="btn-wizard-primary" onclick="goStep(5)" id="s4BtnSelect"><i class="fas fa-check me-1"></i> <span id="s4BtnText">Use this model</span></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Step 5: Cost Estimate ===== -->
+            <div class="wizard-step" id="step5" style="display:none;">
+                <div class="step-card">
+                    <h2 id="s5Title">Cost Estimate</h2>
+
+                    <!-- Payment Method Selection -->
+                    <div class="pay-method-selector">
+                        <label id="s5LabelPayMethod"><i class="fas fa-wallet me-1"></i> Payment Method</label>
+                        <div class="pay-method-options">
+                            <label class="pay-method-option selected" onclick="selectPayMethod('stripe')">
+                                <input type="radio" name="payMethod" value="stripe" checked>
+                                <i class="fab fa-stripe"></i>
+                                <span>Stripe</span>
+                                <small id="s5StripeNote" class="pay-method-note">Credit/Debit Card, Apple Pay, Google Pay</small>
+                            </label>
+                            <label class="pay-method-option" onclick="selectPayMethod('paypal')">
+                                <input type="radio" name="payMethod" value="paypal">
+                                <i class="fab fa-paypal"></i>
+                                <span>PayPal</span>
+                                <small id="s5PaypalNote" class="pay-method-note">PayPal balance, Bank account</small>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="quote-box">
+                        <div class="quote-row"><span id="s5LabelModel">Selected Model</span><span id="quoteModel" class="quote-value">Sonnet</span></div>
+                        <div class="quote-row"><span id="s5LabelChars">Character Count</span><span id="quoteChars" class="quote-value">0</span></div>
+                        <div class="quote-row"><span id="s5LabelRate">Rate</span><span id="quoteRate" class="quote-value"></span></div>
+                        <div class="quote-divider"></div>
+                        <div class="quote-row total"><span id="s5LabelTotal">Total (fees included)</span><span id="quoteTotal" class="quote-value"></span></div>
+                        <div class="quote-min-note" id="s5MinNote"></div>
+                    </div>
+
+                    <div class="step-actions">
+                        <button class="btn-wizard-secondary" onclick="goStep(4)"><i class="fas fa-arrow-left me-1"></i> <span class="back-label">Back</span></button>
+                        <button class="btn-wizard-primary" onclick="goStep(6)" id="s5BtnPay"><i class="fas fa-credit-card me-1"></i> <span id="s5BtnText">Proceed to Payment</span></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Step 6: Payment ===== -->
+            <div class="wizard-step" id="step6" style="display:none;">
+                <div class="step-card">
+                    <h2 id="s6Title">Payment</h2>
+                    <div class="payment-summary">
+                        <div class="payment-amount" id="paymentAmount"></div>
+                        <p class="payment-method-label" id="s6MethodLabel"></p>
+                        <p id="s6Desc">Confirm and proceed to payment.</p>
+                    </div>
+                    <!-- Stripe payment options -->
+                    <div class="payment-methods" id="stripePayMethods">
+                        <button class="payment-btn" onclick="processPayment('card')">
+                            <i class="fas fa-credit-card"></i>
+                            <span id="s6CardLabel">Credit / Debit Card</span>
+                        </button>
+                        <button class="payment-btn" onclick="processPayment('applepay')">
+                            <i class="fab fa-apple-pay"></i>
+                            <span>Apple Pay</span>
+                        </button>
+                        <button class="payment-btn" onclick="processPayment('googlepay')">
+                            <i class="fab fa-google-pay"></i>
+                            <span>Google Pay</span>
+                        </button>
+                    </div>
+                    <!-- PayPal payment -->
+                    <div class="payment-methods" id="paypalPayMethods" style="display:none;">
+                        <button class="payment-btn paypal-btn" onclick="processPayment('paypal')">
+                            <i class="fab fa-paypal"></i>
+                            <span id="s6PaypalLabel">Pay with PayPal</span>
+                        </button>
+                    </div>
+                    <p class="payment-secure"><i class="fas fa-lock me-1"></i> <span id="s6Secure">Payments processed securely</span></p>
+
+                    <div class="step-actions">
+                        <button class="btn-wizard-secondary" onclick="goStep(5)"><i class="fas fa-arrow-left me-1"></i> <span class="back-label">Back</span></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Step 7: Translating (Progress) ===== -->
+            <div class="wizard-step" id="step7" style="display:none;">
+                <div class="step-card center-card">
+                    <div class="translating-icon"><i class="fas fa-language fa-spin-slow"></i></div>
+                    <h2 id="s7Title">Translating your text...</h2>
+                    <div class="progress-container">
+                        <div class="progress-bar-custom">
+                            <div class="progress-fill" id="progressFill" style="width:0%"></div>
+                        </div>
+                        <div class="progress-info">
+                            <span id="progressPercent">0%</span>
+                            <span id="progressEta">Estimated time: calculating...</span>
+                        </div>
+                    </div>
+                    <p class="translating-note" id="s7Note">Please do not close this page. Your translation will be ready shortly.</p>
+                </div>
+            </div>
+
+            <!-- ===== Step 8: Review & Edit ===== -->
+            <div class="wizard-step" id="step8" style="display:none;">
+                <div class="step-card wide-card">
+                    <h2 id="s8Title">Review Translation</h2>
+                    <p class="step-desc" id="s8Desc">Review and edit the translation below. You can make corrections before finalizing.</p>
+
+                    <div class="review-layout">
+                        <div class="review-panel">
+                            <div class="review-panel-header" id="s8OrigHeader">Original</div>
+                            <div class="review-text" id="reviewOriginal"></div>
+                        </div>
+                        <div class="review-panel">
+                            <div class="review-panel-header" id="s8TransHeader">Translation <span class="edit-hint" id="s8EditHint">(click to edit)</span></div>
+                            <textarea class="review-text editable" id="reviewTranslation"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="step-actions">
+                        <button class="btn-wizard-secondary" onclick="goStep(4)"><i class="fas fa-arrow-left me-1"></i> <span id="s8BtnRetranslate">Re-translate with different model</span></button>
+                        <button class="btn-wizard-primary" onclick="goStep(9)" id="s8BtnFinalize"><i class="fas fa-check me-1"></i> <span id="s8BtnText">Finalize & Download</span></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Step 9: Complete & Download ===== -->
+            <div class="wizard-step" id="step9" style="display:none;">
+                <div class="step-card center-card">
+                    <div class="complete-icon"><i class="fas fa-check-circle"></i></div>
+                    <h2 id="s9Title">Translation Complete!</h2>
+                    <p id="s9Desc">Your translation is ready. Download your file below.</p>
+
+                    <div class="download-options">
+                        <button class="download-btn" onclick="downloadResult('txt')">
+                            <i class="fas fa-file-alt"></i>
+                            <span>.txt</span>
+                        </button>
+                        <button class="download-btn" onclick="downloadResult('docx')">
+                            <i class="fas fa-file-word"></i>
+                            <span>.docx</span>
+                        </button>
+                    </div>
+
+                    <div class="step-actions" style="margin-top:2rem;">
+                        <button class="btn-wizard-secondary" onclick="goStep(8)"><i class="fas fa-arrow-left me-1"></i> <span id="s9BtnReview">Review again</span></button>
+                        <button class="btn-wizard-primary" onclick="startNewTranslation()"><i class="fas fa-plus me-1"></i> <span id="s9BtnNew">New Translation</span></button>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /container -->
+    </div><!-- /wizard-container -->
+    <div id="footer-container"></div>
+
+    <!-- ========== Page JavaScript ========== -->
+    <script>
+    // ===== Wizard State =====
+    let currentStep = 1;
+    let selectedModel = 'sonnet';
+    let selectedCurrency = 'JPY';
+    let selectedPayMethod = 'stripe';
+    let glossary = [];
+    let translatedText = '';
+    let sourceTextContent = '';
+
+    // Base pricing in JPY
+    const PRICING_JPY = {
+        haiku:  { per1k: 1 },
+        sonnet: { per1k: 3 },
+        opus:   { per1k: 10 }
+    };
+
+    // Currency definitions: symbol, approximate rate from JPY, decimal places
+    const CURRENCIES = {
+        JPY: { symbol: '\u00a5',  rate: 1,      decimals: 0, name: 'JPY' },
+        USD: { symbol: '$',  rate: 0.0067,  decimals: 2, name: 'USD' },
+        EUR: { symbol: '\u20ac',  rate: 0.0061,  decimals: 2, name: 'EUR' },
+        GBP: { symbol: '\u00a3',  rate: 0.0053,  decimals: 2, name: 'GBP' },
+        AUD: { symbol: 'A$', rate: 0.0103,  decimals: 2, name: 'AUD' },
+        CAD: { symbol: 'C$', rate: 0.0093,  decimals: 2, name: 'CAD' },
+        KRW: { symbol: '\u20a9',  rate: 9.17,    decimals: 0, name: 'KRW' },
+        BRL: { symbol: 'R$', rate: 0.038,   decimals: 2, name: 'BRL' }
+    };
+
+    // Minimum charge per payment method per currency (platform minimums, covering fees)
+    const PAY_MINIMUMS = {
+        stripe: { JPY: 100, USD: 1.00, EUR: 1.00, GBP: 0.80, AUD: 1.50, CAD: 1.50, KRW: 1000, BRL: 5.00 },
+        paypal: { JPY: 150, USD: 1.50, EUR: 1.50, GBP: 1.20, AUD: 2.00, CAD: 2.00, KRW: 1500, BRL: 7.00 }
+    };
+
+    // Convert JPY amount to selected currency
+    function toSelectedCurrency(jpyAmount) {
+        const cur = CURRENCIES[selectedCurrency];
+        const converted = jpyAmount * cur.rate;
+        return Number(converted.toFixed(cur.decimals));
+    }
+
+    // Format price with currency symbol
+    function formatPrice(amount, currCode) {
+        currCode = currCode || selectedCurrency;
+        const cur = CURRENCIES[currCode];
+        const formatted = cur.decimals === 0 ? Math.round(amount).toLocaleString() : amount.toFixed(cur.decimals);
+        return cur.symbol + formatted;
+    }
+
+    // Get minimum charge for current currency & payment method
+    function getMinimum(payMethod) {
+        payMethod = payMethod || selectedPayMethod;
+        return PAY_MINIMUMS[payMethod][selectedCurrency] || PAY_MINIMUMS[payMethod]['USD'];
+    }
+
+    // Currency change handler
+    function onCurrencyChange() {
+        selectedCurrency = document.getElementById('currencySelect').value;
+        updateStep1Prices();
+        if (currentStep === 5) updateQuote();
+    }
+
+    // Payment method selection
+    function selectPayMethod(method) {
+        selectedPayMethod = method;
+        document.querySelectorAll('.pay-method-option').forEach(el => {
+            el.classList.toggle('selected', el.querySelector('input').value === method);
+            el.querySelector('input').checked = (el.querySelector('input').value === method);
+        });
+        updateQuote();
+    }
+
+    // Update Step 1 prices in selected currency
+    function updateStep1Prices() {
+        const L = getLang();
+        const cur = CURRENCIES[selectedCurrency];
+        const descMap = {
+            haiku:  { en: 'Fast, good for simple text', ja: '\u9ad8\u901f\u3001\u30b7\u30f3\u30d7\u30eb\u306a\u30c6\u30ad\u30b9\u30c8\u5411\u304d', zh: '\u5feb\u901f\uff0c\u9069\u5408\u7c21\u55ae\u6587\u672c', es: 'R\u00e1pido, para texto simple', fr: 'Rapide, pour texte simple', de: 'Schnell, f\u00fcr einfachen Text', ko: '\ube60\ub984, \uac04\ub2e8\ud55c \ud14d\uc2a4\ud2b8\uc6a9', ar: '\u0633\u0631\u064a\u0639\u060c \u0644\u0644\u0646\u0635\u0648\u0635 \u0627\u0644\u0628\u0633\u064a\u0637\u0629', pt: 'R\u00e1pido, para texto simples' },
+            sonnet: { en: 'Best quality-cost balance', ja: '\u54c1\u8cea\u3068\u30b3\u30b9\u30c8\u306e\u30d0\u30e9\u30f3\u30b9\u578b', zh: '\u6700\u4f73\u6027\u50f9\u6bd4', es: 'Mejor equilibrio calidad-precio', fr: 'Meilleur rapport qualit\u00e9-prix', de: 'Bestes Preis-Leistungs-Verh\u00e4ltnis', ko: '\ud488\uc9c8\uacfc \ube44\uc6a9\uc758 \uade0\ud615', ar: '\u0623\u0641\u0636\u0644 \u062a\u0648\u0627\u0632\u0646 \u062c\u0648\u062f\u0629-\u062a\u0643\u0644\u0641\u0629', pt: 'Melhor equil\u00edbrio qualidade-custo' },
+            opus:   { en: 'Highest quality, literary text', ja: '\u6700\u9ad8\u54c1\u8cea\u3001\u6587\u5b66\u30c6\u30ad\u30b9\u30c8\u5411\u304d', zh: '\u6700\u9ad8\u54c1\u8cea\uff0c\u6587\u5b78\u6587\u672c', es: 'M\u00e1xima calidad, texto literario', fr: 'Qualit\u00e9 maximale, texte litt\u00e9raire', de: 'H\u00f6chste Qualit\u00e4t, literarischer Text', ko: '\ucd5c\uace0 \ud488\uc9c8, \ubb38\ud559 \ud14d\uc2a4\ud2b8\uc6a9', ar: '\u0623\u0639\u0644\u0649 \u062c\u0648\u062f\u0629\u060c \u0644\u0644\u0646\u0635\u0648\u0635 \u0627\u0644\u0623\u062f\u0628\u064a\u0629', pt: 'Qualidade m\u00e1xima, texto liter\u00e1rio' }
+        };
+        const charsLabel = { en: '1K chars', ja: '1,000\u6587\u5b57', zh: '1,000\u5b57', es: '1K car.', fr: '1K car.', de: '1K Zeich.', ko: '1,000\uc790', ar: '1000 \u062d\u0631\u0641', pt: '1K car.' };
+        const cl = charsLabel[L] || charsLabel['en'];
+        ['haiku', 'sonnet', 'opus'].forEach(model => {
+            const pricePerK = toSelectedCurrency(PRICING_JPY[model].per1k);
+            const desc = descMap[model][L] || descMap[model]['en'];
+            const priceStr = '~' + formatPrice(pricePerK) + ' / ' + cl;
+            const el = document.getElementById('s1Price' + model.charAt(0).toUpperCase() + model.slice(1));
+            if (el) el.textContent = priceStr + ' \u2014 ' + desc;
+        });
+        // Minimum display (show both Stripe and PayPal)
+        const stripeMin = formatPrice(PAY_MINIMUMS.stripe[selectedCurrency]);
+        const paypalMin = formatPrice(PAY_MINIMUMS.paypal[selectedCurrency]);
+        const minLabels = {
+            en: 'Minimum: ' + stripeMin + ' (Stripe) / ' + paypalMin + ' (PayPal) \u2014 fees included',
+            ja: '\u6700\u4f4e\u6599\u91d1: ' + stripeMin + ' (Stripe) / ' + paypalMin + ' (PayPal) \u2014 \u624b\u6570\u6599\u8fbc',
+            zh: '\u6700\u4f4e\u6536\u8cbb: ' + stripeMin + ' (Stripe) / ' + paypalMin + ' (PayPal) \u2014 \u542b\u624b\u7e8c\u8cbb',
+            es: 'M\u00ednimo: ' + stripeMin + ' (Stripe) / ' + paypalMin + ' (PayPal) \u2014 comisiones incluidas',
+            fr: 'Minimum : ' + stripeMin + ' (Stripe) / ' + paypalMin + ' (PayPal) \u2014 frais inclus',
+            de: 'Minimum: ' + stripeMin + ' (Stripe) / ' + paypalMin + ' (PayPal) \u2014 Geb\u00fchren inklusive',
+            ko: '\ucd5c\uc18c: ' + stripeMin + ' (Stripe) / ' + paypalMin + ' (PayPal) \u2014 \uc218\uc218\ub8cc \ud3ec\ud568',
+            ar: '\u0627\u0644\u062d\u062f \u0627\u0644\u0623\u062f\u0646\u0649: ' + stripeMin + ' (Stripe) / ' + paypalMin + ' (PayPal) \u2014 \u0634\u0627\u0645\u0644 \u0627\u0644\u0631\u0633\u0648\u0645',
+            pt: 'M\u00ednimo: ' + stripeMin + ' (Stripe) / ' + paypalMin + ' (PayPal) \u2014 taxas inclusas'
+        };
+        const minEl = document.getElementById('s1Min');
+        if (minEl) minEl.textContent = minLabels[L] || minLabels['en'];
+    }
+
+    // Demo translations for Step 4 comparison
+    const demoTranslations = {
+        'ja-en': {
+            original: '桜の花びらが風に舞い散る中、彼女は古びた手紙を胸に抱きしめた。あの日の約束は、もう叶わないと知りながらも、その言葉だけが彼女を支えていた。',
+            haiku: 'Cherry blossom petals scattered in the wind, and she held an old letter to her chest. Even though she knew the promise from that day would no longer come true, those words alone supported her.',
+            sonnet: 'As cherry blossom petals danced and scattered on the wind, she clutched the weathered letter against her heart. She knew the promise made that day would never be fulfilled, yet those words alone had kept her standing.',
+            opus: 'Cherry blossoms surrendered to the breeze, their petals tracing slow arcs through the spring air, and she pressed the time-worn letter against her chest as though it were the last warm thing left in the world. The promise made on that distant day\u2014she had long since accepted it would go unkept. And yet, those words were the slender thread by which she clung to each passing morning.'
+        },
+        'en-ja': {
+            original: 'The old bookshop smelled of dust and forgotten stories. Eleanor ran her fingers along the spines, each one a doorway she had yet to open.',
+            haiku: '古い書店は埃と忘れられた物語の匂いがした。エレノアは背表紙に沿って指を走らせた。それぞれがまだ開けていない扉だった。',
+            sonnet: '古い書店には、埃と忘れ去られた物語の香りが漂っていた。エレノアは書棚の背表紙をそっと指でなぞった。一冊一冊が、まだ開かれていない扉のようだった。',
+            opus: 'その古書店は、埃と、誰にも読まれなくなった物語たちの匂いに満ちていた。エレノアは棚に並ぶ背表紙を指先でゆっくりとたどった。一冊ごとが、まだ彼女が押し開いたことのない扉だった。'
+        },
+        'default': {
+            original: 'The cherry blossoms danced in the spring breeze. She watched them fall, each petal a whispered goodbye.',
+            haiku: 'The cherry blossoms danced in the spring wind. She watched them fall, each petal was a whispered goodbye.',
+            sonnet: 'Cherry blossoms waltzed through the spring breeze as she watched each petal drift down\u2014a gentle farewell whispered to the retreating winter.',
+            opus: 'The cherry blossoms had given themselves to the spring breeze, pirouetting through the luminous air in their final, exquisite performance. She stood beneath them, watching each petal descend\u2014a silent valediction to the winter that was, at last, loosening its grip on the world.'
+        }
+    };
+
+    // ===== Step Navigation =====
+    function goStep(n) {
+        // Validate before advancing
+        if (n === 3 && currentStep === 2) {
+            const text = document.getElementById('sourceText').value.trim();
+            if (!text) { alert(getLang() === 'ja' ? 'テキストを入力してください' : 'Please enter text to translate'); return; }
+            sourceTextContent = text;
+        }
+        if (n === 4) setTimeout(runComparison, 100);
+        if (n === 5) updateQuote();
+        if (n === 6) updatePaymentAmount();
+        if (n === 8) {
+            document.getElementById('reviewOriginal').textContent = sourceTextContent;
+            document.getElementById('reviewTranslation').value = translatedText;
+        }
+
+        for (let i = 1; i <= 9; i++) {
+            const el = document.getElementById('step' + i);
+            if (el) el.style.display = (i === n) ? '' : 'none';
+        }
+        currentStep = n;
+        updateStepIndicators();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function updateStepIndicators() {
+        document.querySelectorAll('.step-indicator').forEach(el => {
+            const step = parseInt(el.dataset.step);
+            el.classList.remove('active', 'completed');
+            if (step === currentStep) el.classList.add('active');
+            else if (step < currentStep) el.classList.add('completed');
+        });
+    }
+
+    function getLang() { return (typeof getCurrentLanguage === 'function') ? getCurrentLanguage() : (localStorage.getItem('preferredLanguage') || 'en'); }
+
+    // ===== Step 2: Input =====
+    function setInputMode(mode) {
+        document.getElementById('inputFull').style.display = mode === 'full' ? '' : 'none';
+        document.getElementById('inputFile').style.display = mode === 'file' ? '' : 'none';
+        document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+        if (mode === 'full') document.getElementById('tabFull').classList.add('active');
+        else document.getElementById('tabFile').classList.add('active');
+    }
+
+    function updateCharCount() {
+        const text = document.getElementById('sourceText').value;
+        const count = text.length;
+        document.getElementById('charCount').textContent = count.toLocaleString();
+        const pages = Math.ceil(count / 2000);
+        document.getElementById('pageEstimate').textContent = count > 0 ? '\u2248 ' + pages + (getLang() === 'ja' ? ' \u30da\u30fc\u30b8' : ' pages') : '';
+    }
+
+    function swapLanguages() {
+        const src = document.getElementById('sourceLang');
+        const tgt = document.getElementById('targetLang');
+        const tmp = src.value; src.value = tgt.value; tgt.value = tmp;
+    }
+
+    function handleFileUpload(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('sourceText').value = e.target.result;
+            updateCharCount();
+            document.getElementById('fileInfo').style.display = 'block';
+            document.getElementById('fileInfo').innerHTML = '<i class="fas fa-check-circle" style="color:var(--color-success)"></i> ' + file.name + ' (' + (file.size / 1024).toFixed(1) + 'KB)';
+            setInputMode('full');
+        };
+        reader.readAsText(file);
+    }
+
+    // ===== Step 3: Glossary =====
+    function addGlossaryEntry() {
+        const src = document.getElementById('glossarySrc').value.trim();
+        const tgt = document.getElementById('glossaryTgt').value.trim();
+        if (!src || !tgt) return;
+        glossary.push({ src, tgt });
+        document.getElementById('glossarySrc').value = '';
+        document.getElementById('glossaryTgt').value = '';
+        renderGlossary();
+    }
+    function removeGlossaryEntry(i) { glossary.splice(i, 1); renderGlossary(); }
+    function renderGlossary() {
+        document.getElementById('glossaryBody').innerHTML = glossary.map((g, i) =>
+            '<tr><td>' + escH(g.src) + '</td><td>' + escH(g.tgt) + '</td><td><button class="glossary-del-btn" onclick="removeGlossaryEntry(' + i + ')"><i class="fas fa-times"></i></button></td></tr>'
+        ).join('');
+    }
+
+    // ===== Step 4: Model Comparison =====
+    function runComparison() {
+        const srcLang = document.getElementById('sourceLang').value;
+        const tgtLang = document.getElementById('targetLang').value;
+        const key = srcLang + '-' + tgtLang;
+        const sample = demoTranslations[key] || demoTranslations['default'];
+
+        const excerpt = sourceTextContent.slice(0, 300) + (sourceTextContent.length > 300 ? '...' : '');
+        document.getElementById('previewOriginalText').textContent = excerpt;
+
+        ['Haiku', 'Sonnet', 'Opus'].forEach(m => {
+            document.getElementById('compare' + m + 'Text').innerHTML = '<div class="compare-loading"><i class="fas fa-spinner fa-spin"></i> ' + (getLang() === 'ja' ? '翻訳中...' : 'Translating...') + '</div>';
+        });
+
+        setTimeout(() => { document.getElementById('compareHaikuText').innerHTML = '<div style="white-space:pre-wrap;">' + escH(sample.haiku) + '</div>'; }, 800);
+        setTimeout(() => { document.getElementById('compareSonnetText').innerHTML = '<div style="white-space:pre-wrap;">' + escH(sample.sonnet) + '</div>'; }, 1500);
+        setTimeout(() => { document.getElementById('compareOpusText').innerHTML = '<div style="white-space:pre-wrap;">' + escH(sample.opus) + '</div>'; }, 2500);
+    }
+
+    function selectModel(model) {
+        selectedModel = model;
+        document.querySelectorAll('.compare-card').forEach(c => c.classList.remove('selected'));
+        document.getElementById('compare' + model.charAt(0).toUpperCase() + model.slice(1)).classList.add('selected');
+    }
+
+    // ===== Step 5: Quote =====
+    function calculateCost() {
+        const chars = sourceTextContent.length;
+        const rateJpy = PRICING_JPY[selectedModel].per1k;
+        const rawJpy = Math.ceil(chars / 1000 * rateJpy);
+        const rawConverted = toSelectedCurrency(rawJpy);
+        const minCharge = getMinimum(selectedPayMethod);
+        return Math.max(rawConverted, minCharge);
+    }
+
+    function updateQuote() {
+        const L = getLang();
+        const chars = sourceTextContent.length;
+        const rateJpy = PRICING_JPY[selectedModel].per1k;
+        const rateConverted = toSelectedCurrency(rateJpy);
+        const cost = calculateCost();
+        const rawConverted = toSelectedCurrency(Math.ceil(chars / 1000 * rateJpy));
+        const minCharge = getMinimum(selectedPayMethod);
+        const modelNames = { haiku: 'Haiku', sonnet: 'Sonnet', opus: 'Opus' };
+        const charsLabel = { en: '1,000 chars', ja: '1,000\u6587\u5b57', zh: '1,000\u5b57', es: '1K car.', fr: '1K car.', de: '1K Zeich.', ko: '1,000\uc790', ar: '1000 \u062d\u0631\u0641', pt: '1K car.' };
+        const cl = charsLabel[L] || charsLabel['en'];
+        document.getElementById('quoteModel').textContent = modelNames[selectedModel];
+        document.getElementById('quoteChars').textContent = chars.toLocaleString();
+        document.getElementById('quoteRate').textContent = formatPrice(rateConverted) + ' / ' + cl;
+        document.getElementById('quoteTotal').textContent = formatPrice(cost);
+        // Show minimum note if minimum was applied
+        const minNoteEl = document.getElementById('s5MinNote');
+        if (rawConverted < minCharge) {
+            const methodLabel = selectedPayMethod === 'stripe' ? 'Stripe' : 'PayPal';
+            const minNotes = {
+                en: '* Minimum charge ' + formatPrice(minCharge) + ' applied (' + methodLabel + ')',
+                ja: '* \u6700\u4f4e\u6599\u91d1 ' + formatPrice(minCharge) + ' \u304c\u9069\u7528 (' + methodLabel + ')',
+                zh: '* \u5df2\u5957\u7528\u6700\u4f4e\u6536\u8cbb ' + formatPrice(minCharge) + ' (' + methodLabel + ')',
+                es: '* Cargo m\u00ednimo de ' + formatPrice(minCharge) + ' aplicado (' + methodLabel + ')',
+                fr: '* Minimum de ' + formatPrice(minCharge) + ' appliqu\u00e9 (' + methodLabel + ')',
+                de: '* Mindestgeb\u00fchr von ' + formatPrice(minCharge) + ' angewendet (' + methodLabel + ')',
+                ko: '* \ucd5c\uc18c \uc694\uae08 ' + formatPrice(minCharge) + ' \uc801\uc6a9 (' + methodLabel + ')',
+                ar: '* \u062a\u0645 \u062a\u0637\u0628\u064a\u0642 \u0627\u0644\u062d\u062f \u0627\u0644\u0623\u062f\u0646\u0649 ' + formatPrice(minCharge) + ' (' + methodLabel + ')',
+                pt: '* Valor m\u00ednimo de ' + formatPrice(minCharge) + ' aplicado (' + methodLabel + ')'
+            };
+            minNoteEl.textContent = minNotes[L] || minNotes['en'];
+            minNoteEl.style.display = '';
+        } else {
+            minNoteEl.style.display = 'none';
+        }
+    }
+
+    // ===== Step 6: Payment =====
+    function updatePaymentAmount() {
+        const L = getLang();
+        const cost = calculateCost();
+        document.getElementById('paymentAmount').textContent = formatPrice(cost);
+        // Show which payment method
+        const methodLabels = {
+            stripe: { en: 'via Stripe', ja: 'Stripe\u3067\u304a\u652f\u6255\u3044', zh: '\u900f\u904eStripe\u652f\u4ed8', es: 'v\u00eda Stripe', fr: 'via Stripe', de: '\u00fcber Stripe', ko: 'Stripe\ub85c \uacb0\uc81c', ar: '\u0639\u0628\u0631 Stripe', pt: 'via Stripe' },
+            paypal: { en: 'via PayPal', ja: 'PayPal\u3067\u304a\u652f\u6255\u3044', zh: '\u900f\u904ePayPal\u652f\u4ed8', es: 'v\u00eda PayPal', fr: 'via PayPal', de: '\u00fcber PayPal', ko: 'PayPal\ub85c \uacb0\uc81c', ar: '\u0639\u0628\u0631 PayPal', pt: 'via PayPal' }
+        };
+        const ml = methodLabels[selectedPayMethod];
+        document.getElementById('s6MethodLabel').textContent = ml[L] || ml['en'];
+        // Show/hide correct payment buttons
+        document.getElementById('stripePayMethods').style.display = selectedPayMethod === 'stripe' ? '' : 'none';
+        document.getElementById('paypalPayMethods').style.display = selectedPayMethod === 'paypal' ? '' : 'none';
+        // Update secure text
+        const secureTexts = {
+            stripe: { en: 'Payments processed securely by Stripe', ja: 'Stripe\u306b\u3088\u308b\u5b89\u5168\u306a\u6c7a\u6e08', zh: '\u7531Stripe\u5b89\u5168\u8655\u7406\u4ed8\u6b3e', es: 'Pagos procesados de forma segura por Stripe', fr: 'Paiements s\u00e9curis\u00e9s par Stripe', de: 'Sichere Zahlung \u00fcber Stripe', ko: 'Stripe\ub97c \ud1b5\ud55c \uc548\uc804\ud55c \uacb0\uc81c', ar: '\u0645\u062f\u0641\u0648\u0639\u0627\u062a \u0622\u0645\u0646\u0629 \u0639\u0628\u0631 Stripe', pt: 'Pagamentos processados com seguran\u00e7a pelo Stripe' },
+            paypal: { en: 'Payments processed securely by PayPal', ja: 'PayPal\u306b\u3088\u308b\u5b89\u5168\u306a\u6c7a\u6e08', zh: '\u7531PayPal\u5b89\u5168\u8655\u7406\u4ed8\u6b3e', es: 'Pagos procesados de forma segura por PayPal', fr: 'Paiements s\u00e9curis\u00e9s par PayPal', de: 'Sichere Zahlung \u00fcber PayPal', ko: 'PayPal\uc744 \ud1b5\ud55c \uc548\uc804\ud55c \uacb0\uc81c', ar: '\u0645\u062f\u0641\u0648\u0639\u0627\u062a \u0622\u0645\u0646\u0629 \u0639\u0628\u0631 PayPal', pt: 'Pagamentos processados com seguran\u00e7a pelo PayPal' }
+        };
+        const st = secureTexts[selectedPayMethod];
+        document.getElementById('s6Secure').textContent = st[L] || st['en'];
+    }
+
+    function processPayment(method) {
+        const cost = calculateCost();
+        const priceStr = formatPrice(cost);
+        const L = getLang();
+        const confirmMsgs = {
+            en: priceStr + ' will be charged. Proceed?',
+            ja: priceStr + ' \u304c\u8ab2\u91d1\u3055\u308c\u307e\u3059\u3002\u7d9a\u884c\u3057\u307e\u3059\u304b\uff1f',
+            zh: '\u5c07\u6536\u53d6 ' + priceStr + '\u3002\u7e7c\u7e8c\u55ce\uff1f',
+            es: 'Se cobrar\u00e1 ' + priceStr + '. \u00bfContinuar?',
+            fr: priceStr + ' sera factur\u00e9. Continuer ?',
+            de: priceStr + ' wird berechnet. Fortfahren?',
+            ko: priceStr + ' \uc774 \uccad\uad6c\ub429\ub2c8\ub2e4. \uacc4\uc18d\ud558\uc2dc\uaca0\uc2b5\ub2c8\uae4c?',
+            ar: '\u0633\u064a\u062a\u0645 \u062e\u0635\u0645 ' + priceStr + '. \u0647\u0644 \u062a\u0631\u064a\u062f \u0627\u0644\u0645\u062a\u0627\u0628\u0639\u0629\u061f',
+            pt: priceStr + ' ser\u00e1 cobrado. Continuar?'
+        };
+        if (!confirm(confirmMsgs[L] || confirmMsgs['en'])) return;
+        goStep(7);
+        simulateTranslation();
+    }
+
+    // ===== Step 7: Translation Progress =====
+    function simulateTranslation() {
+        const totalChars = sourceTextContent.length;
+        const speeds = { haiku: 40, sonnet: 25, opus: 12 };
+        const speed = speeds[selectedModel] || 25;
+        const totalTicks = Math.max(20, Math.ceil(totalChars / speed));
+        let tick = 0;
+
+        const interval = setInterval(() => {
+            tick++;
+            const pct = Math.min(100, Math.round(tick / totalTicks * 100));
+            document.getElementById('progressFill').style.width = pct + '%';
+            document.getElementById('progressPercent').textContent = pct + '%';
+            const remainSec = Math.ceil((totalTicks - tick) * 50 / 1000);
+            document.getElementById('progressEta').textContent = getLang() === 'ja' ? '\u6b8b\u308a\u7d04' + remainSec + '\u79d2' : '~' + remainSec + 's remaining';
+
+            if (pct >= 100) {
+                clearInterval(interval);
+                generateDemoTranslation();
+                setTimeout(() => goStep(8), 500);
+            }
+        }, 50);
+    }
+
+    function generateDemoTranslation() {
+        const modelLabel = selectedModel.charAt(0).toUpperCase() + selectedModel.slice(1);
+        const paragraphs = sourceTextContent.split(/\n+/).filter(p => p.trim());
+        translatedText = paragraphs.map(p => '[' + modelLabel + ' Translation] ' + p).join('\n\n');
+    }
+
+    // ===== Step 9: Download =====
+    function downloadResult(format) {
+        const text = document.getElementById('reviewTranslation').value;
+        const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'translation_' + selectedModel + '.' + (format === 'docx' ? 'txt' : format);
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function startNewTranslation() {
+        document.getElementById('sourceText').value = '';
+        updateCharCount();
+        glossary = [];
+        renderGlossary();
+        translatedText = '';
+        sourceTextContent = '';
+        selectedModel = 'sonnet';
+        document.querySelectorAll('.compare-card').forEach(c => c.classList.remove('selected'));
+        document.getElementById('compareSonnet').classList.add('selected');
+        goStep(1);
+    }
+
+    function escH(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // ===== i18n Update =====
+    function updateWizardText() {
+        const L = getLang();
+        const t = (obj) => obj[L] || obj['en'] || '';
+        const T = {
+            pageTitle: { en: 'Novel Translator', ja: '\u5c0f\u8aac\u7ffb\u8a33', zh: '\u5c0f\u8aaa\u7ffb\u8b6f', es: 'Traductor de novelas', fr: 'Traducteur de romans', de: 'Roman\u00fcbersetzer', ko: '\uc18c\uc124 \ubc88\uc5ed\uae30', ar: '\u0645\u062a\u0631\u062c\u0645 \u0627\u0644\u0631\u0648\u0627\u064a\u0627\u062a', pt: 'Tradutor de romances' },
+            pageSubtitle: { en: 'AI-powered translation for novels, light novels, and long-form text', ja: 'AI\u7ffb\u8a33\u3067\u5c0f\u8aac\u30fb\u30e9\u30a4\u30c8\u30ce\u30d9\u30eb\u30fb\u9577\u6587\u30c6\u30ad\u30b9\u30c8\u3092\u7ffb\u8a33', zh: 'AI\u7ffb\u8b6f\u5c0f\u8aaa\u3001\u8f15\u5c0f\u8aaa\u548c\u9577\u6587\u672c', es: 'Traducci\u00f3n con IA para novelas y textos largos', fr: 'Traduction IA pour romans et textes longs', de: 'KI-\u00dcbersetzung f\u00fcr Romane und lange Texte', ko: 'AI \ubc88\uc5ed\uc73c\ub85c \uc18c\uc124\uacfc \uc7a5\ubb38 \ud14d\uc2a4\ud2b8\ub97c \ubc88\uc5ed', ar: '\u062a\u0631\u062c\u0645\u0629 \u0628\u0627\u0644\u0630\u0643\u0627\u0621 \u0627\u0644\u0627\u0635\u0637\u0646\u0627\u0639\u064a \u0644\u0644\u0631\u0648\u0627\u064a\u0627\u062a \u0648\u0627\u0644\u0646\u0635\u0648\u0635 \u0627\u0644\u0637\u0648\u064a\u0644\u0629', pt: 'Tradu\u00e7\u00e3o com IA para romances e textos longos' },
+            step1: { en: 'Notice', ja: '\u78ba\u8a8d', zh: '\u78ba\u8a8d', es: 'Aviso', fr: 'Avis', de: 'Hinweis', ko: '\ud655\uc778', ar: '\u0645\u0644\u0627\u062d\u0638\u0629', pt: 'Aviso' },
+            step2: { en: 'Input', ja: '\u5165\u529b', zh: '\u8f38\u5165', es: 'Entrada', fr: 'Saisie', de: 'Eingabe', ko: '\uc785\ub825', ar: '\u0625\u062f\u062e\u0627\u0644', pt: 'Entrada' },
+            step3: { en: 'Settings', ja: '\u8a2d\u5b9a', zh: '\u8a2d\u5b9a', es: 'Ajustes', fr: 'R\u00e9glages', de: 'Einstellungen', ko: '\uc124\uc815', ar: '\u0625\u0639\u062f\u0627\u062f\u0627\u062a', pt: 'Configura\u00e7\u00f5es' },
+            step4: { en: 'Compare', ja: '\u6bd4\u8f03', zh: '\u6bd4\u8f03', es: 'Comparar', fr: 'Comparer', de: 'Vergleichen', ko: '\ube44\uad50', ar: '\u0645\u0642\u0627\u0631\u0646\u0629', pt: 'Comparar' },
+            step5: { en: 'Quote', ja: '\u898b\u7a4d', zh: '\u5831\u50f9', es: 'Cotizaci\u00f3n', fr: 'Devis', de: 'Angebot', ko: '\uacac\uc801', ar: '\u0639\u0631\u0636 \u0633\u0639\u0631', pt: 'Or\u00e7amento' },
+            step6: { en: 'Payment', ja: '\u652f\u6255', zh: '\u4ed8\u6b3e', es: 'Pago', fr: 'Paiement', de: 'Zahlung', ko: '\uacb0\uc81c', ar: '\u0627\u0644\u062f\u0641\u0639', pt: 'Pagamento' },
+            step7: { en: 'Translating', ja: '\u7ffb\u8a33\u4e2d', zh: '\u7ffb\u8b6f\u4e2d', es: 'Traduciendo', fr: 'Traduction', de: '\u00dcbersetzen', ko: '\ubc88\uc5ed \uc911', ar: '\u062c\u0627\u0631\u064a \u0627\u0644\u062a\u0631\u062c\u0645\u0629', pt: 'Traduzindo' },
+            step8: { en: 'Review', ja: '\u78ba\u8a8d', zh: '\u5be9\u67e5', es: 'Revisar', fr: 'V\u00e9rifier', de: 'Pr\u00fcfen', ko: '\uac80\ud1a0', ar: '\u0645\u0631\u0627\u062c\u0639\u0629', pt: 'Revisar' },
+            step9: { en: 'Download', ja: '\u30c0\u30a6\u30f3\u30ed\u30fc\u30c9', zh: '\u4e0b\u8f09', es: 'Descargar', fr: 'T\u00e9l\u00e9charger', de: 'Herunterladen', ko: '\ub2e4\uc6b4\ub85c\ub4dc', ar: '\u062a\u0646\u0632\u064a\u0644', pt: 'Baixar' },
+            s1Title: { en: 'This is a paid translation service', ja: '\u3053\u308c\u306f\u6709\u6599\u306e\u7ffb\u8a33\u30b5\u30fc\u30d3\u30b9\u3067\u3059', zh: '\u9019\u662f\u4ed8\u8cbb\u7ffb\u8b6f\u670d\u52d9', es: 'Este es un servicio de traducci\u00f3n de pago', fr: 'Ceci est un service de traduction payant', de: 'Dies ist ein kostenpflichtiger \u00dcbersetzungsdienst', ko: '\uc774\uac83\uc740 \uc720\ub8cc \ubc88\uc5ed \uc11c\ube44\uc2a4\uc785\ub2c8\ub2e4', ar: '\u0647\u0630\u0647 \u062e\u062f\u0645\u0629 \u062a\u0631\u062c\u0645\u0629 \u0645\u062f\u0641\u0648\u0639\u0629', pt: 'Este \u00e9 um servi\u00e7o de tradu\u00e7\u00e3o pago' },
+            s1Desc: { en: 'Our AI translation uses Claude by Anthropic. Charges are based on the model you choose and the length of your text. Select your currency below.', ja: 'AI\u7ffb\u8a33\u306fAnthropic\u306eClaude\u3092\u4f7f\u7528\u3002\u6599\u91d1\u306f\u30e2\u30c7\u30eb\u3068\u30c6\u30ad\u30b9\u30c8\u306e\u9577\u3055\u306b\u57fa\u3065\u304d\u307e\u3059\u3002\u4e0b\u304b\u3089\u901a\u8ca8\u3092\u9078\u629e\u3057\u3066\u304f\u3060\u3055\u3044\u3002', zh: 'AI\u7ffb\u8b6f\u4f7f\u7528Anthropic\u7684Claude\u3002\u8cbb\u7528\u57fa\u65bc\u6a21\u578b\u548c\u6587\u672c\u9577\u5ea6\u3002\u8acb\u5728\u4e0b\u65b9\u9078\u64c7\u8ca8\u5e63\u3002', es: 'Nuestra traducci\u00f3n IA usa Claude de Anthropic. Los cargos se basan en el modelo y la longitud del texto. Seleccione su moneda.', fr: 'Notre traduction IA utilise Claude d\'Anthropic. Les frais d\u00e9pendent du mod\u00e8le et du texte. S\u00e9lectionnez votre devise.', de: 'Unsere KI-\u00dcbersetzung nutzt Claude von Anthropic. Kosten basieren auf Modell und Textl\u00e4nge. W\u00e4hlen Sie Ihre W\u00e4hrung.', ko: 'AI \ubc88\uc5ed\uc740 Anthropic\uc758 Claude\ub97c \uc0ac\uc6a9\ud569\ub2c8\ub2e4. \uc694\uae08\uc740 \ubaa8\ub378\uacfc \ud14d\uc2a4\ud2b8 \uae38\uc774\uc5d0 \ub530\ub77c \ub2ec\ub77c\uc9d1\ub2c8\ub2e4. \ud1b5\ud654\ub97c \uc120\ud0dd\ud558\uc138\uc694.', ar: '\u062a\u0633\u062a\u062e\u062f\u0645 \u062a\u0631\u062c\u0645\u062a\u0646\u0627 Claude \u0645\u0646 Anthropic. \u0627\u0644\u0631\u0633\u0648\u0645 \u062a\u0639\u062a\u0645\u062f \u0639\u0644\u0649 \u0627\u0644\u0646\u0645\u0648\u0630\u062c \u0648\u0637\u0648\u0644 \u0627\u0644\u0646\u0635. \u0627\u062e\u062a\u0631 \u0627\u0644\u0639\u0645\u0644\u0629.', pt: 'Nossa tradu\u00e7\u00e3o IA usa Claude da Anthropic. Custos dependem do modelo e comprimento do texto. Selecione sua moeda.' },
+            s1CurrLabel: { en: 'Currency', ja: '\u901a\u8ca8', zh: '\u8ca8\u5e63', es: 'Moneda', fr: 'Devise', de: 'W\u00e4hrung', ko: '\ud1b5\ud654', ar: '\u0627\u0644\u0639\u0645\u0644\u0629', pt: 'Moeda' },
+            s1BtnAgree: { en: 'I understand, continue', ja: '\u7406\u89e3\u3057\u307e\u3057\u305f\u3001\u7d9a\u884c', zh: '\u6211\u77ad\u89e3\uff0c\u7e7c\u7e8c', es: 'Entiendo, continuar', fr: 'Je comprends, continuer', de: 'Verstanden, weiter', ko: '\uc774\ud574\ud588\uc2b5\ub2c8\ub2e4, \uacc4\uc18d', ar: '\u0641\u0647\u0645\u062a\u060c \u0645\u062a\u0627\u0628\u0639\u0629', pt: 'Entendi, continuar' },
+            s2Title: { en: 'Language & Text Input', ja: '\u8a00\u8a9e\u3068\u30c6\u30ad\u30b9\u30c8\u5165\u529b', zh: '\u8a9e\u8a00\u8207\u6587\u672c\u8f38\u5165', es: 'Idioma y entrada de texto', fr: 'Langue et saisie de texte', de: 'Sprache & Texteingabe', ko: '\uc5b8\uc5b4 \ubc0f \ud14d\uc2a4\ud2b8 \uc785\ub825', ar: '\u0627\u0644\u0644\u063a\u0629 \u0648\u0625\u062f\u062e\u0627\u0644 \u0627\u0644\u0646\u0635', pt: 'Idioma e entrada de texto' },
+            s2LabelSource: { en: 'Source Language', ja: '\u539f\u6587\u306e\u8a00\u8a9e', zh: '\u539f\u6587\u8a9e\u8a00', es: 'Idioma de origen', fr: 'Langue source', de: 'Ausgangssprache', ko: '\uc6d0\ubb38 \uc5b8\uc5b4', ar: '\u0644\u063a\u0629 \u0627\u0644\u0645\u0635\u062f\u0631', pt: 'Idioma de origem' },
+            s2LabelTarget: { en: 'Target Language', ja: '\u7ffb\u8a33\u5148\u306e\u8a00\u8a9e', zh: '\u76ee\u6a19\u8a9e\u8a00', es: 'Idioma de destino', fr: 'Langue cible', de: 'Zielsprache', ko: '\ubc88\uc5ed \uc5b8\uc5b4', ar: '\u0644\u063a\u0629 \u0627\u0644\u0647\u062f\u0641', pt: 'Idioma de destino' },
+            tabFullLabel: { en: 'Full Text', ja: '\u5168\u6587', zh: '\u5168\u6587', es: 'Texto completo', fr: 'Texte complet', de: 'Volltext', ko: '\uc804\uccb4 \ud14d\uc2a4\ud2b8', ar: '\u0627\u0644\u0646\u0635 \u0627\u0644\u0643\u0627\u0645\u0644', pt: 'Texto completo' },
+            tabFileLabel: { en: 'Upload File', ja: '\u30d5\u30a1\u30a4\u30eb\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9', zh: '\u4e0a\u50b3\u6a94\u6848', es: 'Subir archivo', fr: 'T\u00e9l\u00e9verser', de: 'Datei hochladen', ko: '\ud30c\uc77c \uc5c5\ub85c\ub4dc', ar: '\u0631\u0641\u0639 \u0645\u0644\u0641', pt: 'Enviar arquivo' },
+            charLabel: { en: 'characters', ja: '\u6587\u5b57', zh: '\u5b57\u5143', es: 'caracteres', fr: 'caract\u00e8res', de: 'Zeichen', ko: '\uae00\uc790', ar: '\u062d\u0631\u0641', pt: 'caracteres' },
+            uploadText: { en: 'Click or drag a file here (.txt, .docx)', ja: '\u30af\u30ea\u30c3\u30af\u307e\u305f\u306f\u30d5\u30a1\u30a4\u30eb\u3092\u30c9\u30e9\u30c3\u30b0 (.txt, .docx)', zh: '\u9ede\u64ca\u6216\u62d6\u66f3\u6a94\u6848 (.txt, .docx)', es: 'Haga clic o arrastre un archivo (.txt, .docx)', fr: 'Cliquez ou glissez un fichier (.txt, .docx)', de: 'Klicken oder Datei hierher ziehen (.txt, .docx)', ko: '\ud074\ub9ad \ub610\ub294 \ud30c\uc77c\uc744 \ub4dc\ub798\uadf8 (.txt, .docx)', ar: '\u0627\u0646\u0642\u0631 \u0623\u0648 \u0627\u0633\u062d\u0628 \u0645\u0644\u0641\u064b\u0627 (.txt, .docx)', pt: 'Clique ou arraste um arquivo (.txt, .docx)' },
+            s2Placeholder: { en: 'Paste your novel text here...', ja: '\u5c0f\u8aac\u306e\u30c6\u30ad\u30b9\u30c8\u3092\u3053\u3053\u306b\u8cbc\u308a\u4ed8\u3051...', zh: '\u5728\u6b64\u8cbc\u4e0a\u5c0f\u8aaa\u6587\u672c...', es: 'Pegue el texto de su novela aqu\u00ed...', fr: 'Collez votre texte de roman ici...', de: 'F\u00fcgen Sie Ihren Romantext hier ein...', ko: '\uc18c\uc124 \ud14d\uc2a4\ud2b8\ub97c \uc5ec\uae30\uc5d0 \ubd99\uc5ec\ub123\uc73c\uc138\uc694...', ar: '\u0627\u0644\u0635\u0642 \u0646\u0635 \u0631\u0648\u0627\u064a\u062a\u0643 \u0647\u0646\u0627...', pt: 'Cole o texto do seu romance aqui...' },
+            s5PayMethod: { en: 'Payment Method', ja: '\u652f\u6255\u3044\u65b9\u6cd5', zh: '\u4ed8\u6b3e\u65b9\u5f0f', es: 'M\u00e9todo de pago', fr: 'Mode de paiement', de: 'Zahlungsmethode', ko: '\uacb0\uc81c \ubc29\ubc95', ar: '\u0637\u0631\u064a\u0642\u0629 \u0627\u0644\u062f\u0641\u0639', pt: 'M\u00e9todo de pagamento' },
+            s5StripeNote: { en: 'Credit/Debit Card, Apple Pay, Google Pay', ja: '\u30af\u30ec\u30b8\u30c3\u30c8/\u30c7\u30d3\u30c3\u30c8\u30ab\u30fc\u30c9, Apple Pay, Google Pay', zh: '\u4fe1\u7528\u5361/\u7c3d\u5e33\u5361, Apple Pay, Google Pay', es: 'Tarjeta de cr\u00e9dito/d\u00e9bito, Apple Pay, Google Pay', fr: 'Carte de cr\u00e9dit/d\u00e9bit, Apple Pay, Google Pay', de: 'Kredit-/Debitkarte, Apple Pay, Google Pay', ko: '\uc2e0\uc6a9/\uccb4\ud06c\uce74\ub4dc, Apple Pay, Google Pay', ar: '\u0628\u0637\u0627\u0642\u0629 \u0627\u0626\u062a\u0645\u0627\u0646/\u062e\u0635\u0645, Apple Pay, Google Pay', pt: 'Cart\u00e3o de cr\u00e9dito/d\u00e9bito, Apple Pay, Google Pay' },
+            s5PaypalNote: { en: 'PayPal balance, Bank account', ja: 'PayPal\u6b8b\u9ad8, \u9280\u884c\u53e3\u5ea7', zh: 'PayPal\u9918\u984d, \u9280\u884c\u5e33\u6236', es: 'Saldo PayPal, Cuenta bancaria', fr: 'Solde PayPal, Compte bancaire', de: 'PayPal-Guthaben, Bankkonto', ko: 'PayPal \uc794\uc561, \uc740\ud589 \uacc4\uc88c', ar: '\u0631\u0635\u064a\u062f PayPal, \u062d\u0633\u0627\u0628 \u0628\u0646\u0643\u064a', pt: 'Saldo PayPal, Conta banc\u00e1ria' },
+            s6CardLabel: { en: 'Credit / Debit Card', ja: '\u30af\u30ec\u30b8\u30c3\u30c8/\u30c7\u30d3\u30c3\u30c8\u30ab\u30fc\u30c9', zh: '\u4fe1\u7528\u5361/\u7c3d\u5e33\u5361', es: 'Tarjeta de cr\u00e9dito/d\u00e9bito', fr: 'Carte de cr\u00e9dit/d\u00e9bit', de: 'Kredit-/Debitkarte', ko: '\uc2e0\uc6a9/\uccb4\ud06c\uce74\ub4dc', ar: '\u0628\u0637\u0627\u0642\u0629 \u0627\u0626\u062a\u0645\u0627\u0646/\u062e\u0635\u0645', pt: 'Cart\u00e3o de cr\u00e9dito/d\u00e9bito' },
+            s6PaypalLabel: { en: 'Pay with PayPal', ja: 'PayPal\u3067\u652f\u6255\u3046', zh: '\u7528PayPal\u652f\u4ed8', es: 'Pagar con PayPal', fr: 'Payer avec PayPal', de: 'Mit PayPal bezahlen', ko: 'PayPal\ub85c \uacb0\uc81c', ar: '\u0627\u0644\u062f\u0641\u0639 \u0639\u0628\u0631 PayPal', pt: 'Pagar com PayPal' },
+            s6Desc: { en: 'Confirm and proceed to payment.', ja: '\u78ba\u8a8d\u3057\u3066\u304a\u652f\u6255\u3044\u3078\u9032\u3093\u3067\u304f\u3060\u3055\u3044\u3002', zh: '\u78ba\u8a8d\u4e26\u7e7c\u7e8c\u4ed8\u6b3e\u3002', es: 'Confirme y proceda al pago.', fr: 'Confirmez et proc\u00e9dez au paiement.', de: 'Best\u00e4tigen und zur Zahlung.', ko: '\ud655\uc778 \ud6c4 \uacb0\uc81c\ub85c \uc9c4\ud589\ud569\ub2c8\ub2e4.', ar: '\u0623\u0643\u062f \u0648\u062a\u0627\u0628\u0639 \u0644\u0644\u062f\u0641\u0639.', pt: 'Confirme e prossiga para o pagamento.' },
+            btnBack: { en: 'Back', ja: '\u623b\u308b', zh: '\u8fd4\u56de', es: 'Atr\u00e1s', fr: 'Retour', de: 'Zur\u00fcck', ko: '\ub4a4\ub85c', ar: '\u0631\u062c\u0648\u0639', pt: 'Voltar' },
+            btnNext: { en: 'Next', ja: '\u6b21\u3078', zh: '\u4e0b\u4e00\u6b65', es: 'Siguiente', fr: 'Suivant', de: 'Weiter', ko: '\ub2e4\uc74c', ar: '\u0627\u0644\u062a\u0627\u0644\u064a', pt: 'Pr\u00f3ximo' },
+            s3Title: { en: 'Translation Settings', ja: '\u7ffb\u8a33\u8a2d\u5b9a', zh: '\u7ffb\u8b6f\u8a2d\u5b9a', es: 'Configuraci\u00f3n de traducci\u00f3n', fr: 'Param\u00e8tres de traduction', de: '\u00dcbersetzungseinstellungen', ko: '\ubc88\uc5ed \uc124\uc815', ar: '\u0625\u0639\u062f\u0627\u062f\u0627\u062a \u0627\u0644\u062a\u0631\u062c\u0645\u0629', pt: 'Configura\u00e7\u00f5es de tradu\u00e7\u00e3o' },
+            s3Desc: { en: 'Fine-tune how your text should be translated. All settings are optional.', ja: '\u7ffb\u8a33\u306e\u8abf\u6574\u3092\u884c\u3044\u307e\u3059\u3002\u3059\u3079\u3066\u4efb\u610f\u3067\u3059\u3002', zh: '\u5fae\u8abf\u7ffb\u8b6f\u65b9\u5f0f\u3002\u6240\u6709\u8a2d\u5b9a\u5747\u70ba\u53ef\u9078\u3002', es: 'Ajuste c\u00f3mo se traducir\u00e1 su texto. Todos los ajustes son opcionales.', fr: 'Affinez la traduction. Tous les param\u00e8tres sont optionnels.', de: 'Passen Sie die \u00dcbersetzung an. Alle Einstellungen sind optional.', ko: '\ubc88\uc5ed \ubc29\uc2dd\uc744 \uc870\uc815\ud569\ub2c8\ub2e4. \ubaa8\ub4e0 \uc124\uc815\uc740 \uc120\ud0dd \uc0ac\ud56d\uc785\ub2c8\ub2e4.', ar: '\u0636\u0628\u0637 \u0637\u0631\u064a\u0642\u0629 \u0627\u0644\u062a\u0631\u062c\u0645\u0629. \u062c\u0645\u064a\u0639 \u0627\u0644\u0625\u0639\u062f\u0627\u062f\u0627\u062a \u0627\u062e\u062a\u064a\u0627\u0631\u064a\u0629.', pt: 'Ajuste como seu texto ser\u00e1 traduzido. Todas as configura\u00e7\u00f5es s\u00e3o opcionais.' },
+            s3Style: { en: 'Style', ja: '\u30b9\u30bf\u30a4\u30eb', zh: '\u98a8\u683c', es: 'Estilo', fr: 'Style', de: 'Stil', ko: '\uc2a4\ud0c0\uc77c', ar: '\u0627\u0644\u0623\u0633\u0644\u0648\u0628', pt: 'Estilo' },
+            s3Tone: { en: 'Tone', ja: '\u30c8\u30fc\u30f3', zh: '\u8a9e\u6c23', es: 'Tono', fr: 'Ton', de: 'Ton', ko: '\ud1a4', ar: '\u0627\u0644\u0646\u0628\u0631\u0629', pt: 'Tom' },
+            s3Genre: { en: 'Genre', ja: '\u30b8\u30e3\u30f3\u30eb', zh: '\u985e\u578b', es: 'G\u00e9nero', fr: 'Genre', de: 'Genre', ko: '\uc7a5\ub974', ar: '\u0627\u0644\u0646\u0648\u0639', pt: 'G\u00eanero' },
+            s3Context: { en: 'Context Note (optional)', ja: '\u30b3\u30f3\u30c6\u30ad\u30b9\u30c8\uff08\u4efb\u610f\uff09', zh: '\u80cc\u666f\u8aaa\u660e\uff08\u53ef\u9078\uff09', es: 'Nota de contexto (opcional)', fr: 'Note de contexte (optionnel)', de: 'Kontexthinweis (optional)', ko: '\ucee8\ud14d\uc2a4\ud2b8 \ub178\ud2b8 (\uc120\ud0dd)', ar: '\u0645\u0644\u0627\u062d\u0638\u0629 \u0627\u0644\u0633\u064a\u0627\u0642 (\u0627\u062e\u062a\u064a\u0627\u0631\u064a)', pt: 'Nota de contexto (opcional)' },
+            s3Glossary: { en: 'Glossary (character names, terms)', ja: '\u7528\u8a9e\u96c6\uff08\u30ad\u30e3\u30e9\u30af\u30bf\u30fc\u540d\u30fb\u7528\u8a9e\uff09', zh: '\u8853\u8a9e\u8868\uff08\u89d2\u8272\u540d\u3001\u8853\u8a9e\uff09', es: 'Glosario (nombres de personajes, t\u00e9rminos)', fr: 'Glossaire (noms de personnages, termes)', de: 'Glossar (Charakternamen, Begriffe)', ko: '\uc6a9\uc5b4\uc9d1 (\uce90\ub9ad\ud130\uba85, \uc6a9\uc5b4)', ar: '\u0642\u0627\u0645\u0648\u0633 (\u0623\u0633\u0645\u0627\u0621 \u0627\u0644\u0634\u062e\u0635\u064a\u0627\u062a\u060c \u0627\u0644\u0645\u0635\u0637\u0644\u062d\u0627\u062a)', pt: 'Gloss\u00e1rio (nomes de personagens, termos)' },
+            s3ThSource: { en: 'Source', ja: '\u539f\u8a9e', zh: '\u539f\u6587', es: 'Origen', fr: 'Source', de: 'Quelle', ko: '\uc6d0\uc5b4', ar: '\u0627\u0644\u0645\u0635\u062f\u0631', pt: 'Origem' },
+            s3ThTarget: { en: 'Target', ja: '\u8a33\u8a9e', zh: '\u8b6f\u6587', es: 'Destino', fr: 'Cible', de: 'Ziel', ko: '\ubc88\uc5ed\uc5b4', ar: '\u0627\u0644\u0647\u062f\u0641', pt: 'Destino' },
+            s3NotSpecified: { en: '-- Not specified --', ja: '-- \u6307\u5b9a\u306a\u3057 --', zh: '-- \u672a\u6307\u5b9a --', es: '-- No especificado --', fr: '-- Non sp\u00e9cifi\u00e9 --', de: '-- Nicht angegeben --', ko: '-- \uc9c0\uc815 \uc548\ud568 --', ar: '-- \u063a\u064a\u0631 \u0645\u062d\u062f\u062f --', pt: '-- N\u00e3o especificado --' },
+            s3Formal: { en: 'Formal', ja: '\u30d5\u30a9\u30fc\u30de\u30eb', zh: '\u6b63\u5f0f', es: 'Formal', fr: 'Formel', de: 'Formell', ko: '\uaca9\uc2dd\uccb4', ar: '\u0631\u0633\u0645\u064a', pt: 'Formal' },
+            s3Informal: { en: 'Informal / Casual', ja: '\u30ab\u30b8\u30e5\u30a2\u30eb', zh: '\u975e\u6b63\u5f0f/\u4f11\u9592', es: 'Informal / Casual', fr: 'Informel / D\u00e9contract\u00e9', de: 'Informell / Locker', ko: '\ube44\uaca9\uc2dd / \uce90\uc8fc\uc5bc', ar: '\u063a\u064a\u0631 \u0631\u0633\u0645\u064a', pt: 'Informal / Casual' },
+            s3Literary: { en: 'Literary', ja: '\u6587\u5b66\u7684', zh: '\u6587\u5b78\u6027', es: 'Literario', fr: 'Litt\u00e9raire', de: 'Literarisch', ko: '\ubb38\ud559\uc801', ar: '\u0623\u062f\u0628\u064a', pt: 'Liter\u00e1rio' },
+            s3Novel: { en: 'Novel', ja: '\u5c0f\u8aac', zh: '\u5c0f\u8aaa', es: 'Novela', fr: 'Roman', de: 'Roman', ko: '\uc18c\uc124', ar: '\u0631\u0648\u0627\u064a\u0629', pt: 'Romance' },
+            s3LightNovel: { en: 'Light Novel', ja: '\u30e9\u30a4\u30c8\u30ce\u30d9\u30eb', zh: '\u8f15\u5c0f\u8aaa', es: 'Novela ligera', fr: 'Light Novel', de: 'Light Novel', ko: '\ub77c\uc774\ud2b8 \ub178\ubca8', ar: '\u0631\u0648\u0627\u064a\u0629 \u062e\u0641\u064a\u0641\u0629', pt: 'Light Novel' },
+            s3Friendly: { en: 'Friendly', ja: '\u30d5\u30ec\u30f3\u30c9\u30ea\u30fc', zh: '\u53cb\u5584', es: 'Amigable', fr: 'Amical', de: 'Freundlich', ko: '\uce5c\uadfc\ud55c', ar: '\u0648\u062f\u064a', pt: 'Amig\u00e1vel' },
+            s3Neutral: { en: 'Neutral', ja: '\u30cb\u30e5\u30fc\u30c8\u30e9\u30eb', zh: '\u4e2d\u7acb', es: 'Neutral', fr: 'Neutre', de: 'Neutral', ko: '\uc911\ub9bd\uc801', ar: '\u0645\u062d\u0627\u064a\u062f', pt: 'Neutro' },
+            s3Dramatic: { en: 'Dramatic', ja: '\u30c9\u30e9\u30de\u30c6\u30a3\u30c3\u30af', zh: '\u6232\u5287\u6027', es: 'Dram\u00e1tico', fr: 'Dramatique', de: 'Dramatisch', ko: '\uadf9\uc801\uc778', ar: '\u062f\u0631\u0627\u0645\u064a', pt: 'Dram\u00e1tico' },
+            s3Romantic: { en: 'Romantic', ja: '\u30ed\u30de\u30f3\u30c6\u30a3\u30c3\u30af', zh: '\u6d6a\u6f2b', es: 'Rom\u00e1ntico', fr: 'Romantique', de: 'Romantisch', ko: '\ub85c\ub9e8\ud2f1', ar: '\u0631\u0648\u0645\u0627\u0646\u0633\u064a', pt: 'Rom\u00e2ntico' },
+            s3Humorous: { en: 'Humorous', ja: '\u30e6\u30fc\u30e2\u30e9\u30b9', zh: '\u5e7d\u9ed8', es: 'Humor\u00edstico', fr: 'Humoristique', de: 'Humorvoll', ko: '\uc720\uba38\ub7ec\uc2a4', ar: '\u0641\u0643\u0627\u0647\u064a', pt: 'Humor\u00edstico' },
+            s3Fantasy: { en: 'Fantasy', ja: '\u30d5\u30a1\u30f3\u30bf\u30b8\u30fc', zh: '\u5947\u5e7b', es: 'Fantas\u00eda', fr: 'Fantaisie', de: 'Fantasy', ko: '\ud310\ud0c0\uc9c0', ar: '\u062e\u064a\u0627\u0644\u064a', pt: 'Fantasia' },
+            s3Romance: { en: 'Romance', ja: '\u30ed\u30de\u30f3\u30b9', zh: '\u611b\u60c5', es: 'Romance', fr: 'Romance', de: 'Romanze', ko: '\ub85c\ub9e8\uc2a4', ar: '\u0631\u0648\u0645\u0627\u0646\u0633\u064a\u0629', pt: 'Romance' },
+            s3SciFi: { en: 'Sci-Fi', ja: 'SF', zh: '\u79d1\u5e7b', es: 'Ciencia ficci\u00f3n', fr: 'Science-fiction', de: 'Sci-Fi', ko: 'SF', ar: '\u062e\u064a\u0627\u0644 \u0639\u0644\u0645\u064a', pt: 'Fic\u00e7\u00e3o cient\u00edfica' },
+            s3Mystery: { en: 'Mystery', ja: '\u30df\u30b9\u30c6\u30ea\u30fc', zh: '\u61f8\u7591', es: 'Misterio', fr: 'Myst\u00e8re', de: 'Krimi', ko: '\ubbf8\uc2a4\ud130\ub9ac', ar: '\u063a\u0645\u0648\u0636', pt: 'Mist\u00e9rio' },
+            s3Horror: { en: 'Horror', ja: '\u30db\u30e9\u30fc', zh: '\u6050\u6016', es: 'Terror', fr: 'Horreur', de: 'Horror', ko: '\ud638\ub7ec', ar: '\u0631\u0639\u0628', pt: 'Terror' },
+            s3Historical: { en: 'Historical', ja: '\u6b74\u53f2', zh: '\u6b77\u53f2', es: 'Hist\u00f3rico', fr: 'Historique', de: 'Historisch', ko: '\uc5ed\uc0ac', ar: '\u062a\u0627\u0631\u064a\u062e\u064a', pt: 'Hist\u00f3rico' },
+            s3Isekai: { en: 'Isekai', ja: '\u7570\u4e16\u754c', zh: '\u7570\u4e16\u754c', es: 'Isekai', fr: 'Isekai', de: 'Isekai', ko: '\uc774\uc138\uacc4', ar: 'Isekai', pt: 'Isekai' },
+            s3SliceOfLife: { en: 'Slice of Life', ja: '\u65e5\u5e38\u7cfb', zh: '\u65e5\u5e38\u7cfb', es: 'Vida cotidiana', fr: 'Tranche de vie', de: 'Slice of Life', ko: '\uc77c\uc0c1', ar: '\u0634\u0631\u064a\u062d\u0629 \u0645\u0646 \u0627\u0644\u062d\u064a\u0627\u0629', pt: 'Cotidiano' },
+            s3ContextPh: { en: 'e.g. A samurai story set in the Edo period', ja: '\u4f8b\uff1a\u6c5f\u6238\u6642\u4ee3\u3092\u821e\u53f0\u306b\u3057\u305f\u4f8d\u306e\u7269\u8a9e', zh: '\u4f8b\uff1a\u4ee5\u6c5f\u6236\u6642\u4ee3\u70ba\u80cc\u666f\u7684\u6b66\u58eb\u6545\u4e8b', es: 'Ej. Una historia de samuráis en el periodo Edo', fr: 'Ex. Une histoire de samoura\u00ef \u00e0 l\'\u00e9poque Edo', de: 'Z.B. Eine Samurai-Geschichte in der Edo-Zeit', ko: '\uc608: \uc5d0\ub3c4 \uc2dc\ub300\ub97c \ubc30\uacbd\uc73c\ub85c \ud55c \uc0ac\ubb34\ub77c\uc774 \uc774\uc57c\uae30', ar: '\u0645\u062b\u0627\u0644: \u0642\u0635\u0629 \u0633\u0627\u0645\u0648\u0631\u0627\u064a \u0641\u064a \u0639\u0635\u0631 \u0625\u064a\u062f\u0648', pt: 'Ex. Uma hist\u00f3ria de samurai no per\u00edodo Edo' },
+            s3SrcTermPh: { en: 'Source term', ja: '\u539f\u8a9e', zh: '\u539f\u6587\u8a5e\u5f59', es: 'T\u00e9rmino original', fr: 'Terme source', de: 'Quellbegriff', ko: '\uc6d0\uc5b4', ar: '\u0627\u0644\u0645\u0635\u0637\u0644\u062d \u0627\u0644\u0645\u0635\u062f\u0631', pt: 'Termo original' },
+            s3TgtTermPh: { en: 'Translation', ja: '\u8a33\u8a9e', zh: '\u8b6f\u6587', es: 'Traducci\u00f3n', fr: 'Traduction', de: '\u00dcbersetzung', ko: '\ubc88\uc5ed\uc5b4', ar: '\u0627\u0644\u062a\u0631\u062c\u0645\u0629', pt: 'Tradu\u00e7\u00e3o' },
+            s4Title: { en: 'Compare Translation Quality', ja: '\u7ffb\u8a33\u54c1\u8cea\u3092\u6bd4\u8f03', zh: '\u6bd4\u8f03\u7ffb\u8b6f\u54c1\u8cea', es: 'Comparar calidad de traducci\u00f3n', fr: 'Comparer la qualit\u00e9 de traduction', de: '\u00dcbersetzungsqualit\u00e4t vergleichen', ko: '\ubc88\uc5ed \ud488\uc9c8 \ube44\uad50', ar: '\u0645\u0642\u0627\u0631\u0646\u0629 \u062c\u0648\u062f\u0629 \u0627\u0644\u062a\u0631\u062c\u0645\u0629', pt: 'Comparar qualidade da tradu\u00e7\u00e3o' },
+            s4Desc: { en: 'Here is the first portion of your text translated by all 3 AI models. Compare and choose.', ja: '\u30c6\u30ad\u30b9\u30c8\u306e\u6700\u521d\u306e\u90e8\u5206\u30923\u3064\u306eAI\u30e2\u30c7\u30eb\u3067\u7ffb\u8a33\u3057\u307e\u3057\u305f\u3002\u6bd4\u8f03\u3057\u3066\u9078\u3093\u3067\u304f\u3060\u3055\u3044\u3002', zh: '\u4ee5\u4e0b\u662f\u60a8\u7684\u6587\u672c\u7531\u4e09\u500bAI\u6a21\u578b\u7ffb\u8b6f\u7684\u7d50\u679c\u3002\u8acb\u6bd4\u8f03\u4e26\u9078\u64c7\u3002', es: 'Aqu\u00ed est\u00e1 la primera parte traducida por los 3 modelos. Compare y elija.', fr: 'Voici la premi\u00e8re partie traduite par les 3 mod\u00e8les. Comparez et choisissez.', de: 'Hier ist der erste Teil Ihres Textes, \u00fcbersetzt von allen 3 Modellen. Vergleichen Sie und w\u00e4hlen Sie.', ko: '\ud14d\uc2a4\ud2b8\uc758 \uccab \ubd80\ubd84\uc744 3\uac1c AI \ubaa8\ub378\ub85c \ubc88\uc5ed\ud588\uc2b5\ub2c8\ub2e4. \ube44\uad50\ud558\uace0 \uc120\ud0dd\ud558\uc138\uc694.', ar: '\u0647\u0646\u0627 \u0627\u0644\u062c\u0632\u0621 \u0627\u0644\u0623\u0648\u0644 \u0645\u062a\u0631\u062c\u0645\u064b\u0627 \u0628\u0648\u0627\u0633\u0637\u0629 3 \u0646\u0645\u0627\u0630\u062c. \u0642\u0627\u0631\u0646 \u0648\u0627\u062e\u062a\u0631.', pt: 'Aqui est\u00e1 a primeira parte traduzida pelos 3 modelos. Compare e escolha.' },
+            s4OrigLabel: { en: 'Original Text (excerpt)', ja: '\u539f\u6587\uff08\u62dc\u8cbc\uff09', zh: '\u539f\u6587\uff08\u7bc0\u9304\uff09', es: 'Texto original (extracto)', fr: 'Texte original (extrait)', de: 'Originaltext (Auszug)', ko: '\uc6d0\ubb38 (\ubc1c\ucecc)', ar: '\u0627\u0644\u0646\u0635 \u0627\u0644\u0623\u0635\u0644\u064a (\u0645\u0642\u062a\u0637\u0641)', pt: 'Texto original (trecho)' },
+            s4BtnText: { en: 'Use this model', ja: '\u3053\u306e\u30e2\u30c7\u30eb\u3092\u4f7f\u7528', zh: '\u4f7f\u7528\u6b64\u6a21\u578b', es: 'Usar este modelo', fr: 'Utiliser ce mod\u00e8le', de: 'Dieses Modell verwenden', ko: '\uc774 \ubaa8\ub378 \uc0ac\uc6a9', ar: '\u0627\u0633\u062a\u062e\u062f\u0645 \u0647\u0630\u0627 \u0627\u0644\u0646\u0645\u0648\u0630\u062c', pt: 'Usar este modelo' },
+            s5Title: { en: 'Cost Estimate', ja: '\u898b\u7a4d\u3082\u308a', zh: '\u8cbb\u7528\u4f30\u7b97', es: 'Presupuesto', fr: 'Estimation du co\u00fbt', de: 'Kostensch\u00e4tzung', ko: '\ube44\uc6a9 \uacac\uc801', ar: '\u062a\u0642\u062f\u064a\u0631 \u0627\u0644\u062a\u0643\u0644\u0641\u0629', pt: 'Estimativa de custo' },
+            s5LabelModel: { en: 'Selected Model', ja: '\u9078\u629e\u30e2\u30c7\u30eb', zh: '\u5df2\u9078\u6a21\u578b', es: 'Modelo seleccionado', fr: 'Mod\u00e8le s\u00e9lectionn\u00e9', de: 'Gew\u00e4hltes Modell', ko: '\uc120\ud0dd\ub41c \ubaa8\ub378', ar: '\u0627\u0644\u0646\u0645\u0648\u0630\u062c \u0627\u0644\u0645\u062e\u062a\u0627\u0631', pt: 'Modelo selecionado' },
+            s5LabelChars: { en: 'Character Count', ja: '\u6587\u5b57\u6570', zh: '\u5b57\u5143\u6578', es: 'N\u00famero de caracteres', fr: 'Nombre de caract\u00e8res', de: 'Zeichenanzahl', ko: '\uae00\uc790 \uc218', ar: '\u0639\u062f\u062f \u0627\u0644\u0623\u062d\u0631\u0641', pt: 'Contagem de caracteres' },
+            s5LabelRate: { en: 'Rate', ja: '\u5358\u4fa1', zh: '\u55ae\u50f9', es: 'Tarifa', fr: 'Tarif', de: 'Preis', ko: '\ub2e8\uac00', ar: '\u0627\u0644\u0633\u0639\u0631', pt: 'Tarifa' },
+            s5LabelTotal: { en: 'Total (fees included)', ja: '\u5408\u8a08\uff08\u624b\u6570\u6599\u8fbc\uff09', zh: '\u7e3d\u8a08\uff08\u542b\u624b\u7e8c\u8cbb\uff09', es: 'Total (comisiones incluidas)', fr: 'Total (frais inclus)', de: 'Gesamt (Geb\u00fchren inklusive)', ko: '\ud569\uacc4 (\uc218\uc218\ub8cc \ud3ec\ud568)', ar: '\u0627\u0644\u0625\u062c\u0645\u0627\u0644\u064a (\u0634\u0627\u0645\u0644 \u0627\u0644\u0631\u0633\u0648\u0645)', pt: 'Total (taxas inclusas)' },
+            s5BtnText: { en: 'Proceed to Payment', ja: '\u652f\u6255\u3044\u3078\u9032\u3080', zh: '\u524d\u5f80\u4ed8\u6b3e', es: 'Proceder al pago', fr: 'Proc\u00e9der au paiement', de: 'Zur Zahlung', ko: '\uacb0\uc81c\ub85c \uc9c4\ud589', ar: '\u0627\u0644\u0645\u062a\u0627\u0628\u0639\u0629 \u0644\u0644\u062f\u0641\u0639', pt: 'Prosseguir para pagamento' },
+            s6Title: { en: 'Payment', ja: '\u652f\u6255\u3044', zh: '\u4ed8\u6b3e', es: 'Pago', fr: 'Paiement', de: 'Zahlung', ko: '\uacb0\uc81c', ar: '\u0627\u0644\u062f\u0641\u0639', pt: 'Pagamento' },
+            s7Title: { en: 'Translating your text...', ja: '\u30c6\u30ad\u30b9\u30c8\u3092\u7ffb\u8a33\u4e2d...', zh: '\u6b63\u5728\u7ffb\u8b6f\u60a8\u7684\u6587\u672c...', es: 'Traduciendo su texto...', fr: 'Traduction en cours...', de: 'Ihr Text wird \u00fcbersetzt...', ko: '\ud14d\uc2a4\ud2b8 \ubc88\uc5ed \uc911...', ar: '\u062c\u0627\u0631\u064a \u062a\u0631\u062c\u0645\u0629 \u0627\u0644\u0646\u0635...', pt: 'Traduzindo seu texto...' },
+            s7Note: { en: 'Please do not close this page.', ja: '\u3053\u306e\u30da\u30fc\u30b8\u3092\u9589\u3058\u306a\u3044\u3067\u304f\u3060\u3055\u3044\u3002', zh: '\u8acb\u52ff\u95dc\u9589\u6b64\u9801\u9762\u3002', es: 'No cierre esta p\u00e1gina.', fr: 'Ne fermez pas cette page.', de: 'Bitte schlie\u00dfen Sie diese Seite nicht.', ko: '\uc774 \ud398\uc774\uc9c0\ub97c \ub2eb\uc9c0 \ub9c8\uc138\uc694.', ar: '\u064a\u0631\u062c\u0649 \u0639\u062f\u0645 \u0625\u063a\u0644\u0627\u0642 \u0647\u0630\u0647 \u0627\u0644\u0635\u0641\u062d\u0629.', pt: 'N\u00e3o feche esta p\u00e1gina.' },
+            s8Title: { en: 'Review Translation', ja: '\u7ffb\u8a33\u3092\u78ba\u8a8d', zh: '\u5be9\u67e5\u7ffb\u8b6f', es: 'Revisar traducci\u00f3n', fr: 'V\u00e9rifier la traduction', de: '\u00dcbersetzung pr\u00fcfen', ko: '\ubc88\uc5ed \uac80\ud1a0', ar: '\u0645\u0631\u0627\u062c\u0639\u0629 \u0627\u0644\u062a\u0631\u062c\u0645\u0629', pt: 'Revisar tradu\u00e7\u00e3o' },
+            s8Desc: { en: 'Review and edit the translation below. You can make corrections before finalizing.', ja: '\u4e0b\u8a18\u306e\u7ffb\u8a33\u3092\u78ba\u8a8d\u30fb\u4fee\u6b63\u3057\u3066\u304f\u3060\u3055\u3044\u3002', zh: '\u8acb\u5be9\u67e5\u4e26\u7de8\u8f2f\u4ee5\u4e0b\u7ffb\u8b6f\u3002\u60a8\u53ef\u4ee5\u5728\u5b8c\u6210\u524d\u9032\u884c\u4fee\u6b63\u3002', es: 'Revise y edite la traducci\u00f3n. Puede hacer correcciones antes de finalizar.', fr: 'V\u00e9rifiez et modifiez la traduction. Vous pouvez corriger avant de finaliser.', de: 'Pr\u00fcfen und bearbeiten Sie die \u00dcbersetzung. Sie k\u00f6nnen vor dem Abschluss Korrekturen vornehmen.', ko: '\ubc88\uc5ed\uc744 \uac80\ud1a0\ud558\uace0 \ud3b8\uc9d1\ud558\uc138\uc694. \uc644\ub8cc \uc804\uc5d0 \uc218\uc815\ud560 \uc218 \uc788\uc2b5\ub2c8\ub2e4.', ar: '\u0631\u0627\u062c\u0639 \u0648\u0639\u062f\u0644 \u0627\u0644\u062a\u0631\u062c\u0645\u0629. \u064a\u0645\u0643\u0646\u0643 \u0625\u062c\u0631\u0627\u0621 \u062a\u0635\u062d\u064a\u062d\u0627\u062a \u0642\u0628\u0644 \u0627\u0644\u0627\u0646\u062a\u0647\u0627\u0621.', pt: 'Revise e edite a tradu\u00e7\u00e3o. Voc\u00ea pode fazer corre\u00e7\u00f5es antes de finalizar.' },
+            s8OrigHeader: { en: 'Original', ja: '\u539f\u6587', zh: '\u539f\u6587', es: 'Original', fr: 'Original', de: 'Original', ko: '\uc6d0\ubb38', ar: '\u0627\u0644\u0623\u0635\u0644\u064a', pt: 'Original' },
+            s8TransHeader: { en: 'Translation', ja: '\u7ffb\u8a33', zh: '\u8b6f\u6587', es: 'Traducci\u00f3n', fr: 'Traduction', de: '\u00dcbersetzung', ko: '\ubc88\uc5ed', ar: '\u0627\u0644\u062a\u0631\u062c\u0645\u0629', pt: 'Tradu\u00e7\u00e3o' },
+            s8EditHint: { en: '(click to edit)', ja: '\uff08\u30af\u30ea\u30c3\u30af\u3067\u7de8\u96c6\uff09', zh: '\uff08\u9ede\u64ca\u7de8\u8f2f\uff09', es: '(clic para editar)', fr: '(cliquez pour \u00e9diter)', de: '(klicken zum Bearbeiten)', ko: '(\ud074\ub9ad\ud558\uc5ec \ud3b8\uc9d1)', ar: '(\u0627\u0646\u0642\u0631 \u0644\u0644\u062a\u0639\u062f\u064a\u0644)', pt: '(clique para editar)' },
+            s8BtnRetranslate: { en: 'Re-translate with different model', ja: '\u5225\u306e\u30e2\u30c7\u30eb\u3067\u518d\u7ffb\u8a33', zh: '\u7528\u4e0d\u540c\u6a21\u578b\u91cd\u65b0\u7ffb\u8b6f', es: 'Retraducir con otro modelo', fr: 'Retraduire avec un autre mod\u00e8le', de: 'Mit anderem Modell neu \u00fcbersetzen', ko: '\ub2e4\ub978 \ubaa8\ub378\ub85c \uc7ac\ubc88\uc5ed', ar: '\u0625\u0639\u0627\u062f\u0629 \u0627\u0644\u062a\u0631\u062c\u0645\u0629 \u0628\u0646\u0645\u0648\u0630\u062c \u0622\u062e\u0631', pt: 'Retraduzir com outro modelo' },
+            s8BtnText: { en: 'Finalize & Download', ja: '\u5b8c\u4e86\u3057\u3066\u30c0\u30a6\u30f3\u30ed\u30fc\u30c9', zh: '\u5b8c\u6210\u4e26\u4e0b\u8f09', es: 'Finalizar y descargar', fr: 'Finaliser et t\u00e9l\u00e9charger', de: 'Abschlie\u00dfen & Herunterladen', ko: '\uc644\ub8cc \ubc0f \ub2e4\uc6b4\ub85c\ub4dc', ar: '\u0625\u0646\u0647\u0627\u0621 \u0648\u062a\u0646\u0632\u064a\u0644', pt: 'Finalizar e baixar' },
+            s9Title: { en: 'Translation Complete!', ja: '\u7ffb\u8a33\u5b8c\u4e86\uff01', zh: '\u7ffb\u8b6f\u5b8c\u6210\uff01', es: '\u00a1Traducci\u00f3n completada!', fr: 'Traduction termin\u00e9e !', de: '\u00dcbersetzung abgeschlossen!', ko: '\ubc88\uc5ed \uc644\ub8cc!', ar: '\u0627\u0643\u062a\u0645\u0644\u062a \u0627\u0644\u062a\u0631\u062c\u0645\u0629!', pt: 'Tradu\u00e7\u00e3o conclu\u00edda!' },
+            s9Desc: { en: 'Your translation is ready. Download your file below.', ja: '\u7ffb\u8a33\u304c\u5b8c\u6210\u3057\u307e\u3057\u305f\u3002\u4e0b\u304b\u3089\u30c0\u30a6\u30f3\u30ed\u30fc\u30c9\u3057\u3066\u304f\u3060\u3055\u3044\u3002', zh: '\u7ffb\u8b6f\u5df2\u5b8c\u6210\u3002\u8acb\u5f9e\u4e0b\u65b9\u4e0b\u8f09\u3002', es: 'Su traducci\u00f3n est\u00e1 lista. Descargue su archivo.', fr: 'Votre traduction est pr\u00eate. T\u00e9l\u00e9chargez ci-dessous.', de: 'Ihre \u00dcbersetzung ist fertig. Laden Sie Ihre Datei herunter.', ko: '\ubc88\uc5ed\uc774 \uc644\ub8cc\ub418\uc5c8\uc2b5\ub2c8\ub2e4. \uc544\ub798\uc5d0\uc11c \ub2e4\uc6b4\ub85c\ub4dc\ud558\uc138\uc694.', ar: '\u062a\u0631\u062c\u0645\u062a\u0643 \u062c\u0627\u0647\u0632\u0629. \u0642\u0645 \u0628\u062a\u0646\u0632\u064a\u0644 \u0645\u0644\u0641\u0643.', pt: 'Sua tradu\u00e7\u00e3o est\u00e1 pronta. Baixe seu arquivo abaixo.' },
+            s9BtnReview: { en: 'Review again', ja: '\u3082\u3046\u4e00\u5ea6\u78ba\u8a8d', zh: '\u518d\u6b21\u5be9\u67e5', es: 'Revisar de nuevo', fr: 'Revoir', de: 'Erneut pr\u00fcfen', ko: '\ub2e4\uc2dc \uac80\ud1a0', ar: '\u0645\u0631\u0627\u062c\u0639\u0629 \u0645\u0631\u0629 \u0623\u062e\u0631\u0649', pt: 'Revisar novamente' },
+            s9BtnNew: { en: 'New Translation', ja: '\u65b0\u3057\u3044\u7ffb\u8a33', zh: '\u65b0\u7ffb\u8b6f', es: 'Nueva traducci\u00f3n', fr: 'Nouvelle traduction', de: 'Neue \u00dcbersetzung', ko: '\uc0c8 \ubc88\uc5ed', ar: '\u062a\u0631\u062c\u0645\u0629 \u062c\u062f\u064a\u062f\u0629', pt: 'Nova tradu\u00e7\u00e3o' }
+        };
+
+        const setText = (id, obj) => { const el = document.getElementById(id); if (el) el.textContent = t(obj); };
+        const setPh = (id, obj) => { const el = document.getElementById(id); if (el) el.placeholder = t(obj); };
+        setText('pageTitle', T.pageTitle); setText('pageSubtitle', T.pageSubtitle);
+        for (let i = 1; i <= 9; i++) setText('stepLabel' + i, T['step' + i]);
+        setText('s1Title', T.s1Title); setText('s1Desc', T.s1Desc);
+        const setLabel2 = (id, icon, obj) => { const el = document.getElementById(id); if (el) el.innerHTML = icon + ' ' + t(obj); };
+        setLabel2('s1CurrLabel', '<i class="fas fa-coins me-1"></i>', T.s1CurrLabel);
+        updateStep1Prices();
+        setText('s1BtnAgree', T.s1BtnAgree);
+        setText('s2Title', T.s2Title); setText('s2LabelSource', T.s2LabelSource); setText('s2LabelTarget', T.s2LabelTarget);
+        setText('tabFullLabel', T.tabFullLabel); setText('tabFileLabel', T.tabFileLabel); setText('charLabel', T.charLabel);
+        setText('uploadText', T.uploadText);
+        setPh('sourceText', T.s2Placeholder);
+        setText('s3Title', T.s3Title); setText('s3Desc', T.s3Desc);
+        // Step 3 labels
+        const setLabel = (id, icon, obj) => { const el = document.getElementById(id); if (el) el.innerHTML = icon + ' ' + t(obj); };
+        setLabel('s3LabelStyle', '<i class="fas fa-pen-fancy me-1"></i>', T.s3Style);
+        setLabel('s3LabelTone', '<i class="fas fa-theater-masks me-1"></i>', T.s3Tone);
+        setLabel('s3LabelGenre', '<i class="fas fa-bookmark me-1"></i>', T.s3Genre);
+        setLabel('s3LabelContext', '<i class="fas fa-info-circle me-1"></i>', T.s3Context);
+        setLabel('s3LabelGlossary', '<i class="fas fa-book me-1"></i>', T.s3Glossary);
+        setText('thSource', T.s3ThSource); setText('thTarget', T.s3ThTarget);
+        // Step 3 select options
+        const setOpts = (selId, optMap) => { const sel = document.getElementById(selId); if (!sel) return; sel.querySelectorAll('option').forEach(o => { if (o.value === '') o.textContent = t(T.s3NotSpecified); else if (optMap[o.value]) o.textContent = t(optMap[o.value]); }); };
+        setOpts('tsStyle', { formal: T.s3Formal, informal: T.s3Informal, literary: T.s3Literary, novel: T.s3Novel, lightnovel: T.s3LightNovel });
+        setOpts('tsTone', { friendly: T.s3Friendly, neutral: T.s3Neutral, dramatic: T.s3Dramatic, romantic: T.s3Romantic, humorous: T.s3Humorous });
+        setOpts('tsGenre', { fantasy: T.s3Fantasy, romance: T.s3Romance, scifi: T.s3SciFi, mystery: T.s3Mystery, horror: T.s3Horror, historical: T.s3Historical, isekai: T.s3Isekai, slice: T.s3SliceOfLife });
+        // Step 3 placeholders
+        setPh('tsContext', T.s3ContextPh); setPh('glossarySrc', T.s3SrcTermPh); setPh('glossaryTgt', T.s3TgtTermPh);
+        setText('s4Title', T.s4Title); setText('s4Desc', T.s4Desc); setText('s4OrigLabel', T.s4OrigLabel); setText('s4BtnText', T.s4BtnText);
+        setText('s5Title', T.s5Title); setText('s5LabelModel', T.s5LabelModel); setText('s5LabelChars', T.s5LabelChars);
+        setText('s5LabelRate', T.s5LabelRate); setText('s5LabelTotal', T.s5LabelTotal); setText('s5BtnText', T.s5BtnText);
+        setLabel2('s5LabelPayMethod', '<i class="fas fa-wallet me-1"></i>', T.s5PayMethod);
+        setText('s5StripeNote', T.s5StripeNote); setText('s5PaypalNote', T.s5PaypalNote);
+        setText('s6Title', T.s6Title); setText('s6Desc', T.s6Desc);
+        setText('s6CardLabel', T.s6CardLabel); setText('s6PaypalLabel', T.s6PaypalLabel);
+        setText('s7Title', T.s7Title); setText('s7Note', T.s7Note);
+        setText('s8Title', T.s8Title); setText('s8Desc', T.s8Desc); setText('s8OrigHeader', T.s8OrigHeader);
+        setText('s8EditHint', T.s8EditHint); setText('s8BtnRetranslate', T.s8BtnRetranslate); setText('s8BtnText', T.s8BtnText);
+        setText('s9Title', T.s9Title); setText('s9Desc', T.s9Desc); setText('s9BtnReview', T.s9BtnReview); setText('s9BtnNew', T.s9BtnNew);
+        document.querySelectorAll('.back-label').forEach(el => el.textContent = t(T.btnBack));
+        document.querySelectorAll('.next-label').forEach(el => el.textContent = t(T.btnNext));
+        document.title = t(T.pageTitle) + ' - Publisher';
+    }
+
+    // ===== DOMContentLoaded =====
+    document.addEventListener('DOMContentLoaded', function() {
+        const desktopSelector = document.getElementById('languageSelector');
+        const mobileSelector = document.getElementById('languageSelectorMobile');
+        if (desktopSelector && mobileSelector) {
+            const savedLang = localStorage.getItem('preferredLanguage') || 'en';
+            desktopSelector.value = savedLang;
+            mobileSelector.value = savedLang;
+            mobileSelector.addEventListener('change', function() {
+                desktopSelector.value = this.value;
+                localStorage.setItem('preferredLanguage', this.value);
+                updateWizardText();
+                if (typeof updateNavText === 'function') updateNavText();
+            });
+            desktopSelector.addEventListener('change', function() {
+                mobileSelector.value = this.value;
+                localStorage.setItem('preferredLanguage', this.value);
+                updateWizardText();
+                if (typeof updateNavText === 'function') updateNavText();
+            });
+        }
+        updateWizardText();
+        if (typeof loadUserInfo === 'function') loadUserInfo();
+
+        // Navbar overlay
+        const navbarCollapse = document.getElementById('navbarNav');
+        const navbarOverlay = document.getElementById('navbarOverlay');
+        if (navbarCollapse) {
+            navbarCollapse.addEventListener('show.bs.collapse', function() { if (navbarOverlay) navbarOverlay.classList.add('show'); });
+            navbarCollapse.addEventListener('hide.bs.collapse', function() { if (navbarOverlay) navbarOverlay.classList.remove('show'); });
+        }
+        if (navbarOverlay) {
+            navbarOverlay.addEventListener('click', function() {
+                const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                if (bsCollapse) bsCollapse.hide();
+            });
+        }
+
+        // Close user dropdown on outside click
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.user-dropdown')) {
+                const dropdown = document.getElementById('userDropdown');
+                const dropdownMenu = document.getElementById('userMenu');
+                if (dropdown) dropdown.classList.remove('open');
+                if (dropdownMenu) dropdownMenu.classList.remove('show');
+            }
+        });
+    });
+
+    // Unused export kept for compatibility
+    function escapeHtml(str) {
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    </script>
+
+    <!-- ========== REMOVED OLD CODE ========== -->
+
+    <!-- ========== Pattern C Navbar JavaScript ========== -->
+    <script>
+        const uiText = {
+            translationTools: { en: 'Tools', ja: '翻訳ツール', zh: '翻译工具',
+                es: 'Herramientas de traducción', fr: 'Outils de traduction', de: 'Übersetzungstools',
+                ko: '번역 도구', ar: 'أدوات الترجمة', pt: 'Ferramentas de tradução'
+            },
+            mangaTranslator: {
+                en: 'Manga Translator', ja: 'マンガ翻訳', zh: '漫画翻译',
+                es: 'Traductor de Manga', fr: 'Traducteur de Manga', de: 'Manga-Übersetzer',
+                ko: '만화 번역기', ar: 'مترجم المانجا', pt: 'Tradutor de Mangá'
+            },
+            novelTranslator: {
+                en: 'Novel Translator', ja: '小説翻訳', zh: '小说翻译',
+                es: 'Traductor de Novela', fr: 'Traducteur de Roman', de: 'Roman-Übersetzer',
+                ko: '소설 번역기', ar: 'مترجم الروايات', pt: 'Tradutor de Romance'
+            },
+            translationStatus: {
+                en: 'Translation Status', ja: '翻訳状況', zh: '翻译状态',
+                es: 'Estado de traducción', fr: 'Statut de traduction', de: 'Übersetzungsstatus',
+                ko: '번역 상태', ar: 'حالة الترجمة', pt: 'Status da tradução'
+            },
+            findTranslators: {
+                en: 'Find Translators', ja: '翻訳者を探す', zh: '寻找翻译',
+                es: 'Buscar traductores', fr: 'Trouver des traducteurs', de: 'Übersetzer finden',
+                ko: '번역가 찾기', ar: 'البحث عن مترجمين', pt: 'Encontrar tradutores'
+            },
+            contact: {
+                en: 'Contact', ja: 'お問い合わせ', zh: '联系我们',
+                es: 'Contacto', fr: 'Contact', de: 'Kontakt',
+                ko: '문의', ar: 'اتصل بنا', pt: 'Contato'
+            },
+            library: {
+                en: 'Library', ja: 'ライブラリ', zh: '书库',
+                es: 'Biblioteca', fr: 'Bibliothèque', de: 'Bibliothek',
+                ko: '라이브러리', ar: 'المكتبة', pt: 'Biblioteca'
+            },
+            dashboard: {
+                en: 'Dashboard', ja: 'ダッシュボード', zh: '控制台',
+                es: 'Panel', fr: 'Tableau de bord', de: 'Dashboard',
+                ko: '대시보드', ar: 'لوحة التحكم', pt: 'Painel'
+            },
+            accountSettings: {
+                en: 'Account Settings', ja: 'アカウント設定', zh: '账户设置',
+                es: 'Configuración de cuenta', fr: 'Paramètres du compte', de: 'Kontoeinstellungen',
+                ko: '계정 설정', ar: 'إعدادات الحساب', pt: 'Configurações da conta'
+            },
+            logout: {
+                en: 'Log Out', ja: 'ログアウト', zh: '退出登录',
+                es: 'Cerrar sesión', fr: 'Déconnexion', de: 'Abmelden',
+                ko: '로그아웃', ar: 'تسجيل الخروج', pt: 'Sair'
+            },
+            logOutConfirm: {
+                en: 'Are you sure you want to log out?', ja: 'ログアウトしますか？', zh: '确定要退出登录吗？',
+                es: '¿Estás seguro de que quieres cerrar sesión?', fr: 'Êtes-vous sûr de vouloir vous déconnecter?', de: 'Sind Sie sicher, dass Sie sich abmelden möchten?',
+                ko: '로그아웃 하시겠습니까?', ar: 'هل أنت متأكد أنك تريد تسجيل الخروج؟', pt: 'Tem certeza que deseja sair?'
+            }
+        };
+
+        function getL(obj) {
+            const lang = getCurrentLanguage();
+            return obj[lang] || obj.en || '';
+        }
+
+        function updateUIText() {
+            const els = {
+                menuDashboard: uiText.dashboard,
+                menuAccountSettings: uiText.accountSettings,
+                menuLogout: uiText.logout,
+            };
+            Object.keys(els).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = getL(els[id]);
+            });
+
+            // Update page-specific text
+            if (typeof updatePageText === 'function') updatePageText();
+        }
+
+        function toggleUserDropdown(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const dropdown = document.getElementById('userDropdown');
+            const dropdownMenu = document.getElementById('userMenu');
+            dropdown.classList.toggle('open');
+            dropdownMenu.classList.toggle('show');
+        }
+
+        function handleLogout() {
+            if (confirm(getL(uiText.logOutConfirm))) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.reload();
+            }
+        }
+
+        function loadUserInfo() {
+            const userStr = localStorage.getItem('user');
+            const token = localStorage.getItem('token');
+            const isLoggedIn = !!(userStr && token);
+            if (isLoggedIn) {
+                try {
+                    const user = JSON.parse(userStr);
+                    const displayName = user.display_name || user.firstName || user.email || 'User';
+                    const userNameEl = document.getElementById('userName');
+                    const userDisplayNameEl = document.getElementById('userDisplayName');
+                    const userEmailEl = document.getElementById('userEmail');
+                    if (userNameEl) userNameEl.textContent = displayName;
+                    if (userDisplayNameEl) userDisplayNameEl.textContent = displayName;
+                    if (userEmailEl) userEmailEl.textContent = user.email || '';
+                    document.body.classList.add('logged-in');
+                } catch { document.body.classList.remove('logged-in'); }
+            } else {
+                document.body.classList.remove('logged-in');
+            }
+        }
+
+        function getCurrentLanguage() {
+            return localStorage.getItem('preferredLanguage') || 'en';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Language selectors sync
+            const desktopSelector = document.getElementById('languageSelector');
+            const mobileSelector = document.getElementById('languageSelectorMobile');
+            if (desktopSelector && mobileSelector) {
+                const savedLang = getCurrentLanguage();
+                desktopSelector.value = savedLang;
+                mobileSelector.value = savedLang;
+
+                mobileSelector.addEventListener('change', function() {
+                    desktopSelector.value = this.value;
+                    localStorage.setItem('preferredLanguage', this.value);
+                    updateUIText();
+                });
+                desktopSelector.addEventListener('change', function() {
+                    mobileSelector.value = this.value;
+                    localStorage.setItem('preferredLanguage', this.value);
+                    updateUIText();
+                });
+            }
+
+            // Apply all translations (navbar + page text)
+            updateUIText();
+            loadUserInfo();
+
+            // Init data (after translations applied)
+            loadGlossaryFromStorage();
+            loadMemoryFromStorage();
+
+            // Model selector events
+            document.querySelectorAll('input[name="aiModel"]').forEach(radio => {
+                radio.addEventListener('change', updateCostEstimate);
+            });
+            // Update cost on text input
+            const srcTextEl = document.getElementById('sourceText');
+            if (srcTextEl) srcTextEl.addEventListener('input', updateCostEstimate);
+            updateCostEstimate();
+            updatePreviewLimitDisplay();
+
+            // Close user dropdown on outside click
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.user-dropdown')) {
+                    const dropdown = document.getElementById('userDropdown');
+                    const dropdownMenu = document.getElementById('userMenu');
+                    if (dropdown) dropdown.classList.remove('open');
+                    if (dropdownMenu) dropdownMenu.classList.remove('show');
+                }
+            });
+
+            // Navbar overlay for mobile
+            const navbarCollapse = document.getElementById('navbarNav');
+            const navbarOverlay = document.getElementById('navbarOverlay');
+            if (navbarCollapse) {
+                navbarCollapse.addEventListener('show.bs.collapse', function() {
+                    if (navbarOverlay) navbarOverlay.classList.add('show');
+                });
+                navbarCollapse.addEventListener('hide.bs.collapse', function() {
+                    if (navbarOverlay) navbarOverlay.classList.remove('show');
+                });
+            }
+            if (navbarOverlay) {
+                navbarOverlay.addEventListener('click', function() {
+                    const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                    if (bsCollapse) bsCollapse.hide();
+                });
+            }
+        });
+    </script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/i18n.js"></script>
+    <script src="../js/navbar.js"></script>
+    <script src="../js/language-switcher.js"></script>
+</body>
+</html>

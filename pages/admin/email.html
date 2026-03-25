@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Management - Publisher Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* ===== Admin Layout ===== */
+        body { background: #f5f6fa; }
+        .admin-wrapper { display: flex; min-height: 100vh; }
+        .admin-sidebar { width: 260px; background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%); color: #fff; position: fixed; height: 100vh; overflow-y: auto; z-index: 1000; }
+        .admin-sidebar .brand { padding: 20px; font-size: 1.4rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; }
+        .admin-sidebar .nav-menu { padding: 15px 0; }
+        .admin-sidebar .nav-item { padding: 12px 20px; display: flex; align-items: center; gap: 12px; color: rgba(255,255,255,0.7); text-decoration: none; transition: all 0.3s; border-left: 3px solid transparent; }
+        .admin-sidebar .nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .admin-sidebar .nav-item.active { background: rgba(255,255,255,0.15); color: #fff; border-left-color: #3498db; }
+        .admin-sidebar .nav-item i { font-size: 1.2rem; width: 24px; }
+        .admin-sidebar .nav-section { padding: 15px 20px 8px; font-size: 0.75rem; text-transform: uppercase; color: rgba(255,255,255,0.4); letter-spacing: 1px; }
+        .admin-main { flex: 1; margin-left: 260px; }
+        .admin-header { background: #fff; padding: 15px 30px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; position: sticky; top: 0; z-index: 100; }
+        .admin-content { padding: 30px; }
+
+        /* ===== Email Specific ===== */
+        .panel { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); margin-bottom: 24px; }
+        .panel-header { padding: 18px 24px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .panel-header h2 { font-size: 1rem; font-weight: 700; margin: 0; color: #2c3e50; display: flex; align-items: center; gap: 8px; }
+        .panel-body { padding: 24px; }
+
+        /* Stats bar */
+        .stat-pills { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+        .stat-pill { padding: 8px 18px; border-radius: 20px; border: 2px solid transparent; background: #f0f0f0; cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+        .stat-pill:hover { border-color: #bbb; }
+        .stat-pill.active { color: #fff; }
+        .stat-pill[data-cat="all"].active { background: #2c3e50; border-color: #2c3e50; }
+        .stat-pill[data-cat="bug"].active { background: #e74c3c; border-color: #e74c3c; }
+        .stat-pill[data-cat="payment"].active { background: #e67e22; border-color: #e67e22; }
+        .stat-pill[data-cat="account"].active { background: #3498db; border-color: #3498db; }
+        .stat-pill[data-cat="copyright"].active { background: #8e44ad; border-color: #8e44ad; }
+        .stat-pill[data-cat="feature"].active { background: #27ae60; border-color: #27ae60; }
+        .stat-pill[data-cat="general"].active { background: #7f8c8d; border-color: #7f8c8d; }
+        .stat-pill .pill-count { background: rgba(0,0,0,0.15); border-radius: 10px; padding: 1px 7px; font-size: 0.75rem; }
+        .stat-pill.active .pill-count { background: rgba(255,255,255,0.25); }
+
+        /* Email list */
+        .email-list { display: flex; flex-direction: column; gap: 0; }
+        .email-item { border-bottom: 1px solid #f0f0f0; padding: 14px 20px; display: flex; align-items: flex-start; gap: 14px; cursor: pointer; transition: background 0.15s; }
+        .email-item:hover { background: #f8f9fa; }
+        .email-item.unread { background: #f0f7ff; }
+        .email-item.unread .email-subject { font-weight: 700; }
+        .email-item.selected { background: #e8f4fd; border-left: 3px solid #3498db; }
+        .email-avatar { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; color: #fff; flex-shrink: 0; }
+        .email-meta { flex: 1; min-width: 0; }
+        .email-from { font-size: 0.85rem; font-weight: 600; color: #2c3e50; }
+        .email-subject { font-size: 0.85rem; color: #34495e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .email-preview { font-size: 0.78rem; color: #7f8c8d; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .email-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+        .email-time { font-size: 0.75rem; color: #7f8c8d; }
+        .cat-badge { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 0.7rem; font-weight: 700; white-space: nowrap; }
+        .cat-bug { background: #ffebee; color: #c62828; }
+        .cat-payment { background: #fff3e0; color: #e65100; }
+        .cat-account { background: #e3f2fd; color: #1565c0; }
+        .cat-copyright { background: #f3e5f5; color: #6a1b9a; }
+        .cat-feature { background: #e8f5e9; color: #2e7d32; }
+        .cat-general { background: #f5f5f5; color: #424242; }
+        .cat-uncategorized { background: #fafafa; color: #999; border: 1px solid #e0e0e0; }
+
+        /* Email detail pane */
+        .email-detail { display: none; }
+        .email-detail.open { display: block; }
+        .detail-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+        .detail-subject { font-size: 1.15rem; font-weight: 700; color: #2c3e50; }
+        .detail-from { font-size: 0.85rem; color: #7f8c8d; margin-top: 4px; }
+        .detail-body { background: #f8f9fa; border-radius: 8px; padding: 16px; font-size: 0.875rem; line-height: 1.7; color: #34495e; margin-bottom: 16px; white-space: pre-wrap; }
+        .cat-select-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .cat-select { border-radius: 6px; padding: 6px 12px; border: 1px solid #ddd; font-size: 0.85rem; }
+
+        /* TroubleShoot flag */
+        .ts-flag-box { background: #fff8e1; border: 1px solid #ffe082; border-radius: 8px; padding: 14px; margin-top: 12px; }
+        .ts-flag-box h5 { font-size: 0.85rem; font-weight: 700; color: #e65100; margin-bottom: 8px; }
+        .ts-flag-box textarea { font-size: 0.82rem; resize: vertical; }
+
+        /* Charts */
+        .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .chart-box { border: 1px solid #f0f0f0; border-radius: 10px; padding: 16px; }
+        .chart-box h4 { font-size: 0.85rem; font-weight: 700; color: #2c3e50; margin-bottom: 12px; }
+
+        /* Top issues */
+        .issue-list { list-style: none; padding: 0; margin: 0; }
+        .issue-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
+        .issue-item:last-child { border-bottom: none; }
+        .issue-rank { width: 26px; height: 26px; border-radius: 50%; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+        .issue-rank.r1 { background: #ffd700; color: #333; }
+        .issue-rank.r2 { background: #c0c0c0; color: #333; }
+        .issue-rank.r3 { background: #cd7f32; color: #fff; }
+        .issue-text { flex: 1; font-size: 0.85rem; color: #2c3e50; }
+        .issue-count { font-size: 0.78rem; font-weight: 700; color: #7f8c8d; }
+        .issue-bar { height: 4px; border-radius: 2px; background: #e0e0e0; margin-top: 4px; }
+        .issue-bar-fill { height: 100%; border-radius: 2px; background: #3498db; }
+
+        /* TroubleShoot suggestions panel */
+        .ts-suggestion { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+        .ts-suggestion.flagged { border-left: 3px solid #e74c3c; }
+        .ts-suggestion h5 { font-size: 0.85rem; font-weight: 700; color: #2c3e50; margin-bottom: 4px; }
+        .ts-suggestion p { font-size: 0.78rem; color: #7f8c8d; margin: 0; }
+
+        @media (max-width: 768px) {
+            .admin-sidebar { transform: translateX(-100%); transition: transform 0.3s; }
+            .admin-sidebar.open { transform: translateX(0); }
+            .admin-main { margin-left: 0; }
+            .chart-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="admin-wrapper">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+        <div class="brand"><i class="bi bi-book"></i><span>Publisher Admin</span></div>
+        <nav class="nav-menu">
+            <div class="nav-section">メイン</div>
+            <a class="nav-item" href="index.html"><i class="bi bi-grid-1x2"></i><span>ダッシュボード</span></a>
+            <div class="nav-section">分析</div>
+            <a class="nav-item" href="analytics.html"><i class="bi bi-bar-chart-line"></i><span>アナリティクス</span></a>
+            <div class="nav-section">サポート</div>
+            <a class="nav-item active" href="email.html"><i class="bi bi-envelope"></i><span>メール管理</span></a>
+            <a class="nav-item" href="support.html"><i class="bi bi-headset"></i><span>サポートチケット</span></a>
+            <a class="nav-item" href="feedback.html"><i class="bi bi-chat-dots"></i><span>フィードバック</span></a>
+            <div class="nav-section">財務</div>
+            <a class="nav-item" href="finance.html"><i class="bi bi-calculator"></i><span>財務・税務</span></a>
+        </nav>
+    </aside>
+
+    <main class="admin-main">
+        <header class="admin-header">
+            <div><strong>メール管理</strong> <span style="color:#7f8c8d; font-size:0.85rem; margin-left:10px;">分類・傾向分析・TroubleShoot連携</span></div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-success" onclick="showTab('troubleshoot')"><i class="bi bi-tools"></i> TroubleShoot連携</button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="autoCategorizAll()"><i class="bi bi-cpu"></i> 一括自動分類</button>
+            </div>
+        </header>
+
+        <div class="admin-content">
+
+            <!-- Tab Navigation -->
+            <ul class="nav nav-pills mb-4" id="mainTabs">
+                <li class="nav-item"><a class="nav-link active" href="#" onclick="showTab('inbox');return false;" data-tab="inbox">
+                    <i class="bi bi-inbox"></i> 受信トレイ <span class="badge bg-danger ms-1" id="unreadBadge">5</span></a></li>
+                <li class="nav-item"><a class="nav-link" href="#" onclick="showTab('trends');return false;" data-tab="trends">
+                    <i class="bi bi-graph-up"></i> 傾向分析</a></li>
+                <li class="nav-item"><a class="nav-link" href="#" onclick="showTab('troubleshoot');return false;" data-tab="troubleshoot">
+                    <i class="bi bi-tools"></i> TroubleShoot連携</a></li>
+            </ul>
+
+            <!-- TAB: Inbox -->
+            <div id="tab-inbox">
+                <div class="row g-4">
+                    <!-- Email List -->
+                    <div class="col-lg-5">
+                        <div class="panel">
+                            <div class="panel-body" style="padding:16px 20px 10px;">
+                                <div class="stat-pills" id="catPills">
+                                    <div class="stat-pill active" data-cat="all" onclick="filterEmails('all')">すべて <span class="pill-count" id="cnt-all">12</span></div>
+                                    <div class="stat-pill" data-cat="bug" onclick="filterEmails('bug')">🐛 バグ <span class="pill-count" id="cnt-bug">0</span></div>
+                                    <div class="stat-pill" data-cat="payment" onclick="filterEmails('payment')">💳 支払い <span class="pill-count" id="cnt-payment">0</span></div>
+                                    <div class="stat-pill" data-cat="account" onclick="filterEmails('account')">👤 アカウント <span class="pill-count" id="cnt-account">0</span></div>
+                                    <div class="stat-pill" data-cat="copyright" onclick="filterEmails('copyright')">©️ 著作権 <span class="pill-count" id="cnt-copyright">0</span></div>
+                                    <div class="stat-pill" data-cat="feature" onclick="filterEmails('feature')">✨ 機能要望 <span class="pill-count" id="cnt-feature">0</span></div>
+                                    <div class="stat-pill" data-cat="general" onclick="filterEmails('general')">💬 一般 <span class="pill-count" id="cnt-general">0</span></div>
+                                </div>
+                                <div style="position:relative; margin-bottom:10px;">
+                                    <input type="text" class="form-control form-control-sm" placeholder="メール検索..." id="emailSearch" oninput="searchEmails(this.value)" style="padding-left:32px;">
+                                    <i class="bi bi-search" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#aaa; font-size:0.85rem;"></i>
+                                </div>
+                            </div>
+                            <div class="email-list" id="emailList">
+                                <!-- populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Email Detail -->
+                    <div class="col-lg-7">
+                        <div class="panel" id="emailDetailPanel">
+                            <div class="panel-body" id="emailDetail">
+                                <div style="text-align:center; padding:60px 20px; color:#bbb;">
+                                    <i class="bi bi-envelope-open" style="font-size:3rem; display:block; margin-bottom:12px;"></i>
+                                    メールを選択すると内容が表示されます
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Trends -->
+            <div id="tab-trends" style="display:none;">
+                <div class="row g-4 mb-4">
+                    <div class="col-lg-5">
+                        <div class="panel h-100">
+                            <div class="panel-header"><h2><i class="bi bi-pie-chart" style="color:#8e44ad"></i> カテゴリ分布</h2></div>
+                            <div class="panel-body">
+                                <canvas id="catPieChart" height="220"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-7">
+                        <div class="panel h-100">
+                            <div class="panel-header">
+                                <h2><i class="bi bi-bar-chart" style="color:#2980b9"></i> 月次メール件数推移</h2>
+                            </div>
+                            <div class="panel-body">
+                                <canvas id="trendChart" height="180"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Issues -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2><i class="bi bi-fire" style="color:#e74c3c"></i> よくある問題トップ10</h2>
+                        <span style="font-size:0.8rem; color:#7f8c8d;">過去30日間のメール内容より自動集計</span>
+                    </div>
+                    <div class="panel-body">
+                        <ul class="issue-list" id="topIssuesList">
+                            <!-- populated by JS -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: TroubleShoot Integration -->
+            <div id="tab-troubleshoot" style="display:none;">
+                <div class="panel mb-4">
+                    <div class="panel-header">
+                        <h2><i class="bi bi-tools" style="color:#e67e22"></i> TroubleShoot ページ連携</h2>
+                        <a href="../support/troubleshoot.html" target="_blank" class="btn btn-sm btn-outline-primary"><i class="bi bi-box-arrow-up-right"></i> TroubleShootを開く</a>
+                    </div>
+                    <div class="panel-body">
+                        <div class="alert alert-info d-flex align-items-start gap-3" style="font-size:0.85rem;">
+                            <i class="bi bi-info-circle-fill" style="font-size:1.2rem; flex-shrink:0;"></i>
+                            <div>メールで多く報告された問題を「要追加」としてフラグを立てると、TroubleShootページのどのセクションを更新すべきか確認できます。
+                            <strong>フラグ済み項目をFAQ/TroubleShootに反映することで、同じ問い合わせを減らせます。</strong></div>
+                        </div>
+                        <h5 style="font-size:0.9rem; font-weight:700; color:#2c3e50; margin-bottom:14px;">フラグ済み — TroubleShoot追加候補</h5>
+                        <div id="tsSuggestions">
+                            <!-- populated by JS -->
+                        </div>
+                        <div class="mt-4">
+                            <h5 style="font-size:0.9rem; font-weight:700; color:#2c3e50; margin-bottom:10px;">新規追加提案を作成</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label form-label-sm">問題タイトル</label>
+                                    <input type="text" class="form-control form-control-sm" id="newTsTitle" placeholder="例: ログイン後にページがリロードされる">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label form-label-sm">カテゴリ</label>
+                                    <select class="form-select form-select-sm" id="newTsCat">
+                                        <option value="bug">バグ/技術的問題</option>
+                                        <option value="account">アカウント</option>
+                                        <option value="payment">支払い</option>
+                                        <option value="general">一般</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label form-label-sm">優先度</label>
+                                    <select class="form-select form-select-sm" id="newTsPriority">
+                                        <option value="high">高（すぐ追加）</option>
+                                        <option value="medium" selected>中（次回更新時）</option>
+                                        <option value="low">低（検討中）</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label form-label-sm">推奨解決策</label>
+                                    <textarea class="form-control form-control-sm" id="newTsSolution" rows="3" placeholder="TroubleShootページに追加する解決策の案..."></textarea>
+                                </div>
+                                <div class="col-12">
+                                    <button class="btn btn-primary btn-sm" onclick="addTsSuggestion()"><i class="bi bi-plus-circle"></i> 追加提案を作成</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /admin-content -->
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ===== Category config =====
+const CAT_CONFIG = {
+    bug:          { label: 'バグ/技術的問題', color: '#e74c3c', icon: '🐛', cls: 'cat-bug' },
+    payment:      { label: '支払い/請求',      color: '#e67e22', icon: '💳', cls: 'cat-payment' },
+    account:      { label: 'アカウント問題',    color: '#3498db', icon: '👤', cls: 'cat-account' },
+    copyright:    { label: '著作権/DMCA',      color: '#8e44ad', icon: '©️', cls: 'cat-copyright' },
+    feature:      { label: '機能要望',          color: '#27ae60', icon: '✨', cls: 'cat-feature' },
+    general:      { label: '一般問い合わせ',    color: '#7f8c8d', icon: '💬', cls: 'cat-general' },
+    uncategorized:{ label: '未分類',            color: '#bbb',    icon: '?',  cls: 'cat-uncategorized' },
+};
+
+// ===== Keyword-based auto-categorizer =====
+const KEYWORDS = {
+    bug:       ['error', 'bug', 'broken', '動かない', 'crash', 'not working', 'failed', '失敗', 'cannot', '表示されない', 'login', 'ログイン', '読み込めない'],
+    payment:   ['payment', '支払い', 'charge', 'refund', '返金', 'stripe', 'billing', '請求', 'invoice', 'subscription'],
+    account:   ['account', 'アカウント', 'password', 'パスワード', 'email', 'メール', 'profile', 'delete account', 'アカウント削除'],
+    copyright: ['copyright', '著作権', 'dmca', 'takedown', 'stolen', 'infringement', '盗用', 'unauthorized'],
+    feature:   ['feature', '機能', 'request', '要望', 'suggestion', '提案', 'add', '追加', 'improve', '改善', 'wish'],
+};
+
+function autoCategory(subject, body) {
+    const text = (subject + ' ' + body).toLowerCase();
+    for (const [cat, words] of Object.entries(KEYWORDS)) {
+        if (words.some(w => text.includes(w))) return cat;
+    }
+    return 'general';
+}
+
+// ===== Demo emails =====
+const EMAILS = [
+    { id:1, from:'Alex Kim', email:'alex@example.com', subject:'Login page shows blank screen after update', body:'Hi, since the latest update, the login page shows a blank white screen on Chrome. I cleared cache but it still happens. Other pages work fine.', time:'10:32', date:'2026-03-07', cat:'uncategorized', unread:true, avatarColor:'#e74c3c' },
+    { id:2, from:'Maria Santos', email:'maria@example.com', subject:'Refund request - accidental purchase', body:'I accidentally purchased the wrong work. I would like to request a full refund of £9.99. Transaction date was March 5th. Please help.', time:'09:15', date:'2026-03-07', cat:'uncategorized', unread:true, avatarColor:'#e67e22' },
+    { id:3, from:'Tanaka Yuki', email:'yuki@example.com', subject:'My translated work is not showing in search', body:'I finished my translation of "Cherry Blossom" last week and submitted it for review. However, it does not appear in the browse or search pages.', time:'昨日', date:'2026-03-06', cat:'uncategorized', unread:true, avatarColor:'#3498db' },
+    { id:4, from:'James Park', email:'james@example.com', subject:'Suggestion: Add dark mode to reader', body:'I love the platform! One thing that would make it much better is a dark mode option in the reader, especially for nighttime reading. Many users have requested this.', time:'昨日', date:'2026-03-06', cat:'uncategorized', unread:false, avatarColor:'#27ae60' },
+    { id:5, from:'Sophie Chen', email:'sophie@example.com', subject:'DMCA Notice - unauthorized copy of my work', body:'I am the original author of "Rising Tide" (original title in Chinese). A copy has been uploaded without my permission. Please remove it immediately.', time:'3/5', date:'2026-03-05', cat:'uncategorized', unread:true, avatarColor:'#8e44ad' },
+    { id:6, from:'Tom Wilson', email:'tom@example.com', subject:'Cannot change my email address', body:'I have been trying to change my email address in account settings but I keep getting an error message saying "update failed". I have tried three times.', time:'3/5', date:'2026-03-05', cat:'uncategorized', unread:false, avatarColor:'#2c3e50' },
+    { id:7, from:'Ana Lima', email:'ana@example.com', subject:'Double charged for subscription', body:'I noticed I was charged twice for my monthly subscription in February. My bank statement shows two charges of £9.99 on Feb 1 and Feb 3.', time:'3/4', date:'2026-03-04', cat:'uncategorized', unread:false, avatarColor:'#c0392b' },
+    { id:8, from:'Li Wei', email:'li@example.com', subject:'How do I become a translator on the platform?', body:'Hello, I am interested in becoming a professional translator on your platform. I speak English, Chinese and Japanese. What is the process?', time:'3/4', date:'2026-03-04', cat:'uncategorized', unread:false, avatarColor:'#16a085' },
+    { id:9, from:'Fatima Al-Rashid', email:'fatima@example.com', subject:'Arabic text display issue in reader', body:'When I switch the language to Arabic, the text in the reader does not display right-to-left properly. Some sections are mixed and hard to read.', time:'3/3', date:'2026-03-03', cat:'uncategorized', unread:true, avatarColor:'#d35400' },
+    { id:10, from:'Oliver Brown', email:'oliver@example.com', subject:'Feature request: Offline reading', body:'Could you add an offline reading feature? I commute by train and often lose internet connection. Being able to download works for offline use would be great.', time:'3/3', date:'2026-03-03', cat:'uncategorized', unread:false, avatarColor:'#2980b9' },
+    { id:11, from:'Yuna Park', email:'yuna@example.com', subject:'Payment method update not saving', body:'I tried to add a new credit card but the page shows an error after I click save. The old card is still showing. Please fix this.', time:'3/2', date:'2026-03-02', cat:'uncategorized', unread:false, avatarColor:'#8e44ad' },
+    { id:12, from:'David Müller', email:'david@example.com', subject:'General question about revenue sharing', body:'Hello, I wanted to ask about the revenue split for translators. The website says 20% but I want to understand how that is calculated with VAT and fees.', time:'3/1', date:'2026-03-01', cat:'uncategorized', unread:false, avatarColor:'#27ae60' },
+];
+
+// Auto-categorize on load
+EMAILS.forEach(e => { if (e.cat === 'uncategorized') e.cat = autoCategory(e.subject, e.body); });
+
+let currentFilter = 'all';
+let selectedId = null;
+
+// ===== Render email list =====
+function renderEmailList(emails) {
+    const list = document.getElementById('emailList');
+    if (!emails.length) {
+        list.innerHTML = '<div style="padding:30px; text-align:center; color:#bbb;">メールがありません</div>';
+        return;
+    }
+    list.innerHTML = emails.map(e => {
+        const cat = CAT_CONFIG[e.cat] || CAT_CONFIG.general;
+        const initials = e.from.split(' ').map(n=>n[0]).join('').slice(0,2);
+        return `<div class="email-item ${e.unread?'unread':''} ${selectedId===e.id?'selected':''}" onclick="openEmail(${e.id})">
+            <div class="email-avatar" style="background:${e.avatarColor}">${initials}</div>
+            <div class="email-meta">
+                <div class="email-from">${e.from}</div>
+                <div class="email-subject">${e.subject}</div>
+                <div class="email-preview">${e.body.slice(0,60)}...</div>
+            </div>
+            <div class="email-right">
+                <span class="email-time">${e.time}</span>
+                <span class="cat-badge ${cat.cls}">${cat.icon} ${cat.label}</span>
+                ${e.unread ? '<span class="badge bg-primary" style="font-size:0.65rem;">NEW</span>' : ''}
+            </div>
+        </div>`;
+    }).join('');
+    updateCounts();
+}
+
+function updateCounts() {
+    const cats = ['bug','payment','account','copyright','feature','general','uncategorized'];
+    document.getElementById('cnt-all').textContent = EMAILS.length;
+    cats.forEach(c => {
+        const el = document.getElementById('cnt-' + c);
+        if (el) el.textContent = EMAILS.filter(e => e.cat === c).length;
+    });
+    document.getElementById('unreadBadge').textContent = EMAILS.filter(e => e.unread).length;
+}
+
+// ===== Filter =====
+function filterEmails(cat) {
+    currentFilter = cat;
+    document.querySelectorAll('.stat-pill').forEach(p => p.classList.remove('active'));
+    document.querySelector(`.stat-pill[data-cat="${cat}"]`)?.classList.add('active');
+    const filtered = cat === 'all' ? EMAILS : EMAILS.filter(e => e.cat === cat);
+    renderEmailList(filtered);
+}
+
+// ===== Search =====
+function searchEmails(query) {
+    const q = query.toLowerCase();
+    const filtered = EMAILS.filter(e =>
+        e.from.toLowerCase().includes(q) ||
+        e.subject.toLowerCase().includes(q) ||
+        e.body.toLowerCase().includes(q)
+    );
+    renderEmailList(filtered);
+}
+
+// ===== Open email =====
+function openEmail(id) {
+    const e = EMAILS.find(x => x.id === id);
+    if (!e) return;
+    e.unread = false;
+    selectedId = id;
+    filterEmails(currentFilter);
+
+    const cat = CAT_CONFIG[e.cat] || CAT_CONFIG.general;
+    const catOptions = Object.entries(CAT_CONFIG).map(([k,v]) =>
+        `<option value="${k}" ${e.cat===k?'selected':''}>${v.icon} ${v.label}</option>`
+    ).join('');
+
+    document.getElementById('emailDetail').innerHTML = `
+        <div class="detail-header">
+            <div>
+                <div class="detail-subject">${e.subject}</div>
+                <div class="detail-from"><strong>${e.from}</strong> &lt;${e.email}&gt; &nbsp;·&nbsp; ${e.date}</div>
+            </div>
+            <span class="cat-badge ${cat.cls}" style="font-size:0.8rem; padding:4px 12px;">${cat.icon} ${cat.label}</span>
+        </div>
+        <div class="detail-body">${e.body}</div>
+        <div class="cat-select-row">
+            <label style="font-size:0.82rem; font-weight:600;">カテゴリ変更:</label>
+            <select class="cat-select" onchange="recategorize(${id}, this.value)">
+                ${catOptions}
+            </select>
+            <button class="btn btn-sm btn-outline-success" onclick="flagForTs(${id})"><i class="bi bi-tools"></i> TroubleShootにフラグ</button>
+            <button class="btn btn-sm btn-outline-secondary" onclick="replyEmail(${id})"><i class="bi bi-reply"></i> 返信</button>
+        </div>
+        <div id="tsFlag-${id}" class="ts-flag-box" style="display:none;">
+            <h5><i class="bi bi-tools"></i> TroubleShoot追加提案</h5>
+            <div class="mb-2">
+                <label style="font-size:0.78rem; font-weight:600;">FAQに追加する問題:</label>
+                <input type="text" class="form-control form-control-sm" id="ts-title-${id}" value="${e.subject}" placeholder="問題のタイトル">
+            </div>
+            <div class="mb-2">
+                <label style="font-size:0.78rem; font-weight:600;">解決策の案:</label>
+                <textarea class="form-control form-control-sm" id="ts-solution-${id}" rows="2" placeholder="解決策を入力..."></textarea>
+            </div>
+            <button class="btn btn-sm btn-warning" onclick="submitTsFlag(${id})"><i class="bi bi-check2"></i> フラグを確定</button>
+        </div>
+    `;
+}
+
+function recategorize(id, cat) {
+    const e = EMAILS.find(x => x.id === id);
+    if (e) { e.cat = cat; filterEmails(currentFilter); openEmail(id); }
+}
+
+function flagForTs(id) {
+    const box = document.getElementById('tsFlag-' + id);
+    if (box) box.style.display = box.style.display === 'none' ? 'block' : 'none';
+}
+
+function submitTsFlag(id) {
+    const e = EMAILS.find(x => x.id === id);
+    const title = document.getElementById('ts-title-' + id)?.value || e.subject;
+    const solution = document.getElementById('ts-solution-' + id)?.value || '';
+    TS_SUGGESTIONS.unshift({ title, solution, cat: e.cat, priority: 'high', from: e.from, flagged: true });
+    alert(`「${title}」をTroubleShoot候補としてフラグしました。\n「TroubleShoot連携」タブで確認できます。`);
+    document.getElementById('tsFlag-' + id).style.display = 'none';
+    renderTsSuggestions();
+}
+
+function replyEmail(id) {
+    const e = EMAILS.find(x => x.id === id);
+    alert(`メール返信\n宛先: ${e.email}\n\n（本番環境ではメール送信フォームまたはMailgun/SendGridに接続します）`);
+}
+
+function autoCategorizAll() {
+    EMAILS.forEach(e => { e.cat = autoCategory(e.subject, e.body); });
+    filterEmails(currentFilter);
+    if (selectedId) openEmail(selectedId);
+    alert('全メールを自動分類しました。');
+}
+
+// ===== Charts =====
+function initCharts() {
+    const cats = ['bug','payment','account','copyright','feature','general'];
+    const counts = cats.map(c => EMAILS.filter(e => e.cat === c).length);
+    const colors = cats.map(c => CAT_CONFIG[c].color);
+
+    // Pie
+    new Chart(document.getElementById('catPieChart'), {
+        type: 'doughnut',
+        data: {
+            labels: cats.map(c => CAT_CONFIG[c].label),
+            datasets: [{ data: counts, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }]
+        },
+        options: { plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 10 } } }, cutout: '55%' }
+    });
+
+    // Trend
+    new Chart(document.getElementById('trendChart'), {
+        type: 'bar',
+        data: {
+            labels: ['10月', '11月', '12月', '1月', '2月', '3月'],
+            datasets: [
+                { label: 'バグ',     data: [4,3,6,2,5,3], backgroundColor: '#e74c3c', borderRadius:3 },
+                { label: '支払い',   data: [2,3,2,4,3,2], backgroundColor: '#e67e22', borderRadius:3 },
+                { label: 'アカウント',data: [1,2,1,2,1,1], backgroundColor: '#3498db', borderRadius:3 },
+                { label: '機能要望', data: [3,4,2,3,4,2], backgroundColor: '#27ae60', borderRadius:3 },
+                { label: '一般',     data: [5,3,4,3,2,4], backgroundColor: '#7f8c8d', borderRadius:3 },
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { stepSize: 2 } } },
+            plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 8 } } }
+        }
+    });
+}
+
+// ===== Top Issues =====
+const TOP_ISSUES = [
+    { text: 'ログイン後に画面が真っ白になる', count: 8, cat: 'bug' },
+    { text: '翻訳作品が検索に表示されない', count: 6, cat: 'bug' },
+    { text: 'アラビア語テキストのRTL表示が崩れる', count: 5, cat: 'bug' },
+    { text: '支払い方法の更新ができない', count: 5, cat: 'payment' },
+    { text: 'メールアドレスの変更でエラーが出る', count: 4, cat: 'account' },
+    { text: 'オフライン読書機能の要望', count: 4, cat: 'feature' },
+    { text: 'ダークモードの要望', count: 4, cat: 'feature' },
+    { text: '誤請求・二重請求', count: 3, cat: 'payment' },
+    { text: '翻訳者登録の手順がわかりにくい', count: 3, cat: 'general' },
+    { text: '著作権侵害の報告手順', count: 2, cat: 'copyright' },
+];
+
+function renderTopIssues() {
+    const max = TOP_ISSUES[0].count;
+    document.getElementById('topIssuesList').innerHTML = TOP_ISSUES.map((issue, i) => {
+        const cat = CAT_CONFIG[issue.cat];
+        const rankClass = i < 3 ? `r${i+1}` : '';
+        return `<li class="issue-item">
+            <div class="issue-rank ${rankClass}">${i+1}</div>
+            <div class="issue-text">
+                <div>${issue.text} <span class="cat-badge ${cat.cls}" style="font-size:0.65rem;">${cat.icon}</span></div>
+                <div class="issue-bar"><div class="issue-bar-fill" style="width:${(issue.count/max*100).toFixed(0)}%; background:${cat.color}"></div></div>
+            </div>
+            <div class="issue-count">${issue.count}件</div>
+            <button class="btn btn-outline-warning btn-sm" style="font-size:0.7rem; padding:2px 8px;" onclick="quickFlag('${issue.text}','${issue.cat}')">フラグ</button>
+        </li>`;
+    }).join('');
+}
+
+function quickFlag(text, cat) {
+    TS_SUGGESTIONS.unshift({ title: text, solution: '', cat, priority: 'medium', from: 'システム自動', flagged: true });
+    renderTsSuggestions();
+    showTab('troubleshoot');
+}
+
+// ===== TroubleShoot Suggestions =====
+let TS_SUGGESTIONS = [
+    { title: 'ログイン後に画面が真っ白になる', solution: 'ブラウザのキャッシュをクリアし、再ログインしてください。Chrome拡張機能が干渉している場合があります。', cat: 'bug', priority: 'high', from: 'システム自動', flagged: true },
+    { title: 'アラビア語でテキストが正しく表示されない', solution: 'ページ設定でアラビア語を選択後、ブラウザを再読み込みしてください。RTLモードが自動で適用されます。', cat: 'bug', priority: 'high', from: 'Fatima Al-Rashid', flagged: true },
+    { title: '翻訳作品が検索に表示されない', solution: '審査中の作品は検索に表示されません。審査完了後（通常1〜3営業日）に表示されます。', cat: 'bug', priority: 'medium', from: 'システム自動', flagged: false },
+];
+
+function renderTsSuggestions() {
+    const el = document.getElementById('tsSuggestions');
+    if (!TS_SUGGESTIONS.length) { el.innerHTML = '<p style="color:#bbb; font-size:0.85rem;">フラグ済み項目はありません</p>'; return; }
+    el.innerHTML = TS_SUGGESTIONS.map((s, i) => {
+        const cat = CAT_CONFIG[s.cat] || CAT_CONFIG.general;
+        const priColor = { high:'#e74c3c', medium:'#e67e22', low:'#7f8c8d' }[s.priority];
+        return `<div class="ts-suggestion ${s.flagged?'flagged':''}">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+                <h5>${cat.icon} ${s.title}</h5>
+                <div class="d-flex gap-2 align-items-center">
+                    <span style="font-size:0.72rem; font-weight:700; color:${priColor};">● ${{high:'高',medium:'中',low:'低'}[s.priority]}優先</span>
+                    <span class="cat-badge ${cat.cls}" style="font-size:0.68rem;">${cat.label}</span>
+                </div>
+            </div>
+            <p>${s.solution || '<em style="color:#bbb;">解決策未記入</em>'}</p>
+            <div class="d-flex gap-2 align-items-center mt-2" style="font-size:0.78rem; color:#7f8c8d;">
+                <span><i class="bi bi-person"></i> ${s.from}</span>
+                <div class="ms-auto d-flex gap-2">
+                    <button class="btn btn-sm btn-success" style="font-size:0.72rem; padding:2px 10px;" onclick="markAdded(${i})"><i class="bi bi-check2"></i> FAQに追加済み</button>
+                    <button class="btn btn-sm btn-outline-danger" style="font-size:0.72rem; padding:2px 10px;" onclick="removeTs(${i})"><i class="bi bi-trash"></i></button>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function markAdded(i) {
+    TS_SUGGESTIONS.splice(i, 1);
+    renderTsSuggestions();
+}
+function removeTs(i) {
+    TS_SUGGESTIONS.splice(i, 1);
+    renderTsSuggestions();
+}
+
+function addTsSuggestion() {
+    const title = document.getElementById('newTsTitle').value.trim();
+    const solution = document.getElementById('newTsSolution').value.trim();
+    const cat = document.getElementById('newTsCat').value;
+    const priority = document.getElementById('newTsPriority').value;
+    if (!title) { alert('タイトルを入力してください'); return; }
+    TS_SUGGESTIONS.unshift({ title, solution, cat, priority, from: 'Admin手動', flagged: true });
+    document.getElementById('newTsTitle').value = '';
+    document.getElementById('newTsSolution').value = '';
+    renderTsSuggestions();
+}
+
+// ===== Tab switcher =====
+function showTab(tab) {
+    ['inbox', 'trends', 'troubleshoot'].forEach(t => {
+        document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none';
+    });
+    document.querySelectorAll('#mainTabs .nav-link').forEach(a => {
+        a.classList.toggle('active', a.dataset.tab === tab);
+    });
+    if (tab === 'trends') { initCharts(); renderTopIssues(); }
+    if (tab === 'troubleshoot') renderTsSuggestions();
+}
+
+// ===== Init =====
+document.addEventListener('DOMContentLoaded', () => {
+    renderEmailList(EMAILS);
+    updateCounts();
+});
+</script>
+</body>
+</html>
