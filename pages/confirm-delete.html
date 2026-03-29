@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <title>Confirm Account Deletion - Publisher</title>
     
     <!-- Google Fonts -->
@@ -804,8 +803,132 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/i18n.js"></script>
-    <script src="../js/lang/it.js"></script>
     <script src="../js/navbar.js"></script>
+    <script>
+        // ========== Page-specific: Account Deletion Logic ==========
+        const API_BASE = 'http://localhost:3000/api';
+        let token = null;
+        let countdown = 5;
+        let currentLang = 'en';
+
+        const countdownTexts = {
+            'en': (sec) => `Delete button will be enabled in ${sec} seconds...`,
+            'ja': (sec) => `${sec}秒後に削除ボタンが有効になります...`,
+            'zh': (sec) => `${sec}秒后删除按钮将启用...`,
+            'es': (sec) => `El botón se habilitará en ${sec} segundos...`,
+            'fr': (sec) => `Le bouton sera activé dans ${sec} secondes...`,
+            'de': (sec) => `Schaltfläche wird in ${sec} Sekunden aktiviert...`,
+            'ko': (sec) => `${sec}초 후에 삭제 버튼이 활성화됩니다...`,
+            'ar': (sec) => `سيتم تفعيل زر الحذف خلال ${sec} ثوانٍ...`,
+            'pt': (sec) => `O botão será ativado em ${sec} segundos...`,
+            'it': (sec) => `Il pulsante si attiverà in ${sec} secondi...`
+        };
+
+        const errorMessages = {
+            'en': 'An error occurred. Please try again.',
+            'ja': 'エラーが発生しました。もう一度お試しください。',
+            'zh': '发生错误，请重试。',
+            'es': 'Se produjo un error. Por favor, inténtelo de nuevo.',
+            'fr': 'Une erreur est survenue. Veuillez réessayer.',
+            'de': 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.',
+            'ko': '오류가 발생했습니다. 다시 시도해 주세요.',
+            'ar': 'حدث خطأ. يرجى المحاولة مرة أخرى.',
+            'pt': 'Ocorreu um erro. Por favor, tente novamente.',
+            'it': 'Si è verificato un errore. Per favore riprova.'
+        };
+
+        function showScreenAllLangs(screenClass) {
+            document.querySelectorAll('.confirm-screen, .success-screen, .error-screen, .invalid-screen').forEach(function(el) {
+                el.style.display = 'none';
+            });
+            document.querySelectorAll('.' + screenClass).forEach(function(el) {
+                el.style.display = 'block';
+            });
+        }
+
+        function startCountdown() {
+            countdown = 5;
+            const deleteButtons = document.querySelectorAll('.delete-btn');
+            deleteButtons.forEach(function(btn) { btn.disabled = true; });
+
+            const updateCountdown = function() {
+                const lang = localStorage.getItem('preferredLanguage') || 'en';
+                const textFn = countdownTexts[lang] || countdownTexts['en'];
+                document.querySelectorAll('.countdown-text').forEach(function(el) {
+                    el.textContent = countdown > 0 ? textFn(countdown) : '';
+                });
+
+                if (countdown <= 0) {
+                    deleteButtons.forEach(function(btn) { btn.disabled = false; });
+                    document.querySelectorAll('.countdown-text').forEach(function(el) {
+                        el.textContent = '';
+                    });
+                } else {
+                    countdown--;
+                    setTimeout(updateCountdown, 1000);
+                }
+            };
+            updateCountdown();
+        }
+
+        async function confirmDeletion() {
+            const lang = localStorage.getItem('preferredLanguage') || 'en';
+            document.querySelectorAll('.loading-indicator').forEach(function(el) {
+                el.style.display = 'block';
+            });
+            document.querySelectorAll('.delete-btn').forEach(function(btn) {
+                btn.disabled = true;
+            });
+
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const deleteToken = urlParams.get('token');
+
+                if (!deleteToken) {
+                    showScreenAllLangs('invalid-screen');
+                    return;
+                }
+
+                const response = await fetch(API_BASE + '/auth/delete-account', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + (localStorage.getItem('authToken') || '')
+                    },
+                    body: JSON.stringify({ token: deleteToken })
+                });
+
+                if (response.ok) {
+                    localStorage.clear();
+                    showScreenAllLangs('success-screen');
+                    setTimeout(function() {
+                        window.location.href = '../index.html';
+                    }, 3000);
+                } else if (response.status === 400 || response.status === 404) {
+                    showScreenAllLangs('invalid-screen');
+                } else {
+                    document.querySelectorAll('.error-message').forEach(function(el) {
+                        el.textContent = errorMessages[lang] || errorMessages['en'];
+                    });
+                    showScreenAllLangs('error-screen');
+                }
+            } catch (err) {
+                document.querySelectorAll('.error-message').forEach(function(el) {
+                    el.textContent = errorMessages[lang] || errorMessages['en'];
+                });
+                showScreenAllLangs('error-screen');
+            } finally {
+                document.querySelectorAll('.loading-indicator').forEach(function(el) {
+                    el.style.display = 'none';
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            startCountdown();
+        });
+    </script>
+
     <script>
         // ========== Page-specific: Language Content Switcher ==========
         function showLanguageContent(lang) {
@@ -820,7 +943,7 @@
             showLanguageContent(lang);
         });
         document.addEventListener('languageChanged', function(e) {
-            var lang = (e.detail && e.detail.language) ? e.detail.language : (localStorage.getItem('preferredLanguage') || 'en');
+            var lang = e.detail || localStorage.getItem('preferredLanguage') || 'en';
             showLanguageContent(lang);
         });
     </script>
