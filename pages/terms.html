@@ -486,167 +486,22 @@
     <script src="../js/i18n.js"></script>
     <script src="../js/navbar.js"></script>
     
-    <!-- Pattern C Navbar JavaScript -->
     <script>
-        // ========== 多言語対応テキスト（9言語）==========
-        const uiText = {
-            translationTools: { en: 'Tools', ja: '翻訳ツール', zh: '翻译工具',
-                es: 'Herramientas de traducción', fr: 'Outils de traduction', de: 'Übersetzungstools',
-                ko: '번역 도구', ar: 'أدوات الترجمة', pt: 'Ferramentas de tradução'
-            },
-            mangaTranslator: {
-                en: 'Manga Translator', ja: 'マンガ翻訳', zh: '漫画翻译',
-                es: 'Traductor de Manga', fr: 'Traducteur de Manga', de: 'Manga-Übersetzer',
-                ko: '만화 번역기', ar: 'مترجم المانجا', pt: 'Tradutor de Mangá'
-            },
-            novelTranslator: {
-                en: 'Novel Translator', ja: '小説翻訳', zh: '小说翻译',
-                es: 'Traductor de Novela', fr: 'Traducteur de Roman', de: 'Roman-Übersetzer',
-                ko: '소설 번역기', ar: 'مترجم الروايات', pt: 'Tradutor de Romance'
-            },
-            translationStatus: {
-                en: 'Translation Status', ja: '翻訳状況', zh: '翻译状态',
-                es: 'Estado de traducción', fr: 'Statut de traduction', de: 'Übersetzungsstatus',
-                ko: '번역 상태', ar: 'حالة الترجمة', pt: 'Status da tradução'
-            },
-            findTranslators: {
-                en: 'Find Translators', ja: '翻訳者を探す', zh: '寻找翻译',
-                es: 'Buscar traductores', fr: 'Trouver des traducteurs', de: 'Übersetzer finden',
-                ko: '번역가 찾기', ar: 'البحث عن مترجمين', pt: 'Encontrar tradutores'
-            },
-            contact: {
-                en: 'Contact', ja: 'お問い合わせ', zh: '联系我们',
-                es: 'Contacto', fr: 'Contact', de: 'Kontakt',
-                ko: '문의', ar: 'اتصل بنا', pt: 'Contato'
-            },
-            library: {
-                en: 'Library', ja: 'ライブラリ', zh: '书库',
-                es: 'Biblioteca', fr: 'Bibliothèque', de: 'Bibliothek',
-                ko: '라이브러리', ar: 'المكتبة', pt: 'Biblioteca'
-            },
-            dashboard: {
-                en: 'Dashboard', ja: 'ダッシュボード', zh: '控制台',
-                es: 'Panel', fr: 'Tableau de bord', de: 'Dashboard',
-                ko: '대시보드', ar: 'لوحة التحكم', pt: 'Painel'
-            },
-            accountSettings: {
-                en: 'Account Settings', ja: 'アカウント設定', zh: '账户设置',
-                es: 'Configuración de cuenta', fr: 'Paramètres du compte', de: 'Kontoeinstellungen',
-                ko: '계정 설정', ar: 'إعدادات الحساب', pt: 'Configurações da conta'
-            },
-            logout: {
-                en: 'Log Out', ja: 'ログアウト', zh: '退出登录',
-                es: 'Cerrar sesión', fr: 'Déconnexion', de: 'Abmelden',
-                ko: '로그아웃', ar: 'تسجيل الخروج', pt: 'Sair'
-            },
-            logOutConfirm: {
-                en: 'Are you sure you want to log out?', ja: 'ログアウトしますか？', zh: '确定要退出登录吗？',
-                es: '¿Estás seguro de que quieres cerrar sesión?', fr: 'Êtes-vous sûr de vouloir vous déconnecter?', de: 'Sind Sie sicher, dass Sie sich abmelden möchten?',
-                ko: '로그아웃 하시겠습니까?', ar: 'هل أنت متأكد أنك تريد تسجيل الخروج؟', pt: 'Tem certeza que deseja sair?'
-            }
-        };
-        
-        function updateUIText() {
-
-            const els = {
-
-            };
-            Object.keys(els).forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.textContent = getL(els[id]);
-            });
-        }
-document.addEventListener('DOMContentLoaded', function() {
-            const desktopSelector = document.getElementById('languageSelector');
-            const mobileSelector = document.getElementById('languageSelectorMobile');
-            
-            if (desktopSelector && mobileSelector) {
-                const savedLang = localStorage.getItem('preferredLanguage') || 'en';
-                desktopSelector.value = savedLang;
-                mobileSelector.value = savedLang;
-                
-                mobileSelector.addEventListener('change', function() {
-                    desktopSelector.value = this.value;
-                    if (typeof changeLanguage === 'function') changeLanguage(this.value);
-                    updateUIText();
-                });
-                
-                desktopSelector.addEventListener('change', function() {
-                    mobileSelector.value = this.value;
-                    if (typeof changeLanguage === 'function') changeLanguage(this.value);
-                    updateUIText();
-                });
-            }
-            
-            updateUIText();
-loadUserInfo();
-            if (typeof applyTranslations === 'function') applyTranslations();
-            
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.user-dropdown')) {
-                    const dropdown = document.getElementById('userDropdown');
-                    const dropdownMenu = document.getElementById('userMenu');
-                    if (dropdown) dropdown.classList.remove('open');
-                    if (dropdownMenu) dropdownMenu.classList.remove('show');
-                }
-            });
-            
-            const navbarCollapse = document.getElementById('navbarNav');
-            const navbarOverlay = document.getElementById('navbarOverlay');
-            
-            if (navbarCollapse) {
-                navbarCollapse.addEventListener('show.bs.collapse', function() {
-                    if (navbarOverlay) navbarOverlay.classList.add('show');
-                });
-                navbarCollapse.addEventListener('hide.bs.collapse', function() {
-                    if (navbarOverlay) navbarOverlay.classList.remove('show');
-                });
-            }
-            
-            if (navbarOverlay) {
-                navbarOverlay.addEventListener('click', function() {
-                    const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
-                    if (bsCollapse) bsCollapse.hide();
-                });
-            }
-            
-            document.addEventListener('languageChanged', function() {
-                updateUIText();
-            });
-        });
-    </script>
-    <script>
+        // ========== Page-specific: Language Content Switcher ==========
         function showLanguageContent(lang) {
             document.querySelectorAll('.lang-content').forEach(el => el.classList.remove('active'));
-            const langContent = document.querySelector(`.lang-content[data-lang="${lang}"]`);
-            if (langContent) { langContent.classList.add('active'); }
-            else { document.querySelector('.lang-content[data-lang="en"]')?.classList.add('active'); }
+            const target = document.querySelector('.lang-content[data-lang="' + lang + '"]');
+            if (target) { target.classList.add('active'); }
+            else { var en = document.querySelector('.lang-content[data-lang="en"]'); if (en) en.classList.add('active'); }
+            if (lang === 'ar') { document.body.setAttribute('dir', 'rtl'); } else { document.body.removeAttribute('dir'); }
         }
-        function applyTranslations() {
-            const lang = getCurrentLanguage();
-            const titleKey = 'legal.pageTitle.terms';
-            const translatedTitle = t(titleKey);
-            if (translatedTitle !== titleKey) { document.title = translatedTitle; }
-            // Pattern C セレクタ同期
-            const desktopSel = document.getElementById('languageSelector');
-            const mobileSel = document.getElementById('languageSelectorMobile');
-            if (desktopSel) { desktopSel.value = lang; }
-            if (mobileSel) { mobileSel.value = lang; }
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                const translated = t(key);
-                if (translated && translated !== key) { el.textContent = translated; }
-            });
+        document.addEventListener('DOMContentLoaded', function() {
+            var lang = localStorage.getItem('preferredLanguage') || 'en';
             showLanguageContent(lang);
-            if (availableLanguages[lang] && availableLanguages[lang].rtl) { document.documentElement.dir = 'rtl'; }
-            else { document.documentElement.dir = 'ltr'; }
-        }
-        function changeLanguage(lang) {
-            if (typeof setLanguage === 'function') { setLanguage(lang); }
-            applyTranslations();
-            updateUIText();
-        }
-        document.addEventListener('DOMContentLoaded', applyTranslations);
+        });
+        document.addEventListener('languageChanged', function(e) {
+            showLanguageContent(e.detail || localStorage.getItem('preferredLanguage') || 'en');
+        });
     </script>
 </body>
 </html>
