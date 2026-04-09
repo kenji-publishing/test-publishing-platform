@@ -1,5 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const { authenticate, authorize } = require('../middleware/auth');
+
+// All moderation routes require authentication and admin role
+router.use(authenticate);
+router.use(authorize('admin'));
 
 // Helper function to get database pool
 function getPool(req) {

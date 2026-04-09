@@ -10,6 +10,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
+const { authenticate, authorize } = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -50,7 +51,7 @@ const upload = multer({
  * POST /api/verification/submit
  * Submit a verification request (for users)
  */
-router.post('/submit', upload.single('document'), async (req, res) => {
+router.post('/submit', authenticate, upload.single('document'), async (req, res) => {
     try {
         const {
             userId,
@@ -115,7 +116,7 @@ router.post('/submit', upload.single('document'), async (req, res) => {
  * GET /api/verification/my-requests/:userId
  * Get user's own verification requests
  */
-router.get('/my-requests/:userId', async (req, res) => {
+router.get('/my-requests/:userId', authenticate, async (req, res) => {
     try {
         const { userId } = req.params;
 
@@ -141,7 +142,7 @@ router.get('/my-requests/:userId', async (req, res) => {
  * GET /api/verification/admin/stats
  * Get verification statistics for dashboard
  */
-router.get('/admin/stats', async (req, res) => {
+router.get('/admin/stats', authenticate, authorize('admin'), async (req, res) => {
     try {
         const stats = await db.query(`
             SELECT 
@@ -164,7 +165,7 @@ router.get('/admin/stats', async (req, res) => {
  * GET /api/verification/admin/requests
  * Get all verification requests (with filtering)
  */
-router.get('/admin/requests', async (req, res) => {
+router.get('/admin/requests', authenticate, authorize('admin'), async (req, res) => {
     try {
         const {
             status = '',
@@ -257,7 +258,7 @@ router.get('/admin/requests', async (req, res) => {
  * GET /api/verification/admin/requests/:requestId
  * Get single verification request details
  */
-router.get('/admin/requests/:requestId', async (req, res) => {
+router.get('/admin/requests/:requestId', authenticate, authorize('admin'), async (req, res) => {
     try {
         const { requestId } = req.params;
 
@@ -295,7 +296,7 @@ router.get('/admin/requests/:requestId', async (req, res) => {
  * PATCH /api/verification/admin/requests/:requestId/approve
  * Approve a verification request
  */
-router.patch('/admin/requests/:requestId/approve', async (req, res) => {
+router.patch('/admin/requests/:requestId/approve', authenticate, authorize('admin'), async (req, res) => {
     try {
         const { requestId } = req.params;
         const { reviewerId, reviewNotes } = req.body;
@@ -370,7 +371,7 @@ router.patch('/admin/requests/:requestId/approve', async (req, res) => {
  * PATCH /api/verification/admin/requests/:requestId/reject
  * Reject a verification request
  */
-router.patch('/admin/requests/:requestId/reject', async (req, res) => {
+router.patch('/admin/requests/:requestId/reject', authenticate, authorize('admin'), async (req, res) => {
     try {
         const { requestId } = req.params;
         const { reviewerId, reviewNotes, rejectionReason } = req.body;
@@ -409,7 +410,7 @@ router.patch('/admin/requests/:requestId/reject', async (req, res) => {
  * PATCH /api/verification/admin/requests/:requestId/request-info
  * Request more information from user
  */
-router.patch('/admin/requests/:requestId/request-info', async (req, res) => {
+router.patch('/admin/requests/:requestId/request-info', authenticate, authorize('admin'), async (req, res) => {
     try {
         const { requestId } = req.params;
         const { reviewerId, reviewNotes, infoNeeded } = req.body;

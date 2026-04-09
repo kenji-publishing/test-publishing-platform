@@ -11,10 +11,11 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
+const { authenticate, authorize } = require('../middleware/auth');
 
-// Note: In production, add admin authentication middleware
-// const { authenticateAdmin } = require('../middleware/auth');
-// router.use(authenticateAdmin);
+// All admin routes require authentication and admin role
+router.use(authenticate);
+router.use(authorize('admin'));
 
 // ========== DASHBOARD STATISTICS ==========
 

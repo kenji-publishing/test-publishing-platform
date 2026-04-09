@@ -255,4 +255,136 @@ router.get('/me', authenticate, async (req, res) => {
   }
 });
 
+/**
+ * GET /api/auth/profile
+ * Get current user profile (alias for /me)
+ */
+router.get('/profile', authenticate, async (req, res) => {
+  try {
+    const result = await db.query(
+      `SELECT u.user_id, u.email, u.first_name, u.last_name, u.pen_name,
+              u.country_code, u.bio, u.profile_image_url, u.verified, u.role
+       FROM users u
+       WHERE u.user_id = $1`,
+      [req.user.userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const user = result.rows[0];
+
+    res.json({
+      user: {
+        id: user.user_id,
+        email: user.email,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        penName: user.pen_name,
+        country: user.country_code,
+        bio: user.bio,
+        profileImage: user.profile_image_url,
+        verified: user.verified,
+        role: user.role || 'reader'
+      }
+    });
+  } catch (error) {
+    console.error('Get profile error:', error);
+    res.status(500).json({ error: 'Failed to get profile' });
+  }
+});
+
+/**
+ * PUT /api/auth/profile
+ * Update current user profile
+ */
+router.put('/profile', authenticate, async (req, res) => {
+  try {
+    const { firstName, lastName, penName, bio, country } = req.body;
+
+    const result = await db.query(
+      `UPDATE users
+       SET first_name = COALESCE($1, first_name),
+           last_name = COALESCE($2, last_name),
+           pen_name = COALESCE($3, pen_name),
+           bio = COALESCE($4, bio),
+           country_code = COALESCE($5, country_code),
+           updated_at = NOW()
+       WHERE user_id = $6
+       RETURNING user_id, email, first_name, last_name, pen_name, bio, country_code`,
+      [firstName, lastName, penName, bio, country, req.user.userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const user = result.rows[0];
+
+    res.json({
+      message: 'Profile updated successfully',
+      user: {
+        id: user.user_id,
+        email: user.email,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        penName: user.pen_name,
+        bio: user.bio,
+        country: user.country_code
+      }
+    });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({ error: 'Failed to update profile' });
+  }
+});
+
+/**
+ * PUT /api/auth/password
+ * Change current user password
+ */
+router.put('/password', authenticate, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: 'Current and new password are required' });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: 'New password must be at least 8 characters' });
+    }
+
+    const userResult = await db.query(
+      'SELECT password_hash FROM users WHERE user_id = $1',
+      [req.user.userId]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const bcrypt = require('bcryptjs');
+    const isMatch = await bcrypt.compare(currentPassword, userResult.rows[0].password_hash);
+
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+
+    const salt = await bcrypt.genSalt(12);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    await db.query(
+      'UPDATE users SET password_hash = $1, updated_at = NOW() WHERE user_id = $2',
+      [hashedPassword, req.user.userId]
+    );
+
+    res.json({ message: 'Password updated successfully' });
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({ error: 'Failed to change password' });
+  }
+});
+
 module.exports = router;

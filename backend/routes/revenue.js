@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
 const { sendEmail } = require('../config/email');
+const { authenticate } = require('../middleware/auth');
 const {
     calculateShares,
     calculateAmounts,
@@ -18,6 +19,9 @@ const {
     REVENUE_SHARES,
     SHARE_SCENARIOS
 } = require('../config/revenue');
+
+// All revenue routes require authentication
+router.use(authenticate);
 
 /**
  * GET /api/revenue/shares/calculate

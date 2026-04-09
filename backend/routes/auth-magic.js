@@ -12,6 +12,7 @@ const db = require('../config/database');
 const { sendEmail, templates } = require('../config/email');
 
 // Configuration
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:8000';
 const MAGIC_LINK_EXPIRY = 15 * 60 * 1000; // 15 minutes
 const BACKUP_CODE_COUNT = 10;
 const MAX_RECOVERY_ATTEMPTS = 3;
@@ -129,7 +130,7 @@ router.post('/register', async (req, res) => {
       [user.user_id, tokenHash, expiresAt, 'verify_email']
     );
 
-    const verifyLink = `http://localhost:8000/pages/verify-email.html?token=${token}&email=${encodeURIComponent(email)}`;
+    const verifyLink = `${FRONTEND_URL}/pages/verify-email.html?token=${token}&email=${encodeURIComponent(email)}`;
     
     await sendEmail(
       email,
@@ -200,7 +201,7 @@ router.post('/login', async (req, res) => {
       [user.user_id, tokenHash, expiresAt, 'login']
     );
 
-    const loginLink = `http://localhost:8000/pages/magic-login.html?token=${token}&email=${encodeURIComponent(email)}`;
+    const loginLink = `${FRONTEND_URL}/pages/magic-login.html?token=${token}&email=${encodeURIComponent(email)}`;
 
     await sendEmail(
       email,
@@ -418,7 +419,7 @@ router.post('/recover/backup-email', async (req, res) => {
       [user.user_id, tokenHash, expiresAt, 'recovery']
     );
 
-    const recoveryLink = `http://localhost:8000/pages/recover-account.html?token=${token}&email=${encodeURIComponent(user.email)}`;
+    const recoveryLink = `${FRONTEND_URL}/pages/recover-account.html?token=${token}&email=${encodeURIComponent(user.email)}`;
 
     await sendEmail(
       user.backup_email,
@@ -586,7 +587,7 @@ router.post('/recover/questions', async (req, res) => {
         [user.user_id, tokenHash, expiresAt, 'verify_email']
       );
 
-      const verifyLink = `http://localhost:8000/pages/verify-email.html?token=${token}&email=${encodeURIComponent(newEmail)}`;
+      const verifyLink = `${FRONTEND_URL}/pages/verify-email.html?token=${token}&email=${encodeURIComponent(newEmail)}`;
 
       await sendEmail(
         newEmail,

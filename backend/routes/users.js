@@ -256,7 +256,7 @@ router.post('/delete-request', authenticate, async (req, res) => {
     );
     
     // Send confirmation email
-    const deleteLink = `http://localhost:8000/pages/confirm-delete.html?token=${token}`;
+    const deleteLink = `${process.env.FRONTEND_URL || 'http://localhost:8000'}/pages/confirm-delete.html?token=${token}`;
     
     await sendEmail(
       user.email,
