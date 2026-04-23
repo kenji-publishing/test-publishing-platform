@@ -30,6 +30,7 @@ window.translations.zh = {
         library: '图书馆',
         translationTools: '翻译工具',
         mangaTranslator: '漫画翻译',
+        mangaEditor: '漫画编辑器',
         novelTranslator: '小说翻译',
         translationStatus: '翻译状态',
         findTranslators: '查找翻译员',

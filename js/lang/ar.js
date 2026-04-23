@@ -30,6 +30,7 @@ window.translations.ar = {
         library: 'المكتبة',
         translationTools: 'أدوات الترجمة',
         mangaTranslator: 'مترجم المانجا',
+        mangaEditor: 'محرر المانجا',
         novelTranslator: 'مترجم الروايات',
         translationStatus: 'حالة الترجمة',
         findTranslators: 'ابحث عن مترجمين',

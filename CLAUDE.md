@@ -52,6 +52,7 @@ Browse | Library | Dashboard | Tools ▼ | Support ▼ | Messages
                                 ├─ Upload Work
                                 ├─ ──────────
                                 ├─ Manga Translator
+                                ├─ Manga Editor
                                 ├─ Novel Translator
                                 ├─ Translation Status
                                 ├─ Find Translators
@@ -111,6 +112,7 @@ test-publishing-platform/
 │   ├── work-detail.html    # 作品詳細 (翻訳/編集依頼ボタン)
 │   ├── agreements.html     # 同意書 (3テンプレート+期限+進捗報告)
 │   ├── manga-translator.html  # マンガ翻訳ウィザード
+│   ├── manga-editor.html      # マンガエディター（テキスト編集）
 │   ├── novel-translator.html  # 小説翻訳ウィザード
 │   ├── notifications.html  # 通知センター（14種類）
 │   ├── checkout.html       # 決済 (Stripe/PayPal)

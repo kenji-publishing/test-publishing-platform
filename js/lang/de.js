@@ -30,6 +30,7 @@ window.translations.de = {
         library: 'Bibliothek',
         translationTools: 'Übersetzungstools',
         mangaTranslator: 'Manga-Übersetzer',
+        mangaEditor: 'Manga-Editor',
         novelTranslator: 'Roman-Übersetzer',
         translationStatus: 'Übersetzungsstatus',
         findTranslators: 'Übersetzer Finden',

@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="mangaEditor.pageTitle">Manga Editor - Publisher</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Platform CSS -->
+    <link href="../css/variables.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style-new.css">
+    <link href="../css/components.css" rel="stylesheet">
+    <link href="../css/navbar.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/mobile-fixes.css">
+
+    <!-- Language Files -->
+    <script src="../js/lang/ja.js"></script>
+    <script src="../js/lang/en.js"></script>
+    <script src="../js/lang/zh.js"></script>
+    <script src="../js/lang/es.js"></script>
+    <script src="../js/lang/fr.js"></script>
+    <script src="../js/lang/de.js"></script>
+    <script src="../js/lang/ko.js"></script>
+    <script src="../js/lang/ar.js"></script>
+    <script src="../js/lang/pt.js"></script>
+    <script src="../js/lang/it.js"></script>
+
+    <style>
+        :root {
+            --color-bg: #FAF8F5;
+            --color-bg-card: #FFFFFF;
+            --color-bg-main: #FAF8F5;
+            --color-bg-hover: rgba(139, 115, 85, 0.05);
+            --color-accent: #8B7355;
+            --color-text: #2D2A26;
+            --color-text-secondary: #6B6560;
+            --color-border: #E8E4E0;
+            --color-success: #5D9C59;
+            --color-warning: #D4A853;
+            --color-error: #C75D5D;
+            --color-info: #5D8BC7;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            margin: 0; padding: 0;
+        }
+
+        /* ========== Editor Layout ========== */
+        .editor-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.25rem;
+        }
+
+        .editor-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        .editor-header h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--color-accent);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .editor-header-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .editor-layout {
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 1.25rem;
+            min-height: calc(100vh - 200px);
+        }
+
+        @media (max-width: 1024px) {
+            .editor-layout { grid-template-columns: 1fr; }
+        }
+
+        /* ========== Upload State ========== */
+        .upload-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 500px;
+        }
+        .upload-zone {
+            border: 2px dashed var(--color-border);
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            color: var(--color-text-secondary);
+            transition: all 0.2s;
+            width: 100%;
+            max-width: 600px;
+        }
+        .upload-zone:hover { border-color: var(--color-accent); color: var(--color-accent); }
+        .upload-zone.dragover { border-color: var(--color-accent); background: rgba(139, 115, 85, 0.05); }
+        .upload-zone i { font-size: 3rem; margin-bottom: 1rem; display: block; }
+        .upload-zone p { font-size: 1rem; margin: 0.5rem 0; }
+        .upload-zone small { font-size: 0.82rem; }
+
+        /* ========== Canvas Panel ========== */
+        .canvas-panel {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .canvas-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.6rem 1rem;
+            border-bottom: 1px solid var(--color-border);
+            background: var(--color-bg);
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .canvas-toolbar-left,
+        .canvas-toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .toolbar-btn {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            padding: 0.4rem 0.7rem;
+            cursor: pointer;
+            font-size: 0.82rem;
+            color: var(--color-text-secondary);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .toolbar-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
+        .toolbar-btn.active { background: var(--color-accent); color: #fff; border-color: var(--color-accent); }
+        .toolbar-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .page-nav-info {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--color-text);
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .canvas-area {
+            flex: 1;
+            position: relative;
+            overflow: auto;
+            background: #E0DDD8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 500px;
+            cursor: crosshair;
+        }
+        .canvas-area.mode-select { cursor: default; }
+
+        .canvas-wrapper {
+            position: relative;
+            display: inline-block;
+            line-height: 0;
+        }
+        .canvas-wrapper img {
+            max-width: 100%;
+            max-height: 75vh;
+            display: block;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        /* ========== Text Regions on Canvas ========== */
+        .text-region {
+            position: absolute;
+            border: 2px solid var(--color-accent);
+            background: rgba(139, 115, 85, 0.1);
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+            min-width: 20px;
+            min-height: 20px;
+        }
+        .text-region:hover {
+            border-color: var(--color-info);
+            background: rgba(93, 139, 199, 0.15);
+        }
+        .text-region.selected {
+            border-color: var(--color-info);
+            background: rgba(93, 139, 199, 0.2);
+            box-shadow: 0 0 0 2px rgba(93, 139, 199, 0.3);
+        }
+        .text-region.type-sfx { border-color: var(--color-warning); background: rgba(212, 168, 83, 0.12); }
+        .text-region.type-sfx:hover,
+        .text-region.type-sfx.selected { border-color: #C49A3C; background: rgba(212, 168, 83, 0.25); }
+        .text-region.type-narration { border-color: var(--color-success); background: rgba(93, 156, 89, 0.12); }
+        .text-region.type-narration:hover,
+        .text-region.type-narration.selected { border-color: #4A8A46; background: rgba(93, 156, 89, 0.25); }
+        .text-region.type-free { border-color: #9B7DC7; background: rgba(155, 125, 199, 0.12); }
+        .text-region.type-free:hover,
+        .text-region.type-free.selected { border-color: #7D5FB0; background: rgba(155, 125, 199, 0.25); }
+
+        .region-label {
+            position: absolute;
+            top: -18px;
+            left: -2px;
+            font-size: 0.6rem;
+            font-weight: 700;
+            padding: 1px 5px;
+            border-radius: 3px 3px 0 0;
+            color: #fff;
+            white-space: nowrap;
+        }
+        .text-region .region-label { background: var(--color-accent); }
+        .text-region.type-sfx .region-label { background: var(--color-warning); }
+        .text-region.type-narration .region-label { background: var(--color-success); }
+        .text-region.type-free .region-label { background: #9B7DC7; }
+
+        /* Drawing rectangle */
+        .draw-rect {
+            position: absolute;
+            border: 2px dashed var(--color-accent);
+            background: rgba(139, 115, 85, 0.1);
+            pointer-events: none;
+        }
+
+        /* Preview overlay text */
+        .preview-text-overlay {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-weight: 600;
+            color: #000;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 2px 4px;
+            overflow: hidden;
+            word-break: break-word;
+            line-height: 1.3;
+            pointer-events: none;
+        }
+
+        /* ========== Thumbnail Bar ========== */
+        .thumbnail-bar {
+            display: flex;
+            gap: 0.4rem;
+            padding: 0.5rem 1rem;
+            border-top: 1px solid var(--color-border);
+            overflow-x: auto;
+            background: var(--color-bg);
+        }
+        .thumbnail-bar::-webkit-scrollbar { height: 5px; }
+        .thumbnail-bar::-webkit-scrollbar-track { background: var(--color-bg); }
+        .thumbnail-bar::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+
+        .thumb-item {
+            flex: 0 0 60px;
+            width: 60px;
+            aspect-ratio: 3/4;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 2px solid var(--color-border);
+            cursor: pointer;
+            position: relative;
+            transition: border-color 0.2s;
+        }
+        .thumb-item:hover { border-color: var(--color-accent); }
+        .thumb-item.active { border-color: var(--color-accent); box-shadow: 0 0 0 2px rgba(139, 115, 85, 0.3); }
+        .thumb-item img { width: 100%; height: 100%; object-fit: cover; }
+        .thumb-item .thumb-num {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            text-align: center;
+            font-size: 0.6rem;
+            padding: 1px;
+        }
+
+        /* ========== Side Panel ========== */
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .panel {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .panel-header {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            background: var(--color-bg);
+        }
+        .panel-header h3 {
+            margin: 0;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .panel-body { padding: 0.75rem 1rem; }
+
+        /* ========== Region List ========== */
+        .region-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .region-list::-webkit-scrollbar { width: 5px; }
+        .region-list::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+
+        .region-card {
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            padding: 0.6rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .region-card:hover { border-color: var(--color-accent); }
+        .region-card.selected { border-color: var(--color-info); background: rgba(93, 139, 199, 0.06); }
+
+        .region-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.4rem;
+        }
+        .region-type-badge {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #fff;
+            text-transform: uppercase;
+        }
+        .badge-bubble { background: var(--color-accent); }
+        .badge-sfx { background: var(--color-warning); }
+        .badge-narration { background: var(--color-success); }
+        .badge-free { background: #9B7DC7; }
+
+        .region-delete-btn {
+            background: none;
+            border: none;
+            color: var(--color-error);
+            cursor: pointer;
+            font-size: 0.85rem;
+            padding: 2px 4px;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+        .region-delete-btn:hover { opacity: 1; }
+
+        .region-field {
+            margin-bottom: 0.4rem;
+        }
+        .region-field:last-child { margin-bottom: 0; }
+        .region-field label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            margin-bottom: 0.15rem;
+            text-transform: uppercase;
+        }
+        .region-field textarea {
+            width: 100%;
+            padding: 0.4rem 0.5rem;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            font-size: 0.82rem;
+            font-family: 'Noto Sans JP', sans-serif;
+            resize: vertical;
+            min-height: 50px;
+            line-height: 1.5;
+            color: var(--color-text);
+            background: var(--color-bg);
+        }
+        .region-field textarea:focus { outline: none; border-color: var(--color-accent); background: #fff; }
+
+        .region-type-select {
+            padding: 0.3rem 0.5rem;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            font-size: 0.78rem;
+            background: #fff;
+            color: var(--color-text);
+        }
+
+        .empty-regions {
+            text-align: center;
+            color: var(--color-text-secondary);
+            font-size: 0.85rem;
+            padding: 2rem 1rem;
+        }
+        .empty-regions i { font-size: 2rem; margin-bottom: 0.5rem; display: block; color: var(--color-border); }
+
+        /* ========== Font Settings ========== */
+        .font-settings {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+        .font-field label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            margin-bottom: 0.15rem;
+        }
+        .font-field select,
+        .font-field input {
+            width: 100%;
+            padding: 0.35rem 0.5rem;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            background: #fff;
+            color: var(--color-text);
+        }
+
+        /* ========== Action Buttons ========== */
+        .btn-primary-custom {
+            background: var(--color-accent);
+            color: #fff;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .btn-primary-custom:hover { background: #7A6548; }
+        .btn-primary-custom:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-secondary-custom {
+            background: transparent;
+            color: var(--color-accent);
+            border: 1px solid var(--color-accent);
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .btn-secondary-custom:hover { background: var(--color-accent); color: #fff; }
+
+        .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.82rem; }
+
+        /* ========== Demo Banner ========== */
+        .demo-banner {
+            background: rgba(93, 139, 199, 0.1);
+            border: 1px solid rgba(93, 139, 199, 0.3);
+            border-radius: 8px;
+            padding: 0.6rem 1rem;
+            font-size: 0.82rem;
+            color: var(--color-info);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* ========== Responsive ========== */
+        @media (max-width: 768px) {
+            .editor-container { padding: 0.75rem; }
+            .editor-header { flex-direction: column; align-items: flex-start; }
+            .canvas-area { min-height: 350px; }
+            .font-settings { grid-template-columns: 1fr; }
+            .editor-header-actions { width: 100%; justify-content: flex-end; }
+        }
+    </style>
+</head>
+<body>
+    <div id="navbar-container"></div>
+
+    <div class="editor-container">
+        <!-- Demo Banner -->
+        <div class="demo-banner" id="demoBanner">
+            <i class="fas fa-info-circle"></i>
+            <span id="demoBannerText">Demo Mode: Text regions are manually created. In production, AI (Claude Vision) will auto-detect text areas.</span>
+        </div>
+
+        <!-- Header -->
+        <div class="editor-header">
+            <h1><i class="fas fa-edit"></i> <span id="editorTitle">Manga Editor</span></h1>
+            <div class="editor-header-actions" id="headerActions" style="display:none;">
+                <button class="btn-secondary-custom btn-sm" onclick="addMorePages()">
+                    <i class="fas fa-plus"></i> <span id="btnAddPages">Add Pages</span>
+                </button>
+                <button class="btn-secondary-custom btn-sm" id="btnTogglePreview" onclick="togglePreview()">
+                    <i class="fas fa-eye"></i> <span id="btnPreviewText">Preview</span>
+                </button>
+                <button class="btn-primary-custom btn-sm" onclick="exportPages()">
+                    <i class="fas fa-download"></i> <span id="btnExport">Export</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Upload State (shown initially) -->
+        <div id="uploadState" class="upload-state">
+            <div class="upload-zone" id="uploadZone">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p id="uploadText">Click or drag manga pages here</p>
+                <small id="uploadHint">Supports .jpg, .png, .webp - multiple pages OK</small>
+                <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.webp" multiple style="display:none;" onchange="handleFileUpload(this)">
+            </div>
+        </div>
+
+        <!-- Editor State (shown after upload) -->
+        <div id="editorState" style="display:none;">
+            <div class="editor-layout">
+                <!-- Left: Canvas -->
+                <div class="canvas-panel">
+                    <div class="canvas-toolbar">
+                        <div class="canvas-toolbar-left">
+                            <button class="toolbar-btn" id="btnModeDraw" onclick="setMode('draw')" title="Draw text region">
+                                <i class="fas fa-vector-square"></i> <span id="btnDrawLabel">Draw</span>
+                            </button>
+                            <button class="toolbar-btn active" id="btnModeSelect" onclick="setMode('select')" title="Select & move">
+                                <i class="fas fa-mouse-pointer"></i> <span id="btnSelectLabel">Select</span>
+                            </button>
+                            <span style="color:var(--color-border);">|</span>
+                            <select class="toolbar-btn" id="regionTypeSelect" style="padding-right:1.5rem;">
+                                <option value="bubble">Bubble</option>
+                                <option value="sfx">SFX</option>
+                                <option value="narration">Narration</option>
+                                <option value="free">Free</option>
+                            </select>
+                        </div>
+                        <div class="canvas-toolbar-right">
+                            <button class="toolbar-btn" onclick="navPage(-1)" id="btnPrevPage"><i class="fas fa-chevron-left"></i></button>
+                            <span class="page-nav-info" id="pageNavInfo">1 / 1</span>
+                            <button class="toolbar-btn" onclick="navPage(1)" id="btnNextPage"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="canvas-area" id="canvasArea">
+                        <div class="canvas-wrapper" id="canvasWrapper">
+                            <img id="canvasImg" src="" alt="Manga page">
+                            <!-- Text regions & draw rect rendered here -->
+                        </div>
+                    </div>
+
+                    <div class="thumbnail-bar" id="thumbnailBar"></div>
+                </div>
+
+                <!-- Right: Side Panel -->
+                <div class="side-panel">
+                    <!-- Text Regions List -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3><i class="fas fa-layer-group"></i> <span id="panelRegionsTitle">Text Regions</span></h3>
+                            <span class="region-count" id="regionCount" style="font-size:0.75rem; color:var(--color-text-secondary);">0</span>
+                        </div>
+                        <div class="panel-body">
+                            <div class="region-list" id="regionList">
+                                <div class="empty-regions" id="emptyRegions">
+                                    <i class="fas fa-draw-polygon"></i>
+                                    <p id="emptyRegionsText">Draw on the image to add text regions</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Font Settings -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3><i class="fas fa-font"></i> <span id="panelFontTitle">Font Settings</span></h3>
+                        </div>
+                        <div class="panel-body">
+                            <div class="font-settings">
+                                <div class="font-field">
+                                    <label id="labelFontSize">Size</label>
+                                    <input type="number" id="fontSize" value="14" min="8" max="72" onchange="updateFontSetting()">
+                                </div>
+                                <div class="font-field">
+                                    <label id="labelFontWeight">Weight</label>
+                                    <select id="fontWeight" onchange="updateFontSetting()">
+                                        <option value="400">Normal</option>
+                                        <option value="600">Semi-Bold</option>
+                                        <option value="700" selected>Bold</option>
+                                    </select>
+                                </div>
+                                <div class="font-field">
+                                    <label id="labelFontColor">Color</label>
+                                    <input type="color" id="fontColor" value="#000000" onchange="updateFontSetting()" style="height:32px;">
+                                </div>
+                                <div class="font-field">
+                                    <label id="labelFontBg">Background</label>
+                                    <select id="fontBg" onchange="updateFontSetting()">
+                                        <option value="white">White</option>
+                                        <option value="transparent">Transparent</option>
+                                        <option value="black">Black</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3><i class="fas fa-bolt"></i> <span id="panelActionsTitle">Actions</span></h3>
+                        </div>
+                        <div class="panel-body" style="display:flex; flex-direction:column; gap:0.5rem;">
+                            <button class="btn-secondary-custom btn-sm" onclick="loadDemoRegions()" style="width:100%; justify-content:center;">
+                                <i class="fas fa-magic"></i> <span id="btnLoadDemo">Load Demo Regions</span>
+                            </button>
+                            <button class="btn-secondary-custom btn-sm" onclick="clearAllRegions()" style="width:100%; justify-content:center;">
+                                <i class="fas fa-trash-alt"></i> <span id="btnClearAll">Clear All Regions</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="footer-container"></div>
+
+    <!-- ========== JavaScript ========== -->
+    <script>
+    // ===== State =====
+    var pages = [];          // { file: File, regions: [] }
+    var currentPageIndex = 0;
+    var selectedRegionId = null;
+    var mode = 'select';     // 'select' or 'draw'
+    var isDrawing = false;
+    var drawStart = { x: 0, y: 0 };
+    var previewMode = false;
+    var regionIdCounter = 0;
+    var fontSettings = { size: 14, weight: '700', color: '#000000', bg: 'white' };
+
+    function getLang() {
+        return (typeof getCurrentLanguage === 'function') ? getCurrentLanguage() : (localStorage.getItem('preferredLanguage') || 'en');
+    }
+
+    // ===== File Upload =====
+    function handleFileUpload(input) {
+        var files = Array.from(input.files).filter(function(f) { return f.type.startsWith('image/'); });
+        if (files.length === 0) return;
+        files.forEach(function(f) {
+            pages.push({ file: f, regions: [], url: URL.createObjectURL(f) });
+        });
+        input.value = '';
+        currentPageIndex = pages.length - files.length;
+        showEditorState();
+        renderPage();
+    }
+
+    function addMorePages() {
+        document.getElementById('fileInput').click();
+    }
+
+    function showEditorState() {
+        document.getElementById('uploadState').style.display = 'none';
+        document.getElementById('editorState').style.display = '';
+        document.getElementById('headerActions').style.display = '';
+    }
+
+    // ===== Page Navigation =====
+    function navPage(dir) {
+        var next = currentPageIndex + dir;
+        if (next < 0 || next >= pages.length) return;
+        currentPageIndex = next;
+        selectedRegionId = null;
+        renderPage();
+    }
+
+    function goToPage(idx) {
+        if (idx < 0 || idx >= pages.length) return;
+        currentPageIndex = idx;
+        selectedRegionId = null;
+        renderPage();
+    }
+
+    function renderPage() {
+        var page = pages[currentPageIndex];
+        if (!page) return;
+        document.getElementById('canvasImg').src = page.url;
+        document.getElementById('pageNavInfo').textContent = (currentPageIndex + 1) + ' / ' + pages.length;
+        document.getElementById('btnPrevPage').disabled = currentPageIndex === 0;
+        document.getElementById('btnNextPage').disabled = currentPageIndex === pages.length - 1;
+        renderThumbnails();
+        renderRegionsOnCanvas();
+        renderRegionList();
+    }
+
+    function renderThumbnails() {
+        var bar = document.getElementById('thumbnailBar');
+        bar.innerHTML = '';
+        pages.forEach(function(pg, i) {
+            var div = document.createElement('div');
+            div.className = 'thumb-item' + (i === currentPageIndex ? ' active' : '');
+            div.onclick = function() { goToPage(i); };
+            var img = document.createElement('img');
+            img.src = pg.url;
+            var num = document.createElement('div');
+            num.className = 'thumb-num';
+            num.textContent = 'P' + (i + 1);
+            div.appendChild(img);
+            div.appendChild(num);
+            bar.appendChild(div);
+        });
+    }
+
+    // ===== Mode =====
+    function setMode(m) {
+        mode = m;
+        document.getElementById('btnModeDraw').classList.toggle('active', m === 'draw');
+        document.getElementById('btnModeSelect').classList.toggle('active', m === 'select');
+        var area = document.getElementById('canvasArea');
+        area.classList.toggle('mode-select', m === 'select');
+    }
+
+    // ===== Drawing on Canvas =====
+    (function() {
+        var canvasArea, wrapper, drawRect;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            canvasArea = document.getElementById('canvasArea');
+            wrapper = document.getElementById('canvasWrapper');
+
+            // Upload zone events
+            var uploadZone = document.getElementById('uploadZone');
+            uploadZone.addEventListener('click', function() { document.getElementById('fileInput').click(); });
+            uploadZone.addEventListener('dragover', function(e) { e.preventDefault(); this.classList.add('dragover'); });
+            uploadZone.addEventListener('dragleave', function() { this.classList.remove('dragover'); });
+            uploadZone.addEventListener('drop', function(e) {
+                e.preventDefault(); this.classList.remove('dragover');
+                var files = Array.from(e.dataTransfer.files).filter(function(f) { return f.type.startsWith('image/'); });
+                files.forEach(function(f) { pages.push({ file: f, regions: [], url: URL.createObjectURL(f) }); });
+                if (files.length > 0) { currentPageIndex = pages.length - files.length; showEditorState(); renderPage(); }
+            });
+
+            // Canvas mouse events for drawing
+            wrapper.addEventListener('mousedown', function(e) {
+                if (mode !== 'draw') return;
+                if (e.target.classList.contains('text-region') || e.target.closest('.text-region')) return;
+                e.preventDefault();
+                var rect = wrapper.getBoundingClientRect();
+                drawStart = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+                isDrawing = true;
+                drawRect = document.createElement('div');
+                drawRect.className = 'draw-rect';
+                drawRect.style.left = drawStart.x + 'px';
+                drawRect.style.top = drawStart.y + 'px';
+                drawRect.style.width = '0px';
+                drawRect.style.height = '0px';
+                wrapper.appendChild(drawRect);
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (!isDrawing || !drawRect) return;
+                var rect = wrapper.getBoundingClientRect();
+                var cx = Math.max(0, Math.min(e.clientX - rect.left, wrapper.offsetWidth));
+                var cy = Math.max(0, Math.min(e.clientY - rect.top, wrapper.offsetHeight));
+                var x = Math.min(drawStart.x, cx);
+                var y = Math.min(drawStart.y, cy);
+                var w = Math.abs(cx - drawStart.x);
+                var h = Math.abs(cy - drawStart.y);
+                drawRect.style.left = x + 'px';
+                drawRect.style.top = y + 'px';
+                drawRect.style.width = w + 'px';
+                drawRect.style.height = h + 'px';
+            });
+
+            document.addEventListener('mouseup', function(e) {
+                if (!isDrawing || !drawRect) return;
+                isDrawing = false;
+                var w = parseInt(drawRect.style.width);
+                var h = parseInt(drawRect.style.height);
+                var x = parseInt(drawRect.style.left);
+                var y = parseInt(drawRect.style.top);
+                drawRect.remove();
+                drawRect = null;
+
+                // Ignore tiny rects
+                if (w < 15 || h < 15) return;
+
+                // Convert to percentage of image
+                var img = document.getElementById('canvasImg');
+                var iw = img.offsetWidth;
+                var ih = img.offsetHeight;
+                if (iw === 0 || ih === 0) return;
+
+                var region = {
+                    id: ++regionIdCounter,
+                    type: document.getElementById('regionTypeSelect').value,
+                    x: (x / iw * 100).toFixed(2),
+                    y: (y / ih * 100).toFixed(2),
+                    w: (w / iw * 100).toFixed(2),
+                    h: (h / ih * 100).toFixed(2),
+                    original: '',
+                    edited: '',
+                    fontSize: fontSettings.size,
+                    fontWeight: fontSettings.weight,
+                    fontColor: fontSettings.color,
+                    fontBg: fontSettings.bg
+                };
+
+                pages[currentPageIndex].regions.push(region);
+                selectedRegionId = region.id;
+                renderRegionsOnCanvas();
+                renderRegionList();
+                scrollToRegionCard(region.id);
+            });
+
+            // Touch support for drawing
+            wrapper.addEventListener('touchstart', function(e) {
+                if (mode !== 'draw') return;
+                if (e.target.classList.contains('text-region') || e.target.closest('.text-region')) return;
+                e.preventDefault();
+                var touch = e.touches[0];
+                var rect = wrapper.getBoundingClientRect();
+                drawStart = { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+                isDrawing = true;
+                drawRect = document.createElement('div');
+                drawRect.className = 'draw-rect';
+                drawRect.style.left = drawStart.x + 'px';
+                drawRect.style.top = drawStart.y + 'px';
+                drawRect.style.width = '0px';
+                drawRect.style.height = '0px';
+                wrapper.appendChild(drawRect);
+            }, { passive: false });
+
+            wrapper.addEventListener('touchmove', function(e) {
+                if (!isDrawing || !drawRect) return;
+                e.preventDefault();
+                var touch = e.touches[0];
+                var rect = wrapper.getBoundingClientRect();
+                var cx = Math.max(0, Math.min(touch.clientX - rect.left, wrapper.offsetWidth));
+                var cy = Math.max(0, Math.min(touch.clientY - rect.top, wrapper.offsetHeight));
+                var x = Math.min(drawStart.x, cx);
+                var y = Math.min(drawStart.y, cy);
+                drawRect.style.left = x + 'px';
+                drawRect.style.top = y + 'px';
+                drawRect.style.width = Math.abs(cx - drawStart.x) + 'px';
+                drawRect.style.height = Math.abs(cy - drawStart.y) + 'px';
+            }, { passive: false });
+
+            wrapper.addEventListener('touchend', function(e) {
+                if (!isDrawing || !drawRect) return;
+                isDrawing = false;
+                var w = parseInt(drawRect.style.width);
+                var h = parseInt(drawRect.style.height);
+                var x = parseInt(drawRect.style.left);
+                var y = parseInt(drawRect.style.top);
+                drawRect.remove();
+                drawRect = null;
+                if (w < 15 || h < 15) return;
+                var img = document.getElementById('canvasImg');
+                var iw = img.offsetWidth;
+                var ih = img.offsetHeight;
+                if (iw === 0 || ih === 0) return;
+                var region = {
+                    id: ++regionIdCounter,
+                    type: document.getElementById('regionTypeSelect').value,
+                    x: (x / iw * 100).toFixed(2),
+                    y: (y / ih * 100).toFixed(2),
+                    w: (w / iw * 100).toFixed(2),
+                    h: (h / ih * 100).toFixed(2),
+                    original: '',
+                    edited: '',
+                    fontSize: fontSettings.size,
+                    fontWeight: fontSettings.weight,
+                    fontColor: fontSettings.color,
+                    fontBg: fontSettings.bg
+                };
+                pages[currentPageIndex].regions.push(region);
+                selectedRegionId = region.id;
+                renderRegionsOnCanvas();
+                renderRegionList();
+            });
+
+            // Click on canvas to deselect (if in select mode)
+            canvasArea.addEventListener('mousedown', function(e) {
+                if (mode !== 'select') return;
+                if (!e.target.classList.contains('text-region') && !e.target.closest('.text-region')) {
+                    selectedRegionId = null;
+                    renderRegionsOnCanvas();
+                    renderRegionList();
+                }
+            });
+        });
+    })();
+
+    // ===== Render Regions on Canvas =====
+    function renderRegionsOnCanvas() {
+        var wrapper = document.getElementById('canvasWrapper');
+        // Remove existing regions
+        wrapper.querySelectorAll('.text-region, .preview-text-overlay').forEach(function(el) { el.remove(); });
+        if (!pages[currentPageIndex]) return;
+
+        var regions = pages[currentPageIndex].regions;
+        var typeLabels = getTypeLabels();
+
+        regions.forEach(function(r) {
+            if (previewMode) {
+                // Show edited text overlay
+                if (r.edited.trim()) {
+                    var overlay = document.createElement('div');
+                    overlay.className = 'preview-text-overlay';
+                    overlay.style.left = r.x + '%';
+                    overlay.style.top = r.y + '%';
+                    overlay.style.width = r.w + '%';
+                    overlay.style.height = r.h + '%';
+                    overlay.style.fontSize = r.fontSize + 'px';
+                    overlay.style.fontWeight = r.fontWeight;
+                    overlay.style.color = r.fontColor;
+                    var bgMap = { white: 'rgba(255,255,255,0.85)', transparent: 'transparent', black: 'rgba(0,0,0,0.85)' };
+                    overlay.style.background = bgMap[r.fontBg] || bgMap.white;
+                    if (r.fontBg === 'black') overlay.style.color = r.fontColor === '#000000' ? '#fff' : r.fontColor;
+                    overlay.textContent = r.edited;
+                    wrapper.appendChild(overlay);
+                }
+            } else {
+                var div = document.createElement('div');
+                div.className = 'text-region';
+                if (r.type === 'sfx') div.className += ' type-sfx';
+                else if (r.type === 'narration') div.className += ' type-narration';
+                else if (r.type === 'free') div.className += ' type-free';
+                if (r.id === selectedRegionId) div.className += ' selected';
+
+                div.style.left = r.x + '%';
+                div.style.top = r.y + '%';
+                div.style.width = r.w + '%';
+                div.style.height = r.h + '%';
+                div.dataset.regionId = r.id;
+
+                var label = document.createElement('div');
+                label.className = 'region-label';
+                label.textContent = '#' + r.id + ' ' + (typeLabels[r.type] || r.type);
+                div.appendChild(label);
+
+                div.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    selectRegion(r.id);
+                });
+
+                wrapper.appendChild(div);
+            }
+        });
+    }
+
+    function getTypeLabels() {
+        var L = getLang();
+        var labels = {
+            bubble: { en: 'Bubble', ja: '吹き出し', zh: '对话框', es: 'Burbuja', fr: 'Bulle', de: 'Blase', ko: '말풍선', ar: 'فقاعة', pt: 'Balão', it: 'Fumetto' },
+            sfx: { en: 'SFX', ja: '効果音', zh: '音效', es: 'SFX', fr: 'SFX', de: 'SFX', ko: '효과음', ar: 'مؤثرات', pt: 'SFX', it: 'SFX' },
+            narration: { en: 'Narration', ja: 'ナレーション', zh: '旁白', es: 'Narración', fr: 'Narration', de: 'Erzählung', ko: '나레이션', ar: 'سرد', pt: 'Narração', it: 'Narrazione' },
+            free: { en: 'Free', ja: 'フリー', zh: '自由', es: 'Libre', fr: 'Libre', de: 'Frei', ko: '자유', ar: 'حر', pt: 'Livre', it: 'Libero' }
+        };
+        var result = {};
+        Object.keys(labels).forEach(function(k) { result[k] = labels[k][L] || labels[k].en; });
+        return result;
+    }
+
+    // ===== Render Region List =====
+    function renderRegionList() {
+        var list = document.getElementById('regionList');
+        if (!pages[currentPageIndex]) return;
+
+        var regions = pages[currentPageIndex].regions;
+        var typeLabels = getTypeLabels();
+
+        document.getElementById('regionCount').textContent = regions.length;
+
+        if (regions.length === 0) {
+            list.innerHTML = '<div class="empty-regions" id="emptyRegions">' +
+                '<i class="fas fa-draw-polygon"></i>' +
+                '<p id="emptyRegionsText">' + getEmptyText() + '</p></div>';
+            return;
+        }
+
+        var L = getLang();
+        var origLabel = { en: 'Original', ja: '原文', zh: '原文', es: 'Original', fr: 'Original', de: 'Original', ko: '원문', ar: 'الأصل', pt: 'Original', it: 'Originale' };
+        var editLabel = { en: 'Edited', ja: '編集後', zh: '编辑后', es: 'Editado', fr: 'Modifié', de: 'Bearbeitet', ko: '편집됨', ar: 'معدل', pt: 'Editado', it: 'Modificato' };
+        var origL = origLabel[L] || origLabel.en;
+        var editL = editLabel[L] || editLabel.en;
+
+        var html = '';
+        regions.forEach(function(r) {
+            var sel = r.id === selectedRegionId ? ' selected' : '';
+            var badgeClass = 'badge-bubble';
+            if (r.type === 'sfx') badgeClass = 'badge-sfx';
+            else if (r.type === 'narration') badgeClass = 'badge-narration';
+            else if (r.type === 'free') badgeClass = 'badge-free';
+
+            html += '<div class="region-card' + sel + '" data-region-id="' + r.id + '" onclick="selectRegion(' + r.id + ')">';
+            html += '<div class="region-card-header">';
+            html += '<span class="region-type-badge ' + badgeClass + '">#' + r.id + ' ' + escH(typeLabels[r.type] || r.type) + '</span>';
+            html += '<div style="display:flex;gap:0.3rem;align-items:center;">';
+            html += '<select class="region-type-select" onchange="changeRegionType(' + r.id + ',this.value)" onclick="event.stopPropagation()">';
+            ['bubble', 'sfx', 'narration', 'free'].forEach(function(t) {
+                html += '<option value="' + t + '"' + (r.type === t ? ' selected' : '') + '>' + escH(typeLabels[t]) + '</option>';
+            });
+            html += '</select>';
+            html += '<button class="region-delete-btn" onclick="event.stopPropagation();deleteRegion(' + r.id + ')" title="Delete"><i class="fas fa-times"></i></button>';
+            html += '</div></div>';
+            html += '<div class="region-field"><label>' + escH(origL) + '</label>';
+            html += '<textarea placeholder="..." oninput="updateRegionText(' + r.id + ',\'original\',this.value)" onclick="event.stopPropagation()">' + escH(r.original) + '</textarea></div>';
+            html += '<div class="region-field"><label>' + escH(editL) + '</label>';
+            html += '<textarea placeholder="..." oninput="updateRegionText(' + r.id + ',\'edited\',this.value)" onclick="event.stopPropagation()">' + escH(r.edited) + '</textarea></div>';
+            html += '</div>';
+        });
+        list.innerHTML = html;
+    }
+
+    function getEmptyText() {
+        var L = getLang();
+        var t = {
+            en: 'Draw on the image to add text regions',
+            ja: '画像上にドラッグしてテキスト領域を追加',
+            zh: '在图片上拖动以添加文字区域',
+            es: 'Dibuje en la imagen para agregar regiones de texto',
+            fr: "Dessinez sur l'image pour ajouter des zones de texte",
+            de: 'Zeichnen Sie auf dem Bild, um Textbereiche hinzuzufügen',
+            ko: '이미지 위에 드래그하여 텍스트 영역 추가',
+            ar: 'ارسم على الصورة لإضافة مناطق نص',
+            pt: 'Desenhe na imagem para adicionar regiões de texto',
+            it: "Disegna sull'immagine per aggiungere aree di testo"
+        };
+        return t[L] || t.en;
+    }
+
+    // ===== Region Operations =====
+    function selectRegion(id) {
+        selectedRegionId = id;
+        renderRegionsOnCanvas();
+        renderRegionList();
+        scrollToRegionCard(id);
+    }
+
+    function scrollToRegionCard(id) {
+        setTimeout(function() {
+            var card = document.querySelector('.region-card[data-region-id="' + id + '"]');
+            if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 50);
+    }
+
+    function deleteRegion(id) {
+        var regions = pages[currentPageIndex].regions;
+        pages[currentPageIndex].regions = regions.filter(function(r) { return r.id !== id; });
+        if (selectedRegionId === id) selectedRegionId = null;
+        renderRegionsOnCanvas();
+        renderRegionList();
+    }
+
+    function updateRegionText(id, field, value) {
+        var region = findRegion(id);
+        if (region) region[field] = value;
+    }
+
+    function changeRegionType(id, type) {
+        var region = findRegion(id);
+        if (region) {
+            region.type = type;
+            renderRegionsOnCanvas();
+            renderRegionList();
+        }
+    }
+
+    function findRegion(id) {
+        var regions = pages[currentPageIndex].regions;
+        for (var i = 0; i < regions.length; i++) {
+            if (regions[i].id === id) return regions[i];
+        }
+        return null;
+    }
+
+    function clearAllRegions() {
+        var L = getLang();
+        var msg = { en: 'Clear all regions on this page?', ja: 'このページの全領域をクリアしますか？', zh: '清除此页面的所有区域？' };
+        if (!confirm(msg[L] || msg.en)) return;
+        pages[currentPageIndex].regions = [];
+        selectedRegionId = null;
+        renderRegionsOnCanvas();
+        renderRegionList();
+    }
+
+    // ===== Preview =====
+    function togglePreview() {
+        previewMode = !previewMode;
+        var btn = document.getElementById('btnTogglePreview');
+        var icon = previewMode ? 'fa-eye-slash' : 'fa-eye';
+        btn.querySelector('i').className = 'fas ' + icon;
+        renderRegionsOnCanvas();
+    }
+
+    // ===== Font Settings =====
+    function updateFontSetting() {
+        fontSettings.size = parseInt(document.getElementById('fontSize').value) || 14;
+        fontSettings.weight = document.getElementById('fontWeight').value;
+        fontSettings.color = document.getElementById('fontColor').value;
+        fontSettings.bg = document.getElementById('fontBg').value;
+        // Apply to selected region
+        if (selectedRegionId) {
+            var r = findRegion(selectedRegionId);
+            if (r) {
+                r.fontSize = fontSettings.size;
+                r.fontWeight = fontSettings.weight;
+                r.fontColor = fontSettings.color;
+                r.fontBg = fontSettings.bg;
+            }
+        }
+    }
+
+    // ===== Demo Regions =====
+    function loadDemoRegions() {
+        if (!pages[currentPageIndex]) return;
+        var L = getLang();
+        var demoData = {
+            ja: [
+                { type: 'bubble', x: '10', y: '5', w: '35', h: '15', original: 'お前を倒す！', edited: '' },
+                { type: 'bubble', x: '55', y: '20', w: '30', h: '12', original: 'まさか…！', edited: '' },
+                { type: 'sfx', x: '40', y: '40', w: '20', h: '20', original: 'ドォォォン！！', edited: '' },
+                { type: 'narration', x: '5', y: '80', w: '90', h: '10', original: 'その時、運命の歯車が動き始めた。', edited: '' }
+            ],
+            en: [
+                { type: 'bubble', x: '10', y: '5', w: '35', h: '15', original: "I'll defeat you!", edited: '' },
+                { type: 'bubble', x: '55', y: '20', w: '30', h: '12', original: 'Impossible...!', edited: '' },
+                { type: 'sfx', x: '40', y: '40', w: '20', h: '20', original: 'BOOOM!!', edited: '' },
+                { type: 'narration', x: '5', y: '80', w: '90', h: '10', original: 'At that moment, the gears of fate began to turn.', edited: '' }
+            ]
+        };
+        var demo = demoData[L] || demoData.en;
+        demo.forEach(function(d) {
+            pages[currentPageIndex].regions.push({
+                id: ++regionIdCounter,
+                type: d.type,
+                x: d.x, y: d.y, w: d.w, h: d.h,
+                original: d.original,
+                edited: d.edited,
+                fontSize: fontSettings.size,
+                fontWeight: fontSettings.weight,
+                fontColor: fontSettings.color,
+                fontBg: fontSettings.bg
+            });
+        });
+        renderRegionsOnCanvas();
+        renderRegionList();
+    }
+
+    // ===== Export =====
+    function exportPages() {
+        var L = getLang();
+        // Create a canvas to composite image + text overlays
+        var page = pages[currentPageIndex];
+        if (!page) return;
+
+        var img = document.getElementById('canvasImg');
+        var canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+
+        page.regions.forEach(function(r) {
+            if (!r.edited.trim()) return;
+            var rx = r.x / 100 * canvas.width;
+            var ry = r.y / 100 * canvas.height;
+            var rw = r.w / 100 * canvas.width;
+            var rh = r.h / 100 * canvas.height;
+
+            // Scale font size relative to canvas
+            var scale = canvas.width / img.offsetWidth;
+            var fs = r.fontSize * scale;
+
+            // Background
+            var bgMap = { white: 'rgba(255,255,255,0.9)', transparent: 'transparent', black: 'rgba(0,0,0,0.9)' };
+            if (r.fontBg !== 'transparent') {
+                ctx.fillStyle = bgMap[r.fontBg] || bgMap.white;
+                ctx.fillRect(rx, ry, rw, rh);
+            }
+
+            // Text
+            ctx.fillStyle = r.fontColor;
+            if (r.fontBg === 'black' && r.fontColor === '#000000') ctx.fillStyle = '#ffffff';
+            ctx.font = r.fontWeight + ' ' + fs + 'px "Noto Sans JP", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            // Simple word wrap
+            var words = r.edited.split('');
+            var lines = [];
+            var currentLine = '';
+            words.forEach(function(char) {
+                var testLine = currentLine + char;
+                if (ctx.measureText(testLine).width > rw - 8) {
+                    lines.push(currentLine);
+                    currentLine = char;
+                } else {
+                    currentLine = testLine;
+                }
+            });
+            if (currentLine) lines.push(currentLine);
+
+            var lineHeight = fs * 1.3;
+            var totalH = lines.length * lineHeight;
+            var startY = ry + (rh - totalH) / 2 + lineHeight / 2;
+            lines.forEach(function(line, i) {
+                ctx.fillText(line, rx + rw / 2, startY + i * lineHeight);
+            });
+        });
+
+        canvas.toBlob(function(blob) {
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'manga_edited_page' + (currentPageIndex + 1) + '.png';
+            a.click();
+            URL.revokeObjectURL(url);
+        }, 'image/png');
+    }
+
+    // ===== Utility =====
+    function escH(text) { var d = document.createElement('div'); d.textContent = text; return d.innerHTML; }
+
+    // ===== i18n =====
+    function updateEditorText() {
+        var L = getLang();
+        var t = function(obj) { return obj[L] || obj.en || ''; };
+        var T = {
+            pageTitle: { en: 'Manga Editor', ja: 'マンガエディター', zh: '漫画编辑器', es: 'Editor de Manga', fr: 'Éditeur de Manga', de: 'Manga-Editor', ko: '만화 편집기', ar: 'محرر المانجا', pt: 'Editor de Mangá', it: 'Editor Manga' },
+            demoBanner: { en: 'Demo Mode: Text regions are manually created. In production, AI (Claude Vision) will auto-detect text areas.', ja: 'デモモード: テキスト領域は手動で作成します。本番環境ではAI（Claude Vision）が自動検出します。', zh: '演示模式：文字区域手动创建。正式版中AI（Claude Vision）将自动检测文字区域。', es: 'Modo demo: Las regiones de texto se crean manualmente. En producción, la IA detectará automáticamente.', fr: 'Mode démo : Les zones de texte sont créées manuellement. En production, l\'IA détectera automatiquement.', de: 'Demo-Modus: Textbereiche werden manuell erstellt. In der Produktion erkennt die KI automatisch.', ko: '데모 모드: 텍스트 영역을 수동으로 생성합니다. 프로덕션에서는 AI가 자동 감지합니다.', ar: 'وضع تجريبي: يتم إنشاء مناطق النص يدويًا. في الإنتاج سيكشف الذكاء الاصطناعي تلقائيًا.', pt: 'Modo demo: As regiões de texto são criadas manualmente. Em produção, a IA detectará automaticamente.', it: 'Modalità demo: Le aree di testo vengono create manualmente. In produzione, l\'IA rileverà automaticamente.' },
+            addPages: { en: 'Add Pages', ja: 'ページ追加', zh: '添加页面', es: 'Agregar páginas', fr: 'Ajouter des pages', de: 'Seiten hinzufügen', ko: '페이지 추가', ar: 'إضافة صفحات', pt: 'Adicionar páginas', it: 'Aggiungi pagine' },
+            preview: { en: 'Preview', ja: 'プレビュー', zh: '预览', es: 'Vista previa', fr: 'Aperçu', de: 'Vorschau', ko: '미리보기', ar: 'معاينة', pt: 'Visualizar', it: 'Anteprima' },
+            exportBtn: { en: 'Export', ja: 'エクスポート', zh: '导出', es: 'Exportar', fr: 'Exporter', de: 'Exportieren', ko: '내보내기', ar: 'تصدير', pt: 'Exportar', it: 'Esporta' },
+            upload: { en: 'Click or drag manga pages here', ja: 'クリックまたはマンガページをドラッグ', zh: '点击或拖动漫画页面到此处', es: 'Haga clic o arrastre páginas aquí', fr: 'Cliquez ou glissez des pages ici', de: 'Klicken oder Seiten hierher ziehen', ko: '클릭 또는 만화 페이지를 드래그', ar: 'انقر أو اسحب صفحات المانجا هنا', pt: 'Clique ou arraste páginas aqui', it: 'Clicca o trascina le pagine qui' },
+            uploadHint: { en: 'Supports .jpg, .png, .webp - multiple pages OK', ja: '.jpg, .png, .webp対応 - 複数ページOK', zh: '支持 .jpg, .png, .webp - 可多页', es: 'Soporta .jpg, .png, .webp - múltiples páginas', fr: 'Supporte .jpg, .png, .webp - plusieurs pages', de: 'Unterstützt .jpg, .png, .webp - mehrere Seiten', ko: '.jpg, .png, .webp 지원 - 여러 페이지 가능', ar: 'يدعم .jpg, .png, .webp - صفحات متعددة', pt: 'Suporta .jpg, .png, .webp - múltiplas páginas', it: 'Supporta .jpg, .png, .webp - pagine multiple' },
+            draw: { en: 'Draw', ja: '描画', zh: '绘制', es: 'Dibujar', fr: 'Dessiner', de: 'Zeichnen', ko: '그리기', ar: 'رسم', pt: 'Desenhar', it: 'Disegna' },
+            select: { en: 'Select', ja: '選択', zh: '选择', es: 'Seleccionar', fr: 'Sélectionner', de: 'Auswählen', ko: '선택', ar: 'تحديد', pt: 'Selecionar', it: 'Seleziona' },
+            regionsTitle: { en: 'Text Regions', ja: 'テキスト領域', zh: '文字区域', es: 'Regiones de texto', fr: 'Zones de texte', de: 'Textbereiche', ko: '텍스트 영역', ar: 'مناطق النص', pt: 'Regiões de texto', it: 'Aree di testo' },
+            fontTitle: { en: 'Font Settings', ja: 'フォント設定', zh: '字体设置', es: 'Configuración de fuente', fr: 'Paramètres de police', de: 'Schrifteinstellungen', ko: '글꼴 설정', ar: 'إعدادات الخط', pt: 'Configurações de fonte', it: 'Impostazioni font' },
+            actionsTitle: { en: 'Actions', ja: 'アクション', zh: '操作', es: 'Acciones', fr: 'Actions', de: 'Aktionen', ko: '작업', ar: 'إجراءات', pt: 'Ações', it: 'Azioni' },
+            loadDemo: { en: 'Load Demo Regions', ja: 'デモ領域を読込', zh: '加载演示区域', es: 'Cargar regiones demo', fr: 'Charger les zones démo', de: 'Demo-Bereiche laden', ko: '데모 영역 로드', ar: 'تحميل مناطق تجريبية', pt: 'Carregar regiões demo', it: 'Carica aree demo' },
+            clearAll: { en: 'Clear All Regions', ja: '全領域クリア', zh: '清除所有区域', es: 'Limpiar todas las regiones', fr: 'Effacer toutes les zones', de: 'Alle Bereiche löschen', ko: '모든 영역 삭제', ar: 'مسح جميع المناطق', pt: 'Limpar todas as regiões', it: 'Cancella tutte le aree' },
+            size: { en: 'Size', ja: 'サイズ', zh: '大小', es: 'Tamaño', fr: 'Taille', de: 'Größe', ko: '크기', ar: 'الحجم', pt: 'Tamanho', it: 'Dimensione' },
+            weight: { en: 'Weight', ja: '太さ', zh: '粗细', es: 'Peso', fr: 'Épaisseur', de: 'Stärke', ko: '두께', ar: 'الوزن', pt: 'Peso', it: 'Spessore' },
+            color: { en: 'Color', ja: '色', zh: '颜色', es: 'Color', fr: 'Couleur', de: 'Farbe', ko: '색상', ar: 'اللون', pt: 'Cor', it: 'Colore' },
+            background: { en: 'Background', ja: '背景', zh: '背景', es: 'Fondo', fr: 'Arrière-plan', de: 'Hintergrund', ko: '배경', ar: 'الخلفية', pt: 'Fundo', it: 'Sfondo' },
+            bubbleOpt: { en: 'Bubble', ja: '吹き出し', zh: '对话框', es: 'Burbuja', fr: 'Bulle', de: 'Blase', ko: '말풍선', ar: 'فقاعة', pt: 'Balão', it: 'Fumetto' },
+            sfxOpt: { en: 'SFX', ja: '効果音', zh: '音效', es: 'SFX', fr: 'SFX', de: 'SFX', ko: '효과음', ar: 'مؤثرات', pt: 'SFX', it: 'SFX' },
+            narrationOpt: { en: 'Narration', ja: 'ナレーション', zh: '旁白', es: 'Narración', fr: 'Narration', de: 'Erzählung', ko: '나레이션', ar: 'سرد', pt: 'Narração', it: 'Narrazione' },
+            freeOpt: { en: 'Free', ja: 'フリー', zh: '自由', es: 'Libre', fr: 'Libre', de: 'Frei', ko: '자유', ar: 'حر', pt: 'Livre', it: 'Libero' }
+        };
+
+        var setText = function(id, obj) { var el = document.getElementById(id); if (el) el.textContent = t(obj); };
+        setText('editorTitle', T.pageTitle);
+        setText('demoBannerText', T.demoBanner);
+        setText('btnAddPages', T.addPages);
+        setText('btnPreviewText', T.preview);
+        setText('btnExport', T.exportBtn);
+        setText('uploadText', T.upload);
+        setText('uploadHint', T.uploadHint);
+        setText('btnDrawLabel', T.draw);
+        setText('btnSelectLabel', T.select);
+        setText('panelRegionsTitle', T.regionsTitle);
+        setText('panelFontTitle', T.fontTitle);
+        setText('panelActionsTitle', T.actionsTitle);
+        setText('btnLoadDemo', T.loadDemo);
+        setText('btnClearAll', T.clearAll);
+        setText('labelFontSize', T.size);
+        setText('labelFontWeight', T.weight);
+        setText('labelFontColor', T.color);
+        setText('labelFontBg', T.background);
+
+        // Region type select options
+        var rts = document.getElementById('regionTypeSelect');
+        if (rts) {
+            rts.options[0].textContent = t(T.bubbleOpt);
+            rts.options[1].textContent = t(T.sfxOpt);
+            rts.options[2].textContent = t(T.narrationOpt);
+            rts.options[3].textContent = t(T.freeOpt);
+        }
+
+        document.title = t(T.pageTitle) + ' - Publisher';
+        renderRegionList();
+    }
+
+    // ===== Init =====
+    document.addEventListener('DOMContentLoaded', function() {
+        updateEditorText();
+    });
+
+    document.addEventListener('languageChanged', function() {
+        updateEditorText();
+    });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/i18n.js"></script>
+    <script src="../js/navbar.js"></script>
+</body>
+</html>

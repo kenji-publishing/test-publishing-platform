@@ -56,6 +56,11 @@ var navText = {
         es: 'Traductor de Manga', fr: 'Traducteur de Manga', de: 'Manga-\u00dcbersetzer',
         ko: '만화 번역기', ar: 'مترجم المانجا', pt: 'Tradutor de Mang\u00e1', it: 'Traduttore Manga'
     },
+    mangaEditor: {
+        en: 'Manga Editor', ja: 'マンガエディター', zh: '漫画编辑器',
+        es: 'Editor de Manga', fr: '\u00c9diteur de Manga', de: 'Manga-Editor',
+        ko: '만화 편집기', ar: 'محرر المانجا', pt: 'Editor de Mang\u00e1', it: 'Editor Manga'
+    },
     novelTranslator: {
         en: 'Novel Translator', ja: '小説翻訳', zh: '小说翻译',
         es: 'Traductor de Novela', fr: 'Traducteur de Roman', de: 'Roman-\u00dcbersetzer',
@@ -218,6 +223,7 @@ function _detectActivePage() {
         'dashboard': 'dashboard',
         'upload': 'upload',
         'manga-translator': 'manga-translator',
+        'manga-editor': 'manga-editor',
         'novel-translator': 'novel-translator',
         'translation-status': 'translation-status',
         'messages': 'messages',
@@ -286,7 +292,7 @@ function renderNavbar(options) {
     }
 
     // Tools dropdown items that determine if Tools is active
-    var toolsPages = ['upload', 'manga-translator', 'novel-translator', 'translation-status', 'translators', 'editors'];
+    var toolsPages = ['upload', 'manga-translator', 'manga-editor', 'novel-translator', 'translation-status', 'translators', 'editors'];
     var toolsActive = toolsPages.indexOf(activePage) !== -1;
 
     // Support dropdown items
@@ -372,6 +378,7 @@ function renderNavbar(options) {
     html += '<li><a class="dropdown-item" href="' + p('upload.html') + '"><i class="fas fa-upload me-2"></i><span id="navUploadPC">' + getL(navText.uploadWork) + '</span></a></li>';
     html += '<li><hr class="dropdown-divider"></li>';
     html += '<li><a class="dropdown-item" href="' + p('manga-translator.html') + '"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorPC">' + getL(navText.mangaTranslator) + '</span></a></li>';
+    html += '<li><a class="dropdown-item" href="' + p('manga-editor.html') + '"><i class="fas fa-edit me-2"></i><span id="navMangaEditorPC">' + getL(navText.mangaEditor) + '</span></a></li>';
     html += '<li><a class="dropdown-item" href="' + p('novel-translator.html') + '"><i class="fas fa-book me-2"></i><span id="navNovelTranslatorPC">' + getL(navText.novelTranslator) + '</span></a></li>';
     html += '<li><a class="dropdown-item" href="' + p('translation-status.html') + '"><i class="fas fa-tasks me-2"></i><span id="navTranslationStatusPC">' + getL(navText.translationStatus) + '</span></a></li>';
     html += '<li><a class="dropdown-item" href="' + p('translators/index.html') + '"><i class="fas fa-users me-2"></i><span id="navFindTranslatorsPC">' + getL(navText.findTranslators) + '</span></a></li>';
@@ -425,6 +432,7 @@ function renderNavbar(options) {
     html += '<a class="nav-link" href="' + p('upload.html') + '"><i class="fas fa-upload me-2"></i> <span id="navUploadMobile">' + getL(navText.uploadWork) + '</span></a>';
     html += '<hr class="dropdown-divider my-1">';
     html += '<a class="nav-link" href="' + p('manga-translator.html') + '"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorMobile">' + getL(navText.mangaTranslator) + '</span></a>';
+    html += '<a class="nav-link" href="' + p('manga-editor.html') + '"><i class="fas fa-edit me-2"></i><span id="navMangaEditorMobile">' + getL(navText.mangaEditor) + '</span></a>';
     html += '<a class="nav-link" href="' + p('novel-translator.html') + '"><i class="fas fa-book me-2"></i> <span id="navNovelTranslatorMobile">' + getL(navText.novelTranslator) + '</span></a>';
     html += '<a class="nav-link" href="' + p('translation-status.html') + '"><i class="fas fa-tasks me-2"></i><span id="navTranslationStatusMobile">' + getL(navText.translationStatus) + '</span></a>';
     html += '<a class="nav-link" href="' + p('translators/index.html') + '"><i class="fas fa-users me-2"></i><span id="navFindTranslatorsMobile">' + getL(navText.findTranslators) + '</span></a>';
@@ -546,6 +554,7 @@ function updateNavText() {
         navToolsPC: navText.tools,
         navUploadPC: navText.uploadWork,
         navMangaTranslatorPC: navText.mangaTranslator,
+        navMangaEditorPC: navText.mangaEditor,
         navNovelTranslatorPC: navText.novelTranslator,
         navTranslationStatusPC: navText.translationStatus,
         navFindTranslatorsPC: navText.findTranslators,
@@ -562,6 +571,7 @@ function updateNavText() {
         navToolsMobile: navText.tools,
         navUploadMobile: navText.uploadWork,
         navMangaTranslatorMobile: navText.mangaTranslator,
+        navMangaEditorMobile: navText.mangaEditor,
         navNovelTranslatorMobile: navText.novelTranslator,
         navTranslationStatusMobile: navText.translationStatus,
         navFindTranslatorsMobile: navText.findTranslators,
