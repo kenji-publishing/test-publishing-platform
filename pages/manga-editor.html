@@ -267,11 +267,6 @@
             border: 1px solid var(--color-border);
             border-radius: 6px;
         }
-        .brush-options label {
-            font-size: 0.72rem;
-            color: var(--color-text-secondary);
-            margin: 0;
-        }
         .brush-options input[type="color"] {
             width: 28px;
             height: 24px;
@@ -282,6 +277,32 @@
         }
         .brush-options input[type="range"] {
             width: 80px;
+        }
+
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            padding: 0.15rem 0.35rem;
+        }
+        .zoom-controls button {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem 0.4rem;
+            color: var(--color-text-secondary);
+            font-size: 0.8rem;
+        }
+        .zoom-controls button:hover { color: var(--color-accent); }
+        .zoom-level {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--color-text);
+            min-width: 40px;
+            text-align: center;
         }
 
         .page-nav-info {
@@ -297,16 +318,22 @@
             position: relative;
             overflow: auto;
             background: #E0DDD8;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             min-height: 500px;
+            padding: 1rem;
+        }
+        .canvas-area-inner {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            min-height: 100%;
         }
 
         .canvas-wrapper {
             position: relative;
             display: inline-block;
             line-height: 0;
+            transform-origin: top left;
+            transition: transform 0.15s ease;
         }
         .canvas-wrapper img {
             max-width: 100%;
@@ -324,28 +351,34 @@
             pointer-events: none;
             touch-action: none;
         }
-        .tool-mode-draw #drawCanvas { pointer-events: auto; cursor: crosshair; }
-        .tool-mode-region .canvas-wrapper { cursor: crosshair; }
+        .tool-mode-draw .canvas-wrapper,
+        .tool-mode-erase .canvas-wrapper { cursor: crosshair; }
+        .tool-mode-text .canvas-wrapper { cursor: crosshair; }
 
-        /* ========== Text Regions on Canvas ========== */
-        .text-region {
+        /* ========== Regions on Canvas ========== */
+        .region-box {
             position: absolute;
-            border: 2px solid var(--color-accent);
-            background: rgba(139, 115, 85, 0.1);
             cursor: pointer;
             transition: border-color 0.2s, background 0.2s;
             min-width: 20px;
             min-height: 20px;
         }
-        .text-region:hover {
-            border-color: var(--color-info);
-            background: rgba(93, 139, 199, 0.15);
+        .region-box.type-text {
+            border: 2px solid var(--color-accent);
+            background: rgba(139, 115, 85, 0.08);
         }
-        .text-region.selected {
-            border-color: var(--color-info);
-            background: rgba(93, 139, 199, 0.2);
-            box-shadow: 0 0 0 2px rgba(93, 139, 199, 0.3);
+        .region-box.type-draw {
+            border: 2px solid #9B7DC7;
+            background: rgba(155, 125, 199, 0.08);
         }
+        .region-box.type-text:hover { border-color: var(--color-info); background: rgba(93, 139, 199, 0.12); }
+        .region-box.type-draw:hover { border-color: #7D5FB0; background: rgba(155, 125, 199, 0.18); }
+        .region-box.selected { box-shadow: 0 0 0 2px rgba(93, 139, 199, 0.35); }
+        .region-box.selected.type-text { border-color: var(--color-info); background: rgba(93, 139, 199, 0.15); }
+        .region-box.selected.type-draw { border-color: #7D5FB0; background: rgba(155, 125, 199, 0.22); }
+
+        .region-box.preview-on { border: none; background: transparent; box-shadow: none; cursor: default; }
+        .region-box.preview-on .region-label { display: none; }
 
         .region-label {
             position: absolute;
@@ -357,10 +390,11 @@
             border-radius: 3px 3px 0 0;
             color: #fff;
             white-space: nowrap;
-            background: var(--color-accent);
         }
+        .region-box.type-text .region-label { background: var(--color-accent); }
+        .region-box.type-draw .region-label { background: #9B7DC7; }
 
-        /* Drawing rectangle (during drag) */
+        /* Drawing temp rectangle */
         .draw-rect {
             position: absolute;
             border: 2px dashed var(--color-accent);
@@ -462,7 +496,7 @@
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
-            max-height: 500px;
+            max-height: 550px;
             overflow-y: auto;
         }
         .region-list::-webkit-scrollbar { width: 5px; }
@@ -477,33 +511,56 @@
         }
         .region-card:hover { border-color: var(--color-accent); }
         .region-card.selected { border-color: var(--color-info); background: rgba(93, 139, 199, 0.06); }
+        .region-card.type-draw.selected { border-color: #7D5FB0; background: rgba(155, 125, 199, 0.06); }
 
         .region-card-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
             margin-bottom: 0.4rem;
+            gap: 0.4rem;
+        }
+        .region-title {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
         }
         .region-number {
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             font-weight: 700;
             color: var(--color-accent);
             background: rgba(139, 115, 85, 0.1);
-            padding: 2px 8px;
+            padding: 2px 7px;
             border-radius: 4px;
         }
+        .region-card.type-draw .region-number {
+            color: #7D5FB0;
+            background: rgba(155, 125, 199, 0.15);
+        }
+        .region-type-tag {
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+        }
 
-        .region-delete-btn {
+        .region-card-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.15rem;
+        }
+        .region-action-btn {
             background: none;
             border: none;
-            color: var(--color-error);
             cursor: pointer;
-            font-size: 0.85rem;
-            padding: 2px 4px;
-            opacity: 0.6;
-            transition: opacity 0.2s;
+            padding: 3px 6px;
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            border-radius: 4px;
+            transition: all 0.2s;
         }
-        .region-delete-btn:hover { opacity: 1; }
+        .region-action-btn:hover { background: var(--color-bg-hover); color: var(--color-accent); }
+        .region-action-btn.preview-on { color: var(--color-info); }
+        .region-action-btn.delete:hover { color: var(--color-error); background: rgba(199,93,93,0.1); }
 
         .region-field {
             margin-bottom: 0.4rem;
@@ -525,7 +582,7 @@
             font-size: 0.82rem;
             font-family: 'Noto Sans JP', sans-serif;
             resize: vertical;
-            min-height: 50px;
+            min-height: 60px;
             line-height: 1.5;
             color: var(--color-text);
             background: var(--color-bg);
@@ -555,6 +612,16 @@
             font-size: 0.75rem;
             background: #fff;
             color: var(--color-text);
+        }
+
+        .draw-hint {
+            font-size: 0.75rem;
+            color: var(--color-text-secondary);
+            padding: 0.4rem 0.6rem;
+            background: rgba(155, 125, 199, 0.08);
+            border-radius: 6px;
+            text-align: center;
+            line-height: 1.4;
         }
 
         .empty-regions {
@@ -605,7 +672,7 @@
         @media (max-width: 768px) {
             .editor-container { padding: 0.75rem; }
             .editor-header { flex-direction: column; align-items: flex-start; }
-            .canvas-area { min-height: 350px; }
+            .canvas-area { min-height: 350px; padding: 0.5rem; }
             .region-options { grid-template-columns: 1fr; }
             .editor-header-actions { width: 100%; justify-content: flex-end; }
             .staged-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
@@ -624,9 +691,6 @@
                 <button class="btn-secondary-custom btn-sm" onclick="backToStaging()">
                     <i class="fas fa-arrow-left"></i> <span id="btnBackStaging">Manage Pages</span>
                 </button>
-                <button class="btn-secondary-custom btn-sm" id="btnTogglePreview" onclick="togglePreview()">
-                    <i class="fas fa-eye"></i> <span id="btnPreviewText">Preview</span>
-                </button>
                 <button class="btn-primary-custom btn-sm" onclick="exportPage()">
                     <i class="fas fa-download"></i> <span id="btnExport">Export</span>
                 </button>
@@ -642,7 +706,6 @@
                 <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.webp" multiple style="display:none;" onchange="handleFileUpload(this)">
             </div>
 
-            <!-- Staged pages (shown after upload) -->
             <div id="stagedPanel" class="staged-panel" style="display:none;">
                 <div class="staged-header">
                     <div class="staged-title">
@@ -673,41 +736,46 @@
                 <div class="canvas-panel">
                     <div class="canvas-toolbar">
                         <div class="canvas-toolbar-left">
-                            <button class="toolbar-btn active" id="btnToolRegion" onclick="setTool('region')" title="Add text region">
-                                <i class="fas fa-font"></i> <span id="btnRegionLabel">Text</span>
+                            <button class="toolbar-btn active" id="btnToolText" onclick="setTool('text')" title="Text region">
+                                <i class="fas fa-font"></i> <span id="btnTextLabel">Text</span>
                             </button>
-                            <button class="toolbar-btn" id="btnToolDraw" onclick="setTool('draw')" title="Freehand drawing">
+                            <button class="toolbar-btn" id="btnToolDraw" onclick="setTool('draw')" title="Draw region">
                                 <i class="fas fa-paint-brush"></i> <span id="btnDrawLabel">Draw</span>
                             </button>
-                            <button class="toolbar-btn" id="btnToolErase" onclick="setTool('erase')" title="Eraser">
+                            <button class="toolbar-btn" id="btnToolErase" onclick="setTool('erase')" title="Eraser (within regions)">
                                 <i class="fas fa-eraser"></i> <span id="btnEraseLabel">Erase</span>
                             </button>
 
                             <!-- Brush options (visible in draw/erase mode) -->
                             <div class="brush-options" id="brushOptions" style="display:none;">
-                                <label id="labelBrushColor"><i class="fas fa-palette"></i></label>
+                                <i class="fas fa-palette" style="color:var(--color-text-secondary); font-size:0.75rem;"></i>
                                 <input type="color" id="brushColor" value="#000000">
-                                <label id="labelBrushSize">
-                                    <i class="fas fa-circle" style="font-size:0.65rem;"></i>
-                                </label>
+                                <i class="fas fa-circle" style="color:var(--color-text-secondary); font-size:0.65rem;"></i>
                                 <input type="range" id="brushSize" min="1" max="30" value="4">
                                 <span id="brushSizeVal" style="font-size:0.72rem; min-width:18px; text-align:right;">4</span>
-                                <button class="toolbar-btn" onclick="clearDrawing()" style="padding: 0.25rem 0.5rem;" title="Clear drawing on this page">
-                                    <i class="fas fa-trash"></i>
-                                </button>
                             </div>
                         </div>
                         <div class="canvas-toolbar-right">
+                            <!-- Zoom controls -->
+                            <div class="zoom-controls">
+                                <button onclick="setZoom(-0.2)" title="Zoom out"><i class="fas fa-search-minus"></i></button>
+                                <span class="zoom-level" id="zoomLevel">100%</span>
+                                <button onclick="setZoom(0.2)" title="Zoom in"><i class="fas fa-search-plus"></i></button>
+                                <button onclick="resetZoom()" title="Reset zoom"><i class="fas fa-compress"></i></button>
+                            </div>
+                            <span class="tool-divider"></span>
                             <button class="toolbar-btn" onclick="navPage(-1)" id="btnPrevPage"><i class="fas fa-chevron-left"></i></button>
                             <span class="page-nav-info" id="pageNavInfo">1 / 1</span>
                             <button class="toolbar-btn" onclick="navPage(1)" id="btnNextPage"><i class="fas fa-chevron-right"></i></button>
                         </div>
                     </div>
 
-                    <div class="canvas-area tool-mode-region" id="canvasArea">
-                        <div class="canvas-wrapper" id="canvasWrapper">
-                            <img id="canvasImg" src="" alt="Manga page">
-                            <canvas id="drawCanvas"></canvas>
+                    <div class="canvas-area tool-mode-text" id="canvasArea">
+                        <div class="canvas-area-inner">
+                            <div class="canvas-wrapper" id="canvasWrapper">
+                                <img id="canvasImg" src="" alt="Manga page">
+                                <canvas id="drawCanvas"></canvas>
+                            </div>
                         </div>
                     </div>
 
@@ -716,17 +784,16 @@
 
                 <!-- Right: Side Panel -->
                 <div class="side-panel">
-                    <!-- Text Regions List -->
                     <div class="panel">
                         <div class="panel-header">
-                            <h3><i class="fas fa-layer-group"></i> <span id="panelRegionsTitle">Text Regions</span></h3>
+                            <h3><i class="fas fa-layer-group"></i> <span id="panelRegionsTitle">Regions</span></h3>
                             <span id="regionCount" style="font-size:0.75rem; color:var(--color-text-secondary);">0</span>
                         </div>
                         <div class="panel-body">
                             <div class="region-list" id="regionList">
                                 <div class="empty-regions">
                                     <i class="fas fa-draw-polygon"></i>
-                                    <p id="emptyRegionsText">Drag on the image to add text regions</p>
+                                    <p id="emptyRegionsText">Drag on the image to add a region</p>
                                 </div>
                             </div>
                         </div>
@@ -742,16 +809,19 @@
     <script>
     // ===== State =====
     // Each page: { file, url, regions: [], drawingDataUrl: null }
+    // Each region: { id, type: 'text'|'draw', x, y, w, h, ... }
+    //   text: edited, fontSize, fontWeight, fontColor, bgOpacity, writingMode, preview
+    //   draw: preview
     var pages = [];
     var currentPageIndex = 0;
     var selectedRegionId = null;
-    var tool = 'region';          // 'region' | 'draw' | 'erase'
-    var isDrawing = false;        // for region rectangle drag
-    var isPainting = false;       // for freehand drawing
-    var drawStart = { x: 0, y: 0 };
-    var previewMode = false;
+    var tool = 'text';              // 'text' | 'draw' | 'erase'
+    var isDrawingRect = false;      // dragging rectangle for new region
+    var isPainting = false;         // freehand painting
+    var dragStart = { x: 0, y: 0 };
     var regionIdCounter = 0;
     var lastPaintX = 0, lastPaintY = 0;
+    var zoomLevel = 1.0;
 
     function getLang() {
         return (typeof getCurrentLanguage === 'function') ? getCurrentLanguage() : (localStorage.getItem('preferredLanguage') || 'en');
@@ -772,12 +842,7 @@
         var panel = document.getElementById('stagedPanel');
         var grid = document.getElementById('stagedGrid');
         var count = document.getElementById('stagedCount');
-
-        if (pages.length === 0) {
-            panel.style.display = 'none';
-            return;
-        }
-
+        if (pages.length === 0) { panel.style.display = 'none'; return; }
         panel.style.display = '';
         count.textContent = pages.length;
         grid.innerHTML = '';
@@ -793,24 +858,18 @@
             btn.className = 'staged-item-remove';
             btn.innerHTML = '<i class="fas fa-times"></i>';
             btn.onclick = function(e) { e.stopPropagation(); removeStagedPage(i); };
-            div.appendChild(img);
-            div.appendChild(num);
-            div.appendChild(btn);
+            div.appendChild(img); div.appendChild(num); div.appendChild(btn);
             grid.appendChild(div);
         });
     }
 
-    function removeStagedPage(idx) {
-        pages.splice(idx, 1);
-        renderStaged();
-    }
+    function removeStagedPage(idx) { pages.splice(idx, 1); renderStaged(); }
 
     function clearAllStaged() {
         var L = getLang();
         var msg = { en: 'Remove all uploaded pages?', ja: 'アップロードした全ページを削除しますか？', zh: '删除所有已上传的页面？', es: '¿Eliminar todas las páginas subidas?', fr: 'Supprimer toutes les pages téléchargées ?', de: 'Alle hochgeladenen Seiten entfernen?', ko: '업로드된 모든 페이지를 삭제하시겠습니까?', ar: 'إزالة جميع الصفحات المحملة؟', pt: 'Remover todas as páginas enviadas?', it: 'Rimuovere tutte le pagine caricate?' };
         if (!confirm(msg[L] || msg.en)) return;
-        pages = [];
-        renderStaged();
+        pages = []; renderStaged();
     }
 
     function startEditing() {
@@ -823,7 +882,6 @@
     }
 
     function backToStaging() {
-        // Save current drawing before going back
         savePageDrawing();
         document.getElementById('editorState').style.display = 'none';
         document.getElementById('headerActions').style.display = 'none';
@@ -840,7 +898,6 @@
         selectedRegionId = null;
         renderPage();
     }
-
     function goToPage(idx) {
         if (idx < 0 || idx >= pages.length) return;
         savePageDrawing();
@@ -873,33 +930,40 @@
             var div = document.createElement('div');
             div.className = 'thumb-item' + (i === currentPageIndex ? ' active' : '');
             div.onclick = function() { goToPage(i); };
-            var img = document.createElement('img');
-            img.src = pg.url;
-            var num = document.createElement('div');
-            num.className = 'thumb-num';
-            num.textContent = 'P' + (i + 1);
-            div.appendChild(img);
-            div.appendChild(num);
-            bar.appendChild(div);
+            var img = document.createElement('img'); img.src = pg.url;
+            var num = document.createElement('div'); num.className = 'thumb-num'; num.textContent = 'P' + (i + 1);
+            div.appendChild(img); div.appendChild(num); bar.appendChild(div);
         });
+    }
+
+    // ===== Zoom =====
+    function setZoom(delta) {
+        zoomLevel = Math.max(0.5, Math.min(3.0, zoomLevel + delta));
+        applyZoom();
+    }
+    function resetZoom() {
+        zoomLevel = 1.0;
+        applyZoom();
+    }
+    function applyZoom() {
+        var wrapper = document.getElementById('canvasWrapper');
+        if (wrapper) wrapper.style.transform = 'scale(' + zoomLevel + ')';
+        document.getElementById('zoomLevel').textContent = Math.round(zoomLevel * 100) + '%';
     }
 
     // ===== Tool Mode =====
     function setTool(t) {
         tool = t;
-        document.getElementById('btnToolRegion').classList.toggle('active', t === 'region');
+        document.getElementById('btnToolText').classList.toggle('active', t === 'text');
         document.getElementById('btnToolDraw').classList.toggle('active', t === 'draw');
         document.getElementById('btnToolErase').classList.toggle('active', t === 'erase');
-
         var area = document.getElementById('canvasArea');
-        area.classList.remove('tool-mode-region', 'tool-mode-draw', 'tool-mode-erase');
+        area.classList.remove('tool-mode-text', 'tool-mode-draw', 'tool-mode-erase');
         area.classList.add('tool-mode-' + t);
-
-        var brushOpts = document.getElementById('brushOptions');
-        brushOpts.style.display = (t === 'draw' || t === 'erase') ? '' : 'none';
+        document.getElementById('brushOptions').style.display = (t === 'draw' || t === 'erase') ? '' : 'none';
     }
 
-    // ===== Draw Canvas Setup =====
+    // ===== Draw Canvas =====
     function setupDrawCanvas() {
         var img = document.getElementById('canvasImg');
         var canvas = document.getElementById('drawCanvas');
@@ -908,7 +972,6 @@
         canvas.style.width = img.offsetWidth + 'px';
         canvas.style.height = img.offsetHeight + 'px';
     }
-
     function loadPageDrawing() {
         var canvas = document.getElementById('drawCanvas');
         var ctx = canvas.getContext('2d');
@@ -916,33 +979,16 @@
         var page = pages[currentPageIndex];
         if (page && page.drawingDataUrl) {
             var drawImg = new Image();
-            drawImg.onload = function() {
-                ctx.drawImage(drawImg, 0, 0, canvas.width, canvas.height);
-            };
+            drawImg.onload = function() { ctx.drawImage(drawImg, 0, 0, canvas.width, canvas.height); };
             drawImg.src = page.drawingDataUrl;
         }
     }
-
     function savePageDrawing() {
         var canvas = document.getElementById('drawCanvas');
         if (!canvas || !pages[currentPageIndex]) return;
-        // Only save if canvas has content
-        try {
-            pages[currentPageIndex].drawingDataUrl = canvas.toDataURL('image/png');
-        } catch (e) {}
+        try { pages[currentPageIndex].drawingDataUrl = canvas.toDataURL('image/png'); } catch (e) {}
     }
 
-    function clearDrawing() {
-        var L = getLang();
-        var msg = { en: 'Clear all drawings on this page?', ja: 'このページの全描画をクリアしますか？', zh: '清除此页面的所有绘图？', es: '¿Borrar todos los dibujos de esta página?', fr: 'Effacer tous les dessins de cette page ?', de: 'Alle Zeichnungen auf dieser Seite löschen?', ko: '이 페이지의 모든 그림을 삭제하시겠습니까?', ar: 'مسح جميع الرسومات على هذه الصفحة؟', pt: 'Limpar todos os desenhos desta página?', it: 'Cancellare tutti i disegni di questa pagina?' };
-        if (!confirm(msg[L] || msg.en)) return;
-        var canvas = document.getElementById('drawCanvas');
-        var ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        pages[currentPageIndex].drawingDataUrl = null;
-    }
-
-    // Window resize: re-setup canvas
     window.addEventListener('resize', function() {
         if (document.getElementById('editorState').style.display === 'none') return;
         savePageDrawing();
@@ -950,16 +996,53 @@
         loadPageDrawing();
     });
 
-    // ===== Drawing Events =====
+    // ===== Helpers =====
+    function getCanvasCoord(clientX, clientY) {
+        var canvas = document.getElementById('drawCanvas');
+        var rect = canvas.getBoundingClientRect();
+        var scaleX = canvas.width / rect.width;
+        var scaleY = canvas.height / rect.height;
+        return {
+            x: (clientX - rect.left) * scaleX,
+            y: (clientY - rect.top) * scaleY
+        };
+    }
+    function getWrapperCoord(clientX, clientY) {
+        var img = document.getElementById('canvasImg');
+        var rect = img.getBoundingClientRect();
+        // Convert to image's internal display size (unzoomed)
+        var scaleX = img.offsetWidth / rect.width;
+        var scaleY = img.offsetHeight / rect.height;
+        return {
+            x: (clientX - rect.left) * scaleX,
+            y: (clientY - rect.top) * scaleY
+        };
+    }
+    // Check if canvas coord is inside any region of given type
+    function isInsideRegion(canvasX, canvasY, typeFilter) {
+        var canvas = document.getElementById('drawCanvas');
+        var regions = pages[currentPageIndex].regions;
+        var px = canvasX / canvas.width * 100;
+        var py = canvasY / canvas.height * 100;
+        for (var i = 0; i < regions.length; i++) {
+            var r = regions[i];
+            if (typeFilter && r.type !== typeFilter) continue;
+            var rx = parseFloat(r.x), ry = parseFloat(r.y), rw = parseFloat(r.w), rh = parseFloat(r.h);
+            if (px >= rx && px <= rx + rw && py >= ry && py <= ry + rh) return r;
+        }
+        return null;
+    }
+
+    // ===== Init events =====
     (function() {
-        var canvasArea, wrapper, drawCanvas, drawRect;
+        var canvasArea, wrapper, drawCanvas, tempDrawRect;
 
         document.addEventListener('DOMContentLoaded', function() {
             canvasArea = document.getElementById('canvasArea');
             wrapper = document.getElementById('canvasWrapper');
             drawCanvas = document.getElementById('drawCanvas');
 
-            // Upload zone events
+            // Upload zone
             var uploadZone = document.getElementById('uploadZone');
             uploadZone.addEventListener('click', function() { document.getElementById('fileInput').click(); });
             uploadZone.addEventListener('dragover', function(e) { e.preventDefault(); this.classList.add('dragover'); });
@@ -971,235 +1054,214 @@
                 if (files.length > 0) renderStaged();
             });
 
-            // Brush size display
             document.getElementById('brushSize').addEventListener('input', function() {
                 document.getElementById('brushSizeVal').textContent = this.value;
             });
 
-            // ===== Region mode: mouse drag on wrapper =====
-            wrapper.addEventListener('mousedown', function(e) {
-                if (tool !== 'region') return;
-                // Click on existing region → select
-                if (e.target.classList.contains('text-region') || e.target.closest('.text-region')) return;
-                e.preventDefault();
-                var rect = wrapper.getBoundingClientRect();
-                drawStart = { x: e.clientX - rect.left, y: e.clientY - rect.top };
-                isDrawing = true;
-                drawRect = document.createElement('div');
-                drawRect.className = 'draw-rect';
-                drawRect.style.left = drawStart.x + 'px';
-                drawRect.style.top = drawStart.y + 'px';
-                drawRect.style.width = '0px';
-                drawRect.style.height = '0px';
-                wrapper.appendChild(drawRect);
-            });
+            // ===== Wrapper: mouse/touch down =====
+            var pointerDown = function(e, isTouch) {
+                var pt = isTouch ? e.touches[0] : e;
+                var target = isTouch ? document.elementFromPoint(pt.clientX, pt.clientY) : e.target;
 
-            document.addEventListener('mousemove', function(e) {
-                if (!isDrawing || !drawRect) return;
-                var rect = wrapper.getBoundingClientRect();
-                var cx = Math.max(0, Math.min(e.clientX - rect.left, wrapper.offsetWidth));
-                var cy = Math.max(0, Math.min(e.clientY - rect.top, wrapper.offsetHeight));
-                var x = Math.min(drawStart.x, cx);
-                var y = Math.min(drawStart.y, cy);
-                drawRect.style.left = x + 'px';
-                drawRect.style.top = y + 'px';
-                drawRect.style.width = Math.abs(cx - drawStart.x) + 'px';
-                drawRect.style.height = Math.abs(cy - drawStart.y) + 'px';
-            });
+                // Click on existing region → select (don't start drawing)
+                if (target && (target.classList.contains('region-box') || target.closest('.region-box'))) {
+                    var box = target.classList.contains('region-box') ? target : target.closest('.region-box');
+                    var id = parseInt(box.dataset.regionId);
+                    selectRegion(id);
+                    return;
+                }
 
-            document.addEventListener('mouseup', function(e) {
-                if (!isDrawing || !drawRect) return;
-                isDrawing = false;
-                var w = parseInt(drawRect.style.width);
-                var h = parseInt(drawRect.style.height);
-                var x = parseInt(drawRect.style.left);
-                var y = parseInt(drawRect.style.top);
-                drawRect.remove();
-                drawRect = null;
-                if (w < 15 || h < 15) return;
-                addRegion(x, y, w, h);
-            });
+                if (tool === 'text' || tool === 'draw') {
+                    // Start drag to create new region
+                    if (!isTouch) e.preventDefault();
+                    var coord = getWrapperCoord(pt.clientX, pt.clientY);
+                    dragStart = coord;
+                    isDrawingRect = true;
+                    tempDrawRect = document.createElement('div');
+                    tempDrawRect.className = 'draw-rect';
+                    tempDrawRect.style.left = coord.x + 'px';
+                    tempDrawRect.style.top = coord.y + 'px';
+                    tempDrawRect.style.width = '0px';
+                    tempDrawRect.style.height = '0px';
+                    wrapper.appendChild(tempDrawRect);
+                } else if (tool === 'erase') {
+                    // Only inside a region
+                    var cc = getCanvasCoord(pt.clientX, pt.clientY);
+                    if (isInsideRegion(cc.x, cc.y)) {
+                        if (!isTouch) e.preventDefault();
+                        isPainting = true;
+                        lastPaintX = cc.x; lastPaintY = cc.y;
+                        paintAt(cc.x, cc.y);
+                    }
+                }
+            };
 
-            // Touch support for region drawing
-            wrapper.addEventListener('touchstart', function(e) {
-                if (tool !== 'region') return;
-                if (e.target.classList.contains('text-region') || e.target.closest('.text-region')) return;
-                e.preventDefault();
-                var touch = e.touches[0];
-                var rect = wrapper.getBoundingClientRect();
-                drawStart = { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
-                isDrawing = true;
-                drawRect = document.createElement('div');
-                drawRect.className = 'draw-rect';
-                drawRect.style.left = drawStart.x + 'px';
-                drawRect.style.top = drawStart.y + 'px';
-                drawRect.style.width = '0px';
-                drawRect.style.height = '0px';
-                wrapper.appendChild(drawRect);
+            wrapper.addEventListener('mousedown', function(e) { pointerDown(e, false); });
+            wrapper.addEventListener('touchstart', function(e) { pointerDown(e, true); }, { passive: false });
+
+            // Special: painting inside draw region (when draw tool active and dragging from inside region)
+            // We handle this via the region drag detection - if drag starts inside a draw region, switch to paint mode
+            // But the above already treats clicks on regions as select. So painting in draw tool needs different trigger.
+            //
+            // Simpler: after clicking a draw region (selecting it), further drags on its area paint.
+            // Implement via a separate listener on selected draw region's area.
+
+            // ===== Move =====
+            var pointerMove = function(e, isTouch) {
+                var pt = isTouch ? e.touches[0] : e;
+
+                if (isDrawingRect && tempDrawRect) {
+                    if (isTouch) e.preventDefault();
+                    var coord = getWrapperCoord(pt.clientX, pt.clientY);
+                    var iw = document.getElementById('canvasImg').offsetWidth;
+                    var ih = document.getElementById('canvasImg').offsetHeight;
+                    coord.x = Math.max(0, Math.min(coord.x, iw));
+                    coord.y = Math.max(0, Math.min(coord.y, ih));
+                    var x = Math.min(dragStart.x, coord.x);
+                    var y = Math.min(dragStart.y, coord.y);
+                    tempDrawRect.style.left = x + 'px';
+                    tempDrawRect.style.top = y + 'px';
+                    tempDrawRect.style.width = Math.abs(coord.x - dragStart.x) + 'px';
+                    tempDrawRect.style.height = Math.abs(coord.y - dragStart.y) + 'px';
+                } else if (isPainting) {
+                    if (isTouch) e.preventDefault();
+                    var cc = getCanvasCoord(pt.clientX, pt.clientY);
+                    // Only paint if inside a region (for both draw and erase)
+                    var filter = tool === 'draw' ? 'draw' : null; // erase: any region
+                    if (isInsideRegion(cc.x, cc.y, filter)) {
+                        paintLine(lastPaintX, lastPaintY, cc.x, cc.y);
+                    }
+                    lastPaintX = cc.x; lastPaintY = cc.y;
+                }
+            };
+
+            document.addEventListener('mousemove', function(e) { pointerMove(e, false); });
+            document.addEventListener('touchmove', function(e) {
+                if (isDrawingRect || isPainting) pointerMove(e, true);
             }, { passive: false });
 
-            wrapper.addEventListener('touchmove', function(e) {
-                if (!isDrawing || !drawRect) return;
-                e.preventDefault();
-                var touch = e.touches[0];
-                var rect = wrapper.getBoundingClientRect();
-                var cx = Math.max(0, Math.min(touch.clientX - rect.left, wrapper.offsetWidth));
-                var cy = Math.max(0, Math.min(touch.clientY - rect.top, wrapper.offsetHeight));
-                var x = Math.min(drawStart.x, cx);
-                var y = Math.min(drawStart.y, cy);
-                drawRect.style.left = x + 'px';
-                drawRect.style.top = y + 'px';
-                drawRect.style.width = Math.abs(cx - drawStart.x) + 'px';
-                drawRect.style.height = Math.abs(cy - drawStart.y) + 'px';
-            }, { passive: false });
-
-            wrapper.addEventListener('touchend', function(e) {
-                if (!isDrawing || !drawRect) return;
-                isDrawing = false;
-                var w = parseInt(drawRect.style.width);
-                var h = parseInt(drawRect.style.height);
-                var x = parseInt(drawRect.style.left);
-                var y = parseInt(drawRect.style.top);
-                drawRect.remove();
-                drawRect = null;
-                if (w < 15 || h < 15) return;
-                addRegion(x, y, w, h);
-            });
-
-            // ===== Freehand drawing on canvas =====
-            drawCanvas.addEventListener('mousedown', function(e) {
-                if (tool !== 'draw' && tool !== 'erase') return;
-                e.preventDefault();
-                var rect = drawCanvas.getBoundingClientRect();
-                isPainting = true;
-                lastPaintX = e.clientX - rect.left;
-                lastPaintY = e.clientY - rect.top;
-                drawDot(lastPaintX, lastPaintY);
-            });
-
-            document.addEventListener('mousemove', function(e) {
-                if (!isPainting) return;
-                var rect = drawCanvas.getBoundingClientRect();
-                var x = e.clientX - rect.left;
-                var y = e.clientY - rect.top;
-                drawLine(lastPaintX, lastPaintY, x, y);
-                lastPaintX = x;
-                lastPaintY = y;
-            });
-
-            document.addEventListener('mouseup', function() {
+            // ===== Up =====
+            var pointerUp = function() {
+                if (isDrawingRect && tempDrawRect) {
+                    isDrawingRect = false;
+                    var w = parseInt(tempDrawRect.style.width);
+                    var h = parseInt(tempDrawRect.style.height);
+                    var x = parseInt(tempDrawRect.style.left);
+                    var y = parseInt(tempDrawRect.style.top);
+                    tempDrawRect.remove();
+                    tempDrawRect = null;
+                    if (w >= 15 && h >= 15) {
+                        addRegion(tool === 'draw' ? 'draw' : 'text', x, y, w, h);
+                    }
+                }
                 if (isPainting) {
                     isPainting = false;
                     savePageDrawing();
                 }
-            });
+            };
+            document.addEventListener('mouseup', pointerUp);
+            document.addEventListener('touchend', pointerUp);
 
-            drawCanvas.addEventListener('touchstart', function(e) {
-                if (tool !== 'draw' && tool !== 'erase') return;
-                e.preventDefault();
-                var touch = e.touches[0];
-                var rect = drawCanvas.getBoundingClientRect();
-                isPainting = true;
-                lastPaintX = touch.clientX - rect.left;
-                lastPaintY = touch.clientY - rect.top;
-                drawDot(lastPaintX, lastPaintY);
-            }, { passive: false });
-
-            drawCanvas.addEventListener('touchmove', function(e) {
-                if (!isPainting) return;
-                e.preventDefault();
-                var touch = e.touches[0];
-                var rect = drawCanvas.getBoundingClientRect();
-                var x = touch.clientX - rect.left;
-                var y = touch.clientY - rect.top;
-                drawLine(lastPaintX, lastPaintY, x, y);
-                lastPaintX = x;
-                lastPaintY = y;
-            }, { passive: false });
-
-            drawCanvas.addEventListener('touchend', function() {
-                if (isPainting) {
-                    isPainting = false;
-                    savePageDrawing();
-                }
-            });
-
-            // Click on canvas area to deselect
+            // Click on empty canvas area → deselect
             canvasArea.addEventListener('mousedown', function(e) {
-                if (tool !== 'region') return;
-                if (!e.target.classList.contains('text-region') && !e.target.closest('.text-region')) {
-                    selectedRegionId = null;
-                    renderRegionsOnCanvas();
-                    renderRegionList();
+                if (isDrawingRect || isPainting) return;
+                if (!e.target.classList.contains('region-box') && !e.target.closest('.region-box')
+                    && !e.target.classList.contains('draw-rect')) {
+                    // Falls through to wrapper handler which may start a drag
                 }
             });
         });
+
+        // Expose paint functions
+        window.paintAt = function(x, y) {
+            var canvas = document.getElementById('drawCanvas');
+            var ctx = canvas.getContext('2d');
+            var size = parseInt(document.getElementById('brushSize').value);
+            if (tool === 'erase') {
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI * 2); ctx.fill();
+                ctx.globalCompositeOperation = 'source-over';
+            } else {
+                ctx.fillStyle = document.getElementById('brushColor').value;
+                ctx.beginPath(); ctx.arc(x, y, size / 2, 0, Math.PI * 2); ctx.fill();
+            }
+        };
+        window.paintLine = function(x1, y1, x2, y2) {
+            var canvas = document.getElementById('drawCanvas');
+            var ctx = canvas.getContext('2d');
+            var size = parseInt(document.getElementById('brushSize').value);
+            if (tool === 'erase') {
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.lineWidth = size * 2; ctx.lineCap = 'round';
+                ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+                ctx.globalCompositeOperation = 'source-over';
+            } else {
+                ctx.strokeStyle = document.getElementById('brushColor').value;
+                ctx.lineWidth = size; ctx.lineCap = 'round';
+                ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+            }
+        };
     })();
 
-    // ===== Canvas draw helpers =====
-    function drawDot(x, y) {
-        var canvas = document.getElementById('drawCanvas');
-        var ctx = canvas.getContext('2d');
-        var size = parseInt(document.getElementById('brushSize').value);
-        if (tool === 'erase') {
-            ctx.globalCompositeOperation = 'destination-out';
-            ctx.beginPath();
-            ctx.arc(x, y, size, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.globalCompositeOperation = 'source-over';
-        } else {
-            ctx.fillStyle = document.getElementById('brushColor').value;
-            ctx.beginPath();
-            ctx.arc(x, y, size / 2, 0, Math.PI * 2);
-            ctx.fill();
+    // ===== Special: Draw tool + existing draw region → paint on drag inside region =====
+    // When draw tool is active and user drags inside a selected draw region, paint instead of creating new region.
+    // To enable this cleanly: in pointerDown, if target is a draw region and tool is draw → start painting.
+    // Updated handler below (re-attach in DOMContentLoaded via overriding). Actually simpler: integrate into existing handler.
+    // (Handled inline above: clicks on regions are selected, but dragging stays as selection. To paint, need another rule.)
+    //
+    // Rewrite: when draw tool is active and pointer is over a draw region (without moving), we want to allow painting.
+    // Approach: if tool === 'draw' and pointerDown target is inside a draw region, start painting (not selecting-only).
+    // Let's patch the logic.
+    document.addEventListener('DOMContentLoaded', function() {
+        var wrapper = document.getElementById('canvasWrapper');
+        wrapper.addEventListener('mousedown', function(e) {
+            handleDrawStart(e, false);
+        }, true); // capture phase to override
+        wrapper.addEventListener('touchstart', function(e) {
+            handleDrawStart(e, true);
+        }, { passive: false, capture: true });
+    });
+
+    function handleDrawStart(e, isTouch) {
+        if (tool !== 'draw') return;
+        var pt = isTouch ? e.touches[0] : e;
+        var cc = getCanvasCoord(pt.clientX, pt.clientY);
+        var drawRegion = isInsideRegion(cc.x, cc.y, 'draw');
+        if (drawRegion) {
+            // Paint mode: start painting within the region
+            if (!isTouch) e.preventDefault();
+            e.stopPropagation();
+            isPainting = true;
+            isDrawingRect = false;
+            lastPaintX = cc.x; lastPaintY = cc.y;
+            paintAt(cc.x, cc.y);
+            selectRegion(drawRegion.id);
         }
     }
 
-    function drawLine(x1, y1, x2, y2) {
-        var canvas = document.getElementById('drawCanvas');
-        var ctx = canvas.getContext('2d');
-        var size = parseInt(document.getElementById('brushSize').value);
-        if (tool === 'erase') {
-            ctx.globalCompositeOperation = 'destination-out';
-            ctx.lineWidth = size * 2;
-            ctx.lineCap = 'round';
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.stroke();
-            ctx.globalCompositeOperation = 'source-over';
-        } else {
-            ctx.strokeStyle = document.getElementById('brushColor').value;
-            ctx.lineWidth = size;
-            ctx.lineCap = 'round';
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.stroke();
-        }
-    }
-
-    // ===== Region operations =====
-    function addRegion(x, y, w, h) {
+    // ===== Region Operations =====
+    function addRegion(type, x, y, w, h) {
         var img = document.getElementById('canvasImg');
         var iw = img.offsetWidth;
         var ih = img.offsetHeight;
         if (iw === 0 || ih === 0) return;
-
         var region = {
             id: ++regionIdCounter,
+            type: type,
             x: (x / iw * 100).toFixed(2),
             y: (y / ih * 100).toFixed(2),
             w: (w / iw * 100).toFixed(2),
             h: (h / ih * 100).toFixed(2),
-            original: '',
-            edited: '',
-            fontSize: 14,
-            fontWeight: '700',
-            fontColor: '#000000',
-            bgOpacity: 'opaque',   // 'transparent' | 'semi' | 'opaque'
-            writingMode: 'horizontal'  // 'horizontal' | 'vertical'
+            preview: false
         };
+        if (type === 'text') {
+            region.edited = '';
+            region.fontSize = 14;
+            region.fontWeight = '700';
+            region.fontColor = '#000000';
+            region.bgOpacity = 'opaque';
+            region.writingMode = 'horizontal';
+        }
         pages[currentPageIndex].regions.push(region);
         selectedRegionId = region.id;
         renderRegionsOnCanvas();
@@ -1209,54 +1271,48 @@
 
     function renderRegionsOnCanvas() {
         var wrapper = document.getElementById('canvasWrapper');
-        wrapper.querySelectorAll('.text-region, .preview-text-overlay').forEach(function(el) { el.remove(); });
+        wrapper.querySelectorAll('.region-box, .preview-text-overlay').forEach(function(el) { el.remove(); });
         if (!pages[currentPageIndex]) return;
-
         var regions = pages[currentPageIndex].regions;
 
         regions.forEach(function(r) {
-            if (previewMode) {
-                if (r.edited.trim()) {
-                    var overlay = document.createElement('div');
-                    overlay.className = 'preview-text-overlay';
-                    if (r.writingMode === 'vertical') overlay.className += ' writing-vertical';
-                    overlay.style.left = r.x + '%';
-                    overlay.style.top = r.y + '%';
-                    overlay.style.width = r.w + '%';
-                    overlay.style.height = r.h + '%';
-                    overlay.style.fontSize = r.fontSize + 'px';
-                    overlay.style.fontWeight = r.fontWeight;
-                    overlay.style.color = r.fontColor;
-                    var bgMap = { transparent: 'transparent', semi: 'rgba(255,255,255,0.7)', opaque: '#ffffff' };
-                    overlay.style.background = bgMap[r.bgOpacity] || bgMap.opaque;
-                    overlay.textContent = r.edited;
-                    wrapper.appendChild(overlay);
-                }
-            } else {
-                var div = document.createElement('div');
-                div.className = 'text-region';
-                if (r.id === selectedRegionId) div.className += ' selected';
-                div.style.left = r.x + '%';
-                div.style.top = r.y + '%';
-                div.style.width = r.w + '%';
-                div.style.height = r.h + '%';
-                div.dataset.regionId = r.id;
+            var box = document.createElement('div');
+            box.className = 'region-box type-' + r.type;
+            if (r.id === selectedRegionId) box.className += ' selected';
+            if (r.preview) box.className += ' preview-on';
+            box.style.left = r.x + '%';
+            box.style.top = r.y + '%';
+            box.style.width = r.w + '%';
+            box.style.height = r.h + '%';
+            box.dataset.regionId = r.id;
 
-                var label = document.createElement('div');
-                label.className = 'region-label';
-                label.textContent = '#' + r.id;
-                div.appendChild(label);
+            var label = document.createElement('div');
+            label.className = 'region-label';
+            label.textContent = (r.type === 'text' ? 'T' : 'D') + '#' + r.id;
+            box.appendChild(label);
 
-                div.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    selectRegion(r.id);
-                });
-                div.addEventListener('touchend', function(e) {
-                    e.stopPropagation();
-                    selectRegion(r.id);
-                });
+            if (!r.preview) {
+                // Only bind click when not in preview (preview = pointer-events none via cursor:default)
+                box.addEventListener('click', function(e) { e.stopPropagation(); selectRegion(r.id); });
+            }
+            wrapper.appendChild(box);
 
-                wrapper.appendChild(div);
+            // Preview for text region: show overlay
+            if (r.type === 'text' && r.preview && r.edited.trim()) {
+                var overlay = document.createElement('div');
+                overlay.className = 'preview-text-overlay';
+                if (r.writingMode === 'vertical') overlay.className += ' writing-vertical';
+                overlay.style.left = r.x + '%';
+                overlay.style.top = r.y + '%';
+                overlay.style.width = r.w + '%';
+                overlay.style.height = r.h + '%';
+                overlay.style.fontSize = r.fontSize + 'px';
+                overlay.style.fontWeight = r.fontWeight;
+                overlay.style.color = r.fontColor;
+                var bgMap = { transparent: 'transparent', semi: 'rgba(255,255,255,0.7)', opaque: '#ffffff' };
+                overlay.style.background = bgMap[r.bgOpacity] || bgMap.opaque;
+                overlay.textContent = r.edited;
+                wrapper.appendChild(overlay);
             }
         });
     }
@@ -1266,64 +1322,66 @@
         if (!pages[currentPageIndex]) return;
         var regions = pages[currentPageIndex].regions;
         document.getElementById('regionCount').textContent = regions.length;
-
         if (regions.length === 0) {
-            list.innerHTML = '<div class="empty-regions">' +
-                '<i class="fas fa-draw-polygon"></i>' +
-                '<p>' + getEmptyText() + '</p></div>';
+            list.innerHTML = '<div class="empty-regions"><i class="fas fa-draw-polygon"></i><p>' + getEmptyText() + '</p></div>';
             return;
         }
-
         var L = getLang();
-        var origLabel = { en: 'Original', ja: '原文', zh: '原文', es: 'Original', fr: 'Original', de: 'Original', ko: '원문', ar: 'الأصل', pt: 'Original', it: 'Originale' };
-        var editLabel = { en: 'Edited', ja: '編集後', zh: '编辑后', es: 'Editado', fr: 'Modifié', de: 'Bearbeitet', ko: '편집됨', ar: 'معدل', pt: 'Editado', it: 'Modificato' };
-        var writeLabel = { en: 'Writing', ja: '書字方向', zh: '书写', es: 'Escritura', fr: 'Écriture', de: 'Schreibweise', ko: '쓰기', ar: 'الكتابة', pt: 'Escrita', it: 'Scrittura' };
-        var bgLabel = { en: 'Background', ja: '背景', zh: '背景', es: 'Fondo', fr: 'Fond', de: 'Hintergrund', ko: '배경', ar: 'الخلفية', pt: 'Fundo', it: 'Sfondo' };
-        var sizeLabel = { en: 'Size', ja: 'サイズ', zh: '大小', es: 'Tamaño', fr: 'Taille', de: 'Größe', ko: '크기', ar: 'الحجم', pt: 'Tamanho', it: 'Dimensione' };
-        var colorLabel = { en: 'Color', ja: '色', zh: '颜色', es: 'Color', fr: 'Couleur', de: 'Farbe', ko: '색상', ar: 'اللون', pt: 'Cor', it: 'Colore' };
-        var horizOpt = { en: 'Horizontal', ja: '横書き', zh: '横排', es: 'Horizontal', fr: 'Horizontal', de: 'Horizontal', ko: '가로', ar: 'أفقي', pt: 'Horizontal', it: 'Orizzontale' };
-        var vertOpt = { en: 'Vertical', ja: '縦書き', zh: '竖排', es: 'Vertical', fr: 'Vertical', de: 'Vertikal', ko: '세로', ar: 'عمودي', pt: 'Vertical', it: 'Verticale' };
-        var transpOpt = { en: 'Transparent', ja: '透明', zh: '透明', es: 'Transparente', fr: 'Transparent', de: 'Transparent', ko: '투명', ar: 'شفاف', pt: 'Transparente', it: 'Trasparente' };
-        var semiOpt = { en: 'Semi', ja: '半透明', zh: '半透明', es: 'Semi', fr: 'Semi', de: 'Halb', ko: '반투명', ar: 'نصف', pt: 'Semi', it: 'Semi' };
-        var opaqueOpt = { en: 'Opaque', ja: '不透明', zh: '不透明', es: 'Opaco', fr: 'Opaque', de: 'Undurchsichtig', ko: '불투명', ar: 'معتم', pt: 'Opaco', it: 'Opaco' };
-        var t = function(o) { return o[L] || o.en; };
+        var tr = function(obj) { return obj[L] || obj.en; };
+        var editL = { en: 'Text', ja: 'テキスト', zh: '文字', es: 'Texto', fr: 'Texte', de: 'Text', ko: '텍스트', ar: 'نص', pt: 'Texto', it: 'Testo' };
+        var writeL = { en: 'Writing', ja: '書字方向', zh: '书写', es: 'Escritura', fr: 'Écriture', de: 'Schreibweise', ko: '쓰기', ar: 'الكتابة', pt: 'Escrita', it: 'Scrittura' };
+        var bgL = { en: 'Background', ja: '背景', zh: '背景', es: 'Fondo', fr: 'Fond', de: 'Hintergrund', ko: '배경', ar: 'الخلفية', pt: 'Fundo', it: 'Sfondo' };
+        var sizeL = { en: 'Size', ja: 'サイズ', zh: '大小', es: 'Tamaño', fr: 'Taille', de: 'Größe', ko: '크기', ar: 'الحجم', pt: 'Tamanho', it: 'Dimensione' };
+        var colorL = { en: 'Color', ja: '色', zh: '颜色', es: 'Color', fr: 'Couleur', de: 'Farbe', ko: '색상', ar: 'اللون', pt: 'Cor', it: 'Colore' };
+        var horizO = { en: 'Horizontal', ja: '横書き', zh: '横排', es: 'Horizontal', fr: 'Horizontal', de: 'Horizontal', ko: '가로', ar: 'أفقي', pt: 'Horizontal', it: 'Orizzontale' };
+        var vertO = { en: 'Vertical', ja: '縦書き', zh: '竖排', es: 'Vertical', fr: 'Vertical', de: 'Vertikal', ko: '세로', ar: 'عمودي', pt: 'Vertical', it: 'Verticale' };
+        var transpO = { en: 'Transparent', ja: '透明', zh: '透明', es: 'Transparente', fr: 'Transparent', de: 'Transparent', ko: '투명', ar: 'شفاف', pt: 'Transparente', it: 'Trasparente' };
+        var semiO = { en: 'Semi', ja: '半透明', zh: '半透明', es: 'Semi', fr: 'Semi', de: 'Halb', ko: '반투명', ar: 'نصف', pt: 'Semi', it: 'Semi' };
+        var opaqueO = { en: 'Opaque', ja: '不透明', zh: '不透明', es: 'Opaco', fr: 'Opaque', de: 'Undurchsichtig', ko: '불투명', ar: 'معتم', pt: 'Opaco', it: 'Opaco' };
+        var textTag = { en: 'Text Region', ja: 'テキスト領域', zh: '文字区域', es: 'Región texto', fr: 'Zone texte', de: 'Textbereich', ko: '텍스트 영역', ar: 'منطقة نص', pt: 'Região texto', it: 'Area testo' };
+        var drawTag = { en: 'Draw Region', ja: '描画領域', zh: '绘图区域', es: 'Región dibujo', fr: 'Zone dessin', de: 'Zeichenbereich', ko: '그리기 영역', ar: 'منطقة رسم', pt: 'Região desenho', it: 'Area disegno' };
+        var drawHint = { en: 'With Draw tool active, drag inside this region to paint.', ja: '描画ツール選択中に、この領域内をドラッグして描画します。', zh: '选中描画工具时，在此区域内拖动以绘图。', es: 'Con la herramienta Dibujar activa, arrastre dentro de esta región.', fr: "Avec l'outil Dessin actif, glissez dans cette zone pour dessiner.", de: 'Mit aktivem Zeichenwerkzeug in diesem Bereich ziehen.', ko: '그리기 도구가 활성화된 상태에서 이 영역 내부를 드래그하세요.', ar: 'مع تنشيط أداة الرسم، اسحب داخل هذه المنطقة للرسم.', pt: 'Com a ferramenta Desenhar ativa, arraste dentro desta região.', it: "Con lo strumento Disegna attivo, trascina all'interno di quest'area per dipingere." };
 
         var html = '';
         regions.forEach(function(r) {
             var sel = r.id === selectedRegionId ? ' selected' : '';
-            html += '<div class="region-card' + sel + '" data-region-id="' + r.id + '" onclick="selectRegion(' + r.id + ')">';
+            var previewIcon = r.preview ? 'fa-eye-slash' : 'fa-eye';
+            var previewClass = r.preview ? ' preview-on' : '';
+            html += '<div class="region-card type-' + r.type + sel + '" data-region-id="' + r.id + '" onclick="selectRegion(' + r.id + ')">';
             html += '<div class="region-card-header">';
-            html += '<span class="region-number">#' + r.id + '</span>';
-            html += '<button class="region-delete-btn" onclick="event.stopPropagation();deleteRegion(' + r.id + ')" title="Delete"><i class="fas fa-times"></i></button>';
+            html += '<div class="region-title">';
+            html += '<span class="region-number">' + (r.type === 'text' ? 'T' : 'D') + '#' + r.id + '</span>';
+            html += '<span class="region-type-tag">' + escH(r.type === 'text' ? tr(textTag) : tr(drawTag)) + '</span>';
             html += '</div>';
+            html += '<div class="region-card-actions">';
+            html += '<button class="region-action-btn' + previewClass + '" onclick="event.stopPropagation();toggleRegionPreview(' + r.id + ')" title="Preview"><i class="fas ' + previewIcon + '"></i></button>';
+            html += '<button class="region-action-btn delete" onclick="event.stopPropagation();deleteRegion(' + r.id + ')" title="Delete"><i class="fas fa-times"></i></button>';
+            html += '</div></div>';
 
-            html += '<div class="region-field"><label>' + escH(t(origLabel)) + '</label>';
-            html += '<textarea oninput="updateRegionText(' + r.id + ',\'original\',this.value)" onclick="event.stopPropagation()">' + escH(r.original) + '</textarea></div>';
-            html += '<div class="region-field"><label>' + escH(t(editLabel)) + '</label>';
-            html += '<textarea oninput="updateRegionText(' + r.id + ',\'edited\',this.value)" onclick="event.stopPropagation()">' + escH(r.edited) + '</textarea></div>';
+            if (r.type === 'text') {
+                html += '<div class="region-field"><label>' + escH(tr(editL)) + '</label>';
+                html += '<textarea oninput="updateRegionText(' + r.id + ',\'edited\',this.value)" onclick="event.stopPropagation()">' + escH(r.edited) + '</textarea></div>';
 
-            html += '<div class="region-options">';
-            // Writing mode
-            html += '<div><label>' + escH(t(writeLabel)) + '</label>';
-            html += '<select onchange="updateRegionProp(' + r.id + ',\'writingMode\',this.value)" onclick="event.stopPropagation()">';
-            html += '<option value="horizontal"' + (r.writingMode === 'horizontal' ? ' selected' : '') + '>' + escH(t(horizOpt)) + '</option>';
-            html += '<option value="vertical"' + (r.writingMode === 'vertical' ? ' selected' : '') + '>' + escH(t(vertOpt)) + '</option>';
-            html += '</select></div>';
-            // Background
-            html += '<div><label>' + escH(t(bgLabel)) + '</label>';
-            html += '<select onchange="updateRegionProp(' + r.id + ',\'bgOpacity\',this.value)" onclick="event.stopPropagation()">';
-            html += '<option value="transparent"' + (r.bgOpacity === 'transparent' ? ' selected' : '') + '>' + escH(t(transpOpt)) + '</option>';
-            html += '<option value="semi"' + (r.bgOpacity === 'semi' ? ' selected' : '') + '>' + escH(t(semiOpt)) + '</option>';
-            html += '<option value="opaque"' + (r.bgOpacity === 'opaque' ? ' selected' : '') + '>' + escH(t(opaqueOpt)) + '</option>';
-            html += '</select></div>';
-            // Font size
-            html += '<div><label>' + escH(t(sizeLabel)) + '</label>';
-            html += '<input type="number" value="' + r.fontSize + '" min="8" max="72" onchange="updateRegionProp(' + r.id + ',\'fontSize\',parseInt(this.value))" onclick="event.stopPropagation()"></div>';
-            // Font color
-            html += '<div><label>' + escH(t(colorLabel)) + '</label>';
-            html += '<input type="color" value="' + r.fontColor + '" onchange="updateRegionProp(' + r.id + ',\'fontColor\',this.value)" onclick="event.stopPropagation()" style="height:28px;"></div>';
-            html += '</div>';
-
+                html += '<div class="region-options">';
+                html += '<div><label>' + escH(tr(writeL)) + '</label>';
+                html += '<select onchange="updateRegionProp(' + r.id + ',\'writingMode\',this.value)" onclick="event.stopPropagation()">';
+                html += '<option value="horizontal"' + (r.writingMode === 'horizontal' ? ' selected' : '') + '>' + escH(tr(horizO)) + '</option>';
+                html += '<option value="vertical"' + (r.writingMode === 'vertical' ? ' selected' : '') + '>' + escH(tr(vertO)) + '</option>';
+                html += '</select></div>';
+                html += '<div><label>' + escH(tr(bgL)) + '</label>';
+                html += '<select onchange="updateRegionProp(' + r.id + ',\'bgOpacity\',this.value)" onclick="event.stopPropagation()">';
+                html += '<option value="transparent"' + (r.bgOpacity === 'transparent' ? ' selected' : '') + '>' + escH(tr(transpO)) + '</option>';
+                html += '<option value="semi"' + (r.bgOpacity === 'semi' ? ' selected' : '') + '>' + escH(tr(semiO)) + '</option>';
+                html += '<option value="opaque"' + (r.bgOpacity === 'opaque' ? ' selected' : '') + '>' + escH(tr(opaqueO)) + '</option>';
+                html += '</select></div>';
+                html += '<div><label>' + escH(tr(sizeL)) + '</label>';
+                html += '<input type="number" value="' + r.fontSize + '" min="8" max="72" onchange="updateRegionProp(' + r.id + ',\'fontSize\',parseInt(this.value))" onclick="event.stopPropagation()"></div>';
+                html += '<div><label>' + escH(tr(colorL)) + '</label>';
+                html += '<input type="color" value="' + r.fontColor + '" onchange="updateRegionProp(' + r.id + ',\'fontColor\',this.value)" onclick="event.stopPropagation()" style="height:28px;"></div>';
+                html += '</div>';
+            } else {
+                html += '<div class="draw-hint">' + escH(tr(drawHint)) + '</div>';
+            }
             html += '</div>';
         });
         list.innerHTML = html;
@@ -1332,16 +1390,16 @@
     function getEmptyText() {
         var L = getLang();
         var t = {
-            en: 'Drag on the image to add text regions',
-            ja: '画像上にドラッグしてテキスト領域を追加',
-            zh: '在图片上拖动以添加文字区域',
-            es: 'Arrastre en la imagen para agregar regiones',
-            fr: "Glissez sur l'image pour ajouter des zones",
-            de: 'Ziehen Sie auf dem Bild, um Bereiche hinzuzufügen',
+            en: 'Drag on the image to add a region',
+            ja: '画像上にドラッグして領域を追加',
+            zh: '在图片上拖动以添加区域',
+            es: 'Arrastre en la imagen para agregar una región',
+            fr: "Glissez sur l'image pour ajouter une zone",
+            de: 'Ziehen Sie auf dem Bild, um einen Bereich hinzuzufügen',
             ko: '이미지 위에 드래그하여 영역 추가',
-            ar: 'اسحب على الصورة لإضافة مناطق',
-            pt: 'Arraste na imagem para adicionar regiões',
-            it: "Trascina sull'immagine per aggiungere aree"
+            ar: 'اسحب على الصورة لإضافة منطقة',
+            pt: 'Arraste na imagem para adicionar uma região',
+            it: "Trascina sull'immagine per aggiungere un'area"
         };
         return t[L] || t.en;
     }
@@ -1352,50 +1410,34 @@
         renderRegionList();
         scrollToRegionCard(id);
     }
-
     function scrollToRegionCard(id) {
         setTimeout(function() {
             var card = document.querySelector('.region-card[data-region-id="' + id + '"]');
             if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }, 50);
     }
-
     function deleteRegion(id) {
-        var regions = pages[currentPageIndex].regions;
-        pages[currentPageIndex].regions = regions.filter(function(r) { return r.id !== id; });
+        pages[currentPageIndex].regions = pages[currentPageIndex].regions.filter(function(r) { return r.id !== id; });
         if (selectedRegionId === id) selectedRegionId = null;
         renderRegionsOnCanvas();
         renderRegionList();
     }
-
     function updateRegionText(id, field, value) {
         var region = findRegion(id);
         if (region) region[field] = value;
     }
-
     function updateRegionProp(id, prop, value) {
         var region = findRegion(id);
-        if (region) {
-            region[prop] = value;
-            renderRegionsOnCanvas();
-        }
+        if (region) { region[prop] = value; renderRegionsOnCanvas(); }
     }
-
+    function toggleRegionPreview(id) {
+        var region = findRegion(id);
+        if (region) { region.preview = !region.preview; renderRegionsOnCanvas(); renderRegionList(); }
+    }
     function findRegion(id) {
         var regions = pages[currentPageIndex].regions;
-        for (var i = 0; i < regions.length; i++) {
-            if (regions[i].id === id) return regions[i];
-        }
+        for (var i = 0; i < regions.length; i++) { if (regions[i].id === id) return regions[i]; }
         return null;
-    }
-
-    // ===== Preview =====
-    function togglePreview() {
-        previewMode = !previewMode;
-        var btn = document.getElementById('btnTogglePreview');
-        var icon = previewMode ? 'fa-eye-slash' : 'fa-eye';
-        btn.querySelector('i').className = 'fas ' + icon;
-        renderRegionsOnCanvas();
     }
 
     // ===== Export =====
@@ -1403,7 +1445,6 @@
         savePageDrawing();
         var page = pages[currentPageIndex];
         if (!page) return;
-
         var img = document.getElementById('canvasImg');
         var canvas = document.createElement('canvas');
         canvas.width = img.naturalWidth;
@@ -1411,114 +1452,82 @@
         var ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0);
 
-        // Apply freehand drawing layer
         if (page.drawingDataUrl) {
             var drawImg = new Image();
             drawImg.onload = function() {
                 ctx.drawImage(drawImg, 0, 0, canvas.width, canvas.height);
-                drawRegionsOnCanvas(ctx, canvas, img, page);
+                drawTextRegions(ctx, canvas, img, page);
                 saveCanvas(canvas);
             };
             drawImg.src = page.drawingDataUrl;
         } else {
-            drawRegionsOnCanvas(ctx, canvas, img, page);
+            drawTextRegions(ctx, canvas, img, page);
             saveCanvas(canvas);
         }
     }
-
-    function drawRegionsOnCanvas(ctx, canvas, img, page) {
+    function drawTextRegions(ctx, canvas, img, page) {
         var scale = canvas.width / img.offsetWidth;
         page.regions.forEach(function(r) {
-            if (!r.edited.trim()) return;
+            if (r.type !== 'text' || !r.edited.trim()) return;
             var rx = r.x / 100 * canvas.width;
             var ry = r.y / 100 * canvas.height;
             var rw = r.w / 100 * canvas.width;
             var rh = r.h / 100 * canvas.height;
             var fs = r.fontSize * scale;
-
-            // Background
             var bgMap = { transparent: null, semi: 'rgba(255,255,255,0.7)', opaque: '#ffffff' };
-            if (bgMap[r.bgOpacity]) {
-                ctx.fillStyle = bgMap[r.bgOpacity];
-                ctx.fillRect(rx, ry, rw, rh);
-            }
-
-            // Text
+            if (bgMap[r.bgOpacity]) { ctx.fillStyle = bgMap[r.bgOpacity]; ctx.fillRect(rx, ry, rw, rh); }
             ctx.fillStyle = r.fontColor;
             ctx.font = r.fontWeight + ' ' + fs + 'px "Noto Sans JP", sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-
-            if (r.writingMode === 'vertical') {
-                renderVerticalText(ctx, r.edited, rx, ry, rw, rh, fs);
-            } else {
-                renderHorizontalText(ctx, r.edited, rx, ry, rw, rh, fs);
-            }
+            if (r.writingMode === 'vertical') renderVerticalText(ctx, r.edited, rx, ry, rw, rh, fs);
+            else renderHorizontalText(ctx, r.edited, rx, ry, rw, rh, fs);
         });
     }
-
     function renderHorizontalText(ctx, text, rx, ry, rw, rh, fs) {
-        var chars = text.split('');
         var lines = [];
-        var currentLine = '';
-        chars.forEach(function(char) {
-            if (char === '\n') { lines.push(currentLine); currentLine = ''; return; }
-            var testLine = currentLine + char;
-            if (ctx.measureText(testLine).width > rw - 8) {
-                lines.push(currentLine);
-                currentLine = char;
-            } else {
-                currentLine = testLine;
-            }
+        text.split('\n').forEach(function(para) {
+            var chars = para.split('');
+            var currentLine = '';
+            chars.forEach(function(char) {
+                var testLine = currentLine + char;
+                if (ctx.measureText(testLine).width > rw - 8) {
+                    lines.push(currentLine); currentLine = char;
+                } else { currentLine = testLine; }
+            });
+            lines.push(currentLine);
         });
-        if (currentLine) lines.push(currentLine);
-
         var lineHeight = fs * 1.3;
         var totalH = lines.length * lineHeight;
         var startY = ry + (rh - totalH) / 2 + lineHeight / 2;
-        lines.forEach(function(line, i) {
-            ctx.fillText(line, rx + rw / 2, startY + i * lineHeight);
-        });
+        lines.forEach(function(line, i) { ctx.fillText(line, rx + rw / 2, startY + i * lineHeight); });
     }
-
     function renderVerticalText(ctx, text, rx, ry, rw, rh, fs) {
-        // Split by newlines first (each becomes a column, right to left)
         var cols = text.split('\n');
         var lineHeight = fs * 1.1;
         var colWidth = fs * 1.2;
         var charsPerCol = Math.floor((rh - 8) / lineHeight);
         if (charsPerCol < 1) charsPerCol = 1;
-
-        // Further split long cols into multiple columns
         var allCols = [];
         cols.forEach(function(col) {
-            for (var i = 0; i < col.length; i += charsPerCol) {
-                allCols.push(col.substr(i, charsPerCol));
-            }
-            if (col === '') allCols.push('');
+            if (col === '') { allCols.push(''); return; }
+            for (var i = 0; i < col.length; i += charsPerCol) allCols.push(col.substr(i, charsPerCol));
         });
-
         var totalW = allCols.length * colWidth;
         var startX = rx + rw - (rw - totalW) / 2 - colWidth / 2;
-
         allCols.forEach(function(col, colIdx) {
             var colX = startX - colIdx * colWidth;
             var chars = col.split('');
             var totalColH = chars.length * lineHeight;
             var startY = ry + (rh - totalColH) / 2 + lineHeight / 2;
-            chars.forEach(function(ch, i) {
-                ctx.fillText(ch, colX, startY + i * lineHeight);
-            });
+            chars.forEach(function(ch, i) { ctx.fillText(ch, colX, startY + i * lineHeight); });
         });
     }
-
     function saveCanvas(canvas) {
         canvas.toBlob(function(blob) {
             var url = URL.createObjectURL(blob);
             var a = document.createElement('a');
-            a.href = url;
-            a.download = 'manga_edited_page' + (currentPageIndex + 1) + '.png';
-            a.click();
+            a.href = url; a.download = 'manga_edited_page' + (currentPageIndex + 1) + '.png'; a.click();
             URL.revokeObjectURL(url);
         }, 'image/png');
     }
@@ -1533,7 +1542,6 @@
         var T = {
             pageTitle: { en: 'Manga Editor', ja: 'マンガエディター', zh: '漫画编辑器', es: 'Editor de Manga', fr: 'Éditeur de Manga', de: 'Manga-Editor', ko: '만화 편집기', ar: 'محرر المانجا', pt: 'Editor de Mangá', it: 'Editor Manga' },
             backStaging: { en: 'Manage Pages', ja: 'ページ管理', zh: '管理页面', es: 'Administrar páginas', fr: 'Gérer les pages', de: 'Seiten verwalten', ko: '페이지 관리', ar: 'إدارة الصفحات', pt: 'Gerenciar páginas', it: 'Gestisci pagine' },
-            preview: { en: 'Preview', ja: 'プレビュー', zh: '预览', es: 'Vista previa', fr: 'Aperçu', de: 'Vorschau', ko: '미리보기', ar: 'معاينة', pt: 'Visualizar', it: 'Anteprima' },
             exportBtn: { en: 'Export', ja: 'エクスポート', zh: '导出', es: 'Exportar', fr: 'Exporter', de: 'Exportieren', ko: '내보내기', ar: 'تصدير', pt: 'Exportar', it: 'Esporta' },
             upload: { en: 'Click or drag manga pages here', ja: 'クリックまたはマンガページをドラッグ', zh: '点击或拖动漫画页面到此处', es: 'Haga clic o arrastre páginas aquí', fr: 'Cliquez ou glissez des pages ici', de: 'Klicken oder Seiten hierher ziehen', ko: '클릭 또는 만화 페이지를 드래그', ar: 'انقر أو اسحب صفحات المانجا هنا', pt: 'Clique ou arraste páginas aqui', it: 'Clicca o trascina le pagine qui' },
             uploadHint: { en: 'Supports .jpg, .png, .webp - multiple pages OK', ja: '.jpg, .png, .webp対応 - 複数ページOK', zh: '支持 .jpg, .png, .webp - 可多页', es: 'Soporta .jpg, .png, .webp - múltiples páginas', fr: 'Supporte .jpg, .png, .webp - plusieurs pages', de: 'Unterstützt .jpg, .png, .webp - mehrere Seiten', ko: '.jpg, .png, .webp 지원 - 여러 페이지 가능', ar: 'يدعم .jpg, .png, .webp - صفحات متعددة', pt: 'Suporta .jpg, .png, .webp - múltiplas páginas', it: 'Supporta .jpg, .png, .webp - pagine multiple' },
@@ -1543,14 +1551,12 @@
             startEdit: { en: 'Start Editing', ja: '編集を開始', zh: '开始编辑', es: 'Comenzar edición', fr: "Commencer l'édition", de: 'Bearbeitung starten', ko: '편집 시작', ar: 'بدء التحرير', pt: 'Começar a editar', it: 'Inizia modifica' },
             textTool: { en: 'Text', ja: 'テキスト', zh: '文字', es: 'Texto', fr: 'Texte', de: 'Text', ko: '텍스트', ar: 'نص', pt: 'Texto', it: 'Testo' },
             drawTool: { en: 'Draw', ja: '描画', zh: '绘制', es: 'Dibujar', fr: 'Dessiner', de: 'Zeichnen', ko: '그리기', ar: 'رسم', pt: 'Desenhar', it: 'Disegna' },
-            eraseTool: { en: 'Erase', ja: '消す', zh: '擦除', es: 'Borrar', fr: 'Effacer', de: 'Löschen', ko: '지우기', ar: 'مسح', pt: 'Apagar', it: 'Cancella' },
-            regionsTitle: { en: 'Text Regions', ja: 'テキスト領域', zh: '文字区域', es: 'Regiones de texto', fr: 'Zones de texte', de: 'Textbereiche', ko: '텍스트 영역', ar: 'مناطق النص', pt: 'Regiões de texto', it: 'Aree di testo' }
+            eraseTool: { en: 'Erase', ja: '消しゴム', zh: '擦除', es: 'Borrar', fr: 'Effacer', de: 'Löschen', ko: '지우기', ar: 'مسح', pt: 'Apagar', it: 'Cancella' },
+            regionsTitle: { en: 'Regions', ja: '領域一覧', zh: '区域', es: 'Regiones', fr: 'Zones', de: 'Bereiche', ko: '영역', ar: 'المناطق', pt: 'Regiões', it: 'Aree' }
         };
-
         var setText = function(id, obj) { var el = document.getElementById(id); if (el) el.textContent = t(obj); };
         setText('editorTitle', T.pageTitle);
         setText('btnBackStaging', T.backStaging);
-        setText('btnPreviewText', T.preview);
         setText('btnExport', T.exportBtn);
         setText('uploadText', T.upload);
         setText('uploadHint', T.uploadHint);
@@ -1558,26 +1564,18 @@
         setText('btnAddMore', T.addMore);
         setText('btnClearStaged', T.clearStaged);
         setText('btnStartEdit', T.startEdit);
-        setText('btnRegionLabel', T.textTool);
+        setText('btnTextLabel', T.textTool);
         setText('btnDrawLabel', T.drawTool);
         setText('btnEraseLabel', T.eraseTool);
         setText('panelRegionsTitle', T.regionsTitle);
-
         var empty = document.querySelector('.empty-regions p');
         if (empty) empty.textContent = getEmptyText();
-
         document.title = t(T.pageTitle) + ' - Publisher';
         renderRegionList();
     }
 
-    // ===== Init =====
-    document.addEventListener('DOMContentLoaded', function() {
-        updateEditorText();
-    });
-
-    document.addEventListener('languageChanged', function() {
-        updateEditorText();
-    });
+    document.addEventListener('DOMContentLoaded', function() { updateEditorText(); });
+    document.addEventListener('languageChanged', function() { updateEditorText(); });
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
