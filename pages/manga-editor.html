@@ -100,13 +100,12 @@
             .editor-layout { grid-template-columns: 1fr; }
         }
 
-        /* ========== Upload State ========== */
+        /* ========== Upload / Staging State ========== */
         .upload-state {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            min-height: 500px;
+            gap: 1.5rem;
         }
         .upload-zone {
             border: 2px dashed var(--color-border);
@@ -117,13 +116,97 @@
             color: var(--color-text-secondary);
             transition: all 0.2s;
             width: 100%;
-            max-width: 600px;
+            max-width: 700px;
+            background: var(--color-bg-card);
         }
         .upload-zone:hover { border-color: var(--color-accent); color: var(--color-accent); }
         .upload-zone.dragover { border-color: var(--color-accent); background: rgba(139, 115, 85, 0.05); }
         .upload-zone i { font-size: 3rem; margin-bottom: 1rem; display: block; }
         .upload-zone p { font-size: 1rem; margin: 0.5rem 0; }
         .upload-zone small { font-size: 0.82rem; }
+
+        .staged-panel {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 900px;
+            padding: 1.25rem;
+        }
+        .staged-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .staged-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--color-text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .staged-count {
+            background: var(--color-accent);
+            color: #fff;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+        .staged-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .staged-item {
+            position: relative;
+            aspect-ratio: 3/4;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--color-border);
+            background: var(--color-bg);
+        }
+        .staged-item img { width: 100%; height: 100%; object-fit: cover; }
+        .staged-item-num {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        .staged-item-remove {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(199, 93, 93, 0.9);
+            color: #fff;
+            border: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .staged-item-remove:hover { background: var(--color-error); }
+        .staged-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
 
         /* ========== Canvas Panel ========== */
         .canvas-panel {
@@ -149,6 +232,7 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            flex-wrap: wrap;
         }
         .toolbar-btn {
             background: var(--color-bg-card);
@@ -167,11 +251,44 @@
         .toolbar-btn.active { background: var(--color-accent); color: #fff; border-color: var(--color-accent); }
         .toolbar-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
+        .tool-divider {
+            width: 1px;
+            height: 22px;
+            background: var(--color-border);
+            margin: 0 0.25rem;
+        }
+
+        .brush-options {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.25rem 0.5rem;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+        }
+        .brush-options label {
+            font-size: 0.72rem;
+            color: var(--color-text-secondary);
+            margin: 0;
+        }
+        .brush-options input[type="color"] {
+            width: 28px;
+            height: 24px;
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            padding: 0;
+            cursor: pointer;
+        }
+        .brush-options input[type="range"] {
+            width: 80px;
+        }
+
         .page-nav-info {
             font-size: 0.82rem;
             font-weight: 600;
             color: var(--color-text);
-            min-width: 80px;
+            min-width: 60px;
             text-align: center;
         }
 
@@ -184,9 +301,7 @@
             align-items: center;
             justify-content: center;
             min-height: 500px;
-            cursor: crosshair;
         }
-        .canvas-area.mode-select { cursor: default; }
 
         .canvas-wrapper {
             position: relative;
@@ -200,6 +315,17 @@
             user-select: none;
             -webkit-user-drag: none;
         }
+
+        /* Drawing canvas overlay */
+        #drawCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            touch-action: none;
+        }
+        .tool-mode-draw #drawCanvas { pointer-events: auto; cursor: crosshair; }
+        .tool-mode-region .canvas-wrapper { cursor: crosshair; }
 
         /* ========== Text Regions on Canvas ========== */
         .text-region {
@@ -220,15 +346,6 @@
             background: rgba(93, 139, 199, 0.2);
             box-shadow: 0 0 0 2px rgba(93, 139, 199, 0.3);
         }
-        .text-region.type-sfx { border-color: var(--color-warning); background: rgba(212, 168, 83, 0.12); }
-        .text-region.type-sfx:hover,
-        .text-region.type-sfx.selected { border-color: #C49A3C; background: rgba(212, 168, 83, 0.25); }
-        .text-region.type-narration { border-color: var(--color-success); background: rgba(93, 156, 89, 0.12); }
-        .text-region.type-narration:hover,
-        .text-region.type-narration.selected { border-color: #4A8A46; background: rgba(93, 156, 89, 0.25); }
-        .text-region.type-free { border-color: #9B7DC7; background: rgba(155, 125, 199, 0.12); }
-        .text-region.type-free:hover,
-        .text-region.type-free.selected { border-color: #7D5FB0; background: rgba(155, 125, 199, 0.25); }
 
         .region-label {
             position: absolute;
@@ -240,13 +357,10 @@
             border-radius: 3px 3px 0 0;
             color: #fff;
             white-space: nowrap;
+            background: var(--color-accent);
         }
-        .text-region .region-label { background: var(--color-accent); }
-        .text-region.type-sfx .region-label { background: var(--color-warning); }
-        .text-region.type-narration .region-label { background: var(--color-success); }
-        .text-region.type-free .region-label { background: #9B7DC7; }
 
-        /* Drawing rectangle */
+        /* Drawing rectangle (during drag) */
         .draw-rect {
             position: absolute;
             border: 2px dashed var(--color-accent);
@@ -263,12 +377,15 @@
             text-align: center;
             font-weight: 600;
             color: #000;
-            background: rgba(255, 255, 255, 0.85);
             padding: 2px 4px;
             overflow: hidden;
             word-break: break-word;
             line-height: 1.3;
             pointer-events: none;
+        }
+        .preview-text-overlay.writing-vertical {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
         }
 
         /* ========== Thumbnail Bar ========== */
@@ -345,7 +462,7 @@
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
-            max-height: 400px;
+            max-height: 500px;
             overflow-y: auto;
         }
         .region-list::-webkit-scrollbar { width: 5px; }
@@ -367,18 +484,14 @@
             justify-content: space-between;
             margin-bottom: 0.4rem;
         }
-        .region-type-badge {
-            font-size: 0.65rem;
+        .region-number {
+            font-size: 0.75rem;
             font-weight: 700;
-            padding: 2px 6px;
+            color: var(--color-accent);
+            background: rgba(139, 115, 85, 0.1);
+            padding: 2px 8px;
             border-radius: 4px;
-            color: #fff;
-            text-transform: uppercase;
         }
-        .badge-bubble { background: var(--color-accent); }
-        .badge-sfx { background: var(--color-warning); }
-        .badge-narration { background: var(--color-success); }
-        .badge-free { background: #9B7DC7; }
 
         .region-delete-btn {
             background: none;
@@ -419,11 +532,27 @@
         }
         .region-field textarea:focus { outline: none; border-color: var(--color-accent); background: #fff; }
 
-        .region-type-select {
-            padding: 0.3rem 0.5rem;
+        .region-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.4rem;
+            margin-bottom: 0.4rem;
+        }
+        .region-options label {
+            display: block;
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            margin-bottom: 0.15rem;
+            text-transform: uppercase;
+        }
+        .region-options select,
+        .region-options input {
+            width: 100%;
+            padding: 0.3rem 0.4rem;
             border: 1px solid var(--color-border);
-            border-radius: 6px;
-            font-size: 0.78rem;
+            border-radius: 5px;
+            font-size: 0.75rem;
             background: #fff;
             color: var(--color-text);
         }
@@ -436,30 +565,6 @@
         }
         .empty-regions i { font-size: 2rem; margin-bottom: 0.5rem; display: block; color: var(--color-border); }
 
-        /* ========== Font Settings ========== */
-        .font-settings {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.5rem;
-        }
-        .font-field label {
-            display: block;
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: var(--color-text-secondary);
-            margin-bottom: 0.15rem;
-        }
-        .font-field select,
-        .font-field input {
-            width: 100%;
-            padding: 0.35rem 0.5rem;
-            border: 1px solid var(--color-border);
-            border-radius: 6px;
-            font-size: 0.8rem;
-            background: #fff;
-            color: var(--color-text);
-        }
-
         /* ========== Action Buttons ========== */
         .btn-primary-custom {
             background: var(--color-accent);
@@ -471,7 +576,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 0.4rem;
         }
@@ -488,7 +593,7 @@
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 0.4rem;
         }
@@ -496,27 +601,15 @@
 
         .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.82rem; }
 
-        /* ========== Demo Banner ========== */
-        .demo-banner {
-            background: rgba(93, 139, 199, 0.1);
-            border: 1px solid rgba(93, 139, 199, 0.3);
-            border-radius: 8px;
-            padding: 0.6rem 1rem;
-            font-size: 0.82rem;
-            color: var(--color-info);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
         /* ========== Responsive ========== */
         @media (max-width: 768px) {
             .editor-container { padding: 0.75rem; }
             .editor-header { flex-direction: column; align-items: flex-start; }
             .canvas-area { min-height: 350px; }
-            .font-settings { grid-template-columns: 1fr; }
+            .region-options { grid-template-columns: 1fr; }
             .editor-header-actions { width: 100%; justify-content: flex-end; }
+            .staged-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
+            .brush-options input[type="range"] { width: 60px; }
         }
     </style>
 </head>
@@ -524,29 +617,23 @@
     <div id="navbar-container"></div>
 
     <div class="editor-container">
-        <!-- Demo Banner -->
-        <div class="demo-banner" id="demoBanner">
-            <i class="fas fa-info-circle"></i>
-            <span id="demoBannerText">Demo Mode: Text regions are manually created. In production, AI (Claude Vision) will auto-detect text areas.</span>
-        </div>
-
         <!-- Header -->
         <div class="editor-header">
             <h1><i class="fas fa-edit"></i> <span id="editorTitle">Manga Editor</span></h1>
             <div class="editor-header-actions" id="headerActions" style="display:none;">
-                <button class="btn-secondary-custom btn-sm" onclick="addMorePages()">
-                    <i class="fas fa-plus"></i> <span id="btnAddPages">Add Pages</span>
+                <button class="btn-secondary-custom btn-sm" onclick="backToStaging()">
+                    <i class="fas fa-arrow-left"></i> <span id="btnBackStaging">Manage Pages</span>
                 </button>
                 <button class="btn-secondary-custom btn-sm" id="btnTogglePreview" onclick="togglePreview()">
                     <i class="fas fa-eye"></i> <span id="btnPreviewText">Preview</span>
                 </button>
-                <button class="btn-primary-custom btn-sm" onclick="exportPages()">
+                <button class="btn-primary-custom btn-sm" onclick="exportPage()">
                     <i class="fas fa-download"></i> <span id="btnExport">Export</span>
                 </button>
             </div>
         </div>
 
-        <!-- Upload State (shown initially) -->
+        <!-- Upload / Staging State -->
         <div id="uploadState" class="upload-state">
             <div class="upload-zone" id="uploadZone">
                 <i class="fas fa-cloud-upload-alt"></i>
@@ -554,28 +641,61 @@
                 <small id="uploadHint">Supports .jpg, .png, .webp - multiple pages OK</small>
                 <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.webp" multiple style="display:none;" onchange="handleFileUpload(this)">
             </div>
+
+            <!-- Staged pages (shown after upload) -->
+            <div id="stagedPanel" class="staged-panel" style="display:none;">
+                <div class="staged-header">
+                    <div class="staged-title">
+                        <i class="fas fa-images"></i>
+                        <span id="stagedTitle">Uploaded Pages</span>
+                        <span class="staged-count" id="stagedCount">0</span>
+                    </div>
+                </div>
+                <div class="staged-grid" id="stagedGrid"></div>
+                <div class="staged-actions">
+                    <button class="btn-secondary-custom btn-sm" onclick="document.getElementById('fileInput').click()">
+                        <i class="fas fa-plus"></i> <span id="btnAddMore">Add More Pages</span>
+                    </button>
+                    <button class="btn-secondary-custom btn-sm" onclick="clearAllStaged()">
+                        <i class="fas fa-trash-alt"></i> <span id="btnClearStaged">Clear All</span>
+                    </button>
+                    <button class="btn-primary-custom btn-sm" onclick="startEditing()">
+                        <span id="btnStartEdit">Start Editing</span> <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <!-- Editor State (shown after upload) -->
+        <!-- Editor State -->
         <div id="editorState" style="display:none;">
             <div class="editor-layout">
                 <!-- Left: Canvas -->
                 <div class="canvas-panel">
                     <div class="canvas-toolbar">
                         <div class="canvas-toolbar-left">
-                            <button class="toolbar-btn" id="btnModeDraw" onclick="setMode('draw')" title="Draw text region">
-                                <i class="fas fa-vector-square"></i> <span id="btnDrawLabel">Draw</span>
+                            <button class="toolbar-btn active" id="btnToolRegion" onclick="setTool('region')" title="Add text region">
+                                <i class="fas fa-font"></i> <span id="btnRegionLabel">Text</span>
                             </button>
-                            <button class="toolbar-btn active" id="btnModeSelect" onclick="setMode('select')" title="Select & move">
-                                <i class="fas fa-mouse-pointer"></i> <span id="btnSelectLabel">Select</span>
+                            <button class="toolbar-btn" id="btnToolDraw" onclick="setTool('draw')" title="Freehand drawing">
+                                <i class="fas fa-paint-brush"></i> <span id="btnDrawLabel">Draw</span>
                             </button>
-                            <span style="color:var(--color-border);">|</span>
-                            <select class="toolbar-btn" id="regionTypeSelect" style="padding-right:1.5rem;">
-                                <option value="bubble">Bubble</option>
-                                <option value="sfx">SFX</option>
-                                <option value="narration">Narration</option>
-                                <option value="free">Free</option>
-                            </select>
+                            <button class="toolbar-btn" id="btnToolErase" onclick="setTool('erase')" title="Eraser">
+                                <i class="fas fa-eraser"></i> <span id="btnEraseLabel">Erase</span>
+                            </button>
+
+                            <!-- Brush options (visible in draw/erase mode) -->
+                            <div class="brush-options" id="brushOptions" style="display:none;">
+                                <label id="labelBrushColor"><i class="fas fa-palette"></i></label>
+                                <input type="color" id="brushColor" value="#000000">
+                                <label id="labelBrushSize">
+                                    <i class="fas fa-circle" style="font-size:0.65rem;"></i>
+                                </label>
+                                <input type="range" id="brushSize" min="1" max="30" value="4">
+                                <span id="brushSizeVal" style="font-size:0.72rem; min-width:18px; text-align:right;">4</span>
+                                <button class="toolbar-btn" onclick="clearDrawing()" style="padding: 0.25rem 0.5rem;" title="Clear drawing on this page">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="canvas-toolbar-right">
                             <button class="toolbar-btn" onclick="navPage(-1)" id="btnPrevPage"><i class="fas fa-chevron-left"></i></button>
@@ -584,10 +704,10 @@
                         </div>
                     </div>
 
-                    <div class="canvas-area" id="canvasArea">
+                    <div class="canvas-area tool-mode-region" id="canvasArea">
                         <div class="canvas-wrapper" id="canvasWrapper">
                             <img id="canvasImg" src="" alt="Manga page">
-                            <!-- Text regions & draw rect rendered here -->
+                            <canvas id="drawCanvas"></canvas>
                         </div>
                     </div>
 
@@ -600,65 +720,15 @@
                     <div class="panel">
                         <div class="panel-header">
                             <h3><i class="fas fa-layer-group"></i> <span id="panelRegionsTitle">Text Regions</span></h3>
-                            <span class="region-count" id="regionCount" style="font-size:0.75rem; color:var(--color-text-secondary);">0</span>
+                            <span id="regionCount" style="font-size:0.75rem; color:var(--color-text-secondary);">0</span>
                         </div>
                         <div class="panel-body">
                             <div class="region-list" id="regionList">
-                                <div class="empty-regions" id="emptyRegions">
+                                <div class="empty-regions">
                                     <i class="fas fa-draw-polygon"></i>
-                                    <p id="emptyRegionsText">Draw on the image to add text regions</p>
+                                    <p id="emptyRegionsText">Drag on the image to add text regions</p>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Font Settings -->
-                    <div class="panel">
-                        <div class="panel-header">
-                            <h3><i class="fas fa-font"></i> <span id="panelFontTitle">Font Settings</span></h3>
-                        </div>
-                        <div class="panel-body">
-                            <div class="font-settings">
-                                <div class="font-field">
-                                    <label id="labelFontSize">Size</label>
-                                    <input type="number" id="fontSize" value="14" min="8" max="72" onchange="updateFontSetting()">
-                                </div>
-                                <div class="font-field">
-                                    <label id="labelFontWeight">Weight</label>
-                                    <select id="fontWeight" onchange="updateFontSetting()">
-                                        <option value="400">Normal</option>
-                                        <option value="600">Semi-Bold</option>
-                                        <option value="700" selected>Bold</option>
-                                    </select>
-                                </div>
-                                <div class="font-field">
-                                    <label id="labelFontColor">Color</label>
-                                    <input type="color" id="fontColor" value="#000000" onchange="updateFontSetting()" style="height:32px;">
-                                </div>
-                                <div class="font-field">
-                                    <label id="labelFontBg">Background</label>
-                                    <select id="fontBg" onchange="updateFontSetting()">
-                                        <option value="white">White</option>
-                                        <option value="transparent">Transparent</option>
-                                        <option value="black">Black</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Quick Actions -->
-                    <div class="panel">
-                        <div class="panel-header">
-                            <h3><i class="fas fa-bolt"></i> <span id="panelActionsTitle">Actions</span></h3>
-                        </div>
-                        <div class="panel-body" style="display:flex; flex-direction:column; gap:0.5rem;">
-                            <button class="btn-secondary-custom btn-sm" onclick="loadDemoRegions()" style="width:100%; justify-content:center;">
-                                <i class="fas fa-magic"></i> <span id="btnLoadDemo">Load Demo Regions</span>
-                            </button>
-                            <button class="btn-secondary-custom btn-sm" onclick="clearAllRegions()" style="width:100%; justify-content:center;">
-                                <i class="fas fa-trash-alt"></i> <span id="btnClearAll">Clear All Regions</span>
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -671,15 +741,17 @@
     <!-- ========== JavaScript ========== -->
     <script>
     // ===== State =====
-    var pages = [];          // { file: File, regions: [] }
+    // Each page: { file, url, regions: [], drawingDataUrl: null }
+    var pages = [];
     var currentPageIndex = 0;
     var selectedRegionId = null;
-    var mode = 'select';     // 'select' or 'draw'
-    var isDrawing = false;
+    var tool = 'region';          // 'region' | 'draw' | 'erase'
+    var isDrawing = false;        // for region rectangle drag
+    var isPainting = false;       // for freehand drawing
     var drawStart = { x: 0, y: 0 };
     var previewMode = false;
     var regionIdCounter = 0;
-    var fontSettings = { size: 14, weight: '700', color: '#000000', bg: 'white' };
+    var lastPaintX = 0, lastPaintY = 0;
 
     function getLang() {
         return (typeof getCurrentLanguage === 'function') ? getCurrentLanguage() : (localStorage.getItem('preferredLanguage') || 'en');
@@ -690,28 +762,80 @@
         var files = Array.from(input.files).filter(function(f) { return f.type.startsWith('image/'); });
         if (files.length === 0) return;
         files.forEach(function(f) {
-            pages.push({ file: f, regions: [], url: URL.createObjectURL(f) });
+            pages.push({ file: f, regions: [], url: URL.createObjectURL(f), drawingDataUrl: null });
         });
         input.value = '';
-        currentPageIndex = pages.length - files.length;
-        showEditorState();
-        renderPage();
+        renderStaged();
     }
 
-    function addMorePages() {
-        document.getElementById('fileInput').click();
+    function renderStaged() {
+        var panel = document.getElementById('stagedPanel');
+        var grid = document.getElementById('stagedGrid');
+        var count = document.getElementById('stagedCount');
+
+        if (pages.length === 0) {
+            panel.style.display = 'none';
+            return;
+        }
+
+        panel.style.display = '';
+        count.textContent = pages.length;
+        grid.innerHTML = '';
+        pages.forEach(function(pg, i) {
+            var div = document.createElement('div');
+            div.className = 'staged-item';
+            var img = document.createElement('img');
+            img.src = pg.url;
+            var num = document.createElement('div');
+            num.className = 'staged-item-num';
+            num.textContent = 'P' + (i + 1);
+            var btn = document.createElement('button');
+            btn.className = 'staged-item-remove';
+            btn.innerHTML = '<i class="fas fa-times"></i>';
+            btn.onclick = function(e) { e.stopPropagation(); removeStagedPage(i); };
+            div.appendChild(img);
+            div.appendChild(num);
+            div.appendChild(btn);
+            grid.appendChild(div);
+        });
     }
 
-    function showEditorState() {
+    function removeStagedPage(idx) {
+        pages.splice(idx, 1);
+        renderStaged();
+    }
+
+    function clearAllStaged() {
+        var L = getLang();
+        var msg = { en: 'Remove all uploaded pages?', ja: 'アップロードした全ページを削除しますか？', zh: '删除所有已上传的页面？', es: '¿Eliminar todas las páginas subidas?', fr: 'Supprimer toutes les pages téléchargées ?', de: 'Alle hochgeladenen Seiten entfernen?', ko: '업로드된 모든 페이지를 삭제하시겠습니까?', ar: 'إزالة جميع الصفحات المحملة؟', pt: 'Remover todas as páginas enviadas?', it: 'Rimuovere tutte le pagine caricate?' };
+        if (!confirm(msg[L] || msg.en)) return;
+        pages = [];
+        renderStaged();
+    }
+
+    function startEditing() {
+        if (pages.length === 0) return;
+        currentPageIndex = 0;
         document.getElementById('uploadState').style.display = 'none';
         document.getElementById('editorState').style.display = '';
         document.getElementById('headerActions').style.display = '';
+        renderPage();
+    }
+
+    function backToStaging() {
+        // Save current drawing before going back
+        savePageDrawing();
+        document.getElementById('editorState').style.display = 'none';
+        document.getElementById('headerActions').style.display = 'none';
+        document.getElementById('uploadState').style.display = '';
+        renderStaged();
     }
 
     // ===== Page Navigation =====
     function navPage(dir) {
         var next = currentPageIndex + dir;
         if (next < 0 || next >= pages.length) return;
+        savePageDrawing();
         currentPageIndex = next;
         selectedRegionId = null;
         renderPage();
@@ -719,6 +843,7 @@
 
     function goToPage(idx) {
         if (idx < 0 || idx >= pages.length) return;
+        savePageDrawing();
         currentPageIndex = idx;
         selectedRegionId = null;
         renderPage();
@@ -727,12 +852,17 @@
     function renderPage() {
         var page = pages[currentPageIndex];
         if (!page) return;
-        document.getElementById('canvasImg').src = page.url;
+        var img = document.getElementById('canvasImg');
+        img.onload = function() {
+            setupDrawCanvas();
+            loadPageDrawing();
+            renderRegionsOnCanvas();
+        };
+        img.src = page.url;
         document.getElementById('pageNavInfo').textContent = (currentPageIndex + 1) + ' / ' + pages.length;
         document.getElementById('btnPrevPage').disabled = currentPageIndex === 0;
         document.getElementById('btnNextPage').disabled = currentPageIndex === pages.length - 1;
         renderThumbnails();
-        renderRegionsOnCanvas();
         renderRegionList();
     }
 
@@ -754,22 +884,80 @@
         });
     }
 
-    // ===== Mode =====
-    function setMode(m) {
-        mode = m;
-        document.getElementById('btnModeDraw').classList.toggle('active', m === 'draw');
-        document.getElementById('btnModeSelect').classList.toggle('active', m === 'select');
+    // ===== Tool Mode =====
+    function setTool(t) {
+        tool = t;
+        document.getElementById('btnToolRegion').classList.toggle('active', t === 'region');
+        document.getElementById('btnToolDraw').classList.toggle('active', t === 'draw');
+        document.getElementById('btnToolErase').classList.toggle('active', t === 'erase');
+
         var area = document.getElementById('canvasArea');
-        area.classList.toggle('mode-select', m === 'select');
+        area.classList.remove('tool-mode-region', 'tool-mode-draw', 'tool-mode-erase');
+        area.classList.add('tool-mode-' + t);
+
+        var brushOpts = document.getElementById('brushOptions');
+        brushOpts.style.display = (t === 'draw' || t === 'erase') ? '' : 'none';
     }
 
-    // ===== Drawing on Canvas =====
+    // ===== Draw Canvas Setup =====
+    function setupDrawCanvas() {
+        var img = document.getElementById('canvasImg');
+        var canvas = document.getElementById('drawCanvas');
+        canvas.width = img.offsetWidth;
+        canvas.height = img.offsetHeight;
+        canvas.style.width = img.offsetWidth + 'px';
+        canvas.style.height = img.offsetHeight + 'px';
+    }
+
+    function loadPageDrawing() {
+        var canvas = document.getElementById('drawCanvas');
+        var ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        var page = pages[currentPageIndex];
+        if (page && page.drawingDataUrl) {
+            var drawImg = new Image();
+            drawImg.onload = function() {
+                ctx.drawImage(drawImg, 0, 0, canvas.width, canvas.height);
+            };
+            drawImg.src = page.drawingDataUrl;
+        }
+    }
+
+    function savePageDrawing() {
+        var canvas = document.getElementById('drawCanvas');
+        if (!canvas || !pages[currentPageIndex]) return;
+        // Only save if canvas has content
+        try {
+            pages[currentPageIndex].drawingDataUrl = canvas.toDataURL('image/png');
+        } catch (e) {}
+    }
+
+    function clearDrawing() {
+        var L = getLang();
+        var msg = { en: 'Clear all drawings on this page?', ja: 'このページの全描画をクリアしますか？', zh: '清除此页面的所有绘图？', es: '¿Borrar todos los dibujos de esta página?', fr: 'Effacer tous les dessins de cette page ?', de: 'Alle Zeichnungen auf dieser Seite löschen?', ko: '이 페이지의 모든 그림을 삭제하시겠습니까?', ar: 'مسح جميع الرسومات على هذه الصفحة؟', pt: 'Limpar todos os desenhos desta página?', it: 'Cancellare tutti i disegni di questa pagina?' };
+        if (!confirm(msg[L] || msg.en)) return;
+        var canvas = document.getElementById('drawCanvas');
+        var ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        pages[currentPageIndex].drawingDataUrl = null;
+    }
+
+    // Window resize: re-setup canvas
+    window.addEventListener('resize', function() {
+        if (document.getElementById('editorState').style.display === 'none') return;
+        savePageDrawing();
+        setupDrawCanvas();
+        loadPageDrawing();
+    });
+
+    // ===== Drawing Events =====
     (function() {
-        var canvasArea, wrapper, drawRect;
+        var canvasArea, wrapper, drawCanvas, drawRect;
 
         document.addEventListener('DOMContentLoaded', function() {
             canvasArea = document.getElementById('canvasArea');
             wrapper = document.getElementById('canvasWrapper');
+            drawCanvas = document.getElementById('drawCanvas');
 
             // Upload zone events
             var uploadZone = document.getElementById('uploadZone');
@@ -779,13 +967,19 @@
             uploadZone.addEventListener('drop', function(e) {
                 e.preventDefault(); this.classList.remove('dragover');
                 var files = Array.from(e.dataTransfer.files).filter(function(f) { return f.type.startsWith('image/'); });
-                files.forEach(function(f) { pages.push({ file: f, regions: [], url: URL.createObjectURL(f) }); });
-                if (files.length > 0) { currentPageIndex = pages.length - files.length; showEditorState(); renderPage(); }
+                files.forEach(function(f) { pages.push({ file: f, regions: [], url: URL.createObjectURL(f), drawingDataUrl: null }); });
+                if (files.length > 0) renderStaged();
             });
 
-            // Canvas mouse events for drawing
+            // Brush size display
+            document.getElementById('brushSize').addEventListener('input', function() {
+                document.getElementById('brushSizeVal').textContent = this.value;
+            });
+
+            // ===== Region mode: mouse drag on wrapper =====
             wrapper.addEventListener('mousedown', function(e) {
-                if (mode !== 'draw') return;
+                if (tool !== 'region') return;
+                // Click on existing region → select
                 if (e.target.classList.contains('text-region') || e.target.closest('.text-region')) return;
                 e.preventDefault();
                 var rect = wrapper.getBoundingClientRect();
@@ -807,12 +1001,10 @@
                 var cy = Math.max(0, Math.min(e.clientY - rect.top, wrapper.offsetHeight));
                 var x = Math.min(drawStart.x, cx);
                 var y = Math.min(drawStart.y, cy);
-                var w = Math.abs(cx - drawStart.x);
-                var h = Math.abs(cy - drawStart.y);
                 drawRect.style.left = x + 'px';
                 drawRect.style.top = y + 'px';
-                drawRect.style.width = w + 'px';
-                drawRect.style.height = h + 'px';
+                drawRect.style.width = Math.abs(cx - drawStart.x) + 'px';
+                drawRect.style.height = Math.abs(cy - drawStart.y) + 'px';
             });
 
             document.addEventListener('mouseup', function(e) {
@@ -824,41 +1016,13 @@
                 var y = parseInt(drawRect.style.top);
                 drawRect.remove();
                 drawRect = null;
-
-                // Ignore tiny rects
                 if (w < 15 || h < 15) return;
-
-                // Convert to percentage of image
-                var img = document.getElementById('canvasImg');
-                var iw = img.offsetWidth;
-                var ih = img.offsetHeight;
-                if (iw === 0 || ih === 0) return;
-
-                var region = {
-                    id: ++regionIdCounter,
-                    type: document.getElementById('regionTypeSelect').value,
-                    x: (x / iw * 100).toFixed(2),
-                    y: (y / ih * 100).toFixed(2),
-                    w: (w / iw * 100).toFixed(2),
-                    h: (h / ih * 100).toFixed(2),
-                    original: '',
-                    edited: '',
-                    fontSize: fontSettings.size,
-                    fontWeight: fontSettings.weight,
-                    fontColor: fontSettings.color,
-                    fontBg: fontSettings.bg
-                };
-
-                pages[currentPageIndex].regions.push(region);
-                selectedRegionId = region.id;
-                renderRegionsOnCanvas();
-                renderRegionList();
-                scrollToRegionCard(region.id);
+                addRegion(x, y, w, h);
             });
 
-            // Touch support for drawing
+            // Touch support for region drawing
             wrapper.addEventListener('touchstart', function(e) {
-                if (mode !== 'draw') return;
+                if (tool !== 'region') return;
                 if (e.target.classList.contains('text-region') || e.target.closest('.text-region')) return;
                 e.preventDefault();
                 var touch = e.touches[0];
@@ -899,33 +1063,70 @@
                 drawRect.remove();
                 drawRect = null;
                 if (w < 15 || h < 15) return;
-                var img = document.getElementById('canvasImg');
-                var iw = img.offsetWidth;
-                var ih = img.offsetHeight;
-                if (iw === 0 || ih === 0) return;
-                var region = {
-                    id: ++regionIdCounter,
-                    type: document.getElementById('regionTypeSelect').value,
-                    x: (x / iw * 100).toFixed(2),
-                    y: (y / ih * 100).toFixed(2),
-                    w: (w / iw * 100).toFixed(2),
-                    h: (h / ih * 100).toFixed(2),
-                    original: '',
-                    edited: '',
-                    fontSize: fontSettings.size,
-                    fontWeight: fontSettings.weight,
-                    fontColor: fontSettings.color,
-                    fontBg: fontSettings.bg
-                };
-                pages[currentPageIndex].regions.push(region);
-                selectedRegionId = region.id;
-                renderRegionsOnCanvas();
-                renderRegionList();
+                addRegion(x, y, w, h);
             });
 
-            // Click on canvas to deselect (if in select mode)
+            // ===== Freehand drawing on canvas =====
+            drawCanvas.addEventListener('mousedown', function(e) {
+                if (tool !== 'draw' && tool !== 'erase') return;
+                e.preventDefault();
+                var rect = drawCanvas.getBoundingClientRect();
+                isPainting = true;
+                lastPaintX = e.clientX - rect.left;
+                lastPaintY = e.clientY - rect.top;
+                drawDot(lastPaintX, lastPaintY);
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (!isPainting) return;
+                var rect = drawCanvas.getBoundingClientRect();
+                var x = e.clientX - rect.left;
+                var y = e.clientY - rect.top;
+                drawLine(lastPaintX, lastPaintY, x, y);
+                lastPaintX = x;
+                lastPaintY = y;
+            });
+
+            document.addEventListener('mouseup', function() {
+                if (isPainting) {
+                    isPainting = false;
+                    savePageDrawing();
+                }
+            });
+
+            drawCanvas.addEventListener('touchstart', function(e) {
+                if (tool !== 'draw' && tool !== 'erase') return;
+                e.preventDefault();
+                var touch = e.touches[0];
+                var rect = drawCanvas.getBoundingClientRect();
+                isPainting = true;
+                lastPaintX = touch.clientX - rect.left;
+                lastPaintY = touch.clientY - rect.top;
+                drawDot(lastPaintX, lastPaintY);
+            }, { passive: false });
+
+            drawCanvas.addEventListener('touchmove', function(e) {
+                if (!isPainting) return;
+                e.preventDefault();
+                var touch = e.touches[0];
+                var rect = drawCanvas.getBoundingClientRect();
+                var x = touch.clientX - rect.left;
+                var y = touch.clientY - rect.top;
+                drawLine(lastPaintX, lastPaintY, x, y);
+                lastPaintX = x;
+                lastPaintY = y;
+            }, { passive: false });
+
+            drawCanvas.addEventListener('touchend', function() {
+                if (isPainting) {
+                    isPainting = false;
+                    savePageDrawing();
+                }
+            });
+
+            // Click on canvas area to deselect
             canvasArea.addEventListener('mousedown', function(e) {
-                if (mode !== 'select') return;
+                if (tool !== 'region') return;
                 if (!e.target.classList.contains('text-region') && !e.target.closest('.text-region')) {
                     selectedRegionId = null;
                     renderRegionsOnCanvas();
@@ -935,22 +1136,90 @@
         });
     })();
 
-    // ===== Render Regions on Canvas =====
+    // ===== Canvas draw helpers =====
+    function drawDot(x, y) {
+        var canvas = document.getElementById('drawCanvas');
+        var ctx = canvas.getContext('2d');
+        var size = parseInt(document.getElementById('brushSize').value);
+        if (tool === 'erase') {
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalCompositeOperation = 'source-over';
+        } else {
+            ctx.fillStyle = document.getElementById('brushColor').value;
+            ctx.beginPath();
+            ctx.arc(x, y, size / 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    function drawLine(x1, y1, x2, y2) {
+        var canvas = document.getElementById('drawCanvas');
+        var ctx = canvas.getContext('2d');
+        var size = parseInt(document.getElementById('brushSize').value);
+        if (tool === 'erase') {
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.lineWidth = size * 2;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+            ctx.globalCompositeOperation = 'source-over';
+        } else {
+            ctx.strokeStyle = document.getElementById('brushColor').value;
+            ctx.lineWidth = size;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+        }
+    }
+
+    // ===== Region operations =====
+    function addRegion(x, y, w, h) {
+        var img = document.getElementById('canvasImg');
+        var iw = img.offsetWidth;
+        var ih = img.offsetHeight;
+        if (iw === 0 || ih === 0) return;
+
+        var region = {
+            id: ++regionIdCounter,
+            x: (x / iw * 100).toFixed(2),
+            y: (y / ih * 100).toFixed(2),
+            w: (w / iw * 100).toFixed(2),
+            h: (h / ih * 100).toFixed(2),
+            original: '',
+            edited: '',
+            fontSize: 14,
+            fontWeight: '700',
+            fontColor: '#000000',
+            bgOpacity: 'opaque',   // 'transparent' | 'semi' | 'opaque'
+            writingMode: 'horizontal'  // 'horizontal' | 'vertical'
+        };
+        pages[currentPageIndex].regions.push(region);
+        selectedRegionId = region.id;
+        renderRegionsOnCanvas();
+        renderRegionList();
+        scrollToRegionCard(region.id);
+    }
+
     function renderRegionsOnCanvas() {
         var wrapper = document.getElementById('canvasWrapper');
-        // Remove existing regions
         wrapper.querySelectorAll('.text-region, .preview-text-overlay').forEach(function(el) { el.remove(); });
         if (!pages[currentPageIndex]) return;
 
         var regions = pages[currentPageIndex].regions;
-        var typeLabels = getTypeLabels();
 
         regions.forEach(function(r) {
             if (previewMode) {
-                // Show edited text overlay
                 if (r.edited.trim()) {
                     var overlay = document.createElement('div');
                     overlay.className = 'preview-text-overlay';
+                    if (r.writingMode === 'vertical') overlay.className += ' writing-vertical';
                     overlay.style.left = r.x + '%';
                     overlay.style.top = r.y + '%';
                     overlay.style.width = r.w + '%';
@@ -958,20 +1227,15 @@
                     overlay.style.fontSize = r.fontSize + 'px';
                     overlay.style.fontWeight = r.fontWeight;
                     overlay.style.color = r.fontColor;
-                    var bgMap = { white: 'rgba(255,255,255,0.85)', transparent: 'transparent', black: 'rgba(0,0,0,0.85)' };
-                    overlay.style.background = bgMap[r.fontBg] || bgMap.white;
-                    if (r.fontBg === 'black') overlay.style.color = r.fontColor === '#000000' ? '#fff' : r.fontColor;
+                    var bgMap = { transparent: 'transparent', semi: 'rgba(255,255,255,0.7)', opaque: '#ffffff' };
+                    overlay.style.background = bgMap[r.bgOpacity] || bgMap.opaque;
                     overlay.textContent = r.edited;
                     wrapper.appendChild(overlay);
                 }
             } else {
                 var div = document.createElement('div');
                 div.className = 'text-region';
-                if (r.type === 'sfx') div.className += ' type-sfx';
-                else if (r.type === 'narration') div.className += ' type-narration';
-                else if (r.type === 'free') div.className += ' type-free';
                 if (r.id === selectedRegionId) div.className += ' selected';
-
                 div.style.left = r.x + '%';
                 div.style.top = r.y + '%';
                 div.style.width = r.w + '%';
@@ -980,10 +1244,14 @@
 
                 var label = document.createElement('div');
                 label.className = 'region-label';
-                label.textContent = '#' + r.id + ' ' + (typeLabels[r.type] || r.type);
+                label.textContent = '#' + r.id;
                 div.appendChild(label);
 
                 div.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    selectRegion(r.id);
+                });
+                div.addEventListener('touchend', function(e) {
                     e.stopPropagation();
                     selectRegion(r.id);
                 });
@@ -993,65 +1261,69 @@
         });
     }
 
-    function getTypeLabels() {
-        var L = getLang();
-        var labels = {
-            bubble: { en: 'Bubble', ja: '吹き出し', zh: '对话框', es: 'Burbuja', fr: 'Bulle', de: 'Blase', ko: '말풍선', ar: 'فقاعة', pt: 'Balão', it: 'Fumetto' },
-            sfx: { en: 'SFX', ja: '効果音', zh: '音效', es: 'SFX', fr: 'SFX', de: 'SFX', ko: '효과음', ar: 'مؤثرات', pt: 'SFX', it: 'SFX' },
-            narration: { en: 'Narration', ja: 'ナレーション', zh: '旁白', es: 'Narración', fr: 'Narration', de: 'Erzählung', ko: '나레이션', ar: 'سرد', pt: 'Narração', it: 'Narrazione' },
-            free: { en: 'Free', ja: 'フリー', zh: '自由', es: 'Libre', fr: 'Libre', de: 'Frei', ko: '자유', ar: 'حر', pt: 'Livre', it: 'Libero' }
-        };
-        var result = {};
-        Object.keys(labels).forEach(function(k) { result[k] = labels[k][L] || labels[k].en; });
-        return result;
-    }
-
-    // ===== Render Region List =====
     function renderRegionList() {
         var list = document.getElementById('regionList');
         if (!pages[currentPageIndex]) return;
-
         var regions = pages[currentPageIndex].regions;
-        var typeLabels = getTypeLabels();
-
         document.getElementById('regionCount').textContent = regions.length;
 
         if (regions.length === 0) {
-            list.innerHTML = '<div class="empty-regions" id="emptyRegions">' +
+            list.innerHTML = '<div class="empty-regions">' +
                 '<i class="fas fa-draw-polygon"></i>' +
-                '<p id="emptyRegionsText">' + getEmptyText() + '</p></div>';
+                '<p>' + getEmptyText() + '</p></div>';
             return;
         }
 
         var L = getLang();
         var origLabel = { en: 'Original', ja: '原文', zh: '原文', es: 'Original', fr: 'Original', de: 'Original', ko: '원문', ar: 'الأصل', pt: 'Original', it: 'Originale' };
         var editLabel = { en: 'Edited', ja: '編集後', zh: '编辑后', es: 'Editado', fr: 'Modifié', de: 'Bearbeitet', ko: '편집됨', ar: 'معدل', pt: 'Editado', it: 'Modificato' };
-        var origL = origLabel[L] || origLabel.en;
-        var editL = editLabel[L] || editLabel.en;
+        var writeLabel = { en: 'Writing', ja: '書字方向', zh: '书写', es: 'Escritura', fr: 'Écriture', de: 'Schreibweise', ko: '쓰기', ar: 'الكتابة', pt: 'Escrita', it: 'Scrittura' };
+        var bgLabel = { en: 'Background', ja: '背景', zh: '背景', es: 'Fondo', fr: 'Fond', de: 'Hintergrund', ko: '배경', ar: 'الخلفية', pt: 'Fundo', it: 'Sfondo' };
+        var sizeLabel = { en: 'Size', ja: 'サイズ', zh: '大小', es: 'Tamaño', fr: 'Taille', de: 'Größe', ko: '크기', ar: 'الحجم', pt: 'Tamanho', it: 'Dimensione' };
+        var colorLabel = { en: 'Color', ja: '色', zh: '颜色', es: 'Color', fr: 'Couleur', de: 'Farbe', ko: '색상', ar: 'اللون', pt: 'Cor', it: 'Colore' };
+        var horizOpt = { en: 'Horizontal', ja: '横書き', zh: '横排', es: 'Horizontal', fr: 'Horizontal', de: 'Horizontal', ko: '가로', ar: 'أفقي', pt: 'Horizontal', it: 'Orizzontale' };
+        var vertOpt = { en: 'Vertical', ja: '縦書き', zh: '竖排', es: 'Vertical', fr: 'Vertical', de: 'Vertikal', ko: '세로', ar: 'عمودي', pt: 'Vertical', it: 'Verticale' };
+        var transpOpt = { en: 'Transparent', ja: '透明', zh: '透明', es: 'Transparente', fr: 'Transparent', de: 'Transparent', ko: '투명', ar: 'شفاف', pt: 'Transparente', it: 'Trasparente' };
+        var semiOpt = { en: 'Semi', ja: '半透明', zh: '半透明', es: 'Semi', fr: 'Semi', de: 'Halb', ko: '반투명', ar: 'نصف', pt: 'Semi', it: 'Semi' };
+        var opaqueOpt = { en: 'Opaque', ja: '不透明', zh: '不透明', es: 'Opaco', fr: 'Opaque', de: 'Undurchsichtig', ko: '불투명', ar: 'معتم', pt: 'Opaco', it: 'Opaco' };
+        var t = function(o) { return o[L] || o.en; };
 
         var html = '';
         regions.forEach(function(r) {
             var sel = r.id === selectedRegionId ? ' selected' : '';
-            var badgeClass = 'badge-bubble';
-            if (r.type === 'sfx') badgeClass = 'badge-sfx';
-            else if (r.type === 'narration') badgeClass = 'badge-narration';
-            else if (r.type === 'free') badgeClass = 'badge-free';
-
             html += '<div class="region-card' + sel + '" data-region-id="' + r.id + '" onclick="selectRegion(' + r.id + ')">';
             html += '<div class="region-card-header">';
-            html += '<span class="region-type-badge ' + badgeClass + '">#' + r.id + ' ' + escH(typeLabels[r.type] || r.type) + '</span>';
-            html += '<div style="display:flex;gap:0.3rem;align-items:center;">';
-            html += '<select class="region-type-select" onchange="changeRegionType(' + r.id + ',this.value)" onclick="event.stopPropagation()">';
-            ['bubble', 'sfx', 'narration', 'free'].forEach(function(t) {
-                html += '<option value="' + t + '"' + (r.type === t ? ' selected' : '') + '>' + escH(typeLabels[t]) + '</option>';
-            });
-            html += '</select>';
+            html += '<span class="region-number">#' + r.id + '</span>';
             html += '<button class="region-delete-btn" onclick="event.stopPropagation();deleteRegion(' + r.id + ')" title="Delete"><i class="fas fa-times"></i></button>';
-            html += '</div></div>';
-            html += '<div class="region-field"><label>' + escH(origL) + '</label>';
-            html += '<textarea placeholder="..." oninput="updateRegionText(' + r.id + ',\'original\',this.value)" onclick="event.stopPropagation()">' + escH(r.original) + '</textarea></div>';
-            html += '<div class="region-field"><label>' + escH(editL) + '</label>';
-            html += '<textarea placeholder="..." oninput="updateRegionText(' + r.id + ',\'edited\',this.value)" onclick="event.stopPropagation()">' + escH(r.edited) + '</textarea></div>';
+            html += '</div>';
+
+            html += '<div class="region-field"><label>' + escH(t(origLabel)) + '</label>';
+            html += '<textarea oninput="updateRegionText(' + r.id + ',\'original\',this.value)" onclick="event.stopPropagation()">' + escH(r.original) + '</textarea></div>';
+            html += '<div class="region-field"><label>' + escH(t(editLabel)) + '</label>';
+            html += '<textarea oninput="updateRegionText(' + r.id + ',\'edited\',this.value)" onclick="event.stopPropagation()">' + escH(r.edited) + '</textarea></div>';
+
+            html += '<div class="region-options">';
+            // Writing mode
+            html += '<div><label>' + escH(t(writeLabel)) + '</label>';
+            html += '<select onchange="updateRegionProp(' + r.id + ',\'writingMode\',this.value)" onclick="event.stopPropagation()">';
+            html += '<option value="horizontal"' + (r.writingMode === 'horizontal' ? ' selected' : '') + '>' + escH(t(horizOpt)) + '</option>';
+            html += '<option value="vertical"' + (r.writingMode === 'vertical' ? ' selected' : '') + '>' + escH(t(vertOpt)) + '</option>';
+            html += '</select></div>';
+            // Background
+            html += '<div><label>' + escH(t(bgLabel)) + '</label>';
+            html += '<select onchange="updateRegionProp(' + r.id + ',\'bgOpacity\',this.value)" onclick="event.stopPropagation()">';
+            html += '<option value="transparent"' + (r.bgOpacity === 'transparent' ? ' selected' : '') + '>' + escH(t(transpOpt)) + '</option>';
+            html += '<option value="semi"' + (r.bgOpacity === 'semi' ? ' selected' : '') + '>' + escH(t(semiOpt)) + '</option>';
+            html += '<option value="opaque"' + (r.bgOpacity === 'opaque' ? ' selected' : '') + '>' + escH(t(opaqueOpt)) + '</option>';
+            html += '</select></div>';
+            // Font size
+            html += '<div><label>' + escH(t(sizeLabel)) + '</label>';
+            html += '<input type="number" value="' + r.fontSize + '" min="8" max="72" onchange="updateRegionProp(' + r.id + ',\'fontSize\',parseInt(this.value))" onclick="event.stopPropagation()"></div>';
+            // Font color
+            html += '<div><label>' + escH(t(colorLabel)) + '</label>';
+            html += '<input type="color" value="' + r.fontColor + '" onchange="updateRegionProp(' + r.id + ',\'fontColor\',this.value)" onclick="event.stopPropagation()" style="height:28px;"></div>';
+            html += '</div>';
+
             html += '</div>';
         });
         list.innerHTML = html;
@@ -1060,21 +1332,20 @@
     function getEmptyText() {
         var L = getLang();
         var t = {
-            en: 'Draw on the image to add text regions',
+            en: 'Drag on the image to add text regions',
             ja: '画像上にドラッグしてテキスト領域を追加',
             zh: '在图片上拖动以添加文字区域',
-            es: 'Dibuje en la imagen para agregar regiones de texto',
-            fr: "Dessinez sur l'image pour ajouter des zones de texte",
-            de: 'Zeichnen Sie auf dem Bild, um Textbereiche hinzuzufügen',
-            ko: '이미지 위에 드래그하여 텍스트 영역 추가',
-            ar: 'ارسم على الصورة لإضافة مناطق نص',
-            pt: 'Desenhe na imagem para adicionar regiões de texto',
-            it: "Disegna sull'immagine per aggiungere aree di testo"
+            es: 'Arrastre en la imagen para agregar regiones',
+            fr: "Glissez sur l'image pour ajouter des zones",
+            de: 'Ziehen Sie auf dem Bild, um Bereiche hinzuzufügen',
+            ko: '이미지 위에 드래그하여 영역 추가',
+            ar: 'اسحب على الصورة لإضافة مناطق',
+            pt: 'Arraste na imagem para adicionar regiões',
+            it: "Trascina sull'immagine per aggiungere aree"
         };
         return t[L] || t.en;
     }
 
-    // ===== Region Operations =====
     function selectRegion(id) {
         selectedRegionId = id;
         renderRegionsOnCanvas();
@@ -1102,12 +1373,11 @@
         if (region) region[field] = value;
     }
 
-    function changeRegionType(id, type) {
+    function updateRegionProp(id, prop, value) {
         var region = findRegion(id);
         if (region) {
-            region.type = type;
+            region[prop] = value;
             renderRegionsOnCanvas();
-            renderRegionList();
         }
     }
 
@@ -1119,16 +1389,6 @@
         return null;
     }
 
-    function clearAllRegions() {
-        var L = getLang();
-        var msg = { en: 'Clear all regions on this page?', ja: 'このページの全領域をクリアしますか？', zh: '清除此页面的所有区域？' };
-        if (!confirm(msg[L] || msg.en)) return;
-        pages[currentPageIndex].regions = [];
-        selectedRegionId = null;
-        renderRegionsOnCanvas();
-        renderRegionList();
-    }
-
     // ===== Preview =====
     function togglePreview() {
         previewMode = !previewMode;
@@ -1138,64 +1398,9 @@
         renderRegionsOnCanvas();
     }
 
-    // ===== Font Settings =====
-    function updateFontSetting() {
-        fontSettings.size = parseInt(document.getElementById('fontSize').value) || 14;
-        fontSettings.weight = document.getElementById('fontWeight').value;
-        fontSettings.color = document.getElementById('fontColor').value;
-        fontSettings.bg = document.getElementById('fontBg').value;
-        // Apply to selected region
-        if (selectedRegionId) {
-            var r = findRegion(selectedRegionId);
-            if (r) {
-                r.fontSize = fontSettings.size;
-                r.fontWeight = fontSettings.weight;
-                r.fontColor = fontSettings.color;
-                r.fontBg = fontSettings.bg;
-            }
-        }
-    }
-
-    // ===== Demo Regions =====
-    function loadDemoRegions() {
-        if (!pages[currentPageIndex]) return;
-        var L = getLang();
-        var demoData = {
-            ja: [
-                { type: 'bubble', x: '10', y: '5', w: '35', h: '15', original: 'お前を倒す！', edited: '' },
-                { type: 'bubble', x: '55', y: '20', w: '30', h: '12', original: 'まさか…！', edited: '' },
-                { type: 'sfx', x: '40', y: '40', w: '20', h: '20', original: 'ドォォォン！！', edited: '' },
-                { type: 'narration', x: '5', y: '80', w: '90', h: '10', original: 'その時、運命の歯車が動き始めた。', edited: '' }
-            ],
-            en: [
-                { type: 'bubble', x: '10', y: '5', w: '35', h: '15', original: "I'll defeat you!", edited: '' },
-                { type: 'bubble', x: '55', y: '20', w: '30', h: '12', original: 'Impossible...!', edited: '' },
-                { type: 'sfx', x: '40', y: '40', w: '20', h: '20', original: 'BOOOM!!', edited: '' },
-                { type: 'narration', x: '5', y: '80', w: '90', h: '10', original: 'At that moment, the gears of fate began to turn.', edited: '' }
-            ]
-        };
-        var demo = demoData[L] || demoData.en;
-        demo.forEach(function(d) {
-            pages[currentPageIndex].regions.push({
-                id: ++regionIdCounter,
-                type: d.type,
-                x: d.x, y: d.y, w: d.w, h: d.h,
-                original: d.original,
-                edited: d.edited,
-                fontSize: fontSettings.size,
-                fontWeight: fontSettings.weight,
-                fontColor: fontSettings.color,
-                fontBg: fontSettings.bg
-            });
-        });
-        renderRegionsOnCanvas();
-        renderRegionList();
-    }
-
     // ===== Export =====
-    function exportPages() {
-        var L = getLang();
-        // Create a canvas to composite image + text overlays
+    function exportPage() {
+        savePageDrawing();
         var page = pages[currentPageIndex];
         if (!page) return;
 
@@ -1206,54 +1411,108 @@
         var ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0);
 
+        // Apply freehand drawing layer
+        if (page.drawingDataUrl) {
+            var drawImg = new Image();
+            drawImg.onload = function() {
+                ctx.drawImage(drawImg, 0, 0, canvas.width, canvas.height);
+                drawRegionsOnCanvas(ctx, canvas, img, page);
+                saveCanvas(canvas);
+            };
+            drawImg.src = page.drawingDataUrl;
+        } else {
+            drawRegionsOnCanvas(ctx, canvas, img, page);
+            saveCanvas(canvas);
+        }
+    }
+
+    function drawRegionsOnCanvas(ctx, canvas, img, page) {
+        var scale = canvas.width / img.offsetWidth;
         page.regions.forEach(function(r) {
             if (!r.edited.trim()) return;
             var rx = r.x / 100 * canvas.width;
             var ry = r.y / 100 * canvas.height;
             var rw = r.w / 100 * canvas.width;
             var rh = r.h / 100 * canvas.height;
-
-            // Scale font size relative to canvas
-            var scale = canvas.width / img.offsetWidth;
             var fs = r.fontSize * scale;
 
             // Background
-            var bgMap = { white: 'rgba(255,255,255,0.9)', transparent: 'transparent', black: 'rgba(0,0,0,0.9)' };
-            if (r.fontBg !== 'transparent') {
-                ctx.fillStyle = bgMap[r.fontBg] || bgMap.white;
+            var bgMap = { transparent: null, semi: 'rgba(255,255,255,0.7)', opaque: '#ffffff' };
+            if (bgMap[r.bgOpacity]) {
+                ctx.fillStyle = bgMap[r.bgOpacity];
                 ctx.fillRect(rx, ry, rw, rh);
             }
 
             // Text
             ctx.fillStyle = r.fontColor;
-            if (r.fontBg === 'black' && r.fontColor === '#000000') ctx.fillStyle = '#ffffff';
             ctx.font = r.fontWeight + ' ' + fs + 'px "Noto Sans JP", sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
 
-            // Simple word wrap
-            var words = r.edited.split('');
-            var lines = [];
-            var currentLine = '';
-            words.forEach(function(char) {
-                var testLine = currentLine + char;
-                if (ctx.measureText(testLine).width > rw - 8) {
-                    lines.push(currentLine);
-                    currentLine = char;
-                } else {
-                    currentLine = testLine;
-                }
-            });
-            if (currentLine) lines.push(currentLine);
+            if (r.writingMode === 'vertical') {
+                renderVerticalText(ctx, r.edited, rx, ry, rw, rh, fs);
+            } else {
+                renderHorizontalText(ctx, r.edited, rx, ry, rw, rh, fs);
+            }
+        });
+    }
 
-            var lineHeight = fs * 1.3;
-            var totalH = lines.length * lineHeight;
-            var startY = ry + (rh - totalH) / 2 + lineHeight / 2;
-            lines.forEach(function(line, i) {
-                ctx.fillText(line, rx + rw / 2, startY + i * lineHeight);
-            });
+    function renderHorizontalText(ctx, text, rx, ry, rw, rh, fs) {
+        var chars = text.split('');
+        var lines = [];
+        var currentLine = '';
+        chars.forEach(function(char) {
+            if (char === '\n') { lines.push(currentLine); currentLine = ''; return; }
+            var testLine = currentLine + char;
+            if (ctx.measureText(testLine).width > rw - 8) {
+                lines.push(currentLine);
+                currentLine = char;
+            } else {
+                currentLine = testLine;
+            }
+        });
+        if (currentLine) lines.push(currentLine);
+
+        var lineHeight = fs * 1.3;
+        var totalH = lines.length * lineHeight;
+        var startY = ry + (rh - totalH) / 2 + lineHeight / 2;
+        lines.forEach(function(line, i) {
+            ctx.fillText(line, rx + rw / 2, startY + i * lineHeight);
+        });
+    }
+
+    function renderVerticalText(ctx, text, rx, ry, rw, rh, fs) {
+        // Split by newlines first (each becomes a column, right to left)
+        var cols = text.split('\n');
+        var lineHeight = fs * 1.1;
+        var colWidth = fs * 1.2;
+        var charsPerCol = Math.floor((rh - 8) / lineHeight);
+        if (charsPerCol < 1) charsPerCol = 1;
+
+        // Further split long cols into multiple columns
+        var allCols = [];
+        cols.forEach(function(col) {
+            for (var i = 0; i < col.length; i += charsPerCol) {
+                allCols.push(col.substr(i, charsPerCol));
+            }
+            if (col === '') allCols.push('');
         });
 
+        var totalW = allCols.length * colWidth;
+        var startX = rx + rw - (rw - totalW) / 2 - colWidth / 2;
+
+        allCols.forEach(function(col, colIdx) {
+            var colX = startX - colIdx * colWidth;
+            var chars = col.split('');
+            var totalColH = chars.length * lineHeight;
+            var startY = ry + (rh - totalColH) / 2 + lineHeight / 2;
+            chars.forEach(function(ch, i) {
+                ctx.fillText(ch, colX, startY + i * lineHeight);
+            });
+        });
+    }
+
+    function saveCanvas(canvas) {
         canvas.toBlob(function(blob) {
             var url = URL.createObjectURL(blob);
             var a = document.createElement('a');
@@ -1273,57 +1532,39 @@
         var t = function(obj) { return obj[L] || obj.en || ''; };
         var T = {
             pageTitle: { en: 'Manga Editor', ja: 'マンガエディター', zh: '漫画编辑器', es: 'Editor de Manga', fr: 'Éditeur de Manga', de: 'Manga-Editor', ko: '만화 편집기', ar: 'محرر المانجا', pt: 'Editor de Mangá', it: 'Editor Manga' },
-            demoBanner: { en: 'Demo Mode: Text regions are manually created. In production, AI (Claude Vision) will auto-detect text areas.', ja: 'デモモード: テキスト領域は手動で作成します。本番環境ではAI（Claude Vision）が自動検出します。', zh: '演示模式：文字区域手动创建。正式版中AI（Claude Vision）将自动检测文字区域。', es: 'Modo demo: Las regiones de texto se crean manualmente. En producción, la IA detectará automáticamente.', fr: 'Mode démo : Les zones de texte sont créées manuellement. En production, l\'IA détectera automatiquement.', de: 'Demo-Modus: Textbereiche werden manuell erstellt. In der Produktion erkennt die KI automatisch.', ko: '데모 모드: 텍스트 영역을 수동으로 생성합니다. 프로덕션에서는 AI가 자동 감지합니다.', ar: 'وضع تجريبي: يتم إنشاء مناطق النص يدويًا. في الإنتاج سيكشف الذكاء الاصطناعي تلقائيًا.', pt: 'Modo demo: As regiões de texto são criadas manualmente. Em produção, a IA detectará automaticamente.', it: 'Modalità demo: Le aree di testo vengono create manualmente. In produzione, l\'IA rileverà automaticamente.' },
-            addPages: { en: 'Add Pages', ja: 'ページ追加', zh: '添加页面', es: 'Agregar páginas', fr: 'Ajouter des pages', de: 'Seiten hinzufügen', ko: '페이지 추가', ar: 'إضافة صفحات', pt: 'Adicionar páginas', it: 'Aggiungi pagine' },
+            backStaging: { en: 'Manage Pages', ja: 'ページ管理', zh: '管理页面', es: 'Administrar páginas', fr: 'Gérer les pages', de: 'Seiten verwalten', ko: '페이지 관리', ar: 'إدارة الصفحات', pt: 'Gerenciar páginas', it: 'Gestisci pagine' },
             preview: { en: 'Preview', ja: 'プレビュー', zh: '预览', es: 'Vista previa', fr: 'Aperçu', de: 'Vorschau', ko: '미리보기', ar: 'معاينة', pt: 'Visualizar', it: 'Anteprima' },
             exportBtn: { en: 'Export', ja: 'エクスポート', zh: '导出', es: 'Exportar', fr: 'Exporter', de: 'Exportieren', ko: '내보내기', ar: 'تصدير', pt: 'Exportar', it: 'Esporta' },
             upload: { en: 'Click or drag manga pages here', ja: 'クリックまたはマンガページをドラッグ', zh: '点击或拖动漫画页面到此处', es: 'Haga clic o arrastre páginas aquí', fr: 'Cliquez ou glissez des pages ici', de: 'Klicken oder Seiten hierher ziehen', ko: '클릭 또는 만화 페이지를 드래그', ar: 'انقر أو اسحب صفحات المانجا هنا', pt: 'Clique ou arraste páginas aqui', it: 'Clicca o trascina le pagine qui' },
             uploadHint: { en: 'Supports .jpg, .png, .webp - multiple pages OK', ja: '.jpg, .png, .webp対応 - 複数ページOK', zh: '支持 .jpg, .png, .webp - 可多页', es: 'Soporta .jpg, .png, .webp - múltiples páginas', fr: 'Supporte .jpg, .png, .webp - plusieurs pages', de: 'Unterstützt .jpg, .png, .webp - mehrere Seiten', ko: '.jpg, .png, .webp 지원 - 여러 페이지 가능', ar: 'يدعم .jpg, .png, .webp - صفحات متعددة', pt: 'Suporta .jpg, .png, .webp - múltiplas páginas', it: 'Supporta .jpg, .png, .webp - pagine multiple' },
-            draw: { en: 'Draw', ja: '描画', zh: '绘制', es: 'Dibujar', fr: 'Dessiner', de: 'Zeichnen', ko: '그리기', ar: 'رسم', pt: 'Desenhar', it: 'Disegna' },
-            select: { en: 'Select', ja: '選択', zh: '选择', es: 'Seleccionar', fr: 'Sélectionner', de: 'Auswählen', ko: '선택', ar: 'تحديد', pt: 'Selecionar', it: 'Seleziona' },
-            regionsTitle: { en: 'Text Regions', ja: 'テキスト領域', zh: '文字区域', es: 'Regiones de texto', fr: 'Zones de texte', de: 'Textbereiche', ko: '텍스트 영역', ar: 'مناطق النص', pt: 'Regiões de texto', it: 'Aree di testo' },
-            fontTitle: { en: 'Font Settings', ja: 'フォント設定', zh: '字体设置', es: 'Configuración de fuente', fr: 'Paramètres de police', de: 'Schrifteinstellungen', ko: '글꼴 설정', ar: 'إعدادات الخط', pt: 'Configurações de fonte', it: 'Impostazioni font' },
-            actionsTitle: { en: 'Actions', ja: 'アクション', zh: '操作', es: 'Acciones', fr: 'Actions', de: 'Aktionen', ko: '작업', ar: 'إجراءات', pt: 'Ações', it: 'Azioni' },
-            loadDemo: { en: 'Load Demo Regions', ja: 'デモ領域を読込', zh: '加载演示区域', es: 'Cargar regiones demo', fr: 'Charger les zones démo', de: 'Demo-Bereiche laden', ko: '데모 영역 로드', ar: 'تحميل مناطق تجريبية', pt: 'Carregar regiões demo', it: 'Carica aree demo' },
-            clearAll: { en: 'Clear All Regions', ja: '全領域クリア', zh: '清除所有区域', es: 'Limpiar todas las regiones', fr: 'Effacer toutes les zones', de: 'Alle Bereiche löschen', ko: '모든 영역 삭제', ar: 'مسح جميع المناطق', pt: 'Limpar todas as regiões', it: 'Cancella tutte le aree' },
-            size: { en: 'Size', ja: 'サイズ', zh: '大小', es: 'Tamaño', fr: 'Taille', de: 'Größe', ko: '크기', ar: 'الحجم', pt: 'Tamanho', it: 'Dimensione' },
-            weight: { en: 'Weight', ja: '太さ', zh: '粗细', es: 'Peso', fr: 'Épaisseur', de: 'Stärke', ko: '두께', ar: 'الوزن', pt: 'Peso', it: 'Spessore' },
-            color: { en: 'Color', ja: '色', zh: '颜色', es: 'Color', fr: 'Couleur', de: 'Farbe', ko: '색상', ar: 'اللون', pt: 'Cor', it: 'Colore' },
-            background: { en: 'Background', ja: '背景', zh: '背景', es: 'Fondo', fr: 'Arrière-plan', de: 'Hintergrund', ko: '배경', ar: 'الخلفية', pt: 'Fundo', it: 'Sfondo' },
-            bubbleOpt: { en: 'Bubble', ja: '吹き出し', zh: '对话框', es: 'Burbuja', fr: 'Bulle', de: 'Blase', ko: '말풍선', ar: 'فقاعة', pt: 'Balão', it: 'Fumetto' },
-            sfxOpt: { en: 'SFX', ja: '効果音', zh: '音效', es: 'SFX', fr: 'SFX', de: 'SFX', ko: '효과음', ar: 'مؤثرات', pt: 'SFX', it: 'SFX' },
-            narrationOpt: { en: 'Narration', ja: 'ナレーション', zh: '旁白', es: 'Narración', fr: 'Narration', de: 'Erzählung', ko: '나레이션', ar: 'سرد', pt: 'Narração', it: 'Narrazione' },
-            freeOpt: { en: 'Free', ja: 'フリー', zh: '自由', es: 'Libre', fr: 'Libre', de: 'Frei', ko: '자유', ar: 'حر', pt: 'Livre', it: 'Libero' }
+            stagedTitle: { en: 'Uploaded Pages', ja: 'アップロード済みページ', zh: '已上传页面', es: 'Páginas subidas', fr: 'Pages téléchargées', de: 'Hochgeladene Seiten', ko: '업로드된 페이지', ar: 'الصفحات المحملة', pt: 'Páginas enviadas', it: 'Pagine caricate' },
+            addMore: { en: 'Add More Pages', ja: 'ページを追加', zh: '添加更多页面', es: 'Agregar más páginas', fr: "Ajouter d'autres pages", de: 'Mehr Seiten hinzufügen', ko: '페이지 더 추가', ar: 'إضافة المزيد', pt: 'Adicionar mais páginas', it: 'Aggiungi altre pagine' },
+            clearStaged: { en: 'Clear All', ja: '全削除', zh: '全部清除', es: 'Borrar todo', fr: 'Tout effacer', de: 'Alle löschen', ko: '모두 삭제', ar: 'مسح الكل', pt: 'Limpar tudo', it: 'Cancella tutto' },
+            startEdit: { en: 'Start Editing', ja: '編集を開始', zh: '开始编辑', es: 'Comenzar edición', fr: "Commencer l'édition", de: 'Bearbeitung starten', ko: '편집 시작', ar: 'بدء التحرير', pt: 'Começar a editar', it: 'Inizia modifica' },
+            textTool: { en: 'Text', ja: 'テキスト', zh: '文字', es: 'Texto', fr: 'Texte', de: 'Text', ko: '텍스트', ar: 'نص', pt: 'Texto', it: 'Testo' },
+            drawTool: { en: 'Draw', ja: '描画', zh: '绘制', es: 'Dibujar', fr: 'Dessiner', de: 'Zeichnen', ko: '그리기', ar: 'رسم', pt: 'Desenhar', it: 'Disegna' },
+            eraseTool: { en: 'Erase', ja: '消す', zh: '擦除', es: 'Borrar', fr: 'Effacer', de: 'Löschen', ko: '지우기', ar: 'مسح', pt: 'Apagar', it: 'Cancella' },
+            regionsTitle: { en: 'Text Regions', ja: 'テキスト領域', zh: '文字区域', es: 'Regiones de texto', fr: 'Zones de texte', de: 'Textbereiche', ko: '텍스트 영역', ar: 'مناطق النص', pt: 'Regiões de texto', it: 'Aree di testo' }
         };
 
         var setText = function(id, obj) { var el = document.getElementById(id); if (el) el.textContent = t(obj); };
         setText('editorTitle', T.pageTitle);
-        setText('demoBannerText', T.demoBanner);
-        setText('btnAddPages', T.addPages);
+        setText('btnBackStaging', T.backStaging);
         setText('btnPreviewText', T.preview);
         setText('btnExport', T.exportBtn);
         setText('uploadText', T.upload);
         setText('uploadHint', T.uploadHint);
-        setText('btnDrawLabel', T.draw);
-        setText('btnSelectLabel', T.select);
+        setText('stagedTitle', T.stagedTitle);
+        setText('btnAddMore', T.addMore);
+        setText('btnClearStaged', T.clearStaged);
+        setText('btnStartEdit', T.startEdit);
+        setText('btnRegionLabel', T.textTool);
+        setText('btnDrawLabel', T.drawTool);
+        setText('btnEraseLabel', T.eraseTool);
         setText('panelRegionsTitle', T.regionsTitle);
-        setText('panelFontTitle', T.fontTitle);
-        setText('panelActionsTitle', T.actionsTitle);
-        setText('btnLoadDemo', T.loadDemo);
-        setText('btnClearAll', T.clearAll);
-        setText('labelFontSize', T.size);
-        setText('labelFontWeight', T.weight);
-        setText('labelFontColor', T.color);
-        setText('labelFontBg', T.background);
 
-        // Region type select options
-        var rts = document.getElementById('regionTypeSelect');
-        if (rts) {
-            rts.options[0].textContent = t(T.bubbleOpt);
-            rts.options[1].textContent = t(T.sfxOpt);
-            rts.options[2].textContent = t(T.narrationOpt);
-            rts.options[3].textContent = t(T.freeOpt);
-        }
+        var empty = document.querySelector('.empty-regions p');
+        if (empty) empty.textContent = getEmptyText();
 
         document.title = t(T.pageTitle) + ' - Publisher';
         renderRegionList();
