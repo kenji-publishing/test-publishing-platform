@@ -1575,9 +1575,20 @@
         scrollToRegionCard(id);
     }
     function scrollToRegionCard(id) {
+        // Only scroll within the region-list container (NEVER the page),
+        // otherwise selecting a region by tapping it on the canvas would
+        // cause the page to jump to the side panel on mobile.
         setTimeout(function() {
             var card = document.querySelector('.region-card[data-region-id="' + id + '"]');
-            if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            var list = document.getElementById('regionList');
+            if (!card || !list) return;
+            var listRect = list.getBoundingClientRect();
+            var cardRect = card.getBoundingClientRect();
+            if (cardRect.top < listRect.top) {
+                list.scrollTop += cardRect.top - listRect.top - 4;
+            } else if (cardRect.bottom > listRect.bottom) {
+                list.scrollTop += cardRect.bottom - listRect.bottom + 4;
+            }
         }, 50);
     }
     function deleteRegion(id) {
