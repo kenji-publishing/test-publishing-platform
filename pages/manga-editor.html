@@ -352,8 +352,25 @@
             touch-action: none;
         }
         .tool-mode-draw .canvas-wrapper,
-        .tool-mode-erase .canvas-wrapper { cursor: crosshair; }
+        .tool-mode-erase .canvas-wrapper { cursor: none; }
         .tool-mode-text .canvas-wrapper { cursor: crosshair; }
+        .tool-mode-text .canvas-wrapper,
+        .tool-mode-draw .canvas-wrapper,
+        .tool-mode-erase .canvas-wrapper { touch-action: none; }
+
+        /* Brush cursor preview */
+        .brush-cursor {
+            position: fixed;
+            pointer-events: none;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.85);
+        }
+        .brush-cursor.active { display: block; }
+        .tool-mode-draw .brush-cursor { border: 2px solid var(--color-info); background: rgba(93,139,199,0.15); }
+        .tool-mode-erase .brush-cursor { border: 2px solid var(--color-error); background: rgba(199,93,93,0.15); }
 
         /* ========== Regions on Canvas ========== */
         .region-box {
@@ -803,6 +820,9 @@
         </div>
     </div>
 
+    <!-- Brush cursor preview (follows pointer in draw/erase mode) -->
+    <div id="brushCursor" class="brush-cursor"></div>
+
     <div id="footer-container"></div>
 
     <!-- ========== JavaScript ========== -->
@@ -961,6 +981,10 @@
         area.classList.remove('tool-mode-text', 'tool-mode-draw', 'tool-mode-erase');
         area.classList.add('tool-mode-' + t);
         document.getElementById('brushOptions').style.display = (t === 'draw' || t === 'erase') ? '' : 'none';
+        // Hide brush cursor when not in draw/erase mode
+        var bc = document.getElementById('brushCursor');
+        if (bc && t !== 'draw' && t !== 'erase') bc.classList.remove('active');
+        if (typeof window.updateBrushCursorSize === 'function') window.updateBrushCursorSize();
     }
 
     // ===== Draw Canvas =====
@@ -1056,7 +1080,44 @@
 
             document.getElementById('brushSize').addEventListener('input', function() {
                 document.getElementById('brushSizeVal').textContent = this.value;
+                updateBrushCursorSize();
             });
+
+            // ===== Brush cursor preview =====
+            var brushCursor = document.getElementById('brushCursor');
+            function updateBrushCursorSize() {
+                var size = parseInt(document.getElementById('brushSize').value);
+                // Eraser is 2x effective size (matches paintLine logic)
+                if (tool === 'erase') size = size * 2;
+                brushCursor.style.width = size + 'px';
+                brushCursor.style.height = size + 'px';
+            }
+            window.updateBrushCursorSize = updateBrushCursorSize;
+
+            function moveBrushCursor(clientX, clientY) {
+                if (tool !== 'draw' && tool !== 'erase') {
+                    brushCursor.classList.remove('active');
+                    return;
+                }
+                // Check if pointer is within canvas-area bounds
+                var areaRect = canvasArea.getBoundingClientRect();
+                if (clientX < areaRect.left || clientX > areaRect.right ||
+                    clientY < areaRect.top || clientY > areaRect.bottom) {
+                    brushCursor.classList.remove('active');
+                    return;
+                }
+                updateBrushCursorSize();
+                brushCursor.style.left = clientX + 'px';
+                brushCursor.style.top = clientY + 'px';
+                brushCursor.classList.add('active');
+            }
+
+            canvasArea.addEventListener('mousemove', function(e) { moveBrushCursor(e.clientX, e.clientY); });
+            canvasArea.addEventListener('mouseleave', function() { brushCursor.classList.remove('active'); });
+            canvasArea.addEventListener('touchmove', function(e) {
+                if (e.touches.length > 0) moveBrushCursor(e.touches[0].clientX, e.touches[0].clientY);
+            }, { passive: true });
+            canvasArea.addEventListener('touchend', function() { brushCursor.classList.remove('active'); });
 
             // ===== Wrapper: mouse/touch down =====
             var pointerDown = function(e, isTouch) {
@@ -1073,7 +1134,7 @@
 
                 if (tool === 'text' || tool === 'draw') {
                     // Start drag to create new region
-                    if (!isTouch) e.preventDefault();
+                    e.preventDefault();
                     var coord = getWrapperCoord(pt.clientX, pt.clientY);
                     dragStart = coord;
                     isDrawingRect = true;
@@ -1088,7 +1149,7 @@
                     // Only inside a region
                     var cc = getCanvasCoord(pt.clientX, pt.clientY);
                     if (isInsideRegion(cc.x, cc.y)) {
-                        if (!isTouch) e.preventDefault();
+                        e.preventDefault();
                         isPainting = true;
                         lastPaintX = cc.x; lastPaintY = cc.y;
                         paintAt(cc.x, cc.y);
@@ -1229,7 +1290,7 @@
         var drawRegion = isInsideRegion(cc.x, cc.y, 'draw');
         if (drawRegion) {
             // Paint mode: start painting within the region
-            if (!isTouch) e.preventDefault();
+            e.preventDefault();
             e.stopPropagation();
             isPainting = true;
             isDrawingRect = false;
