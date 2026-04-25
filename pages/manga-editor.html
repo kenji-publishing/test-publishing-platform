@@ -48,6 +48,8 @@
             --color-warning: #D4A853;
             --color-error: #C75D5D;
             --color-info: #5D8BC7;
+            /* Draw region tint color (RGB triple, customizable via toolbar) */
+            --draw-rgb: 155, 125, 199;
         }
 
         * { box-sizing: border-box; }
@@ -385,7 +387,7 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.3);
             box-sizing: border-box;
         }
-        .region-box.type-draw .resize-handle { background: #7D5FB0; }
+        .region-box.type-draw .resize-handle { background: rgb(var(--draw-rgb)); }
         .handle-tl { top: -8px; left: -8px; cursor: nwse-resize; }
         .handle-tr { top: -8px; right: -8px; cursor: nesw-resize; }
         .handle-bl { bottom: -8px; left: -8px; cursor: nesw-resize; }
@@ -419,14 +421,14 @@
             background: rgba(139, 115, 85, 0.08);
         }
         .region-box.type-draw {
-            border: 2px solid #9B7DC7;
-            background: rgba(155, 125, 199, 0.08);
+            border: 2px solid rgb(var(--draw-rgb));
+            background: rgba(var(--draw-rgb), 0.08);
         }
         .region-box.type-text:hover { border-color: var(--color-info); background: rgba(93, 139, 199, 0.12); }
-        .region-box.type-draw:hover { border-color: #7D5FB0; background: rgba(155, 125, 199, 0.18); }
+        .region-box.type-draw:hover { border-color: rgb(var(--draw-rgb)); background: rgba(var(--draw-rgb), 0.18); }
         .region-box.selected { box-shadow: 0 0 0 2px rgba(93, 139, 199, 0.35); }
         .region-box.selected.type-text { border-color: var(--color-info); background: rgba(93, 139, 199, 0.15); }
-        .region-box.selected.type-draw { border-color: #7D5FB0; background: rgba(155, 125, 199, 0.22); }
+        .region-box.selected.type-draw { border-color: rgb(var(--draw-rgb)); background: rgba(var(--draw-rgb), 0.22); }
 
         .region-box.preview-on { border: none; background: transparent; box-shadow: none; cursor: default; }
         .region-box.preview-on .region-label { display: none; }
@@ -443,7 +445,7 @@
             white-space: nowrap;
         }
         .region-box.type-text .region-label { background: var(--color-accent); }
-        .region-box.type-draw .region-label { background: #9B7DC7; }
+        .region-box.type-draw .region-label { background: rgb(var(--draw-rgb)); }
 
         /* Drawing temp rectangle */
         .draw-rect {
@@ -563,7 +565,7 @@
         }
         .region-card:hover { border-color: var(--color-accent); }
         .region-card.selected { border-color: var(--color-info); background: rgba(93, 139, 199, 0.06); }
-        .region-card.type-draw.selected { border-color: #7D5FB0; background: rgba(155, 125, 199, 0.06); }
+        .region-card.type-draw.selected { border-color: rgb(var(--draw-rgb)); background: rgba(var(--draw-rgb), 0.06); }
 
         .region-card-header {
             display: flex;
@@ -586,8 +588,8 @@
             border-radius: 4px;
         }
         .region-card.type-draw .region-number {
-            color: #7D5FB0;
-            background: rgba(155, 125, 199, 0.15);
+            color: rgb(var(--draw-rgb));
+            background: rgba(var(--draw-rgb), 0.15);
         }
         .region-type-tag {
             font-size: 0.65rem;
@@ -670,7 +672,7 @@
             font-size: 0.75rem;
             color: var(--color-text-secondary);
             padding: 0.4rem 0.6rem;
-            background: rgba(155, 125, 199, 0.08);
+            background: rgba(var(--draw-rgb), 0.08);
             border-radius: 6px;
             text-align: center;
             line-height: 1.4;
@@ -800,11 +802,17 @@
 
                             <!-- Brush options (visible in draw/erase mode) -->
                             <div class="brush-options" id="brushOptions" style="display:none;">
-                                <i class="fas fa-palette" style="color:var(--color-text-secondary); font-size:0.75rem;"></i>
-                                <input type="color" id="brushColor" value="#000000">
-                                <i class="fas fa-circle" style="color:var(--color-text-secondary); font-size:0.65rem;"></i>
-                                <input type="range" id="brushSize" min="1" max="30" value="4">
+                                <i class="fas fa-palette" style="color:var(--color-text-secondary); font-size:0.75rem;" title="Brush color"></i>
+                                <input type="color" id="brushColor" value="#000000" title="Brush color">
+                                <i class="fas fa-circle" style="color:var(--color-text-secondary); font-size:0.65rem;" title="Brush size"></i>
+                                <input type="range" id="brushSize" min="1" max="30" value="4" title="Brush size">
                                 <span id="brushSizeVal" style="font-size:0.72rem; min-width:18px; text-align:right;">4</span>
+                            </div>
+
+                            <!-- Draw region tint color (visible in draw mode) -->
+                            <div class="brush-options" id="drawTintOptions" style="display:none;">
+                                <i class="fas fa-vector-square" style="color:var(--color-text-secondary); font-size:0.75rem;" title="Draw region color"></i>
+                                <input type="color" id="drawRegionColor" value="#9B7DC7" title="Draw region color">
                             </div>
                         </div>
                         <div class="canvas-toolbar-right">
@@ -1021,10 +1029,31 @@
         area.classList.remove('tool-mode-text', 'tool-mode-draw', 'tool-mode-erase');
         area.classList.add('tool-mode-' + t);
         document.getElementById('brushOptions').style.display = (t === 'draw' || t === 'erase') ? '' : 'none';
+        document.getElementById('drawTintOptions').style.display = (t === 'draw') ? '' : 'none';
         // Hide brush cursor when not in draw/erase mode
         var bc = document.getElementById('brushCursor');
         if (bc && t !== 'draw' && t !== 'erase') bc.classList.remove('active');
         if (typeof window.updateBrushCursorSize === 'function') window.updateBrushCursorSize();
+    }
+
+    // Draw region tint color (CSS variable + localStorage)
+    function applyDrawRegionColor(hex) {
+        var h = hex.replace('#', '');
+        if (h.length !== 6) return;
+        var r = parseInt(h.slice(0, 2), 16);
+        var g = parseInt(h.slice(2, 4), 16);
+        var b = parseInt(h.slice(4, 6), 16);
+        document.documentElement.style.setProperty('--draw-rgb', r + ', ' + g + ', ' + b);
+        try { localStorage.setItem('mangaEditorDrawColor', hex); } catch (e) {}
+    }
+    function loadDrawRegionColor() {
+        var saved;
+        try { saved = localStorage.getItem('mangaEditorDrawColor'); } catch (e) {}
+        if (saved) {
+            applyDrawRegionColor(saved);
+            var input = document.getElementById('drawRegionColor');
+            if (input) input.value = saved;
+        }
     }
 
     // ===== Draw Canvas =====
@@ -1876,7 +1905,12 @@
         renderRegionList();
     }
 
-    document.addEventListener('DOMContentLoaded', function() { updateEditorText(); });
+    document.addEventListener('DOMContentLoaded', function() {
+        updateEditorText();
+        loadDrawRegionColor();
+        var dc = document.getElementById('drawRegionColor');
+        if (dc) dc.addEventListener('input', function() { applyDrawRegionColor(this.value); });
+    });
     document.addEventListener('languageChanged', function() { updateEditorText(); });
     </script>
 
