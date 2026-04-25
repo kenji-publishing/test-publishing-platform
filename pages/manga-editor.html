@@ -354,9 +354,32 @@
         .tool-mode-draw .canvas-wrapper,
         .tool-mode-erase .canvas-wrapper { cursor: none; }
         .tool-mode-text .canvas-wrapper { cursor: crosshair; }
+        /* touch-action: none must apply to wrapper AND all descendants
+           because the touch target may be a child element (region-box, label, etc) */
         .tool-mode-text .canvas-wrapper,
+        .tool-mode-text .canvas-wrapper *,
         .tool-mode-draw .canvas-wrapper,
-        .tool-mode-erase .canvas-wrapper { touch-action: none; }
+        .tool-mode-draw .canvas-wrapper *,
+        .tool-mode-erase .canvas-wrapper,
+        .tool-mode-erase .canvas-wrapper * { touch-action: none; -webkit-touch-callout: none; }
+
+        /* Resize handles on selected region */
+        .resize-handle {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: var(--color-info);
+            border: 2px solid #fff;
+            border-radius: 50%;
+            z-index: 10;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            box-sizing: border-box;
+        }
+        .region-box.type-draw .resize-handle { background: #7D5FB0; }
+        .handle-tl { top: -8px; left: -8px; cursor: nwse-resize; }
+        .handle-tr { top: -8px; right: -8px; cursor: nesw-resize; }
+        .handle-bl { bottom: -8px; left: -8px; cursor: nesw-resize; }
+        .handle-br { bottom: -8px; right: -8px; cursor: nwse-resize; }
 
         /* Brush cursor preview */
         .brush-cursor {
@@ -838,10 +861,15 @@
     var tool = 'text';              // 'text' | 'draw' | 'erase'
     var isDrawingRect = false;      // dragging rectangle for new region
     var isPainting = false;         // freehand painting
+    var isResizing = false;         // dragging a resize handle
+    var isMoving = false;           // dragging a region to move
+    var moveTentative = null;       // {region, startX, startY, originalX, originalY} - upgrades to isMoving on threshold
+    var resizeData = null;          // {region, handle, startX, startY, originalX, originalY, originalW, originalH}
     var dragStart = { x: 0, y: 0 };
     var regionIdCounter = 0;
     var lastPaintX = 0, lastPaintY = 0;
     var zoomLevel = 1.0;
+    var MOVE_THRESHOLD = 4;
 
     function getLang() {
         return (typeof getCurrentLanguage === 'function') ? getCurrentLanguage() : (localStorage.getItem('preferredLanguage') || 'en');
@@ -1121,15 +1149,44 @@
 
             // ===== Wrapper: mouse/touch down =====
             var pointerDown = function(e, isTouch) {
+                // Always prevent default for touches in any tool mode -
+                // stops the page from scrolling while interacting with the canvas
+                if (isTouch) e.preventDefault();
+
                 var pt = isTouch ? e.touches[0] : e;
                 var target = isTouch ? document.elementFromPoint(pt.clientX, pt.clientY) : e.target;
 
-                // Click on existing region → select (don't start drawing)
+                // ===== Resize handle =====
+                if (target && (target.classList.contains('resize-handle') || target.closest('.resize-handle'))) {
+                    var handleEl = target.classList.contains('resize-handle') ? target : target.closest('.resize-handle');
+                    var hRegionId = parseInt(handleEl.dataset.regionId);
+                    var hPos = handleEl.dataset.handle;
+                    var hRegion = findRegion(hRegionId);
+                    if (hRegion) {
+                        if (!isTouch) e.preventDefault();
+                        e.stopPropagation();
+                        startResize(hRegion, hPos, pt.clientX, pt.clientY);
+                    }
+                    return;
+                }
+
+                // Click on existing region → select (and possibly start move in Text tool)
+                var clickedRegionId = null;
                 if (target && (target.classList.contains('region-box') || target.closest('.region-box'))) {
                     var box = target.classList.contains('region-box') ? target : target.closest('.region-box');
-                    var id = parseInt(box.dataset.regionId);
-                    selectRegion(id);
-                    return;
+                    clickedRegionId = parseInt(box.dataset.regionId);
+                    selectRegion(clickedRegionId);
+                    // Text tool: prepare for potential move
+                    if (tool === 'text') {
+                        if (!isTouch) e.preventDefault();
+                        var movRegion = findRegion(clickedRegionId);
+                        if (movRegion) startMoveTentative(movRegion, pt.clientX, pt.clientY);
+                        return;
+                    }
+                    // Draw tool: drag inside draw region was already handled by capture-phase
+                    // handleDrawStart. For text regions clicked in Draw tool, just select.
+                    if (tool === 'draw') return;
+                    // Erase tool: fall through so the erase branch below can start erasing.
                 }
 
                 if (tool === 'text' || tool === 'draw') {
@@ -1171,6 +1228,24 @@
             var pointerMove = function(e, isTouch) {
                 var pt = isTouch ? e.touches[0] : e;
 
+                if (isResizing && resizeData) {
+                    if (isTouch) e.preventDefault();
+                    applyResize(pt.clientX, pt.clientY);
+                    return;
+                }
+                if (moveTentative) {
+                    var dx = pt.clientX - moveTentative.startX;
+                    var dy = pt.clientY - moveTentative.startY;
+                    if (Math.abs(dx) > MOVE_THRESHOLD || Math.abs(dy) > MOVE_THRESHOLD) {
+                        isMoving = true;
+                    }
+                }
+                if (isMoving && moveTentative) {
+                    if (isTouch) e.preventDefault();
+                    applyMove(pt.clientX, pt.clientY);
+                    return;
+                }
+
                 if (isDrawingRect && tempDrawRect) {
                     if (isTouch) e.preventDefault();
                     var coord = getWrapperCoord(pt.clientX, pt.clientY);
@@ -1198,11 +1273,22 @@
 
             document.addEventListener('mousemove', function(e) { pointerMove(e, false); });
             document.addEventListener('touchmove', function(e) {
-                if (isDrawingRect || isPainting) pointerMove(e, true);
+                if (isDrawingRect || isPainting || isResizing || moveTentative) pointerMove(e, true);
             }, { passive: false });
 
             // ===== Up =====
             var pointerUp = function() {
+                if (isResizing) {
+                    isResizing = false;
+                    resizeData = null;
+                    return;
+                }
+                if (moveTentative) {
+                    moveTentative = null;
+                    isMoving = false;
+                    // (If no movement happened, the click already selected the region)
+                    return;
+                }
                 if (isDrawingRect && tempDrawRect) {
                     isDrawingRect = false;
                     var w = parseInt(tempDrawRect.style.width);
@@ -1286,6 +1372,11 @@
     function handleDrawStart(e, isTouch) {
         if (tool !== 'draw') return;
         var pt = isTouch ? e.touches[0] : e;
+        // Don't intercept clicks on resize handles - let bubble-phase pointerDown handle resize
+        var target = isTouch ? document.elementFromPoint(pt.clientX, pt.clientY) : e.target;
+        if (target && (target.classList.contains('resize-handle') || (target.closest && target.closest('.resize-handle')))) {
+            return;
+        }
         var cc = getCanvasCoord(pt.clientX, pt.clientY);
         var drawRegion = isInsideRegion(cc.x, cc.y, 'draw');
         if (drawRegion) {
@@ -1356,6 +1447,18 @@
                 // Only bind click when not in preview (preview = pointer-events none via cursor:default)
                 box.addEventListener('click', function(e) { e.stopPropagation(); selectRegion(r.id); });
             }
+
+            // Resize handles on selected region (when not in preview)
+            if (r.id === selectedRegionId && !r.preview) {
+                ['tl', 'tr', 'bl', 'br'].forEach(function(pos) {
+                    var h = document.createElement('div');
+                    h.className = 'resize-handle handle-' + pos;
+                    h.dataset.handle = pos;
+                    h.dataset.regionId = r.id;
+                    box.appendChild(h);
+                });
+            }
+
             wrapper.appendChild(box);
 
             // Preview for text region: show overlay
@@ -1499,6 +1602,81 @@
         var regions = pages[currentPageIndex].regions;
         for (var i = 0; i < regions.length; i++) { if (regions[i].id === id) return regions[i]; }
         return null;
+    }
+
+    // ===== Resize =====
+    function startResize(region, handle, clientX, clientY) {
+        isResizing = true;
+        resizeData = {
+            region: region,
+            handle: handle,
+            startX: clientX,
+            startY: clientY,
+            originalX: parseFloat(region.x),
+            originalY: parseFloat(region.y),
+            originalW: parseFloat(region.w),
+            originalH: parseFloat(region.h)
+        };
+    }
+    function applyResize(clientX, clientY) {
+        if (!resizeData) return;
+        var img = document.getElementById('canvasImg');
+        var rect = img.getBoundingClientRect();
+        // Movement in % of image
+        var dxPct = (clientX - resizeData.startX) / rect.width * 100;
+        var dyPct = (clientY - resizeData.startY) / rect.height * 100;
+
+        var nx = resizeData.originalX, ny = resizeData.originalY;
+        var nw = resizeData.originalW, nh = resizeData.originalH;
+        var h = resizeData.handle;
+
+        if (h === 'tl') { nx += dxPct; ny += dyPct; nw -= dxPct; nh -= dyPct; }
+        else if (h === 'tr') { ny += dyPct; nw += dxPct; nh -= dyPct; }
+        else if (h === 'bl') { nx += dxPct; nw -= dxPct; nh += dyPct; }
+        else if (h === 'br') { nw += dxPct; nh += dyPct; }
+
+        // Min size (in %)
+        var minPct = 2;
+        if (nw < minPct) { nw = minPct; if (h === 'tl' || h === 'bl') nx = resizeData.originalX + resizeData.originalW - minPct; }
+        if (nh < minPct) { nh = minPct; if (h === 'tl' || h === 'tr') ny = resizeData.originalY + resizeData.originalH - minPct; }
+        // Bounds
+        if (nx < 0) { nw += nx; nx = 0; }
+        if (ny < 0) { nh += ny; ny = 0; }
+        if (nx + nw > 100) nw = 100 - nx;
+        if (ny + nh > 100) nh = 100 - ny;
+
+        resizeData.region.x = nx.toFixed(2);
+        resizeData.region.y = ny.toFixed(2);
+        resizeData.region.w = nw.toFixed(2);
+        resizeData.region.h = nh.toFixed(2);
+        renderRegionsOnCanvas();
+    }
+
+    // ===== Move (Text tool) =====
+    function startMoveTentative(region, clientX, clientY) {
+        moveTentative = {
+            region: region,
+            startX: clientX,
+            startY: clientY,
+            originalX: parseFloat(region.x),
+            originalY: parseFloat(region.y)
+        };
+    }
+    function applyMove(clientX, clientY) {
+        if (!moveTentative) return;
+        var img = document.getElementById('canvasImg');
+        var rect = img.getBoundingClientRect();
+        var dxPct = (clientX - moveTentative.startX) / rect.width * 100;
+        var dyPct = (clientY - moveTentative.startY) / rect.height * 100;
+        var nx = moveTentative.originalX + dxPct;
+        var ny = moveTentative.originalY + dyPct;
+        var w = parseFloat(moveTentative.region.w);
+        var h = parseFloat(moveTentative.region.h);
+        nx = Math.max(0, Math.min(nx, 100 - w));
+        ny = Math.max(0, Math.min(ny, 100 - h));
+        moveTentative.region.x = nx.toFixed(2);
+        moveTentative.region.y = ny.toFixed(2);
+        renderRegionsOnCanvas();
     }
 
     // ===== Export =====
