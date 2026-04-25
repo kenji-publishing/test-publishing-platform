@@ -350,7 +350,17 @@
             left: 0;
             pointer-events: none;
             touch-action: none;
+            z-index: 2;
         }
+
+        /* Backdrop behind painted strokes inside a draw region (used when its bgOpacity != transparent) */
+        .draw-backdrop {
+            position: absolute;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .draw-backdrop.bg-semi { background: rgba(255, 255, 255, 0.7); }
+        .draw-backdrop.bg-opaque { background: #ffffff; }
         .tool-mode-draw .canvas-wrapper,
         .tool-mode-erase .canvas-wrapper { cursor: none; }
         .tool-mode-text .canvas-wrapper { cursor: crosshair; }
@@ -402,6 +412,7 @@
             transition: border-color 0.2s, background 0.2s;
             min-width: 20px;
             min-height: 20px;
+            z-index: 3;
         }
         .region-box.type-text {
             border: 2px solid var(--color-accent);
@@ -456,6 +467,7 @@
             word-break: break-word;
             line-height: 1.3;
             pointer-events: none;
+            z-index: 4;
         }
         .preview-text-overlay.writing-vertical {
             writing-mode: vertical-rl;
@@ -1413,6 +1425,8 @@
             region.fontColor = '#000000';
             region.bgOpacity = 'opaque';
             region.writingMode = 'horizontal';
+        } else if (type === 'draw') {
+            region.bgOpacity = 'transparent';
         }
         pages[currentPageIndex].regions.push(region);
         selectedRegionId = region.id;
@@ -1423,9 +1437,22 @@
 
     function renderRegionsOnCanvas() {
         var wrapper = document.getElementById('canvasWrapper');
-        wrapper.querySelectorAll('.region-box, .preview-text-overlay').forEach(function(el) { el.remove(); });
+        wrapper.querySelectorAll('.region-box, .preview-text-overlay, .draw-backdrop').forEach(function(el) { el.remove(); });
         if (!pages[currentPageIndex]) return;
         var regions = pages[currentPageIndex].regions;
+
+        // First pass: draw-region backdrops (sit behind drawCanvas via z-index)
+        regions.forEach(function(r) {
+            if (r.type !== 'draw') return;
+            if (!r.bgOpacity || r.bgOpacity === 'transparent') return;
+            var bd = document.createElement('div');
+            bd.className = 'draw-backdrop bg-' + r.bgOpacity;
+            bd.style.left = r.x + '%';
+            bd.style.top = r.y + '%';
+            bd.style.width = r.w + '%';
+            bd.style.height = r.h + '%';
+            wrapper.appendChild(bd);
+        });
 
         regions.forEach(function(r) {
             var box = document.createElement('div');
@@ -1544,6 +1571,15 @@
                 html += '<input type="color" value="' + r.fontColor + '" onchange="updateRegionProp(' + r.id + ',\'fontColor\',this.value)" onclick="event.stopPropagation()" style="height:28px;"></div>';
                 html += '</div>';
             } else {
+                // Draw region: background opacity option
+                html += '<div class="region-options">';
+                html += '<div><label>' + escH(tr(bgL)) + '</label>';
+                html += '<select onchange="updateRegionProp(' + r.id + ',\'bgOpacity\',this.value)" onclick="event.stopPropagation()">';
+                html += '<option value="transparent"' + (r.bgOpacity === 'transparent' ? ' selected' : '') + '>' + escH(tr(transpO)) + '</option>';
+                html += '<option value="semi"' + (r.bgOpacity === 'semi' ? ' selected' : '') + '>' + escH(tr(semiO)) + '</option>';
+                html += '<option value="opaque"' + (r.bgOpacity === 'opaque' ? ' selected' : '') + '>' + escH(tr(opaqueO)) + '</option>';
+                html += '</select></div>';
+                html += '</div>';
                 html += '<div class="draw-hint">' + escH(tr(drawHint)) + '</div>';
             }
             html += '</div>';
@@ -1702,6 +1738,9 @@
         var ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0);
 
+        // Layer order: image → draw-region backdrops → freehand strokes → text regions
+        drawDrawBackdrops(ctx, canvas, page);
+
         if (page.drawingDataUrl) {
             var drawImg = new Image();
             drawImg.onload = function() {
@@ -1714,6 +1753,19 @@
             drawTextRegions(ctx, canvas, img, page);
             saveCanvas(canvas);
         }
+    }
+    function drawDrawBackdrops(ctx, canvas, page) {
+        var bgMap = { semi: 'rgba(255,255,255,0.7)', opaque: '#ffffff' };
+        page.regions.forEach(function(r) {
+            if (r.type !== 'draw') return;
+            if (!r.bgOpacity || r.bgOpacity === 'transparent') return;
+            var rx = r.x / 100 * canvas.width;
+            var ry = r.y / 100 * canvas.height;
+            var rw = r.w / 100 * canvas.width;
+            var rh = r.h / 100 * canvas.height;
+            ctx.fillStyle = bgMap[r.bgOpacity];
+            ctx.fillRect(rx, ry, rw, rh);
+        });
     }
     function drawTextRegions(ctx, canvas, img, page) {
         var scale = canvas.width / img.offsetWidth;
