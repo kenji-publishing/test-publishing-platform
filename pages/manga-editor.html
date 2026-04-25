@@ -48,8 +48,8 @@
             --color-warning: #D4A853;
             --color-error: #C75D5D;
             --color-info: #5D8BC7;
-            /* Draw region tint color (RGB triple, customizable via toolbar) */
-            --draw-rgb: 155, 125, 199;
+            /* Draw region tint matches the text region (color-accent #8B7355) */
+            --draw-rgb: 139, 115, 85;
         }
 
         * { box-sizing: border-box; }
@@ -809,11 +809,6 @@
                                 <span id="brushSizeVal" style="font-size:0.72rem; min-width:18px; text-align:right;">4</span>
                             </div>
 
-                            <!-- Draw region tint color (visible in draw mode) -->
-                            <div class="brush-options" id="drawTintOptions" style="display:none;">
-                                <i class="fas fa-vector-square" style="color:var(--color-text-secondary); font-size:0.75rem;" title="Draw region color"></i>
-                                <input type="color" id="drawRegionColor" value="#9B7DC7" title="Draw region color">
-                            </div>
                         </div>
                         <div class="canvas-toolbar-right">
                             <!-- Zoom controls -->
@@ -1029,32 +1024,12 @@
         area.classList.remove('tool-mode-text', 'tool-mode-draw', 'tool-mode-erase');
         area.classList.add('tool-mode-' + t);
         document.getElementById('brushOptions').style.display = (t === 'draw' || t === 'erase') ? '' : 'none';
-        document.getElementById('drawTintOptions').style.display = (t === 'draw') ? '' : 'none';
         // Hide brush cursor when not in draw/erase mode
         var bc = document.getElementById('brushCursor');
         if (bc && t !== 'draw' && t !== 'erase') bc.classList.remove('active');
         if (typeof window.updateBrushCursorSize === 'function') window.updateBrushCursorSize();
     }
 
-    // Draw region tint color (CSS variable + localStorage)
-    function applyDrawRegionColor(hex) {
-        var h = hex.replace('#', '');
-        if (h.length !== 6) return;
-        var r = parseInt(h.slice(0, 2), 16);
-        var g = parseInt(h.slice(2, 4), 16);
-        var b = parseInt(h.slice(4, 6), 16);
-        document.documentElement.style.setProperty('--draw-rgb', r + ', ' + g + ', ' + b);
-        try { localStorage.setItem('mangaEditorDrawColor', hex); } catch (e) {}
-    }
-    function loadDrawRegionColor() {
-        var saved;
-        try { saved = localStorage.getItem('mangaEditorDrawColor'); } catch (e) {}
-        if (saved) {
-            applyDrawRegionColor(saved);
-            var input = document.getElementById('drawRegionColor');
-            if (input) input.value = saved;
-        }
-    }
 
     // ===== Draw Canvas =====
     function setupDrawCanvas() {
@@ -1905,12 +1880,7 @@
         renderRegionList();
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        updateEditorText();
-        loadDrawRegionColor();
-        var dc = document.getElementById('drawRegionColor');
-        if (dc) dc.addEventListener('input', function() { applyDrawRegionColor(this.value); });
-    });
+    document.addEventListener('DOMContentLoaded', function() { updateEditorText(); });
     document.addEventListener('languageChanged', function() { updateEditorText(); });
     </script>
 
