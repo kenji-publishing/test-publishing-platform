@@ -1676,6 +1676,15 @@
         updateWizardText();
         if (typeof loadUserInfo === 'function')
 
+        // The language selector lives inside the dynamically-rendered navbar,
+        // so getElementById returns null at this point - navbar.js wires its
+        // own change listener and then i18n.js fires `languageChanged`. We
+        // just listen for that event to refresh the wizard text.
+        document.addEventListener('languageChanged', function() {
+            updateWizardText();
+            if (typeof updateNavText === 'function') updateNavText();
+        });
+
         // ===== Drag & drop file upload =====
         // Without these handlers, dropping a file anywhere on the page falls
         // back to the browser default (open / download the file).
