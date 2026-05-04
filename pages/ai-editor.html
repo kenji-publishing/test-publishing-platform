@@ -1305,8 +1305,9 @@
         const tmp = src.value; src.value = tgt.value; tgt.value = tmp;
     }
 
-    function handleFileUpload(input) {
-        const file = input.files[0];
+    // Accepts either a file <input> element (from change event) or a File directly (from drop)
+    function handleFileUpload(inputOrFile) {
+        const file = (inputOrFile && inputOrFile.files) ? inputOrFile.files[0] : inputOrFile;
         if (!file) return;
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -1674,6 +1675,40 @@
         }
         updateWizardText();
         if (typeof loadUserInfo === 'function')
+
+        // ===== Drag & drop file upload =====
+        // Without these handlers, dropping a file anywhere on the page falls
+        // back to the browser default (open / download the file).
+        const uploadZone = document.getElementById('uploadZone');
+        if (uploadZone) {
+            uploadZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.style.borderColor = 'var(--color-accent)';
+                this.style.background = 'rgba(139, 115, 85, 0.05)';
+            });
+            uploadZone.addEventListener('dragleave', function() {
+                this.style.borderColor = '';
+                this.style.background = '';
+            });
+            uploadZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '';
+                this.style.background = '';
+                const files = e.dataTransfer && e.dataTransfer.files;
+                if (files && files.length > 0) handleFileUpload(files[0]);
+            });
+        }
+        // Block accidental drops outside the upload zone too - otherwise the
+        // browser would still treat them as "open this file".
+        window.addEventListener('dragover', function(e) { e.preventDefault(); }, false);
+        window.addEventListener('drop', function(e) {
+            // Allow the upload-zone handler above to run; only block when the
+            // drop landed somewhere else on the page.
+            if (!e.target || !e.target.closest || !e.target.closest('#uploadZone')) {
+                e.preventDefault();
+            }
+        }, false);
+
         // Navbar overlay
 
             if (navbarOverlay) {
