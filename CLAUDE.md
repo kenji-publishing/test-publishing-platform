@@ -54,6 +54,7 @@ Browse | Library | Dashboard | Tools ▼ | Support ▼ | Messages
                                 ├─ Manga Translator
                                 ├─ Manga Editor
                                 ├─ Novel Translator
+                                ├─ AI Editor
                                 ├─ Translation Status
                                 ├─ Find Translators
                                 └─ Find Editors
@@ -114,6 +115,7 @@ test-publishing-platform/
 │   ├── manga-translator.html  # マンガ翻訳ウィザード
 │   ├── manga-editor.html      # マンガエディター（テキスト編集）
 │   ├── novel-translator.html  # 小説翻訳ウィザード
+│   ├── ai-editor.html         # AI校正・校閲ウィザード
 │   ├── notifications.html  # 通知センター（14種類）
 │   ├── checkout.html       # 決済 (Stripe/PayPal)
 │   ├── support/            # FAQ, トラブルシューティング

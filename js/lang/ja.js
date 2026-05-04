@@ -32,6 +32,7 @@ window.translations.ja = {
         mangaTranslator: 'マンガ翻訳',
         mangaEditor: 'マンガエディター',
         novelTranslator: '小説翻訳',
+        aiEditor: 'AIエディター',
         translationStatus: '翻訳状況',
         findTranslators: '翻訳者を探す',
         contact: 'お問い合わせ'

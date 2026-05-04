@@ -32,6 +32,7 @@ window.translations.ko = {
         mangaTranslator: '만화 번역기',
         mangaEditor: '만화 편집기',
         novelTranslator: '소설 번역기',
+        aiEditor: 'AI 편집기',
         translationStatus: '번역 상태',
         findTranslators: '번역가 찾기',
         contact: '문의하기'

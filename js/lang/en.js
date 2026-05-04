@@ -32,6 +32,7 @@ window.translations.en = {
         mangaTranslator: 'Manga Translator',
         mangaEditor: 'Manga Editor',
         novelTranslator: 'Novel Translator',
+        aiEditor: 'AI Editor',
         translationStatus: 'Translation Status',
         findTranslators: 'Find Translators',
         contact: 'Contact'

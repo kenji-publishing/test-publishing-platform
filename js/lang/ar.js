@@ -32,6 +32,7 @@ window.translations.ar = {
         mangaTranslator: 'مترجم المانجا',
         mangaEditor: 'محرر المانجا',
         novelTranslator: 'مترجم الروايات',
+        aiEditor: 'محرر الذكاء الاصطناعي',
         translationStatus: 'حالة الترجمة',
         findTranslators: 'ابحث عن مترجمين',
         contact: 'اتصل بنا'

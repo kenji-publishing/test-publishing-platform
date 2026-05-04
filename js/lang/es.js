@@ -32,6 +32,7 @@ window.translations.es = {
         mangaTranslator: 'Traductor de Manga',
         mangaEditor: 'Editor de Manga',
         novelTranslator: 'Traductor de Novela',
+        aiEditor: 'Editor IA',
         translationStatus: 'Estado de Traducción',
         findTranslators: 'Buscar Traductores',
         contact: 'Contacto'
