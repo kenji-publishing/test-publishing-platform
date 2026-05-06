@@ -1309,15 +1309,89 @@
     function handleFileUpload(inputOrFile) {
         const file = (inputOrFile && inputOrFile.files) ? inputOrFile.files[0] : inputOrFile;
         if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('sourceText').value = e.target.result;
-            updateCharCount();
-            document.getElementById('fileInfo').style.display = 'block';
-            document.getElementById('fileInfo').innerHTML = '<i class="fas fa-check-circle" style="color:var(--color-success)"></i> ' + file.name + ' (' + (file.size / 1024).toFixed(1) + 'KB)';
-            setInputMode('full');
-        };
-        reader.readAsText(file);
+        const fileName = (file.name || '').toLowerCase();
+
+        if (fileName.endsWith('.docx')) {
+            // .docx is a ZIP archive containing XML - readAsText would yield binary garbage
+            readDocxText(file).then(function(text) {
+                applyLoadedText(text, file);
+            }).catch(function(err) {
+                console.error('docx read failed:', err);
+                alert(getLang() === 'ja'
+                    ? 'Wordファイルの読み込みに失敗しました。.txt形式（UTF-8）で再試行してください。'
+                    : 'Failed to read the .docx file. Please try saving it as .txt (UTF-8).');
+            });
+        } else {
+            // .txt and similar - try common encodings and pick the one that decodes cleanly
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = decodeTextWithFallback(e.target.result);
+                applyLoadedText(text, file);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+    }
+
+    function applyLoadedText(text, file) {
+        document.getElementById('sourceText').value = text;
+        updateCharCount();
+        document.getElementById('fileInfo').style.display = 'block';
+        document.getElementById('fileInfo').innerHTML = '<i class="fas fa-check-circle" style="color:var(--color-success)"></i> ' + file.name + ' (' + (file.size / 1024).toFixed(1) + 'KB)';
+        setInputMode('full');
+    }
+
+    // Try UTF-8 first (modern default), then Shift-JIS / EUC-JP for legacy Japanese files.
+    // `fatal: true` makes TextDecoder throw on invalid sequences instead of silently
+    // substituting U+FFFD - which is exactly the "garbled characters" the user saw.
+    function decodeTextWithFallback(arrayBuffer) {
+        const candidates = ['utf-8', 'shift-jis', 'euc-jp'];
+        for (let i = 0; i < candidates.length; i++) {
+            try {
+                return new TextDecoder(candidates[i], { fatal: true }).decode(arrayBuffer);
+            } catch (_) { /* try next encoding */ }
+        }
+        // Last resort: lossy UTF-8 decode (still better than refusing the file)
+        return new TextDecoder('utf-8').decode(arrayBuffer);
+    }
+
+    // Crack open a .docx (ZIP), pull word/document.xml, and concatenate the text inside <w:t> elements.
+    function readDocxText(file) {
+        if (typeof JSZip === 'undefined') {
+            return Promise.reject(new Error('JSZip is not loaded'));
+        }
+        return JSZip.loadAsync(file).then(function(zip) {
+            const docFile = zip.file('word/document.xml');
+            if (!docFile) throw new Error('word/document.xml not found in the .docx');
+            return docFile.async('string');
+        }).then(function(xmlString) {
+            return extractDocxParagraphs(xmlString);
+        });
+    }
+
+    function extractDocxParagraphs(xmlString) {
+        const doc = new DOMParser().parseFromString(xmlString, 'application/xml');
+        if (doc.getElementsByTagName('parsererror').length > 0) {
+            throw new Error('Failed to parse document.xml');
+        }
+        const paragraphs = doc.getElementsByTagName('w:p');
+        const lines = [];
+        for (let i = 0; i < paragraphs.length; i++) {
+            const p = paragraphs[i];
+            // Walk in document order so <w:t> text and <w:br/> soft breaks come out
+            // in the same sequence the author typed them.
+            let line = '';
+            const walker = document.createTreeWalker(p, NodeFilter.SHOW_ELEMENT, null);
+            let node = walker.nextNode();
+            while (node) {
+                const tag = node.tagName;
+                if (tag === 'w:t') line += node.textContent;
+                else if (tag === 'w:br') line += '\n';
+                else if (tag === 'w:tab') line += '\t';
+                node = walker.nextNode();
+            }
+            lines.push(line);
+        }
+        return lines.join('\n');
     }
 
     // ===== Step 3: Glossary =====
@@ -1731,6 +1805,8 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- JSZip: lets us crack open .docx (which is a ZIP) to read the text inside -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="../js/i18n.js"></script>
     <script src="../js/navbar.js"></script>
 </body>
