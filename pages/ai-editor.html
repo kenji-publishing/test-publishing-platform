@@ -1309,27 +1309,42 @@
     function handleFileUpload(inputOrFile) {
         const file = (inputOrFile && inputOrFile.files) ? inputOrFile.files[0] : inputOrFile;
         if (!file) return;
-        const fileName = (file.name || '').toLowerCase();
+        // Sniff the first 8 bytes to identify the format. Extensions can lie
+        // (a .doc renamed to .docx, or a file with no extension via drag-drop),
+        // so magic bytes are the reliable signal.
+        const headerReader = new FileReader();
+        headerReader.onload = function(e) {
+            const bytes = new Uint8Array(e.target.result);
+            const isZip = bytes.length >= 4 && bytes[0] === 0x50 && bytes[1] === 0x4B && bytes[2] === 0x03 && bytes[3] === 0x04; // PK\x03\x04
+            const isOle = bytes.length >= 8 && bytes[0] === 0xD0 && bytes[1] === 0xCF && bytes[2] === 0x11 && bytes[3] === 0xE0; // legacy .doc
 
-        if (fileName.endsWith('.docx')) {
-            // .docx is a ZIP archive containing XML - readAsText would yield binary garbage
-            readDocxText(file).then(function(text) {
-                applyLoadedText(text, file);
-            }).catch(function(err) {
-                console.error('docx read failed:', err);
+            if (isOle) {
                 alert(getLang() === 'ja'
-                    ? 'Wordファイルの読み込みに失敗しました。.txt形式（UTF-8）で再試行してください。'
-                    : 'Failed to read the .docx file. Please try saving it as .txt (UTF-8).');
-            });
-        } else {
-            // .txt and similar - try common encodings and pick the one that decodes cleanly
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const text = decodeTextWithFallback(e.target.result);
+                    ? '古い「.doc」形式には対応していません。Wordで「名前を付けて保存」→「Word文書(.docx)」または「.txt(UTF-8)」で保存し直してください。'
+                    : 'The legacy .doc format is not supported. Please re-save the file as .docx or .txt (UTF-8) in Word.');
+                return;
+            }
+            if (isZip) {
+                // .docx (and any other ZIP-shaped file) - parse as docx
+                readDocxText(file).then(function(text) {
+                    applyLoadedText(text, file);
+                }).catch(function(err) {
+                    console.error('docx read failed:', err);
+                    alert(getLang() === 'ja'
+                        ? 'このファイルは.docxとして読み込めませんでした。.txt(UTF-8)形式で保存し直してください。'
+                        : 'Could not read this file as .docx. Please save it as .txt (UTF-8) instead.');
+                });
+                return;
+            }
+            // Plain text - try common encodings until one decodes cleanly
+            const textReader = new FileReader();
+            textReader.onload = function(ev) {
+                const text = decodeTextWithFallback(ev.target.result);
                 applyLoadedText(text, file);
             };
-            reader.readAsArrayBuffer(file);
-        }
+            textReader.readAsArrayBuffer(file);
+        };
+        headerReader.readAsArrayBuffer(file.slice(0, 8));
     }
 
     function applyLoadedText(text, file) {
