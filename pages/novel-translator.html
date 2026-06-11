@@ -796,9 +796,10 @@
 
                     <!-- Full Text Input -->
                     <div id="inputFull">
-                        <textarea class="text-input" id="sourceText" rows="12" placeholder="Paste your novel text here..."></textarea>
+                        <textarea class="text-input" id="sourceText" rows="12" placeholder="Paste your novel text here..." oninput="updateCharCount()"></textarea>
                         <div class="text-meta">
-                            <span id="charCount">0 <span id="charLabel">characters</span></span>
+                            <!-- charCount only holds the number so updating it can't wipe out the label span -->
+                            <span><span id="charCount">0</span> <span id="charLabel">characters</span></span>
                             <span id="pageEstimate"></span>
                         </div>
                     </div>
@@ -1741,7 +1742,6 @@
             });
         }
         updateWizardText();
-        if (typeof loadUserInfo === 'function')
 
         // The language selector lives inside the dynamically-rendered navbar,
         // so getElementById returns null at this point - navbar.js wires its
@@ -1782,14 +1782,9 @@
             }
         }, false);
 
-        // Navbar overlay
-
-            if (navbarOverlay) {
-                navbarOverlay.addEventListener('click', function() {
-                    const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
-                    if (bsCollapse) bsCollapse.hide();
-                });
-            }
+        // (Navbar overlay wiring removed — the overlay element doesn't exist
+        //  yet at this point; navbar.js attaches its own handlers after it
+        //  renders the navbar.)
         });
     </script>
 

@@ -694,43 +694,9 @@
     <!-- 言語切替機能 -->
     
     
-    <!-- Navbar Script (Simplified) -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Language Selector Sync
-            const desktopSelector = document.getElementById('languageSelector');
-            const mobileSelector = document.getElementById('languageSelectorMobile');
-            
-            if (desktopSelector && mobileSelector) {
-                const savedLang = localStorage.getItem('preferredLanguage') || 'en';
-                desktopSelector.value = savedLang;
-                mobileSelector.value = savedLang;
-                
-                mobileSelector.addEventListener('change', function() {
-                    desktopSelector.value = this.value;
-                    localStorage.setItem('preferredLanguage', this.value);
-}
-                });
-                
-                desktopSelector.addEventListener('change', function() {
-                    mobileSelector.value = this.value;
-                    localStorage.setItem('preferredLanguage', this.value);
-}
-                });
-            }
-            
-            // Mobile Menu Overlay
+    <!-- (Broken "Navbar Script (Simplified)" block removed: stray braces made
+         it a SyntaxError and navbar.js already handles selector sync.) -->
 
-            
-            if (navbarOverlay) {
-                navbarOverlay.addEventListener('click', function() {
-                    const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
-                    if (bsCollapse) bsCollapse.hide();
-                });
-            }
-        });
-    </script>
-    
     <script>
         // Preferred Language Selector Sync
         document.addEventListener('DOMContentLoaded', function() {
@@ -831,56 +797,8 @@
         });
     </script>
 
-    <!-- ========== Pattern C Navbar JS ========== -->
-    <script>
-        // ========== 多言語対応テキスト（9言語）==========
-        const uiText = {
-        };
-
-        // updateUIText removed - handled by i18n.js
-document.addEventListener('DOMContentLoaded', function() {
-            const desktopSelector = document.getElementById('languageSelector');
-            const mobileSelector = document.getElementById('languageSelectorMobile');
-
-            if (desktopSelector && mobileSelector) {
-                const savedLang = localStorage.getItem('preferredLanguage') || 'en';
-                desktopSelector.value = savedLang;
-                mobileSelector.value = savedLang;
-
-                mobileSelector.addEventListener('change', function() {
-                    desktopSelector.value = this.value;
-                    if (typeof changeLanguage === 'function') changeLanguage(this.value);
-                    updateUIText();
-                });
-
-                desktopSelector.addEventListener('change', function() {
-                    mobileSelector.value = this.value;
-                    updateUIText();
-                });
-            }
-
-            updateUIText();
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.user-dropdown')) {
-                    const dropdown = document.getElementById('userDropdown');
-                    const dropdownMenu = document.getElementById('userMenu');
-                    if (dropdown) dropdown.classList.remove('open');
-                    if (dropdownMenu) dropdownMenu.classList.remove('show');
-                }
-            });
-
-
-            if (navbarOverlay) {
-                navbarOverlay.addEventListener('click', function() {
-                    const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
-                    if (bsCollapse) bsCollapse.hide();
-                });
-            }
-
-            document.addEventListener('languageChanged', function() {
-                updateUIText();
-            });
-        });
-    </script>
+    <!-- (Old "Pattern C Navbar JS" block removed: it called the deleted
+         updateUIText() and referenced navbar elements that don't exist at
+         this point — navbar.js and i18n.js handle all of it now.) -->
 </body>
 </html>

@@ -1383,7 +1383,7 @@
             if (rp) { rp.innerHTML = ''; uploadedPages.forEach((f, i) => {
                 const div = document.createElement('div'); div.className = 'thumbnail-item';
                 div.onclick = function() { openImgModal(uploadedPages, i); };
-                const img = document.createElement('img'); img.src = URL.createObjectURL(f);
+                const img = document.createElement('img'); img.src = pageUrl(f);
                 const label = document.createElement('div'); label.className = 'page-number'; label.textContent = 'P'+(i+1)+' ['+selectedModel+']';
                 div.appendChild(img); div.appendChild(label); rp.appendChild(div);
             });
@@ -1421,7 +1421,7 @@
         grid.innerHTML = ''; uploadedPages.forEach((f, i) => {
             const div = document.createElement('div'); div.className = 'thumbnail-item';
             div.onclick = function() { openImgModal(uploadedPages, i); };
-            const img = document.createElement('img'); img.src = URL.createObjectURL(f);
+            const img = document.createElement('img'); img.src = pageUrl(f);
             const num = document.createElement('div'); num.className = 'page-number'; num.textContent = 'P'+(i+1);
             div.appendChild(img); div.appendChild(num); grid.appendChild(div);
         });
@@ -1433,7 +1433,7 @@
             grid.parentNode.insertBefore(hint, grid.nextSibling);
         }
     }
-    function clearPages() { uploadedPages = []; renderThumbnails(); }
+    function clearPages() { uploadedPages = []; revokeAllPageUrls(); renderThumbnails(); }
     function swapLanguages() { const s=document.getElementById('sourceLang'),t=document.getElementById('targetLang'),v=s.value; s.value=t.value; t.value=v; }
 
     function addGlossaryEntry() {
@@ -1447,11 +1447,6 @@
         document.getElementById('glossaryBody').innerHTML = glossary.map((g,i) =>
             '<tr><td data-label="'+escH(srcLabel)+'">'+escH(g.src)+'</td><td data-label="'+escH(tgtLabel)+'">'+escH(g.tgt)+'</td><td><button class="glossary-del-btn" onclick="removeGlossaryEntry('+i+')"><i class="fas fa-times"></i></button></td></tr>'
         ).join('');
-    }
-    function updateTsActiveBadge() {
-        let c=0; if(document.getElementById('tsStyle').value)c++; if(document.getElementById('tsTone').value)c++;
-        const sfx=document.getElementById('tsSfx'); if(sfx&&sfx.value)c++;
-        if(document.getElementById('tsGenre').value)c++; if(document.getElementById('tsContext').value.trim())c++; if(glossary.length>0)c++;
     }
 
     function runComparison() {
@@ -1528,10 +1523,23 @@
         a.href=url; a.download='manga_translation_'+selectedModel+'.'+format; a.click(); URL.revokeObjectURL(url);
     }
     function startNewTranslation() {
-        uploadedPages=[]; renderThumbnails(); glossary=[]; renderGlossary(); selectedModel='sonnet';
+        clearPages(); glossary=[]; renderGlossary(); selectedModel='sonnet';
         document.querySelectorAll('.compare-card').forEach(c=>c.classList.remove('selected')); goStep(1);
     }
     function escH(text) { const d=document.createElement('div'); d.textContent=text; return d.innerHTML; }
+
+    // One object URL per uploaded file, reused across re-renders.
+    // Creating a new URL on every render leaks the previous blobs until the
+    // tab closes — noticeable with dozens of high-res manga pages on mobile.
+    const _pageUrlCache = new Map();
+    function pageUrl(f) {
+        if (!_pageUrlCache.has(f)) _pageUrlCache.set(f, URL.createObjectURL(f));
+        return _pageUrlCache.get(f);
+    }
+    function revokeAllPageUrls() {
+        _pageUrlCache.forEach(function(url) { URL.revokeObjectURL(url); });
+        _pageUrlCache.clear();
+    }
 
     // ===== Image Viewer Modal =====
     var imgModalImages = [];
@@ -1558,7 +1566,7 @@
     function renderImgModal() {
         var img = document.getElementById('imgModalImg');
         var src = imgModalImages[imgModalIndex];
-        img.src = (typeof src === 'string') ? src : URL.createObjectURL(src);
+        img.src = (typeof src === 'string') ? src : pageUrl(src);
         document.getElementById('imgModalCounter').textContent = (imgModalIndex + 1) + ' / ' + imgModalImages.length;
         // Dots
         var dots = document.getElementById('imgModalDots');
@@ -1606,8 +1614,12 @@
         if (e.target === this || e.target.id === 'imgModalBody') closeImgModal();
     });
 
-    // Close modal on Escape key
+    // Modal keyboard navigation — only while the modal is actually open,
+    // otherwise arrow keys (e.g. moving the caret in a text input) would
+    // call imgModalNav on an empty image list and throw.
     document.addEventListener('keydown', function(e) {
+        var modal = document.getElementById('imgModal');
+        if (!modal || !modal.classList.contains('active') || imgModalImages.length === 0) return;
         if (e.key === 'Escape') closeImgModal();
         if (e.key === 'ArrowLeft') imgModalNav(-1);
         if (e.key === 'ArrowRight') imgModalNav(1);
@@ -1758,12 +1770,6 @@
     // ===== DOMContentLoaded =====
     document.addEventListener('DOMContentLoaded', function() {
         renderGlossary();
-        document.getElementById('tsStyle').addEventListener('change', updateTsActiveBadge);
-        document.getElementById('tsTone').addEventListener('change', updateTsActiveBadge);
-        var sfxEl = document.getElementById('tsSfx'); if (sfxEl) sfxEl.addEventListener('change', updateTsActiveBadge);
-        document.getElementById('tsGenre').addEventListener('change', updateTsActiveBadge);
-        document.getElementById('tsContext').addEventListener('input', updateTsActiveBadge);
-        updateTsActiveBadge();
 
         // Drag-drop for upload zone
         var uploadZone = document.getElementById('uploadZone');
@@ -1778,19 +1784,8 @@
         }
 
         updateWizardText();
-        if (typeof loadUserInfo === 'function')
-        var navbarCollapse = document.getElementById('navbarNav');
-        var navbarOverlay = document.getElementById('navbarOverlay');
-        if (navbarCollapse) {
-            navbarCollapse.addEventListener('show.bs.collapse', function() { if (navbarOverlay) navbarOverlay.classList.add('show'); });
-            navbarCollapse.addEventListener('hide.bs.collapse', function() { if (navbarOverlay) navbarOverlay.classList.remove('show'); });
-        }
-        if (navbarOverlay) {
-            navbarOverlay.addEventListener('click', function() {
-                var bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
-                if (bsCollapse) bsCollapse.hide();
-            });
-        }
+
+        // Close user dropdown on outside click
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.user-dropdown')) {
                 var dd = document.getElementById('userDropdown');
@@ -1800,75 +1795,13 @@
             }
         });
     });
-    </script>
 
-    <!-- ========== Pattern C Navbar JavaScript ========== -->
-    <script>
-        // Navbar UI Text (9 languages)
-        const uiText = {
-        };
-
-        function getL(obj) {
-            const lang = getCurrentLanguage();
-            return obj[lang] || obj.en || '';
-        }
-
-        // updateUIText removed - handled by i18n.js
-        }
-        document.addEventListener('DOMContentLoaded', function() {
-
-            // Language selectors sync
-            const desktopSelector = document.getElementById('languageSelector');
-            const mobileSelector = document.getElementById('languageSelectorMobile');
-
-            if (desktopSelector && mobileSelector) {
-                const savedLang = localStorage.getItem('preferredLanguage') || 'en';
-                desktopSelector.value = savedLang;
-                mobileSelector.value = savedLang;
-
-                mobileSelector.addEventListener('change', function() {
-                    desktopSelector.value = this.value;
-                    if (typeof changeLanguage === 'function') changeLanguage(this.value);
-                    updateUIText();
-                });
-
-                desktopSelector.addEventListener('change', function() {
-                    mobileSelector.value = this.value;
-                    if (typeof changeLanguage === 'function') changeLanguage(this.value);
-                    updateUIText();
-                });
-            }
-
-            // Apply translations & UI text
-            updateWizardText();
-            updateUIText();
-// Load user info
-            // Close user dropdown on outside click
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.user-dropdown')) {
-                    const dropdown = document.getElementById('userDropdown');
-                    const dropdownMenu = document.getElementById('userMenu');
-                    if (dropdown) dropdown.classList.remove('open');
-                    if (dropdownMenu) dropdownMenu.classList.remove('show');
-                }
-            });
-
-            // Navbar overlay for mobile
-
-
-            if (navbarOverlay) {
-                navbarOverlay.addEventListener('click', function() {
-                    const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
-                    if (bsCollapse) bsCollapse.hide();
-                });
-            }
-
-            // Listen for language change events
-            document.addEventListener('languageChanged', function() {
-                updateWizardText();
-                updateUIText();
-            });
-        });
+    // Refresh wizard text when the navbar language selector changes.
+    // (The selector itself is rendered and wired by navbar.js; i18n.js
+    // dispatches this event after each switch.)
+    document.addEventListener('languageChanged', function() {
+        updateWizardText();
+    });
     </script>
     <!-- Bootstrap JS (Pattern C navbar requires) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

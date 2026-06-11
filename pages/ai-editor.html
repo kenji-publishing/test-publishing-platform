@@ -787,9 +787,10 @@
 
                     <!-- Full Text Input -->
                     <div id="inputFull">
-                        <textarea class="text-input" id="sourceText" rows="12" placeholder="Paste your novel text here..."></textarea>
+                        <textarea class="text-input" id="sourceText" rows="12" placeholder="Paste your manuscript here..." oninput="updateCharCount()"></textarea>
                         <div class="text-meta">
-                            <span id="charCount">0 <span id="charLabel">characters</span></span>
+                            <!-- charCount only holds the number so updating it can't wipe out the label span -->
+                            <span><span id="charCount">0</span> <span id="charLabel">characters</span></span>
                             <span id="pageEstimate"></span>
                         </div>
                     </div>
@@ -1198,30 +1199,6 @@
         if (minEl) minEl.textContent = minLabels[L] || minLabels['en'];
     }
 
-    // Demo edits for Step 4 comparison: same passage, three depths of editing
-    // Haiku = light proofreading (typos/grammar)
-    // Sonnet = proofreading + editorial review (consistency, repetition, clarity)
-    // Opus = full polish (rhythm, word choice, narrative flow)
-    const _OLD_demoTranslations = {
-        'ja-en': {
-            original: '桜の花びらが風に舞い散る中、彼女は古びた手紙を胸に抱きしめた。あの日の約束は、もう叶わないと知りながらも、その言葉だけが彼女を支えていた。',
-            haiku: 'Cherry blossom petals scattered in the wind, and she held an old letter to her chest. Even though she knew the promise from that day would no longer come true, those words alone supported her.',
-            sonnet: 'As cherry blossom petals danced and scattered on the wind, she clutched the weathered letter against her heart. She knew the promise made that day would never be fulfilled, yet those words alone had kept her standing.',
-            opus: 'Cherry blossoms surrendered to the breeze, their petals tracing slow arcs through the spring air, and she pressed the time-worn letter against her chest as though it were the last warm thing left in the world. The promise made on that distant day\u2014she had long since accepted it would go unkept. And yet, those words were the slender thread by which she clung to each passing morning.'
-        },
-        'en-ja': {
-            original: 'The old bookshop smelled of dust and forgotten stories. Eleanor ran her fingers along the spines, each one a doorway she had yet to open.',
-            haiku: '古い書店は埃と忘れられた物語の匂いがした。エレノアは背表紙に沿って指を走らせた。それぞれがまだ開けていない扉だった。',
-            sonnet: '古い書店には、埃と忘れ去られた物語の香りが漂っていた。エレノアは書棚の背表紙をそっと指でなぞった。一冊一冊が、まだ開かれていない扉のようだった。',
-            opus: 'その古書店は、埃と、誰にも読まれなくなった物語たちの匂いに満ちていた。エレノアは棚に並ぶ背表紙を指先でゆっくりとたどった。一冊ごとが、まだ彼女が押し開いたことのない扉だった。'
-        },
-        'default': {
-            original: 'The cherry blossoms danced in the spring breeze. She watched them fall, each petal a whispered goodbye.',
-            haiku: 'The cherry blossoms danced in the spring wind. She watched them fall, each petal was a whispered goodbye.',
-            sonnet: 'Cherry blossoms waltzed through the spring breeze as she watched each petal drift down\u2014a gentle farewell whispered to the retreating winter.',
-            opus: 'The cherry blossoms had given themselves to the spring breeze, pirouetting through the luminous air in their final, exquisite performance. She stood beneath them, watching each petal descend\u2014a silent valediction to the winter that was, at last, loosening its grip on the world.'
-        }
-    };
 
     // Editing demos keyed by manuscript language. Three depths: light proofreading,
     // proofreading + editorial review, full polish.
@@ -1807,14 +1784,9 @@
             }
         }, false);
 
-        // Navbar overlay
-
-            if (navbarOverlay) {
-                navbarOverlay.addEventListener('click', function() {
-                    const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
-                    if (bsCollapse) bsCollapse.hide();
-                });
-            }
+        // (Navbar overlay wiring removed — the overlay element doesn't exist
+        //  yet at this point; navbar.js attaches its own handlers after it
+        //  renders the navbar.)
         });
     </script>
 
