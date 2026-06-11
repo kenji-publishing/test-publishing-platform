@@ -1,4 +1,4 @@
-# Publisher メール通知サービス
+# AuctLect メール通知サービス
 
 ## 概要
 

@@ -1,5 +1,5 @@
 /**
- * Publisher Platform - Translator Marketplace Routes
+ * AuctLect Platform - Translator Marketplace Routes
  * Phase 7b: Translator Marketplace
  * 
  * Allows authors to find, contact, and hire translators directly.

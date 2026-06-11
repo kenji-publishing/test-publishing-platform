@@ -86,7 +86,7 @@ function generateReceiptHTML(purchase, lang = 'ja') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${texts.title} - Publisher</title>
+    <title>${texts.title} - AuctLect</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="${langSettings.fontUrl}" rel="stylesheet">
@@ -303,7 +303,7 @@ function generateReceiptHTML(purchase, lang = 'ja') {
         <div class="receipt-header">
             <div class="logo">
                 <span class="logo-icon">📚</span>
-                <span>Publisher</span>
+                <span>AuctLect</span>
             </div>
             <div class="receipt-title">${texts.title}</div>
         </div>
@@ -382,8 +382,8 @@ function getTexts(lang) {
             productType: '電子書籍',
             totalAmount: '合計金額',
             thankYou: 'ご購入ありがとうございます',
-            footerLine1: 'Publisher - 世界中の読者と作家をつなぐ',
-            footerLine2: '© 2026 Publisher. All rights reserved.',
+            footerLine1: 'AuctLect - 世界中の読者と作家をつなぐ',
+            footerLine2: '© 2026 AuctLect. All rights reserved.',
             printButton: '印刷 / PDFとして保存'
         },
         en: {
@@ -398,8 +398,8 @@ function getTexts(lang) {
             productType: 'Digital Content',
             totalAmount: 'Total Amount',
             thankYou: 'Thank you for your purchase',
-            footerLine1: 'Publisher - Connecting readers and authors worldwide',
-            footerLine2: '© 2026 Publisher. All rights reserved.',
+            footerLine1: 'AuctLect - Connecting readers and authors worldwide',
+            footerLine2: '© 2026 AuctLect. All rights reserved.',
             printButton: 'Print / Save as PDF'
         },
         zh: {
@@ -414,8 +414,8 @@ function getTexts(lang) {
             productType: '电子书',
             totalAmount: '总金额',
             thankYou: '感谢您的购买',
-            footerLine1: 'Publisher - 连接全球读者与作者',
-            footerLine2: '© 2026 Publisher. 保留所有权利。',
+            footerLine1: 'AuctLect - 连接全球读者与作者',
+            footerLine2: '© 2026 AuctLect. 保留所有权利。',
             printButton: '打印 / 保存为PDF'
         },
         ko: {
@@ -430,8 +430,8 @@ function getTexts(lang) {
             productType: '전자책',
             totalAmount: '총액',
             thankYou: '구매해 주셔서 감사합니다',
-            footerLine1: 'Publisher - 전 세계 독자와 작가를 연결',
-            footerLine2: '© 2026 Publisher. All rights reserved.',
+            footerLine1: 'AuctLect - 전 세계 독자와 작가를 연결',
+            footerLine2: '© 2026 AuctLect. All rights reserved.',
             printButton: '인쇄 / PDF로 저장'
         },
         es: {
@@ -446,8 +446,8 @@ function getTexts(lang) {
             productType: 'Libro Digital',
             totalAmount: 'Monto Total',
             thankYou: 'Gracias por su compra',
-            footerLine1: 'Publisher - Conectando lectores y autores en todo el mundo',
-            footerLine2: '© 2026 Publisher. Todos los derechos reservados.',
+            footerLine1: 'AuctLect - Conectando lectores y autores en todo el mundo',
+            footerLine2: '© 2026 AuctLect. Todos los derechos reservados.',
             printButton: 'Imprimir / Guardar como PDF'
         },
         fr: {
@@ -462,8 +462,8 @@ function getTexts(lang) {
             productType: 'Livre Numérique',
             totalAmount: 'Montant Total',
             thankYou: 'Merci pour votre achat',
-            footerLine1: 'Publisher - Connecter les lecteurs et les auteurs du monde entier',
-            footerLine2: '© 2026 Publisher. Tous droits réservés.',
+            footerLine1: 'AuctLect - Connecter les lecteurs et les auteurs du monde entier',
+            footerLine2: '© 2026 AuctLect. Tous droits réservés.',
             printButton: 'Imprimer / Enregistrer en PDF'
         },
         de: {
@@ -478,8 +478,8 @@ function getTexts(lang) {
             productType: 'E-Book',
             totalAmount: 'Gesamtbetrag',
             thankYou: 'Vielen Dank für Ihren Kauf',
-            footerLine1: 'Publisher - Leser und Autoren weltweit verbinden',
-            footerLine2: '© 2026 Publisher. Alle Rechte vorbehalten.',
+            footerLine1: 'AuctLect - Leser und Autoren weltweit verbinden',
+            footerLine2: '© 2026 AuctLect. Alle Rechte vorbehalten.',
             printButton: 'Drucken / Als PDF speichern'
         },
         ar: {
@@ -494,8 +494,8 @@ function getTexts(lang) {
             productType: 'كتاب إلكتروني',
             totalAmount: 'المبلغ الإجمالي',
             thankYou: 'شكراً لشرائك',
-            footerLine1: 'Publisher - ربط القراء والمؤلفين حول العالم',
-            footerLine2: '© 2026 Publisher. جميع الحقوق محفوظة.',
+            footerLine1: 'AuctLect - ربط القراء والمؤلفين حول العالم',
+            footerLine2: '© 2026 AuctLect. جميع الحقوق محفوظة.',
             printButton: 'طباعة / حفظ كـ PDF'
         },
         pt: {
@@ -510,8 +510,8 @@ function getTexts(lang) {
             productType: 'Livro Digital',
             totalAmount: 'Valor Total',
             thankYou: 'Obrigado pela sua compra',
-            footerLine1: 'Publisher - Conectando leitores e autores em todo o mundo',
-            footerLine2: '© 2026 Publisher. Todos os direitos reservados.',
+            footerLine1: 'AuctLect - Conectando leitores e autores em todo o mundo',
+            footerLine2: '© 2026 AuctLect. Todos os direitos reservados.',
             printButton: 'Imprimir / Salvar como PDF'
         }
     };

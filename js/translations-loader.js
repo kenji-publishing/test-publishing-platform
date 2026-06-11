@@ -1,5 +1,5 @@
 /**
- * Publisher Platform - Translations Loader
+ * AuctLect Platform - Translations Loader
  * 翻訳システムローダー
  * 
  * このファイルは全ての言語ファイルを順番に読み込みます。

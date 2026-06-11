@@ -1,5 +1,5 @@
 /**
- * Publisher Platform - Main Server
+ * AuctLect Platform - Main Server
  * 
  * This is the entry point for the backend API server.
  * It sets up Express, connects to PostgreSQL, and defines all routes.
@@ -88,7 +88,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
-    message: 'Publisher API is running',
+    message: 'AuctLect API is running',
     timestamp: new Date().toISOString(),
     database: db.pool ? 'connected' : 'disconnected'
   });
@@ -97,7 +97,7 @@ app.get('/api/health', (req, res) => {
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({
-    message: 'Welcome to Publisher API',
+    message: 'Welcome to AuctLect API',
     version: '1.0.0',
     endpoints: {
       health: '/api/health',
@@ -139,7 +139,7 @@ app.use((err, req, res, next) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`\n🚀 Publisher API Server is running!`);
+  console.log(`\n🚀 AuctLect API Server is running!`);
   console.log(`📍 URL: http://localhost:${PORT}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`💾 Database: ${process.env.DB_NAME}@${process.env.DB_HOST}:${process.env.DB_PORT}`);

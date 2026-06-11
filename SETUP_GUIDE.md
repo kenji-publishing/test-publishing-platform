@@ -1,6 +1,6 @@
-# 📚 Publisher Platform - Complete Setup Guide
+# 📚 AuctLect Platform - Complete Setup Guide
 
-This guide will walk you through setting up the **entire Publisher platform** from scratch, even if you're not familiar with programming.
+This guide will walk you through setting up the **entire AuctLect platform** from scratch, even if you're not familiar with programming.
 
 ---
 
@@ -215,7 +215,7 @@ npm start
 
 You should see:
 ```
-🚀 Publisher API Server is running!
+🚀 AuctLect API Server is running!
 📍 URL: http://localhost:3000
 🌍 Environment: development
 💾 Database: publisher_db@localhost:5432
@@ -241,7 +241,7 @@ You should see:
 ```json
 {
   "status": "ok",
-  "message": "Publisher API is running",
+  "message": "AuctLect API is running",
   "database": "connected"
 }
 ```
@@ -294,7 +294,7 @@ Open your browser and go to:
 
 **http://localhost:8000**
 
-You should see the Publisher homepage!
+You should see the AuctLect homepage!
 
 ### Test Features:
 
@@ -420,4 +420,4 @@ You now have a fully functional multilingual publishing platform running on your
 
 ---
 
-**Made with ❤️ by the Publisher Team**
+**Made with ❤️ by the AuctLect Team**

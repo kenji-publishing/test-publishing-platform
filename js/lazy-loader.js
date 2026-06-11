@@ -1,5 +1,5 @@
 /**
- * Publisher Platform - Lazy Loader
+ * AuctLect Platform - Lazy Loader
  * Phase 11C-1: 画像の遅延読み込み（Lazy Loading）
  * 
  * Intersection Observer APIを使用して、画面に表示される直前に

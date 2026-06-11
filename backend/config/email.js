@@ -43,7 +43,7 @@ if (process.env.NODE_ENV === 'production' && process.env.EMAIL_HOST) {
 async function sendEmail(to, subject, text, html) {
   try {
     const mailOptions = {
-      from: process.env.EMAIL_FROM || '"Publisher Platform" <noreply@publisher.com>',
+      from: process.env.EMAIL_FROM || '"AuctLect Platform" <noreply@publisher.com>',
       to: to,
       subject: subject,
       text: text,
@@ -70,7 +70,7 @@ const BASE_URL = process.env.BASE_URL || 'http://localhost:8000';
 const emailHeader = `
 <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
   <div style="background: linear-gradient(135deg, #4a90d9 0%, #357abd 100%); padding: 20px 30px; text-align: center;">
-    <h1 style="color: white; margin: 0; font-size: 24px;">📚 Publisher</h1>
+    <h1 style="color: white; margin: 0; font-size: 24px;">📚 AuctLect</h1>
   </div>
   <div style="padding: 30px;">
 `;
@@ -81,13 +81,13 @@ const emailHeader = `
 const emailFooter = `
   </div>
   <div style="background: #f8f9fa; padding: 20px 30px; text-align: center; font-size: 12px; color: #6c757d;">
-    <p style="margin: 0 0 10px 0;">このメールはPublisherから自動送信されています。</p>
+    <p style="margin: 0 0 10px 0;">このメールはAuctLectから自動送信されています。</p>
     <p style="margin: 0;">
-      <a href="${BASE_URL}" style="color: #4a90d9; text-decoration: none;">Publisher</a> |
+      <a href="${BASE_URL}" style="color: #4a90d9; text-decoration: none;">AuctLect</a> |
       <a href="${BASE_URL}/pages/support/faq.html" style="color: #4a90d9; text-decoration: none;">FAQ</a> |
       <a href="${BASE_URL}/pages/account-settings.html" style="color: #4a90d9; text-decoration: none;">設定</a>
     </p>
-    <p style="margin: 10px 0 0 0;">© 2026 Publisher. All rights reserved.</p>
+    <p style="margin: 10px 0 0 0;">© 2026 AuctLect. All rights reserved.</p>
   </div>
 </div>
 `;
@@ -102,11 +102,11 @@ const templates = {
 
   // Welcome email for new users
   welcome: (userName) => ({
-    subject: 'Welcome to Publisher! 🎉',
+    subject: 'Welcome to AuctLect! 🎉',
     text: `
 Hi ${userName},
 
-Welcome to Publisher - the multilingual publishing platform!
+Welcome to AuctLect - the multilingual publishing platform!
 
 You can now:
 ✅ Upload your works
@@ -117,13 +117,13 @@ You can now:
 Get started: ${BASE_URL}
 
 Best regards,
-The Publisher Team
+The AuctLect Team
     `,
     html: `
 ${emailHeader}
-  <h2 style="color: #333; margin-top: 0;">Welcome to Publisher! 🎉</h2>
+  <h2 style="color: #333; margin-top: 0;">Welcome to AuctLect! 🎉</h2>
   <p>Hi ${userName},</p>
-  <p>Welcome to Publisher - the multilingual publishing platform!</p>
+  <p>Welcome to AuctLect - the multilingual publishing platform!</p>
   <p>You can now:</p>
   <ul style="color: #555;">
     <li>✅ Upload your works</li>
@@ -134,7 +134,7 @@ ${emailHeader}
   <p style="text-align: center; margin: 30px 0;">
     <a href="${BASE_URL}" style="background: #4a90d9; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">Get Started</a>
   </p>
-  <p>Best regards,<br>The Publisher Team</p>
+  <p>Best regards,<br>The AuctLect Team</p>
 ${emailFooter}
     `
   }),
@@ -153,7 +153,7 @@ ${userName} 様
 
 翻訳を確認: ${BASE_URL}/pages/translation-status.html
 
-Publisher Team
+AuctLect Team
     `,
     html: `
 ${emailHeader}
@@ -187,7 +187,7 @@ ${authorName} 様
 
 収益を確認: ${BASE_URL}/pages/dashboard.html
 
-Publisher Team
+AuctLect Team
     `,
     html: `
 ${emailHeader}
@@ -221,7 +221,7 @@ ${userName} 様
 
 詳細を確認: ${BASE_URL}/pages/dashboard.html
 
-Publisher Team
+AuctLect Team
     `,
     html: `
 ${emailHeader}
@@ -267,7 +267,7 @@ ${userName || 'お客'} 様
 ※ このメールに直接返信いただいても対応できません。
   追加のご質問はチケット画面からお願いします。
 
-Publisher サポートチーム
+AuctLect サポートチーム
     `,
     html: `
 ${emailHeader}
@@ -329,7 +329,7 @@ ${faqListText}
 
 チケットの状況確認: ${BASE_URL}/pages/support/tickets.html
 
-Publisher サポートチーム
+AuctLect サポートチーム
       `,
       html: `
 ${emailHeader}
@@ -381,7 +381,7 @@ ${replyPreview}...
 
 チケットを確認: ${BASE_URL}/pages/support/tickets.html
 
-Publisher サポートチーム
+AuctLect サポートチーム
     `,
     html: `
 ${emailHeader}
@@ -427,7 +427,7 @@ ${userName || 'お客'} 様
 
 ご利用ありがとうございました。
 
-Publisher サポートチーム
+AuctLect サポートチーム
     `,
     html: `
 ${emailHeader}
@@ -478,7 +478,7 @@ ${userName || 'お客'} 様
 
 ご利用ありがとうございました。
 
-Publisher サポートチーム
+AuctLect サポートチーム
     `,
     html: `
 ${emailHeader}
@@ -519,7 +519,7 @@ ${emailFooter}
 
 管理画面から確認してください。
 
-Publisher System
+AuctLect System
     `,
     html: `
 ${emailHeader}

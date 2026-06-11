@@ -53,7 +53,7 @@ router.post('/create-checkout-session', authenticate, async (req, res) => {
             currency: 'usd',
             product_data: {
               name: work.title,
-              description: work.description || 'Digital content from Publisher',
+              description: work.description || 'Digital content from AuctLect',
             },
             unit_amount: Math.round(work.price * 100),
           },

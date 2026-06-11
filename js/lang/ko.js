@@ -1,5 +1,5 @@
 /**
- * Publisher Platform - KO Translations
+ * AuctLect Platform - KO Translations
  * Auto-merged from ko.json
  */
 
@@ -126,7 +126,7 @@ window.translations.ko = {
         createAccount: '계정 만들기',
         orSignUpWith: '또는 다음으로 가입',
         haveAccount: '이미 계정이 있으신가요?',
-        pageTitle: '계정 만들기 - Publisher'
+        pageTitle: '계정 만들기 - AuctLect'
     },
     dashboard: {
         title: '대시보드',
@@ -241,7 +241,7 @@ window.translations.ko = {
         optPriceLow: '가격: 낮은순',
         btnApplyFilters: '필터 적용',
         btnRecommended: '당신을 위한 추천',
-        publisherPicks: 'Publisher 추천',
+        publisherPicks: 'AuctLect 추천',
         worksFound: '개의 작품',
         noResults: '조건에 맞는 작품을 찾을 수 없습니다',
         by: '저자:',
@@ -682,7 +682,7 @@ window.translations.ko = {
         noResults: '결과 없음'
     },
     mangaViewer: {
-        pageTitle: '만화 뷰어 - Publisher',
+        pageTitle: '만화 뷰어 - AuctLect',
         fullscreen: '전체 화면',
         pages: '페이지',
         close: '닫기',
@@ -698,7 +698,7 @@ window.translations.ko = {
         by: '작가'
     },
     mangaTranslator: {
-        pageTitle: '만화 번역기 - Publisher',
+        pageTitle: '만화 번역기 - AuctLect',
         dashboard: '대시보드',
         editorTitle: '에디터',
         zoomOut: '축소',
@@ -824,7 +824,7 @@ window.translations.ko = {
         btnNext: '\\ub2e4\\uc74c'
     },
     registerTranslator: {
-        pageTitle: '번역가 등록 - Publisher',
+        pageTitle: '번역가 등록 - AuctLect',
         title: '번역가 등록',
         subtitle: '문화와 전 세계 독자를 연결하세요',
         personalInfo: '개인 정보',
@@ -886,7 +886,7 @@ window.translations.ko = {
         createAccount: '번역가 계정 만들기'
     },
     registerEditor: {
-        pageTitle: '편집자 등록 - Publisher',
+        pageTitle: '편집자 등록 - AuctLect',
         title: '편집자 등록',
         subtitle: '훌륭한 이야기를 완벽하게 다듬어주세요',
         personalInfo: '개인 정보',
@@ -963,7 +963,7 @@ window.translations.ko = {
         createAccount: '편집자 계정 만들기'
     },
     registerAuthor: {
-        pageTitle: '작가 등록 - Publisher',
+        pageTitle: '작가 등록 - AuctLect',
         title: '작가 등록',
         subtitle: '당신의 이야기를 세계와 공유하세요',
         personalInfo: '개인 정보',
@@ -1023,10 +1023,10 @@ window.translations.ko = {
     },
     support: {
         faq: {
-            pageTitle: 'FAQ - Publisher',
+            pageTitle: 'FAQ - AuctLect',
             title: 'FAQ',
             heroTitle: '자주 묻는 질문',
-            heroSubtitle: 'Publisher에 대한 일반적인 질문에 대한 답변을 찾아보세요',
+            heroSubtitle: 'AuctLect에 대한 일반적인 질문에 대한 답변을 찾아보세요',
             searchPlaceholder: '답변 검색...',
             searchResults: '검색 결과',
             clear: '지우기',
@@ -1215,7 +1215,7 @@ window.translations.ko = {
                 userMessage: '여기에 제 문의 사항이 있습니다.\n자세한 내용을 알려주세요.',
                 adminMessage: '문의해 주셔서 감사합니다.\n검토하겠습니다.'
             },
-            pageTitle: '지원 티켓 - Publisher',
+            pageTitle: '지원 티켓 - AuctLect',
             noTicketsDesc: '질문이나 요청이 있으시면 언제든지 문의해 주세요',
             send: '보내기',
             ratingQuestion: '지원은 어떠셨나요?',
@@ -1246,7 +1246,7 @@ window.translations.ko = {
         terms: '이용약관',
         privacy: '개인정보',
         contact: '문의',
-        copyright: '© 2024 Publisher. All rights reserved.'
+        copyright: '© 2024 AuctLect. All rights reserved.'
     },
     notificationManager: {
         sale: '판매 알림',
@@ -1998,7 +1998,7 @@ window.translations.ko = {
         words: '단어 수',
         pages: '페이지 수',
         lastEdit: '마지막 편집: 방금',
-        editorTitle: '에디터 - Publisher'
+        editorTitle: '에디터 - AuctLect'
     },
     notifications: {
         loginRequired: '로그인이 필요합니다',
@@ -2014,7 +2014,7 @@ window.translations.ko = {
         tmpl_feedback_message: '「{work}」이(가) {rating}점 평가를 받았습니다!',
         tmpl_comment_title: '새 댓글',
         tmpl_comment_message: '「{work}」에 새 댓글이 달렸습니다.',
-        tmpl_system_title: 'Publisher에 오신 것을 환영합니다! 🎉',
+        tmpl_system_title: 'AuctLect에 오신 것을 환영합니다! 🎉',
         tmpl_system_message: '계정이 준비되었습니다. 탐색을 시작하세요!',
         tmpl_agreement_request_title: '협업 계약 요청',
         tmpl_agreement_request_message: '「{work}」의 {role}로서 협업 계약을 받았습니다.',
@@ -2049,10 +2049,10 @@ window.translations.ko = {
     },
     legal: {
         pageTitle: {
-            guidelines: '콘텐츠 가이드라인 - Publisher',
-            copyright: '저작권 정책 - Publisher',
-            privacy: '개인정보 처리방침 - Publisher',
-            terms: '이용약관 - Publisher'
+            guidelines: '콘텐츠 가이드라인 - AuctLect',
+            copyright: '저작권 정책 - AuctLect',
+            privacy: '개인정보 처리방침 - AuctLect',
+            terms: '이용약관 - AuctLect'
         },
         title: {
             guidelines: '콘텐츠 가이드라인',

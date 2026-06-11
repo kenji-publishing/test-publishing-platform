@@ -169,7 +169,7 @@ function generateAgreementTerms(config) {
             'Minimum payout threshold is $10 USD',
             'All parties must agree to any changes in revenue split',
             'Work deletion requires 30 days notice to all collaborators',
-            'Disputes will be resolved through Publisher mediation'
+            'Disputes will be resolved through AuctLect mediation'
         ],
         createdAt: new Date().toISOString()
     };

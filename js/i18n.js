@@ -1,5 +1,5 @@
 /**
- * Publisher Platform - i18n Engine (翻訳エンジン)
+ * AuctLect Platform - i18n Engine (翻訳エンジン)
  *
  * 全ページ共通の多言語対応を提供。
  * 言語別JSONファイルから翻訳を読み込み、data-i18n属性で自動適用。

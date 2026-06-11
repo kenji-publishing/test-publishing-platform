@@ -1,5 +1,5 @@
 /**
- * Publisher Platform - Editor Page Translations
+ * AuctLect Platform - Editor Page Translations
  * Adds editor-specific translations to each language.
  * Load AFTER all js/lang/*.js files and translations-base.js
  */
@@ -14,7 +14,7 @@
     // English
     if (window.translations.en) {
         window.translations.en.editor = {
-            title: 'Editor - Publisher',
+            title: 'Editor - AuctLect',
             untitled: 'Untitled',
             placeholder: 'Start writing your story...',
             paragraph: 'Paragraph',
@@ -57,7 +57,7 @@
     // Japanese
     if (window.translations.ja) {
         window.translations.ja.editor = {
-            title: '\u30a8\u30c7\u30a3\u30bf\u30fc - Publisher',
+            title: '\u30a8\u30c7\u30a3\u30bf\u30fc - AuctLect',
             untitled: '\u7121\u984c',
             placeholder: '\u3053\u3053\u306b\u7269\u8a9e\u3092\u66f8\u304d\u59cb\u3081\u3066\u304f\u3060\u3055\u3044...',
             paragraph: '\u6bb5\u843d',
@@ -100,7 +100,7 @@
     // Chinese (Simplified)
     if (window.translations.zh) {
         window.translations.zh.editor = {
-            title: '\u7f16\u8f91\u5668 - Publisher',
+            title: '\u7f16\u8f91\u5668 - AuctLect',
             untitled: '\u65e0\u6807\u9898',
             placeholder: '\u5728\u8fd9\u91cc\u5f00\u59cb\u5199\u4f5c...',
             paragraph: '\u6bb5\u843d',
@@ -143,7 +143,7 @@
     // Spanish
     if (window.translations.es) {
         window.translations.es.editor = {
-            title: 'Editor - Publisher',
+            title: 'Editor - AuctLect',
             untitled: 'Sin t\u00edtulo',
             placeholder: 'Comienza a escribir tu historia...',
             paragraph: 'P\u00e1rrafo',
@@ -186,7 +186,7 @@
     // French
     if (window.translations.fr) {
         window.translations.fr.editor = {
-            title: '\u00c9diteur - Publisher',
+            title: '\u00c9diteur - AuctLect',
             untitled: 'Sans titre',
             placeholder: 'Commencez \u00e0 \u00e9crire votre histoire...',
             paragraph: 'Paragraphe',
@@ -229,7 +229,7 @@
     // German
     if (window.translations.de) {
         window.translations.de.editor = {
-            title: 'Editor - Publisher',
+            title: 'Editor - AuctLect',
             untitled: 'Ohne Titel',
             placeholder: 'Beginnen Sie Ihre Geschichte zu schreiben...',
             paragraph: 'Absatz',
@@ -272,7 +272,7 @@
     // Korean
     if (window.translations.ko) {
         window.translations.ko.editor = {
-            title: '\uc5d0\ub514\ud130 - Publisher',
+            title: '\uc5d0\ub514\ud130 - AuctLect',
             untitled: '\uc81c\ubaa9 \uc5c6\uc74c',
             placeholder: '\uc5ec\uae30\uc5d0 \uc774\uc57c\uae30\ub97c \uc791\uc131\ud558\uc138\uc694...',
             paragraph: '\ub2e8\ub77d',
@@ -315,7 +315,7 @@
     // Arabic
     if (window.translations.ar) {
         window.translations.ar.editor = {
-            title: '\u0627\u0644\u0645\u062d\u0631\u0631 - Publisher',
+            title: '\u0627\u0644\u0645\u062d\u0631\u0631 - AuctLect',
             untitled: '\u0628\u062f\u0648\u0646 \u0639\u0646\u0648\u0627\u0646',
             placeholder: '\u0627\u0628\u062f\u0623 \u0628\u0643\u062a\u0627\u0628\u0629 \u0642\u0635\u062a\u0643 \u0647\u0646\u0627...',
             paragraph: '\u0641\u0642\u0631\u0629',
@@ -358,7 +358,7 @@
     // Portuguese
     if (window.translations.pt) {
         window.translations.pt.editor = {
-            title: 'Editor - Publisher',
+            title: 'Editor - AuctLect',
             untitled: 'Sem t\u00edtulo',
             placeholder: 'Comece a escrever sua hist\u00f3ria...',
             paragraph: 'Par\u00e1grafo',

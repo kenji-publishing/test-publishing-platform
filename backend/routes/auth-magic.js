@@ -134,9 +134,9 @@ router.post('/register', async (req, res) => {
     
     await sendEmail(
       email,
-      'Welcome to Publisher! Please verify your email',
-      `Welcome to Publisher!\n\nClick here to verify your email:\n${verifyLink}\n\nThis link expires in 15 minutes.`,
-      `<h1>Welcome to Publisher!</h1>
+      'Welcome to AuctLect! Please verify your email',
+      `Welcome to AuctLect!\n\nClick here to verify your email:\n${verifyLink}\n\nThis link expires in 15 minutes.`,
+      `<h1>Welcome to AuctLect!</h1>
        <p>Click the button below to verify your email:</p>
        <a href="${verifyLink}" style="background: #8B7355; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">Verify Email</a>
        <p>This link expires in 15 minutes.</p>`
@@ -205,11 +205,11 @@ router.post('/login', async (req, res) => {
 
     await sendEmail(
       email,
-      'Your Publisher Login Link',
+      'Your AuctLect Login Link',
       `Click here to log in:\n${loginLink}\n\nThis link expires in 15 minutes.\n\nIf you didn't request this, please ignore this email.`,
-      `<h2>Log in to Publisher</h2>
+      `<h2>Log in to AuctLect</h2>
        <p>Click the button below to log in:</p>
-       <a href="${loginLink}" style="background: #8B7355; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">Log In to Publisher</a>
+       <a href="${loginLink}" style="background: #8B7355; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">Log In to AuctLect</a>
        <p style="color: #666; font-size: 14px;">This link expires in 15 minutes.</p>
        <p style="color: #666; font-size: 14px;">If you didn't request this, please ignore this email.</p>`
     );
@@ -423,11 +423,11 @@ router.post('/recover/backup-email', async (req, res) => {
 
     await sendEmail(
       user.backup_email,
-      'Publisher Account Recovery',
-      `Hi ${user.first_name},\n\nSomeone requested account recovery for your Publisher account.\n\nClick here to recover your account:\n${recoveryLink}\n\nThis link expires in 15 minutes.\n\nIf you didn't request this, please ignore this email.`,
+      'AuctLect Account Recovery',
+      `Hi ${user.first_name},\n\nSomeone requested account recovery for your AuctLect account.\n\nClick here to recover your account:\n${recoveryLink}\n\nThis link expires in 15 minutes.\n\nIf you didn't request this, please ignore this email.`,
       `<h2>Account Recovery</h2>
        <p>Hi ${user.first_name},</p>
-       <p>Someone requested account recovery for your Publisher account.</p>
+       <p>Someone requested account recovery for your AuctLect account.</p>
        <a href="${recoveryLink}" style="background: #8B7355; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">Recover Account</a>
        <p style="color: #666; font-size: 14px;">This link expires in 15 minutes.</p>
        <p style="color: #666; font-size: 14px;">If you didn't request this, please ignore this email.</p>`
@@ -591,7 +591,7 @@ router.post('/recover/questions', async (req, res) => {
 
       await sendEmail(
         newEmail,
-        'Verify your new email - Publisher',
+        'Verify your new email - AuctLect',
         `Your email has been changed. Click here to verify:\n${verifyLink}`,
         `<h2>Verify Your New Email</h2>
          <p>Your email has been changed. Click below to verify:</p>

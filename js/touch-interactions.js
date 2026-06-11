@@ -1,5 +1,5 @@
 /**
- * Publisher Platform - Touch Interactions
+ * AuctLect Platform - Touch Interactions
  * Phase 11B-3: Swipe actions and touch gestures
  */
 

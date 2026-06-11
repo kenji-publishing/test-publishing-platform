@@ -1,4 +1,4 @@
-# Publisher ナビバー・メニュー設計書 v3
+# AuctLect ナビバー・メニュー設計書 v3
 
 ## 変更履歴
 - **v3 (2026-01-30)**: パターンCをログイン状態対応に修正、PCナビバーとハンバーガーメニューの項目統一
@@ -55,7 +55,7 @@ Dashboardページ自体に「まだ作品がありません。最初の作品�
 
 #### PCナビバー
 ```
-[Publisher Logo] | Browse | FAQ | 🌐 | [Sign In]
+[AuctLect Logo] | Browse | FAQ | 🌐 | [Sign In]
 ```
 
 #### ハンバーガーメニュー（モバイル展開時）
@@ -78,7 +78,7 @@ Sign In（ログイン）
 
 #### PCナビバー
 ```
-[Publisher Logo] | Browse | Library | Dashboard | 🔔 | 🌐 | 👤▼
+[AuctLect Logo] | Browse | Library | Dashboard | 🔔 | 🌐 | 👤▼
 ```
 
 #### ハンバーガーメニュー（モバイル展開時）
@@ -123,7 +123,7 @@ Log Out（ログアウト）
 
 #### PCナビバー
 ```
-[Publisher Logo] | Browse | Features | About | 🌐 | [Sign In] [Sign Up]
+[AuctLect Logo] | Browse | Features | About | 🌐 | [Sign In] [Sign Up]
 ```
 
 #### ハンバーガーメニュー（モバイル展開時）
@@ -148,7 +148,7 @@ Sign Up（新規登録）
 
 #### PCナビバー
 ```
-[Publisher Logo] | Browse | Library | Dashboard | 🔔 | 🌐 | 👤▼
+[AuctLect Logo] | Browse | Library | Dashboard | 🔔 | 🌐 | 👤▼
 ```
 
 #### ハンバーガーメニュー（モバイル展開時）
@@ -173,7 +173,7 @@ Home（ホーム）
 
 #### PCナビバー
 ```
-[Publisher Logo] | Browse | Library | 🔔 | 🌐 | 👤▼
+[AuctLect Logo] | Browse | Library | 🔔 | 🌐 | 👤▼
 ```
 
 #### ハンバーガーメニュー（モバイル展開時）
@@ -206,7 +206,7 @@ Log Out（ログアウト）
 
 #### PCナビバー
 ```
-[Publisher Logo] | Dashboard | My Works | Analytics | 🔔 | 🌐 | 👤▼
+[AuctLect Logo] | Dashboard | My Works | Analytics | 🔔 | 🌐 | 👤▼
 ```
 
 #### ハンバーガーメニュー（モバイル展開時）

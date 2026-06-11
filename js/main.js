@@ -2,7 +2,7 @@
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Publisher platform initialized');
+    console.log('AuctLect platform initialized');
     
     // Initialize tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));

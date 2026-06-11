@@ -1,5 +1,5 @@
 /**
- * Publisher Platform - Common Utilities
+ * AuctLect Platform - Common Utilities
  * Phase 11C-3: JavaScript最適化
  * 
  * 共通で使用するユーティリティ関数を集約

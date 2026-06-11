@@ -1,7 +1,7 @@
-# Publisher Platform - Database Design
+# AuctLect Platform - Database Design
 
 ## Overview
-This document outlines the complete database schema for the Publisher multilingual publishing platform.
+This document outlines the complete database schema for the AuctLect multilingual publishing platform.
 
 ---
 
@@ -453,4 +453,4 @@ All critical foreign keys have indexes for optimal query performance:
 
 **Version:** 1.0  
 **Last Updated:** 2024-11-20  
-**Author:** Publisher Development Team
+**Author:** AuctLect Development Team

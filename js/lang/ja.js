@@ -1,5 +1,5 @@
 /**
- * Publisher Platform - JA Translations
+ * AuctLect Platform - JA Translations
  * Auto-merged from ja.json
  */
 
@@ -126,7 +126,7 @@ window.translations.ja = {
         createAccount: 'アカウント作成',
         orSignUpWith: 'または登録',
         haveAccount: 'アカウントをお持ち？',
-        pageTitle: 'アカウント作成 - Publisher'
+        pageTitle: 'アカウント作成 - AuctLect'
     },
     dashboard: {
         title: 'ダッシュボード',
@@ -241,7 +241,7 @@ window.translations.ja = {
         optPriceLow: '価格: 安い順',
         btnApplyFilters: 'フィルター適用',
         btnRecommended: 'あなたへのおすすめ',
-        publisherPicks: 'Publisherのおすすめ',
+        publisherPicks: 'AuctLectのおすすめ',
         worksFound: '件の作品',
         noResults: '条件に一致する作品が見つかりませんでした',
         by: '著者:',
@@ -682,7 +682,7 @@ window.translations.ja = {
         noResults: '結果が見つかりません'
     },
     mangaViewer: {
-        pageTitle: 'マンガビューワー - Publisher',
+        pageTitle: 'マンガビューワー - AuctLect',
         fullscreen: 'フルスクリーン',
         pages: 'ページ一覧',
         close: '閉じる',
@@ -698,7 +698,7 @@ window.translations.ja = {
         by: '作者'
     },
     mangaTranslator: {
-        pageTitle: 'マンガ翻訳エディタ - Publisher',
+        pageTitle: 'マンガ翻訳エディタ - AuctLect',
         dashboard: 'ダッシュボード',
         editorTitle: 'エディタ',
         zoomOut: '縮小',
@@ -824,7 +824,7 @@ window.translations.ja = {
         btnNext: '\\u6b21\\u3078'
     },
     registerTranslator: {
-        pageTitle: '翻訳者登録 - Publisher',
+        pageTitle: '翻訳者登録 - AuctLect',
         title: '翻訳者登録',
         subtitle: '文化をつなぎ、世界中の読者とつながる',
         personalInfo: '個人情報',
@@ -886,7 +886,7 @@ window.translations.ja = {
         createAccount: '翻訳者アカウントを作成'
     },
     registerEditor: {
-        pageTitle: '編集者登録 - Publisher',
+        pageTitle: '編集者登録 - AuctLect',
         title: '編集者登録',
         subtitle: '素晴らしい物語を完璧に仕上げる',
         personalInfo: '個人情報',
@@ -963,7 +963,7 @@ window.translations.ja = {
         createAccount: '編集者アカウントを作成'
     },
     registerAuthor: {
-        pageTitle: '著者登録 - Publisher',
+        pageTitle: '著者登録 - AuctLect',
         title: '著者登録',
         subtitle: 'あなたの物語を世界と共有しましょう',
         personalInfo: '個人情報',
@@ -1023,10 +1023,10 @@ window.translations.ja = {
     },
     support: {
         faq: {
-            pageTitle: 'FAQ - Publisher',
+            pageTitle: 'FAQ - AuctLect',
             title: 'FAQ',
             heroTitle: 'よくある質問',
-            heroSubtitle: 'Publisherに関するよくある質問への回答',
+            heroSubtitle: 'AuctLectに関するよくある質問への回答',
             searchPlaceholder: '回答を検索...',
             searchResults: '検索結果',
             clear: 'クリア',
@@ -1215,7 +1215,7 @@ window.translations.ja = {
                 userMessage: 'こちらがお問い合わせ内容です。\nPlease provide more details.',
                 adminMessage: 'お問い合わせありがとうございます。\n確認いたします。'
             },
-            pageTitle: 'サポートチケット - Publisher',
+            pageTitle: 'サポートチケット - AuctLect',
             noTicketsDesc: 'ご質問やご要望がございましたら、お気軽にお問い合わせください',
             send: '送信',
             ratingQuestion: 'サポートはいかがでしたか？',
@@ -1246,7 +1246,7 @@ window.translations.ja = {
         terms: '利用規約',
         privacy: 'プライバシー',
         contact: 'お問い合わせ',
-        copyright: '© 2024 Publisher. All rights reserved.'
+        copyright: '© 2024 AuctLect. All rights reserved.'
     },
     notificationManager: {
         sale: '売上通知',
@@ -1998,7 +1998,7 @@ window.translations.ja = {
         words: '単語数',
         pages: 'ページ数',
         lastEdit: '最終編集: たった今',
-        editorTitle: 'エディター - Publisher'
+        editorTitle: 'エディター - AuctLect'
     },
     notifications: {
         loginRequired: 'ログインが必要です',
@@ -2014,7 +2014,7 @@ window.translations.ja = {
         tmpl_feedback_message: '「{work}」が{rating}つ星の評価を受けました！',
         tmpl_comment_title: '新しいコメント',
         tmpl_comment_message: '「{work}」に新しいコメントがあります。',
-        tmpl_system_title: 'Publisherへようこそ！ 🎉',
+        tmpl_system_title: 'AuctLectへようこそ！ 🎉',
         tmpl_system_message: 'アカウントの準備ができました。さあ、始めましょう！',
         tmpl_agreement_request_title: 'コラボレーション契約リクエスト',
         tmpl_agreement_request_message: '「{work}」の{role}としてコラボレーション契約を受け取りました。',
@@ -2049,10 +2049,10 @@ window.translations.ja = {
     },
     legal: {
         pageTitle: {
-            guidelines: 'コンテンツガイドライン - Publisher',
-            copyright: '著作権ポリシー - Publisher',
-            privacy: 'プライバシーポリシー - Publisher',
-            terms: '利用規約 - Publisher'
+            guidelines: 'コンテンツガイドライン - AuctLect',
+            copyright: '著作権ポリシー - AuctLect',
+            privacy: 'プライバシーポリシー - AuctLect',
+            terms: '利用規約 - AuctLect'
         },
         title: {
             guidelines: 'コンテンツガイドライン',

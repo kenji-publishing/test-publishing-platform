@@ -378,7 +378,7 @@ router.post('/calculate-payout', async (req, res) => {
         // Add platform share
         payouts.push({
             userId: null,
-            name: 'Publisher Platform',
+            name: 'AuctLect Platform',
             email: null,
             role: 'platform',
             sharePercent: terms.revenueShares.platform,

@@ -260,8 +260,8 @@ router.post('/delete-request', authenticate, async (req, res) => {
     
     await sendEmail(
       user.email,
-      '【重要】アカウント削除の確認 - Publisher',
-      `${user.first_name || 'お客'}様\n\nアカウント削除のリクエストを受け付けました。\n\n削除を確定するには、以下のリンクをクリックしてください：\n${deleteLink}\n\nこのリンクは24時間有効です。\n\n心当たりがない場合は、このメールを無視してください。\n\nPublisher サポートチーム`,
+      '【重要】アカウント削除の確認 - AuctLect',
+      `${user.first_name || 'お客'}様\n\nアカウント削除のリクエストを受け付けました。\n\n削除を確定するには、以下のリンクをクリックしてください：\n${deleteLink}\n\nこのリンクは24時間有効です。\n\n心当たりがない場合は、このメールを無視してください。\n\nAuctLect サポートチーム`,
       `<h2>アカウント削除の確認</h2>
        <p>${user.first_name || 'お客'}様</p>
        <p>アカウント削除のリクエストを受け付けました。</p>
@@ -270,7 +270,7 @@ router.post('/delete-request', authenticate, async (req, res) => {
        <p style="color: #666;">このリンクは24時間有効です。</p>
        <p style="color: #666;">心当たりがない場合は、このメールを無視してください。</p>
        <hr>
-       <p style="color: #999; font-size: 12px;">Publisher サポートチーム</p>`
+       <p style="color: #999; font-size: 12px;">AuctLect サポートチーム</p>`
     );
     
     res.json({
@@ -339,13 +339,13 @@ router.post('/confirm-delete', async (req, res) => {
       const user = userResult.rows[0];
       await sendEmail(
         user.email,
-        'アカウント削除完了 - Publisher',
-        `${user.first_name || 'お客'}様\n\nアカウントの削除が完了しました。\n\nご利用いただきありがとうございました。\n\nPublisher`,
+        'アカウント削除完了 - AuctLect',
+        `${user.first_name || 'お客'}様\n\nアカウントの削除が完了しました。\n\nご利用いただきありがとうございました。\n\nAuctLect`,
         `<h2>アカウント削除完了</h2>
          <p>${user.first_name || 'お客'}様</p>
          <p>アカウントの削除が完了しました。</p>
          <p>ご利用いただきありがとうございました。</p>
-         <p>Publisher</p>`
+         <p>AuctLect</p>`
       );
     }
     

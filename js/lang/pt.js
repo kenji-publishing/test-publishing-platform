@@ -1,5 +1,5 @@
 /**
- * Publisher Platform - PT Translations
+ * AuctLect Platform - PT Translations
  * Auto-merged from pt.json
  */
 
@@ -126,7 +126,7 @@ window.translations.pt = {
         createAccount: 'Criar Conta',
         orSignUpWith: 'ou registre-se com',
         haveAccount: 'Já tem uma conta?',
-        pageTitle: 'Criar conta - Publisher'
+        pageTitle: 'Criar conta - AuctLect'
     },
     dashboard: {
         title: 'Painel',
@@ -241,7 +241,7 @@ window.translations.pt = {
         optPriceLow: 'Preço: menor para maior',
         btnApplyFilters: 'Aplicar filtros',
         btnRecommended: 'Recomendado para você',
-        publisherPicks: 'Escolhas do Publisher',
+        publisherPicks: 'Escolhas do AuctLect',
         worksFound: 'obras encontradas',
         noResults: 'Nenhuma obra encontrada correspondendo aos seus critérios',
         by: 'por',
@@ -682,7 +682,7 @@ window.translations.pt = {
         noResults: 'Nenhum resultado encontrado'
     },
     mangaViewer: {
-        pageTitle: 'Visualizador de Mangá - Publisher',
+        pageTitle: 'Visualizador de Mangá - AuctLect',
         fullscreen: 'Tela cheia',
         pages: 'Páginas',
         close: 'Fechar',
@@ -698,7 +698,7 @@ window.translations.pt = {
         by: 'por'
     },
     mangaTranslator: {
-        pageTitle: 'Tradutor de Mangá - Publisher',
+        pageTitle: 'Tradutor de Mangá - AuctLect',
         dashboard: 'Painel',
         editorTitle: 'Editor',
         zoomOut: 'Diminuir Zoom',
@@ -824,7 +824,7 @@ window.translations.pt = {
         btnNext: 'Pr\\u00f3ximo'
     },
     registerTranslator: {
-        pageTitle: 'Registro de Tradutor - Publisher',
+        pageTitle: 'Registro de Tradutor - AuctLect',
         title: 'Registro de Tradutor',
         subtitle: 'Conecte culturas e leitores ao redor do mundo',
         personalInfo: 'Informações Pessoais',
@@ -886,7 +886,7 @@ window.translations.pt = {
         createAccount: 'Criar Conta de Tradutor'
     },
     registerEditor: {
-        pageTitle: 'Registro de Editor - Publisher',
+        pageTitle: 'Registro de Editor - AuctLect',
         title: 'Registro de Editor',
         subtitle: 'Ajude a aperfeiçoar grandes histórias',
         personalInfo: 'Informações Pessoais',
@@ -963,7 +963,7 @@ window.translations.pt = {
         createAccount: 'Criar Conta de Editor'
     },
     registerAuthor: {
-        pageTitle: 'Registro de Autor - Publisher',
+        pageTitle: 'Registro de Autor - AuctLect',
         title: 'Registro de Autor',
         subtitle: 'Comece a compartilhar suas histórias com o mundo',
         personalInfo: 'Informações Pessoais',
@@ -1023,10 +1023,10 @@ window.translations.pt = {
     },
     support: {
         faq: {
-            pageTitle: 'FAQ - Publisher',
+            pageTitle: 'FAQ - AuctLect',
             title: 'FAQ',
             heroTitle: 'Perguntas Frequentes',
-            heroSubtitle: 'Encontre respostas para perguntas comuns sobre o Publisher',
+            heroSubtitle: 'Encontre respostas para perguntas comuns sobre o AuctLect',
             searchPlaceholder: 'Buscar respostas...',
             searchResults: 'Resultados da busca',
             clear: 'Limpar',
@@ -1215,7 +1215,7 @@ window.translations.pt = {
                 userMessage: 'Aqui está minha consulta.\nPor favor, forneça mais detalhes.',
                 adminMessage: 'Obrigado pela sua consulta.\nVamos analisar isso.'
             },
-            pageTitle: 'Tickets de suporte - Publisher',
+            pageTitle: 'Tickets de suporte - AuctLect',
             noTicketsDesc: 'Se tiver perguntas ou solicitações, entre em contato conosco',
             send: 'Enviar',
             ratingQuestion: 'Como foi nosso suporte?',
@@ -1246,7 +1246,7 @@ window.translations.pt = {
         terms: 'Termos',
         privacy: 'Privacidade',
         contact: 'Contato',
-        copyright: '© 2024 Publisher. Todos os direitos reservados.'
+        copyright: '© 2024 AuctLect. Todos os direitos reservados.'
     },
     notificationManager: {
         sale: 'Notificações de Vendas',
@@ -1998,7 +1998,7 @@ window.translations.pt = {
         words: 'Palavras',
         pages: 'Páginas',
         lastEdit: 'Última edição: agora',
-        editorTitle: 'Editor - Publisher'
+        editorTitle: 'Editor - AuctLect'
     },
     notifications: {
         loginRequired: 'Login necessário',
@@ -2014,7 +2014,7 @@ window.translations.pt = {
         tmpl_feedback_message: '"{work}" recebeu uma avaliação de {rating} estrelas!',
         tmpl_comment_title: 'Novo comentário',
         tmpl_comment_message: 'Novo comentário em "{work}".',
-        tmpl_system_title: 'Bem-vindo ao Publisher! 🎉',
+        tmpl_system_title: 'Bem-vindo ao AuctLect! 🎉',
         tmpl_system_message: 'Sua conta está pronta. Comece a explorar!',
         tmpl_agreement_request_title: 'Solicitação de acordo de colaboração',
         tmpl_agreement_request_message: 'Você recebeu um acordo de colaboração para \'{work}\' como {role}.',
@@ -2049,10 +2049,10 @@ window.translations.pt = {
     },
     legal: {
         pageTitle: {
-            guidelines: 'Diretrizes de conteúdo - Publisher',
-            copyright: 'Política de direitos autorais - Publisher',
-            privacy: 'Política de privacidade - Publisher',
-            terms: 'Termos e condições - Publisher'
+            guidelines: 'Diretrizes de conteúdo - AuctLect',
+            copyright: 'Política de direitos autorais - AuctLect',
+            privacy: 'Política de privacidade - AuctLect',
+            terms: 'Termos e condições - AuctLect'
         },
         title: {
             guidelines: 'Diretrizes de conteúdo',

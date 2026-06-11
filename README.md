@@ -1,11 +1,11 @@
-# Publisher - Multilingual Publishing Platform
+# AuctLect - Multilingual Publishing Platform
 
-[![GitHub](https://img.shields.io/badge/GitHub-Publisher-blue)](https://github.com/kenji-publishing/test-publishing-platform)
+[![GitHub](https://img.shields.io/badge/GitHub-AuctLect-blue)](https://github.com/kenji-publishing/test-publishing-platform)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
 ## 🌐 Overview
 
-**Publisher** is a revolutionary multilingual publishing platform that connects authors, translators, editors, and readers across 6 languages. Our mission is to democratize global publishing and ensure fair compensation for all creative contributors.
+**AuctLect** is a revolutionary multilingual publishing platform that connects authors, translators, editors, and readers across 6 languages. Our mission is to democratize global publishing and ensure fair compensation for all creative contributors.
 
 ### Supported Languages
 - 🇬🇧 English
@@ -283,15 +283,15 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 🌟 Why Publisher?
+## 🌟 Why AuctLect?
 
-### Traditional Publishing vs. Publisher Platform
+### Traditional Publishing vs. AuctLect Platform
 
-| Feature | Traditional | Publisher |
+| Feature | Traditional | AuctLect |
 |---------|-------------|----------|
 | Author Royalty | 10-15% | 40-70% ✅ |
 | Time to Market | 12-24 months | Immediate ✅ |
-| Rights Retention | Publisher owns | Author keeps ✅ |
+| Rights Retention | AuctLect owns | Author keeps ✅ |
 | International | Separate deals | Automatic ✅ |
 | Payment Frequency | Quarterly/Annual | Monthly ✅ |
 | Advance/Debt | Yes (risky) | No debt ✅ |

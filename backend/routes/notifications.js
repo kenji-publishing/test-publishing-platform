@@ -800,7 +800,7 @@ router.post('/welcome', authenticate, async (req, res) => {
     await sendNotification({
       userId,
       notificationType: 'system',
-      title: 'Publisherへようこそ！ 🎉',
+      title: 'AuctLectへようこそ！ 🎉',
       message: `${userName}さん、アカウントの作成が完了しました。作品をアップロードして世界中の読者に届けましょう！`,
       actionUrl: '/pages/upload-work.html'
     });

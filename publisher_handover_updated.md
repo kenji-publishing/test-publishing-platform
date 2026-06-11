@@ -1,4 +1,4 @@
-# Publisher Platform 引き継ぎドキュメント
+# AuctLect Platform 引き継ぎドキュメント
 
 最終更新: 2026年2月9日
 
@@ -17,7 +17,7 @@
 
 ## 1. プロジェクト概要
 
-多言語オンライン出版プラットフォーム「Publisher」の開発プロジェクトです。
+多言語オンライン出版プラットフォーム「AuctLect」の開発プロジェクトです。
 
 | 項目 | 内容 |
 |------|------|
@@ -287,7 +287,7 @@ reader.htmlにPattern C（サポートページ向け）ナビバーを適用し
    - `changeLanguage()` → `updateAllText()` → `updateNavbarText()` の連動
 
 4. **重複要素の削除**
-   - reader-toolbar内のPublisherロゴ（黒色）を削除（Navbarロゴと重複）
+   - reader-toolbar内のAuctLectロゴ（黒色）を削除（Navbarロゴと重複）
    - reader-toolbar内の言語セレクタ `langSelector` を削除（Navbarセレクタと重複）
    - JS参照4箇所もクリーンアップ
 

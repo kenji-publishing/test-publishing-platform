@@ -1,5 +1,5 @@
 /**
- * Publisher - Email Notification Service
+ * AuctLect - Email Notification Service
  * メール通知サービス
  * 
  * 配置先: C:\Projects\test-publishing-platform\services\emailService.js
@@ -24,7 +24,7 @@ const config = {
     },
     // 送信元
     from: {
-        name: 'Publisher',
+        name: 'AuctLect',
         address: process.env.SMTP_FROM || 'noreply@publisher.com'
     },
     // サイトURL
@@ -296,19 +296,19 @@ const emailTemplates = {
     // ウェルカムメール
     welcome: {
         subject: {
-            en: '🎉 Welcome to Publisher!',
-            ja: '🎉 Publisherへようこそ！',
-            zh: '🎉 欢迎来到Publisher！',
-            es: '🎉 ¡Bienvenido a Publisher!',
-            fr: '🎉 Bienvenue sur Publisher !',
-            de: '🎉 Willkommen bei Publisher!',
-            ko: '🎉 Publisher에 오신 것을 환영합니다!',
-            ar: '🎉 مرحبًا بك في Publisher!',
-            pt: '🎉 Bem-vindo ao Publisher!'
+            en: '🎉 Welcome to AuctLect!',
+            ja: '🎉 AuctLectへようこそ！',
+            zh: '🎉 欢迎来到AuctLect！',
+            es: '🎉 ¡Bienvenido a AuctLect!',
+            fr: '🎉 Bienvenue sur AuctLect !',
+            de: '🎉 Willkommen bei AuctLect!',
+            ko: '🎉 AuctLect에 오신 것을 환영합니다!',
+            ar: '🎉 مرحبًا بك في AuctLect!',
+            pt: '🎉 Bem-vindo ao AuctLect!'
         },
         body: {
             en: `
-                <h2>Welcome to Publisher! 🎉</h2>
+                <h2>Welcome to AuctLect! 🎉</h2>
                 <p>Hi <strong>{name}</strong>,</p>
                 <p>Your account is ready. You can now:</p>
                 <ul>
@@ -320,7 +320,7 @@ const emailTemplates = {
                 <p>Start your publishing journey today!</p>
             `,
             ja: `
-                <h2>Publisherへようこそ！ 🎉</h2>
+                <h2>AuctLectへようこそ！ 🎉</h2>
                 <p><strong>{name}</strong>さん、こんにちは。</p>
                 <p>アカウントの準備ができました。これからできること：</p>
                 <ul>
@@ -332,7 +332,7 @@ const emailTemplates = {
                 <p>さあ、出版の旅を始めましょう！</p>
             `,
             zh: `
-                <h2>欢迎来到Publisher！ 🎉</h2>
+                <h2>欢迎来到AuctLect！ 🎉</h2>
                 <p><strong>{name}</strong>，您好！</p>
                 <p>您的账户已准备就绪。现在您可以：</p>
                 <ul>
@@ -344,7 +344,7 @@ const emailTemplates = {
                 <p>今天就开始您的出版之旅吧！</p>
             `,
             es: `
-                <h2>¡Bienvenido a Publisher! 🎉</h2>
+                <h2>¡Bienvenido a AuctLect! 🎉</h2>
                 <p>Hola <strong>{name}</strong>,</p>
                 <p>Tu cuenta está lista. Ahora puedes:</p>
                 <ul>
@@ -356,7 +356,7 @@ const emailTemplates = {
                 <p>¡Comienza tu viaje de publicación hoy!</p>
             `,
             fr: `
-                <h2>Bienvenue sur Publisher ! 🎉</h2>
+                <h2>Bienvenue sur AuctLect ! 🎉</h2>
                 <p>Bonjour <strong>{name}</strong>,</p>
                 <p>Votre compte est prêt. Vous pouvez maintenant :</p>
                 <ul>
@@ -368,7 +368,7 @@ const emailTemplates = {
                 <p>Commencez votre aventure éditoriale aujourd'hui !</p>
             `,
             de: `
-                <h2>Willkommen bei Publisher! 🎉</h2>
+                <h2>Willkommen bei AuctLect! 🎉</h2>
                 <p>Hallo <strong>{name}</strong>,</p>
                 <p>Ihr Konto ist bereit. Sie können jetzt:</p>
                 <ul>
@@ -380,7 +380,7 @@ const emailTemplates = {
                 <p>Starten Sie heute Ihre Veröffentlichungsreise!</p>
             `,
             ko: `
-                <h2>Publisher에 오신 것을 환영합니다! 🎉</h2>
+                <h2>AuctLect에 오신 것을 환영합니다! 🎉</h2>
                 <p><strong>{name}</strong>님, 안녕하세요.</p>
                 <p>계정이 준비되었습니다. 이제 다음을 할 수 있습니다:</p>
                 <ul>
@@ -392,7 +392,7 @@ const emailTemplates = {
                 <p>오늘 출판 여정을 시작하세요!</p>
             `,
             ar: `
-                <h2>مرحبًا بك في Publisher! 🎉</h2>
+                <h2>مرحبًا بك في AuctLect! 🎉</h2>
                 <p>مرحبًا <strong>{name}</strong>،</p>
                 <p>حسابك جاهز. يمكنك الآن:</p>
                 <ul>
@@ -404,7 +404,7 @@ const emailTemplates = {
                 <p>ابدأ رحلة النشر اليوم!</p>
             `,
             pt: `
-                <h2>Bem-vindo ao Publisher! 🎉</h2>
+                <h2>Bem-vindo ao AuctLect! 🎉</h2>
                 <p>Olá <strong>{name}</strong>,</p>
                 <p>Sua conta está pronta. Agora você pode:</p>
                 <ul>
@@ -422,15 +422,15 @@ const emailTemplates = {
 // ========== HTML メールラッパー ==========
 function wrapInEmailTemplate(content, lang = 'en') {
     const footerText = {
-        en: 'This email was sent by Publisher. If you no longer wish to receive these emails, please update your notification settings.',
-        ja: 'このメールはPublisherから送信されました。今後このようなメールを受け取りたくない場合は、通知設定を更新してください。',
-        zh: '此邮件由Publisher发送。如果您不想再收到此类邮件，请更新您的通知设置。',
-        es: 'Este correo fue enviado por Publisher. Si no deseas recibir estos correos, actualiza tu configuración de notificaciones.',
-        fr: 'Cet email a été envoyé par Publisher. Si vous ne souhaitez plus recevoir ces emails, veuillez mettre à jour vos paramètres de notification.',
-        de: 'Diese E-Mail wurde von Publisher gesendet. Wenn Sie diese E-Mails nicht mehr erhalten möchten, aktualisieren Sie bitte Ihre Benachrichtigungseinstellungen.',
-        ko: '이 이메일은 Publisher에서 발송되었습니다. 더 이상 이러한 이메일을 받고 싶지 않으시면 알림 설정을 업데이트해 주세요.',
-        ar: 'تم إرسال هذا البريد الإلكتروني بواسطة Publisher. إذا كنت لا ترغب في تلقي هذه الرسائل الإلكترونية، يرجى تحديث إعدادات الإشعارات.',
-        pt: 'Este email foi enviado pelo Publisher. Se você não deseja mais receber esses emails, atualize suas configurações de notificação.'
+        en: 'This email was sent by AuctLect. If you no longer wish to receive these emails, please update your notification settings.',
+        ja: 'このメールはAuctLectから送信されました。今後このようなメールを受け取りたくない場合は、通知設定を更新してください。',
+        zh: '此邮件由AuctLect发送。如果您不想再收到此类邮件，请更新您的通知设置。',
+        es: 'Este correo fue enviado por AuctLect. Si no deseas recibir estos correos, actualiza tu configuración de notificaciones.',
+        fr: 'Cet email a été envoyé par AuctLect. Si vous ne souhaitez plus recevoir ces emails, veuillez mettre à jour vos paramètres de notification.',
+        de: 'Diese E-Mail wurde von AuctLect gesendet. Wenn Sie diese E-Mails nicht mehr erhalten möchten, aktualisieren Sie bitte Ihre Benachrichtigungseinstellungen.',
+        ko: '이 이메일은 AuctLect에서 발송되었습니다. 더 이상 이러한 이메일을 받고 싶지 않으시면 알림 설정을 업데이트해 주세요.',
+        ar: 'تم إرسال هذا البريد الإلكتروني بواسطة AuctLect. إذا كنت لا ترغب في تلقي هذه الرسائل الإلكترونية، يرجى تحديث إعدادات الإشعارات.',
+        pt: 'Este email foi enviado pelo AuctLect. Se você não deseja mais receber esses emails, atualize suas configurações de notificação.'
     };
 
     return `
@@ -457,7 +457,7 @@ function wrapInEmailTemplate(content, lang = 'en') {
 <body>
     <div class="container">
         <div class="header">
-            <h1>📚 Publisher</h1>
+            <h1>📚 AuctLect</h1>
         </div>
         <div class="content">
             ${content}

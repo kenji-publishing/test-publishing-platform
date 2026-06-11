@@ -1,6 +1,6 @@
-# Publisher Backend API
+# AuctLect Backend API
 
-🚀 Backend server for the Publisher multilingual publishing platform
+🚀 Backend server for the AuctLect multilingual publishing platform
 
 ---
 
@@ -439,4 +439,4 @@ If you encounter issues:
 
 ---
 
-**Built with ❤️ for the Publisher platform**
+**Built with ❤️ for the AuctLect platform**

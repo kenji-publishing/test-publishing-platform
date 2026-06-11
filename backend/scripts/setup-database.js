@@ -1,7 +1,7 @@
 /**
  * Database Setup Script
  * 
- * Creates all necessary tables for the Publisher platform
+ * Creates all necessary tables for the AuctLect platform
  * Run this once to initialize your database
  */
 

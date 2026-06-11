@@ -1,5 +1,5 @@
 /**
- * Publisher Platform - Navbar JavaScript (Pattern C)
+ * AuctLect Platform - Navbar JavaScript (Pattern C)
  *
  * Dynamically generates navbar and footer HTML.
  * Each page only needs:
@@ -317,7 +317,7 @@ function renderNavbar(options) {
 
     // Brand
     html += '<a class="navbar-brand" href="' + indexLink + '">';
-    html += '<i class="fas fa-book-open"></i> Publisher';
+    html += '<i class="fas fa-book-open"></i> AuctLect';
     html += '</a>';
 
     // Mobile language selector
@@ -530,7 +530,7 @@ function renderFooter(options) {
     var html = '<footer class="footer-custom">';
     html += '<div class="container">';
     html += '<div class="d-flex flex-wrap justify-content-between align-items-center">';
-    html += '<p class="small mb-0" id="footerCopyright">&copy; 2025 Publisher. ' + getL(navText.allRights) + '</p>';
+    html += '<p class="small mb-0" id="footerCopyright">&copy; 2025 AuctLect. ' + getL(navText.allRights) + '</p>';
     html += '<div class="d-flex gap-3">';
     html += '<a href="' + p('support/faq.html') + '" class="text-secondary" id="footerHelp">' + getL(navText.help) + '</a>';
     html += '<a href="' + p('terms.html') + '" class="text-secondary" id="footerTerms">' + getL(navText.terms) + '</a>';
@@ -606,7 +606,7 @@ function updateNavText() {
     if (footerHelp) footerHelp.textContent = getL(navText.help);
     if (footerTerms) footerTerms.textContent = getL(navText.terms);
     if (footerPrivacy) footerPrivacy.textContent = getL(navText.privacy);
-    if (footerCopyright) footerCopyright.innerHTML = '&copy; 2025 Publisher. ' + getL(navText.allRights);
+    if (footerCopyright) footerCopyright.innerHTML = '&copy; 2025 AuctLect. ' + getL(navText.allRights);
 
     // Legacy support: update elements from old Pattern C pages that still have inline navbar HTML
     var menuProfile = document.getElementById('menuProfile');

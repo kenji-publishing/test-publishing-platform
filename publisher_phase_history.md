@@ -1,4 +1,4 @@
-# Publisher Platform フェーズ履歴
+# AuctLect Platform フェーズ履歴
 
 完了済みフェーズの詳細記録です。  
 現在の作業には `publisher_handover.md` を参照してください。

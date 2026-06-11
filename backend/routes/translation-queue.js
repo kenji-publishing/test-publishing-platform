@@ -1,5 +1,5 @@
 /**
- * Publisher Platform - Translation Queue Management Routes
+ * AuctLect Platform - Translation Queue Management Routes
  * Phase 7: Translation Queue for Admin Dashboard
  * 
  * Handles translation request management, assignments, and progress tracking.

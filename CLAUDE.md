@@ -1,8 +1,12 @@
-# Publisher Platform - Project Guide
+# AuctLect Platform - Project Guide
 
 ## Overview
 多言語対応の出版プラットフォーム。作家・翻訳者・編集者・読者をつなぐWebアプリケーション。
 ユーザー（kenji）はIT初心者。日本語で会話すること。
+
+- **サービス名: AuctLect**（旧名 Publisher。ドメイン取得不可のため2026年6月に改名）
+- **運営会社: K's Publisher Ltd**（登記上の会社名はPublisherのまま。変更しないこと）
+- バックエンド内部識別子（publisher_db, publisher-backend, デモ用@publisher.comメール等）は互換性のため旧名のまま
 
 ## Tech Stack
 - **Frontend:** HTML, CSS (Bootstrap 5.3), vanilla JavaScript (フレームワーク不使用)
@@ -89,7 +93,7 @@ css/
 ```
 test-publishing-platform/
 ├── index.html              # ランディングページ
-├── favicon.svg             # ブランドカラー #8B7355 白セリフ "P"
+├── favicon.svg             # ブランドカラー #8B7355 白セリフ "A"
 ├── CLAUDE.md               # このファイル
 ├── css/
 │   ├── variables.css       # CSS変数（色・フォント・サイズ）
@@ -138,7 +142,7 @@ test-publishing-platform/
 - ナビバー・フッターは navbar.js が動的生成（38ページ共通）
 - 各ページは `<div id="navbar-container"></div>` と `<div id="footer-container"></div>` のみ記述
 - 各ページ固有のCSSはインライン `<style>` ブロックで記述
-- copyright: `&copy; 2025 Publisher`
+- copyright: `&copy; 2025 AuctLect`
 - デモモード: バックエンド未接続時にダミーデータで動作
 - RTL対応: アラビア語選択時に `dir="rtl"` を設定
 - 変更完了後は毎回 Git Commit + Push する

@@ -1,4 +1,4 @@
-# Publisher ナビバー・メニュー設計書 v2
+# AuctLect ナビバー・メニュー設計書 v2
 
 ## 1. ユーザータイプの定義
 
@@ -125,7 +125,7 @@
 
 #### ナビバー（PC）
 ```
-[Publisher Logo] | Browse | Library | [🔔通知] | [🌐言語] | [👤ユーザー▼]
+[AuctLect Logo] | Browse | Library | [🔔通知] | [🌐言語] | [👤ユーザー▼]
 ```
 
 #### ハンバーガーメニュー（モバイル展開時）
@@ -162,7 +162,7 @@ Log Out（ログアウト）
 
 #### ナビバー（PC）
 ```
-[Publisher Logo] | Dashboard | My Works | Analytics | [🔔通知] | [🌐言語] | [👤ユーザー▼]
+[AuctLect Logo] | Dashboard | My Works | Analytics | [🔔通知] | [🌐言語] | [👤ユーザー▼]
 ```
 
 #### ハンバーガーメニュー（モバイル展開時）
@@ -204,7 +204,7 @@ Log Out（ログアウト）
 
 #### ナビバー（PC）
 ```
-[Publisher Logo] | Browse | Library | Dashboard | [🔔通知] | [🌐言語] | [👤ユーザー▼]
+[AuctLect Logo] | Browse | Library | Dashboard | [🔔通知] | [🌐言語] | [👤ユーザー▼]
 ```
 
 #### ハンバーガーメニュー（モバイル展開時）
@@ -236,7 +236,7 @@ Home（トップページ）
 
 #### ナビバー（PC）
 ```
-[Publisher Logo] | Browse | Features | About | [🌐言語] | [Sign In] [Sign Up]
+[AuctLect Logo] | Browse | Features | About | [🌐言語] | [Sign In] [Sign Up]
 ```
 
 #### ハンバーガーメニュー（モバイル展開時）
@@ -263,7 +263,7 @@ Sign Up（新規登録）
 
 #### ナビバー（PC）
 ```
-[Publisher Logo] [ADMIN] | Dashboard | Users | Content | Support | [🌐言語] | [👤管理者▼]
+[AuctLect Logo] [ADMIN] | Dashboard | Users | Content | Support | [🌐言語] | [👤管理者▼]
 ```
 
 #### サイドバー or ハンバーガー

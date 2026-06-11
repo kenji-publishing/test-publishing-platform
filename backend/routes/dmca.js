@@ -1,5 +1,5 @@
 /**
- * Publisher Platform - DMCA Management Routes
+ * AuctLect Platform - DMCA Management Routes
  * Phase 6: Copyright Infringement Management
  * 
  * Handles DMCA takedown requests, counter-notices, and related actions.

@@ -1,5 +1,5 @@
 /**
- * Publisher Platform - EN Translations
+ * AuctLect Platform - EN Translations
  * Auto-merged from en.json
  */
 
@@ -126,7 +126,7 @@ window.translations.en = {
         createAccount: 'Create Account',
         orSignUpWith: 'or sign up with',
         haveAccount: 'Already have account?',
-        pageTitle: 'Create Account - Publisher'
+        pageTitle: 'Create Account - AuctLect'
     },
     dashboard: {
         title: 'Dashboard',
@@ -241,7 +241,7 @@ window.translations.en = {
         optPriceLow: 'Price: Low to High',
         btnApplyFilters: 'Apply Filters',
         btnRecommended: 'Recommended for You',
-        publisherPicks: 'Publisher\'s Picks',
+        publisherPicks: 'AuctLect\'s Picks',
         worksFound: 'works found',
         noResults: 'No works found matching your criteria',
         by: 'by',
@@ -685,7 +685,7 @@ window.translations.en = {
         noResults: 'No results found'
     },
     mangaViewer: {
-        pageTitle: 'Manga Viewer - Publisher',
+        pageTitle: 'Manga Viewer - AuctLect',
         fullscreen: 'Fullscreen',
         pages: 'Pages',
         close: 'Close',
@@ -701,7 +701,7 @@ window.translations.en = {
         by: 'by'
     },
     mangaTranslator: {
-        pageTitle: 'Manga Translator - Publisher',
+        pageTitle: 'Manga Translator - AuctLect',
         dashboard: 'Dashboard',
         editorTitle: 'Editor',
         zoomOut: 'Zoom Out',
@@ -827,7 +827,7 @@ window.translations.en = {
         btnNext: 'Next'
     },
     registerTranslator: {
-        pageTitle: 'Translator Registration - Publisher',
+        pageTitle: 'Translator Registration - AuctLect',
         title: 'Translator Registration',
         subtitle: 'Bridge cultures and connect readers worldwide',
         personalInfo: 'Personal Information',
@@ -889,7 +889,7 @@ window.translations.en = {
         createAccount: 'Create Translator Account'
     },
     registerEditor: {
-        pageTitle: 'Editor Registration - Publisher',
+        pageTitle: 'Editor Registration - AuctLect',
         title: 'Editor Registration',
         subtitle: 'Help polish great stories to perfection',
         personalInfo: 'Personal Information',
@@ -966,7 +966,7 @@ window.translations.en = {
         createAccount: 'Create Editor Account'
     },
     registerAuthor: {
-        pageTitle: 'Author Registration - Publisher',
+        pageTitle: 'Author Registration - AuctLect',
         title: 'Author Registration',
         subtitle: 'Start sharing your stories with the world',
         personalInfo: 'Personal Information',
@@ -1026,10 +1026,10 @@ window.translations.en = {
     },
     support: {
         faq: {
-            pageTitle: 'FAQ - Publisher',
+            pageTitle: 'FAQ - AuctLect',
             title: 'FAQ',
             heroTitle: 'Frequently Asked Questions',
-            heroSubtitle: 'Find answers to common questions about Publisher',
+            heroSubtitle: 'Find answers to common questions about AuctLect',
             searchPlaceholder: 'Search for answers...',
             searchResults: 'Search Results',
             clear: 'Clear',
@@ -1218,7 +1218,7 @@ window.translations.en = {
                 userMessage: 'This is my inquiry.\nPlease provide more details.',
                 adminMessage: 'Thank you for your inquiry.\nWe will look into it.'
             },
-            pageTitle: 'Support Tickets - Publisher',
+            pageTitle: 'Support Tickets - AuctLect',
             noTicketsDesc: 'If you have questions or requests, please feel free to contact us',
             send: 'Send',
             ratingQuestion: 'How was our support?',
@@ -1249,7 +1249,7 @@ window.translations.en = {
         terms: 'Terms',
         privacy: 'Privacy',
         contact: 'Contact',
-        copyright: '© 2024 Publisher. All rights reserved.'
+        copyright: '© 2024 AuctLect. All rights reserved.'
     },
     notificationManager: {
         sale: 'Sales Notifications',
@@ -2001,7 +2001,7 @@ window.translations.en = {
         words: 'Words',
         pages: 'Pages',
         lastEdit: 'Last edit: just now',
-        editorTitle: 'Editor - Publisher'
+        editorTitle: 'Editor - AuctLect'
     },
     notifications: {
         loginRequired: 'Login required',
@@ -2017,7 +2017,7 @@ window.translations.en = {
         tmpl_feedback_message: '"{work}" received a {rating}-star rating!',
         tmpl_comment_title: 'New comment',
         tmpl_comment_message: 'New comment on "{work}".',
-        tmpl_system_title: 'Welcome to Publisher! 🎉',
+        tmpl_system_title: 'Welcome to AuctLect! 🎉',
         tmpl_system_message: 'Your account is ready. Start exploring!',
         tmpl_agreement_request_title: 'Collaboration agreement request',
         tmpl_agreement_request_message: 'You received a collaboration agreement for \'{work}\' as {role}.',
@@ -2052,10 +2052,10 @@ window.translations.en = {
     },
     legal: {
         pageTitle: {
-            guidelines: 'Content Guidelines - Publisher',
-            copyright: 'Copyright Policy - Publisher',
-            privacy: 'Privacy Policy - Publisher',
-            terms: 'Terms and Conditions - Publisher'
+            guidelines: 'Content Guidelines - AuctLect',
+            copyright: 'Copyright Policy - AuctLect',
+            privacy: 'Privacy Policy - AuctLect',
+            terms: 'Terms and Conditions - AuctLect'
         },
         title: {
             guidelines: 'Content Guidelines',

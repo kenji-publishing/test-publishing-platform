@@ -1,5 +1,5 @@
 /**
- * Publisher Platform - ZH Translations
+ * AuctLect Platform - ZH Translations
  * Auto-merged from zh.json
  */
 
@@ -126,7 +126,7 @@ window.translations.zh = {
         createAccount: '创建账户',
         orSignUpWith: '或注册',
         haveAccount: '已有账户？',
-        pageTitle: '创建账户 - Publisher'
+        pageTitle: '创建账户 - AuctLect'
     },
     dashboard: {
         title: '仪表板',
@@ -682,7 +682,7 @@ window.translations.zh = {
         noResults: '未找到结果'
     },
     mangaViewer: {
-        pageTitle: '漫画阅读器 - Publisher',
+        pageTitle: '漫画阅读器 - AuctLect',
         fullscreen: '全屏',
         pages: '页面',
         close: '关闭',
@@ -698,7 +698,7 @@ window.translations.zh = {
         by: '作者'
     },
     mangaTranslator: {
-        pageTitle: '漫画翻译编辑器 - Publisher',
+        pageTitle: '漫画翻译编辑器 - AuctLect',
         dashboard: '仪表板',
         editorTitle: '编辑器',
         zoomOut: '缩小',
@@ -824,7 +824,7 @@ window.translations.zh = {
         btnNext: '\\u4e0b\\u4e00\\u6b65'
     },
     registerTranslator: {
-        pageTitle: '译者注册 - Publisher',
+        pageTitle: '译者注册 - AuctLect',
         title: '译者注册',
         subtitle: '连接文化，沟通世界读者',
         personalInfo: '个人信息',
@@ -886,7 +886,7 @@ window.translations.zh = {
         createAccount: '创建译者账户'
     },
     registerEditor: {
-        pageTitle: '编辑注册 - Publisher',
+        pageTitle: '编辑注册 - AuctLect',
         title: '编辑注册',
         subtitle: '帮助打磨优秀故事至完美',
         personalInfo: '个人信息',
@@ -963,7 +963,7 @@ window.translations.zh = {
         createAccount: '创建编辑账户'
     },
     registerAuthor: {
-        pageTitle: '作者注册 - Publisher',
+        pageTitle: '作者注册 - AuctLect',
         title: '作者注册',
         subtitle: '开始与世界分享您的故事',
         personalInfo: '个人信息',
@@ -1023,10 +1023,10 @@ window.translations.zh = {
     },
     support: {
         faq: {
-            pageTitle: '常见问题 - Publisher',
+            pageTitle: '常见问题 - AuctLect',
             title: '常见问题',
             heroTitle: '常见问题',
-            heroSubtitle: '查找有关Publisher的常见问题的答案',
+            heroSubtitle: '查找有关AuctLect的常见问题的答案',
             searchPlaceholder: '搜索答案...',
             searchResults: '搜索结果',
             clear: '清除',
@@ -1162,7 +1162,7 @@ window.translations.zh = {
                 userMessage: '这是我的咨询内容。\n请提供更多详细信息。',
                 adminMessage: '感谢您的咨询。\n我们会尽快处理。'
             },
-            pageTitle: '支持工单 - Publisher',
+            pageTitle: '支持工单 - AuctLect',
             noTicketsDesc: '如有任何问题或请求，请随时联系我们',
             send: '发送',
             ratingQuestion: '我们的支持服务如何？',
@@ -1193,7 +1193,7 @@ window.translations.zh = {
         terms: '条款',
         privacy: '隐私',
         contact: '联系',
-        copyright: '© 2024 Publisher. 版权所有。'
+        copyright: '© 2024 AuctLect. 版权所有。'
     },
     notificationManager: {
         sale: '销售通知',
@@ -1945,7 +1945,7 @@ window.translations.zh = {
         words: '词数',
         pages: '页数',
         lastEdit: '最后编辑：刚刚',
-        editorTitle: '编辑器 - Publisher'
+        editorTitle: '编辑器 - AuctLect'
     },
     notifications: {
         loginRequired: '需要登录',
@@ -1961,7 +1961,7 @@ window.translations.zh = {
         tmpl_feedback_message: '《{work}》获得了{rating}星评价！',
         tmpl_comment_title: '新评论',
         tmpl_comment_message: '《{work}》有新评论。',
-        tmpl_system_title: '欢迎来到Publisher！ 🎉',
+        tmpl_system_title: '欢迎来到AuctLect！ 🎉',
         tmpl_system_message: '您的账户已准备就绪。开始探索吧！',
         tmpl_agreement_request_title: '合作协议请求',
         tmpl_agreement_request_message: '您收到了作为{role}参与《{work}》的合作协议。',
@@ -1996,10 +1996,10 @@ window.translations.zh = {
     },
     legal: {
         pageTitle: {
-            guidelines: '内容指南 - Publisher',
-            copyright: '版权政策 - Publisher',
-            privacy: '隐私政策 - Publisher',
-            terms: '服务条款 - Publisher'
+            guidelines: '内容指南 - AuctLect',
+            copyright: '版权政策 - AuctLect',
+            privacy: '隐私政策 - AuctLect',
+            terms: '服务条款 - AuctLect'
         },
         title: {
             guidelines: '内容指南',

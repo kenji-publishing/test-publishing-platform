@@ -1,5 +1,5 @@
 /**
- * Publisher Platform - AR Translations
+ * AuctLect Platform - AR Translations
  * Auto-merged from ar.json
  */
 
@@ -126,7 +126,7 @@ window.translations.ar = {
         createAccount: 'إنشاء حساب',
         orSignUpWith: 'أو سجل باستخدام',
         haveAccount: 'لديك حساب بالفعل؟',
-        pageTitle: 'إنشاء حساب - Publisher'
+        pageTitle: 'إنشاء حساب - AuctLect'
     },
     dashboard: {
         title: 'لوحة التحكم',
@@ -682,7 +682,7 @@ window.translations.ar = {
         noResults: 'لم يتم العثور على نتائج'
     },
     mangaViewer: {
-        pageTitle: 'عارض المانجا - Publisher',
+        pageTitle: 'عارض المانجا - AuctLect',
         fullscreen: 'ملء الشاشة',
         pages: 'الصفحات',
         close: 'إغلاق',
@@ -698,7 +698,7 @@ window.translations.ar = {
         by: 'بواسطة'
     },
     mangaTranslator: {
-        pageTitle: 'مترجم المانجا - Publisher',
+        pageTitle: 'مترجم المانجا - AuctLect',
         dashboard: 'لوحة التحكم',
         editorTitle: 'المحرر',
         zoomOut: 'تصغير',
@@ -824,7 +824,7 @@ window.translations.ar = {
         btnNext: '\\u0627\\u0644\\u062a\\u0627\\u0644\\u064a'
     },
     registerTranslator: {
-        pageTitle: 'تسجيل المترجم - Publisher',
+        pageTitle: 'تسجيل المترجم - AuctLect',
         title: 'تسجيل المترجم',
         subtitle: 'اربط الثقافات والقراء حول العالم',
         personalInfo: 'المعلومات الشخصية',
@@ -886,7 +886,7 @@ window.translations.ar = {
         createAccount: 'إنشاء حساب مترجم'
     },
     registerEditor: {
-        pageTitle: 'تسجيل المحرر - Publisher',
+        pageTitle: 'تسجيل المحرر - AuctLect',
         title: 'تسجيل المحرر',
         subtitle: 'ساعد في إتقان القصص الرائعة',
         personalInfo: 'المعلومات الشخصية',
@@ -963,7 +963,7 @@ window.translations.ar = {
         createAccount: 'إنشاء حساب محرر'
     },
     registerAuthor: {
-        pageTitle: 'تسجيل المؤلف - Publisher',
+        pageTitle: 'تسجيل المؤلف - AuctLect',
         title: 'تسجيل المؤلف',
         subtitle: 'ابدأ بمشاركة قصصك مع العالم',
         personalInfo: 'المعلومات الشخصية',
@@ -1023,10 +1023,10 @@ window.translations.ar = {
     },
     support: {
         faq: {
-            pageTitle: 'الأسئلة الشائعة - Publisher',
+            pageTitle: 'الأسئلة الشائعة - AuctLect',
             title: 'الأسئلة الشائعة',
             heroTitle: 'الأسئلة المتكررة',
-            heroSubtitle: 'اعثر على إجابات للأسئلة الشائعة حول Publisher',
+            heroSubtitle: 'اعثر على إجابات للأسئلة الشائعة حول AuctLect',
             searchPlaceholder: 'البحث عن إجابات...',
             searchResults: 'نتائج البحث',
             clear: 'مسح',
@@ -1215,7 +1215,7 @@ window.translations.ar = {
                 userMessage: 'هذا استفساري.\nيرجى تقديم المزيد من التفاصيل.',
                 adminMessage: 'شكراً لاستفسارك.\nسنراجع ذلك.'
             },
-            pageTitle: 'تذاكر الدعم - Publisher',
+            pageTitle: 'تذاكر الدعم - AuctLect',
             noTicketsDesc: 'إذا كانت لديك أسئلة أو طلبات، فلا تتردد في الاتصال بنا',
             send: 'إرسال',
             ratingQuestion: 'كيف كانت خدمة الدعم لدينا؟',
@@ -1246,7 +1246,7 @@ window.translations.ar = {
         terms: 'الشروط',
         privacy: 'الخصوصية',
         contact: 'اتصل',
-        copyright: '© 2024 Publisher. جميع الحقوق محفوظة.'
+        copyright: '© 2024 AuctLect. جميع الحقوق محفوظة.'
     },
     notificationManager: {
         sale: 'إشعارات المبيعات',
@@ -1998,7 +1998,7 @@ window.translations.ar = {
         words: 'الكلمات',
         pages: 'الصفحات',
         lastEdit: 'آخر تعديل: الآن',
-        editorTitle: 'المحرر - Publisher'
+        editorTitle: 'المحرر - AuctLect'
     },
     notifications: {
         loginRequired: 'تسجيل الدخول مطلوب',
@@ -2014,7 +2014,7 @@ window.translations.ar = {
         tmpl_feedback_message: 'حصل "{work}" على تقييم {rating} نجوم!',
         tmpl_comment_title: 'تعليق جديد',
         tmpl_comment_message: 'تعليق جديد على "{work}".',
-        tmpl_system_title: 'مرحبًا بك في Publisher! 🎉',
+        tmpl_system_title: 'مرحبًا بك في AuctLect! 🎉',
         tmpl_system_message: 'حسابك جاهز. ابدأ الاستكشاف!',
         tmpl_agreement_request_title: 'طلب اتفاقية تعاون',
         tmpl_agreement_request_message: 'لقد تلقيت اتفاقية تعاون لـ \'{work}\' بصفتك {role}.',
@@ -2049,10 +2049,10 @@ window.translations.ar = {
     },
     legal: {
         pageTitle: {
-            guidelines: 'إرشادات المحتوى - Publisher',
-            copyright: 'سياسة حقوق النشر - Publisher',
-            privacy: 'سياسة الخصوصية - Publisher',
-            terms: 'الشروط والأحكام - Publisher'
+            guidelines: 'إرشادات المحتوى - AuctLect',
+            copyright: 'سياسة حقوق النشر - AuctLect',
+            privacy: 'سياسة الخصوصية - AuctLect',
+            terms: 'الشروط والأحكام - AuctLect'
         },
         title: {
             guidelines: 'إرشادات المحتوى',
