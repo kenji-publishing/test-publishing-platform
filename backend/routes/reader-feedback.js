@@ -5,6 +5,26 @@
 
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
+const { authenticate, authorize } = require('../middleware/auth');
+
+// Admin endpoints (stats, list-all, resolve, delete) require an admin JWT.
+router.use('/admin', authenticate, authorize('admin'));
+
+// Optional authentication for the public endpoints: if a valid JWT is sent,
+// req.user is populated; otherwise the request proceeds anonymously. Identity
+// must never come from a client-controlled header.
+router.use((req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        try {
+            req.user = jwt.verify(authHeader.split(' ')[1], process.env.JWT_SECRET);
+        } catch (e) {
+            // Invalid/expired token → treat as anonymous
+        }
+    }
+    next();
+});
 
 // Language names for display
 const LANG_NAMES = {
@@ -32,9 +52,10 @@ const STATUS_NAMES = {
     'fixed': '修正済み'
 };
 
-// Middleware to get user ID from header (simplified auth)
+// Get the authenticated user's ID (from verified JWT only — the old
+// x-user-id header was spoofable and must not be trusted)
 const getUserId = (req) => {
-    return req.headers['x-user-id'] || req.user?.userId;
+    return req.user?.userId || null;
 };
 
 // ============================================

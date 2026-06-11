@@ -7,6 +7,7 @@
 
 const express = require('express');
 const router = express.Router();
+const { authenticate } = require('../middleware/auth');
 
 // Helper function to get database pool
 function getPool(req) {
@@ -237,12 +238,15 @@ router.get('/languages/pairs', async (req, res) => {
 });
 
 // ===== AUTHENTICATED ENDPOINTS =====
+// Everything registered below requires a verified JWT. Identity comes from
+// req.user.userId — the old spoofable x-user-id header must never be used.
+router.use(authenticate);
 
 // POST /api/translators/profile - Create/Update translator profile
 router.post('/profile', async (req, res) => {
     try {
         const pool = getPool(req);
-        const userId = req.headers['x-user-id']; // In production, get from auth middleware
+        const userId = req.user.userId;
         
         if (!userId) {
             return res.status(401).json({ error: 'Authentication required' });
@@ -320,7 +324,7 @@ router.post('/profile', async (req, res) => {
 router.post('/profile/languages', async (req, res) => {
     try {
         const pool = getPool(req);
-        const userId = req.headers['x-user-id'];
+        const userId = req.user.userId;
         
         if (!userId) {
             return res.status(401).json({ error: 'Authentication required' });
@@ -373,7 +377,7 @@ router.post('/profile/languages', async (req, res) => {
 router.delete('/profile/languages/:languageId', async (req, res) => {
     try {
         const pool = getPool(req);
-        const userId = req.headers['x-user-id'];
+        const userId = req.user.userId;
         const { languageId } = req.params;
         
         if (!userId) {
@@ -403,7 +407,7 @@ router.delete('/profile/languages/:languageId', async (req, res) => {
 router.post('/:profileId/request', async (req, res) => {
     try {
         const pool = getPool(req);
-        const authorId = req.headers['x-user-id'];
+        const authorId = req.user.userId;
         const { profileId } = req.params;
         
         if (!authorId) {
@@ -476,7 +480,7 @@ router.post('/:profileId/request', async (req, res) => {
 router.get('/jobs/received', async (req, res) => {
     try {
         const pool = getPool(req);
-        const translatorId = req.headers['x-user-id'];
+        const translatorId = req.user.userId;
         const { status, page = 1, limit = 20 } = req.query;
         
         if (!translatorId) {
@@ -541,7 +545,7 @@ router.get('/jobs/received', async (req, res) => {
 router.get('/jobs/sent', async (req, res) => {
     try {
         const pool = getPool(req);
-        const authorId = req.headers['x-user-id'];
+        const authorId = req.user.userId;
         const { status, page = 1, limit = 20 } = req.query;
         
         if (!authorId) {
@@ -606,7 +610,7 @@ router.get('/jobs/sent', async (req, res) => {
 router.patch('/jobs/:jobId/respond', async (req, res) => {
     try {
         const pool = getPool(req);
-        const translatorId = req.headers['x-user-id'];
+        const translatorId = req.user.userId;
         const { jobId } = req.params;
         const { accept, agreedRate, message } = req.body;
         
@@ -668,7 +672,7 @@ router.patch('/jobs/:jobId/respond', async (req, res) => {
 router.patch('/jobs/:jobId/status', async (req, res) => {
     try {
         const pool = getPool(req);
-        const userId = req.headers['x-user-id'];
+        const userId = req.user.userId;
         const { jobId } = req.params;
         const { status } = req.body;
         
@@ -741,7 +745,7 @@ router.patch('/jobs/:jobId/status', async (req, res) => {
 router.post('/jobs/:jobId/review', async (req, res) => {
     try {
         const pool = getPool(req);
-        const authorId = req.headers['x-user-id'];
+        const authorId = req.user.userId;
         const { jobId } = req.params;
         const { 
             overallRating, 
@@ -815,7 +819,7 @@ router.post('/jobs/:jobId/review', async (req, res) => {
 router.get('/jobs/:jobId/messages', async (req, res) => {
     try {
         const pool = getPool(req);
-        const userId = req.headers['x-user-id'];
+        const userId = req.user.userId;
         const { jobId } = req.params;
         
         if (!userId) {
@@ -860,7 +864,7 @@ router.get('/jobs/:jobId/messages', async (req, res) => {
 router.post('/jobs/:jobId/messages', async (req, res) => {
     try {
         const pool = getPool(req);
-        const userId = req.headers['x-user-id'];
+        const userId = req.user.userId;
         const { jobId } = req.params;
         const { messageText, attachmentUrl, attachmentName } = req.body;
         

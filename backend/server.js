@@ -13,6 +13,14 @@ const path = require('path');
 // Load environment variables
 dotenv.config();
 
+// Fail fast if the JWT secret is missing. Without this, signing/verifying
+// would either crash per-request or (with a hardcoded fallback) let anyone
+// forge admin tokens. Refusing to start is the only safe behavior.
+if (!process.env.JWT_SECRET) {
+  console.error('❌ FATAL: JWT_SECRET is not set. Add it to backend/.env before starting the server.');
+  process.exit(1);
+}
+
 // Import database connection
 const db = require('./config/database');
 

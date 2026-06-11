@@ -22,7 +22,7 @@ const authenticate = async (req, res, next) => {
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const jwt = require('jsonwebtoken');
       const token = authHeader.split(' ')[1];
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
       req.user = { userId: decoded.userId };
       return next();
     }

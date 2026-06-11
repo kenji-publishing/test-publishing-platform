@@ -6,18 +6,20 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
 const { moderateUserContent } = require('../config/moderation');
+const { authenticate } = require('../middleware/auth');
+
+// All messaging endpoints require a logged-in user. Identity always comes
+// from the verified JWT (req.user.userId) — never from query/body, otherwise
+// anyone could read or send messages as someone else.
+router.use(authenticate);
 
 /**
  * GET /api/messages/conversations
- * Get all conversations for a user
+ * Get all conversations for the authenticated user
  */
 router.get('/conversations', async (req, res) => {
     try {
-        const { userId } = req.query;
-
-        if (!userId) {
-            return res.status(400).json({ error: 'userId is required' });
-        }
+        const userId = req.user.userId;
 
         const result = await db.query(
             `SELECT c.*, 
@@ -50,7 +52,17 @@ router.get('/conversations', async (req, res) => {
 router.get('/conversation/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { userId } = req.query;
+        const userId = req.user.userId;
+
+        // Only participants may read a conversation
+        const memberCheck = await db.query(
+            `SELECT 1 FROM conversations
+             WHERE conversation_id = $1 AND (participant_1 = $2 OR participant_2 = $2)`,
+            [id, userId]
+        );
+        if (memberCheck.rows.length === 0) {
+            return res.status(403).json({ error: 'You are not a participant of this conversation' });
+        }
 
         const result = await db.query(
             `SELECT m.*, u.first_name, u.last_name
@@ -62,13 +74,11 @@ router.get('/conversation/:id', async (req, res) => {
         );
 
         // Mark messages as read
-        if (userId) {
-            await db.query(
-                `UPDATE messages SET is_read = TRUE 
-                 WHERE conversation_id = $1 AND sender_id != $2 AND is_read = FALSE`,
-                [id, userId]
-            );
-        }
+        await db.query(
+            `UPDATE messages SET is_read = TRUE
+             WHERE conversation_id = $1 AND sender_id != $2 AND is_read = FALSE`,
+            [id, userId]
+        );
 
         res.json({
             success: true,
@@ -87,10 +97,11 @@ router.get('/conversation/:id', async (req, res) => {
  */
 router.post('/send', async (req, res) => {
     try {
-        const { senderId, recipientId, content } = req.body;
+        const senderId = req.user.userId;
+        const { recipientId, content } = req.body;
 
-        if (!senderId || !recipientId || !content) {
-            return res.status(400).json({ error: 'senderId, recipientId, and content are required' });
+        if (!recipientId || !content) {
+            return res.status(400).json({ error: 'recipientId and content are required' });
         }
 
         // Check if sender is blocked
@@ -175,11 +186,12 @@ router.post('/send', async (req, res) => {
  */
 router.post('/proposal', async (req, res) => {
     try {
-        const { fromUserId, toUserId, workId, proposalType, targetLanguage, message, portfolioUrl } = req.body;
+        const fromUserId = req.user.userId;
+        const { toUserId, workId, proposalType, targetLanguage, message, portfolioUrl } = req.body;
 
-        if (!fromUserId || !toUserId || !proposalType || !message) {
-            return res.status(400).json({ 
-                error: 'fromUserId, toUserId, proposalType, and message are required' 
+        if (!toUserId || !proposalType || !message) {
+            return res.status(400).json({
+                error: 'toUserId, proposalType, and message are required'
             });
         }
 
@@ -233,11 +245,8 @@ router.post('/proposal', async (req, res) => {
  */
 router.get('/proposals', async (req, res) => {
     try {
-        const { userId, type } = req.query;
-
-        if (!userId) {
-            return res.status(400).json({ error: 'userId is required' });
-        }
+        const userId = req.user.userId;
+        const { type } = req.query;
 
         let query;
         if (type === 'sent') {
@@ -274,10 +283,11 @@ router.get('/proposals', async (req, res) => {
 router.put('/proposal/:id/respond', async (req, res) => {
     try {
         const { id } = req.params;
-        const { userId, response } = req.body;
+        const userId = req.user.userId;
+        const { response } = req.body;
 
-        if (!userId || !response) {
-            return res.status(400).json({ error: 'userId and response are required' });
+        if (!response) {
+            return res.status(400).json({ error: 'response is required' });
         }
 
         const validResponses = ['accepted', 'declined'];
@@ -314,10 +324,11 @@ router.put('/proposal/:id/respond', async (req, res) => {
  */
 router.post('/block', async (req, res) => {
     try {
-        const { blockerId, blockedId } = req.body;
+        const blockerId = req.user.userId;
+        const { blockedId } = req.body;
 
-        if (!blockerId || !blockedId) {
-            return res.status(400).json({ error: 'blockerId and blockedId are required' });
+        if (!blockedId) {
+            return res.status(400).json({ error: 'blockedId is required' });
         }
 
         await db.query(
@@ -343,11 +354,8 @@ router.post('/block', async (req, res) => {
  */
 router.put('/settings', async (req, res) => {
     try {
-        const { userId, allowMessages, allowProposals } = req.body;
-
-        if (!userId) {
-            return res.status(400).json({ error: 'userId is required' });
-        }
+        const userId = req.user.userId;
+        const { allowMessages, allowProposals } = req.body;
 
         await db.query(
             `INSERT INTO user_message_settings (user_id, allow_messages, allow_proposals)

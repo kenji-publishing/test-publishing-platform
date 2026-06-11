@@ -7,11 +7,15 @@
 
 const express = require('express');
 const router = express.Router();
+const { authenticate, authorize } = require('../middleware/auth');
 
 // Helper function to get database pool
 function getPool(req) {
     return req.app.get('db');
 }
+
+// Every route in this file is an admin operation — admin JWT required.
+router.use('/admin', authenticate, authorize('admin'));
 
 // ===== ADMIN ENDPOINTS =====
 

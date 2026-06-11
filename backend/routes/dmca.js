@@ -7,11 +7,16 @@
 
 const express = require('express');
 const router = express.Router();
+const { authenticate, authorize } = require('../middleware/auth');
 
 // Helper function to get database pool
 function getPool(req) {
     return req.app.get('db');
 }
+
+// All /admin/* endpoints expose reporter PII and takedown powers —
+// admin JWT required. Public submission endpoints below stay open.
+router.use('/admin', authenticate, authorize('admin'));
 
 // ===== PUBLIC ENDPOINTS =====
 

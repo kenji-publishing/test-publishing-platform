@@ -280,7 +280,7 @@ router.post('/verify', async (req, res) => {
 
     const jwtToken = jwt.sign(
       { userId: user.user_id, email: user.email, role: user.role },
-      process.env.JWT_SECRET || 'your-secret-key',
+      process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
 
@@ -366,7 +366,7 @@ router.post('/recover/backup-code', async (req, res) => {
 
     const jwtToken = jwt.sign(
       { userId: user.user_id, email: user.email, recovery: true },
-      process.env.JWT_SECRET || 'your-secret-key',
+      process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
 
@@ -606,7 +606,7 @@ router.post('/recover/questions', async (req, res) => {
 
     const jwtToken = jwt.sign(
       { userId: user.user_id, recovery: true },
-      process.env.JWT_SECRET || 'your-secret-key',
+      process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
 
@@ -634,7 +634,7 @@ router.post('/backup-codes/regenerate', async (req, res) => {
     }
 
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     await db.query('DELETE FROM backup_codes WHERE user_id = $1', [decoded.userId]);
 
@@ -675,7 +675,7 @@ router.get('/backup-codes/count', async (req, res) => {
       const authHeader = req.headers.authorization;
       if (authHeader && authHeader.startsWith('Bearer ')) {
         const token = authHeader.split(' ')[1];
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         userId = decoded.userId;
       }
     }

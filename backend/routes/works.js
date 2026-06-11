@@ -253,13 +253,12 @@ router.get('/:workId/preview', async (req, res) => {
  * GET /api/works/:workId/full
  * Get full work content (requires purchase or ownership)
  */
-router.get('/:workId/full', async (req, res) => {
+router.get('/:workId/full', authenticate, async (req, res) => {
     try {
-        const { userId } = req.query;
-
-        if (!userId) {
-            return res.status(401).json({ error: 'Authentication required' });
-        }
+        // Identity must come from the verified JWT. Author IDs are public
+        // (returned by GET /works), so a client-supplied userId would let
+        // anyone read paid content for free.
+        const userId = req.user.userId;
 
         const result = await db.query(
             `SELECT * FROM works WHERE work_id = $1 AND status = 'published'`,
@@ -274,24 +273,36 @@ router.get('/:workId/full', async (req, res) => {
 
         // Check if user is author
         if (work.author_id === userId) {
-            return res.json({ 
-                success: true, 
-                work, 
-                access: 'author' 
+            return res.json({
+                success: true,
+                work,
+                access: 'author'
             });
         }
 
         // Check if work is free
         if (work.is_free || work.price === 0 || work.price === null) {
-            return res.json({ 
-                success: true, 
-                work, 
-                access: 'free' 
+            return res.json({
+                success: true,
+                work,
+                access: 'free'
             });
         }
 
-        // TODO: Check if user has purchased (when purchase system is implemented)
-        // For now, return error
+        // Check if user has purchased the work
+        const purchaseCheck = await db.query(
+            `SELECT 1 FROM purchases
+             WHERE user_id = $1 AND work_id = $2 AND status = 'completed'`,
+            [userId, req.params.workId]
+        );
+        if (purchaseCheck.rows.length > 0) {
+            return res.json({
+                success: true,
+                work,
+                access: 'purchased'
+            });
+        }
+
         return res.status(403).json({
             error: 'Purchase required to access full content',
             price: work.price
