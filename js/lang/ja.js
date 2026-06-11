@@ -87,7 +87,8 @@ window.translations.ja = {
             title: '始める準備はできましたか？',
             subtitle: 'クリエイターに参加',
             createAccount: '無料アカウント作成',
-            browseWorks: '作品を探す'
+            browseWorks: '作品を探す',
+            goToDashboard: 'ダッシュボードへ'
         }
     },
     login: {
@@ -461,6 +462,41 @@ window.translations.ja = {
         addLanguages: '言語を追加',
         requestReview: 'プロレビューを依頼'
     },
+    profile: {
+        pageTitle: 'プロフィール',
+        pageSubtitle: '個人情報を管理する',
+        sectionProfileInfo: 'プロフィール情報',
+        labelFirstName: '名',
+        labelLastName: '姓',
+        labelDisplayName: '表示名 / ペンネーム',
+        labelBio: '自己紹介',
+        labelPreferredLang: '使用言語',
+        btnEditProfile: 'プロフィールを編集',
+        btnChangePhoto: '写真を変更',
+        btnSave: '保存',
+        btnCancel: 'キャンセル',
+        sectionEmail: 'メールアドレス',
+        emailHintText: 'メールアドレスの変更は',
+        emailHintLinkText: 'アカウント設定',
+        sectionChangePassword: 'パスワード変更',
+        labelCurrentPassword: '現在のパスワード',
+        labelNewPassword: '新しいパスワード',
+        labelConfirmPassword: 'パスワード確認',
+        reqLength: '8文字以上',
+        reqUppercase: '大文字を1つ以上',
+        reqLowercase: '小文字を1つ以上',
+        reqNumber: '数字を1つ以上',
+        btnChangePassword: 'パスワードを変更',
+        footerHelp: 'ヘルプ',
+        footerTerms: '利用規約',
+        footerPrivacy: 'プライバシー',
+        profileSaved: 'プロフィールを保存しました！',
+        profileSaveError: 'プロフィールの保存に失敗しました。',
+        passwordChanged: 'パスワードを変更しました！',
+        passwordMismatch: 'パスワードが一致しません。',
+        passwordRequirementsNotMet: 'パスワードが要件を満たしていません。',
+        passwordChangeError: 'パスワードの変更に失敗しました。'
+    },
     accountSettings: {
         title: 'アカウント設定',
         subtitle: 'プロフィール、セキュリティ、通知などの設定を管理',
@@ -501,7 +537,10 @@ window.translations.ja = {
             question: '質問',
             question1: '子供の頃のペットの名前は？',
             question2: '初めて買った本のタイトルは？',
-            question3: '一番好きな映画は？'
+            question3: '一番好きな映画は？',
+            locationTokyo: '東京',
+            locationOsaka: '大阪',
+            locationJapan: '日本'
         },
         notificationSettings: {
             emailNotifications: 'メール通知',

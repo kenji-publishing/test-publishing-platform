@@ -87,7 +87,8 @@ window.translations.es = {
             title: '¿Listo para Empezar?',
             subtitle: 'Únete a miles de creadores.',
             createAccount: 'Crear Cuenta Gratis',
-            browseWorks: 'Explorar Obras'
+            browseWorks: 'Explorar Obras',
+            goToDashboard: 'Ir al Panel'
         }
     },
     login: {
@@ -461,6 +462,41 @@ window.translations.es = {
         addLanguages: 'Añadir Más Idiomas',
         requestReview: 'Solicitar Revisión Profesional'
     },
+    profile: {
+        pageTitle: 'Perfil',
+        pageSubtitle: 'Administra tu información personal',
+        sectionProfileInfo: 'Información del perfil',
+        labelFirstName: 'Nombre',
+        labelLastName: 'Apellido',
+        labelDisplayName: 'Nombre visible / Seudónimo',
+        labelBio: 'Biografía',
+        labelPreferredLang: 'Idioma preferido',
+        btnEditProfile: 'Editar perfil',
+        btnChangePhoto: 'Cambiar foto',
+        btnSave: 'Guardar',
+        btnCancel: 'Cancelar',
+        sectionEmail: 'Correo electrónico',
+        emailHintText: 'Para cambiar tu correo, ve a',
+        emailHintLinkText: 'Configuración de cuenta',
+        sectionChangePassword: 'Cambiar contraseña',
+        labelCurrentPassword: 'Contraseña actual',
+        labelNewPassword: 'Nueva contraseña',
+        labelConfirmPassword: 'Confirmar contraseña',
+        reqLength: 'Al menos 8 caracteres',
+        reqUppercase: 'Al menos una mayúscula',
+        reqLowercase: 'Al menos una minúscula',
+        reqNumber: 'Al menos un número',
+        btnChangePassword: 'Cambiar contraseña',
+        footerHelp: 'Ayuda',
+        footerTerms: 'Términos',
+        footerPrivacy: 'Privacidad',
+        profileSaved: '¡Perfil guardado con éxito!',
+        profileSaveError: 'Error al guardar el perfil.',
+        passwordChanged: '¡Contraseña cambiada con éxito!',
+        passwordMismatch: 'Las contraseñas no coinciden.',
+        passwordRequirementsNotMet: 'La contraseña no cumple todos los requisitos.',
+        passwordChangeError: 'Error al cambiar la contraseña.'
+    },
     accountSettings: {
         title: 'Configuración de Cuenta',
         subtitle: 'Administra tu perfil, seguridad, notificaciones y más',
@@ -501,7 +537,10 @@ window.translations.es = {
             question: 'Pregunta',
             question1: '¿Cuál era el nombre de tu mascota de infancia?',
             question2: '¿Cuál fue el primer libro que compraste?',
-            question3: '¿Cuál es tu película favorita?'
+            question3: '¿Cuál es tu película favorita?',
+            locationTokyo: 'Tokio',
+            locationOsaka: 'Osaka',
+            locationJapan: 'Japón'
         },
         notificationSettings: {
             emailNotifications: 'Notificaciones por Correo',

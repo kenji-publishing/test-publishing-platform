@@ -559,7 +559,40 @@
             { id: 5, title: '月夜の物語', author: '鈴木花子', cover: null, status: 'completed', progress: 100, favorite: false, wishlist: false, lastRead: '2026-01-15', addedAt: '2025-11-20' },
             { id: 6, title: 'Ocean of Stars', author: 'James Wilson', cover: null, status: 'wishlist', progress: 0, favorite: false, wishlist: true, lastRead: null, addedAt: '2026-01-23' }
         ];
-        
+
+        function escapeHtml(text) {
+            const d = document.createElement('div');
+            d.textContent = text == null ? '' : String(text);
+            return d.innerHTML;
+        }
+
+        // Merge purchased works (written to localStorage 'publisherLibrary' by
+        // checkout / work-detail / payment-success) into the library list.
+        // Without this, bought works never appeared on this page at all.
+        function loadPurchasedBooks() {
+            let purchased = [];
+            try { purchased = JSON.parse(localStorage.getItem('publisherLibrary') || '[]'); }
+            catch (e) { console.error('Failed to read purchased library:', e); }
+            purchased.forEach(item => {
+                if (!item || item.id == null) return;
+                if (books.some(b => String(b.id) === String(item.id))) return;
+                books.push({
+                    id: String(item.id),
+                    title: item.title || 'Untitled',
+                    author: item.author || '',
+                    cover: null,
+                    status: 'new',
+                    progress: 0,
+                    favorite: false,
+                    wishlist: false,
+                    lastRead: null,
+                    addedAt: item.addedAt || new Date().toISOString(),
+                    purchased: true
+                });
+            });
+        }
+        loadPurchasedBooks();
+
         // ========== Shared Helpers ==========
 function getL(obj, replacements = {}) {
             if (!obj) return '';
@@ -583,7 +616,6 @@ function getL(obj, replacements = {}) {
             if (desktopSel) desktopSel.value = lang;
             if (mobileSel) mobileSel.value = lang;
             updateAllText();
-            updateUIText();
         }
         
         function updateAllText() {
@@ -665,11 +697,14 @@ function getL(obj, replacements = {}) {
             
             emptyState.style.display = 'none';
             
+            // Note: ids are quoted in the onclick handlers (purchased works have
+            // string ids), and title/author are escaped — they now come from
+            // localStorage, so they must be treated as untrusted input.
             grid.innerHTML = filtered.map(book => `
-                <div class="book-card" onclick="openBook(${book.id})">
+                <div class="book-card" onclick="openBook('${escapeHtml(book.id)}')">
                     <div class="book-cover">
-                        ${book.cover 
-                            ? `<img src="${book.cover}" alt="${book.title}">`
+                        ${book.cover
+                            ? `<img src="${escapeHtml(book.cover)}" alt="${escapeHtml(book.title)}">`
                             : `<i class="fas fa-book book-cover-placeholder"></i>`
                         }
                         ${book.progress > 0 && book.progress < 100 ? `
@@ -679,11 +714,11 @@ function getL(obj, replacements = {}) {
                         ` : ''}
                     </div>
                     <div class="book-info">
-                        <div class="book-title">${book.title}</div>
-                        <div class="book-author">${book.author}</div>
+                        <div class="book-title">${escapeHtml(book.title)}</div>
+                        <div class="book-author">${escapeHtml(book.author)}</div>
                         <div class="book-meta">
                             <span class="book-status ${book.status === 'reading' ? 'status-reading' : book.status === 'completed' ? 'status-completed' : 'status-new'}">
-                                ${book.status === 'reading' 
+                                ${book.status === 'reading'
                                     ? `<i class="fas fa-bookmark"></i> ${book.progress}%`
                                     : book.status === 'completed'
                                     ? `<i class="fas fa-check-circle"></i> ${getL(uiText.completed)}`
@@ -691,8 +726,8 @@ function getL(obj, replacements = {}) {
                                 }
                             </span>
                             <div class="book-actions" onclick="event.stopPropagation()">
-                                <button class="book-action-btn ${book.favorite ? 'favorited' : ''}" 
-                                        onclick="toggleFavorite(${book.id})" 
+                                <button class="book-action-btn ${book.favorite ? 'favorited' : ''}"
+                                        onclick="toggleFavorite('${escapeHtml(book.id)}')"
                                         title="${book.favorite ? getL(uiText.removeFromFavorites) : getL(uiText.addToFavorites)}">
                                     <i class="fas fa-heart"></i>
                                 </button>
@@ -703,15 +738,16 @@ function getL(obj, replacements = {}) {
             `).join('');
         }
         
+        // String() comparison: demo ids are numbers, purchased ids are strings
         function openBook(id) {
-            const book = books.find(b => b.id === id);
+            const book = books.find(b => String(b.id) === String(id));
             if (book) {
-                window.location.href = `reader.html?workId=${id}&title=${encodeURIComponent(book.title)}`;
+                window.location.href = `reader.html?workId=${encodeURIComponent(id)}&title=${encodeURIComponent(book.title)}`;
             }
         }
-        
+
         function toggleFavorite(id) {
-            const book = books.find(b => b.id === id);
+            const book = books.find(b => String(b.id) === String(id));
             if (book) {
                 book.favorite = !book.favorite;
                 renderBooks();
@@ -731,19 +767,16 @@ function getL(obj, replacements = {}) {
                 mobileSelector.addEventListener('change', function() {
                     desktopSelector.value = this.value;
                     if (typeof changeLanguage === 'function') changeLanguage(this.value);
-                    updateUIText();
                 });
-                
+
                 desktopSelector.addEventListener('change', function() {
                     mobileSelector.value = this.value;
                     if (typeof changeLanguage === 'function') changeLanguage(this.value);
-                    updateUIText();
                 });
             }
-            
+
             updateAllText();
-            updateUIText();
-renderBooks();
+            renderBooks();
             
             // Close user dropdown when clicking outside
             document.addEventListener('click', function(e) {
@@ -755,19 +788,11 @@ renderBooks();
                 }
             });
             
-            // Navbar mobile menu overlay
+            // (Navbar overlay wiring removed — navbar.js attaches its own
+            //  handlers after it renders the navbar.)
 
-            
-            if (navbarOverlay) {
-                navbarOverlay.addEventListener('click', function() {
-                    const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
-                    if (bsCollapse) bsCollapse.hide();
-                });
-            }
-            
             // Listen for language changes from other components
             document.addEventListener('languageChanged', function() {
-                updateUIText();
                 updateAllText();
             });
 

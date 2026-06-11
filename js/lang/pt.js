@@ -87,7 +87,8 @@ window.translations.pt = {
             title: 'Pronto para Começar?',
             subtitle: 'Junte-se a milhares de criadores.',
             createAccount: 'Criar Conta Gratuita',
-            browseWorks: 'Explorar Obras'
+            browseWorks: 'Explorar Obras',
+            goToDashboard: 'Ir para o Painel'
         }
     },
     login: {
@@ -461,6 +462,41 @@ window.translations.pt = {
         addLanguages: 'Adicionar Idiomas',
         requestReview: 'Solicitar Revisão Profissional'
     },
+    profile: {
+        pageTitle: 'Perfil',
+        pageSubtitle: 'Gerencie suas informações pessoais',
+        sectionProfileInfo: 'Informações do perfil',
+        labelFirstName: 'Nome',
+        labelLastName: 'Sobrenome',
+        labelDisplayName: 'Nome de exibição / Pseudônimo',
+        labelBio: 'Biografia',
+        labelPreferredLang: 'Idioma preferido',
+        btnEditProfile: 'Editar perfil',
+        btnChangePhoto: 'Alterar foto',
+        btnSave: 'Salvar',
+        btnCancel: 'Cancelar',
+        sectionEmail: 'E-mail',
+        emailHintText: 'Para alterar seu e-mail, vá para',
+        emailHintLinkText: 'Configurações da conta',
+        sectionChangePassword: 'Alterar senha',
+        labelCurrentPassword: 'Senha atual',
+        labelNewPassword: 'Nova senha',
+        labelConfirmPassword: 'Confirmar senha',
+        reqLength: 'Pelo menos 8 caracteres',
+        reqUppercase: 'Pelo menos uma letra maiúscula',
+        reqLowercase: 'Pelo menos uma letra minúscula',
+        reqNumber: 'Pelo menos um número',
+        btnChangePassword: 'Alterar senha',
+        footerHelp: 'Ajuda',
+        footerTerms: 'Termos',
+        footerPrivacy: 'Privacidade',
+        profileSaved: 'Perfil salvo com sucesso!',
+        profileSaveError: 'Falha ao salvar o perfil.',
+        passwordChanged: 'Senha alterada com sucesso!',
+        passwordMismatch: 'As senhas não coincidem.',
+        passwordRequirementsNotMet: 'A senha não atende aos requisitos.',
+        passwordChangeError: 'Falha ao alterar a senha.'
+    },
     accountSettings: {
         title: 'Configurações da Conta',
         subtitle: 'Gerencie seu perfil, segurança, notificações e mais',
@@ -501,7 +537,10 @@ window.translations.pt = {
             question: 'Pergunta',
             question1: 'Qual era o nome do seu animal de estimação na infância?',
             question2: 'Qual foi o primeiro livro que você comprou?',
-            question3: 'Qual é o seu filme favorito?'
+            question3: 'Qual é o seu filme favorito?',
+            locationTokyo: 'Tóquio',
+            locationOsaka: 'Osaka',
+            locationJapan: 'Japão'
         },
         notificationSettings: {
             emailNotifications: 'Notificações por E-mail',

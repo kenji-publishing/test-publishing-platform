@@ -87,7 +87,8 @@ window.translations.en = {
             title: 'Ready to Start?',
             subtitle: 'Join thousands of creators.',
             createAccount: 'Create Free Account',
-            browseWorks: 'Browse Works'
+            browseWorks: 'Browse Works',
+            goToDashboard: 'Go to Dashboard'
         }
     },
     login: {
@@ -460,6 +461,41 @@ window.translations.en = {
         options: 'Translation Options',
         addLanguages: 'Add More Languages',
         requestReview: 'Request Professional Review'
+    },
+    profile: {
+        pageTitle: 'Profile',
+        pageSubtitle: 'Manage your personal information',
+        sectionProfileInfo: 'Profile Information',
+        labelFirstName: 'First Name',
+        labelLastName: 'Last Name',
+        labelDisplayName: 'Display Name / Pen Name',
+        labelBio: 'Bio',
+        labelPreferredLang: 'Preferred Language',
+        btnEditProfile: 'Edit Profile',
+        btnChangePhoto: 'Change Photo',
+        btnSave: 'Save',
+        btnCancel: 'Cancel',
+        sectionEmail: 'Email',
+        emailHintText: 'To change your email, go to',
+        emailHintLinkText: 'Account Settings',
+        sectionChangePassword: 'Change Password',
+        labelCurrentPassword: 'Current Password',
+        labelNewPassword: 'New Password',
+        labelConfirmPassword: 'Confirm Password',
+        reqLength: 'At least 8 characters',
+        reqUppercase: 'At least one uppercase letter',
+        reqLowercase: 'At least one lowercase letter',
+        reqNumber: 'At least one number',
+        btnChangePassword: 'Change Password',
+        footerHelp: 'Help',
+        footerTerms: 'Terms',
+        footerPrivacy: 'Privacy',
+        profileSaved: 'Profile saved successfully!',
+        profileSaveError: 'Failed to save profile. Please try again.',
+        passwordChanged: 'Password changed successfully!',
+        passwordMismatch: 'Passwords do not match.',
+        passwordRequirementsNotMet: 'Password does not meet all requirements.',
+        passwordChangeError: 'Failed to change password. Please try again.'
     },
     accountSettings: {
         title: 'Account Settings',

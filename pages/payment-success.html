@@ -125,24 +125,27 @@
         }
 
         // ライブラリに追加（localStorageで管理）
+        // NOTE: key and item shape must match checkout.html / work-detail.html
+        // ({ id, title, addedAt } in 'publisherLibrary') — this page previously
+        // wrote to a different key ('userLibrary') so purchases never showed up.
         function addToLibrary(workId, title, amount, orderId) {
             try {
-                var library = JSON.parse(localStorage.getItem('userLibrary') || '[]');
+                var library = JSON.parse(localStorage.getItem('publisherLibrary') || '[]');
 
                 // 重複チェック
-                if (workId && library.some(function(item) { return item.workId === workId; })) {
+                if (workId && library.some(function(item) { return String(item.id) === String(workId); })) {
                     return;
                 }
 
                 library.push({
-                    workId: workId || 'unknown',
+                    id: String(workId || 'unknown'),
                     title: decodeURIComponent(title || 'Digital Content'),
-                    purchaseDate: new Date().toISOString(),
+                    addedAt: new Date().toISOString(),
                     orderId: orderId,
                     amount: amount
                 });
 
-                localStorage.setItem('userLibrary', JSON.stringify(library));
+                localStorage.setItem('publisherLibrary', JSON.stringify(library));
             } catch (e) {
                 console.error('Failed to add to library:', e);
             }

@@ -87,7 +87,8 @@ window.translations.ar = {
             title: 'هل أنت مستعد للبدء؟',
             subtitle: 'انضم إلى آلاف المبدعين.',
             createAccount: 'إنشاء حساب مجاني',
-            browseWorks: 'تصفح الأعمال'
+            browseWorks: 'تصفح الأعمال',
+            goToDashboard: 'الذهاب إلى لوحة التحكم'
         }
     },
     login: {
@@ -461,6 +462,41 @@ window.translations.ar = {
         addLanguages: 'إضافة لغات',
         requestReview: 'طلب مراجعة احترافية'
     },
+    profile: {
+        pageTitle: 'الملف الشخصي',
+        pageSubtitle: 'إدارة معلوماتك الشخصية',
+        sectionProfileInfo: 'معلومات الملف الشخصي',
+        labelFirstName: 'الاسم الأول',
+        labelLastName: 'الاسم الأخير',
+        labelDisplayName: 'اسم العرض / الاسم المستعار',
+        labelBio: 'السيرة الذاتية',
+        labelPreferredLang: 'اللغة المفضلة',
+        btnEditProfile: 'تعديل الملف الشخصي',
+        btnChangePhoto: 'تغيير الصورة',
+        btnSave: 'حفظ',
+        btnCancel: 'إلغاء',
+        sectionEmail: 'البريد الإلكتروني',
+        emailHintText: 'لتغيير بريدك الإلكتروني، انتقل إلى',
+        emailHintLinkText: 'إعدادات الحساب',
+        sectionChangePassword: 'تغيير كلمة المرور',
+        labelCurrentPassword: 'كلمة المرور الحالية',
+        labelNewPassword: 'كلمة المرور الجديدة',
+        labelConfirmPassword: 'تأكيد كلمة المرور',
+        reqLength: '8 أحرف على الأقل',
+        reqUppercase: 'حرف كبير واحد على الأقل',
+        reqLowercase: 'حرف صغير واحد على الأقل',
+        reqNumber: 'رقم واحد على الأقل',
+        btnChangePassword: 'تغيير كلمة المرور',
+        footerHelp: 'مساعدة',
+        footerTerms: 'الشروط',
+        footerPrivacy: 'الخصوصية',
+        profileSaved: 'تم حفظ الملف الشخصي بنجاح!',
+        profileSaveError: 'فشل في حفظ الملف الشخصي.',
+        passwordChanged: 'تم تغيير كلمة المرور بنجاح!',
+        passwordMismatch: 'كلمات المرور غير متطابقة.',
+        passwordRequirementsNotMet: 'كلمة المرور لا تستوفي المتطلبات.',
+        passwordChangeError: 'فشل في تغيير كلمة المرور.'
+    },
     accountSettings: {
         title: 'إعدادات الحساب',
         subtitle: 'إدارة الملف الشخصي والأمان والإشعارات والمزيد',
@@ -501,7 +537,10 @@ window.translations.ar = {
             question: 'السؤال',
             question1: 'ما اسم حيوانك الأليف في طفولتك؟',
             question2: 'ما أول كتاب اشتريته؟',
-            question3: 'ما فيلمك المفضل؟'
+            question3: 'ما فيلمك المفضل؟',
+            locationTokyo: 'طوكيو',
+            locationOsaka: 'أوساكا',
+            locationJapan: 'اليابان'
         },
         notificationSettings: {
             emailNotifications: 'إشعارات البريد الإلكتروني',

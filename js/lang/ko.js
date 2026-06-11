@@ -87,7 +87,8 @@ window.translations.ko = {
             title: '시작할 준비가 되셨나요?',
             subtitle: '수천 명의 크리에이터와 함께하세요.',
             createAccount: '무료 계정 만들기',
-            browseWorks: '작품 둘러보기'
+            browseWorks: '작품 둘러보기',
+            goToDashboard: '대시보드로 이동'
         }
     },
     login: {
@@ -461,6 +462,41 @@ window.translations.ko = {
         addLanguages: '언어 추가',
         requestReview: '전문 검토 요청'
     },
+    profile: {
+        pageTitle: '프로필',
+        pageSubtitle: '개인 정보 관리',
+        sectionProfileInfo: '프로필 정보',
+        labelFirstName: '이름',
+        labelLastName: '성',
+        labelDisplayName: '표시 이름 / 필명',
+        labelBio: '소개',
+        labelPreferredLang: '선호 언어',
+        btnEditProfile: '프로필 수정',
+        btnChangePhoto: '사진 변경',
+        btnSave: '저장',
+        btnCancel: '취소',
+        sectionEmail: '이메일',
+        emailHintText: '이메일을 변경하려면 다음으로 이동하세요:',
+        emailHintLinkText: '계정 설정',
+        sectionChangePassword: '비밀번호 변경',
+        labelCurrentPassword: '현재 비밀번호',
+        labelNewPassword: '새 비밀번호',
+        labelConfirmPassword: '비밀번호 확인',
+        reqLength: '8자 이상',
+        reqUppercase: '대문자 1개 이상',
+        reqLowercase: '소문자 1개 이상',
+        reqNumber: '숫자 1개 이상',
+        btnChangePassword: '비밀번호 변경',
+        footerHelp: '도움말',
+        footerTerms: '약관',
+        footerPrivacy: '개인정보',
+        profileSaved: '프로필이 저장되었습니다!',
+        profileSaveError: '프로필 저장에 실패했습니다.',
+        passwordChanged: '비밀번호가 변경되었습니다!',
+        passwordMismatch: '비밀번호가 일치하지 않습니다.',
+        passwordRequirementsNotMet: '비밀번호가 요구 사항을 충족하지 않습니다.',
+        passwordChangeError: '비밀번호 변경에 실패했습니다.'
+    },
     accountSettings: {
         title: '계정 설정',
         subtitle: '프로필, 보안, 알림 등을 관리하세요',
@@ -501,7 +537,10 @@ window.translations.ko = {
             question: '질문',
             question1: '어린 시절 애완동물의 이름은?',
             question2: '처음 구입한 책의 제목은?',
-            question3: '가장 좋아하는 영화는?'
+            question3: '가장 좋아하는 영화는?',
+            locationTokyo: '도쿄',
+            locationOsaka: '오사카',
+            locationJapan: '일본'
         },
         notificationSettings: {
             emailNotifications: '이메일 알림',

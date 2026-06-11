@@ -87,7 +87,8 @@ window.translations.zh = {
             title: '准备好了吗？',
             subtitle: '加入创作者',
             createAccount: '创建免费账户',
-            browseWorks: '浏览作品'
+            browseWorks: '浏览作品',
+            goToDashboard: '前往控制台'
         }
     },
     login: {
@@ -461,6 +462,41 @@ window.translations.zh = {
         addLanguages: '添加更多语言',
         requestReview: '请求专业审核'
     },
+    profile: {
+        pageTitle: '个人资料',
+        pageSubtitle: '管理您的个人信息',
+        sectionProfileInfo: '个人资料信息',
+        labelFirstName: '名',
+        labelLastName: '姓',
+        labelDisplayName: '显示名称 / 笔名',
+        labelBio: '个人简介',
+        labelPreferredLang: '首选语言',
+        btnEditProfile: '编辑资料',
+        btnChangePhoto: '更换照片',
+        btnSave: '保存',
+        btnCancel: '取消',
+        sectionEmail: '电子邮箱',
+        emailHintText: '要更改电子邮箱，请前往',
+        emailHintLinkText: '账户设置',
+        sectionChangePassword: '修改密码',
+        labelCurrentPassword: '当前密码',
+        labelNewPassword: '新密码',
+        labelConfirmPassword: '确认密码',
+        reqLength: '至少8个字符',
+        reqUppercase: '至少一个大写字母',
+        reqLowercase: '至少一个小写字母',
+        reqNumber: '至少一个数字',
+        btnChangePassword: '修改密码',
+        footerHelp: '帮助',
+        footerTerms: '条款',
+        footerPrivacy: '隐私',
+        profileSaved: '个人资料保存成功！',
+        profileSaveError: '保存个人资料失败，请重试。',
+        passwordChanged: '密码修改成功！',
+        passwordMismatch: '密码不匹配。',
+        passwordRequirementsNotMet: '密码不满足所有要求。',
+        passwordChangeError: '修改密码失败，请重试。'
+    },
     accountSettings: {
         title: '账户设置',
         subtitle: '管理您的个人资料、安全、通知等',
@@ -501,7 +537,10 @@ window.translations.zh = {
             question: '问题',
             question1: '你童年宠物的名字是？',
             question2: '你第一本购买的书的名字是？',
-            question3: '你最喜欢的电影是？'
+            question3: '你最喜欢的电影是？',
+            locationTokyo: '东京',
+            locationOsaka: '大阪',
+            locationJapan: '日本'
         },
         notificationSettings: {
             emailNotifications: '邮件通知',
@@ -1057,7 +1096,60 @@ window.translations.zh = {
             stillNeedHelp: '仍需帮助？',
             contactSupport: '联系支持',
             back: '返回',
-            startOver: '重新开始'
+            startOver: '重新开始',
+            progress: {
+                step1: '选择问题',
+                step2: '选择详情',
+                step3: '解决方案'
+            },
+            questions: {
+                whatProblem: '您遇到了什么问题？',
+                selectClosest: '请选择最接近的类别',
+                tellMore: '请告诉我们更多详细情况',
+                selectBestMatch: '请选择最符合的选项'
+            },
+            categories: {
+                login: {
+                    title: '无法登录',
+                    desc: '忘记密码、账户被锁定'
+                },
+                payment: {
+                    title: '支付问题',
+                    desc: '支付错误、退款、收据'
+                },
+                reading: {
+                    title: '无法阅读作品',
+                    desc: '显示错误、下载问题'
+                },
+                translation: {
+                    title: '翻译问题',
+                    desc: 'AI翻译、与翻译者的沟通'
+                },
+                publishing: {
+                    title: '无法上传作品',
+                    desc: '上传错误、发布问题'
+                },
+                account: {
+                    title: '账户设置',
+                    desc: '资料更改、删除账户'
+                }
+            },
+            resolution: {
+                didItHelp: '这个解决方案有帮助吗？',
+                resolved: '是的，已解决！',
+                notResolved: '没有，未解决',
+                relatedFaqs: '相关常见问题',
+                stillNotResolved: '如果以上方法没有帮助，请再次点击"未解决"',
+                contactUs: '仍未解决？',
+                contactDesc: '我们的支持团队随时为您提供帮助。',
+                contactButton: '联系我们'
+            },
+            success: {
+                title: '问题已解决！',
+                message: '很高兴能帮到您。',
+                viewFaq: '查看常见问题',
+                backHome: '返回首页'
+            }
         },
         contact: {
             title: '联系我们',

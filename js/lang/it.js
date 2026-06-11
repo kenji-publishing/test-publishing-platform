@@ -1,5 +1,5 @@
 /**
- * AuctLect Platform - Italian Translations
+ * AuctLect Platform - IT Translations
  * Auto-merged from it.json
  */
 
@@ -87,7 +87,8 @@ window.translations.it = {
             title: 'Pronto per Iniziare?',
             subtitle: 'Unisciti a migliaia di creatori.',
             createAccount: 'Crea Account Gratuito',
-            browseWorks: 'Esplora le Opere'
+            browseWorks: 'Esplora le Opere',
+            goToDashboard: 'Vai al Pannello'
         }
     },
     login: {
@@ -460,6 +461,41 @@ window.translations.it = {
         options: 'Opzioni di Traduzione',
         addLanguages: 'Aggiungi Altre Lingue',
         requestReview: 'Richiedi Revisione Professionale'
+    },
+    profile: {
+        pageTitle: 'Profilo',
+        pageSubtitle: 'Gestisci le tue informazioni personali',
+        sectionProfileInfo: 'Informazioni del profilo',
+        labelFirstName: 'Nome',
+        labelLastName: 'Cognome',
+        labelDisplayName: 'Nome visualizzato / Nome d\'arte',
+        labelBio: 'Biografia',
+        labelPreferredLang: 'Lingua preferita',
+        btnEditProfile: 'Modifica profilo',
+        btnChangePhoto: 'Cambia foto',
+        btnSave: 'Salva',
+        btnCancel: 'Annulla',
+        sectionEmail: 'E-mail',
+        emailHintText: 'Per cambiare la tua e-mail, vai a',
+        emailHintLinkText: 'Impostazioni account',
+        sectionChangePassword: 'Cambia password',
+        labelCurrentPassword: 'Password attuale',
+        labelNewPassword: 'Nuova password',
+        labelConfirmPassword: 'Conferma password',
+        reqLength: 'Almeno 8 caratteri',
+        reqUppercase: 'Almeno una lettera maiuscola',
+        reqLowercase: 'Almeno una lettera minuscola',
+        reqNumber: 'Almeno un numero',
+        btnChangePassword: 'Cambia password',
+        footerHelp: 'Aiuto',
+        footerTerms: 'Termini',
+        footerPrivacy: 'Privacy',
+        profileSaved: 'Profilo salvato con successo!',
+        profileSaveError: 'Impossibile salvare il profilo.',
+        passwordChanged: 'Password cambiata con successo!',
+        passwordMismatch: 'Le password non corrispondono.',
+        passwordRequirementsNotMet: 'La password non soddisfa tutti i requisiti.',
+        passwordChangeError: 'Impossibile cambiare la password.'
     },
     accountSettings: {
         title: 'Impostazioni Account',

@@ -87,7 +87,8 @@ window.translations.de = {
             title: 'Bereit Loszulegen?',
             subtitle: 'Schließen Sie sich Tausenden von Kreativen an.',
             createAccount: 'Kostenloses Konto Erstellen',
-            browseWorks: 'Werke Durchsuchen'
+            browseWorks: 'Werke Durchsuchen',
+            goToDashboard: 'Zum Dashboard'
         }
     },
     login: {
@@ -461,6 +462,41 @@ window.translations.de = {
         addLanguages: 'Weitere Sprachen Hinzufügen',
         requestReview: 'Professionelle Überprüfung Anfordern'
     },
+    profile: {
+        pageTitle: 'Profil',
+        pageSubtitle: 'Verwalten Sie Ihre persönlichen Informationen',
+        sectionProfileInfo: 'Profilinformationen',
+        labelFirstName: 'Vorname',
+        labelLastName: 'Nachname',
+        labelDisplayName: 'Anzeigename / Künstlername',
+        labelBio: 'Biografie',
+        labelPreferredLang: 'Bevorzugte Sprache',
+        btnEditProfile: 'Profil bearbeiten',
+        btnChangePhoto: 'Foto ändern',
+        btnSave: 'Speichern',
+        btnCancel: 'Abbrechen',
+        sectionEmail: 'E-Mail',
+        emailHintText: 'Um Ihre E-Mail zu ändern, gehen Sie zu',
+        emailHintLinkText: 'Kontoeinstellungen',
+        sectionChangePassword: 'Passwort ändern',
+        labelCurrentPassword: 'Aktuelles Passwort',
+        labelNewPassword: 'Neues Passwort',
+        labelConfirmPassword: 'Passwort bestätigen',
+        reqLength: 'Mindestens 8 Zeichen',
+        reqUppercase: 'Mindestens ein Großbuchstabe',
+        reqLowercase: 'Mindestens ein Kleinbuchstabe',
+        reqNumber: 'Mindestens eine Zahl',
+        btnChangePassword: 'Passwort ändern',
+        footerHelp: 'Hilfe',
+        footerTerms: 'Bedingungen',
+        footerPrivacy: 'Datenschutz',
+        profileSaved: 'Profil erfolgreich gespeichert!',
+        profileSaveError: 'Profil konnte nicht gespeichert werden.',
+        passwordChanged: 'Passwort erfolgreich geändert!',
+        passwordMismatch: 'Passwörter stimmen nicht überein.',
+        passwordRequirementsNotMet: 'Passwort erfüllt nicht alle Anforderungen.',
+        passwordChangeError: 'Passwort konnte nicht geändert werden.'
+    },
     accountSettings: {
         title: 'Kontoeinstellungen',
         subtitle: 'Verwalten Sie Ihr Profil, Sicherheit, Benachrichtigungen und mehr',
@@ -501,7 +537,10 @@ window.translations.de = {
             question: 'Frage',
             question1: 'Wie hieß Ihr Haustier in der Kindheit?',
             question2: 'Welches war das erste Buch, das Sie gekauft haben?',
-            question3: 'Was ist Ihr Lieblingsfilm?'
+            question3: 'Was ist Ihr Lieblingsfilm?',
+            locationTokyo: 'Tokio',
+            locationOsaka: 'Osaka',
+            locationJapan: 'Japan'
         },
         notificationSettings: {
             emailNotifications: 'E-Mail-Benachrichtigungen',

@@ -30,7 +30,7 @@ window.translations.fr = {
         library: 'Bibliothèque',
         translationTools: 'Outils de Traduction',
         mangaTranslator: 'Traducteur de Manga',
-        mangaEditor: '\u00c9diteur de Manga',
+        mangaEditor: 'Éditeur de Manga',
         novelTranslator: 'Traducteur de Roman',
         aiEditor: 'Éditeur IA',
         translationStatus: 'État de Traduction',
@@ -87,7 +87,8 @@ window.translations.fr = {
             title: 'Prêt à Commencer ?',
             subtitle: 'Rejoignez des milliers de créateurs.',
             createAccount: 'Créer un Compte Gratuit',
-            browseWorks: 'Parcourir les Œuvres'
+            browseWorks: 'Parcourir les Œuvres',
+            goToDashboard: 'Aller au tableau de bord'
         }
     },
     login: {
@@ -461,6 +462,41 @@ window.translations.fr = {
         addLanguages: 'Ajouter des Langues',
         requestReview: 'Demander une Révision Professionnelle'
     },
+    profile: {
+        pageTitle: 'Profil',
+        pageSubtitle: 'Gérez vos informations personnelles',
+        sectionProfileInfo: 'Informations du profil',
+        labelFirstName: 'Prénom',
+        labelLastName: 'Nom',
+        labelDisplayName: 'Nom d\'affichage / Pseudonyme',
+        labelBio: 'Biographie',
+        labelPreferredLang: 'Langue préférée',
+        btnEditProfile: 'Modifier le profil',
+        btnChangePhoto: 'Changer la photo',
+        btnSave: 'Enregistrer',
+        btnCancel: 'Annuler',
+        sectionEmail: 'E-mail',
+        emailHintText: 'Pour changer votre e-mail, allez à',
+        emailHintLinkText: 'Paramètres du compte',
+        sectionChangePassword: 'Changer le mot de passe',
+        labelCurrentPassword: 'Mot de passe actuel',
+        labelNewPassword: 'Nouveau mot de passe',
+        labelConfirmPassword: 'Confirmer le mot de passe',
+        reqLength: 'Au moins 8 caractères',
+        reqUppercase: 'Au moins une majuscule',
+        reqLowercase: 'Au moins une minuscule',
+        reqNumber: 'Au moins un chiffre',
+        btnChangePassword: 'Changer le mot de passe',
+        footerHelp: 'Aide',
+        footerTerms: 'Conditions',
+        footerPrivacy: 'Confidentialité',
+        profileSaved: 'Profil enregistré avec succès !',
+        profileSaveError: 'Échec de l\'enregistrement du profil.',
+        passwordChanged: 'Mot de passe changé avec succès !',
+        passwordMismatch: 'Les mots de passe ne correspondent pas.',
+        passwordRequirementsNotMet: 'Le mot de passe ne répond pas aux exigences.',
+        passwordChangeError: 'Échec du changement de mot de passe.'
+    },
     accountSettings: {
         title: 'Paramètres du Compte',
         subtitle: 'Gérez votre profil, sécurité, notifications et plus',
@@ -501,7 +537,10 @@ window.translations.fr = {
             question: 'Question',
             question1: 'Quel était le nom de votre animal d\'enfance ?',
             question2: 'Quel est le premier livre que vous avez acheté ?',
-            question3: 'Quel est votre film préféré ?'
+            question3: 'Quel est votre film préféré ?',
+            locationTokyo: 'Tokyo',
+            locationOsaka: 'Osaka',
+            locationJapan: 'Japon'
         },
         notificationSettings: {
             emailNotifications: 'Notifications par Email',
