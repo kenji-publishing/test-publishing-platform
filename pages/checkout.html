@@ -275,7 +275,9 @@
                         <div><i class="fas fa-check-circle text-primary fa-2x" id="stripeCheck" style="display:none;"></i></div>
                     </div>
                 </div>
-                <div class="card payment-method-card mb-3" id="paypalMethod" onclick="selectPaymentMethod('paypal')">
+                <!-- PayPal hidden until the integration is implemented — advertising a
+                     payment method that ends in "coming soon!" breaks buyer trust -->
+                <div class="card payment-method-card mb-3" id="paypalMethod" onclick="selectPaymentMethod('paypal')" style="display:none;">
                     <div class="card-body d-flex align-items-center">
                         <div class="payment-icon paypal-icon me-4"><i class="fab fa-paypal"></i></div>
                         <div class="flex-grow-1">
@@ -310,6 +312,7 @@
     </div>
     <div id="footer-container"></div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/config.js"></script>
     <script src="../js/i18n.js"></script>
     <script src="../js/navbar.js"></script>
     <script src="../js/lang/ja.js"></script>
@@ -374,13 +377,57 @@
         const urlParams=new URLSearchParams(window.location.search);
         const workId=urlParams.get('workId');
         
-        async function loadWorkDetails(){
-            workData={id:workId||'sample-123',title:'Midnight Stories',author:'J.A. Writer',genre:'Fiction',price:9.99};
+        function renderWorkDetails(){
             document.getElementById('workTitle').textContent=workData.title;
             document.getElementById('workAuthor').textContent=(window.i18n ? i18n.t('checkout.by') : 'by')+' '+workData.author;
             document.getElementById('workGenre').textContent=workData.genre;
             document.getElementById('subtotal').textContent='$'+workData.price.toFixed(2);
             document.getElementById('total').textContent='$'+workData.price.toFixed(2);
+        }
+
+        function showCheckoutError(msgJa, msgEn){
+            var lang = localStorage.getItem('preferredLanguage') || 'en';
+            var box = document.getElementById('checkoutError');
+            if (!box) {
+                box = document.createElement('div');
+                box.id = 'checkoutError';
+                box.className = 'alert alert-danger mt-3';
+                var payBtn = document.getElementById('payButton');
+                payBtn.parentNode.insertBefore(box, payBtn);
+            }
+            box.textContent = (lang === 'ja') ? msgJa : msgEn;
+        }
+
+        async function loadWorkDetails(){
+            // Always show the real work + price for this workId, so the
+            // displayed total matches what the backend will actually charge.
+            try {
+                if (!workId) throw new Error('Missing workId');
+                const r = await fetch((window.API_ORIGIN||'') + '/api/works/' + encodeURIComponent(workId));
+                const d = await r.json();
+                if (!r.ok || !d.work) throw new Error(d.error || 'Failed to load work');
+                workData = {
+                    id: d.work.work_id,
+                    title: d.work.title || '',
+                    author: d.work.author_name || '',
+                    genre: d.work.genre || '',
+                    price: parseFloat(d.work.price) || 0
+                };
+            } catch (e) {
+                if (window.DEMO_MODE) {
+                    // Demo only: sample data for trying out the page offline
+                    workData = { id: workId||'sample-123', title:'Midnight Stories', author:'J.A. Writer', genre:'Fiction', price:9.99 };
+                } else {
+                    console.error('Failed to load work details:', e);
+                    showCheckoutError(
+                        '作品情報を読み込めませんでした。前のページに戻ってやり直してください。',
+                        'Could not load the work details. Please go back and try again.'
+                    );
+                    document.getElementById('payButton').disabled = true;
+                    return;
+                }
+            }
+            renderWorkDetails();
         }
         
         function selectPaymentMethod(method){
@@ -419,34 +466,52 @@
             return 'payment-success.html?' + params.toString();
         }
 
+        function resetPayButton(btn){
+            btn.disabled = false;
+            btn.innerHTML = (selectedMethod === 'paypal')
+                ? '<i class="fab fa-paypal me-2"></i>Pay with PayPal'
+                : '<i class="fas fa-credit-card me-2"></i>Pay with Card';
+        }
+
         async function processPayment(){
             const btn=document.getElementById('payButton');
             btn.disabled=true;
             btn.innerHTML='<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
             try{
                 if(selectedMethod==='stripe'){
-                    const r=await fetch('http://localhost:3000/api/payments/create-checkout-session',{
+                    const r=await fetch((window.API_ORIGIN||'') + '/api/payments/create-checkout-session',{
                         method:'POST',
                         headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('token')},
                         body:JSON.stringify({workId:workData.id})
                     });
                     const d=await r.json();
                     if(d.url){
-                        // 購入成功 → ライブラリに追加
-                        addToLibrary(workData.id, workData.title);
+                        // The work is added to the library AFTER payment, on the
+                        // payment-success page — never before redirecting to Stripe
+                        // (the buyer may still cancel there).
                         window.location.href=d.url;
                     }
                     else{throw new Error(d.error||'Payment failed')}
                 }else if(selectedMethod==='paypal'){
                     alert('PayPal integration coming soon!');
-                    btn.disabled=false;
-                    btn.innerHTML='<i class="fab fa-paypal me-2"></i>Pay with PayPal';
+                    resetPayButton(btn);
                 }
             }catch(e){
-                console.error('Backend not available, using demo mode:', e);
-                // デモモード: 購入成功としてライブラリに追加
-                addToLibrary(workData.id, workData.title);
-                window.location.href = buildSuccessUrl();
+                if (window.DEMO_MODE) {
+                    // Explicit demo mode only: simulate a successful purchase
+                    console.warn('DEMO_MODE: simulating purchase:', e);
+                    addToLibrary(workData.id, workData.title);
+                    window.location.href = buildSuccessUrl();
+                    return;
+                }
+                // Real mode: a failed payment is an ERROR. Never pretend it
+                // succeeded or hand over the item.
+                console.error('Payment failed:', e);
+                showCheckoutError(
+                    '決済処理に失敗しました。請求は行われていません。時間をおいて再度お試しください。',
+                    'Payment could not be processed. You have not been charged. Please try again later.'
+                );
+                resetPayButton(btn);
             }
         }
         

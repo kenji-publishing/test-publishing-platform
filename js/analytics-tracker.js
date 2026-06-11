@@ -6,7 +6,7 @@
 (function() {
     'use strict';
     
-    const API_BASE = 'http://localhost:3000/api/analytics';
+    const API_BASE = (window.API_ORIGIN || '') + '/api/analytics';
     
     // Generate or retrieve session ID
     function getSessionId() {

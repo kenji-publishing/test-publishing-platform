@@ -14,7 +14,7 @@
         // Configuration
         // =====================================================
         config: {
-            apiBase: 'http://localhost:3000/api',
+            apiBase: (window.API_ORIGIN || '') + '/api',
             tokenKey: 'token',
             refreshInterval: 60000 // 1分
         },

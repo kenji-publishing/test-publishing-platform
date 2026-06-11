@@ -7,7 +7,7 @@
  */
 
 // API Base URL
-const NOTIFICATION_API = 'http://localhost:3000/api/notifications';
+const NOTIFICATION_API = (window.API_ORIGIN || '') + '/api/notifications';
 
 // 通知タイプの定義（翻訳キー対応）
 const NOTIFICATION_TYPES = [

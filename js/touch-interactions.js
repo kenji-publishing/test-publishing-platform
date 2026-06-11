@@ -438,7 +438,7 @@
                 }
 
                 // API call
-                const response = await fetch(`http://localhost:3000/api/notifications/${notificationId}`, {
+                const response = await fetch(`${window.API_ORIGIN || ''}/api/notifications/${notificationId}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -471,7 +471,7 @@
                     return;
                 }
 
-                const response = await fetch(`http://localhost:3000/api/notifications/${notificationId}/read`, {
+                const response = await fetch(`${window.API_ORIGIN || ''}/api/notifications/${notificationId}/read`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${token}`
