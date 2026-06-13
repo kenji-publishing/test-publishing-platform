@@ -33,6 +33,7 @@
     <script src="../js/lang/ar.js"></script>
     <script src="../js/lang/pt.js"></script>
     <script src="../js/lang/it.js"></script>
+    <script src="../js/wizard-common.js"></script>
 
     <style>
         :root {
@@ -1107,43 +1108,20 @@
         opus:   { per1k: 10 }
     };
 
-    // Currency definitions: symbol, approximate rate from JPY, decimal places
-    const CURRENCIES = {
-        JPY: { symbol: '\u00a5',  rate: 1,      decimals: 0, name: 'JPY' },
-        USD: { symbol: '$',  rate: 0.0067,  decimals: 2, name: 'USD' },
-        EUR: { symbol: '\u20ac',  rate: 0.0061,  decimals: 2, name: 'EUR' },
-        GBP: { symbol: '\u00a3',  rate: 0.0053,  decimals: 2, name: 'GBP' },
-        AUD: { symbol: 'A$', rate: 0.0103,  decimals: 2, name: 'AUD' },
-        CAD: { symbol: 'C$', rate: 0.0093,  decimals: 2, name: 'CAD' },
-        KRW: { symbol: '\u20a9',  rate: 9.17,    decimals: 0, name: 'KRW' },
-        BRL: { symbol: 'R$', rate: 0.038,   decimals: 2, name: 'BRL' }
-    };
+    // Currency table, minimums and money helpers live in js/wizard-common.js
+    // (shared with manga-translator and novel-translator). Local aliases/wrappers
+    // keep the original names and signatures so call sites are unchanged.
+    const CURRENCIES = WizardCommon.CURRENCIES;
+    const PAY_MINIMUMS = WizardCommon.PAY_MINIMUMS;
 
-    // Minimum charge per payment method per currency (platform minimums, covering fees)
-    const PAY_MINIMUMS = {
-        stripe: { JPY: 100, USD: 1.00, EUR: 1.00, GBP: 0.80, AUD: 1.50, CAD: 1.50, KRW: 1000, BRL: 5.00 },
-        paypal: { JPY: 150, USD: 1.50, EUR: 1.50, GBP: 1.20, AUD: 2.00, CAD: 2.00, KRW: 1500, BRL: 7.00 }
-    };
-
-    // Convert JPY amount to selected currency
     function toSelectedCurrency(jpyAmount) {
-        const cur = CURRENCIES[selectedCurrency];
-        const converted = jpyAmount * cur.rate;
-        return Number(converted.toFixed(cur.decimals));
+        return WizardCommon.toSelectedCurrency(jpyAmount, selectedCurrency);
     }
-
-    // Format price with currency symbol
     function formatPrice(amount, currCode) {
-        currCode = currCode || selectedCurrency;
-        const cur = CURRENCIES[currCode];
-        const formatted = cur.decimals === 0 ? Math.round(amount).toLocaleString() : amount.toFixed(cur.decimals);
-        return cur.symbol + formatted;
+        return WizardCommon.formatPrice(amount, currCode || selectedCurrency);
     }
-
-    // Get minimum charge for current currency & payment method
     function getMinimum(payMethod) {
-        payMethod = payMethod || selectedPayMethod;
-        return PAY_MINIMUMS[payMethod][selectedCurrency] || PAY_MINIMUMS[payMethod]['USD'];
+        return WizardCommon.getMinimum(selectedCurrency, payMethod || selectedPayMethod);
     }
 
     // Currency change handler
