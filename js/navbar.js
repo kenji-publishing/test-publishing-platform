@@ -817,6 +817,8 @@ function _getUnreadCount() {
     var user = localStorage.getItem('user');
     if (!token && !user) return 0; // Not logged in
 
+    var isDemo = (typeof window !== 'undefined' && window.DEMO_MODE);
+
     // Count unread conversations
     var convCount = 0;
     try {
@@ -824,7 +826,7 @@ function _getUnreadCount() {
         if (storedCount !== null) {
             convCount = parseInt(storedCount, 10) || 0;
         } else {
-            // First visit: check publisher_messages for demo data
+            // First visit: check publisher_messages for real/seeded data
             var msgs = localStorage.getItem('publisher_messages');
             if (msgs) {
                 var convs = JSON.parse(msgs);
@@ -832,11 +834,12 @@ function _getUnreadCount() {
                     if (convs[i].unread && convs[i].unread > 0) convCount += convs[i].unread;
                 }
                 localStorage.setItem('publisher_unread_conversations', String(convCount));
-            } else {
-                // Demo default: 3 unread messages (Sarah 2 + Yuki 1)
+            } else if (isDemo) {
+                // Demo only: sample unread messages (Sarah 2 + Yuki 1)
                 convCount = 3;
                 localStorage.setItem('publisher_unread_conversations', '3');
             }
+            // Real users with no message data → 0 (no fabricated badge)
         }
     } catch(e) {}
 
@@ -848,8 +851,8 @@ function _getUnreadCount() {
             for (var j = 0; j < notifs.length; j++) {
                 if (!notifs[j].is_read) notifCount++;
             }
-        } else {
-            // Demo default: 4 unread notifications
+        } else if (isDemo) {
+            // Demo only: sample unread notifications
             notifCount = 4;
         }
     } catch(e) {}
