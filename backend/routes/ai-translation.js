@@ -309,7 +309,7 @@ Important:
 
     // Call Claude API
     const message = await anthropic.messages.create({
-      model: process.env.CLAUDE_MODEL || 'claude-3-haiku-20240307',
+      model: process.env.CLAUDE_MODEL || 'claude-haiku-4-5-20251001',
       max_tokens: 1024,
       messages: [
         {
