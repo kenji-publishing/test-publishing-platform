@@ -208,15 +208,15 @@ router.get('/author/overview', authenticateToken, async (req, res) => {
         // Get top works
         const topWorksResult = await pool.query(`
             SELECT 
-                w.id,
+                w.work_id as id,
                 w.title,
                 COALESCE(SUM(wa.page_views), 0) as views,
                 COALESCE(SUM(wa.unique_visitors), 0) as readers,
                 COALESCE(SUM(wa.revenue), 0) as revenue
             FROM works w
-            LEFT JOIN work_analytics_daily wa ON w.id = wa.work_id AND wa.date >= CURRENT_DATE - $2::int
+            LEFT JOIN work_analytics_daily wa ON w.work_id = wa.work_id AND wa.date >= CURRENT_DATE - $2::int
             WHERE w.author_id = $1
-            GROUP BY w.id, w.title
+            GROUP BY w.work_id, w.title
             ORDER BY views DESC
             LIMIT 5
         `, [authorId, days]);
@@ -455,16 +455,16 @@ router.get('/admin/overview', authenticateToken, requireAdmin, async (req, res) 
         // Get top works
         const topWorksResult = await pool.query(`
             SELECT 
-                w.id,
+                w.work_id as id,
                 w.title,
-                u.display_name as author_name,
+                COALESCE(u.pen_name, u.first_name || ' ' || u.last_name) as author_name,
                 COALESCE(SUM(wa.page_views), 0) as views,
                 COALESCE(SUM(wa.revenue), 0) as revenue
             FROM works w
-            JOIN users u ON w.author_id = u.id
-            LEFT JOIN work_analytics_daily wa ON w.id = wa.work_id AND wa.date >= CURRENT_DATE - $1::int
+            JOIN users u ON w.author_id = u.user_id
+            LEFT JOIN work_analytics_daily wa ON w.work_id = wa.work_id AND wa.date >= CURRENT_DATE - $1::int
             WHERE w.status = 'published'
-            GROUP BY w.id, w.title, u.display_name
+            GROUP BY w.work_id, w.title, u.pen_name, u.first_name, u.last_name
             ORDER BY views DESC
             LIMIT 10
         `, [days]);
@@ -637,10 +637,10 @@ router.get('/admin/export', authenticateToken, requireAdmin, async (req, res) =>
                 SELECT 
                     wa.*,
                     w.title as work_title,
-                    u.display_name as author_name
+                    COALESCE(u.pen_name, u.first_name || ' ' || u.last_name) as author_name
                 FROM work_analytics_daily wa
-                JOIN works w ON wa.work_id = w.id
-                JOIN users u ON w.author_id = u.id
+                JOIN works w ON wa.work_id = w.work_id
+                JOIN users u ON w.author_id = u.user_id
                 WHERE wa.date >= CURRENT_DATE - $1::int
                 ORDER BY wa.date ASC, wa.page_views DESC
             `, [days]);
