@@ -7,7 +7,7 @@
 -- =============================================
 CREATE TABLE IF NOT EXISTS page_views (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    user_id UUID REFERENCES users(user_id) ON DELETE SET NULL,
     session_id VARCHAR(100),
     page_path VARCHAR(500) NOT NULL,
     page_type VARCHAR(50), -- 'home', 'work', 'reader', 'profile', 'explore', etc.
@@ -22,19 +22,19 @@ CREATE TABLE IF NOT EXISTS page_views (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE INDEX idx_page_views_user ON page_views(user_id);
-CREATE INDEX idx_page_views_session ON page_views(session_id);
-CREATE INDEX idx_page_views_page_type ON page_views(page_type);
-CREATE INDEX idx_page_views_created ON page_views(created_at);
-CREATE INDEX idx_page_views_date ON page_views(DATE(created_at));
+CREATE INDEX IF NOT EXISTS idx_page_views_user ON page_views(user_id);
+CREATE INDEX IF NOT EXISTS idx_page_views_session ON page_views(session_id);
+CREATE INDEX IF NOT EXISTS idx_page_views_page_type ON page_views(page_type);
+CREATE INDEX IF NOT EXISTS idx_page_views_created ON page_views(created_at);
+CREATE INDEX IF NOT EXISTS idx_page_views_date ON page_views(DATE(created_at));
 
 -- =============================================
 -- 2. Work Analytics (Detailed)
 -- =============================================
 CREATE TABLE IF NOT EXISTS work_views (
     id SERIAL PRIMARY KEY,
-    work_id INTEGER NOT NULL REFERENCES works(id) ON DELETE CASCADE,
-    user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    work_id UUID NOT NULL REFERENCES works(work_id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(user_id) ON DELETE SET NULL,
     session_id VARCHAR(100),
     view_type VARCHAR(20) DEFAULT 'page', -- 'page', 'preview', 'read', 'download'
     chapter_index INTEGER,
@@ -47,11 +47,11 @@ CREATE TABLE IF NOT EXISTS work_views (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE INDEX idx_work_views_work ON work_views(work_id);
-CREATE INDEX idx_work_views_user ON work_views(user_id);
-CREATE INDEX idx_work_views_created ON work_views(created_at);
-CREATE INDEX idx_work_views_date ON work_views(DATE(created_at));
-CREATE INDEX idx_work_views_work_date ON work_views(work_id, DATE(created_at));
+CREATE INDEX IF NOT EXISTS idx_work_views_work ON work_views(work_id);
+CREATE INDEX IF NOT EXISTS idx_work_views_user ON work_views(user_id);
+CREATE INDEX IF NOT EXISTS idx_work_views_created ON work_views(created_at);
+CREATE INDEX IF NOT EXISTS idx_work_views_date ON work_views(DATE(created_at));
+CREATE INDEX IF NOT EXISTS idx_work_views_work_date ON work_views(work_id, DATE(created_at));
 
 -- =============================================
 -- 3. Daily Aggregated Stats (for fast queries)
@@ -92,14 +92,14 @@ CREATE TABLE IF NOT EXISTS analytics_daily (
     UNIQUE(date)
 );
 
-CREATE INDEX idx_analytics_daily_date ON analytics_daily(date);
+CREATE INDEX IF NOT EXISTS idx_analytics_daily_date ON analytics_daily(date);
 
 -- =============================================
 -- 4. Author Analytics Daily
 -- =============================================
 CREATE TABLE IF NOT EXISTS author_analytics_daily (
     id SERIAL PRIMARY KEY,
-    author_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    author_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     date DATE NOT NULL,
     
     -- Views
@@ -131,16 +131,16 @@ CREATE TABLE IF NOT EXISTS author_analytics_daily (
     UNIQUE(author_id, date)
 );
 
-CREATE INDEX idx_author_analytics_author ON author_analytics_daily(author_id);
-CREATE INDEX idx_author_analytics_date ON author_analytics_daily(date);
-CREATE INDEX idx_author_analytics_author_date ON author_analytics_daily(author_id, date);
+CREATE INDEX IF NOT EXISTS idx_author_analytics_author ON author_analytics_daily(author_id);
+CREATE INDEX IF NOT EXISTS idx_author_analytics_date ON author_analytics_daily(date);
+CREATE INDEX IF NOT EXISTS idx_author_analytics_author_date ON author_analytics_daily(author_id, date);
 
 -- =============================================
 -- 5. Work Analytics Daily
 -- =============================================
 CREATE TABLE IF NOT EXISTS work_analytics_daily (
     id SERIAL PRIMARY KEY,
-    work_id INTEGER NOT NULL REFERENCES works(id) ON DELETE CASCADE,
+    work_id UUID NOT NULL REFERENCES works(work_id) ON DELETE CASCADE,
     date DATE NOT NULL,
     
     -- Views
@@ -181,16 +181,16 @@ CREATE TABLE IF NOT EXISTS work_analytics_daily (
     UNIQUE(work_id, date)
 );
 
-CREATE INDEX idx_work_analytics_work ON work_analytics_daily(work_id);
-CREATE INDEX idx_work_analytics_date ON work_analytics_daily(date);
-CREATE INDEX idx_work_analytics_work_date ON work_analytics_daily(work_id, date);
+CREATE INDEX IF NOT EXISTS idx_work_analytics_work ON work_analytics_daily(work_id);
+CREATE INDEX IF NOT EXISTS idx_work_analytics_date ON work_analytics_daily(date);
+CREATE INDEX IF NOT EXISTS idx_work_analytics_work_date ON work_analytics_daily(work_id, date);
 
 -- =============================================
 -- 6. User Events (for detailed tracking)
 -- =============================================
 CREATE TABLE IF NOT EXISTS user_events (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    user_id UUID REFERENCES users(user_id) ON DELETE SET NULL,
     session_id VARCHAR(100),
     event_type VARCHAR(50) NOT NULL, -- 'click', 'scroll', 'purchase', 'download', 'share', etc.
     event_category VARCHAR(50), -- 'work', 'navigation', 'social', 'commerce'
@@ -200,10 +200,10 @@ CREATE TABLE IF NOT EXISTS user_events (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE INDEX idx_user_events_user ON user_events(user_id);
-CREATE INDEX idx_user_events_type ON user_events(event_type);
-CREATE INDEX idx_user_events_created ON user_events(created_at);
-CREATE INDEX idx_user_events_date ON user_events(DATE(created_at));
+CREATE INDEX IF NOT EXISTS idx_user_events_user ON user_events(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_events_type ON user_events(event_type);
+CREATE INDEX IF NOT EXISTS idx_user_events_created ON user_events(created_at);
+CREATE INDEX IF NOT EXISTS idx_user_events_date ON user_events(DATE(created_at));
 
 -- =============================================
 -- 7. Real-time Stats Cache

@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS support_tickets (
     ticket_number VARCHAR(50) UNIQUE NOT NULL,
     
     -- 問い合わせしたユーザー（NULLの場合は未ログインユーザー）
-    user_id INT REFERENCES users(id) ON DELETE SET NULL,
+    user_id UUID REFERENCES users(user_id) ON DELETE SET NULL,
     
     -- 未ログインユーザー用のメールアドレス
     guest_email VARCHAR(255),
@@ -120,10 +120,10 @@ CREATE TABLE IF NOT EXISTS support_tickets (
     status VARCHAR(30) DEFAULT 'open',
     
     -- 担当者（管理者のユーザーID）
-    assigned_to INT REFERENCES users(id) ON DELETE SET NULL,
-    
+    assigned_to UUID REFERENCES users(user_id) ON DELETE SET NULL,
+
     -- 関連情報（任意）
-    related_work_id INT REFERENCES works(id) ON DELETE SET NULL,
+    related_work_id UUID REFERENCES works(work_id) ON DELETE SET NULL,
     related_order_id VARCHAR(100),
     
     -- 最後のメッセージ日時（ソート用）
@@ -148,7 +148,7 @@ CREATE TABLE IF NOT EXISTS ticket_messages (
     ticket_id INT REFERENCES support_tickets(id) ON DELETE CASCADE,
     
     -- 送信者（NULLの場合はシステムメッセージ）
-    sender_id INT REFERENCES users(id) ON DELETE SET NULL,
+    sender_id UUID REFERENCES users(user_id) ON DELETE SET NULL,
     
     -- 送信者の種類
     -- 'user': ユーザー
