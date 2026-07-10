@@ -480,7 +480,9 @@
                             <h4 style="margin-bottom:1rem;"><i class="fas fa-font me-2" style="color:#8B7355;"></i><span id="cdHeading">Cover Text</span></h4>
                             <div style="display:flex; gap:1.5rem; flex-wrap:wrap;">
                                 <div style="flex:1 1 320px; min-width:280px; text-align:center;">
-                                    <canvas id="cdCanvas" style="max-width:100%; max-height:60vh; border:1px solid var(--color-border, #e5ddd3); border-radius:8px; background:#f5f0eb;"></canvas>
+                                    <canvas id="cdCanvas" style="max-width:100%; max-height:60vh; border:1px solid var(--color-border, #e5ddd3); border-radius:8px; background:#f5f0eb; touch-action:none;"></canvas>
+                                    <p class="small text-secondary" style="margin:0.5rem 0 0.25rem;"><i class="fas fa-arrows-alt me-1"></i><span id="cdDragHint">Drag the text on the preview to move it</span></p>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="resetCoverPositions(); redrawCoverDesign();"><i class="fas fa-undo me-1"></i><span id="cdResetPosText">Reset positions</span></button>
                                 </div>
                                 <div style="flex:1 1 260px; min-width:250px;">
                                     <div class="mb-2">
@@ -492,7 +494,7 @@
                                         <input type="text" class="form-control form-control-sm" id="cdText2" oninput="redrawCoverDesign()">
                                     </div>
                                     <div class="mb-2 form-check">
-                                        <input class="form-check-input" type="checkbox" id="cdVertical" onchange="redrawCoverDesign()">
+                                        <input class="form-check-input" type="checkbox" id="cdVertical" onchange="resetCoverPositions(); redrawCoverDesign();">
                                         <label class="form-check-label small" for="cdVertical" id="cdLabelVertical">Vertical text (Japanese style)</label>
                                     </div>
                                     <div class="mb-2">
@@ -503,29 +505,23 @@
                                         </select>
                                     </div>
                                     <div class="mb-2">
-                                        <label class="form-label small fw-semibold" id="cdLabelSize">Text size</label>
-                                        <select class="form-select form-select-sm" id="cdSize" onchange="redrawCoverDesign()">
-                                            <option value="small">S</option>
-                                            <option value="medium" selected>M</option>
-                                            <option value="large">L</option>
-                                        </select>
+                                        <label class="form-label small fw-semibold"><span id="cdLabelSize1">Title size</span> (px)</label>
+                                        <div style="display:flex; gap:0.5rem; align-items:center;">
+                                            <input type="range" class="form-range" id="cdSize1Range" min="12" max="200" value="48" style="flex:1;" oninput="syncCoverSize('1', 'range')">
+                                            <input type="number" class="form-control form-control-sm" id="cdSize1" min="8" max="500" value="48" style="width:80px;" oninput="syncCoverSize('1', 'num')">
+                                        </div>
                                     </div>
-                                    <div class="mb-2" id="cdPositionWrap">
-                                        <label class="form-label small fw-semibold" id="cdLabelPosition">Title position</label>
-                                        <select class="form-select form-select-sm" id="cdPosition" onchange="redrawCoverDesign()">
-                                            <option value="top" id="cdOptTop">Top</option>
-                                            <option value="center" id="cdOptCenter">Center</option>
-                                            <option value="bottom" id="cdOptBottom">Bottom</option>
-                                        </select>
+                                    <div class="mb-2">
+                                        <label class="form-label small fw-semibold"><span id="cdLabelSize2">Author size</span> (px)</label>
+                                        <div style="display:flex; gap:0.5rem; align-items:center;">
+                                            <input type="range" class="form-range" id="cdSize2Range" min="12" max="200" value="22" style="flex:1;" oninput="syncCoverSize('2', 'range')">
+                                            <input type="number" class="form-control form-control-sm" id="cdSize2" min="8" max="500" value="22" style="width:80px;" oninput="syncCoverSize('2', 'num')">
+                                        </div>
                                     </div>
                                     <div class="mb-2">
                                         <label class="form-label small fw-semibold" id="cdLabelColor">Text color</label>
-                                        <div style="display:flex; align-items:center; gap:0.5rem;">
-                                            <input type="color" id="cdColor" value="#FFFFFF" onchange="redrawCoverDesign()" oninput="redrawCoverDesign()" style="width:48px; height:32px; padding:2px; border:1px solid var(--color-border, #e5ddd3); border-radius:6px; cursor:pointer;">
-                                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setCoverTextColor('#FFFFFF')" style="background:#fff;">&nbsp;A&nbsp;</button>
-                                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setCoverTextColor('#1A1A1A')" style="background:#1A1A1A; color:#fff;">&nbsp;A&nbsp;</button>
-                                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setCoverTextColor('#8B7355')" style="background:#8B7355; color:#fff;">&nbsp;A&nbsp;</button>
-                                        </div>
+                                        <div id="cdSwatches" style="display:flex; gap:4px; flex-wrap:wrap; margin-bottom:6px;"></div>
+                                        <input type="color" id="cdColor" value="#FFFFFF" onchange="redrawCoverDesign()" oninput="redrawCoverDesign()" style="width:100%; height:32px; padding:2px; border:1px solid var(--color-border, #e5ddd3); border-radius:6px; cursor:pointer;">
                                     </div>
                                     <div class="mb-3 form-check">
                                         <input class="form-check-input" type="checkbox" id="cdOutline" checked onchange="redrawCoverDesign()">
@@ -576,11 +572,10 @@
             cdLabelFont: { en: 'Font', ja: 'フォント', zh: '字体', es: 'Fuente', fr: 'Police', de: 'Schriftart', ko: '글꼴', ar: 'الخط', pt: 'Fonte', it: 'Carattere' },
             cdOptSerif: { en: 'Serif (Mincho)', ja: '明朝体', zh: '衬线体（明朝）', es: 'Serif', fr: 'Serif', de: 'Serif', ko: '명조체', ar: 'سيريف', pt: 'Serif', it: 'Serif' },
             cdOptSans: { en: 'Sans-serif (Gothic)', ja: 'ゴシック体', zh: '无衬线体（黑体）', es: 'Sans-serif', fr: 'Sans-serif', de: 'Sans-serif', ko: '고딕체', ar: 'سانس سيريف', pt: 'Sans-serif', it: 'Sans-serif' },
-            cdLabelSize: { en: 'Text size', ja: '文字サイズ', zh: '文字大小', es: 'Tamaño del texto', fr: 'Taille du texte', de: 'Textgröße', ko: '글자 크기', ar: 'حجم النص', pt: 'Tamanho do texto', it: 'Dimensione testo' },
-            cdLabelPosition: { en: 'Title position', ja: 'タイトルの位置', zh: '标题位置', es: 'Posición del título', fr: 'Position du titre', de: 'Titelposition', ko: '제목 위치', ar: 'موضع العنوان', pt: 'Posição do título', it: 'Posizione del titolo' },
-            cdOptTop: { en: 'Top', ja: '上', zh: '上', es: 'Arriba', fr: 'Haut', de: 'Oben', ko: '위', ar: 'أعلى', pt: 'Topo', it: 'In alto' },
-            cdOptCenter: { en: 'Center', ja: '中央', zh: '中', es: 'Centro', fr: 'Centre', de: 'Mitte', ko: '가운데', ar: 'وسط', pt: 'Centro', it: 'Centro' },
-            cdOptBottom: { en: 'Bottom', ja: '下', zh: '下', es: 'Abajo', fr: 'Bas', de: 'Unten', ko: '아래', ar: 'أسفل', pt: 'Base', it: 'In basso' },
+            cdLabelSize1: { en: 'Title size', ja: 'タイトルの文字サイズ', zh: '标题文字大小', es: 'Tamaño del título', fr: 'Taille du titre', de: 'Titelgröße', ko: '제목 글자 크기', ar: 'حجم العنوان', pt: 'Tamanho do título', it: 'Dimensione titolo' },
+            cdLabelSize2: { en: 'Author size', ja: '著者名の文字サイズ', zh: '作者名文字大小', es: 'Tamaño del autor', fr: 'Taille de l\'auteur', de: 'Autorgröße', ko: '저자명 글자 크기', ar: 'حجم اسم المؤلف', pt: 'Tamanho do autor', it: 'Dimensione autore' },
+            cdDragHint: { en: 'Drag the text on the preview to move it', ja: 'プレビュー上の文字はドラッグで移動できます', zh: '在预览上拖动文字即可移动', es: 'Arrastra el texto en la vista previa para moverlo', fr: 'Faites glisser le texte sur l\'aperçu pour le déplacer', de: 'Text in der Vorschau ziehen, um ihn zu verschieben', ko: '미리보기에서 글자를 드래그하여 이동', ar: 'اسحب النص في المعاينة لتحريكه', pt: 'Arraste o texto na prévia para movê-lo', it: 'Trascina il testo nell\'anteprima per spostarlo' },
+            cdResetPos: { en: 'Reset positions', ja: '位置をリセット', zh: '重置位置', es: 'Restablecer posiciones', fr: 'Réinitialiser les positions', de: 'Positionen zurücksetzen', ko: '위치 초기화', ar: 'إعادة تعيين المواضع', pt: 'Redefinir posições', it: 'Ripristina posizioni' },
             cdLabelColor: { en: 'Text color', ja: '文字色', zh: '文字颜色', es: 'Color del texto', fr: 'Couleur du texte', de: 'Textfarbe', ko: '글자 색', ar: 'لون النص', pt: 'Cor do texto', it: 'Colore del testo' },
             cdLabelOutline: { en: 'Outline (improves readability)', ja: '縁取り（読みやすくなります）', zh: '描边（更易读）', es: 'Contorno (mejora la legibilidad)', fr: 'Contour (améliore la lisibilité)', de: 'Kontur (bessere Lesbarkeit)', ko: '테두리（가독성 향상）', ar: 'حدود（يحسن القراءة）', pt: 'Contorno (melhora a leitura)', it: 'Contorno (migliora la leggibilità)' },
             cdApply: { en: 'Apply', ja: 'この表紙にする', zh: '应用', es: 'Aplicar', fr: 'Appliquer', de: 'Übernehmen', ko: '적용', ar: 'تطبيق', pt: 'Aplicar', it: 'Applica' },
@@ -959,6 +954,93 @@
         // ========== 表紙デザイナー（画像に文字入れ、Canvasで合成） ==========
         var designedCoverFile = null; // 文字入れ後の画像（これがあれば優先してアップロード）
         var cdSourceImage = null;     // 元画像（再編集は常に元画像から行う）
+        var cdPos = null;             // 文字の位置 { title:{x,y}, author:{x,y} }（0〜1の正規化座標・ブロック中心）
+        var cdBlocks = {};            // 直近の描画で計算した文字の当たり判定ボックス
+        var cdSizesInited = false;    // 画像サイズに応じた文字サイズ初期化済みフラグ
+
+        // 文字色プリセット（10色）
+        var CD_SWATCHES = ['#FFFFFF', '#1A1A1A', '#8B7355', '#C0392B', '#E67E22', '#D4AF37', '#2E7D32', '#2C5F8A', '#7B1FA2', '#E91E63'];
+
+        function buildCoverSwatches() {
+            var wrap = document.getElementById('cdSwatches');
+            if (!wrap) return;
+            wrap.innerHTML = '';
+            CD_SWATCHES.forEach(function(hex) {
+                var b = document.createElement('button');
+                b.type = 'button';
+                b.style.cssText = 'width:26px; height:26px; border-radius:50%; border:2px solid var(--color-border, #ccc); background:' + hex + '; cursor:pointer; padding:0;';
+                b.title = hex;
+                b.onclick = function() { setCoverTextColor(hex); };
+                wrap.appendChild(b);
+            });
+        }
+
+        // スライダーと数値入力を同期して再描画
+        function syncCoverSize(which, from) {
+            var range = document.getElementById('cdSize' + which + 'Range');
+            var num = document.getElementById('cdSize' + which);
+            if (from === 'range') num.value = range.value;
+            else range.value = Math.min(parseInt(range.max, 10), Math.max(parseInt(range.min, 10), parseInt(num.value, 10) || 0));
+            redrawCoverDesign();
+        }
+
+        // 位置を初期配置に戻す（縦書き/横書きで初期位置が異なる）
+        function resetCoverPositions() {
+            var vertical = document.getElementById('cdVertical').checked;
+            cdPos = vertical
+                ? { title: { x: 0.78, y: 0.32 }, author: { x: 0.14, y: 0.72 } }
+                : { title: { x: 0.5, y: 0.2 }, author: { x: 0.5, y: 0.88 } };
+        }
+
+        // ===== プレビュー上のドラッグ移動 =====
+        var cdDragging = null;   // 'title' | 'author'
+        var cdDragOffset = { dx: 0, dy: 0 };
+
+        function cdCanvasPoint(e) {
+            var cv = document.getElementById('cdCanvas');
+            var r = cv.getBoundingClientRect();
+            return { x: (e.clientX - r.left) * (cv.width / r.width), y: (e.clientY - r.top) * (cv.height / r.height) };
+        }
+
+        function cdHitBlock(p) {
+            var pad = 14;
+            var keys = ['title', 'author'];
+            for (var i = 0; i < keys.length; i++) {
+                var b = cdBlocks[keys[i]];
+                if (b && p.x >= b.x - pad && p.x <= b.x + b.w + pad && p.y >= b.y - pad && p.y <= b.y + b.h + pad) return keys[i];
+            }
+            return null;
+        }
+
+        function initCoverDrag() {
+            var cv = document.getElementById('cdCanvas');
+            if (!cv) return;
+            cv.addEventListener('pointerdown', function(e) {
+                var p = cdCanvasPoint(e);
+                var key = cdHitBlock(p);
+                if (!key) return;
+                cdDragging = key;
+                cdDragOffset.dx = cdPos[key].x * cv.width - p.x;
+                cdDragOffset.dy = cdPos[key].y * cv.height - p.y;
+                cv.setPointerCapture(e.pointerId);
+                e.preventDefault();
+            });
+            cv.addEventListener('pointermove', function(e) {
+                var p = cdCanvasPoint(e);
+                if (cdDragging) {
+                    cdPos[cdDragging] = {
+                        x: Math.min(1, Math.max(0, (p.x + cdDragOffset.dx) / cv.width)),
+                        y: Math.min(1, Math.max(0, (p.y + cdDragOffset.dy) / cv.height))
+                    };
+                    redrawCoverDesign();
+                } else {
+                    cv.style.cursor = cdHitBlock(p) ? 'move' : 'default';
+                }
+            });
+            ['pointerup', 'pointercancel'].forEach(function(ev) {
+                cv.addEventListener(ev, function() { cdDragging = null; });
+            });
+        }
 
         function updateCoverDesignerText() {
             document.getElementById('btnCoverDesign').textContent = getL(uiText.cdBtnDesign);
@@ -970,11 +1052,10 @@
             document.getElementById('cdLabelFont').textContent = getL(uiText.cdLabelFont);
             document.getElementById('cdOptSerif').textContent = getL(uiText.cdOptSerif);
             document.getElementById('cdOptSans').textContent = getL(uiText.cdOptSans);
-            document.getElementById('cdLabelSize').textContent = getL(uiText.cdLabelSize);
-            document.getElementById('cdLabelPosition').textContent = getL(uiText.cdLabelPosition);
-            document.getElementById('cdOptTop').textContent = getL(uiText.cdOptTop);
-            document.getElementById('cdOptCenter').textContent = getL(uiText.cdOptCenter);
-            document.getElementById('cdOptBottom').textContent = getL(uiText.cdOptBottom);
+            document.getElementById('cdLabelSize1').textContent = getL(uiText.cdLabelSize1);
+            document.getElementById('cdLabelSize2').textContent = getL(uiText.cdLabelSize2);
+            document.getElementById('cdDragHint').textContent = getL(uiText.cdDragHint);
+            document.getElementById('cdResetPosText').textContent = getL(uiText.cdResetPos);
             document.getElementById('cdLabelColor').textContent = getL(uiText.cdLabelColor);
             document.getElementById('cdLabelOutline').textContent = getL(uiText.cdLabelOutline);
             document.getElementById('cdApplyText').textContent = getL(uiText.cdApply);
@@ -983,9 +1064,13 @@
         document.addEventListener('languageChanged', updateCoverDesignerText);
         document.addEventListener('DOMContentLoaded', function() {
             updateCoverDesignerText();
+            buildCoverSwatches();
+            initCoverDrag();
             document.getElementById('coverImage').addEventListener('change', function() {
                 designedCoverFile = null; // 新しい画像を選んだらデザインをリセット
                 cdSourceImage = null;
+                cdSizesInited = false;
+                cdPos = null;
                 updateCoverDesignRow();
             });
         });
@@ -1034,6 +1119,9 @@
                     t2.value = u.penName || u.pen_name || u.username || u.name || '';
                 } catch (e) {}
             }
+            // 画像サイズに合わせて文字サイズの初期値とスライダー範囲を設定
+            if (!cdSizesInited) { initCoverSizes(); cdSizesInited = true; }
+            if (!cdPos) resetCoverPositions();
             document.getElementById('coverDesignerModal').style.display = 'block';
             // Canvas描画前にフォントを読み込んでおく
             try {
@@ -1061,8 +1149,27 @@
             return lum > 140 ? 'rgba(0,0,0,0.75)' : 'rgba(255,255,255,0.85)';
         }
 
+        // 画像サイズに応じて文字サイズの初期値とスライダー範囲を決める
+        function initCoverSizes() {
+            var maxSide = 1600;
+            var w = cdSourceImage.naturalWidth, h = cdSourceImage.naturalHeight;
+            var scale = Math.min(1, maxSide / Math.max(w, h));
+            var base = Math.min(Math.round(w * scale), Math.round(h * scale));
+            var min = Math.max(8, Math.round(base * 0.02));
+            var max = Math.round(base * 0.3);
+            var title = Math.round(base * 0.08);
+            var author = Math.max(min, Math.round(title * 0.45));
+            ['1', '2'].forEach(function(which) {
+                var range = document.getElementById('cdSize' + which + 'Range');
+                range.min = min; range.max = max;
+                var v = which === '1' ? title : author;
+                range.value = v;
+                document.getElementById('cdSize' + which).value = v;
+            });
+        }
+
         function redrawCoverDesign() {
-            if (!cdSourceImage) return;
+            if (!cdSourceImage || !cdPos) return;
             var canvas = document.getElementById('cdCanvas');
             var maxSide = 1600; // 出力画像の最大辺
             var w = cdSourceImage.naturalWidth, h = cdSourceImage.naturalHeight;
@@ -1076,18 +1183,12 @@
             var text2 = document.getElementById('cdText2').value.trim();
             var vertical = document.getElementById('cdVertical').checked;
             var fontFamily = document.getElementById('cdFont').value === 'sans' ? "'Noto Sans JP', sans-serif" : "'Noto Serif JP', serif";
-            var sizeKey = document.getElementById('cdSize').value;
+            var titleSize = parseInt(document.getElementById('cdSize1').value, 10) || 40;
+            var authorSize = parseInt(document.getElementById('cdSize2').value, 10) || 20;
             var color = document.getElementById('cdColor').value;
             var outline = document.getElementById('cdOutline').checked;
-            var position = document.getElementById('cdPosition').value;
 
-            // 縦書きでは位置指定は使わない（右上固定）
-            document.getElementById('cdPositionWrap').style.opacity = vertical ? '0.4' : '1';
-            document.getElementById('cdPosition').disabled = vertical;
-
-            var base = Math.min(w, h);
-            var titleSize = Math.round(base * (sizeKey === 'small' ? 0.055 : sizeKey === 'large' ? 0.11 : 0.08));
-            var authorSize = Math.max(12, Math.round(titleSize * 0.45));
+            var ROTATE_CHARS = 'ー―−‐-〜～…‥（）「」『』()[]｛｝{}＝=';
 
             function drawChar(ch, x, y, fontSize, rotate) {
                 ctx.font = '700 ' + fontSize + 'px ' + fontFamily;
@@ -1121,43 +1222,36 @@
                 ctx.fillText(line, centerX, topY);
             }
 
-            var ROTATE_CHARS = 'ー―−‐-〜～…‥（）「」『』()[]｛｝{}＝=';
-
-            if (vertical) {
-                // タイトル: 右上から縦に。改行ごとに右から左へ列を作る
-                var cols = text1.split('\n').filter(function(s) { return s.trim(); });
-                var step = titleSize * 1.08;
-                cols.forEach(function(colText, ci) {
-                    var x = w - w * 0.09 - ci * titleSize * 1.45;
-                    var chars = Array.from(colText.trim());
-                    chars.forEach(function(ch, i) {
-                        drawChar(ch, x, h * 0.06 + i * step + titleSize / 2, titleSize, ROTATE_CHARS.indexOf(ch) !== -1);
+            // テキストブロックを中心座標(pos)基準で描画し、当たり判定ボックスを返す
+            function drawTextBlock(textRaw, fontSize, pos) {
+                var lines = textRaw.split('\n').map(function(s) { return s.trim(); }).filter(Boolean);
+                if (!lines.length) return null;
+                var cx = pos.x * w, cy = pos.y * h;
+                if (vertical) {
+                    var step = fontSize * 1.08, colSpace = fontSize * 1.45;
+                    var maxChars = Math.max.apply(null, lines.map(function(l) { return Array.from(l).length; }));
+                    var blockW = colSpace * lines.length, blockH = step * maxChars;
+                    var top = cy - blockH / 2, right = cx + blockW / 2;
+                    lines.forEach(function(colText, ci) {
+                        var x = right - colSpace / 2 - ci * colSpace;
+                        Array.from(colText).forEach(function(ch, i) {
+                            drawChar(ch, x, top + i * step + step / 2, fontSize, ROTATE_CHARS.indexOf(ch) !== -1);
+                        });
                     });
-                });
-                // 著者名: 左下に縦書き
-                if (text2) {
-                    var aChars = Array.from(text2);
-                    var aStep = authorSize * 1.1;
-                    var startY = h * 0.94 - aChars.length * aStep;
-                    aChars.forEach(function(ch, i) {
-                        drawChar(ch, w * 0.09, startY + i * aStep + authorSize / 2, authorSize, ROTATE_CHARS.indexOf(ch) !== -1);
-                    });
+                    return { x: right - blockW, y: top, w: blockW, h: blockH };
+                } else {
+                    var lh = fontSize * 1.25;
+                    ctx.font = '700 ' + fontSize + 'px ' + fontFamily;
+                    var blockW = Math.max.apply(null, lines.map(function(l) { return ctx.measureText(l).width; }));
+                    var blockH = lh * lines.length;
+                    var top = cy - blockH / 2;
+                    lines.forEach(function(line, i) { drawHLine(line, cx, top + i * lh, fontSize); });
+                    return { x: cx - blockW / 2, y: top, w: blockW, h: blockH };
                 }
-            } else {
-                var lines = text1.split('\n').filter(function(s) { return s.trim(); });
-                var lh = titleSize * 1.25;
-                var titleH = lines.length * lh;
-                var authorLh = authorSize * 1.3;
-                var authorY = h - h * 0.06 - authorLh; // 著者名は常に下部中央
-                var y0;
-                if (position === 'top') y0 = h * 0.07;
-                else if (position === 'bottom') y0 = (text2 ? authorY - titleSize * 0.8 : h - h * 0.07) - titleH;
-                else y0 = (h - titleH) / 2;
-                lines.forEach(function(line, i) {
-                    drawHLine(line.trim(), w / 2, y0 + i * lh, titleSize);
-                });
-                if (text2) drawHLine(text2, w / 2, authorY, authorSize);
             }
+
+            cdBlocks.title = drawTextBlock(text1, titleSize, cdPos.title);
+            cdBlocks.author = text2 ? drawTextBlock(text2, authorSize, cdPos.author) : null;
         }
 
         function applyCoverDesign() {
