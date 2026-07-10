@@ -63,8 +63,9 @@ app.use(cors({
 // Stripe webhook needs raw body for signature verification
 app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Long manuscripts exceed the 100kb default; nginx caps requests at 15M
+app.use(express.json({ limit: '15mb' }));
+app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 
 // Static files for uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

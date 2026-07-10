@@ -181,7 +181,7 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="workLanguage" class="form-label"><span id="labelLanguage" data-i18n="upload.labelLanguage">Original Language</span> *</label>
-                                    <select class="form-select" id="workLanguage" required onchange="updateTranslationLanguages()">
+                                    <select class="form-select" id="workLanguage" required>
                                         <option value="" id="optSelectLang" data-i18n="upload.optSelectLang">Select language</option>
                                         <option value="en">English</option>
                                         <option value="ja">日本語</option>
@@ -1093,10 +1093,16 @@
                     },
                     body: JSON.stringify(pendingPayload)
                 });
-                var data = await resp.json();
+
+                // 413はサーバーの上限超え（レスポンスがJSONでない場合もある）
+                if (resp.status === 413) {
+                    throw new Error(getL({ en: 'The work data is too large to upload (max approx. 15MB).', ja: '作品データが大きすぎます（上限は約15MBです）。本文を分割するか、表紙画像を小さくしてください。' }));
+                }
+                var data = null;
+                try { data = await resp.json(); } catch (e) {}
 
                 if (!resp.ok) {
-                    throw new Error(data.error || data.message || ('HTTP ' + resp.status));
+                    throw new Error((data && (data.error || data.message)) || ('HTTP ' + resp.status));
                 }
 
                 // コラボレーター通知（メッセージ + メール）
