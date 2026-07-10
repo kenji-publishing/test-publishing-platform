@@ -455,6 +455,10 @@
                                 </div>
                             </div>
                             <div id="pvDesc" style="white-space:pre-wrap; border-top:1px solid var(--color-border, #e5ddd3); padding-top:1rem; margin-bottom:1.5rem;"></div>
+                            <div style="border-top:1px solid var(--color-border, #e5ddd3); padding-top:1rem; margin-bottom:1.5rem;">
+                                <h5 style="margin-bottom:0.75rem;"><i class="fas fa-book-open me-2" style="color:#8B7355;"></i><span id="pvContentHeading"></span></h5>
+                                <div id="pvContent" style="max-height:320px; overflow-y:auto; white-space:pre-wrap; font-family:'Noto Serif JP', Georgia, serif; font-size:1.05rem; line-height:2; background:var(--color-bg-main, #faf7f2); padding:1.25rem; border-radius:8px;"></div>
+                            </div>
                             <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
                                 <button type="button" class="btn" id="pvConfirmBtn" onclick="confirmPublish()" style="background:#8B7355; color:#fff;">
                                     <i class="fas fa-check me-1"></i><span id="pvConfirmText"></span>
@@ -950,6 +954,12 @@
                 ? getL({ en: 'Free', ja: '無料' })
                 : formatWorkPrice(p.price, p.currency);
             document.getElementById('pvDesc').textContent = p.description;
+
+            // 本文プレビュー（Reader風の表示で全文をスクロール確認できる）
+            document.getElementById('pvContentHeading').textContent = getL({
+                en: 'Contents preview', ja: '本文プレビュー' });
+            document.getElementById('pvContent').textContent = p.content ||
+                getL({ en: '(No text content)', ja: '（本文なし）' });
 
             // 表紙プレビュー（選択したファイルをその場で表示）
             var box = document.getElementById('pvCoverBox');
