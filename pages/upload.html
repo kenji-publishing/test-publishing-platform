@@ -128,7 +128,7 @@
                             </div>
                             <div class="mb-3 mt-3">
                                 <label class="form-label" id="labelTranslationLangUpload" data-i18n="upload.labelTranslationLangUpload">Translation Language *</label>
-                                <select class="form-select" id="translationLangUpload" required>
+                                <select class="form-select" id="translationLangUpload">
                                     <option value="">-- Select --</option>
                                     <option value="en">English</option>
                                     <option value="ja">日本語</option>
@@ -996,20 +996,17 @@
                 mobileSelector.addEventListener('change', function() {
                     desktopSelector.value = this.value;
                     if (typeof changeLanguage === 'function') changeLanguage(this.value);
-                    updateUIText();
                     updatePageText();
                 });
 
                 desktopSelector.addEventListener('change', function() {
                     mobileSelector.value = this.value;
-                    updateUIText();
                     updatePageText();
                 });
             }
 
-            updateUIText();
             updatePageText();
-            setTimeout(function() { updateUIText(); updatePageText(); }, 100);
+            setTimeout(function() { updatePageText(); }, 100);
             // Close user dropdown on outside click
             document.addEventListener('click', function(e) {
                 if (!e.target.closest('.user-dropdown')) {
@@ -1032,7 +1029,6 @@
 
             // Language changed event
             document.addEventListener('languageChanged', function() {
-                updateUIText();
                 updatePageText();
             });
 
