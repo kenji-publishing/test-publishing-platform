@@ -211,6 +211,31 @@ function formatWorkPrice(price, currency) {
     return symbol + (zeroDecimal.indexOf(cur) >= 0 ? Math.round(n).toLocaleString() : n.toFixed(2));
 }
 
+// ========== AI disclosure badge (multi-language, shared) ==========
+// 本文と表紙のAI利用をそれぞれ表示（例: 本文: 部分的AI / 表紙: AI生成）
+
+function getAiBadgeLabel(textUsage, coverUsage) {
+    var levelLabel = function(u) {
+        if (u === 'generated' || u === 'full_ai') {
+            return getL({ en: 'AI-generated', ja: 'AI生成', zh: 'AI生成', es: 'generado por IA', fr: 'généré par IA', de: 'KI-generiert', ko: 'AI 생성', ar: 'مولد بالذكاء الاصطناعي', pt: 'gerado por IA', it: 'generato da IA' });
+        }
+        if (u === 'assisted') {
+            return getL({ en: 'partly AI', ja: '部分的AI', zh: '部分AI', es: 'parcialmente IA', fr: 'partiellement IA', de: 'teilweise KI', ko: '부분적 AI', ar: 'ذكاء اصطناعي جزئي', pt: 'parcialmente IA', it: 'parzialmente IA' });
+        }
+        return null;
+    };
+    var t = levelLabel(textUsage);
+    var c = (coverUsage === 'na') ? null : levelLabel(coverUsage);
+    var parts = [];
+    if (t) {
+        parts.push(getL({ en: 'Text', ja: '本文', zh: '正文', es: 'Texto', fr: 'Texte', de: 'Text', ko: '본문', ar: 'النص', pt: 'Texto', it: 'Testo' }) + ': ' + t);
+    }
+    if (c) {
+        parts.push(getL({ en: 'Cover', ja: '表紙', zh: '封面', es: 'Portada', fr: 'Couverture', de: 'Cover', ko: '표지', ar: 'الغلاف', pt: 'Capa', it: 'Copertina' }) + ': ' + c);
+    }
+    return parts.length ? parts.join(' / ') : null;
+}
+
 // ========== Path prefix auto-detection ==========
 
 function detectPathPrefix() {
