@@ -381,8 +381,9 @@
             document.getElementById('workTitle').textContent=workData.title;
             document.getElementById('workAuthor').textContent=(window.i18n ? i18n.t('checkout.by') : 'by')+' '+workData.author;
             document.getElementById('workGenre').textContent=workData.genre;
-            document.getElementById('subtotal').textContent='$'+workData.price.toFixed(2);
-            document.getElementById('total').textContent='$'+workData.price.toFixed(2);
+            var priceText = (typeof formatPrice === 'function') ? formatPrice(workData.price, workData.currency) : (workData.currency + ' ' + workData.price);
+            document.getElementById('subtotal').textContent = priceText;
+            document.getElementById('total').textContent = priceText;
         }
 
         function showCheckoutError(msgJa, msgEn){
@@ -411,12 +412,13 @@
                     title: d.work.title || '',
                     author: d.work.author_name || '',
                     genre: d.work.genre || '',
-                    price: parseFloat(d.work.price) || 0
+                    price: parseFloat(d.work.price) || 0,
+                    currency: d.work.currency || 'USD'
                 };
             } catch (e) {
                 if (window.DEMO_MODE) {
                     // Demo only: sample data for trying out the page offline
-                    workData = { id: workId||'sample-123', title:'Midnight Stories', author:'J.A. Writer', genre:'Fiction', price:9.99 };
+                    workData = { id: workId||'sample-123', title:'Midnight Stories', author:'J.A. Writer', genre:'Fiction', price:9.99, currency:'USD' };
                 } else {
                     console.error('Failed to load work details:', e);
                     showCheckoutError(

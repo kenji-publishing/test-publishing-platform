@@ -236,6 +236,18 @@ function getAiBadgeLabel(textUsage, coverUsage) {
     return parts.length ? parts.join(' / ') : null;
 }
 
+// ========== Price formatting (multi-currency) ==========
+
+// 通貨記号付きで価格を整形（JPY/KRWは小数なし）。全ページ共通で使う
+function formatPrice(price, currency) {
+    var cur = (currency || 'USD').toUpperCase();
+    var SYMBOLS = { USD: '$', JPY: '¥', EUR: '€', GBP: '£', KRW: '₩', CNY: '¥', BRL: 'R$', SAR: 'SAR ' };
+    var ZERO_DECIMAL = ['JPY', 'KRW'];
+    var n = parseFloat(price) || 0;
+    var sym = SYMBOLS[cur] || (cur + ' ');
+    return sym + (ZERO_DECIMAL.indexOf(cur) !== -1 ? Math.round(n).toLocaleString() : n.toFixed(2));
+}
+
 // ========== Path prefix auto-detection ==========
 
 function detectPathPrefix() {

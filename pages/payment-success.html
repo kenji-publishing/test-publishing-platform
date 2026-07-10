@@ -65,7 +65,7 @@
                         <h6 class="text-muted mb-3" data-i18n="payment.orderDetails">Order Details</h6>
                         <div class="d-flex justify-content-between mb-2"><span data-i18n="payment.orderId">Order ID:</span><strong id="orderId">Loading...</strong></div>
                         <div class="d-flex justify-content-between mb-2"><span data-i18n="payment.item">Item:</span><strong id="itemTitle">Digital Content</strong></div>
-                        <div class="d-flex justify-content-between mb-2"><span data-i18n="payment.amountPaid">Amount Paid:</span><strong id="amountPaid" class="text-success">$0.00</strong></div>
+                        <div class="d-flex justify-content-between mb-2"><span data-i18n="payment.amountPaid">Amount Paid:</span><strong id="amountPaid" class="text-success">—</strong></div>
                         <div class="d-flex justify-content-between"><span data-i18n="payment.date">Date:</span><strong id="purchaseDate">-</strong></div>
                     </div>
                     <div class="alert alert-info text-start">
@@ -110,6 +110,7 @@
             const workId = p.get('work_id');
             const title = p.get('title') || 'Digital Content';
             const amount = p.get('amount') || '9.99';
+            const currency = p.get('currency') || 'USD';
 
             const orderId = sessionId
                 ? 'PUB-' + sessionId.substring(0, 8).toUpperCase()
@@ -117,7 +118,7 @@
 
             document.getElementById('orderId').textContent = orderId;
             document.getElementById('itemTitle').textContent = decodeURIComponent(title);
-            document.getElementById('amountPaid').textContent = '$' + amount;
+            document.getElementById('amountPaid').textContent = (typeof formatPrice === 'function') ? formatPrice(amount, currency) : (currency + ' ' + amount);
             document.getElementById('purchaseDate').textContent = new Date().toLocaleDateString();
 
             // 購入した作品をライブラリに自動追加
