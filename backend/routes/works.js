@@ -69,6 +69,27 @@ router.get('/my', authenticate, async (req, res) => {
 });
 
 /**
+ * GET /api/works/my/:workId
+ * Get one of the authenticated user's own works, full row (content
+ * included, any status) — used by the upload page's edit mode.
+ */
+router.get('/my/:workId', authenticate, async (req, res) => {
+    try {
+        const result = await db.query(
+            `SELECT * FROM works WHERE work_id = $1 AND author_id = $2`,
+            [req.params.workId, req.user.userId]
+        );
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Work not found' });
+        }
+        res.json({ success: true, work: result.rows[0] });
+    } catch (error) {
+        console.error('Get my work error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
  * GET /api/works
  * Get all published works (public)
  */
@@ -494,12 +515,18 @@ router.put('/:workId', authenticate, async (req, res) => {
         const {
             title, description, synopsis, content, genre, tags,
             price, status, isFree, coverImage, isAdult,
-            isAiGenerated, aiToolsUsed, previewPercent, currency
+            isAiGenerated, aiToolsUsed, previewPercent, currency,
+            aiTextUsage, aiCoverUsage, aiTranslationUsage
         } = req.body;
 
         const SUPPORTED_CURRENCIES = ['USD', 'JPY', 'EUR', 'GBP', 'KRW', 'CNY', 'BRL', 'SAR'];
         const workCurrency = SUPPORTED_CURRENCIES.includes((currency || '').toUpperCase())
             ? currency.toUpperCase() : null;
+        const AI_LEVELS = ['none', 'assisted', 'generated', 'full_ai', 'na'];
+        const aiLevel = (v) => AI_LEVELS.includes(v) ? v : null; // null = keep existing
+        const aiText = aiLevel(aiTextUsage);
+        const aiCover = aiLevel(aiCoverUsage);
+        const aiTranslation = aiLevel(aiTranslationUsage);
 
         // Calculate word count if content changed
         let wordCount = null;
@@ -528,6 +555,9 @@ router.put('/:workId', authenticate, async (req, res) => {
                  word_count = COALESCE($15, word_count),
                  page_count = COALESCE($16, page_count),
                  currency = COALESCE($18, currency),
+                 ai_text_usage = COALESCE($19, ai_text_usage),
+                 ai_cover_usage = COALESCE($20, ai_cover_usage),
+                 ai_translation_usage = COALESCE($21, ai_translation_usage),
                  updated_at = CURRENT_TIMESTAMP,
                  published_at = CASE
                      WHEN $8 = 'published' AND published_at IS NULL THEN CURRENT_TIMESTAMP
@@ -539,7 +569,8 @@ router.put('/:workId', authenticate, async (req, res) => {
                 title, description, synopsis, content, genre, tags,
                 price, status, isFree, coverImage, isAdult,
                 isAiGenerated, aiToolsUsed, previewPercent,
-                wordCount, pageCount, req.params.workId, workCurrency
+                wordCount, pageCount, req.params.workId, workCurrency,
+                aiText, aiCover, aiTranslation
             ]
         );
 

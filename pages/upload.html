@@ -862,6 +862,66 @@
         var pendingPayload = null;
         var pendingCoverFile = null;
 
+        // ========== 編集モード（my-worksの編集ボタンから ?edit=<id> で開く） ==========
+        var editWorkId = new URLSearchParams(window.location.search).get('edit');
+        var editWork = null;
+
+        async function initEditMode() {
+            if (!editWorkId) return;
+            var token = localStorage.getItem('token');
+            if (!token) { window.location.href = 'login.html'; return; }
+            try {
+                var resp = await fetch((window.API_ORIGIN || '') + '/api/works/my/' + encodeURIComponent(editWorkId), {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                var data = await resp.json();
+                if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
+                editWork = data.work;
+
+                // 既存の内容をフォームに反映
+                document.getElementById('workTitle').value = editWork.title || '';
+                document.getElementById('workDescription').value = editWork.description || '';
+                if (editWork.language) document.getElementById('workLanguage').value = editWork.language;
+                if (editWork.genre) document.getElementById('workGenre').value = editWork.genre;
+                document.getElementById('tags').value = (editWork.tags || []).join(', ');
+                document.getElementById('contentType').value = editWork.content_type || 'text';
+
+                document.getElementById('isFree').checked = !!editWork.is_free;
+                if (typeof togglePriceInput === 'function') { togglePriceInput(); }
+                var cs = document.getElementById('currencySelect');
+                if (cs && editWork.currency) {
+                    cs.value = editWork.currency;
+                    cs.dispatchEvent(new Event('change'));
+                }
+                if (!editWork.is_free) {
+                    document.getElementById('customPrice').value = Number(editWork.price) || '';
+                }
+
+                var setSel = function(id, v) { var el = document.getElementById(id); if (el && v) el.value = v; };
+                setSel('aiTextUsage', editWork.ai_text_usage);
+                setSel('aiCoverUsage', editWork.ai_cover_usage);
+                setSel('aiTranslationUsage', editWork.ai_translation_usage);
+
+                // ボタン表記を「更新」に変更
+                var btn = document.getElementById('btnPublish');
+                if (btn) {
+                    btn.textContent = getL({ en: 'Update Work', ja: '作品を更新', zh: '更新作品', es: 'Actualizar obra', fr: 'Mettre à jour', de: 'Werk aktualisieren', ko: '작품 업데이트', ar: 'تحديث العمل', pt: 'Atualizar obra', it: 'Aggiorna opera' });
+                }
+                // 原稿・表紙は「新しいファイルを付けた時だけ差し替え」の案内
+                var dragText = document.getElementById('uploadDragText');
+                if (dragText) {
+                    dragText.textContent = getL({
+                        en: 'Existing manuscript is kept. Attach a new .txt only to replace it.',
+                        ja: '現在の原稿は保持されます。差し替える場合のみ新しい .txt を添付してください。'
+                    });
+                }
+            } catch (err) {
+                alert(getL({ en: 'Failed to load work for editing: ', ja: '編集用データの読み込みに失敗しました: ' }) + err.message);
+                window.location.href = 'my-works.html';
+            }
+        }
+        document.addEventListener('DOMContentLoaded', initEditMode);
+
         // Step 1: 「公開」ボタン → 入力内容を集めてプレビューを表示（まだ送信しない）
         document.getElementById('uploadForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -892,7 +952,7 @@
                         parts.push(await readFileAsText(txtFiles[i]));
                     }
                     content = parts.join('\n\n');
-                } else if (contentType === 'text') {
+                } else if (contentType === 'text' && !editWorkId) {
                     alert(getL({
                         en: 'Please attach your manuscript as a .txt file (other formats coming soon).',
                         ja: '原稿を .txt ファイルで添付してください（他の形式は今後対応予定です）。'
@@ -905,7 +965,7 @@
                     title: workTitle,
                     description: document.getElementById('workDescription').value || '',
                     synopsis: document.getElementById('workDescription').value || '',
-                    content: content,
+                    content: content || (editWorkId ? null : content), // 編集時: nullなら既存の原稿を維持
                     originalLanguage: lang,
                     language: lang,
                     contentType: contentType,
@@ -916,7 +976,7 @@
                     currency: currency,
                     isFree: isFree,
                     coverImage: null,
-                    status: 'published',
+                    status: editWorkId ? (editWork && editWork.status) || 'published' : 'published',
                     aiTextUsage: (document.getElementById('aiTextUsage') || {}).value || 'none',
                     aiCoverUsage: (document.getElementById('aiCoverUsage') || {}).value || 'none',
                     aiTranslationUsage: (document.getElementById('aiTranslationUsage') || {}).value || 'none'
@@ -962,6 +1022,7 @@
             document.getElementById('pvContentHeading').textContent = getL({
                 en: 'Contents preview', ja: '本文プレビュー' });
             document.getElementById('pvContent').textContent = p.content ||
+                (editWork && editWork.content) ||
                 getL({ en: '(No text content)', ja: '（本文なし）' });
 
             // AI利用表示（読者に見える形と同じラベル）
@@ -977,14 +1038,17 @@
                 priceEl.parentNode.appendChild(badge);
             }
 
-            // 表紙プレビュー（選択したファイルをその場で表示）
+            // 表紙プレビュー（新ファイル > 既存の表紙 > アイコン の順で表示）
             var box = document.getElementById('pvCoverBox');
+            var existingCover = editWork ? (editWork.cover_image || editWork.cover_image_url) : null;
             if (pendingCoverFile) {
                 var reader = new FileReader();
                 reader.onload = function(e) {
                     box.innerHTML = '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover;">';
                 };
                 reader.readAsDataURL(pendingCoverFile);
+            } else if (existingCover) {
+                box.innerHTML = '<img src="' + existingCover + '" style="width:100%;height:100%;object-fit:cover;">';
             } else {
                 box.innerHTML = '<i class="fas fa-book" style="font-size:3rem; color:#c9b8a3;"></i>';
             }
@@ -1033,8 +1097,10 @@
                     if (coverResp.ok && coverData.url) { pendingPayload.coverImage = coverData.url; }
                 }
 
-                var resp = await fetch((window.API_ORIGIN || '') + '/api/works', {
-                    method: 'POST',
+                // 新規作成はPOST、編集モードはPUT（既存作品の更新）
+                var apiUrl = (window.API_ORIGIN || '') + '/api/works' + (editWorkId ? '/' + encodeURIComponent(editWorkId) : '');
+                var resp = await fetch(apiUrl, {
+                    method: editWorkId ? 'PUT' : 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': 'Bearer ' + token
