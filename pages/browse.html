@@ -424,6 +424,9 @@
                         rating: w.rating_average != null ? Number(w.rating_average) : 0,
                         category: w.genre || 'general',
                         language: w.language || w.original_language || 'en',
+                        cover: w.cover_image || w.cover_image_url || null,
+                        aiText: w.ai_text_usage || 'none',
+                        aiCover: w.ai_cover_usage || 'none',
                         tags: [],
                         description: w.description || '',
                         reviews: ''
@@ -458,7 +461,15 @@ function updateAllText() {
             
             grid.innerHTML = works.map(work => `
                 <div class="work-card" onclick="viewWork('${work.id}')">
-                    <div class="work-cover"><i class="fas fa-book"></i></div>
+                    <div class="work-cover" style="position:relative;">
+                        ${work.cover
+                            ? '<img src="' + work.cover + '" alt="" style="width:100%;height:100%;object-fit:cover;">'
+                            : '<i class="fas fa-book"></i>'}
+                        ${(function() {
+                            var l = getAiBadgeLabel(work.aiText, work.aiCover);
+                            return l ? '<span style="position:absolute; bottom:6px; left:6px; right:6px; text-align:center; padding:0.2rem 0.4rem; border-radius:6px; font-size:0.7rem; font-weight:600; background:rgba(40,50,80,0.85); color:#fff;"><i class=\'fas fa-robot me-1\'></i>' + l + '</span>' : '';
+                        })()}
+                    </div>
                     <div class="work-info">
                         <div class="work-title">${escapeHtml(work.title)}</div>
                         <div class="work-author">${getL(uiText.by)} ${escapeHtml(work.author)}</div>
@@ -542,6 +553,22 @@ function updateAllText() {
 
         function viewWork(id) {
             window.location.href = `work-detail.html?id=${id}`;
+        }
+
+        // AI利用バッジのラベル決定（本文AI > 部分アシスト > 表紙のみ）
+        function getAiBadgeLabel(textUsage, coverUsage) {
+            var t = textUsage || 'none';
+            var c = coverUsage || 'none';
+            if (t === 'generated' || t === 'full_ai') {
+                return getL({ en: 'AI-Generated', ja: 'AI生成', zh: 'AI生成', es: 'Generado por IA', fr: 'Généré par IA', de: 'KI-generiert', ko: 'AI 생성', ar: 'مولد بالذكاء الاصطناعي', pt: 'Gerado por IA', it: 'Generato da IA' });
+            }
+            if (t === 'assisted') {
+                return getL({ en: 'Partially AI-Assisted', ja: '部分的AIアシスト', zh: '部分AI辅助', es: 'Parcialmente asistido por IA', fr: 'Partiellement assisté par IA', de: 'Teilweise KI-unterstützt', ko: '부분적 AI 어시스트', ar: 'بمساعدة جزئية من الذكاء الاصطناعي', pt: 'Parcialmente assistido por IA', it: 'Parzialmente assistito da IA' });
+            }
+            if (c !== 'none' && c !== 'na') {
+                return getL({ en: 'AI-Assisted Cover', ja: '表紙のみAIアシスト', zh: '仅封面AI辅助', es: 'Portada asistida por IA', fr: 'Couverture assistée par IA', de: 'KI-unterstütztes Cover', ko: '표지만 AI 어시스트', ar: 'غلاف بمساعدة الذكاء الاصطناعي', pt: 'Capa assistida por IA', it: 'Copertina assistita da IA' });
+            }
+            return null;
         }
 
         function escapeHtml(text) {

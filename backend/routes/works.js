@@ -55,6 +55,7 @@ router.get('/my', authenticate, async (req, res) => {
             `SELECT work_id, title, status, cover_image, cover_image_url,
                     view_count, like_count, comment_count, page_count,
                     price, currency, is_free, language, original_language,
+                    ai_text_usage, ai_cover_usage,
                     created_at, updated_at, published_at
              FROM works
              WHERE author_id = $1 AND status != 'deleted'
