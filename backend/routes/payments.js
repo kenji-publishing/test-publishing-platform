@@ -11,11 +11,14 @@ const db = require('../config/database');
 // Stripe initialization
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-// Revenue distribution percentages
+// Revenue distribution percentages.
+// Purchases are currently always of the base work with no translator/editor
+// attached (collaborator relationships are not yet modeled per purchase), so
+// the author receives everything except the platform share (70/30).
+// When per-work translator (20) / editor (10) splits are implemented, derive
+// the author share as 100 - platform - translator - editor per work.
 const REVENUE_SPLIT = {
-  author: 40,
-  translator: 20,
-  editor: 10,
+  author: 70,
   platform: 30
 };
 
