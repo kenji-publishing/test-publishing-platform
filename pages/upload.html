@@ -434,6 +434,35 @@
                             </button>
                         </div>
                     </form>
+
+                    <!-- 公開前プレビューモーダル -->
+                    <div id="previewModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:2000; overflow-y:auto; padding:2rem 1rem;">
+                        <div style="max-width:640px; margin:0 auto; background:var(--color-bg-card, #fff); border-radius:12px; padding:2rem;">
+                            <h3 style="margin-bottom:0.5rem;"><i class="fas fa-eye me-2" style="color:#8B7355;"></i><span id="pvHeading"></span></h3>
+                            <p id="pvNote" class="text-muted" style="font-size:0.9rem;"></p>
+                            <div style="display:flex; gap:1.5rem; flex-wrap:wrap; margin:1rem 0;">
+                                <div id="pvCoverBox" style="width:160px; height:230px; background:var(--color-bg-main, #f5f0eb); border-radius:8px; display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0;">
+                                    <i class="fas fa-book" style="font-size:3rem; color:#c9b8a3;"></i>
+                                </div>
+                                <div style="flex:1; min-width:220px;">
+                                    <h2 id="pvTitle" style="font-size:1.4rem; margin-bottom:0.3rem;"></h2>
+                                    <div id="pvAuthor" class="text-muted" style="margin-bottom:0.5rem;"></div>
+                                    <div style="margin-bottom:0.5rem;">
+                                        <span id="pvGenre" class="badge" style="background:rgba(139,115,85,.15); color:#8B7355;"></span>
+                                        <span id="pvLang" class="badge" style="background:rgba(139,115,85,.15); color:#8B7355;"></span>
+                                    </div>
+                                    <div id="pvPrice" style="font-size:1.3rem; font-weight:700; color:#8B7355;"></div>
+                                </div>
+                            </div>
+                            <div id="pvDesc" style="white-space:pre-wrap; border-top:1px solid var(--color-border, #e5ddd3); padding-top:1rem; margin-bottom:1.5rem;"></div>
+                            <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+                                <button type="button" class="btn" id="pvConfirmBtn" onclick="confirmPublish()" style="background:#8B7355; color:#fff;">
+                                    <i class="fas fa-check me-1"></i><span id="pvConfirmText"></span>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="closePreview()"><span id="pvBackText"></span></button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -815,7 +844,7 @@
         });
 
         // Form submission
-        // ---- Real submission: POST the work to the backend API ----
+        // ---- 公開フロー: フォーム確認 → プレビュー表示 → 確認後にAPIへ送信 ----
 
         function readFileAsText(file) {
             return new Promise(function(resolve, reject) {
@@ -826,6 +855,10 @@
             });
         }
 
+        var pendingPayload = null;
+        var pendingCoverFile = null;
+
+        // Step 1: 「公開」ボタン → 入力内容を集めてプレビューを表示（まだ送信しない）
         document.getElementById('uploadForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -835,9 +868,6 @@
                 window.location.href = 'login.html';
                 return;
             }
-
-            var btn = document.getElementById('btnPublish');
-            if (btn) { btn.disabled = true; }
 
             try {
                 var workTitle = document.getElementById('workTitle').value || 'Untitled';
@@ -863,27 +893,11 @@
                         en: 'Please attach your manuscript as a .txt file (other formats coming soon).',
                         ja: '原稿を .txt ファイルで添付してください（他の形式は今後対応予定です）。'
                     }));
-                    if (btn) { btn.disabled = false; }
                     return;
                 }
 
-                // Cover image: upload first, get back its URL
-                var coverUrl = null;
-                var coverInput = document.getElementById('coverImage');
-                if (coverInput && coverInput.files && coverInput.files[0]) {
-                    var fd = new FormData();
-                    fd.append('cover', coverInput.files[0]);
-                    var coverResp = await fetch((window.API_ORIGIN || '') + '/api/works/upload-cover', {
-                        method: 'POST',
-                        headers: { 'Authorization': 'Bearer ' + token },
-                        body: fd
-                    });
-                    var coverData = await coverResp.json();
-                    if (coverResp.ok && coverData.url) { coverUrl = coverData.url; }
-                }
-
                 var lang = document.getElementById('workLanguage').value || 'en';
-                var payload = {
+                pendingPayload = {
                     title: workTitle,
                     description: document.getElementById('workDescription').value || '',
                     synopsis: document.getElementById('workDescription').value || '',
@@ -897,9 +911,85 @@
                     price: isFree ? 0 : priceVal,
                     currency: currency,
                     isFree: isFree,
-                    coverImage: coverUrl,
+                    coverImage: null,
                     status: 'published'
                 };
+
+                var coverInput = document.getElementById('coverImage');
+                pendingCoverFile = (coverInput && coverInput.files && coverInput.files[0]) || null;
+
+                showPreview();
+            } catch (err) {
+                alert(getL({ en: 'Failed to build preview: ', ja: 'プレビューの作成に失敗しました: ' }) + err.message);
+            }
+        });
+
+        // Step 2: 読者から見た形でプレビューを表示
+        function showPreview() {
+            var p = pendingPayload;
+            if (!p) return;
+
+            document.getElementById('pvHeading').textContent = getL({
+                en: 'Preview — how readers will see it', ja: 'プレビュー — 読者からの見え方' });
+            document.getElementById('pvNote').textContent = getL({
+                en: 'Nothing has been published yet. Check the details below, then confirm.',
+                ja: 'まだ公開されていません。以下の内容を確認してから公開してください。' });
+            document.getElementById('pvTitle').textContent = p.title;
+
+            var authorName = '';
+            try {
+                var u = JSON.parse(localStorage.getItem('user') || '{}');
+                authorName = u.penName || u.pen_name ||
+                    ((u.firstName || u.first_name || '') + ' ' + (u.lastName || u.last_name || '')).trim();
+            } catch (e) {}
+            document.getElementById('pvAuthor').textContent = authorName ? (getL(uiText.by || { en: 'by' }) + ' ' + authorName) : '';
+
+            document.getElementById('pvGenre').textContent = p.genre;
+            document.getElementById('pvLang').textContent = p.language.toUpperCase();
+            document.getElementById('pvPrice').textContent = p.isFree
+                ? getL({ en: 'Free', ja: '無料' })
+                : formatWorkPrice(p.price, p.currency);
+            document.getElementById('pvDesc').textContent = p.description;
+
+            // 表紙プレビュー（選択したファイルをその場で表示）
+            var box = document.getElementById('pvCoverBox');
+            if (pendingCoverFile) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    box.innerHTML = '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover;">';
+                };
+                reader.readAsDataURL(pendingCoverFile);
+            } else {
+                box.innerHTML = '<i class="fas fa-book" style="font-size:3rem; color:#c9b8a3;"></i>';
+            }
+
+            document.getElementById('pvConfirmText').textContent = getL({ en: 'Publish now', ja: 'この内容で公開する' });
+            document.getElementById('pvBackText').textContent = getL({ en: 'Back to editing', ja: '編集に戻る' });
+            document.getElementById('previewModal').style.display = 'block';
+        }
+
+        function closePreview() {
+            document.getElementById('previewModal').style.display = 'none';
+        }
+
+        // Step 3: 確認後に本当に公開（表紙アップロード → 作品作成）
+        async function confirmPublish() {
+            var token = localStorage.getItem('token');
+            var btn = document.getElementById('pvConfirmBtn');
+            if (btn) { btn.disabled = true; }
+
+            try {
+                if (pendingCoverFile) {
+                    var fd = new FormData();
+                    fd.append('cover', pendingCoverFile);
+                    var coverResp = await fetch((window.API_ORIGIN || '') + '/api/works/upload-cover', {
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + token },
+                        body: fd
+                    });
+                    var coverData = await coverResp.json();
+                    if (coverResp.ok && coverData.url) { pendingPayload.coverImage = coverData.url; }
+                }
 
                 var resp = await fetch((window.API_ORIGIN || '') + '/api/works', {
                     method: 'POST',
@@ -907,7 +997,7 @@
                         'Content-Type': 'application/json',
                         'Authorization': 'Bearer ' + token
                     },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(pendingPayload)
                 });
                 var data = await resp.json();
 
@@ -916,7 +1006,7 @@
                 }
 
                 // コラボレーター通知（メッセージ + メール）
-                notifyCollaborators(workTitle);
+                notifyCollaborators(pendingPayload.title);
                 alert(getL(uiText.alertSuccess));
                 window.location.href = 'my-works.html';
             } catch (err) {
@@ -924,7 +1014,7 @@
             } finally {
                 if (btn) { btn.disabled = false; }
             }
-        });
+        }
 
         // コラボレーターにメッセージ＋メール通知を送信
         function notifyCollaborators(workTitle) {
