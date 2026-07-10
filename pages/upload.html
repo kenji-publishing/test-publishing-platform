@@ -916,7 +916,10 @@
                     currency: currency,
                     isFree: isFree,
                     coverImage: null,
-                    status: 'published'
+                    status: 'published',
+                    aiTextUsage: (document.getElementById('aiTextUsage') || {}).value || 'none',
+                    aiCoverUsage: (document.getElementById('aiCoverUsage') || {}).value || 'none',
+                    aiTranslationUsage: (document.getElementById('aiTranslationUsage') || {}).value || 'none'
                 };
 
                 var coverInput = document.getElementById('coverImage');
@@ -961,6 +964,19 @@
             document.getElementById('pvContent').textContent = p.content ||
                 getL({ en: '(No text content)', ja: '（本文なし）' });
 
+            // AI利用表示（読者に見える形と同じラベル）
+            var aiLabel = getAiBadgeLabel(p.aiTextUsage, p.aiCoverUsage);
+            var priceEl = document.getElementById('pvPrice');
+            var oldBadge = document.getElementById('pvAiBadge');
+            if (oldBadge) oldBadge.remove();
+            if (aiLabel) {
+                var badge = document.createElement('div');
+                badge.id = 'pvAiBadge';
+                badge.style.cssText = 'display:inline-block; margin-top:0.5rem; padding:0.25rem 0.6rem; border-radius:6px; font-size:0.8rem; background:rgba(90,110,160,0.15); color:#4a5a80;';
+                badge.innerHTML = '<i class="fas fa-robot me-1"></i>' + aiLabel;
+                priceEl.parentNode.appendChild(badge);
+            }
+
             // 表紙プレビュー（選択したファイルをその場で表示）
             var box = document.getElementById('pvCoverBox');
             if (pendingCoverFile) {
@@ -980,6 +996,22 @@
 
         function closePreview() {
             document.getElementById('previewModal').style.display = 'none';
+        }
+
+        // AI利用バッジのラベル決定（本文AI > 部分アシスト > 表紙のみ）
+        function getAiBadgeLabel(textUsage, coverUsage) {
+            var t = textUsage || 'none';
+            var c = coverUsage || 'none';
+            if (t === 'generated' || t === 'full_ai') {
+                return getL({ en: 'AI-Generated', ja: 'AI生成', zh: 'AI生成', es: 'Generado por IA', fr: 'Généré par IA', de: 'KI-generiert', ko: 'AI 생성', ar: 'مولد بالذكاء الاصطناعي', pt: 'Gerado por IA', it: 'Generato da IA' });
+            }
+            if (t === 'assisted') {
+                return getL({ en: 'Partially AI-Assisted', ja: '部分的AIアシスト', zh: '部分AI辅助', es: 'Parcialmente asistido por IA', fr: 'Partiellement assisté par IA', de: 'Teilweise KI-unterstützt', ko: '부분적 AI 어시스트', ar: 'بمساعدة جزئية من الذكاء الاصطناعي', pt: 'Parcialmente assistido por IA', it: 'Parzialmente assistito da IA' });
+            }
+            if (c !== 'none' && c !== 'na') {
+                return getL({ en: 'AI-Assisted Cover', ja: '表紙のみAIアシスト', zh: '仅封面AI辅助', es: 'Portada asistida por IA', fr: 'Couverture assistée par IA', de: 'KI-unterstütztes Cover', ko: '표지만 AI 어시스트', ar: 'غلاف بمساعدة الذكاء الاصطناعي', pt: 'Capa assistida por IA', it: 'Copertina assistita da IA' });
+            }
+            return null;
         }
 
         // Step 3: 確認後に本当に公開（表紙アップロード → 作品作成）

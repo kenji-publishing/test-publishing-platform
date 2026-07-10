@@ -57,7 +57,7 @@ router.get('/my', authenticate, async (req, res) => {
                     price, currency, is_free, language, original_language,
                     created_at, updated_at, published_at
              FROM works
-             WHERE author_id = $1
+             WHERE author_id = $1 AND status != 'deleted'
              ORDER BY updated_at DESC`,
             [req.user.userId]
         );
@@ -87,6 +87,7 @@ router.get('/', async (req, res) => {
                    w.view_count, w.like_count, w.comment_count,
                    w.rating_average, w.rating_count, w.published_at,
                    w.is_adult, w.is_ai_generated, w.ai_tools_used,
+                   w.ai_text_usage, w.ai_cover_usage, w.ai_translation_usage,
                    u.user_id as author_id, u.pen_name as author_name,
                    u.first_name, u.last_name
             FROM works w
@@ -396,7 +397,10 @@ router.post('/', authenticate, async (req, res) => {
             aiToolsUsed,
             previewPercent,
             currency,
-            status
+            status,
+            aiTextUsage,
+            aiCoverUsage,
+            aiTranslationUsage
         } = req.body;
 
         // Whitelist currency and publish status
@@ -406,6 +410,12 @@ router.post('/', authenticate, async (req, res) => {
         const workStatus = status === 'published' ? 'published' : 'draft';
         // content_type is a DB enum: only 'text' | 'manga' | 'art'
         const workContentType = ['text', 'manga', 'art'].includes(contentType) ? contentType : 'text';
+        // AI disclosure levels
+        const AI_LEVELS = ['none', 'assisted', 'generated', 'full_ai', 'na'];
+        const aiLevel = (v) => AI_LEVELS.includes(v) ? v : 'none';
+        const aiText = aiLevel(aiTextUsage);
+        const aiCover = aiLevel(aiCoverUsage);
+        const aiTranslation = aiLevel(aiTranslationUsage);
 
         // Calculate word count
         const textContent = content || '';
@@ -418,8 +428,9 @@ router.post('/', authenticate, async (req, res) => {
                 original_language, language, content_type, genre, tags,
                 price, is_free, cover_image, is_adult,
                 is_ai_generated, ai_tools_used, preview_percent,
-                word_count, page_count, currency, status
-             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
+                word_count, page_count, currency, status,
+                ai_text_usage, ai_cover_usage, ai_translation_usage
+             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
              RETURNING *`,
             [
                 req.user.userId,
@@ -436,13 +447,16 @@ router.post('/', authenticate, async (req, res) => {
                 isFree || false,
                 coverImage || null,
                 isAdult || false,
-                isAiGenerated || false,
+                isAiGenerated || (aiText !== 'none') || false,
                 aiToolsUsed || null,
                 previewPercent || 10,
                 wordCount,
                 pageCount,
                 workCurrency,
-                workStatus
+                workStatus,
+                aiText,
+                aiCover,
+                aiTranslation
             ]
         );
 
