@@ -699,14 +699,45 @@
         }
 
         // ========== Load Works ==========
-        function loadMyWorks() {
+        async function loadMyWorks() {
             var isDemo = window.location.search.indexOf('demo') !== -1;
             if (isDemo) {
                 works = getDemoWorks();
-            } else {
-                // In production, load from API/localStorage
-                var saved = localStorage.getItem('myWorks');
-                works = saved ? JSON.parse(saved) : [];
+                updateStats();
+                renderWorks();
+                return;
+            }
+
+            var token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                var resp = await fetch((window.API_ORIGIN || '') + '/api/works/my', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                var data = await resp.json();
+                if (!resp.ok) {
+                    throw new Error(data.error || ('HTTP ' + resp.status));
+                }
+                works = (data.works || []).map(function(w) {
+                    return {
+                        id: w.work_id,
+                        title: w.title,
+                        status: w.status,
+                        cover: w.cover_image || w.cover_image_url || null,
+                        views: w.view_count || 0,
+                        likes: w.like_count || 0,
+                        chapters: w.page_count || 0,
+                        updatedAt: w.updated_at ? String(w.updated_at).slice(0, 10) : '-'
+                    };
+                });
+            } catch (err) {
+                console.error('Failed to load works:', err);
+                alert(getL({ en: 'Failed to load your works: ', ja: '作品の読み込みに失敗しました: ' }) + err.message);
+                works = [];
             }
             updateStats();
             renderWorks();
@@ -770,7 +801,7 @@
                     + '<div class="work-actions">'
                     + '<a href="upload.html?edit=' + work.id + '" class="work-action-btn"><i class="fas fa-edit"></i> ' + getL(uiText.edit) + '</a>'
                     + '<a href="reader.html?workId=' + work.id + '" class="work-action-btn"><i class="fas fa-external-link-alt"></i> ' + getL(uiText.view) + '</a>'
-                    + '<button class="work-action-btn btn-delete" onclick="deleteWork(' + work.id + ')"><i class="fas fa-trash-alt"></i> ' + getL(uiText.deleteBtn) + '</button>'
+                    + '<button class="work-action-btn btn-delete" onclick="deleteWork(\'' + work.id + '\')"><i class="fas fa-trash-alt"></i> ' + getL(uiText.deleteBtn) + '</button>'
                     + '</div>'
                     + '</div>'
                     + '</div>';
@@ -801,14 +832,26 @@
         }
 
         // ========== Delete Work ==========
-        function deleteWork(id) {
+        async function deleteWork(id) {
             var confirmMsg = getL(uiText.deleteConfirm);
             if (!confirm(confirmMsg)) return;
 
-            works = works.filter(function(w) { return w.id !== id; });
-            localStorage.setItem('myWorks', JSON.stringify(works));
-            updateStats();
-            renderWorks();
+            try {
+                var token = localStorage.getItem('token');
+                var resp = await fetch((window.API_ORIGIN || '') + '/api/works/' + id, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                var data = await resp.json();
+                if (!resp.ok) {
+                    throw new Error(data.error || ('HTTP ' + resp.status));
+                }
+                works = works.filter(function(w) { return w.id !== id; });
+                updateStats();
+                renderWorks();
+            } catch (err) {
+                alert(getL({ en: 'Delete failed: ', ja: '削除に失敗しました: ' }) + err.message);
+            }
         }
 
         // ========== Initialization ==========

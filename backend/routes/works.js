@@ -46,6 +46,29 @@ router.post('/upload-cover', authenticate, coverUpload.single('cover'), (req, re
 });
 
 /**
+ * GET /api/works/my
+ * Get the authenticated user's own works, all statuses (drafts included)
+ */
+router.get('/my', authenticate, async (req, res) => {
+    try {
+        const result = await db.query(
+            `SELECT work_id, title, status, cover_image, cover_image_url,
+                    view_count, like_count, comment_count, page_count,
+                    price, currency, is_free, language, original_language,
+                    created_at, updated_at, published_at
+             FROM works
+             WHERE author_id = $1
+             ORDER BY updated_at DESC`,
+            [req.user.userId]
+        );
+        res.json({ success: true, works: result.rows });
+    } catch (error) {
+        console.error('Get my works error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
  * GET /api/works
  * Get all published works (public)
  */
