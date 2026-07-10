@@ -89,6 +89,17 @@
             white-space: nowrap;
         }
 
+        .reader-cover { text-align: center; padding: 2rem 0; }
+        .reader-cover img {
+            max-width: 100%;
+            max-height: 65vh;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        .reader-cover h1 { margin-top: 1.5rem; font-size: 1.6rem; }
+
+        .toc-item-page { float: right; color: var(--reader-secondary); font-size: 0.8rem; margin-left: 0.5rem; }
+
         .lang-selector-reader {
             padding: 0.3rem 0.5rem;
             border: 1px solid var(--reader-border);
@@ -577,6 +588,7 @@
         <div class="toolbar-right">
             <!-- Desktop: Show all buttons -->
             <button class="btn-toolbar desktop-only" onclick="toggleSearch()" id="btnSearch" data-i18n-title="reader.search" title="Search"><i class="fas fa-search"></i></button>
+            <button class="btn-toolbar desktop-only" onclick="toggleToc()" id="btnToc" style="display: none;" title="Contents"><i class="fas fa-list"></i></button>
             <button class="btn-toolbar desktop-only" onclick="toggleBookmarks()" id="btnBookmarks" data-i18n-title="reader.bookmarks" title="Bookmarks"><i class="fas fa-bookmark"></i></button>
             <button class="btn-toolbar desktop-only" onclick="addBookmark()" id="btnAddBookmark" data-i18n-title="reader.addBookmark" title="Add Bookmark"><i class="fas fa-plus"></i></button>
             <button class="btn-toolbar desktop-only" onclick="toggleSettings()" id="btnSettings" data-i18n-title="reader.settings" title="Settings"><i class="fas fa-cog"></i></button>
@@ -589,6 +601,9 @@
                 <div class="mobile-menu" id="mobileMenu">
                     <button class="mobile-menu-item" onclick="toggleSearch(); toggleMobileMenu();">
                         <i class="fas fa-search"></i> <span id="mobileSearchText" data-i18n="reader.toolbar.search">Search</span>
+                    </button>
+                    <button class="mobile-menu-item" id="mobileTocItem" style="display: none;" onclick="toggleToc(); toggleMobileMenu();">
+                        <i class="fas fa-list"></i> <span id="mobileTocText">Contents</span>
                     </button>
                     <button class="mobile-menu-item" onclick="toggleBookmarks(); toggleMobileMenu();">
                         <i class="fas fa-bookmark"></i> <span id="mobileBookmarksText" data-i18n="reader.toolbar.bookmarks">Bookmarks</span>
@@ -655,6 +670,14 @@
         <div class="bookmarks-list" id="bookmarksList">
             <p style="text-align: center; color: var(--reader-secondary); padding: 1rem; font-size: 0.85rem;" id="noBookmarksText" data-i18n="reader.noBookmarks">No bookmarks yet</p>
         </div>
+    </div>
+
+    <div class="bookmarks-panel" id="tocPanel">
+        <div class="bookmarks-header">
+            <span><i class="fas fa-list me-2"></i><span id="tocTitle">Contents</span></span>
+            <button class="btn-toolbar" onclick="toggleToc()" style="padding: 0.2rem 0.4rem;"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="bookmarks-list" id="tocList"></div>
     </div>
 
     <!-- Highlight Toolbar with Report Button -->
@@ -865,7 +888,8 @@
             viewWorkPage: { en: 'View work page', ja: '作品ページを見る', zh: '查看作品页面', es: 'Ver página de la obra', fr: 'Voir la page de l\'œuvre', de: 'Werkseite ansehen', ko: '작품 페이지 보기', ar: 'عرض صفحة العمل', pt: 'Ver página da obra', it: 'Vedi la pagina dell\'opera' },
             workNotFound: { en: 'Work not found.', ja: '作品が見つかりません。', zh: '未找到作品。', es: 'Obra no encontrada.', fr: 'Œuvre introuvable.', de: 'Werk nicht gefunden.', ko: '작품을 찾을 수 없습니다.', ar: 'العمل غير موجود.', pt: 'Obra não encontrada.', it: 'Opera non trovata.' },
             loadFailed: { en: 'Failed to load the work. Please try again.', ja: '作品を読み込めませんでした。もう一度お試しください。', zh: '加载作品失败。请重试。', es: 'No se pudo cargar la obra. Inténtalo de nuevo.', fr: 'Échec du chargement de l\'œuvre. Veuillez réessayer.', de: 'Werk konnte nicht geladen werden. Bitte erneut versuchen.', ko: '작품을 불러오지 못했습니다. 다시 시도해주세요.', ar: 'فشل تحميل العمل. حاول مرة أخرى.', pt: 'Falha ao carregar a obra. Tente novamente.', it: 'Impossibile caricare l\'opera. Riprova.' },
-            retry: { en: 'Retry', ja: '再試行', zh: '重试', es: 'Reintentar', fr: 'Réessayer', de: 'Erneut versuchen', ko: '다시 시도', ar: 'إعادة المحاولة', pt: 'Tentar novamente', it: 'Riprova' }
+            retry: { en: 'Retry', ja: '再試行', zh: '重试', es: 'Reintentar', fr: 'Réessayer', de: 'Erneut versuchen', ko: '다시 시도', ar: 'إعادة المحاولة', pt: 'Tentar novamente', it: 'Riprova' },
+            contents: { en: 'Contents', ja: '目次', zh: '目录', es: 'Índice', fr: 'Table des matières', de: 'Inhaltsverzeichnis', ko: '목차', ar: 'المحتويات', pt: 'Sumário', it: 'Indice' }
         };
 
         let currentLang = localStorage.getItem('preferredLanguage') || 'en';
@@ -910,6 +934,15 @@ function getL(obj, replacements = {}) {
             renderBookmarks();
             renderNotes();
             updateAiBadge();
+
+            // 目次ラベル
+            var tocLabel = getL(uiText.contents);
+            var btnToc = document.getElementById('btnToc');
+            if (btnToc) btnToc.title = tocLabel;
+            var tocTitleEl = document.getElementById('tocTitle');
+            if (tocTitleEl) tocTitleEl.textContent = tocLabel;
+            var mobileTocText = document.getElementById('mobileTocText');
+            if (mobileTocText) mobileTocText.textContent = tocLabel;
 
             // Navbarテキストも連動更新
         }
@@ -988,7 +1021,7 @@ function getL(obj, replacements = {}) {
                 loadedWork = data.work;
                 document.getElementById('workTitle').textContent = loadedWork.title || '';
                 document.title = (loadedWork.title || 'Reader') + ' - AuctLect';
-                renderWorkPages(paginateContent(loadedWork.content || ''), loadedWork.title);
+                renderWorkPages(paginateContent(loadedWork.content || ''), loadedWork);
 
                 // アラビア語作品は自動でRTL表示にする
                 if ((loadedWork.language || loadedWork.original_language) === 'ar') {
@@ -1008,10 +1041,40 @@ function getL(obj, replacements = {}) {
             }
         }
 
-        // 原稿テキストをページ（段落のかたまり）に分割する
+        // ===== 見出し検出 =====
+
+        // 記号だけの行（場面転換の「＊＊＊」等）は見出しにしない
+        function isSymbolOnlyLine(s) {
+            return /^[\s*＊※◆◇■□▲△●○★☆†‡=＝\-ー―—～〜・．.]+$/.test(s);
+        }
+
+        // 'strong': 第○章などの定型見出し / 'weak': 句読点のない短い行 / null: 本文
+        function detectHeading(s) {
+            if (s.length > 35) return null;
+            if (/^[「『（("'“‘・…―—]/.test(s)) return null;
+            if (isSymbolOnlyLine(s)) return null;
+            if (/^(第\s*[0-9０-９一二三四五六七八九十百千]+\s*(章|話|部|幕|節|編)|chapter\s+[0-9ivxlc]+|prologue|epilogue|プロローグ|エピローグ|序章|終章|序幕|終幕|まえがき|あとがき)/i.test(s)) return 'strong';
+            if (s.length <= 25 && !/[。、．，！？!?.,:;：；]/.test(s)) return 'weak';
+            return null;
+        }
+
+        // 原稿を行ブロックに分解し見出しを判定する
+        function parseBlocks(text) {
+            var lines = String(text).split(/\r?\n/).map(function(s) { return s.trim(); }).filter(Boolean);
+            var blocks = lines.map(function(s) { return { heading: detectHeading(s), text: s }; });
+            // 短い行が大半を占める作品（詩・歌詞など）では弱い見出し判定を無効化
+            var weak = 0;
+            blocks.forEach(function(b) { if (b.heading === 'weak') weak++; });
+            if (weak > 30 || weak > blocks.length * 0.2) {
+                blocks.forEach(function(b) { if (b.heading === 'weak') b.heading = null; });
+            }
+            return blocks;
+        }
+
+        // 原稿テキストをページ（段落のかたまり）に分割する。見出しは新しいページの先頭から
         function paginateContent(text) {
             var LIMIT = 2000; // 1ページあたりのおおよその文字数
-            var paras = String(text).split(/\r?\n/).map(function(s) { return s.trim(); }).filter(Boolean);
+            var blocks = parseBlocks(text);
             var pages = [];
             var cur = [], curLen = 0;
 
@@ -1019,50 +1082,128 @@ function getL(obj, replacements = {}) {
                 if (cur.length) { pages.push(cur); cur = []; curLen = 0; }
             }
 
-            paras.forEach(function(p) {
+            blocks.forEach(function(b) {
+                if (b.heading) flush(); // 章の始まりで改ページ
+                var t = b.text;
                 // 1ページを超える長い段落は文末で区切って分割
-                while (p.length > LIMIT) {
+                while (t.length > LIMIT) {
                     var cut = LIMIT;
                     for (var i = LIMIT; i > LIMIT - 400 && i > 0; i--) {
-                        if ('。．！？!?.'.indexOf(p.charAt(i - 1)) !== -1) { cut = i; break; }
+                        if ('。．！？!?.'.indexOf(t.charAt(i - 1)) !== -1) { cut = i; break; }
                     }
                     flush();
-                    pages.push([p.slice(0, cut)]);
-                    p = p.slice(cut).trim();
+                    pages.push([{ heading: null, text: t.slice(0, cut) }]);
+                    t = t.slice(cut).trim();
                 }
-                if (!p) return;
-                if (curLen > 0 && curLen + p.length > LIMIT) flush();
-                cur.push(p);
-                curLen += p.length;
+                if (!t) return;
+                if (curLen > 0 && curLen + t.length > LIMIT) flush();
+                cur.push({ heading: b.heading, text: t });
+                curLen += t.length;
             });
             flush();
-            if (!pages.length) pages.push(['']);
+            if (!pages.length) pages.push([{ heading: null, text: '' }]);
             return pages;
         }
 
-        // 分割したページをDOMに描画する（textContentでXSS対策）
-        function renderWorkPages(pages, title) {
+        // ===== ページ・表紙・目次の描画 =====
+
+        let tocEntries = []; // [{ title, page }]
+
+        // 分割したページをDOMに描画する（textContentでXSS対策）。表紙があれば1ページ目にする
+        function renderWorkPages(pages, work) {
             var container = document.getElementById('readerContent');
             container.innerHTML = '';
-            pages.forEach(function(paras, idx) {
+            tocEntries = [];
+            var pageNum = 1;
+
+            var coverUrl = work && (work.cover_image || work.cover_image_url);
+            if (coverUrl) {
+                var coverDiv = document.createElement('div');
+                coverDiv.className = 'page reader-cover';
+                coverDiv.dataset.page = pageNum;
+                coverDiv.style.display = 'none';
+                var img = document.createElement('img');
+                img.src = coverUrl;
+                img.alt = work.title || '';
+                coverDiv.appendChild(img);
+                if (work.title) {
+                    var coverTitle = document.createElement('h1');
+                    coverTitle.textContent = work.title;
+                    coverDiv.appendChild(coverTitle);
+                }
+                container.appendChild(coverDiv);
+                pageNum++;
+            }
+
+            pages.forEach(function(blocks, idx) {
                 var div = document.createElement('div');
                 div.className = 'page';
-                div.dataset.page = idx + 1;
-                if (idx > 0) div.style.display = 'none';
-                if (idx === 0 && title) {
+                div.dataset.page = pageNum;
+                div.style.display = 'none';
+                // 表紙が無い場合は本文1ページ目の先頭にタイトルを表示
+                if (!coverUrl && idx === 0 && work && work.title) {
                     var h1 = document.createElement('h1');
-                    h1.textContent = title;
+                    h1.textContent = work.title;
                     div.appendChild(h1);
                 }
-                paras.forEach(function(p) {
-                    var el = document.createElement('p');
-                    el.textContent = p;
+                blocks.forEach(function(b) {
+                    var el;
+                    if (b.heading) {
+                        el = document.createElement('h2');
+                        tocEntries.push({ title: b.text, page: pageNum });
+                    } else {
+                        el = document.createElement('p');
+                    }
+                    el.textContent = b.text;
                     div.appendChild(el);
                 });
                 container.appendChild(div);
+                pageNum++;
             });
-            totalPages = pages.length;
+
+            totalPages = pageNum - 1;
             currentPage = 1;
+            renderToc();
+        }
+
+        // 目次パネルを描画。見出しが無い作品ではContentsボタン自体を隠す
+        function renderToc() {
+            var has = tocEntries.length > 0;
+            var btn = document.getElementById('btnToc');
+            var mobileItem = document.getElementById('mobileTocItem');
+            if (btn) btn.style.display = has ? '' : 'none';
+            if (mobileItem) mobileItem.style.display = has ? '' : 'none';
+
+            var list = document.getElementById('tocList');
+            if (!list) return;
+            list.innerHTML = '';
+            tocEntries.forEach(function(e) {
+                var item = document.createElement('div');
+                item.className = 'bookmark-item';
+                item.onclick = function() {
+                    currentPage = e.page;
+                    updatePageInfo();
+                    window.scrollTo(0, 0);
+                    toggleToc();
+                };
+                var pg = document.createElement('span');
+                pg.className = 'toc-item-page';
+                pg.textContent = e.page;
+                var title = document.createElement('div');
+                title.className = 'bookmark-title';
+                title.textContent = e.title;
+                item.appendChild(pg);
+                item.appendChild(title);
+                list.appendChild(item);
+            });
+        }
+
+        function toggleToc() {
+            var panel = document.getElementById('tocPanel');
+            panel.classList.toggle('show');
+            document.getElementById('settingsPanel').classList.remove('show');
+            document.getElementById('bookmarksPanel').classList.remove('show');
+            document.getElementById('searchPanel').classList.remove('show');
         }
 
         // 本文のAI利用のみ表示（表紙のAI利用はReaderには表示しない仕様）
@@ -1248,6 +1389,7 @@ function getL(obj, replacements = {}) {
             panel.classList.toggle('show');
             document.getElementById('bookmarksPanel').classList.remove('show');
             document.getElementById('searchPanel').classList.remove('show');
+            document.getElementById('tocPanel').classList.remove('show');
         }
 
         function setTextSize(size) {
@@ -1295,6 +1437,7 @@ function getL(obj, replacements = {}) {
             panel.classList.toggle('show');
             document.getElementById('settingsPanel').classList.remove('show');
             document.getElementById('searchPanel').classList.remove('show');
+            document.getElementById('tocPanel').classList.remove('show');
         }
 
         function addBookmark() {
@@ -1392,6 +1535,7 @@ function getL(obj, replacements = {}) {
             panel.classList.toggle('show');
             document.getElementById('settingsPanel').classList.remove('show');
             document.getElementById('bookmarksPanel').classList.remove('show');
+            document.getElementById('tocPanel').classList.remove('show');
             if (panel.classList.contains('show')) document.getElementById('searchInput').focus();
         }
 
@@ -1496,6 +1640,7 @@ function getL(obj, replacements = {}) {
                 document.getElementById('settingsPanel').classList.remove('show');
                 document.getElementById('bookmarksPanel').classList.remove('show');
                 document.getElementById('searchPanel').classList.remove('show');
+                document.getElementById('tocPanel').classList.remove('show');
                 document.getElementById('highlightToolbar').classList.remove('show');
             }
         });
@@ -1505,6 +1650,7 @@ function getL(obj, replacements = {}) {
             if (!e.target.closest('.settings-panel, [onclick*="toggleSettings"]')) document.getElementById('settingsPanel').classList.remove('show');
             if (!e.target.closest('.bookmarks-panel, [onclick*="toggleBookmarks"]')) document.getElementById('bookmarksPanel').classList.remove('show');
             if (!e.target.closest('.search-panel, [onclick*="toggleSearch"]')) document.getElementById('searchPanel').classList.remove('show');
+            if (!e.target.closest('#tocPanel, [onclick*="toggleToc"]')) document.getElementById('tocPanel').classList.remove('show');
             if (!e.target.closest('.mobile-menu-dropdown')) document.getElementById('mobileMenu').classList.remove('show');
         });
     </script>
@@ -1541,8 +1687,7 @@ function getL(obj, replacements = {}) {
             });
         }
 
-        // User情報読み込み
-        loadUserInfoNav();
+        // User情報読み込みは navbar.js の loadUserInfo() が行う
 
         // User dropdown外クリックで閉じる
         document.addEventListener('click', function(e) {
