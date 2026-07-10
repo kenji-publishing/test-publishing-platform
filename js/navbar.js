@@ -642,7 +642,8 @@ function handleLogout() {
     if (confirm(getL(navText.logOutConfirm))) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        window.location.reload();
+        var prefix = detectPathPrefix();
+        window.location.href = prefix === 'pages/' ? 'index.html' : (prefix + '../index.html');
     }
 }
 
