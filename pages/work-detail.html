@@ -640,9 +640,9 @@ function escapeHtml(text) {
         }
 
         function getWorkIdFromUrl() {
+            // 作品IDはUUID文字列（parseIntすると壊れる）
             const params = new URLSearchParams(window.location.search);
-            const id = parseInt(params.get('id'));
-            return isNaN(id) ? 1 : id; // IDなし・無効の場合はデモ作品(id=1)を表示
+            return params.get('id') || '';
         }
 
         function renderStars(rating) {

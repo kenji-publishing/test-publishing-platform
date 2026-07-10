@@ -238,6 +238,7 @@ function _detectActivePage() {
         'browse': 'browse',
         'library': 'library',
         'dashboard': 'dashboard',
+        'my-works': 'my-works',
         'upload': 'upload',
         'manga-translator': 'manga-translator',
         'manga-editor': 'manga-editor',
@@ -388,6 +389,11 @@ function renderNavbar(options) {
     html += '<a class="nav-link' + ac('dashboard') + '" href="' + p('dashboard.html') + '">';
     html += '<i class="fas fa-th-large me-1"></i> <span id="navDashboardPC">' + getL(navText.dashboard) + '</span></a></li>';
 
+    // My Works (auth)
+    html += '<li class="nav-item auth-only">';
+    html += '<a class="nav-link' + ac('my-works') + '" href="' + p('my-works.html') + '">';
+    html += '<i class="fas fa-pen-fancy me-1"></i> <span id="navMyWorksPC">' + getL(navText.myWorks) + '</span></a></li>';
+
     // Tools dropdown (auth)
     html += '<li class="nav-item dropdown auth-only">';
     html += '<a class="nav-link dropdown-toggle' + (toolsActive ? ' active' : '') + '" href="#" role="button" data-bs-toggle="dropdown">';
@@ -441,6 +447,11 @@ function renderNavbar(options) {
     html += '<li class="nav-item auth-only">';
     html += '<a class="nav-link' + ac('dashboard') + '" href="' + p('dashboard.html') + '">';
     html += '<i class="fas fa-th-large me-2"></i><span id="navDashboardMobile">' + getL(navText.dashboard) + '</span></a></li>';
+
+    // My Works (auth)
+    html += '<li class="nav-item auth-only">';
+    html += '<a class="nav-link' + ac('my-works') + '" href="' + p('my-works.html') + '">';
+    html += '<i class="fas fa-pen-fancy me-2"></i><span id="navMyWorksMobile">' + getL(navText.myWorks) + '</span></a></li>';
 
     // Tools collapsible (auth)
     html += '<li class="nav-item auth-only">';
