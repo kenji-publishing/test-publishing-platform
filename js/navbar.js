@@ -200,6 +200,17 @@ function getL(obj) {
     return obj[lang] || obj.en || '';
 }
 
+// ========== Work price formatting (multi-currency) ==========
+
+function formatWorkPrice(price, currency) {
+    var symbols = { USD: '$', JPY: '¥', EUR: '€', GBP: '£', KRW: '₩', CNY: '¥', BRL: 'R$', SAR: '﷼' };
+    var zeroDecimal = ['JPY', 'KRW'];
+    var cur = (currency || 'USD').toUpperCase();
+    var symbol = symbols[cur] || (cur + ' ');
+    var n = Number(price) || 0;
+    return symbol + (zeroDecimal.indexOf(cur) >= 0 ? Math.round(n).toLocaleString() : n.toFixed(2));
+}
+
 // ========== Path prefix auto-detection ==========
 
 function detectPathPrefix() {

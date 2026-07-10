@@ -693,7 +693,10 @@
         uploadArea.addEventListener('drop', (e) => { e.preventDefault(); uploadArea.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
         fileInput.addEventListener('change', (e) => { handleFiles(e.target.files); });
 
+        var selectedContentFiles = [];
+
         function handleFiles(files) {
+            selectedContentFiles = Array.from(files);
             fileList.innerHTML = '<h6>' + getL(uiText.selectedFiles) + '</h6>';
             previewArea.innerHTML = '';
 
@@ -763,6 +766,9 @@
                 var opt = this.options[this.selectedIndex];
                 customPriceInput.placeholder = opt.dataset.placeholder || '0';
                 customPriceInput.step = opt.dataset.step || '0.01';
+                // min must match the step, otherwise whole-number prices
+                // (e.g. JPY 200) are rejected as "invalid" (min 0.01 + step 1)
+                customPriceInput.min = opt.dataset.step || '0.01';
                 customPriceInput.value = '';
                 updateRevenuePreview();
             });
@@ -809,12 +815,115 @@
         });
 
         // Form submission
-        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+        // ---- Real submission: POST the work to the backend API ----
+
+        function readFileAsText(file) {
+            return new Promise(function(resolve, reject) {
+                var reader = new FileReader();
+                reader.onload = function(e) { resolve(e.target.result); };
+                reader.onerror = function() { reject(new Error('Failed to read ' + file.name)); };
+                reader.readAsText(file);
+            });
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            var workTitle = document.getElementById('workTitle').value || 'Untitled';
-            // コラボレーター通知（メッセージ + メール）
-            notifyCollaborators(workTitle);
-            alert(getL(uiText.alertSuccess));
+
+            var token = localStorage.getItem('token');
+            if (!token) {
+                alert(getL({ en: 'Please log in to publish a work.', ja: '作品を公開するにはログインしてください。' }));
+                window.location.href = 'login.html';
+                return;
+            }
+
+            var btn = document.getElementById('btnPublish');
+            if (btn) { btn.disabled = true; }
+
+            try {
+                var workTitle = document.getElementById('workTitle').value || 'Untitled';
+                var isFree = document.getElementById('isFree').checked;
+                var priceVal = parseFloat(document.getElementById('customPrice').value) || 0;
+                var cs = document.getElementById('currencySelect');
+                var currency = cs ? cs.value : 'USD';
+
+                // Manuscript content: read .txt files (v1 supports plain text)
+                var txtFiles = selectedContentFiles.filter(function(f) {
+                    return /\.txt$/i.test(f.name);
+                });
+                var contentType = document.getElementById('contentType').value || 'text';
+                var content = '';
+                if (txtFiles.length > 0) {
+                    var parts = [];
+                    for (var i = 0; i < txtFiles.length; i++) {
+                        parts.push(await readFileAsText(txtFiles[i]));
+                    }
+                    content = parts.join('\n\n');
+                } else if (contentType === 'text') {
+                    alert(getL({
+                        en: 'Please attach your manuscript as a .txt file (other formats coming soon).',
+                        ja: '原稿を .txt ファイルで添付してください（他の形式は今後対応予定です）。'
+                    }));
+                    if (btn) { btn.disabled = false; }
+                    return;
+                }
+
+                // Cover image: upload first, get back its URL
+                var coverUrl = null;
+                var coverInput = document.getElementById('coverImage');
+                if (coverInput && coverInput.files && coverInput.files[0]) {
+                    var fd = new FormData();
+                    fd.append('cover', coverInput.files[0]);
+                    var coverResp = await fetch((window.API_ORIGIN || '') + '/api/works/upload-cover', {
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + token },
+                        body: fd
+                    });
+                    var coverData = await coverResp.json();
+                    if (coverResp.ok && coverData.url) { coverUrl = coverData.url; }
+                }
+
+                var lang = document.getElementById('workLanguage').value || 'en';
+                var payload = {
+                    title: workTitle,
+                    description: document.getElementById('workDescription').value || '',
+                    synopsis: document.getElementById('workDescription').value || '',
+                    content: content,
+                    originalLanguage: lang,
+                    language: lang,
+                    contentType: contentType,
+                    genre: document.getElementById('workGenre').value || 'general',
+                    tags: (document.getElementById('tags').value || '')
+                        .split(',').map(function(t) { return t.trim(); }).filter(Boolean),
+                    price: isFree ? 0 : priceVal,
+                    currency: currency,
+                    isFree: isFree,
+                    coverImage: coverUrl,
+                    status: 'published'
+                };
+
+                var resp = await fetch((window.API_ORIGIN || '') + '/api/works', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(payload)
+                });
+                var data = await resp.json();
+
+                if (!resp.ok) {
+                    throw new Error(data.error || data.message || ('HTTP ' + resp.status));
+                }
+
+                // コラボレーター通知（メッセージ + メール）
+                notifyCollaborators(workTitle);
+                alert(getL(uiText.alertSuccess));
+                window.location.href = 'my-works.html';
+            } catch (err) {
+                alert(getL({ en: 'Upload failed: ', ja: 'アップロードに失敗しました: ' }) + err.message);
+            } finally {
+                if (btn) { btn.disabled = false; }
+            }
         });
 
         // コラボレーターにメッセージ＋メール通知を送信

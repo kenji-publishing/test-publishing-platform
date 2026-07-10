@@ -8,6 +8,42 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const db = require('../config/database');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+// Cover image upload (multer) — stored under uploads/covers, served via /uploads
+const COVER_DIR = path.join(__dirname, '..', 'uploads', 'covers');
+fs.mkdirSync(COVER_DIR, { recursive: true });
+
+const coverStorage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, COVER_DIR),
+    filename: (req, file, cb) => {
+        const ext = path.extname(file.originalname).toLowerCase();
+        cb(null, `cover_${req.user.userId}_${Date.now()}${ext}`);
+    }
+});
+
+const coverUpload = multer({
+    storage: coverStorage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+    fileFilter: (req, file, cb) => {
+        const ok = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
+            .includes(path.extname(file.originalname).toLowerCase());
+        cb(ok ? null : new Error('Only image files are allowed'), ok);
+    }
+});
+
+/**
+ * POST /api/works/upload-cover
+ * Upload a cover image (authenticated). Returns the public URL.
+ */
+router.post('/upload-cover', authenticate, coverUpload.single('cover'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+    }
+    res.json({ success: true, url: `/uploads/covers/${req.file.filename}` });
+});
 
 /**
  * GET /api/works
@@ -335,8 +371,16 @@ router.post('/', authenticate, async (req, res) => {
             isAdult,
             isAiGenerated,
             aiToolsUsed,
-            previewPercent
+            previewPercent,
+            currency,
+            status
         } = req.body;
+
+        // Whitelist currency and publish status
+        const SUPPORTED_CURRENCIES = ['USD', 'JPY', 'EUR', 'GBP', 'KRW', 'CNY', 'BRL', 'SAR'];
+        const workCurrency = SUPPORTED_CURRENCIES.includes((currency || '').toUpperCase())
+            ? currency.toUpperCase() : 'USD';
+        const workStatus = status === 'published' ? 'published' : 'draft';
 
         // Calculate word count
         const textContent = content || '';
@@ -349,8 +393,8 @@ router.post('/', authenticate, async (req, res) => {
                 original_language, language, content_type, genre, tags,
                 price, is_free, cover_image, is_adult,
                 is_ai_generated, ai_tools_used, preview_percent,
-                word_count, page_count, status
-             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, 'draft')
+                word_count, page_count, currency, status
+             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
              RETURNING *`,
             [
                 req.user.userId,
@@ -371,7 +415,9 @@ router.post('/', authenticate, async (req, res) => {
                 aiToolsUsed || null,
                 previewPercent || 10,
                 wordCount,
-                pageCount
+                pageCount,
+                workCurrency,
+                workStatus
             ]
         );
 
@@ -409,8 +455,12 @@ router.put('/:workId', authenticate, async (req, res) => {
         const {
             title, description, synopsis, content, genre, tags,
             price, status, isFree, coverImage, isAdult,
-            isAiGenerated, aiToolsUsed, previewPercent
+            isAiGenerated, aiToolsUsed, previewPercent, currency
         } = req.body;
+
+        const SUPPORTED_CURRENCIES = ['USD', 'JPY', 'EUR', 'GBP', 'KRW', 'CNY', 'BRL', 'SAR'];
+        const workCurrency = SUPPORTED_CURRENCIES.includes((currency || '').toUpperCase())
+            ? currency.toUpperCase() : null;
 
         // Calculate word count if content changed
         let wordCount = null;
@@ -438,10 +488,11 @@ router.put('/:workId', authenticate, async (req, res) => {
                  preview_percent = COALESCE($14, preview_percent),
                  word_count = COALESCE($15, word_count),
                  page_count = COALESCE($16, page_count),
+                 currency = COALESCE($18, currency),
                  updated_at = CURRENT_TIMESTAMP,
-                 published_at = CASE 
-                     WHEN $8 = 'published' AND published_at IS NULL THEN CURRENT_TIMESTAMP 
-                     ELSE published_at 
+                 published_at = CASE
+                     WHEN $8 = 'published' AND published_at IS NULL THEN CURRENT_TIMESTAMP
+                     ELSE published_at
                  END
              WHERE work_id = $17
              RETURNING *`,
@@ -449,7 +500,7 @@ router.put('/:workId', authenticate, async (req, res) => {
                 title, description, synopsis, content, genre, tags,
                 price, status, isFree, coverImage, isAdult,
                 isAiGenerated, aiToolsUsed, previewPercent,
-                wordCount, pageCount, req.params.workId
+                wordCount, pageCount, req.params.workId, workCurrency
             ]
         );
 

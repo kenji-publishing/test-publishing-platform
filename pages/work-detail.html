@@ -782,12 +782,13 @@ function escapeHtml(text) {
             const ratingEl = document.getElementById('workRating');
             ratingEl.innerHTML = renderStars(work.rating) + ` <span class="rating-number">${work.rating}</span>`;
 
-            // 価格
+            // 価格（DBのDECIMALは文字列で届くため必ず数値化する）
             const priceEl = document.getElementById('workPrice');
-            if (work.price === 0) {
+            const priceNum = Number(work.price) || 0;
+            if (priceNum === 0) {
                 priceEl.textContent = getL(uiText.free);
             } else {
-                priceEl.textContent = '$' + work.price.toFixed(2);
+                priceEl.textContent = formatWorkPrice(priceNum, work.currency);
             }
 
             // 言語
@@ -804,10 +805,10 @@ function escapeHtml(text) {
                 document.getElementById('btnReadNow').href = 'reader.html?id=' + id;
                 document.getElementById('badgeInLibrary').style.display = 'inline-flex';
                 document.getElementById('badgeInLibraryText').textContent = getL(uiText.inLibrary);
-            } else if (work.price > 0) {
+            } else if (priceNum > 0) {
                 document.getElementById('btnPurchase').style.display = 'inline-flex';
                 document.getElementById('btnPurchaseText').textContent =
-                    `${getL(uiText.purchase)} - $${work.price.toFixed(2)}`;
+                    `${getL(uiText.purchase)} - ${formatWorkPrice(priceNum, work.currency)}`;
                 document.getElementById('btnGetFree').style.display = 'none';
                 document.getElementById('btnReadNow').style.display = 'none';
                 document.getElementById('badgeInLibrary').style.display = 'none';

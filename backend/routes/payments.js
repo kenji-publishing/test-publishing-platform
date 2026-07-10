@@ -45,17 +45,24 @@ router.post('/create-checkout-session', authenticate, async (req, res) => {
       return res.status(400).json({ error: 'This work is free' });
     }
     
+    // Zero-decimal currencies (JPY, KRW) use the base unit directly in Stripe
+    const ZERO_DECIMAL = ['jpy', 'krw'];
+    const currency = (work.currency || 'USD').toLowerCase();
+    const unitAmount = ZERO_DECIMAL.includes(currency)
+      ? Math.round(work.price)
+      : Math.round(work.price * 100);
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
         {
           price_data: {
-            currency: 'usd',
+            currency: currency,
             product_data: {
               name: work.title,
               description: work.description || 'Digital content from AuctLect',
             },
-            unit_amount: Math.round(work.price * 100),
+            unit_amount: unitAmount,
           },
           quantity: 1,
         },
@@ -119,7 +126,11 @@ router.post('/webhook', async (req, res) => {
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     const { work_id, buyer_id, author_id } = session.metadata;
-    const amount = session.amount_total / 100;
+    // Zero-decimal currencies (JPY, KRW): amount_total is already the base unit
+    const ZERO_DECIMAL = ['jpy', 'krw'];
+    const amount = ZERO_DECIMAL.includes(session.currency)
+      ? session.amount_total
+      : session.amount_total / 100;
     const currency = session.currency.toUpperCase();
 
     // BEGIN/COMMIT must run on a single dedicated connection. db.query()
