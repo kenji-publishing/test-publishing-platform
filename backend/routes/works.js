@@ -83,7 +83,7 @@ router.get('/', async (req, res) => {
         let query = `
             SELECT w.work_id, w.title, w.description, w.synopsis, w.cover_image_url,
                    w.cover_image, w.genre, w.original_language, w.language,
-                   w.content_type, w.price, w.is_free,
+                   w.content_type, w.price, w.currency, w.is_free,
                    w.view_count, w.like_count, w.comment_count,
                    w.rating_average, w.rating_count, w.published_at,
                    w.is_adult, w.is_ai_generated, w.ai_tools_used,

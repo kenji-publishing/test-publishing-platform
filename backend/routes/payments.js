@@ -140,11 +140,11 @@ router.post('/webhook', async (req, res) => {
     try {
       await client.query('BEGIN');
 
-      // Record the purchase
+      // Record the purchase (schema: payment_status / transaction_id — see phase8d)
       await client.query(
-        `INSERT INTO purchases (user_id, work_id, amount, currency, payment_method, payment_gateway_id, status)
-         VALUES ($1, $2, $3, $4, 'stripe', $5, 'completed')
-         ON CONFLICT DO NOTHING`,
+        `INSERT INTO purchases (user_id, work_id, amount, currency, payment_method, payment_status, transaction_id)
+         VALUES ($1, $2, $3, $4, 'stripe', 'completed', $5)
+         ON CONFLICT (user_id, work_id) DO NOTHING`,
         [buyer_id, work_id, amount, currency, session.id]
       );
 
@@ -281,9 +281,9 @@ router.post('/capture-paypal-order', authenticate, async (req, res) => {
       );
 
       await client.query(
-        `INSERT INTO purchases (user_id, work_id, amount, currency, payment_method, payment_gateway_id, status)
-         VALUES ($1, $2, $3, 'USD', 'paypal', $4, 'completed')
-         ON CONFLICT DO NOTHING`,
+        `INSERT INTO purchases (user_id, work_id, amount, currency, payment_method, payment_status, transaction_id)
+         VALUES ($1, $2, $3, 'USD', 'paypal', 'completed', $4)
+         ON CONFLICT (user_id, work_id) DO NOTHING`,
         [req.user.userId, workId, paidAmount, orderId]
       );
 

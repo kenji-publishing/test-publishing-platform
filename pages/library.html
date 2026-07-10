@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <title>Library - AuctLect</title>
-    
+    <script src="../js/config.js"></script>
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -551,14 +552,40 @@
         let currentTab = 'all';
         
         // Demo books data
-        let books = [
-            { id: 1, title: 'The Midnight Garden', author: 'Sarah Chen', cover: null, status: 'reading', progress: 45, favorite: true, wishlist: false, lastRead: '2026-01-25', addedAt: '2026-01-10' },
-            { id: 2, title: '星の旅人', author: '田中太郎', cover: null, status: 'reading', progress: 72, favorite: false, wishlist: false, lastRead: '2026-01-24', addedAt: '2026-01-05' },
-            { id: 3, title: 'Digital Dreams', author: 'Alex Kim', cover: null, status: 'completed', progress: 100, favorite: true, wishlist: false, lastRead: '2026-01-20', addedAt: '2025-12-15' },
-            { id: 4, title: 'The Last Algorithm', author: 'Maria Garcia', cover: null, status: 'new', progress: 0, favorite: false, wishlist: false, lastRead: null, addedAt: '2026-01-22' },
-            { id: 5, title: '月夜の物語', author: '鈴木花子', cover: null, status: 'completed', progress: 100, favorite: false, wishlist: false, lastRead: '2026-01-15', addedAt: '2025-11-20' },
-            { id: 6, title: 'Ocean of Stars', author: 'James Wilson', cover: null, status: 'wishlist', progress: 0, favorite: false, wishlist: true, lastRead: null, addedAt: '2026-01-23' }
-        ];
+        let books = [];
+
+        // Load purchased works from the API into the library list
+        async function loadLibraryFromApi() {
+            var token = localStorage.getItem('token');
+            if (!token) { window.location.href = 'login.html'; return; }
+            try {
+                var resp = await fetch((window.API_ORIGIN || '') + '/api/users/purchases', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                var data = await resp.json();
+                if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
+                (data.purchases || []).forEach(function(p) {
+                    if (!p.work_id) return;
+                    if (books.some(function(b) { return String(b.id) === String(p.work_id); })) return;
+                    books.push({
+                        id: String(p.work_id),
+                        title: p.work_title || 'Untitled',
+                        author: p.author_name || '',
+                        cover: p.cover_image || p.cover_image_url || null,
+                        status: 'new',
+                        progress: 0,
+                        favorite: false,
+                        wishlist: false,
+                        lastRead: null,
+                        addedAt: p.purchased_at || new Date().toISOString(),
+                        purchased: true
+                    });
+                });
+            } catch (err) {
+                console.error('Failed to load library:', err);
+            }
+            renderBooks();
+        }
 
         function escapeHtml(text) {
             const d = document.createElement('div');
@@ -776,8 +803,8 @@ function getL(obj, replacements = {}) {
             }
 
             updateAllText();
-            renderBooks();
-            
+            loadLibraryFromApi();
+
             // Close user dropdown when clicking outside
             document.addEventListener('click', function(e) {
                 if (!e.target.closest('.user-dropdown')) {

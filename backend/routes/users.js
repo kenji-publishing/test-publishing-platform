@@ -146,10 +146,15 @@ router.put('/notifications', authenticate, async (req, res) => {
 router.get('/purchases', authenticate, async (req, res) => {
   try {
     const result = await db.query(
-      `SELECT 
+      `SELECT
         p.purchase_id as id,
         p.work_id,
         w.title as work_title,
+        w.cover_image,
+        w.cover_image_url,
+        w.language,
+        w.original_language,
+        COALESCE(u.pen_name, u.first_name || ' ' || u.last_name) as author_name,
         p.amount,
         p.currency,
         p.payment_method,
@@ -158,6 +163,7 @@ router.get('/purchases', authenticate, async (req, res) => {
         p.transaction_id
        FROM purchases p
        LEFT JOIN works w ON p.work_id = w.work_id
+       LEFT JOIN users u ON w.author_id = u.user_id
        WHERE p.user_id = $1
        ORDER BY p.created_at DESC
        LIMIT 50`,

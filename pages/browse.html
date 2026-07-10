@@ -407,20 +407,33 @@
         };
 
         // Sample works data
-        const sampleWorks = [
-            { id: 1, title: 'The Adventure of Magic Academy', author: 'Sarah Chen', price: 4.99, rating: 4.8, category: 'fiction', language: 'en', tags: ['fantasy', 'adventure', 'magic'], description: 'A young wizard enrolls in a prestigious magic academy where she discovers hidden powers and ancient secrets. A thrilling fantasy adventure about friendship, courage, and destiny.', reviews: 'Absolutely captivating! The world-building is incredible. Best fantasy novel I have read this year. The magic system is unique and well thought out.' },
-            { id: 2, title: 'Whispers of Tomorrow', author: 'James Miller', price: 3.99, rating: 4.6, category: 'fiction', language: 'en', tags: ['sci-fi', 'dystopia', 'thriller'], description: 'In a dystopian future, a journalist uncovers a conspiracy that could change humanity forever. A gripping sci-fi thriller exploring technology, surveillance, and freedom.', reviews: 'A thought-provoking dystopian tale. The plot twists kept me on edge. Reminds me of Orwell. Excellent writing style with deep character development.' },
-            { id: 3, title: 'Digital Dreams', author: 'Yuki Tanaka', price: 5.99, rating: 4.9, category: 'manga', language: 'ja', tags: ['cyberpunk', 'ai', 'action'], description: 'サイバーパンクの世界で、天才ハッカーの少女が仮想現実と現実の境界を越える冒険に挑む。AIと人間の共存をテーマにした近未来SFマンガ。', reviews: '作画が美しく、ストーリーも深い。サイバーパンク好きにはたまらない作品。キャラクターデザインが素晴らしい。The art style is breathtaking.' },
-            { id: 4, title: 'The Last Kingdom', author: 'Maria Garcia', price: 2.99, rating: 4.5, category: 'fiction', language: 'es', tags: ['historical', 'romance', 'medieval'], description: 'Una épica historia medieval sobre el último reino que resiste la invasión. Amor, traición y valentía se entrelazan en esta saga histórica llena de batallas y romance.', reviews: 'Historia épica con personajes memorables. Great historical fiction with vivid battle scenes. Medieval romance at its finest. La mejor novela histórica del año.' },
-            { id: 5, title: '月光の詩', author: '田中花子', price: 0, rating: 4.7, category: 'poetry', language: 'ja', tags: ['nature', 'love', 'seasons'], description: '四季の移ろいと人生の美しさを詠んだ現代詩集。月の光に照らされた日本の風景と心の機微を繊細な言葉で紡ぐ。自然、愛、孤独をテーマにした珠玉の詩篇。', reviews: '心に染みる美しい詩集。読むたびに新しい発見がある。日本語の美しさを再認識させてくれる。Hauntingly beautiful poetry collection.' },
-            { id: 6, title: 'Le Monde Nouveau', author: 'Pierre Dubois', price: 3.49, rating: 4.4, category: 'non-fiction', language: 'fr', tags: ['philosophy', 'society', 'climate'], description: 'Une exploration fascinante de la mondialisation et son impact sur les cultures locales. Essai philosophique sur le changement climatique, la technologie et l\'avenir de l\'humanité.', reviews: 'Brillante analyse sociologique. Eye-opening perspective on globalization. Un essai incontournable pour comprendre notre époque. Climate change discussion is particularly compelling.' },
-            { id: 7, title: 'Shadows of the Empire', author: 'David Park', price: 6.99, rating: 4.7, category: 'fiction', language: 'en', tags: ['fantasy', 'war', 'politics'], description: 'An epic tale of warring kingdoms, political intrigue, and forbidden magic. When a young general discovers a power that could end all wars, she must choose between duty and conscience.', reviews: 'Game of Thrones meets Avatar. Incredible world-building and complex characters. The battle scenes are breathtaking.' },
-            { id: 8, title: '星降る夜に', author: '佐藤美咲', price: 4.49, rating: 4.8, category: 'fiction', language: 'ja', tags: ['romance', 'drama', 'slice-of-life'], description: '東京の小さな書店を舞台に、失恋した女性と謎めいた常連客が織りなす心温まるラブストーリー。日常の中にある小さな奇跡を描く。', reviews: '心が温まる素敵な物語。キャラクターに共感できる。東京の情景描写が美しい。A beautiful love story set in Tokyo.' },
-            { id: 9, title: 'Code of Honor', author: 'Robert Kim', price: 0, rating: 4.3, category: 'non-fiction', language: 'en', tags: ['technology', 'ethics', 'ai'], description: 'A compelling exploration of AI ethics and the future of technology. From autonomous weapons to algorithmic bias, this book examines the moral challenges of our digital age.', reviews: 'Essential reading for anyone in tech. Thought-provoking and well-researched. Changed my perspective on AI development.' },
-            { id: 10, title: 'Flores del Viento', author: 'Isabella Torres', price: 3.99, rating: 4.6, category: 'poetry', language: 'es', tags: ['nature', 'love', 'latin-america'], description: 'Una colección de poemas que celebra la naturaleza latinoamericana y el amor en todas sus formas. Versos llenos de color, pasión y la brisa del Caribe.', reviews: 'Poesía que te transporta. Beautiful imagery and emotional depth. Los mejores poemas en español que he leído.' },
-            { id: 11, title: 'Neon Samurai', author: 'Hiroshi Kato', price: 7.99, rating: 4.9, category: 'manga', language: 'ja', tags: ['cyberpunk', 'samurai', 'action'], description: 'ネオ東京を舞台に、最後の侍がサイバー犯罪組織に立ち向かう。伝統と未来が交差するアクションマンガの傑作。', reviews: '圧倒的な画力とストーリー。サイバーパンクと侍の融合が新鮮。A masterpiece of manga storytelling.' },
-            { id: 12, title: 'The Mindful Writer', author: 'Emma Clarke', price: 2.49, rating: 4.2, category: 'non-fiction', language: 'en', tags: ['writing', 'creativity', 'mindfulness'], description: 'A guide to finding your creative voice through mindfulness practices. Learn how meditation and awareness can transform your writing and unlock your full potential.', reviews: 'Changed my writing process completely. Practical and inspiring. Great for overcoming writer\'s block.' }
-        ];
+        let sampleWorks = [];
+
+        async function loadWorksFromApi() {
+            try {
+                const resp = await fetch((window.API_ORIGIN || '') + '/api/works?limit=100');
+                const data = await resp.json();
+                if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
+                sampleWorks = (data.works || []).map(function(w) {
+                    return {
+                        id: w.work_id,
+                        title: w.title,
+                        author: w.author_name || ((w.first_name || '') + ' ' + (w.last_name || '')).trim() || 'Unknown',
+                        price: Number(w.price) || 0,
+                        currency: w.currency || 'USD',
+                        rating: w.rating_average != null ? Number(w.rating_average) : 0,
+                        category: w.genre || 'general',
+                        language: w.language || w.original_language || 'en',
+                        tags: [],
+                        description: w.description || '',
+                        reviews: ''
+                    };
+                });
+            } catch (err) {
+                console.error('Failed to load works:', err);
+            }
+            applyFilters();
+        }
 function updateAllText() {
             document.title = getL(uiText.pageTitle) + ' - AuctLect';
             if (typeof i18n !== 'undefined') i18n.applyToDOM();
@@ -444,7 +457,7 @@ function updateAllText() {
             countEl.textContent = works.length;
             
             grid.innerHTML = works.map(work => `
-                <div class="work-card" onclick="viewWork(${work.id})">
+                <div class="work-card" onclick="viewWork('${work.id}')">
                     <div class="work-cover"><i class="fas fa-book"></i></div>
                     <div class="work-info">
                         <div class="work-title">${escapeHtml(work.title)}</div>
@@ -539,7 +552,7 @@ function updateAllText() {
 
         document.addEventListener('DOMContentLoaded', function() {
             updateAllText();
-            applyFilters();
+            loadWorksFromApi();
         });
 
         document.addEventListener('languageChanged', function(e) {
