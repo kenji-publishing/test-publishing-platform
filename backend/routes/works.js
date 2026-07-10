@@ -381,6 +381,8 @@ router.post('/', authenticate, async (req, res) => {
         const workCurrency = SUPPORTED_CURRENCIES.includes((currency || '').toUpperCase())
             ? currency.toUpperCase() : 'USD';
         const workStatus = status === 'published' ? 'published' : 'draft';
+        // content_type is a DB enum: only 'text' | 'manga' | 'art'
+        const workContentType = ['text', 'manga', 'art'].includes(contentType) ? contentType : 'text';
 
         // Calculate word count
         const textContent = content || '';
@@ -404,7 +406,7 @@ router.post('/', authenticate, async (req, res) => {
                 content || '',
                 originalLanguage || 'ja',
                 language || originalLanguage || 'ja',
-                contentType || 'novel',
+                workContentType,
                 genre || 'general',
                 tags || [],
                 price || 0,
