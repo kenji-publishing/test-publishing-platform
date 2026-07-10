@@ -374,7 +374,7 @@ router.get('/:workId/full', authenticate, async (req, res) => {
         // Check if user has purchased the work
         const purchaseCheck = await db.query(
             `SELECT 1 FROM purchases
-             WHERE user_id = $1 AND work_id = $2 AND status = 'completed'`,
+             WHERE user_id = $1 AND work_id = $2 AND payment_status = 'completed'`,
             [userId, req.params.workId]
         );
         if (purchaseCheck.rows.length > 0) {

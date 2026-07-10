@@ -566,7 +566,16 @@
                 if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
                 (data.purchases || []).forEach(function(p) {
                     if (!p.work_id) return;
-                    if (books.some(function(b) { return String(b.id) === String(p.work_id); })) return;
+                    var cover = p.cover_image || p.cover_image_url || null;
+                    // localStorage経由（購入完了ページ）で先に追加された分には
+                    // 表紙・著者名が無いので、API側の情報で補完する
+                    var existing = books.find(function(b) { return String(b.id) === String(p.work_id); });
+                    if (existing) {
+                        if (!existing.cover && cover) existing.cover = cover;
+                        if (!existing.author && p.author_name) existing.author = p.author_name;
+                        existing.purchased = true;
+                        return;
+                    }
                     books.push({
                         id: String(p.work_id),
                         title: p.work_title || 'Untitled',
