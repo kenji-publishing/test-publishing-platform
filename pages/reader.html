@@ -78,6 +78,17 @@
 
         .work-title { font-weight: 600; font-size: 0.95rem; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+        .ai-badge-reader {
+            display: none;
+            font-size: 0.7rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 10px;
+            background: rgba(139, 115, 85, 0.12);
+            color: var(--reader-accent);
+            border: 1px solid var(--reader-accent);
+            white-space: nowrap;
+        }
+
         .lang-selector-reader {
             padding: 0.3rem 0.5rem;
             border: 1px solid var(--reader-border);
@@ -554,6 +565,7 @@
                 <span id="backLinkText" data-i18n="reader.backToLibrary">Library</span>
             </a>
             <span class="work-title" id="workTitle">Sample Story</span>
+            <span class="ai-badge-reader" id="readerAiBadge"></span>
         </div>
         
         <div class="toolbar-center">
@@ -792,6 +804,7 @@
     <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/config.js"></script>
     <script src="../js/i18n.js"></script>
     <script src="../js/lang/it.js"></script>
     <script src="../js/navbar.js"></script>
@@ -846,7 +859,13 @@
             noNotes: { en: 'No notes to export', ja: 'エクスポートするノートがありません', zh: '没有可导出的笔记', es: 'No hay notas para exportar', fr: 'Pas de notes à exporter', de: 'Keine Notizen zum Exportieren', ko: '내보낼 노트 없음', ar: 'لا توجد ملاحظات للتصدير', pt: 'Sem notas para exportar' },
             exported: { en: 'Exported', ja: 'エクスポート日時', zh: '导出时间', es: 'Exportado', fr: 'Exporté', de: 'Exportiert', ko: '내보낸 날짜', ar: 'تم التصدير', pt: 'Exportado' },
             foundMatches: { en: '{count} matches found', ja: '{count}件見つかりました', zh: '找到{count}个匹配', es: '{count} coincidencias encontradas', fr: '{count} correspondances trouvées', de: '{count} Treffer gefunden', ko: '{count}개 일치', ar: 'تم العثور على {count} نتائج', pt: '{count} correspondências encontradas' },
-            noResults: { en: 'No results found', ja: '結果が見つかりません', zh: '未找到结果', es: 'No se encontraron resultados', fr: 'Aucun résultat trouvé', de: 'Keine Ergebnisse gefunden', ko: '결과 없음', ar: 'لم يتم العثور على نتائج', pt: 'Nenhum resultado encontrado' }
+            noResults: { en: 'No results found', ja: '結果が見つかりません', zh: '未找到结果', es: 'No se encontraron resultados', fr: 'Aucun résultat trouvé', de: 'Keine Ergebnisse gefunden', ko: '결과 없음', ar: 'لم يتم العثور على نتائج', pt: 'Nenhum resultado encontrado' },
+            loadingContent: { en: 'Loading...', ja: '読み込み中...', zh: '加载中...', es: 'Cargando...', fr: 'Chargement...', de: 'Wird geladen...', ko: '로딩 중...', ar: 'جارٍ التحميل...', pt: 'Carregando...', it: 'Caricamento...' },
+            purchaseRequired: { en: 'Purchase is required to read this work.', ja: 'この作品を読むには購入が必要です。', zh: '阅读此作品需要购买。', es: 'Se requiere la compra para leer esta obra.', fr: 'L\'achat est requis pour lire cette œuvre.', de: 'Zum Lesen dieses Werks ist ein Kauf erforderlich.', ko: '이 작품을 읽으려면 구매가 필요합니다.', ar: 'الشراء مطلوب لقراءة هذا العمل.', pt: 'A compra é necessária para ler esta obra.', it: 'È necessario l\'acquisto per leggere quest\'opera.' },
+            viewWorkPage: { en: 'View work page', ja: '作品ページを見る', zh: '查看作品页面', es: 'Ver página de la obra', fr: 'Voir la page de l\'œuvre', de: 'Werkseite ansehen', ko: '작품 페이지 보기', ar: 'عرض صفحة العمل', pt: 'Ver página da obra', it: 'Vedi la pagina dell\'opera' },
+            workNotFound: { en: 'Work not found.', ja: '作品が見つかりません。', zh: '未找到作品。', es: 'Obra no encontrada.', fr: 'Œuvre introuvable.', de: 'Werk nicht gefunden.', ko: '작품을 찾을 수 없습니다.', ar: 'العمل غير موجود.', pt: 'Obra não encontrada.', it: 'Opera non trovata.' },
+            loadFailed: { en: 'Failed to load the work. Please try again.', ja: '作品を読み込めませんでした。もう一度お試しください。', zh: '加载作品失败。请重试。', es: 'No se pudo cargar la obra. Inténtalo de nuevo.', fr: 'Échec du chargement de l\'œuvre. Veuillez réessayer.', de: 'Werk konnte nicht geladen werden. Bitte erneut versuchen.', ko: '작품을 불러오지 못했습니다. 다시 시도해주세요.', ar: 'فشل تحميل العمل. حاول مرة أخرى.', pt: 'Falha ao carregar a obra. Tente novamente.', it: 'Impossibile caricare l\'opera. Riprova.' },
+            retry: { en: 'Retry', ja: '再試行', zh: '重试', es: 'Reintentar', fr: 'Réessayer', de: 'Erneut versuchen', ko: '다시 시도', ar: 'إعادة المحاولة', pt: 'Tentar novamente', it: 'Riprova' }
         };
 
         let currentLang = localStorage.getItem('preferredLanguage') || 'en';
@@ -890,25 +909,34 @@ function getL(obj, replacements = {}) {
 
             renderBookmarks();
             renderNotes();
+            updateAiBadge();
 
             // Navbarテキストも連動更新
         }
 
         // Get work info from URL parameters
         const urlParams = new URLSearchParams(window.location.search);
-        const workId = urlParams.get('workId') || urlParams.get('work_id') || 'sample-work-id';
+        // apiWorkId: 実作品ID（あればAPIから読み込む）。無ければデモ表示のまま
+        const apiWorkId = urlParams.get('workId') || urlParams.get('work_id') || urlParams.get('id') || null;
+        const workId = apiWorkId || 'sample-work-id';
         const workTitle = urlParams.get('title') || document.getElementById('workTitle').textContent;
-        
+
         if (urlParams.get('title')) {
             document.getElementById('workTitle').textContent = urlParams.get('title');
         }
 
+        // 作品ごとにしおり・メモ・最終ページを分けて保存する
+        function storageKey(base) { return base + '_' + workId; }
+
         // State
         let currentPage = 1;
         let totalPages = 3;
-        let bookmarks = JSON.parse(localStorage.getItem('reader_bookmarks') || '[]');
-        let notes = JSON.parse(localStorage.getItem('reader_notes') || '[]');
-        let highlights = JSON.parse(localStorage.getItem('reader_highlights') || '[]');
+        let loadedWork = null; // APIから読み込んだ作品データ
+        // 前回の読書位置（初期表示のupdatePageInfoで上書きされる前に読んでおく）
+        const savedLastPage = parseInt(localStorage.getItem(storageKey('reader_lastpage')) || '1', 10);
+        let bookmarks = JSON.parse(localStorage.getItem(storageKey('reader_bookmarks')) || '[]');
+        let notes = JSON.parse(localStorage.getItem(storageKey('reader_notes')) || '[]');
+        let highlights = JSON.parse(localStorage.getItem(storageKey('reader_highlights')) || '[]');
         let selectedText = '';
 
         // Touch/Swipe State
@@ -929,7 +957,155 @@ function getL(obj, replacements = {}) {
             initClickZones();
             initMouseDrag();
             showTouchHint();
+            if (!isManga && apiWorkId) loadWorkFromApi();
         });
+
+        // ===== 実作品の読み込み（API接続） =====
+
+        async function loadWorkFromApi() {
+            var token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+            showReaderNotice(getL(uiText.loadingContent));
+            try {
+                var resp = await fetch((window.API_ORIGIN || '') + '/api/works/' + encodeURIComponent(apiWorkId) + '/full', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (resp.status === 401) { window.location.href = 'login.html'; return; }
+                var data = await resp.json();
+                if (resp.status === 403) {
+                    showReaderNotice(getL(uiText.purchaseRequired), 'work-detail.html?id=' + encodeURIComponent(apiWorkId), getL(uiText.viewWorkPage));
+                    return;
+                }
+                if (resp.status === 404) {
+                    showReaderNotice(getL(uiText.workNotFound), 'browse.html', getL(uiText.viewWorkPage));
+                    return;
+                }
+                if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
+
+                loadedWork = data.work;
+                document.getElementById('workTitle').textContent = loadedWork.title || '';
+                document.title = (loadedWork.title || 'Reader') + ' - AuctLect';
+                renderWorkPages(paginateContent(loadedWork.content || ''), loadedWork.title);
+
+                // アラビア語作品は自動でRTL表示にする
+                if ((loadedWork.language || loadedWork.original_language) === 'ar') {
+                    var rc = document.getElementById('readerContent');
+                    rc.classList.remove('writing-horizontal', 'writing-vertical');
+                    rc.classList.add('writing-rtl');
+                }
+
+                // 前回の続きから再開
+                if (savedLastPage >= 1 && savedLastPage <= totalPages) currentPage = savedLastPage;
+
+                updateAiBadge();
+                updatePageInfo();
+            } catch (err) {
+                console.error('Failed to load work:', err);
+                showReaderNotice(getL(uiText.loadFailed), 'javascript:location.reload()', getL(uiText.retry));
+            }
+        }
+
+        // 原稿テキストをページ（段落のかたまり）に分割する
+        function paginateContent(text) {
+            var LIMIT = 2000; // 1ページあたりのおおよその文字数
+            var paras = String(text).split(/\r?\n/).map(function(s) { return s.trim(); }).filter(Boolean);
+            var pages = [];
+            var cur = [], curLen = 0;
+
+            function flush() {
+                if (cur.length) { pages.push(cur); cur = []; curLen = 0; }
+            }
+
+            paras.forEach(function(p) {
+                // 1ページを超える長い段落は文末で区切って分割
+                while (p.length > LIMIT) {
+                    var cut = LIMIT;
+                    for (var i = LIMIT; i > LIMIT - 400 && i > 0; i--) {
+                        if ('。．！？!?.'.indexOf(p.charAt(i - 1)) !== -1) { cut = i; break; }
+                    }
+                    flush();
+                    pages.push([p.slice(0, cut)]);
+                    p = p.slice(cut).trim();
+                }
+                if (!p) return;
+                if (curLen > 0 && curLen + p.length > LIMIT) flush();
+                cur.push(p);
+                curLen += p.length;
+            });
+            flush();
+            if (!pages.length) pages.push(['']);
+            return pages;
+        }
+
+        // 分割したページをDOMに描画する（textContentでXSS対策）
+        function renderWorkPages(pages, title) {
+            var container = document.getElementById('readerContent');
+            container.innerHTML = '';
+            pages.forEach(function(paras, idx) {
+                var div = document.createElement('div');
+                div.className = 'page';
+                div.dataset.page = idx + 1;
+                if (idx > 0) div.style.display = 'none';
+                if (idx === 0 && title) {
+                    var h1 = document.createElement('h1');
+                    h1.textContent = title;
+                    div.appendChild(h1);
+                }
+                paras.forEach(function(p) {
+                    var el = document.createElement('p');
+                    el.textContent = p;
+                    div.appendChild(el);
+                });
+                container.appendChild(div);
+            });
+            totalPages = pages.length;
+            currentPage = 1;
+        }
+
+        // 本文のAI利用のみ表示（表紙のAI利用はReaderには表示しない仕様）
+        function updateAiBadge() {
+            var el = document.getElementById('readerAiBadge');
+            if (!el) return;
+            var label = (loadedWork && typeof getAiBadgeLabel === 'function')
+                ? getAiBadgeLabel(loadedWork.ai_text_usage, 'na')
+                : null;
+            if (label) {
+                el.textContent = label;
+                el.style.display = 'inline-block';
+            } else {
+                el.style.display = 'none';
+            }
+        }
+
+        // 本文エリアにメッセージ（読み込み中・購入案内・エラー）を表示する
+        function showReaderNotice(message, linkHref, linkText) {
+            var container = document.getElementById('readerContent');
+            container.innerHTML = '';
+            var div = document.createElement('div');
+            div.className = 'page';
+            div.dataset.page = 1;
+            div.style.textAlign = 'center';
+            div.style.padding = '4rem 1rem';
+            var p = document.createElement('p');
+            p.textContent = message;
+            p.style.fontSize = '1.1rem';
+            p.style.marginBottom = '1.5rem';
+            div.appendChild(p);
+            if (linkHref && linkText) {
+                var a = document.createElement('a');
+                a.href = linkHref;
+                a.textContent = linkText;
+                a.style.cssText = 'display:inline-block; padding:0.6rem 1.5rem; background:var(--reader-accent); color:#fff; border-radius:8px; text-decoration:none;';
+                div.appendChild(a);
+            }
+            container.appendChild(div);
+            totalPages = 1;
+            currentPage = 1;
+            document.getElementById('pageInfo').textContent = '1 / 1';
+        }
 
         function showTouchHint() {
             if ('ontouchstart' in window) {
@@ -1043,7 +1219,7 @@ function getL(obj, replacements = {}) {
                 try {
                     range.surroundContents(span);
                     highlights.push({ id: span.dataset.highlightId, text: selection.toString(), color: color, page: currentPage });
-                    localStorage.setItem('reader_highlights', JSON.stringify(highlights));
+                    localStorage.setItem(storageKey('reader_highlights'), JSON.stringify(highlights));
                 } catch (e) { alert(getL(uiText.cannotHighlight)); }
             }
             document.getElementById('highlightToolbar').classList.remove('show');
@@ -1102,6 +1278,8 @@ function getL(obj, replacements = {}) {
                 page.style.display = page.dataset.page == currentPage ? 'block' : 'none';
             });
             updateReadingProgress();
+            // 次回同じページから再開できるよう現在ページを保存
+            localStorage.setItem(storageKey('reader_lastpage'), currentPage);
         }
 
         function updateReadingProgress() {
@@ -1124,7 +1302,7 @@ function getL(obj, replacements = {}) {
             const preview = content ? content.textContent.substring(0, 80).trim() + '...' : '';
             const bookmark = { id: Date.now(), page: currentPage, title: `${getL(uiText.page)} ${currentPage}`, preview: preview, createdAt: new Date().toISOString() };
             bookmarks.push(bookmark);
-            localStorage.setItem('reader_bookmarks', JSON.stringify(bookmarks));
+            localStorage.setItem(storageKey('reader_bookmarks'), JSON.stringify(bookmarks));
             renderBookmarks();
             const btn = event.target.closest('.btn-toolbar');
             btn.style.background = 'var(--reader-accent)';
@@ -1148,7 +1326,7 @@ function getL(obj, replacements = {}) {
         }
 
         function goToBookmark(page) { currentPage = page; updatePageInfo(); toggleBookmarks(); }
-        function deleteBookmark(id) { bookmarks = bookmarks.filter(b => b.id !== id); localStorage.setItem('reader_bookmarks', JSON.stringify(bookmarks)); renderBookmarks(); }
+        function deleteBookmark(id) { bookmarks = bookmarks.filter(b => b.id !== id); localStorage.setItem(storageKey('reader_bookmarks'), JSON.stringify(bookmarks)); renderBookmarks(); }
 
         function toggleNotes() {
             const content = document.getElementById('notesContent');
@@ -1162,7 +1340,7 @@ function getL(obj, replacements = {}) {
             const text = input.value.trim();
             if (!text) return;
             notes.push({ id: Date.now(), text: text, page: currentPage, createdAt: new Date().toISOString() });
-            localStorage.setItem('reader_notes', JSON.stringify(notes));
+            localStorage.setItem(storageKey('reader_notes'), JSON.stringify(notes));
             input.value = '';
             renderNotes();
         }
@@ -1181,7 +1359,7 @@ function getL(obj, replacements = {}) {
             `).join('');
         }
 
-        function deleteNote(id) { notes = notes.filter(n => n.id !== id); localStorage.setItem('reader_notes', JSON.stringify(notes)); renderNotes(); }
+        function deleteNote(id) { notes = notes.filter(n => n.id !== id); localStorage.setItem(storageKey('reader_notes'), JSON.stringify(notes)); renderNotes(); }
 
         function exportNotes(format) {
             if (notes.length === 0) { alert(getL(uiText.noNotes)); return; }
