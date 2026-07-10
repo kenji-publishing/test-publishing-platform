@@ -381,11 +381,30 @@
         st.className = 'save-status saving';
         tx.textContent = (window.i18n ? i18n.t('editor.saving') : 'Saving...');
         st.querySelector('i').className = 'fas fa-spinner fa-spin';
+        // 下書きをブラウザ（localStorage）に保存。次回開いたとき復元される
+        try {
+            var area = document.getElementById('editorArea');
+            localStorage.setItem('editorDraft', JSON.stringify({
+                title: document.getElementById('workTitle').value || '',
+                html: area ? area.innerHTML : '',
+                updatedAt: new Date().toISOString()
+            }));
+        } catch (e) { console.error('Draft save failed:', e); }
         setTimeout(function() {
             st.className = 'save-status saved';
             tx.textContent = (window.i18n ? i18n.t('editor.saved') : 'Saved');
             st.querySelector('i').className = 'fas fa-check-circle';
         }, 600);
+    }
+
+    /* 前回の下書きを復元 */
+    function restoreDraft() {
+        try {
+            var draft = JSON.parse(localStorage.getItem('editorDraft') || 'null');
+            if (!draft) return;
+            if (draft.title) document.getElementById('workTitle').value = draft.title;
+            if (draft.html) document.getElementById('editorArea').innerHTML = draft.html;
+        } catch (e) { console.error('Draft restore failed:', e); }
     }
 
     /* Export as plain text - called by Export button onclick */
@@ -404,15 +423,29 @@
         URL.revokeObjectURL(a.href);
     }
 
-    /* Publish - called by Publish button onclick */
+    /* Publish - 原稿をアップロードページへ引き渡す */
     function doPublish() {
-        if (confirm(window.i18n ? i18n.t('editor.publishConfirm') : 'Are you sure you want to publish?')) {
-            alert(window.i18n ? i18n.t('editor.publishDemo') : 'Demo mode: Publishing is disabled');
+        var area = document.getElementById('editorArea');
+        var text = area ? area.innerText.trim() : '';
+        if (!text) {
+            alert(window.i18n ? i18n.t('editor.placeholder') : 'Start writing your story...');
+            return;
         }
+        try {
+            localStorage.setItem('editorDraftForUpload', JSON.stringify({
+                title: document.getElementById('workTitle').value || '',
+                text: text
+            }));
+        } catch (e) {
+            console.error('Handoff failed:', e);
+            return;
+        }
+        window.location.href = 'upload.html?from=editor';
     }
 
     /* Initial word count on page load */
     document.addEventListener('DOMContentLoaded', function() {
+        restoreDraft();
         countWords();
     });
     </script>

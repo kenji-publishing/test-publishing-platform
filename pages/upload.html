@@ -1268,6 +1268,27 @@
         var editWorkId = new URLSearchParams(window.location.search).get('edit');
         var editWork = null;
 
+        // ========== テキストエディターからの原稿引き渡し（editor.html の公開ボタン） ==========
+        var editorDraft = null;
+        if (new URLSearchParams(window.location.search).get('from') === 'editor') {
+            try { editorDraft = JSON.parse(localStorage.getItem('editorDraftForUpload') || 'null'); } catch (e) {}
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!editorDraft || !editorDraft.text) return;
+            var titleInput = document.getElementById('workTitle');
+            if (editorDraft.title && titleInput && !titleInput.value) titleInput.value = editorDraft.title;
+            // 原稿が読み込み済みであることをファイル欄に表示
+            var fl = document.getElementById('fileList');
+            if (fl) {
+                fl.innerHTML = '<div class="alert alert-success"><i class="fas fa-pen me-2"></i>'
+                    + getL({ en: 'Manuscript loaded from the Text Editor (', ja: 'テキストエディターから原稿を読み込みました（', zh: '已从文本编辑器载入稿件（', ko: '텍스트 편집기에서 원고를 불러왔습니다（' })
+                    + editorDraft.text.length
+                    + getL({ en: ' characters). Attaching a .txt file will override it.', ja: '文字）。.txtファイルを添付した場合はそちらが優先されます。', zh: '字）。如附加.txt文件则以其为准。', ko: '자）. .txt 파일을 첨부하면 그쪽이 우선됩니다.' })
+                    + '</div>';
+            }
+        });
+
         async function initEditMode() {
             if (!editWorkId) return;
             var token = localStorage.getItem('token');
@@ -1357,6 +1378,9 @@
                         parts.push(await readFileAsText(txtFiles[i]));
                     }
                     content = parts.join('\n\n');
+                } else if (editorDraft && editorDraft.text) {
+                    // テキストエディターから引き渡された原稿を使う
+                    content = editorDraft.text;
                 } else if (contentType === 'text' && !editWorkId) {
                     alert(getL({
                         en: 'Please attach your manuscript as a .txt file (other formats coming soon).',

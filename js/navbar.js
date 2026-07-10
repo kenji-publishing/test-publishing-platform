@@ -46,6 +46,11 @@ var navText = {
         es: 'Subir obra', fr: 'T\u00e9l\u00e9charger', de: 'Werk hochladen',
         ko: '작품 업로드', ar: 'رفع عمل', pt: 'Enviar obra', it: 'Carica opera'
     },
+    textEditor: {
+        en: 'Text Editor', ja: 'テキストエディター', zh: '文本编辑器',
+        es: 'Editor de texto', fr: 'Éditeur de texte', de: 'Text-Editor',
+        ko: '텍스트 편집기', ar: 'محرر النصوص', pt: 'Editor de texto', it: 'Editor di testo'
+    },
     translationTools: {
         en: 'Translation Tools', ja: '翻訳ツール', zh: '翻译工具',
         es: 'Herramientas de traducci\u00f3n', fr: 'Outils de traduction', de: '\u00dcbersetzungstools',
@@ -438,6 +443,7 @@ function renderNavbar(options) {
     html += '<ul class="dropdown-menu">';
     html += '<li><a class="dropdown-item" href="' + p('upload.html') + '"><i class="fas fa-upload me-2"></i><span id="navUploadPC">' + getL(navText.uploadWork) + '</span></a></li>';
     html += '<li><hr class="dropdown-divider"></li>';
+    html += '<li><a class="dropdown-item" href="' + p('editor.html') + '"><i class="fas fa-pen me-2"></i><span id="navTextEditorPC">' + getL(navText.textEditor) + '</span></a></li>';
     html += '<li><a class="dropdown-item" href="' + p('manga-translator.html') + '"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorPC">' + getL(navText.mangaTranslator) + '</span></a></li>';
     html += '<li><a class="dropdown-item" href="' + p('manga-editor.html') + '"><i class="fas fa-edit me-2"></i><span id="navMangaEditorPC">' + getL(navText.mangaEditor) + '</span></a></li>';
     html += '<li><a class="dropdown-item" href="' + p('novel-translator.html') + '"><i class="fas fa-book me-2"></i><span id="navNovelTranslatorPC">' + getL(navText.novelTranslator) + '</span></a></li>';
@@ -498,6 +504,7 @@ function renderNavbar(options) {
     html += '<div class="collapse ps-4" id="translationToolsMenu">';
     html += '<a class="nav-link" href="' + p('upload.html') + '"><i class="fas fa-upload me-2"></i> <span id="navUploadMobile">' + getL(navText.uploadWork) + '</span></a>';
     html += '<hr class="dropdown-divider my-1">';
+    html += '<a class="nav-link" href="' + p('editor.html') + '"><i class="fas fa-pen me-2"></i><span id="navTextEditorMobile">' + getL(navText.textEditor) + '</span></a>';
     html += '<a class="nav-link" href="' + p('manga-translator.html') + '"><i class="fas fa-image me-2"></i><span id="navMangaTranslatorMobile">' + getL(navText.mangaTranslator) + '</span></a>';
     html += '<a class="nav-link" href="' + p('manga-editor.html') + '"><i class="fas fa-edit me-2"></i><span id="navMangaEditorMobile">' + getL(navText.mangaEditor) + '</span></a>';
     html += '<a class="nav-link" href="' + p('novel-translator.html') + '"><i class="fas fa-book me-2"></i> <span id="navNovelTranslatorMobile">' + getL(navText.novelTranslator) + '</span></a>';
@@ -621,6 +628,7 @@ function updateNavText() {
         navDashboardPC: navText.dashboard,
         navToolsPC: navText.tools,
         navUploadPC: navText.uploadWork,
+        navTextEditorPC: navText.textEditor,
         navMangaTranslatorPC: navText.mangaTranslator,
         navMangaEditorPC: navText.mangaEditor,
         navNovelTranslatorPC: navText.novelTranslator,
@@ -639,6 +647,7 @@ function updateNavText() {
         navDashboardMobile: navText.dashboard,
         navToolsMobile: navText.tools,
         navUploadMobile: navText.uploadWork,
+        navTextEditorMobile: navText.textEditor,
         navMangaTranslatorMobile: navText.mangaTranslator,
         navMangaEditorMobile: navText.mangaEditor,
         navNovelTranslatorMobile: navText.novelTranslator,
