@@ -1205,7 +1205,21 @@
         let currentMsgTab = 'conversations';
 
         function getMyUserId() {
-            try { const u = JSON.parse(localStorage.getItem('user') || '{}'); return u.user_id || u.userId || null; } catch (e) { return null; }
+            // ログインAPIは user.id で保存する（他ページは user_id の場合もあるため全部見る）
+            try {
+                const u = JSON.parse(localStorage.getItem('user') || '{}');
+                const id = u.user_id || u.userId || u.id;
+                if (id) return id;
+            } catch (e) {}
+            // フォールバック: JWTトークンのペイロードから自分のIDを取得
+            try {
+                const token = localStorage.getItem('token');
+                if (token) {
+                    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+                    return payload.userId || null;
+                }
+            } catch (e) {}
+            return null;
         }
 
         async function fetchConversations() {
