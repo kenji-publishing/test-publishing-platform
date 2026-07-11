@@ -4,7 +4,10 @@
  * Phase 9C: Auto-generate notifications
  */
 
-const pool = require('../config/db');
+// NOTE: config/db は存在しない（正しくは config/database の pool）。
+// このモジュールは長らく未使用で、works.js から読み込んだ際に
+// MODULE_NOT_FOUND でサーバーが起動できなくなった事故あり（2026-07-11）
+const { pool } = require('../config/database');
 
 // 通知タイプの定義
 const NotificationTypes = {
