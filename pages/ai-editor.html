@@ -1054,6 +1054,18 @@
                         </div>
                     </div>
 
+                    <!-- 変更箇所（差分）表示 -->
+                    <style>
+                        .diff-del { background: #ffe3e3; color: #b02a37; text-decoration: line-through; border-radius: 2px; }
+                        .diff-ins { background: #d9f2df; color: #1e7e34; border-radius: 2px; }
+                    </style>
+                    <div style="margin-top: 1rem;">
+                        <button class="btn-wizard-secondary" type="button" onclick="toggleDiffView()" id="btnDiffToggle">
+                            <i class="fas fa-highlighter me-1"></i> <span id="btnDiffToggleText">Show changes</span>
+                        </button>
+                        <div id="reviewDiff" style="display:none; margin-top:0.75rem; padding:1rem; border:1px solid var(--color-border, #e5ddd3); border-radius:8px; white-space:pre-wrap; line-height:2; max-height:420px; overflow-y:auto; background:#fff;"></div>
+                    </div>
+
                     <div class="step-actions">
                         <button class="btn-wizard-secondary" onclick="goStep(4)"><i class="fas fa-arrow-left me-1"></i> <span id="s8BtnRetranslate">Re-edit with different model</span></button>
                         <button class="btn-wizard-primary" onclick="goStep(9)" id="s8BtnFinalize"><i class="fas fa-check me-1"></i> <span id="s8BtnText">Finalize & Download</span></button>
@@ -1076,6 +1088,10 @@
                         <button class="download-btn" onclick="downloadResult('docx')">
                             <i class="fas fa-file-word"></i>
                             <span>.docx</span>
+                        </button>
+                        <button class="download-btn" onclick="uploadEditedWork()" style="border-color: var(--color-accent, #8B7355);">
+                            <i class="fas fa-upload" style="color: var(--color-accent, #8B7355);"></i>
+                            <span id="s9UploadLabel">Upload as a work</span>
                         </button>
                     </div>
 
@@ -1195,6 +1211,8 @@
         if (n === 8) {
             document.getElementById('reviewOriginal').textContent = sourceTextContent;
             document.getElementById('reviewTranslation').value = translatedText;
+            // 差分表示は開き直すたびにリセット（編集結果が変わっているため）
+            if (typeof diffVisible !== 'undefined' && diffVisible) toggleDiffView();
         }
 
         for (let i = 1; i <= 9; i++) {
@@ -1285,9 +1303,27 @@
     function applyLoadedText(text, file) {
         document.getElementById('sourceText').value = text;
         updateCharCount();
-        document.getElementById('fileInfo').style.display = 'block';
-        document.getElementById('fileInfo').innerHTML = '<i class="fas fa-check-circle" style="color:var(--color-success)"></i> ' + file.name + ' (' + (file.size / 1024).toFixed(1) + 'KB)';
+        const removeLabel = { en: 'Remove', ja: '削除', zh: '删除', es: 'Eliminar', fr: 'Supprimer', de: 'Entfernen', ko: '삭제', ar: 'إزالة', pt: 'Remover', it: 'Rimuovi' };
+        const info = document.getElementById('fileInfo');
+        info.style.display = 'block';
+        info.innerHTML = '<i class="fas fa-check-circle" style="color:var(--color-success)"></i> ' + escH(file.name) + ' (' + (file.size / 1024).toFixed(1) + 'KB) '
+            + '<button type="button" onclick="clearUploadedFile()" style="margin-left:0.75rem; border:1px solid #dc3545; background:transparent; color:#dc3545; border-radius:6px; padding:0.15rem 0.6rem; cursor:pointer; font-size:0.85rem;"><i class="fas fa-times me-1"></i>' + (removeLabel[getLang()] || removeLabel.en) + '</button>';
+        // 同じファイルをもう一度選べるようにリセット
+        const fi = document.getElementById('fileInput');
+        if (fi) fi.value = '';
         setInputMode('full');
+    }
+
+    // アップロードした原稿を取り消す（テキスト・ファイル表示の両方をクリア）
+    function clearUploadedFile() {
+        document.getElementById('sourceText').value = '';
+        sourceTextContent = '';
+        updateCharCount();
+        const info = document.getElementById('fileInfo');
+        info.style.display = 'none';
+        info.innerHTML = '';
+        const fi = document.getElementById('fileInput');
+        if (fi) fi.value = '';
     }
 
     // Try UTF-8 first (modern default), then Shift-JIS / EUC-JP for legacy Japanese files.
@@ -1386,6 +1422,11 @@
                 headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
                 body: JSON.stringify({ text: sourceTextContent.slice(0, 500), language: srcLang })
             });
+            if (resp.status === 401) {
+                alert(L === 'ja' ? 'ログインの有効期限が切れています。もう一度ログインしてください。' : 'Your session has expired. Please log in again.');
+                window.location.href = 'login.html';
+                return;
+            }
             const data = await resp.json();
             if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
             ['haiku', 'sonnet', 'opus'].forEach(m => {
@@ -1528,6 +1569,11 @@
                     glossary: glossary
                 })
             });
+            if (startResp.status === 401) {
+                alert(L === 'ja' ? 'ログインの有効期限が切れています。もう一度ログインしてください。' : 'Your session has expired. Please log in again.');
+                window.location.href = 'login.html';
+                return;
+            }
             const startData = await startResp.json();
             if (!startResp.ok) throw new Error(startData.error || ('HTTP ' + startResp.status));
 
@@ -1569,6 +1615,32 @@
         URL.revokeObjectURL(url);
     }
 
+    // 編集済みの原稿をアップロードページへ引き渡す（テキストエディターと同じ連携）
+    function uploadEditedWork() {
+        const text = (document.getElementById('reviewTranslation').value || translatedText || '').trim();
+        if (!text) return;
+        try {
+            localStorage.setItem('editorDraftForUpload', JSON.stringify({ title: '', text: text }));
+        } catch (e) {
+            console.error('Handoff failed:', e);
+            return;
+        }
+        window.location.href = 'upload.html?from=editor';
+    }
+
+    // 追加ラベルの多言語化（アップロードボタン・差分ボタン）
+    function updateAiEditorExtraText() {
+        const L = getLang();
+        const uploadLabel = { en: 'Upload as a work', ja: '作品としてアップロード', zh: '作为作品上传', es: 'Subir como obra', fr: 'Publier comme œuvre', de: 'Als Werk hochladen', ko: '작품으로 업로드', ar: 'رفع كعمل', pt: 'Enviar como obra', it: 'Carica come opera' };
+        const showLabel = { en: 'Show changes', ja: '変更箇所を表示', zh: '显示修改处', es: 'Mostrar cambios', fr: 'Afficher les modifications', de: 'Änderungen anzeigen', ko: '변경 사항 표시', ar: 'إظهار التغييرات', pt: 'Mostrar alterações', it: 'Mostra modifiche' };
+        const up = document.getElementById('s9UploadLabel');
+        if (up) up.textContent = uploadLabel[L] || uploadLabel.en;
+        const dt = document.getElementById('btnDiffToggleText');
+        if (dt && !diffVisible) dt.textContent = showLabel[L] || showLabel.en;
+    }
+    document.addEventListener('DOMContentLoaded', updateAiEditorExtraText);
+    document.addEventListener('languageChanged', updateAiEditorExtraText);
+
     function startNewTranslation() {
         document.getElementById('sourceText').value = '';
         updateCharCount();
@@ -1586,6 +1658,106 @@
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    // ===== 変更箇所（差分）表示 =====
+    let diffVisible = false;
+
+    function toggleDiffView() {
+        const L = getLang();
+        const labels = {
+            show: { en: 'Show changes', ja: '変更箇所を表示', zh: '显示修改处', es: 'Mostrar cambios', fr: 'Afficher les modifications', de: 'Änderungen anzeigen', ko: '변경 사항 표시', ar: 'إظهار التغييرات', pt: 'Mostrar alterações', it: 'Mostra modifiche' },
+            hide: { en: 'Hide changes', ja: '変更箇所を隠す', zh: '隐藏修改处', es: 'Ocultar cambios', fr: 'Masquer les modifications', de: 'Änderungen ausblenden', ko: '변경 사항 숨기기', ar: 'إخفاء التغييرات', pt: 'Ocultar alterações', it: 'Nascondi modifiche' }
+        };
+        diffVisible = !diffVisible;
+        const panel = document.getElementById('reviewDiff');
+        const label = document.getElementById('btnDiffToggleText');
+        if (diffVisible) {
+            panel.innerHTML = buildDiffHtml(sourceTextContent, document.getElementById('reviewTranslation').value);
+            panel.style.display = 'block';
+            label.textContent = labels.hide[L] || labels.hide.en;
+        } else {
+            panel.style.display = 'none';
+            label.textContent = labels.show[L] || labels.show.en;
+        }
+    }
+
+    // 汎用LCS差分（トークン列 → [type, token]の列。大きすぎる場合はnull）
+    function lcsDiff(a, b) {
+        const n = a.length, m = b.length;
+        if ((n + 1) * (m + 1) > 4000000) return null;
+        const W = m + 1;
+        const dp = new Int32Array((n + 1) * W);
+        for (let i = n - 1; i >= 0; i--) {
+            for (let j = m - 1; j >= 0; j--) {
+                dp[i * W + j] = (a[i] === b[j])
+                    ? dp[(i + 1) * W + j + 1] + 1
+                    : Math.max(dp[(i + 1) * W + j], dp[i * W + j + 1]);
+            }
+        }
+        const ops = [];
+        let i = 0, j = 0;
+        while (i < n && j < m) {
+            if (a[i] === b[j]) { ops.push(['eq', a[i]]); i++; j++; }
+            else if (dp[(i + 1) * W + j] >= dp[i * W + j + 1]) { ops.push(['del', a[i]]); i++; }
+            else { ops.push(['ins', b[j]]); j++; }
+        }
+        while (i < n) ops.push(['del', a[i++]]);
+        while (j < m) ops.push(['ins', b[j++]]);
+        return ops;
+    }
+
+    // 文字単位の差分（連続する同種の文字をまとめる）
+    function charDiffHtml(a, b) {
+        if (a === b) return escH(a);
+        const ops = lcsDiff(Array.from(a), Array.from(b));
+        if (!ops) return '<span class="diff-del">' + escH(a) + '</span><span class="diff-ins">' + escH(b) + '</span>';
+        const merged = [];
+        for (const [t, s] of ops) {
+            if (merged.length && merged[merged.length - 1][0] === t) merged[merged.length - 1][1] += s;
+            else merged.push([t, s]);
+        }
+        return merged.map(([t, s]) =>
+            t === 'eq' ? escH(s)
+            : t === 'del' ? '<span class="diff-del">' + escH(s) + '</span>'
+            : '<span class="diff-ins">' + escH(s) + '</span>'
+        ).join('');
+    }
+
+    // 全体の差分HTML: 段落単位で対応付けし、各段落内は文字単位でハイライト
+    function buildDiffHtml(orig, edited) {
+        const L = getLang();
+        const aParas = String(orig).split('\n');
+        const bParas = String(edited).split('\n');
+        let pairs = [];
+
+        if (aParas.length === bParas.length) {
+            for (let k = 0; k < aParas.length; k++) pairs.push(['pair', aParas[k], bParas[k]]);
+        } else {
+            const ops = lcsDiff(aParas, bParas);
+            if (!ops) {
+                const msg = { en: 'The text is too large to show differences.', ja: 'テキストが大きすぎるため変更箇所を表示できません。' };
+                return '<em>' + (msg[L] || msg.en) + '</em>';
+            }
+            // 連続する削除段落群と挿入段落群を位置で対応付けて「書き換え」として文字差分にする
+            let k = 0;
+            while (k < ops.length) {
+                if (ops[k][0] === 'eq') { pairs.push(['pair', ops[k][1], ops[k][1]]); k++; continue; }
+                const dels = [], inss = [];
+                while (k < ops.length && ops[k][0] === 'del') { dels.push(ops[k][1]); k++; }
+                while (k < ops.length && ops[k][0] === 'ins') { inss.push(ops[k][1]); k++; }
+                const nPairs = Math.min(dels.length, inss.length);
+                for (let x = 0; x < nPairs; x++) pairs.push(['pair', dels[x], inss[x]]);
+                for (let x = nPairs; x < dels.length; x++) pairs.push(['del', dels[x]]);
+                for (let x = nPairs; x < inss.length; x++) pairs.push(['ins', inss[x]]);
+            }
+        }
+
+        return pairs.map(p =>
+            p[0] === 'pair' ? charDiffHtml(p[1], p[2])
+            : p[0] === 'del' ? '<span class="diff-del">' + escH(p[1]) + '</span>'
+            : '<span class="diff-ins">' + escH(p[1]) + '</span>'
+        ).join('\n');
     }
 
     // ===== i18n Update =====
