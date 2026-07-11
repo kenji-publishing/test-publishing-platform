@@ -46,7 +46,16 @@ async function createRevenueSplits(client, { workId, authorId, amount, currency,
     }
 
     rows.unshift({ recipientId: authorId, role: 'author', share: authorShare, amount: round2(amount * authorShare / 100) });
-    rows.push({ recipientId: null, role: 'platform', share: REVENUE_SHARES.PLATFORM, amount: round2(amount * REVENUE_SHARES.PLATFORM / 100) });
+
+    // Platform takes the remainder so the rows always sum to exactly the
+    // charged amount (independent rounding can otherwise drift by a cent,
+    // e.g. 9.99 -> 5.00 + 2.00 + 3.00 = 10.00)
+    const allocated = rows.reduce((sum, r) => sum + r.amount, 0);
+    const platformAmount = round2(amount - allocated);
+    if (platformAmount < 0) {
+        throw new Error(`Split allocation exceeds amount for work ${workId}: ${allocated} > ${amount}`);
+    }
+    rows.push({ recipientId: null, role: 'platform', share: REVENUE_SHARES.PLATFORM, amount: platformAmount });
 
     for (const r of rows) {
         await client.query(
