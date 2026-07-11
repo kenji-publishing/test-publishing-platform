@@ -12,6 +12,24 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { REVENUE_SHARES, generateAgreementHash } = require('../config/revenue');
+const { createNotification } = require('../services/notificationService');
+
+/** 同意書発行をコラボレーターに通知（失敗しても本処理は止めない） */
+async function notifyNewCollaborators(newCollabs, workTitle) {
+    for (const n of newCollabs) {
+        try {
+            await createNotification({
+                userId: n.userId,
+                type: 'system',
+                title: '同意書が届きました / New agreement',
+                message: `「${workTitle}」の${n.role === 'translator' ? '翻訳' : '編集'}同意書が届いています。内容を確認して署名してください。 / You have a new ${n.role === 'translator' ? 'translation' : 'editing'} agreement for "${workTitle}". Please review and sign it.`,
+                actionUrl: '/pages/agreements.html'
+            });
+        } catch (e) {
+            console.error('Notify collaborator failed:', e.message);
+        }
+    }
+}
 
 // ===== Collaborators (editor / translator revenue sharing) =====
 
@@ -94,9 +112,12 @@ async function syncWorkCollaborators(client, workId, resolved, workInfo, authorI
         }
     }
 
+    const newCollabs = []; // COMMIT後に通知するため呼び出し元へ返す
+
     for (const r of resolved) {
         const already = existing.find(ex => ex.role === r.role && ex.user_id === r.userId);
         if (already) continue; // 署名状態を保持
+        newCollabs.push({ userId: r.userId, role: r.role });
 
         const ins = await client.query(
             `INSERT INTO work_collaborators (work_id, user_id, role, revenue_share, target_language, status)
@@ -123,6 +144,8 @@ async function syncWorkCollaborators(client, workId, resolved, workInfo, authorI
             [ins.rows[0].collaborator_id, workId, authorId, r.userId, JSON.stringify(terms), generateAgreementHash(terms)]
         );
     }
+
+    return newCollabs;
 }
 
 /** 400 payload for collaborator validation errors, null for other errors. */
@@ -659,8 +682,9 @@ router.post('/', authenticate, async (req, res) => {
                 ]
             );
             work = result.rows[0];
-            await syncWorkCollaborators(client, work.work_id, resolvedCollabs, work, req.user.userId);
+            const newCollabs = await syncWorkCollaborators(client, work.work_id, resolvedCollabs, work, req.user.userId);
             await client.query('COMMIT');
+            notifyNewCollaborators(newCollabs, work.title); // 非同期・失敗しても本処理に影響なし
         } catch (txError) {
             await client.query('ROLLBACK');
             throw txError;
@@ -775,8 +799,9 @@ router.put('/:workId', authenticate, async (req, res) => {
             const client = await db.pool.connect();
             try {
                 await client.query('BEGIN');
-                await syncWorkCollaborators(client, req.params.workId, resolvedCollabs, result.rows[0], req.user.userId);
+                const newCollabs = await syncWorkCollaborators(client, req.params.workId, resolvedCollabs, result.rows[0], req.user.userId);
                 await client.query('COMMIT');
+                notifyNewCollaborators(newCollabs, result.rows[0].title); // 非同期・失敗しても本処理に影響なし
             } catch (txError) {
                 await client.query('ROLLBACK');
                 throw txError;

@@ -132,8 +132,10 @@
         </div>
 
         <!-- Agreement Type Selection -->
+        <!-- 翻訳・編集の同意書は自動発行（上のセクション）に一本化。手動作成は共同制作用のみ -->
+        <p class="text-secondary small mb-2" id="agAutoNote"></p>
         <div class="row g-4 mb-4" id="typeSelectionRow">
-            <div class="col-md-4">
+            <div class="col-md-4" id="colCardTranslation" style="display:none;">
                 <div class="agreement-type-card" onclick="selectAgreementType('translation')" id="cardTranslation">
                     <div class="type-icon"><i class="fas fa-language"></i></div>
                     <h5 id="typeTranslationTitle" data-i18n="agreements.typeTranslationTitle">Translation Agreement</h5>
@@ -145,7 +147,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4" id="colCardEditing" style="display:none;">
                 <div class="agreement-type-card" onclick="selectAgreementType('editing')" id="cardEditing">
                     <div class="type-icon"><i class="fas fa-edit"></i></div>
                     <h5 id="typeEditingTitle" data-i18n="agreements.typeEditingTitle">Editing Agreement</h5>
@@ -361,6 +363,9 @@
             btnSign: { en: 'Agree & sign', ja: '同意して署名する', zh: '同意并签署', ko: '동의하고 서명' },
             btnDecline: { en: 'Decline', ja: '辞退する', zh: '拒绝', ko: '거절' },
             confirmSign: { en: 'Sign this agreement? You will become an active collaborator with the stated revenue share.', ja: 'この同意書に署名しますか？署名すると記載の分配率でコラボレーターとして有効になります。', zh: '确定签署此协议？签署后您将以所述分成比例成为正式合作者。', ko: '이 동의서에 서명하시겠습니까? 서명하면 명시된 분배율로 협업자가 됩니다.' },
+            docTranslation: { en: 'Translation Agreement', ja: '翻訳同意書', zh: '翻译协议', ko: '번역 동의서' },
+            docEditing: { en: 'Editing Agreement', ja: '編集同意書', zh: '编辑协议', ko: '편집 동의서' },
+            autoNote: { en: 'Translation and editing agreements are issued automatically when an author adds a collaborator to a work, and appear above. The tool below is for co-production (multiple authors) agreements only.', ja: '翻訳・編集の同意書は、作者が作品にコラボレーターを指定すると自動で発行され、このページ上部に表示されます。以下の作成ツールは共同制作（複数作者）用の同意書のみです。', zh: '翻译和编辑协议在作者为作品指定合作者时自动发出，并显示在本页上方。下面的工具仅用于共同创作（多位作者）协议。', ko: '번역·편집 동의서는 저자가 작품에 협업자를 지정하면 자동으로 발행되어 이 페이지 상단에 표시됩니다. 아래 도구는 공동 제작(복수 저자)용 동의서 전용입니다.' },
             confirmDecline: { en: 'Decline this agreement? The author will be able to choose someone else.', ja: 'この同意書を辞退しますか？作者は別の相手を選べるようになります。', zh: '确定拒绝此协议？作者将可以另选他人。', ko: '이 동의서를 거절하시겠습니까? 저자는 다른 사람을 선택할 수 있습니다.' },
             signedDone: { en: 'Signed! You are now an active collaborator.', ja: '署名しました！コラボレーターとして有効になりました。', zh: '已签署！您现在是正式合作者。', ko: '서명 완료! 이제 활성 협업자입니다.' }
         };
@@ -397,9 +402,11 @@
                 ? '<button class="btn btn-sm" style="background:var(--color-accent, #8B7355); color:#fff;" onclick="agSign(\'' + a.agreement_id + '\')"><i class="fas fa-signature me-1"></i>' + agL(agT.btnSign) + '</button> '
                   + '<button class="btn btn-sm btn-outline-secondary" onclick="agDecline(\'' + a.agreement_id + '\')">' + agL(agT.btnDecline) + '</button>'
                 : '';
+            const docType = terms.role === 'translator' ? agL(agT.docTranslation) : agL(agT.docEditing);
             return '<div style="border:1px solid var(--color-border, #e5ddd3); border-radius:10px; padding:0.9rem 1rem; margin-bottom:0.75rem;">'
                 + '<div class="d-flex justify-content-between align-items-start flex-wrap gap-2">'
-                + '<div><strong>「' + agEsc(a.work_title) + '」</strong> — ' + agRoleLabel(terms.role) + ' (' + agL(agT.share) + ': ' + share + ')'
+                + '<div><span class="badge" style="background:var(--color-accent, #8B7355); color:#fff; margin-bottom:0.3rem;">' + docType + '</span><br>'
+                + '<strong>「' + agEsc(a.work_title) + '」</strong> — ' + agRoleLabel(terms.role) + ' (' + agL(agT.share) + ': ' + share + ')'
                 + '<div class="text-secondary" style="font-size:0.85rem; margin-top:0.2rem;">' + who
                 + (a.signed_at ? ' • ' + new Date(a.signed_at).toLocaleDateString() : '') + '</div></div>'
                 + '<div>' + agBadge(a.status) + '</div></div>'
@@ -468,8 +475,12 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', agLoadAgreements);
-        document.addEventListener('languageChanged', agLoadAgreements);
+        function agSetNote() {
+            const note = document.getElementById('agAutoNote');
+            if (note) note.textContent = agL(agT.autoNote);
+        }
+        document.addEventListener('DOMContentLoaded', function() { agSetNote(); agLoadAgreements(); });
+        document.addEventListener('languageChanged', function() { agSetNote(); agLoadAgreements(); });
     })();
     </script>
 

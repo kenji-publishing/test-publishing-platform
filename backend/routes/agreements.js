@@ -13,6 +13,30 @@ const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const db = require('../config/database');
 const { generateSignatureHash } = require('../config/revenue');
+const { createNotification } = require('../services/notificationService');
+
+/** 署名/辞退を著者に通知（失敗しても本処理は止めない） */
+async function notifyAuthor(agreement, signerUserId, action) {
+    try {
+        const info = (await db.query(
+            `SELECT (SELECT title FROM works WHERE work_id = $1) AS title,
+                    (SELECT COALESCE(pen_name, first_name || ' ' || last_name) FROM users WHERE user_id = $2) AS signer`,
+            [agreement.work_id, signerUserId]
+        )).rows[0] || {};
+        const signed = action === 'signed';
+        await createNotification({
+            userId: agreement.author_id,
+            type: 'system',
+            title: signed ? '同意書が署名されました / Agreement signed' : '同意書が辞退されました / Agreement declined',
+            message: signed
+                ? `「${info.title}」の同意書に${info.signer}さんが署名しました。コラボレーターとして有効になりました。 / ${info.signer} signed the agreement for "${info.title}" and is now an active collaborator.`
+                : `「${info.title}」の同意書を${info.signer}さんが辞退しました。作品の編集画面から別のコラボレーターを指定できます。 / ${info.signer} declined the agreement for "${info.title}". You can assign someone else from the work's edit page.`,
+            actionUrl: '/pages/dashboard.html'
+        });
+    } catch (e) {
+        console.error('Notify author failed:', e.message);
+    }
+}
 
 /**
  * GET /api/agreements/mine
@@ -97,6 +121,7 @@ router.post('/:agreementId/sign', authenticate, async (req, res) => {
             [agreement.collaborator_id]
         );
         await client.query('COMMIT');
+        notifyAuthor(agreement, req.user.userId, 'signed'); // 非同期・失敗しても署名は成立
 
         res.json({ success: true, status: 'signed', signedAt });
     } catch (error) {
@@ -132,6 +157,7 @@ router.post('/:agreementId/decline', authenticate, async (req, res) => {
             [agreement.collaborator_id]
         );
         await client.query('COMMIT');
+        notifyAuthor(agreement, req.user.userId, 'declined'); // 非同期・失敗しても辞退は成立
 
         res.json({ success: true, status: 'declined' });
     } catch (error) {

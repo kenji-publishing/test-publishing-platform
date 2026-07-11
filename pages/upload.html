@@ -415,12 +415,7 @@
                             <!-- Revenue Preview -->
                             <div id="revenuePreview" style="display: none; margin-top: 1rem; padding: 1rem; background: var(--color-bg-hover); border-radius: var(--radius-md); border-left: 3px solid var(--color-accent);">
                                 <h6 style="font-weight: 600; margin-bottom: 0.75rem;"><i class="fas fa-chart-pie me-1" style="color: var(--color-accent);"></i> <span id="revenuePreviewTitle" data-i18n="upload.revenuePreviewTitle">Revenue Preview</span></h6>
-                                <div style="display: grid; grid-template-columns: 1fr auto; gap: 0.25rem 1rem; font-size: var(--font-size-sm);">
-                                    <span id="revLabelAuthor" data-i18n="upload.revLabelAuthor">Author (70%)</span>
-                                    <strong id="revAuthor">-</strong>
-                                    <span id="revLabelPlatform" data-i18n="upload.revLabelPlatform">Platform (30%)</span>
-                                    <strong id="revPlatform">-</strong>
-                                </div>
+                                <div id="revBreakdown" style="display: grid; grid-template-columns: 1fr auto; gap: 0.25rem 1rem; font-size: var(--font-size-sm);"></div>
                                 <hr style="margin: 0.5rem 0;">
                                 <div style="display: grid; grid-template-columns: 1fr auto; gap: 0.25rem 1rem; font-size: var(--font-size-sm);">
                                     <span id="revLabelTotal" data-i18n="upload.revLabelTotal">Total Price</span>
@@ -897,7 +892,7 @@
             customPriceInput.addEventListener('input', updateRevenuePreview);
         }
 
-        // Revenue Preview
+        // Revenue Preview（コラボレーターのチェック状態に連動して分配率を更新）
         function updateRevenuePreview() {
             var preview = document.getElementById('revenuePreview');
             if (document.getElementById('isFree').checked) {
@@ -909,15 +904,31 @@
             var cs = document.getElementById('currencySelect');
             var symbol = cs.options[cs.selectedIndex].dataset.symbol || '$';
             preview.style.display = 'block';
-            var authorPct = 0.70, platformPct = 0.30;
+
+            var hasEd = document.getElementById('hasEditor') && document.getElementById('hasEditor').checked;
+            var hasTr = document.getElementById('hasTranslator') && document.getElementById('hasTranslator').checked;
+            var edPct = hasEd ? 10 : 0;
+            var trPct = hasTr ? 20 : 0;
+            var authorPct = 70 - edPct - trPct;
+
             var isInt = (symbol === '¥' || symbol === '₩');
             var fmt = function(v) { return isInt ? symbol + Math.round(v) : symbol + v.toFixed(2); };
-            document.getElementById('revAuthor').textContent = fmt(price * authorPct);
-            document.getElementById('revPlatform').textContent = fmt(price * platformPct);
+            var esc = function(t) { var d = document.createElement('div'); d.textContent = t == null ? '' : String(t); return d.innerHTML; };
+
+            var roleTr = { en: 'Translator', ja: '翻訳者', zh: '译者', es: 'Traductor', fr: 'Traducteur', de: 'Übersetzer', ko: '번역가', ar: 'المترجم', pt: 'Tradutor', it: 'Traduttore' };
+            var roleEd = { en: 'Editor', ja: '編集者', zh: '编辑', es: 'Editor', fr: 'Éditeur', de: 'Lektor', ko: '편집자', ar: 'المحرر', pt: 'Editor', it: 'Editor' };
+            var rows = [];
+            rows.push([getL(uiText.revLabelAuthor || { en: 'Author (70%)' }).replace(/\d+\s*%/, authorPct + '%'), fmt(price * authorPct / 100)]);
+            if (hasTr) rows.push([getL(roleTr) + ' (20%)', fmt(price * 0.20)]);
+            if (hasEd) rows.push([getL(roleEd) + ' (10%)', fmt(price * 0.10)]);
+            rows.push([getL(uiText.revLabelPlatform || { en: 'Platform (30%)' }), fmt(price * 0.30)]);
+
+            document.getElementById('revBreakdown').innerHTML = rows
+                .map(function(r) { return '<span>' + esc(r[0]) + '</span><strong>' + esc(r[1]) + '</strong>'; })
+                .join('');
             document.getElementById('revTotal').textContent = fmt(price);
-            document.getElementById('revLabelAuthor').textContent = getL(uiText.revLabelAuthor || { en: 'Author (70%)' });
-            document.getElementById('revLabelPlatform').textContent = getL(uiText.revLabelPlatform || { en: 'Platform (30%)' });
         }
+        document.addEventListener('languageChanged', updateRevenuePreview);
 
         // AI Usage Disclosure - show/hide AI service section
         function updateAiServiceVisibility() {
