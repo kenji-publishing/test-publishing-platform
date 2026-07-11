@@ -1191,15 +1191,9 @@
             system: ''
         };
 
-        // ========== Demo Notifications ==========
-        const DEMO_NOTIFS = [
-            { id: 'n1', type: 'sale', params: { work: 'Magic Academy Adventure', amount: '$9.80' }, icon: 'fa-dollar-sign', icon_color: 'success', is_read: false, created_at: new Date(Date.now() - 30*60*1000).toISOString() },
-            { id: 'n2', type: 'translation_complete', params: { work: 'Digital Dreams', language: 'English' }, icon: 'fa-language', icon_color: 'info', is_read: false, created_at: new Date(Date.now() - 2*60*60*1000).toISOString() },
-            { id: 'n3', type: 'feedback', params: { work: 'Starlight Symphony', rating: '5' }, icon: 'fa-star', icon_color: 'warning', is_read: false, created_at: new Date(Date.now() - 5*60*60*1000).toISOString() },
-            { id: 'n4', type: 'agreement_request', params: { work: 'Magic Academy Adventure', role: 'Translator' }, icon: 'fa-file-signature', icon_color: 'primary', is_read: false, created_at: new Date(Date.now() - 45*60*1000).toISOString() },
-            { id: 'n5', type: 'deadline_warning', params: { work: 'Digital Dreams', days: '3' }, icon: 'fa-exclamation-triangle', icon_color: 'warning', is_read: true, created_at: new Date(Date.now() - 1*60*60*1000).toISOString() },
-            { id: 'n6', type: 'system', params: {}, icon: 'fa-rocket', icon_color: 'primary', is_read: true, created_at: new Date(Date.now() - 7*24*60*60*1000).toISOString() }
-        ];
+        // ========== Notifications: 実API接続（デモ通知は撤去済み） ==========
+        let notifCache = [];
+        try { localStorage.removeItem('publisher_msg_notifs'); } catch (e) {} // 旧デモ通知の掃除
 
         // ========== Demo Data ==========
         const demoConversations = [
@@ -1313,80 +1307,85 @@
             }
         }
 
-        // ========== Load Notifications from localStorage ==========
-        function loadNotifs() {
-            const saved = localStorage.getItem('publisher_msg_notifs');
-            if (saved) { try { return JSON.parse(saved); } catch(e) {} }
-            localStorage.setItem('publisher_msg_notifs', JSON.stringify(DEMO_NOTIFS));
-            return JSON.parse(JSON.stringify(DEMO_NOTIFS));
-        }
-        function saveNotifs(notifs) {
-            localStorage.setItem('publisher_msg_notifs', JSON.stringify(notifs));
+        // ========== Load Notifications from API ==========
+        async function fetchNotifs() {
+            const token = localStorage.getItem('token');
+            if (!token) { notifCache = []; return; }
+            try {
+                const resp = await fetch((window.API_ORIGIN || '') + '/api/notifications', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await resp.json();
+                if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
+                notifCache = data.notifications || data.data || [];
+            } catch (e) {
+                console.error('Failed to load notifications:', e);
+                notifCache = [];
+            }
         }
 
         // ========== Render Notification List ==========
-        function renderNotificationList() {
-            const notifs = loadNotifs();
+        async function renderNotificationList() {
+            await fetchNotifs();
             const list = document.getElementById('notifList');
 
-            if (notifs.length === 0) {
+            if (notifCache.length === 0) {
                 list.innerHTML = '<div class="notif-empty"><i class="fas fa-bell-slash"></i><p style="font-size:var(--font-size-sm); margin:0;">' + getL(uiText.noNotifications) + '</p></div>';
+                updateNotifBadge();
                 return;
             }
 
-            list.innerHTML = notifs.map(n => {
-                const title = getNotifText(n.type, 'title', n.params);
-                const message = getNotifText(n.type, 'message', n.params);
+            list.innerHTML = notifCache.map(n => {
                 const timeAgo = formatNotifTimeAgo(n.created_at);
-                const link = NOTIFICATION_LINKS[n.type] || '';
-                const linkLabel = link ? getL(uiText.notifViewLink) : '';
-                return '<div class="notif-item ' + (n.is_read ? '' : 'unread') + '" onclick="handleNotifClick(\'' + n.id + '\')">' +
-                    '<div class="notif-icon ' + n.icon_color + '"><i class="fas ' + n.icon + '"></i></div>' +
+                return '<div class="notif-item ' + (n.is_read ? '' : 'unread') + '" onclick="handleNotifClick(\'' + n.notification_id + '\')">' +
+                    '<div class="notif-icon ' + (n.icon_color || 'primary') + '"><i class="fas ' + (n.icon || 'fa-bell') + '"></i></div>' +
                     '<div class="notif-content">' +
-                        '<div class="notif-title">' + escapeHtml(title) + '</div>' +
-                        '<div class="notif-message">' + escapeHtml(message) + '</div>' +
+                        '<div class="notif-title">' + escapeHtml(n.title) + '</div>' +
+                        '<div class="notif-message">' + escapeHtml(n.message) + '</div>' +
                         '<div class="notif-meta">' +
                             '<span class="notif-time"><i class="fas fa-clock me-1"></i>' + timeAgo + '</span>' +
-                            (linkLabel ? '<span class="notif-link-label"><i class="fas fa-external-link-alt me-1"></i>' + linkLabel + '</span>' : '') +
+                            (n.action_url ? '<span class="notif-link-label"><i class="fas fa-external-link-alt me-1"></i>' + getL(uiText.notifViewLink) + '</span>' : '') +
                         '</div>' +
                     '</div>' +
                 '</div>';
             }).join('');
+            updateNotifBadge();
         }
 
         // ========== Mark All Notifications as Read ==========
-        function markAllNotifRead() {
-            const notifs = loadNotifs();
-            notifs.forEach(n => n.is_read = true);
-            saveNotifs(notifs);
-            renderNotificationList();
-            updateNotifBadge();
+        async function markAllNotifRead() {
+            const token = localStorage.getItem('token');
+            try {
+                await fetch((window.API_ORIGIN || '') + '/api/notifications/read-all', {
+                    method: 'PUT', headers: { 'Authorization': 'Bearer ' + token }
+                });
+            } catch (e) { console.error(e); }
+            await renderNotificationList();
             if (typeof updateMessageBadge === 'function') updateMessageBadge();
         }
 
         // ========== Handle Notification Click ==========
-        function handleNotifClick(id) {
-            const notifs = loadNotifs();
-            const n = notifs.find(x => x.id === id);
-            if (n) {
-                n.is_read = true;
-                saveNotifs(notifs);
-                updateNotifBadge();
-                if (typeof updateMessageBadge === 'function') updateMessageBadge();
-                const link = NOTIFICATION_LINKS[n.type] || '';
-                if (link) {
-                    window.location.href = link;
-                } else {
-                    renderNotificationList();
-                }
+        async function handleNotifClick(id) {
+            const n = notifCache.find(x => String(x.notification_id) === String(id));
+            const token = localStorage.getItem('token');
+            try {
+                await fetch((window.API_ORIGIN || '') + '/api/notifications/' + encodeURIComponent(id) + '/read', {
+                    method: 'PUT', headers: { 'Authorization': 'Bearer ' + token }
+                });
+            } catch (e) { console.error(e); }
+            if (typeof updateMessageBadge === 'function') updateMessageBadge();
+            if (n && n.action_url) {
+                window.location.href = n.action_url;
+            } else {
+                renderNotificationList();
             }
         }
 
         // ========== Update Notification Badge ==========
         function updateNotifBadge() {
-            const notifs = loadNotifs();
-            const unread = notifs.filter(n => !n.is_read).length;
+            const unread = notifCache.filter(n => !n.is_read).length;
             const badge = document.getElementById('notifBadge');
+            if (!badge) return;
             if (unread > 0) {
                 badge.textContent = unread;
                 badge.style.display = 'inline-flex';

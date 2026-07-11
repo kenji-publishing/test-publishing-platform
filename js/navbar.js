@@ -408,6 +408,12 @@ function renderNavbar(options) {
     html += '<i class="fas fa-sign-out-alt"></i> <span id="menuLogout">Log Out</span></button>';
     html += '</div></div>';
 
+    // Mobile: 常時表示のメッセージアイコン（ハンバーガーを開かなくても未読が分かる）
+    html += '<a class="msg-icon-mobile position-relative" href="' + p('messages.html') + '" id="navMsgIconMobile" style="padding: 0.35rem 0.55rem; margin-right: 0.25rem; color: var(--color-text, #2D2A26); text-decoration: none;">';
+    html += '<i class="fas fa-envelope" style="font-size: 1.25rem;"></i>';
+    html += '<span class="msg-badge" id="msgBadgeMobileTop" style="display:none;"></span>';
+    html += '</a>';
+
     // Hamburger
     html += '<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">';
     html += '<span class="navbar-toggler-icon"></span>';
@@ -869,16 +875,30 @@ document.addEventListener('DOMContentLoaded', function() {
  * localStorageから未読数を取得、またはAPIから取得
  */
 function updateMessageBadge() {
-    var count = _getUnreadCount();
-    var badges = document.querySelectorAll('.msg-badge');
-    for (var i = 0; i < badges.length; i++) {
-        if (count > 0) {
-            badges[i].textContent = count > 99 ? '99+' : count;
-            badges[i].style.display = 'inline-flex';
-        } else {
-            badges[i].style.display = 'none';
+    var token = localStorage.getItem('token');
+    var apply = function(count) {
+        var badges = document.querySelectorAll('.msg-badge');
+        for (var i = 0; i < badges.length; i++) {
+            if (count > 0) {
+                badges[i].textContent = count > 99 ? '99+' : count;
+                badges[i].style.display = 'inline-flex';
+            } else {
+                badges[i].style.display = 'none';
+            }
         }
-    }
+    };
+    if (!token) { apply(0); return; }
+    // 実APIの未読通知数を表示（旧: localStorageのデモ未読数）
+    fetch((window.API_ORIGIN || '') + '/api/notifications/unread-count', {
+        headers: { 'Authorization': 'Bearer ' + token }
+    }).then(function(r) { return r.ok ? r.json() : null; }).then(function(data) {
+        if (!data) { apply(0); return; }
+        var c = data.count;
+        if (c == null) c = data.unread_count;
+        if (c == null) c = data.unreadCount;
+        if (c == null && data.data) c = data.data.count;
+        apply(parseInt(c, 10) || 0);
+    }).catch(function() { apply(0); });
 }
 
 function _getUnreadCount() {
