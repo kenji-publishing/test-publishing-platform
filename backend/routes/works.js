@@ -11,7 +11,7 @@ const db = require('../config/database');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const { REVENUE_SHARES } = require('../config/revenue');
+const { REVENUE_SHARES, generateAgreementHash } = require('../config/revenue');
 
 // ===== Collaborators (editor / translator revenue sharing) =====
 
@@ -72,14 +72,55 @@ async function resolveCollaborators(collaborators, authorId) {
     return resolved;
 }
 
-/** Replace a work's collaborators with the resolved set (inside caller's transaction). */
-async function syncWorkCollaborators(client, workId, resolved) {
-    await client.query('DELETE FROM work_collaborators WHERE work_id = $1', [workId]);
+/**
+ * Sync a work's collaborators with the resolved set (inside caller's txn).
+ * - Removed collaborators are deleted (their agreement rows cascade away).
+ * - Unchanged collaborators keep their row and signing status.
+ * - New collaborators start as 'pending' with a collaboration agreement to
+ *   sign on agreements.html; they become 'active' (revenue-eligible) only
+ *   after signing. Until then their share goes to the author.
+ */
+async function syncWorkCollaborators(client, workId, resolved, workInfo, authorId) {
+    const existing = (await client.query(
+        `SELECT collaborator_id, user_id, role FROM work_collaborators
+         WHERE work_id = $1 AND status != 'removed'`,
+        [workId]
+    )).rows;
+
+    for (const ex of existing) {
+        const kept = resolved.find(r => r.role === ex.role && r.userId === ex.user_id);
+        if (!kept) {
+            await client.query('DELETE FROM work_collaborators WHERE collaborator_id = $1', [ex.collaborator_id]);
+        }
+    }
+
     for (const r of resolved) {
-        await client.query(
-            `INSERT INTO work_collaborators (work_id, user_id, role, revenue_share, target_language)
-             VALUES ($1, $2, $3, $4, $5)`,
+        const already = existing.find(ex => ex.role === r.role && ex.user_id === r.userId);
+        if (already) continue; // 署名状態を保持
+
+        const ins = await client.query(
+            `INSERT INTO work_collaborators (work_id, user_id, role, revenue_share, target_language, status)
+             VALUES ($1, $2, $3, $4, $5, 'pending')
+             RETURNING collaborator_id`,
             [workId, r.userId, r.role, r.share, r.targetLanguage]
+        );
+
+        const terms = {
+            version: '1.0',
+            workId,
+            workTitle: (workInfo && workInfo.title) || '',
+            role: r.role,
+            revenueShare: r.share,
+            platformShare: REVENUE_SHARES.PLATFORM,
+            targetLanguage: r.targetLanguage || null,
+            authorId,
+            collaboratorUserId: r.userId,
+            createdAt: new Date().toISOString()
+        };
+        await client.query(
+            `INSERT INTO collaboration_agreements (collaborator_id, work_id, author_id, user_id, terms, terms_hash)
+             VALUES ($1, $2, $3, $4, $5, $6)`,
+            [ins.rows[0].collaborator_id, workId, authorId, r.userId, JSON.stringify(terms), generateAgreementHash(terms)]
         );
     }
 }
@@ -164,11 +205,11 @@ router.get('/my/:workId', authenticate, async (req, res) => {
         const work = result.rows[0];
         // Collaborators for the edit form (email shown so the author can fix it)
         const collabs = await db.query(
-            `SELECT wc.role, wc.revenue_share, wc.target_language, u.email,
+            `SELECT wc.role, wc.revenue_share, wc.target_language, wc.status, u.email,
                     COALESCE(u.pen_name, u.first_name || ' ' || u.last_name) AS name
              FROM work_collaborators wc
              JOIN users u ON wc.user_id = u.user_id
-             WHERE wc.work_id = $1 AND wc.status = 'active'`,
+             WHERE wc.work_id = $1 AND wc.status IN ('pending', 'active')`,
             [req.params.workId]
         );
         work.collaborators = collabs.rows;
@@ -303,7 +344,7 @@ router.get('/my/all', authenticate, async (req, res) => {
 router.get('/collaborations/mine', authenticate, async (req, res) => {
     try {
         const result = await db.query(
-            `SELECT wc.role, wc.revenue_share, wc.target_language, wc.created_at,
+            `SELECT wc.role, wc.revenue_share, wc.target_language, wc.created_at, wc.status,
                     w.work_id, w.title, w.status AS work_status,
                     COALESCE(u.pen_name, u.first_name || ' ' || u.last_name) AS author_name,
                     COALESCE((SELECT SUM(rs.amount) FROM revenue_splits rs
@@ -314,7 +355,7 @@ router.get('/collaborations/mine', authenticate, async (req, res) => {
              FROM work_collaborators wc
              JOIN works w ON wc.work_id = w.work_id
              JOIN users u ON w.author_id = u.user_id
-             WHERE wc.user_id = $1 AND wc.status = 'active' AND w.status != 'deleted'
+             WHERE wc.user_id = $1 AND wc.status IN ('pending', 'active') AND w.status != 'deleted'
              ORDER BY wc.created_at DESC`,
             [req.user.userId]
         );
@@ -618,7 +659,7 @@ router.post('/', authenticate, async (req, res) => {
                 ]
             );
             work = result.rows[0];
-            await syncWorkCollaborators(client, work.work_id, resolvedCollabs);
+            await syncWorkCollaborators(client, work.work_id, resolvedCollabs, work, req.user.userId);
             await client.query('COMMIT');
         } catch (txError) {
             await client.query('ROLLBACK');
@@ -734,7 +775,7 @@ router.put('/:workId', authenticate, async (req, res) => {
             const client = await db.pool.connect();
             try {
                 await client.query('BEGIN');
-                await syncWorkCollaborators(client, req.params.workId, resolvedCollabs);
+                await syncWorkCollaborators(client, req.params.workId, resolvedCollabs, result.rows[0], req.user.userId);
                 await client.query('COMMIT');
             } catch (txError) {
                 await client.query('ROLLBACK');

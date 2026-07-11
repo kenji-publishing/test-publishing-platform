@@ -1151,8 +1151,13 @@
                 return;
             }
 
-            // 参加中のコラボ一覧
-            listEl.innerHTML = collabs.map(c => `
+            // 参加中のコラボ一覧（pending=承諾待ち: 同意書への署名が必要）
+            listEl.innerHTML = collabs.map(c => {
+                const isPending = c.status === 'pending';
+                const statusBadge = isPending
+                    ? '<span class="collab-status-badge" style="background:#fff3cd; color:#856404;">' + getL({ en: 'Awaiting your signature', ja: '承諾待ち（署名が必要）', zh: '待您签署', ko: '서명 대기 중' }) + '</span>'
+                    : '<span class="collab-status-badge in-progress">' + getL({ en: 'Active', ja: '参加中', zh: '进行中', ko: '참여 중' }) + '</span>';
+                return `
                 <div class="collab-card">
                     <div class="collab-card-header">
                         <div class="collab-card-icon"><i class="fas fa-book-open"></i></div>
@@ -1162,18 +1167,19 @@
                                 <span><strong>${getL(uiText.collabRole)}:</strong> ${getL(uiText[roleKey[c.role]] || {})} (${parseFloat(c.revenue_share)}%)</span>
                                 <span><strong>${getL(uiText.collabAuthor)}:</strong> ${esc(c.author_name)}</span>
                             </div>
+                            <div class="collab-card-meta"><span><strong>${getL(uiText.collabStatus)}:</strong> ${statusBadge}</span></div>
                         </div>
                     </div>
                     <div class="collab-card-actions">
-                        <a href="work-detail.html?id=${encodeURIComponent(c.work_id)}" class="btn btn-custom btn-sm">
+                        <a href="work-detail.html?id=${encodeURIComponent(c.work_id)}" class="btn btn-soft-custom btn-sm">
                             <i class="fas fa-book me-1"></i>${getL({ en: 'View work', ja: '作品を見る', zh: '查看作品', ko: '작품 보기' })}
                         </a>
-                        <a href="agreements.html" class="btn btn-soft-custom btn-sm">
-                            <i class="fas fa-file-contract me-1"></i>${getL(uiText.collabViewAgreement)}
+                        <a href="agreements.html" class="btn ${isPending ? 'btn-custom' : 'btn-soft-custom'} btn-sm">
+                            <i class="fas fa-file-contract me-1"></i>${isPending ? getL({ en: 'Sign agreement', ja: '同意書に署名する', zh: '签署协议', ko: '동의서 서명' }) : getL(uiText.collabViewAgreement)}
                         </a>
                     </div>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
 
             // 収益（配当の実績）
             revenueEl.innerHTML = collabs.map(c => {
