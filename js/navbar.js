@@ -243,8 +243,11 @@ function getAiBadgeLabel(textUsage, coverUsage) {
 
 // ========== Price formatting (multi-currency) ==========
 
-// 通貨記号付きで価格を整形（JPY/KRWは小数なし）。全ページ共通で使う
-function formatPrice(price, currency) {
+// 通貨記号付きで価格を整形（JPY/KRWは小数なし）。作品価格の表示用。
+// NOTE: 名前は formatWorkPrice にすること — ウィザード各ページ（ai-editor等）が
+// ローカルに formatPrice を定義しており、navbar.js は後から読み込まれるため
+// 同名のグローバル関数を定義するとページ側の関数を上書きして通貨表示が壊れる
+function formatWorkPrice(price, currency) {
     var cur = (currency || 'USD').toUpperCase();
     var SYMBOLS = { USD: '$', JPY: '¥', EUR: '€', GBP: '£', KRW: '₩', CNY: '¥', BRL: 'R$', SAR: 'SAR ' };
     var ZERO_DECIMAL = ['JPY', 'KRW'];

@@ -93,14 +93,14 @@ ${chunk}`;
 }
 
 /** Edit one chunk of text (streaming to avoid HTTP timeouts on long outputs). */
-async function editChunk({ chunk, language, tier, glossary }) {
+async function editChunk({ chunk, language, tier, glossary }, requestOptions) {
     if (!chunk.trim()) return chunk;
     const message = await anthropic.messages
         .stream({
             model: MODEL_TIERS[tier],
             max_tokens: 16000,
             messages: [{ role: 'user', content: buildPrompt({ chunk, language, tier, glossary }) }]
-        })
+        }, requestOptions)
         .finalMessage();
 
     if (message.stop_reason === 'refusal') {
@@ -120,8 +120,10 @@ async function editChunk({ chunk, language, tier, glossary }) {
  */
 async function editSample({ text, language }) {
     const tiers = ['haiku', 'sonnet', 'opus'];
+    // 25s per-model cap + single retry: one hung model must not push the
+    // whole comparison response past the 60s nginx proxy timeout (504)
     const results = await Promise.allSettled(
-        tiers.map(tier => editChunk({ chunk: text, language, tier }))
+        tiers.map(tier => editChunk({ chunk: text, language, tier }, { timeout: 25000, maxRetries: 1 }))
     );
     const out = {};
     tiers.forEach((tier, i) => {

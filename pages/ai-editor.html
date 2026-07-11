@@ -803,8 +803,9 @@
                             <p id="uploadText">Click or drag a file here (.txt, .docx)</p>
                             <input type="file" id="fileInput" accept=".txt,.docx" style="display:none;" onchange="handleFileUpload(this)">
                         </div>
-                        <div id="fileInfo" style="display:none;"></div>
                     </div>
+                    <!-- 読み込んだファイル名+削除ボタン（タブ切替に関係なく常に表示） -->
+                    <div id="fileInfo" style="display:none; margin-top:0.5rem;"></div>
 
                     <div class="step-actions">
                         <button class="btn-wizard-secondary" onclick="goStep(1)"><i class="fas fa-arrow-left me-1"></i> <span class="back-label">Back</span></button>
@@ -965,6 +966,9 @@
                     </div>
 
                     <div class="quote-box">
+                        <div style="display:flex; justify-content:flex-end; margin-bottom:0.75rem;">
+                            <select class="form-select-custom" id="currencySelect5" style="max-width:230px;" onchange="onCurrencyChange5()"></select>
+                        </div>
                         <div class="quote-row"><span id="s5LabelModel">Selected Model</span><span id="quoteModel" class="quote-value">Sonnet</span></div>
                         <div class="quote-row"><span id="s5LabelChars">Character Count</span><span id="quoteChars" class="quote-value">0</span></div>
                         <div class="quote-row"><span id="s5LabelRate">Rate</span><span id="quoteRate" class="quote-value"></span></div>
@@ -1143,9 +1147,30 @@
     // Currency change handler
     function onCurrencyChange() {
         selectedCurrency = document.getElementById('currencySelect').value;
+        const sel5 = document.getElementById('currencySelect5');
+        if (sel5) sel5.value = selectedCurrency;
         updateStep1Prices();
         if (currentStep === 5) updateQuote();
     }
+
+    // 見積画面（Step 5）側の通貨セレクタ — Step 1のセレクタと双方向で同期
+    function onCurrencyChange5() {
+        const sel5 = document.getElementById('currencySelect5');
+        selectedCurrency = sel5.value;
+        const main = document.getElementById('currencySelect');
+        if (main) main.value = selectedCurrency;
+        updateStep1Prices();
+        updateQuote();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const main = document.getElementById('currencySelect');
+        const sel5 = document.getElementById('currencySelect5');
+        if (main && sel5) {
+            sel5.innerHTML = main.innerHTML;
+            sel5.value = selectedCurrency;
+        }
+    });
 
     // Payment method selection
     function selectPayMethod(method) {
@@ -1398,12 +1423,29 @@
     }
 
     // ===== Step 4: Model Comparison — 実際にClaude 3モデルで冒頭を編集して比較 =====
+    // 同じ原稿での結果はキャッシュし、ステップを行き来しても即表示・再課金なしにする
+    let comparisonCache = { key: null, samples: null };
+
+    function renderComparisonSamples(samples) {
+        ['haiku', 'sonnet', 'opus'].forEach(m => {
+            const el = document.getElementById('compare' + m.charAt(0).toUpperCase() + m.slice(1) + 'Text');
+            el.innerHTML = '<div style="white-space:pre-wrap;">' + escH(samples[m] || '') + '</div>';
+        });
+    }
+
     async function runComparison() {
         const srcLang = document.getElementById('sourceLang').value;
         const L = getLang();
 
         const excerpt = sourceTextContent.slice(0, 300) + (sourceTextContent.length > 300 ? '...' : '');
         document.getElementById('previewOriginalText').textContent = excerpt;
+
+        // 同じ原稿・言語なら前回の結果をそのまま表示（戻ってきた時に消えない）
+        const cacheKey = srcLang + '::' + sourceTextContent.slice(0, 500);
+        if (comparisonCache.key === cacheKey && comparisonCache.samples) {
+            renderComparisonSamples(comparisonCache.samples);
+            return;
+        }
 
         const token = localStorage.getItem('token');
         if (!token) {
@@ -1412,8 +1454,11 @@
             return;
         }
 
+        const loadingMsg = L === 'ja'
+            ? '3つのAIモデルで編集中です。10〜30秒ほどお待ちください...'
+            : 'Editing with 3 AI models — this takes 10-30 seconds...';
         ['Haiku', 'Sonnet', 'Opus'].forEach(m => {
-            document.getElementById('compare' + m + 'Text').innerHTML = '<div class="compare-loading"><i class="fas fa-spinner fa-spin"></i> ' + (L === 'ja' ? '編集中...' : 'Editing...') + '</div>';
+            document.getElementById('compare' + m + 'Text').innerHTML = '<div class="compare-loading"><i class="fas fa-spinner fa-spin"></i> ' + loadingMsg + '</div>';
         });
 
         try {
@@ -1429,10 +1474,8 @@
             }
             const data = await resp.json();
             if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
-            ['haiku', 'sonnet', 'opus'].forEach(m => {
-                const el = document.getElementById('compare' + m.charAt(0).toUpperCase() + m.slice(1) + 'Text');
-                el.innerHTML = '<div style="white-space:pre-wrap;">' + escH(data.samples[m] || '') + '</div>';
-            });
+            comparisonCache = { key: cacheKey, samples: data.samples };
+            renderComparisonSamples(data.samples);
         } catch (err) {
             const msg = (L === 'ja' ? 'サンプル編集に失敗しました: ' : 'Sample editing failed: ') + err.message;
             ['Haiku', 'Sonnet', 'Opus'].forEach(m => {
@@ -1476,17 +1519,19 @@
         const minNoteEl = document.getElementById('s5MinNote');
         if (rawConverted < minCharge) {
             const methodLabel = selectedPayMethod === 'stripe' ? 'Stripe' : 'PayPal';
+            const raw = formatPrice(rawConverted);
+            const min = formatPrice(minCharge);
             const minNotes = {
-                en: '* Minimum charge ' + formatPrice(minCharge) + ' applied (' + methodLabel + ')',
-                ja: '* \u6700\u4f4e\u6599\u91d1 ' + formatPrice(minCharge) + ' \u304c\u9069\u7528 (' + methodLabel + ')',
-                zh: '* \u5df2\u5957\u7528\u6700\u4f4e\u6536\u8cbb ' + formatPrice(minCharge) + ' (' + methodLabel + ')',
-                es: '* Cargo m\u00ednimo de ' + formatPrice(minCharge) + ' aplicado (' + methodLabel + ')',
-                fr: '* Minimum de ' + formatPrice(minCharge) + ' appliqu\u00e9 (' + methodLabel + ')',
-                de: '* Mindestgeb\u00fchr von ' + formatPrice(minCharge) + ' angewendet (' + methodLabel + ')',
-                ko: '* \ucd5c\uc18c \uc694\uae08 ' + formatPrice(minCharge) + ' \uc801\uc6a9 (' + methodLabel + ')',
-                ar: '* \u062a\u0645 \u062a\u0637\u0628\u064a\u0642 \u0627\u0644\u062d\u062f \u0627\u0644\u0623\u062f\u0646\u0649 ' + formatPrice(minCharge) + ' (' + methodLabel + ')',
-                pt: '* Valor m\u00ednimo de ' + formatPrice(minCharge) + ' aplicado (' + methodLabel + ')',
-                it: '* Tariffa minima di ' + formatPrice(minCharge) + ' applicata (' + methodLabel + ')'
+                en: '* Calculated price ' + raw + ' is below the ' + methodLabel + ' minimum, so the minimum charge ' + min + ' applies',
+                ja: '* \u8a08\u7b97\u984d ' + raw + ' \u304c\u6700\u4f4e\u6599\u91d1\u3092\u4e0b\u56de\u308b\u305f\u3081\u3001\u6700\u4f4e\u6599\u91d1 ' + min + ' \u304c\u9069\u7528\u3055\u308c\u307e\u3059 (' + methodLabel + ')',
+                zh: '* \u8a08\u7b97\u91d1\u984d ' + raw + ' \u4f4e\u65bc\u6700\u4f4e\u6536\u8cbb\uff0c\u6545\u5957\u7528\u6700\u4f4e\u6536\u8cbb ' + min + ' (' + methodLabel + ')',
+                es: '* El precio calculado ' + raw + ' es inferior al m\u00ednimo, se aplica el cargo m\u00ednimo ' + min + ' (' + methodLabel + ')',
+                fr: '* Le prix calcul\u00e9 ' + raw + ' est inf\u00e9rieur au minimum, le minimum ' + min + ' s\'applique (' + methodLabel + ')',
+                de: '* Der berechnete Preis ' + raw + ' liegt unter dem Minimum, daher gilt die Mindestgeb\u00fchr ' + min + ' (' + methodLabel + ')',
+                ko: '* \uacc4\uc0b0 \uae08\uc561 ' + raw + ' \uc774 \ucd5c\uc18c \uc694\uae08\ubcf4\ub2e4 \ub0ae\uc544 \ucd5c\uc18c \uc694\uae08 ' + min + ' \uc774 \uc801\uc6a9\ub429\ub2c8\ub2e4 (' + methodLabel + ')',
+                ar: '* \u0627\u0644\u0633\u0639\u0631 \u0627\u0644\u0645\u062d\u0633\u0648\u0628 ' + raw + ' \u0623\u0642\u0644 \u0645\u0646 \u0627\u0644\u062d\u062f \u0627\u0644\u0623\u062f\u0646\u0649\u060c \u0644\u0630\u0627 \u064a\u064f\u0637\u0628\u0642 \u0627\u0644\u062d\u062f \u0627\u0644\u0623\u062f\u0646\u0649 ' + min + ' (' + methodLabel + ')',
+                pt: '* O pre\u00e7o calculado ' + raw + ' est\u00e1 abaixo do m\u00ednimo, ent\u00e3o o valor m\u00ednimo ' + min + ' se aplica (' + methodLabel + ')',
+                it: '* Il prezzo calcolato ' + raw + ' \u00e8 inferiore al minimo, quindi si applica la tariffa minima ' + min + ' (' + methodLabel + ')'
             };
             minNoteEl.textContent = minNotes[L] || minNotes['en'];
             minNoteEl.style.display = '';
