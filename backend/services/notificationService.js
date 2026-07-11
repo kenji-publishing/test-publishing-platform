@@ -48,22 +48,15 @@ async function createNotification(options) {
     const { userId, type, title, message, actionUrl = null, metadata = {} } = options;
     
     try {
-        // ユーザーの通知設定を確認
+        // ユーザーの通知設定を確認（設定は「通知タイプごとの行」で保持される。
+        // 行が無ければデフォルトで通知ON。in_app_enabled=false の時だけスキップ）
         const prefResult = await pool.query(
-            'SELECT * FROM notification_preferences WHERE user_id = $1',
-            [userId]
+            `SELECT in_app_enabled FROM notification_preferences
+             WHERE user_id = $1 AND notification_type = $2`,
+            [userId, type]
         );
-        
-        // 設定に基づいて通知を送信するか判断
-        if (prefResult.rows.length > 0) {
-            const prefs = prefResult.rows[0];
-            
-            // タイプ別の設定チェック
-            if (type === 'sale' && !prefs.sale_notifications) return null;
-            if (type === 'translation_complete' && !prefs.translation_notifications) return null;
-            if (type === 'comment' && !prefs.comment_notifications) return null;
-            if (type === 'feedback' && !prefs.feedback_notifications) return null;
-            if (type === 'system' && !prefs.system_notifications) return null;
+        if (prefResult.rows.length > 0 && prefResult.rows[0].in_app_enabled === false) {
+            return null;
         }
         
         // 通知を作成（列名は notification_type — DBスキーマに合わせる）
