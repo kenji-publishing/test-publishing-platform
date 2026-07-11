@@ -485,6 +485,7 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/config.js"></script>
     <script src="js/i18n.js"></script>
     <script src="js/navbar.js"></script>
     <script src="js/lang/ja.js"></script>
@@ -500,7 +501,7 @@
     <script>
 document.addEventListener('DOMContentLoaded', function() {
         loadUserInfo();
-        renderFeaturedWorks();
+        loadFeaturedWorks();
 
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.user-dropdown')) {
@@ -535,23 +536,34 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Featured works data
-    const featuredWorks = [
-        { id: 1, title: 'The Adventure of Magic Academy', author: 'Sarah Chen', price: 9.99, category: 'Fiction', language: 'en', tags: ['fantasy', 'adventure'] },
-        { id: 2, title: 'Whispers of Tomorrow', author: 'Maria Garcia', price: 12.99, category: 'Romance', language: 'en', tags: ['romance', 'drama'] },
-        { id: 3, title: 'Digital Dreams', author: 'Alex Chen', price: 0, category: 'Sci-Fi', language: 'en', tags: ['sci-fi', 'cyberpunk'] },
-        { id: 4, title: "The Last Samurai's Tale", author: 'Yamamoto Hiro', price: 14.99, category: 'Historical', language: 'ja', tags: ['historical', 'samurai'] },
-        { id: 5, title: '星降る夜に', author: '佐藤美咲', price: 4.49, category: 'Fiction', language: 'ja', tags: ['romance', 'slice-of-life'] },
-        { id: 6, title: 'Shadows of the Empire', author: 'David Park', price: 6.99, category: 'Fantasy', language: 'en', tags: ['fantasy', 'war'] },
-        { id: 7, title: 'Neon Samurai', author: 'Hiroshi Kato', price: 7.99, category: 'Manga', language: 'ja', tags: ['cyberpunk', 'action'] },
-        { id: 8, title: 'Code of Honor', author: 'Robert Kim', price: 0, category: 'Non-Fiction', language: 'en', tags: ['technology', 'ai'] },
-        { id: 9, title: 'Flores del Viento', author: 'Isabella Torres', price: 3.99, category: 'Poetry', language: 'es', tags: ['nature', 'love'] },
-        { id: 10, title: 'Le Monde Nouveau', author: 'Pierre Dubois', price: 3.49, category: 'Non-Fiction', language: 'fr', tags: ['philosophy', 'society'] },
-        { id: 11, title: 'The Mindful Writer', author: 'Emma Clarke', price: 2.49, category: 'Non-Fiction', language: 'en', tags: ['writing', 'creativity'] },
-        { id: 12, title: '月光の詩', author: '田中花子', price: 0, category: 'Poetry', language: 'ja', tags: ['nature', 'seasons'] }
-    ];
-
+    // 注目の作品: 公開中の実作品をAPIから取得（デモ用ハードコードは撤去済み）
+    let featuredWorks = [];
+    let featuredLoaded = false;
     let showingRecommended = false;
+
+    async function loadFeaturedWorks() {
+        try {
+            const resp = await fetch((window.API_ORIGIN || '') + '/api/works?limit=12&sort=newest');
+            const data = await resp.json();
+            if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
+            featuredWorks = (data.works || []).map(w => ({
+                id: w.work_id,
+                title: w.title || 'Untitled',
+                author: w.author_name || ((w.first_name || '') + ' ' + (w.last_name || '')).trim(),
+                price: parseFloat(w.price) || 0,
+                currency: w.currency || 'USD',
+                isFree: !!w.is_free || !(parseFloat(w.price) > 0),
+                category: w.genre || '',
+                language: w.original_language || w.language || '',
+                cover: w.cover_image || w.cover_image_url || null
+            }));
+        } catch (e) {
+            console.error('Failed to load featured works:', e);
+            featuredWorks = [];
+        }
+        featuredLoaded = true;
+        renderFeaturedWorks();
+    }
 
     function renderFeaturedWorks() {
         const grid = document.getElementById('featuredGrid');
@@ -571,17 +583,19 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         const gl = (obj) => obj[lang] || obj['en'] || '';
 
+        // 公開作品がない（またはAPI未接続）間はセクションごと隠す
+        const section = grid.closest('section') || grid.parentElement;
+        if (featuredLoaded && featuredWorks.length === 0) {
+            if (section) section.style.display = 'none';
+            return;
+        }
+        if (section) section.style.display = '';
+
         let works;
         if (showingRecommended) {
             if (isLoggedIn) {
-                const userPrefs = JSON.parse(localStorage.getItem('userPreferences') || '{}');
-                const favTags = userPrefs.tags || ['fantasy', 'adventure', 'cyberpunk'];
-                let scored = featuredWorks.map(w => {
-                    let score = 0;
-                    if (w.language === lang) score += 2;
-                    if (w.tags) w.tags.forEach(tag => { if (favTags.includes(tag)) score += 2; });
-                    return { ...w, score };
-                });
+                // 表示言語に合う作品を優先しておすすめ表示
+                let scored = featuredWorks.map(w => ({ ...w, score: (w.language === lang) ? 2 : 0 }));
                 scored.sort((a, b) => b.score - a.score);
                 works = scored.slice(0, 4);
                 titleEl.textContent = gl(t.recommended);
@@ -598,14 +612,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
         grid.innerHTML = works.map(w => `
             <div class="col-6 col-md-4 col-lg-3">
-                <div class="book-card" onclick="location.href='pages/work-detail.html?id=${w.id}'" style="cursor:pointer">
-                    <div class="book-cover"><i class="fas fa-book"></i></div>
+                <div class="book-card" onclick="location.href='pages/work-detail.html?id=${encodeURIComponent(w.id)}'" style="cursor:pointer">
+                    <div class="book-cover">${w.cover
+                        ? `<img src="${escapeH(w.cover)}" alt="" style="width:100%; height:100%; object-fit:cover;">`
+                        : '<i class="fas fa-book"></i>'}</div>
                     <div class="book-info">
                         <h3 class="book-title">${escapeH(w.title)}</h3>
                         <p class="book-author">${gl(t.by)} ${escapeH(w.author)}</p>
                         <div class="d-flex justify-content-between align-items-center">
-                            <span class="book-price ${w.price === 0 ? 'free' : ''}">${w.price === 0 ? gl(t.free) : '$' + w.price.toFixed(2)}</span>
-                            <span class="badge badge-soft">${escapeH(w.category)}</span>
+                            <span class="book-price ${w.isFree ? 'free' : ''}">${w.isFree ? gl(t.free) : (typeof formatWorkPrice === 'function' ? formatWorkPrice(w.price, w.currency) : w.currency + ' ' + w.price)}</span>
+                            ${w.category ? `<span class="badge badge-soft">${escapeH(w.category)}</span>` : ''}
                         </div>
                     </div>
                 </div>

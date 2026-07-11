@@ -598,7 +598,7 @@
                             <div class="action-title" data-i18n="dashboard.actions.manga">Manga</div>
                             <div class="action-desc" data-i18n="dashboard.actions.translator">Translator</div>
                         </a>
-                        <a href="reader.html" class="action-card">
+                        <a href="library.html" class="action-card">
                             <i class="fas fa-book-reader d-block"></i>
                             <div class="action-title" data-i18n="dashboard.actions.reader">Reader</div>
                             <div class="action-desc" data-i18n="dashboard.actions.preview">Preview</div>
@@ -664,6 +664,7 @@
     <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/config.js"></script>
     <script src="../js/i18n.js"></script>
     <script src="../js/navbar.js"></script>
     <!-- 言語ファイル（9言語） -->
@@ -1097,37 +1098,7 @@
             ).join('');
         }
         
-        // ===== Collaboration Features =====
-        const demoCollabs = [
-            {
-                id: 'collab1',
-                titleKey: null,
-                title: '"Magic Academy"',
-                descKey: 'collabEnTranslation',
-                role: 'collabTranslator',
-                rolePercent: '20%',
-                author: 'Sarah Chen',
-                status: 'collabInProgress',
-                due: '2026-06-15',
-                sales: 128,
-                revenue: 127.74,
-                targetPercent: 64
-            },
-            {
-                id: 'collab2',
-                titleKey: null,
-                title: '"月光の庭"',
-                descKey: 'collabEditing',
-                role: 'collabEditor',
-                rolePercent: '10%',
-                author: 'Yuki Tanaka',
-                status: 'collabInProgress',
-                due: '2026-09-01',
-                sales: 45,
-                revenue: 22.50,
-                targetPercent: 30
-            }
-        ];
+        // ===== Collaboration Features（実データ: work_collaborators + revenue_splits） =====
 
         function switchDashTab(tab) {
             const myworksContent = document.getElementById('myworksContent');
@@ -1149,31 +1120,54 @@
             }
         }
 
-        function renderCollaborations() {
+        async function renderCollaborations() {
             const listEl = document.getElementById('collabList');
             const revenueEl = document.getElementById('collabRevenueList');
+            const esc = function(t) { const d = document.createElement('div'); d.textContent = t == null ? '' : String(t); return d.innerHTML; };
+            const noCollabs = {
+                en: 'No collaborations yet. When an author adds you as an editor or translator, it will appear here.',
+                ja: 'コラボレーションはまだありません。作者があなたを編集者・翻訳者として指定すると、ここに表示されます。',
+                zh: '尚无合作。当作者将您指定为编辑或译者时，将显示在此处。',
+                ko: '아직 협업이 없습니다. 작가가 회원님을 편집자·번역가로 지정하면 여기에 표시됩니다.'
+            };
+            const roleKey = { editor: 'collabEditor', translator: 'collabTranslator' };
 
-            // Render active collaboration cards
-            listEl.innerHTML = demoCollabs.map(c => `
+            let collabs = [];
+            try {
+                const token = localStorage.getItem('token');
+                const resp = await fetch((window.API_ORIGIN || '') + '/api/works/collaborations/mine', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await resp.json();
+                if (resp.ok) collabs = data.collaborations || [];
+            } catch (e) {
+                console.error('Failed to load collaborations:', e);
+            }
+
+            if (collabs.length === 0) {
+                const msg = '<p style="color: var(--color-text-secondary); padding: 1rem;">' + (noCollabs[getCurrentLanguage()] || noCollabs.en) + '</p>';
+                listEl.innerHTML = msg;
+                revenueEl.innerHTML = msg;
+                return;
+            }
+
+            // 参加中のコラボ一覧
+            listEl.innerHTML = collabs.map(c => `
                 <div class="collab-card">
                     <div class="collab-card-header">
                         <div class="collab-card-icon"><i class="fas fa-book-open"></i></div>
                         <div>
-                            <div class="collab-card-title">${c.title} ${getL(uiText[c.descKey])}</div>
+                            <div class="collab-card-title">「${esc(c.title)}」</div>
                             <div class="collab-card-meta">
-                                <span><strong>${getL(uiText.collabRole)}:</strong> ${getL(uiText[c.role])}</span>
-                                <span><strong>${getL(uiText.collabAuthor)}:</strong> ${c.author}</span>
-                            </div>
-                            <div class="collab-card-meta">
-                                <span><strong>${getL(uiText.collabStatus)}:</strong> <span class="collab-status-badge in-progress">${getL(uiText[c.status])}</span></span>
-                                <span><strong>${getL(uiText.collabDue)}:</strong> ${c.due}</span>
+                                <span><strong>${getL(uiText.collabRole)}:</strong> ${getL(uiText[roleKey[c.role]] || {})} (${parseFloat(c.revenue_share)}%)</span>
+                                <span><strong>${getL(uiText.collabAuthor)}:</strong> ${esc(c.author_name)}</span>
                             </div>
                         </div>
                     </div>
                     <div class="collab-card-actions">
-                        <button class="btn btn-custom btn-sm" onclick="openProgressModal('${c.id}')">
-                            <i class="fas fa-tasks me-1"></i>${getL(uiText.collabUpdateProgress)}
-                        </button>
+                        <a href="work-detail.html?id=${encodeURIComponent(c.work_id)}" class="btn btn-custom btn-sm">
+                            <i class="fas fa-book me-1"></i>${getL({ en: 'View work', ja: '作品を見る', zh: '查看作品', ko: '작품 보기' })}
+                        </a>
                         <a href="agreements.html" class="btn btn-soft-custom btn-sm">
                             <i class="fas fa-file-contract me-1"></i>${getL(uiText.collabViewAgreement)}
                         </a>
@@ -1181,19 +1175,20 @@
                 </div>
             `).join('');
 
-            // Render revenue items
-            revenueEl.innerHTML = demoCollabs.map(c => `
+            // 収益（配当の実績）
+            revenueEl.innerHTML = collabs.map(c => {
+                const earned = parseFloat(c.earned) || 0;
+                const earnedText = (typeof formatWorkPrice === 'function' && c.earned_currency)
+                    ? formatWorkPrice(earned, c.earned_currency)
+                    : (earned > 0 ? earned + ' ' + (c.earned_currency || '') : '0');
+                return `
                 <div class="collab-revenue-item">
-                    <div class="collab-revenue-title">${c.title} (${getL(uiText[c.role])} ${c.rolePercent})</div>
+                    <div class="collab-revenue-title">「${esc(c.title)}」 (${getL(uiText[roleKey[c.role]] || {})} ${parseFloat(c.revenue_share)}%)</div>
                     <div class="collab-revenue-meta">
-                        ${getL(uiText.collabSales)}: ${c.sales} | ${getL(uiText.collabYourRevenue)}: $${c.revenue.toFixed(2)}
+                        ${getL(uiText.collabYourRevenue)}: <strong>${earnedText}</strong>
                     </div>
-                    <div class="collab-revenue-bar">
-                        <div class="collab-revenue-bar-fill" style="width: ${c.targetPercent}%"></div>
-                    </div>
-                    <div class="collab-revenue-target">${c.targetPercent}% ${getL(uiText.collabOfTarget)}</div>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
         }
 
         function openProgressModal(collabId) {

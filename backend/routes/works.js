@@ -133,7 +133,7 @@ router.get('/my', authenticate, async (req, res) => {
             `SELECT work_id, title, status, cover_image, cover_image_url,
                     view_count, like_count, comment_count, page_count,
                     price, currency, is_free, language, original_language,
-                    ai_text_usage, ai_cover_usage,
+                    content_type, genre, ai_text_usage, ai_cover_usage,
                     created_at, updated_at, published_at
              FROM works
              WHERE author_id = $1 AND status != 'deleted'
@@ -290,6 +290,37 @@ router.get('/my/all', authenticate, async (req, res) => {
         });
     } catch (error) {
         console.error('Get my works error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/works/collaborations/mine
+ * Works where the authenticated user is an active collaborator
+ * (editor/translator), with the revenue earned so far per work.
+ * NOTE: must stay defined before GET /:workId or it gets shadowed.
+ */
+router.get('/collaborations/mine', authenticate, async (req, res) => {
+    try {
+        const result = await db.query(
+            `SELECT wc.role, wc.revenue_share, wc.target_language, wc.created_at,
+                    w.work_id, w.title, w.status AS work_status,
+                    COALESCE(u.pen_name, u.first_name || ' ' || u.last_name) AS author_name,
+                    COALESCE((SELECT SUM(rs.amount) FROM revenue_splits rs
+                              WHERE rs.recipient_id = wc.user_id AND rs.work_id = wc.work_id), 0) AS earned,
+                    (SELECT rs2.currency FROM revenue_splits rs2
+                     WHERE rs2.recipient_id = wc.user_id AND rs2.work_id = wc.work_id
+                     ORDER BY rs2.created_at DESC LIMIT 1) AS earned_currency
+             FROM work_collaborators wc
+             JOIN works w ON wc.work_id = w.work_id
+             JOIN users u ON w.author_id = u.user_id
+             WHERE wc.user_id = $1 AND wc.status = 'active' AND w.status != 'deleted'
+             ORDER BY wc.created_at DESC`,
+            [req.user.userId]
+        );
+        res.json({ success: true, collaborations: result.rows });
+    } catch (error) {
+        console.error('Get my collaborations error:', error);
         res.status(500).json({ error: error.message });
     }
 });
