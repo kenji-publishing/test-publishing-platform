@@ -1179,28 +1179,7 @@
     }
 
 
-    // Editing demos keyed by manuscript language. Three depths: light proofreading,
-    // proofreading + editorial review, full polish.
-    const demoTranslations = {
-        'ja': {
-            original: '\u5f7c\u308f\u90e8\u5c4b\u3092\u51fa\u3066\u968e\u6bb5\u3092\u99c6\u3051\u964d\u308a\u305f\u3002\u5fc3\u81d3\u304c\u30c9\u30ad\u30c9\u30ad\u3068\u65e9\u304f\u6253\u3063\u3066\u3044\u308b\u3002\u300c\u7d76\u4f53\u306b\u9593\u306b\u5408\u308f\u305b\u308b\u300d\u3068\u5fc3\u306b\u6c7a\u3081\u3066\u3001\u5f7c\u306f\u90e8\u5c4b\u3092\u51fa\u3066\u99c5\u3078\u5411\u304b\u3063\u3066\u8d70\u3063\u305f\u3002',
-            haiku: '\u5f7c\u306f\u90e8\u5c4b\u3092\u51fa\u3066\u968e\u6bb5\u3092\u99c6\u3051\u964d\u308a\u305f\u3002\u5fc3\u81d3\u304c\u30c9\u30ad\u30c9\u30ad\u3068\u65e9\u304f\u6253\u3063\u3066\u3044\u308b\u3002\u300c\u7d76\u5bfe\u306b\u9593\u306b\u5408\u308f\u305b\u308b\u300d\u3068\u5fc3\u306b\u6c7a\u3081\u3066\u3001\u5f7c\u306f\u90e8\u5c4b\u3092\u51fa\u3066\u99c5\u3078\u5411\u304b\u3063\u3066\u8d70\u3063\u305f\u3002',
-            sonnet: '\u5f7c\u306f\u90e8\u5c4b\u3092\u51fa\u3066\u968e\u6bb5\u3092\u99c6\u3051\u964d\u308a\u305f\u3002\u5fc3\u81d3\u304c\u65e9\u304f\u6253\u3063\u3066\u3044\u308b\u3002\u300c\u7d76\u5bfe\u306b\u9593\u306b\u5408\u308f\u305b\u308b\u300d\u3068\u5fc3\u306b\u6c7a\u3081\u3001\u99c5\u3078\u5411\u304b\u3063\u3066\u8d70\u3063\u305f\u3002',
-            opus: '\u5f7c\u306f\u90e8\u5c4b\u3092\u98db\u3073\u51fa\u3057\u3001\u968e\u6bb5\u3092\u4e00\u6c17\u306b\u99c6\u3051\u964d\u308a\u305f\u3002\u5fc3\u81d3\u304c\u9ad8\u9cf4\u308b\u3002\u300c\u4f55\u3068\u3057\u3066\u3082\u9593\u306b\u5408\u308f\u305b\u308b\u300d\u2014\u305d\u306e\u4e00\u5ff5\u3060\u3051\u3092\u80f8\u306b\u3001\u5f7c\u306f\u99c5\u3078\u3068\u8d70\u308a\u51fa\u3057\u305f\u3002'
-        },
-        'en': {
-            original: 'She opened the door quitely and stepped into the room. The room was dark and quiet, and the room smelled like old books. She new something was different today.',
-            haiku: 'She opened the door quietly and stepped into the room. The room was dark and quiet, and the room smelled like old books. She knew something was different today.',
-            sonnet: 'She opened the door quietly and stepped inside. The room was dark and silent, smelling of old books. She knew something was different today.',
-            opus: 'She eased the door open and slipped inside. The room lay dark and silent around her, thick with the scent of old books. Something was different today\u2014she could feel it.'
-        },
-        'default': {
-            original: 'The cherry blossoms danced in the spring breeze. She watched them fall, each petal a whispered goodbye. The cherry blossoms reminded her of her grandmother.',
-            haiku: 'The cherry blossoms danced in the spring breeze. She watched them fall, each petal a whispered goodbye. The cherry blossoms reminded her of her grandmother.',
-            sonnet: 'The cherry blossoms danced in the spring breeze. She watched them fall, each petal a whispered goodbye\u2014and a memory of her grandmother.',
-            opus: 'The cherry blossoms danced in the spring breeze, and she watched them fall, each petal a whispered goodbye that carried her grandmother\'s memory on the wind.'
-        }
-    };
+    // \u30c7\u30e2\u7528\u306e\u5b9a\u578b\u7de8\u96c6\u30c7\u30fc\u30bf\u306f\u524a\u9664\u6e08\u307f \u2014 Step 4/7 \u306f\u5b9f\u969b\u306bClaude API\u3092\u547c\u3073\u51fa\u3059
 
     // ===== Step Navigation =====
     function goStep(n) {
@@ -1382,21 +1361,43 @@
         ).join('');
     }
 
-    // ===== Step 4: Model Comparison (single-language editing) =====
-    function runComparison() {
+    // ===== Step 4: Model Comparison — 実際にClaude 3モデルで冒頭を編集して比較 =====
+    async function runComparison() {
         const srcLang = document.getElementById('sourceLang').value;
-        const sample = demoTranslations[srcLang] || demoTranslations['default'];
+        const L = getLang();
 
         const excerpt = sourceTextContent.slice(0, 300) + (sourceTextContent.length > 300 ? '...' : '');
         document.getElementById('previewOriginalText').textContent = excerpt;
 
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert(L === 'ja' ? 'AIエディターの利用にはログインが必要です' : 'Please log in to use the AI Editor');
+            window.location.href = 'login.html';
+            return;
+        }
+
         ['Haiku', 'Sonnet', 'Opus'].forEach(m => {
-            document.getElementById('compare' + m + 'Text').innerHTML = '<div class="compare-loading"><i class="fas fa-spinner fa-spin"></i> ' + (getLang() === 'ja' ? '編集中...' : 'Editing...') + '</div>';
+            document.getElementById('compare' + m + 'Text').innerHTML = '<div class="compare-loading"><i class="fas fa-spinner fa-spin"></i> ' + (L === 'ja' ? '編集中...' : 'Editing...') + '</div>';
         });
 
-        setTimeout(() => { document.getElementById('compareHaikuText').innerHTML = '<div style="white-space:pre-wrap;">' + escH(sample.haiku) + '</div>'; }, 800);
-        setTimeout(() => { document.getElementById('compareSonnetText').innerHTML = '<div style="white-space:pre-wrap;">' + escH(sample.sonnet) + '</div>'; }, 1500);
-        setTimeout(() => { document.getElementById('compareOpusText').innerHTML = '<div style="white-space:pre-wrap;">' + escH(sample.opus) + '</div>'; }, 2500);
+        try {
+            const resp = await fetch((window.API_ORIGIN || '') + '/api/ai-editor/sample', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ text: sourceTextContent.slice(0, 500), language: srcLang })
+            });
+            const data = await resp.json();
+            if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
+            ['haiku', 'sonnet', 'opus'].forEach(m => {
+                const el = document.getElementById('compare' + m.charAt(0).toUpperCase() + m.slice(1) + 'Text');
+                el.innerHTML = '<div style="white-space:pre-wrap;">' + escH(data.samples[m] || '') + '</div>';
+            });
+        } catch (err) {
+            const msg = (L === 'ja' ? 'サンプル編集に失敗しました: ' : 'Sample editing failed: ') + err.message;
+            ['Haiku', 'Sonnet', 'Opus'].forEach(m => {
+                document.getElementById('compare' + m + 'Text').innerHTML = '<div style="color:#dc3545; white-space:pre-wrap;">' + escH(msg) + '</div>';
+            });
+        }
     }
 
     function selectModel(model) {
@@ -1498,36 +1499,62 @@
         simulateTranslation();
     }
 
-    // ===== Step 7: Translation Progress =====
-    function simulateTranslation() {
-        const totalChars = sourceTextContent.length;
-        const speeds = { haiku: 40, sonnet: 25, opus: 12 };
-        const speed = speeds[selectedModel] || 25;
-        const totalTicks = Math.max(20, Math.ceil(totalChars / speed));
-        let tick = 0;
+    // ===== Step 7: \u5b9f\u7de8\u96c6\u306e\u5b9f\u884c\uff08\u975e\u540c\u671f\u30b8\u30e7\u30d6 + \u9032\u6357\u30dd\u30fc\u30ea\u30f3\u30b0\uff09 =====
+    async function simulateTranslation() {
+        const L = getLang();
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert(L === 'ja' ? 'AI\u30a8\u30c7\u30a3\u30bf\u30fc\u306e\u5229\u7528\u306b\u306f\u30ed\u30b0\u30a4\u30f3\u304c\u5fc5\u8981\u3067\u3059' : 'Please log in to use the AI Editor');
+            window.location.href = 'login.html';
+            return;
+        }
 
-        const interval = setInterval(() => {
-            tick++;
-            const pct = Math.min(100, Math.round(tick / totalTicks * 100));
-            document.getElementById('progressFill').style.width = pct + '%';
-            document.getElementById('progressPercent').textContent = pct + '%';
-            const remainSec = Math.ceil((totalTicks - tick) * 50 / 1000);
-            document.getElementById('progressEta').textContent = getLang() === 'ja' ? '\u6b8b\u308a\u7d04' + remainSec + '\u79d2' : '~' + remainSec + 's remaining';
+        const fill = document.getElementById('progressFill');
+        const pctEl = document.getElementById('progressPercent');
+        const etaEl = document.getElementById('progressEta');
+        fill.style.width = '2%';
+        pctEl.textContent = '0%';
+        etaEl.textContent = L === 'ja' ? 'AI\u304c\u539f\u7a3f\u3092\u7de8\u96c6\u3057\u3066\u3044\u307e\u3059...' : 'The AI is editing your manuscript...';
 
-            if (pct >= 100) {
-                clearInterval(interval);
-                generateDemoTranslation();
-                setTimeout(() => goStep(8), 500);
+        try {
+            // \u30b8\u30e7\u30d6\u958b\u59cb
+            const startResp = await fetch((window.API_ORIGIN || '') + '/api/ai-editor/edit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({
+                    text: sourceTextContent,
+                    language: document.getElementById('sourceLang').value,
+                    model: selectedModel,
+                    glossary: glossary
+                })
+            });
+            const startData = await startResp.json();
+            if (!startResp.ok) throw new Error(startData.error || ('HTTP ' + startResp.status));
+
+            // \u9032\u6357\u3092\u30dd\u30fc\u30ea\u30f3\u30b0
+            while (true) {
+                await new Promise(r => setTimeout(r, 1500));
+                const jobResp = await fetch((window.API_ORIGIN || '') + '/api/ai-editor/job/' + encodeURIComponent(startData.jobId), {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const job = await jobResp.json();
+                if (!jobResp.ok) throw new Error(job.error || ('HTTP ' + jobResp.status));
+                if (job.status === 'failed') throw new Error(job.error || (L === 'ja' ? '\u7de8\u96c6\u51e6\u7406\u304c\u5931\u6557\u3057\u307e\u3057\u305f' : 'Editing failed'));
+
+                const pct = job.status === 'completed' ? 100 : Math.max(2, job.progress || 0);
+                fill.style.width = pct + '%';
+                pctEl.textContent = pct + '%';
+
+                if (job.status === 'completed') {
+                    translatedText = job.editedText || '';
+                    setTimeout(() => goStep(8), 400);
+                    return;
+                }
             }
-        }, 50);
-    }
-
-    function generateDemoTranslation() {
-        // In demo mode, just return the source text with a marker; the real
-        // implementation will return AI-edited prose.
-        const modelLabel = selectedModel.charAt(0).toUpperCase() + selectedModel.slice(1);
-        const paragraphs = sourceTextContent.split(/\n+/).filter(p => p.trim());
-        translatedText = paragraphs.map(p => '[' + modelLabel + ' Edited] ' + p).join('\n\n');
+        } catch (err) {
+            alert((L === 'ja' ? 'AI\u7de8\u96c6\u306b\u5931\u6557\u3057\u307e\u3057\u305f: ' : 'AI editing failed: ') + err.message);
+            goStep(6);
+        }
     }
 
     // ===== Step 9: Download =====
@@ -1775,6 +1802,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- JSZip: lets us crack open .docx (which is a ZIP) to read the text inside -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="../js/config.js"></script>
     <script src="../js/i18n.js"></script>
     <script src="../js/navbar.js"></script>
 </body>

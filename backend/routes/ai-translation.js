@@ -139,9 +139,9 @@ router.post('/translate/:translationId', authenticate, async (req, res) => {
   try {
     const { translationId } = req.params;
 
-    // Get translation details
+    // Get translation details — only the work's author may trigger it
     const translationResult = await db.query(
-      `SELECT t.*, w.title, w.description, w.original_language
+      `SELECT t.*, w.title, w.description, w.original_language, w.author_id
        FROM translations t
        JOIN works w ON t.work_id = w.work_id
        WHERE t.translation_id = $1`,
@@ -150,6 +150,9 @@ router.post('/translate/:translationId', authenticate, async (req, res) => {
 
     if (translationResult.rows.length === 0) {
       return res.status(404).json({ error: 'Translation not found' });
+    }
+    if (translationResult.rows[0].author_id !== req.user.userId) {
+      return res.status(403).json({ error: 'Not authorized to run this translation' });
     }
 
     const translation = translationResult.rows[0];
@@ -273,7 +276,7 @@ router.get('/usage', authenticate, async (req, res) => {
  */
 async function simulateClaudeTranslation(title, description, sourceLang, targetLang) {
   try {
-    // Language names for better translation
+    // Language names for better translation (all 10 platform languages)
     const langNames = {
       'en': 'English',
       'es': 'Spanish',
@@ -282,7 +285,9 @@ async function simulateClaudeTranslation(title, description, sourceLang, targetL
       'ja': 'Japanese',
       'zh': 'Chinese',
       'ko': 'Korean',
-      'ar': 'Arabic'
+      'ar': 'Arabic',
+      'pt': 'Portuguese',
+      'it': 'Italian'
     };
 
     const sourceLangName = langNames[sourceLang] || sourceLang;
