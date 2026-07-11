@@ -21,6 +21,11 @@ const SAMPLE_MAX_CHARS = 600;
 const EDIT_MAX_CHARS = 100000;
 const JOB_TTL_MS = 30 * 60 * 1000; // jobs are kept for 30 minutes
 
+// The 3-model comparison is free for users but costs the platform real API
+// money (~JPY 3-5 per run), so cap runs per user per day
+const SAMPLE_DAILY_LIMIT = 30;
+const sampleUsage = new Map(); // userId -> { day, count }
+
 // In-memory job store (single pm2 process; jobs are lost on restart, which
 // is acceptable for v1 — the client shows an error and the user retries).
 const jobs = new Map();
@@ -42,6 +47,22 @@ router.post('/sample', authenticate, async (req, res) => {
         if (!text || !String(text).trim()) {
             return res.status(400).json({ error: 'Text is required' });
         }
+
+        // Per-user daily cap on free comparison runs
+        const today = new Date().toISOString().slice(0, 10);
+        let usage = sampleUsage.get(req.user.userId);
+        if (!usage || usage.day !== today) {
+            usage = { day: today, count: 0 };
+            sampleUsage.set(req.user.userId, usage);
+        }
+        if (usage.count >= SAMPLE_DAILY_LIMIT) {
+            return res.status(429).json({
+                error: 'Daily comparison limit reached. Please try again tomorrow.',
+                code: 'SAMPLE_LIMIT'
+            });
+        }
+        usage.count++;
+
         const excerpt = String(text).slice(0, SAMPLE_MAX_CHARS);
         const samples = await editSample({ text: excerpt, language });
         res.json({ success: true, samples });

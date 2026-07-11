@@ -1473,6 +1473,9 @@
                 return;
             }
             const data = await resp.json();
+            if (data && data.code === 'SAMPLE_LIMIT') {
+                throw new Error(L === 'ja' ? '本日のお試し編集の上限に達しました。明日以降にお試しください。' : 'Daily comparison limit reached. Please try again tomorrow.');
+            }
             if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
             comparisonCache = { key: cacheKey, samples: data.samples };
             renderComparisonSamples(data.samples);
@@ -1622,7 +1625,8 @@
             const startData = await startResp.json();
             if (!startResp.ok) throw new Error(startData.error || ('HTTP ' + startResp.status));
 
-            // \u9032\u6357\u3092\u30dd\u30fc\u30ea\u30f3\u30b0
+            // \u9032\u6357\u3092\u30dd\u30fc\u30ea\u30f3\u30b0\uff08\u6b8b\u308a\u6642\u9593\u306f\u7d4c\u904e\u6642\u9593\u00d7\u9032\u6357\u304b\u3089\u5b9f\u6e2c\u30d9\u30fc\u30b9\u3067\u63a8\u5b9a\uff09
+            const startedAt = Date.now();
             while (true) {
                 await new Promise(r => setTimeout(r, 1500));
                 const jobResp = await fetch((window.API_ORIGIN || '') + '/api/ai-editor/job/' + encodeURIComponent(startData.jobId), {
@@ -1635,6 +1639,12 @@
                 const pct = job.status === 'completed' ? 100 : Math.max(2, job.progress || 0);
                 fill.style.width = pct + '%';
                 pctEl.textContent = pct + '%';
+
+                if (job.status !== 'completed' && pct >= 5) {
+                    const elapsedSec = (Date.now() - startedAt) / 1000;
+                    const remainSec = Math.max(1, Math.round(elapsedSec * (100 - pct) / pct));
+                    etaEl.textContent = L === 'ja' ? '\u6b8b\u308a\u7d04' + remainSec + '\u79d2' : '~' + remainSec + 's remaining';
+                }
 
                 if (job.status === 'completed') {
                     translatedText = job.editedText || '';

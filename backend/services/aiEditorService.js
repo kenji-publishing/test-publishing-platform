@@ -92,16 +92,20 @@ Text to edit:
 ${chunk}`;
 }
 
-/** Edit one chunk of text (streaming to avoid HTTP timeouts on long outputs). */
-async function editChunk({ chunk, language, tier, glossary }, requestOptions) {
+/**
+ * Edit one chunk of text (streaming to avoid HTTP timeouts on long outputs).
+ * onText(charCount) fires for each streamed text delta so callers can report
+ * smooth real progress instead of jumping at chunk boundaries.
+ */
+async function editChunk({ chunk, language, tier, glossary }, requestOptions, onText) {
     if (!chunk.trim()) return chunk;
-    const message = await anthropic.messages
-        .stream({
-            model: MODEL_TIERS[tier],
-            max_tokens: 16000,
-            messages: [{ role: 'user', content: buildPrompt({ chunk, language, tier, glossary }) }]
-        }, requestOptions)
-        .finalMessage();
+    const stream = anthropic.messages.stream({
+        model: MODEL_TIERS[tier],
+        max_tokens: 16000,
+        messages: [{ role: 'user', content: buildPrompt({ chunk, language, tier, glossary }) }]
+    }, requestOptions);
+    if (onText) stream.on('text', (t) => onText(t.length));
+    const message = await stream.finalMessage();
 
     if (message.stop_reason === 'refusal') {
         throw new Error('The editing request was declined by the model safety system');
@@ -136,16 +140,33 @@ async function editSample({ text, language }) {
 
 /**
  * Edit a full manuscript with the chosen tier. Long texts are chunked at
- * paragraph boundaries and processed sequentially; onProgress(0-100) is
- * called after each chunk so the caller can report job progress.
+ * paragraph boundaries and processed sequentially. onProgress(0-100) is
+ * driven by the characters streamed back so far (edited output length is
+ * roughly the input length), giving a smooth real progress signal.
  */
 async function editText({ text, language, tier, glossary, onProgress }) {
     const chunks = chunkText(text);
+    const totalChars = chunks.reduce((sum, c) => sum + c.length, 0) || 1;
+    let doneChars = 0;
     const edited = [];
+
     for (let i = 0; i < chunks.length; i++) {
-        edited.push(await editChunk({ chunk: chunks[i], language, tier, glossary }));
-        if (onProgress) onProgress(Math.round(((i + 1) / chunks.length) * 100));
+        const chunkLen = chunks[i].length;
+        let streamedChars = 0;
+        const report = () => {
+            if (!onProgress) return;
+            const current = doneChars + Math.min(streamedChars, chunkLen);
+            onProgress(Math.min(99, Math.round((current / totalChars) * 100)));
+        };
+        edited.push(await editChunk(
+            { chunk: chunks[i], language, tier, glossary },
+            undefined,
+            (n) => { streamedChars += n; report(); }
+        ));
+        doneChars += chunkLen;
+        report();
     }
+    if (onProgress) onProgress(100);
     return edited.join('\n');
 }
 
