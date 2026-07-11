@@ -66,9 +66,9 @@ async function createNotification(options) {
             if (type === 'system' && !prefs.system_notifications) return null;
         }
         
-        // 通知を作成
+        // 通知を作成（列名は notification_type — DBスキーマに合わせる）
         const result = await pool.query(`
-            INSERT INTO notifications (user_id, type, title, message, action_url, metadata)
+            INSERT INTO notifications (user_id, notification_type, title, message, action_url, metadata)
             VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING *
         `, [userId, type, title, message, actionUrl, JSON.stringify(metadata)]);
