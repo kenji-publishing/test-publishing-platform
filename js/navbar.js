@@ -888,68 +888,25 @@ function updateMessageBadge() {
         }
     };
     if (!token) { apply(0); return; }
-    // 実APIの未読通知数を表示（旧: localStorageのデモ未読数）
-    fetch((window.API_ORIGIN || '') + '/api/notifications/unread-count', {
-        headers: { 'Authorization': 'Bearer ' + token }
-    }).then(function(r) { return r.ok ? r.json() : null; }).then(function(data) {
-        if (!data) { apply(0); return; }
-        var c = data.count;
-        if (c == null) c = data.unread_count;
-        if (c == null) c = data.unreadCount;
-        if (c == null && data.data) c = data.data.count;
-        apply(parseInt(c, 10) || 0);
-    }).catch(function() { apply(0); });
-}
-
-function _getUnreadCount() {
-    // Method 1: Check API (when backend is connected)
-    // For now, use localStorage-based count
-
-    var token = localStorage.getItem('token');
-    var user = localStorage.getItem('user');
-    if (!token && !user) return 0; // Not logged in
-
-    var isDemo = (typeof window !== 'undefined' && window.DEMO_MODE);
-
-    // Count unread conversations
-    var convCount = 0;
-    try {
-        var storedCount = localStorage.getItem('publisher_unread_conversations');
-        if (storedCount !== null) {
-            convCount = parseInt(storedCount, 10) || 0;
-        } else {
-            // First visit: check publisher_messages for real/seeded data
-            var msgs = localStorage.getItem('publisher_messages');
-            if (msgs) {
-                var convs = JSON.parse(msgs);
-                for (var i = 0; i < convs.length; i++) {
-                    if (convs[i].unread && convs[i].unread > 0) convCount += convs[i].unread;
-                }
-                localStorage.setItem('publisher_unread_conversations', String(convCount));
-            } else if (isDemo) {
-                // Demo only: sample unread messages (Sarah 2 + Yuki 1)
-                convCount = 3;
-                localStorage.setItem('publisher_unread_conversations', '3');
-            }
-            // Real users with no message data → 0 (no fabricated badge)
-        }
-    } catch(e) {}
-
-    // Count unread notifications
-    var notifCount = 0;
-    try {
-        var notifs = JSON.parse(localStorage.getItem('publisher_msg_notifs') || '[]');
-        if (notifs.length > 0) {
-            for (var j = 0; j < notifs.length; j++) {
-                if (!notifs[j].is_read) notifCount++;
-            }
-        } else if (isDemo) {
-            // Demo only: sample unread notifications
-            notifCount = 4;
-        }
-    } catch(e) {}
-
-    return convCount + notifCount;
+    // 実APIの未読数を表示: 通知 + DM の合算
+    var headers = { 'Authorization': 'Bearer ' + token };
+    var getCount = function(url) {
+        return fetch((window.API_ORIGIN || '') + url, { headers: headers })
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(data) {
+                if (!data) return 0;
+                var c = data.count;
+                if (c == null) c = data.unread_count;
+                if (c == null) c = data.unreadCount;
+                if (c == null && data.data) c = data.data.count;
+                return parseInt(c, 10) || 0;
+            })
+            .catch(function() { return 0; });
+    };
+    Promise.all([
+        getCount('/api/notifications/unread-count'),
+        getCount('/api/messages/unread-count')
+    ]).then(function(counts) { apply(counts[0] + counts[1]); });
 }
 
 // Expose globally so pages can trigger updates

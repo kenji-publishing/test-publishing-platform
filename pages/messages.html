@@ -1195,66 +1195,34 @@
         let notifCache = [];
         try { localStorage.removeItem('publisher_msg_notifs'); } catch (e) {} // 旧デモ通知の掃除
 
-        // ========== Demo Data ==========
-        const demoConversations = [
-            {
-                id: 'conv1',
-                name: 'Sarah Chen',
-                role: 'author',
-                initial: 'S',
-                unread: 2,
-                messages: [
-                    { id: 'm1', text: 'Hi! I saw your translation portfolio. Would you be interested in translating my latest novel into Japanese?', sent: false, time: '2025-03-17T10:30:00' },
-                    { id: 'm2', text: 'That sounds great! I\'d love to take a look at the manuscript. Could you share the first chapter so I can evaluate the style?', sent: true, time: '2025-03-17T11:15:00' },
-                    { id: 'm3', text: 'Of course! I\'ve uploaded it to my works page. The novel is called "Moonlit Garden". It\'s a literary fiction piece with some poetic passages.', sent: false, time: '2025-03-17T14:00:00' },
-                    { id: 'm4', text: 'I\'ve read the first chapter. The writing style is beautiful. I think I can capture the nuances well in Japanese. Shall we discuss the timeline?', sent: true, time: '2025-03-17T16:45:00' },
-                    { id: 'm5', text: 'Wonderful! I was hoping to have the translation ready within 3 months. Does that work for you?', sent: false, time: '2025-03-18T09:00:00' },
-                    { id: 'm6', text: 'That timeline seems reasonable for a novel of this length. I\'ll prepare a detailed proposal with milestones.', sent: false, time: '2025-03-18T09:05:00' }
-                ]
-            },
-            {
-                id: 'conv2',
-                name: 'Yuki Tanaka',
-                role: 'editor',
-                initial: 'Y',
-                unread: 1,
-                messages: [
-                    { id: 'm1', text: 'I\'ve finished reviewing Chapter 3 of your manuscript. Overall, the pacing is excellent!', sent: false, time: '2025-03-16T13:00:00' },
-                    { id: 'm2', text: 'Thank you for the quick turnaround! Were there any major issues?', sent: true, time: '2025-03-16T14:30:00' },
-                    { id: 'm3', text: 'A few minor consistency issues with character names in the dialogue. I\'ve left detailed comments in the editor. Also, the transition between scenes 2 and 3 could be smoother.', sent: false, time: '2025-03-16T15:00:00' },
-                    { id: 'm4', text: 'Got it, I\'ll review the comments today. Thanks for catching those!', sent: true, time: '2025-03-16T15:20:00' },
-                    { id: 'm5', text: 'No problem! Let me know when you\'ve made the revisions and I\'ll do a final pass.', sent: false, time: '2025-03-17T10:00:00' }
-                ]
-            },
-            {
-                id: 'conv3',
-                name: 'Platform Support',
-                role: 'support',
-                initial: 'P',
-                unread: 0,
-                messages: [
-                    { id: 'm1', text: 'Welcome to AuctLect! We\'re thrilled to have you on board. Here are some tips to get started:\n\n1. Complete your profile to attract collaborators\n2. Browse works available for translation\n3. Set up your payment preferences\n\nFeel free to reach out if you have any questions!', sent: false, time: '2025-03-10T09:00:00' },
-                    { id: 'm2', text: 'Thank you! I\'ve set up my profile. How do I get verified as a translator?', sent: true, time: '2025-03-10T10:30:00' },
-                    { id: 'm3', text: 'Great question! To get verified, go to your Account Settings and submit your credentials. Our team reviews applications within 2-3 business days. Verified translators get a badge on their profile and priority in search results.', sent: false, time: '2025-03-10T11:00:00' }
-                ]
-            },
-            {
-                id: 'conv4',
-                name: 'Carlos Rivera',
-                role: 'translator',
-                initial: 'C',
-                unread: 0,
-                messages: [
-                    { id: 'm1', text: 'Hey! I\'m working on the Spanish translation of Chapter 5. Quick question - should I keep the honorifics in the original form or localize them?', sent: false, time: '2025-03-15T08:00:00' },
-                    { id: 'm2', text: 'Good question! For this particular work, I think localizing them would be better since the target audience may not be familiar with Japanese honorifics.', sent: true, time: '2025-03-15T09:30:00' },
-                    { id: 'm3', text: 'Makes sense. I\'ll use the Spanish equivalents where possible. Also, I\'m about 60% done with this chapter. Should be finished by Friday.', sent: false, time: '2025-03-15T10:00:00' },
-                    { id: 'm4', text: 'That\'s great progress! Take your time to get the quality right. No rush on this one.', sent: true, time: '2025-03-15T10:15:00' }
-                ]
-            }
-        ];
+        // ========== Conversations: 実API接続（デモ会話は撤去） ==========
+        try { localStorage.removeItem('publisher_messages'); localStorage.removeItem('publisher_unread_conversations'); } catch (e) {} // 旧デモ会話の掃除
 
-        let activeConversationId = null;
+        let convCache = [];            // GET /api/messages/conversations の結果
+        let activeConversationId = null; // 開いている会話のconversation_id（文字列）。'draft'=まだ会話が無い新規相手
+        let activeRecipientId = null;  // 開いているスレッドの相手user_id（送信先）
+        let draftPartner = null;       // { userId, name } 会話未作成の新規相手
         let currentMsgTab = 'conversations';
+
+        function getMyUserId() {
+            try { const u = JSON.parse(localStorage.getItem('user') || '{}'); return u.user_id || u.userId || null; } catch (e) { return null; }
+        }
+
+        async function fetchConversations() {
+            const token = localStorage.getItem('token');
+            if (!token) { convCache = []; return convCache; }
+            try {
+                const resp = await fetch((window.API_ORIGIN || '') + '/api/messages/conversations', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await resp.json();
+                convCache = resp.ok ? (data.conversations || []) : [];
+            } catch (e) {
+                console.error('Failed to load conversations:', e);
+                convCache = [];
+            }
+            return convCache;
+        }
 
         function getCurrentLang() { return localStorage.getItem('preferredLanguage') || 'en'; }
         function getL(obj) { if (!obj) return ''; const l = getCurrentLang(); return obj[l] || obj['en'] || ''; }
@@ -1394,48 +1362,26 @@
             }
         }
 
-        // ========== Load/Save messages from localStorage ==========
-        function loadConversations() {
-            const saved = localStorage.getItem('publisher_messages');
-            if (saved) {
-                try {
-                    var convs = JSON.parse(saved);
-                    syncUnreadCount();
-                    return convs;
-                } catch(e) { /* fall through */ }
-            }
-            // First time: save demo data
-            localStorage.setItem('publisher_messages', JSON.stringify(demoConversations));
-            syncUnreadCount();
-            return demoConversations;
-        }
-
-        function saveConversations(convs) {
-            localStorage.setItem('publisher_messages', JSON.stringify(convs));
-            syncUnreadCount();
-        }
-
-        // Sync unread count to localStorage for navbar badge
-        function syncUnreadCount() {
-            try {
-                var convs = JSON.parse(localStorage.getItem('publisher_messages') || '[]');
-                var unreadConvs = 0;
-                for (var i = 0; i < convs.length; i++) {
-                    if (convs[i].unread && convs[i].unread > 0) unreadConvs += convs[i].unread;
-                }
-                localStorage.setItem('publisher_unread_conversations', String(unreadConvs));
-                if (typeof updateMessageBadge === 'function') updateMessageBadge();
-            } catch(e) {}
-        }
-
-        // ========== Render Conversation List ==========
+        // ========== Render Conversation List（convCacheから描画） ==========
         function renderConversationList(filter) {
-            const convs = loadConversations();
             const list = document.getElementById('conversationList');
             const search = (filter || '').toLowerCase();
-            const filtered = convs.filter(c => !search || c.name.toLowerCase().includes(search));
+            const filtered = convCache.filter(c => !search || (c.display_name || '').toLowerCase().includes(search));
 
-            if (filtered.length === 0) {
+            let html = '';
+            // 会話がまだ無い新規相手（申請カード等から遷移してきた場合）を先頭に表示
+            if (draftPartner) {
+                html += `
+                    <div class="conversation-item ${activeConversationId === 'draft' ? 'active' : ''}" onclick="openConversation('draft')">
+                        <div class="conversation-avatar author">${escapeHtml((draftPartner.name || '?').charAt(0).toUpperCase())}</div>
+                        <div class="conversation-details">
+                            <div class="conversation-name">${escapeHtml(draftPartner.name || '')}</div>
+                            <div class="conversation-preview">${getL({ en: 'New conversation', ja: '新しい会話', zh: '新对话', ko: '새 대화' })}</div>
+                        </div>
+                    </div>`;
+            }
+
+            if (filtered.length === 0 && !draftPartner) {
                 list.innerHTML = `
                     <div style="text-align:center; padding:2rem; color:var(--color-text-secondary);">
                         <i class="fas fa-inbox" style="font-size:2rem; opacity:0.3; margin-bottom:0.5rem;"></i>
@@ -1445,25 +1391,27 @@
                 return;
             }
 
-            list.innerHTML = filtered.map(c => {
-                const lastMsg = c.messages[c.messages.length - 1];
-                const preview = lastMsg ? (lastMsg.sent ? 'You: ' : '') + lastMsg.text.substring(0, 50) + (lastMsg.text.length > 50 ? '...' : '') : '';
-                const timeStr = lastMsg ? formatConversationTime(lastMsg.time) : '';
-                const isActive = c.id === activeConversationId;
+            html += filtered.map(c => {
+                const name = c.display_name || '';
+                const preview = (c.last_message || '').substring(0, 50) + ((c.last_message || '').length > 50 ? '...' : '');
+                const timeStr = c.last_message_at ? formatConversationTime(c.last_message_at) : '';
+                const unread = parseInt(c.unread_count, 10) || 0;
+                const isActive = String(c.conversation_id) === String(activeConversationId);
 
                 return `
-                    <div class="conversation-item ${isActive ? 'active' : ''}" onclick="openConversation('${c.id}')">
-                        <div class="conversation-avatar ${c.role}">${c.initial}</div>
+                    <div class="conversation-item ${isActive ? 'active' : ''}" onclick="openConversation('${c.conversation_id}')">
+                        <div class="conversation-avatar author">${escapeHtml(name.charAt(0).toUpperCase())}</div>
                         <div class="conversation-details">
-                            <div class="conversation-name">${escapeHtml(c.name)}</div>
+                            <div class="conversation-name">${escapeHtml(name)}</div>
                             <div class="conversation-preview">${escapeHtml(preview)}</div>
                         </div>
                         <div class="conversation-meta">
                             <span class="conversation-time">${timeStr}</span>
-                            ${c.unread > 0 ? `<span class="unread-badge">${c.unread}</span>` : ''}
+                            ${unread > 0 ? `<span class="unread-badge">${unread}</span>` : ''}
                         </div>
                     </div>`;
             }).join('');
+            list.innerHTML = html;
         }
 
         function formatConversationTime(timeStr) {
@@ -1496,48 +1444,60 @@
         }
 
         // ========== Open Conversation ==========
-        function openConversation(convId) {
-            const convs = loadConversations();
-            const conv = convs.find(c => c.id === convId);
-            if (!conv) return;
-
-            activeConversationId = convId;
-
-            // Mark as read
-            conv.unread = 0;
-            saveConversations(convs);
-
-            // Update header
-            document.getElementById('threadContactName').textContent = conv.name;
-            const roleBadge = document.getElementById('threadRoleBadge');
-            const roleKey = 'role' + conv.role.charAt(0).toUpperCase() + conv.role.slice(1);
-            roleBadge.textContent = getL(uiText[roleKey]) || conv.role;
-            roleBadge.className = 'role-badge ' + conv.role;
-
-            // Render messages
+        async function openConversation(convId) {
             const container = document.getElementById('threadMessages');
-            let html = '';
-            let lastDate = '';
-            conv.messages.forEach(msg => {
-                const msgDate = new Date(msg.time);
-                const dateKey = msgDate.toDateString();
-                if (dateKey !== lastDate) {
-                    html += `<div class="date-separator"><span>${formatDateSeparator(msg.time)}</span></div>`;
-                    lastDate = dateKey;
-                }
-                html += `
-                    <div class="message-bubble ${msg.sent ? 'sent' : 'received'}">
-                        <div class="message-text">${escapeHtml(msg.text).replace(/\n/g, '<br>')}</div>
-                        <div class="message-time">${formatMessageTime(msg.time)}</div>
+            const roleBadge = document.getElementById('threadRoleBadge');
+            roleBadge.style.display = 'none'; // 役割情報はAPIに無いため非表示
+
+            if (convId === 'draft') {
+                if (!draftPartner) return;
+                activeConversationId = 'draft';
+                activeRecipientId = draftPartner.userId;
+                document.getElementById('threadContactName').textContent = draftPartner.name || '';
+                container.innerHTML = `<div class="date-separator"><span>${getL({ en: 'Send a message to start the conversation', ja: 'メッセージを送って会話を始めましょう', zh: '发送消息开始对话', ko: '메시지를 보내 대화를 시작하세요' })}</span></div>`;
+            } else {
+                const conv = convCache.find(c => String(c.conversation_id) === String(convId));
+                if (!conv) return;
+                activeConversationId = String(convId);
+                activeRecipientId = conv.other_user_id;
+                document.getElementById('threadContactName').textContent = conv.display_name || '';
+
+                // メッセージ取得（サーバー側で既読化される）
+                let msgs = [];
+                try {
+                    const token = localStorage.getItem('token');
+                    const resp = await fetch((window.API_ORIGIN || '') + '/api/messages/conversation/' + encodeURIComponent(convId), {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const data = await resp.json();
+                    if (resp.ok) msgs = data.messages || [];
+                } catch (e) { console.error('Failed to load messages:', e); }
+
+                const myId = getMyUserId();
+                let html = '';
+                let lastDate = '';
+                msgs.forEach(msg => {
+                    const dateKey = new Date(msg.created_at).toDateString();
+                    if (dateKey !== lastDate) {
+                        html += `<div class="date-separator"><span>${formatDateSeparator(msg.created_at)}</span></div>`;
+                        lastDate = dateKey;
+                    }
+                    const sent = myId && msg.sender_id === myId;
+                    html += `
+                    <div class="message-bubble ${sent ? 'sent' : 'received'}">
+                        <div class="message-text">${escapeHtml(msg.content).replace(/\n/g, '<br>')}</div>
+                        <div class="message-time">${formatMessageTime(msg.created_at)}</div>
                     </div>`;
-            });
-            container.innerHTML = html;
+                });
+                container.innerHTML = html;
+                conv.unread_count = 0; // 既読になったのでバッジを消す
+                if (typeof updateMessageBadge === 'function') updateMessageBadge();
+            }
             container.scrollTop = container.scrollHeight;
 
             // Show thread, hide empty
             document.getElementById('threadEmpty').style.display = 'none';
-            const threadView = document.getElementById('threadView');
-            threadView.style.display = 'flex';
+            document.getElementById('threadView').style.display = 'flex';
 
             // Mobile: show thread panel
             document.getElementById('messagesContainer').classList.add('show-thread');
@@ -1552,66 +1512,84 @@
         }
 
         // ========== Send Message in Thread ==========
-        function sendMessage() {
+        async function sendMessage() {
             const input = document.getElementById('messageInput');
             const text = input.value.trim();
-            if (!text || !activeConversationId) return;
+            if (!text || !activeRecipientId) return;
 
-            const convs = loadConversations();
-            const conv = convs.find(c => c.id === activeConversationId);
-            if (!conv) return;
+            const btn = document.getElementById('btnSend');
+            btn.disabled = true;
+            try {
+                const sentToDraft = (activeConversationId === 'draft');
+                await postDirectMessage(activeRecipientId, text);
+                input.value = '';
+                input.style.height = 'auto';
+                if (sentToDraft) draftPartner = null; // 会話がサーバー側に作成された
+                await fetchConversations();
+                // 送信相手との会話を特定して開き直す
+                const conv = convCache.find(c => c.other_user_id === activeRecipientId);
+                if (conv) await openConversation(String(conv.conversation_id));
+            } catch (e) {
+                alert(getL({ en: 'Failed to send: ', ja: '送信に失敗しました: ' }) + e.message);
+                btn.disabled = false;
+            }
+        }
 
-            conv.messages.push({
-                id: 'm' + Date.now(),
-                text: text,
-                sent: true,
-                time: new Date().toISOString()
+        // 送信の共通処理（成功時はmessage行を返す。失敗時はthrow）
+        async function postDirectMessage(recipientId, content) {
+            const token = localStorage.getItem('token');
+            if (!token) throw new Error(getL({ en: 'Please log in.', ja: 'ログインが必要です。' }));
+            const resp = await fetch((window.API_ORIGIN || '') + '/api/messages/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ recipientId: recipientId, content: content })
             });
-            saveConversations(convs);
-
-            input.value = '';
-            input.style.height = 'auto';
-            document.getElementById('btnSend').disabled = true;
-            openConversation(activeConversationId);
+            const data = await resp.json();
+            if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
+            return data.message;
         }
 
         // ========== Send New Message (Modal) ==========
-        function sendNewMessage() {
+        async function sendNewMessage() {
             const recipient = document.getElementById('newMsgRecipient').value.trim();
             const subject = document.getElementById('newMsgSubject').value.trim();
             const body = document.getElementById('newMsgBody').value.trim();
 
-            if (!recipient || !subject || !body) {
+            if (!recipient || !body) {
                 alert(getL(uiText.fillAllFields));
                 return;
             }
 
-            const convs = loadConversations();
-            const newConv = {
-                id: 'conv' + Date.now(),
-                name: recipient,
-                role: 'author',
-                initial: recipient.charAt(0).toUpperCase(),
-                unread: 0,
-                messages: [{
-                    id: 'm' + Date.now(),
-                    text: (subject ? '[' + subject + ']\n' : '') + body,
-                    sent: true,
-                    time: new Date().toISOString()
-                }]
-            };
-            convs.unshift(newConv);
-            saveConversations(convs);
+            try {
+                // 宛先解決（メールアドレスまたはペンネームの完全一致）
+                const token = localStorage.getItem('token');
+                const resp = await fetch((window.API_ORIGIN || '') + '/api/users/lookup/by-identifier?identifier=' + encodeURIComponent(recipient), {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await resp.json();
+                if (!resp.ok) {
+                    alert(getL({
+                        en: 'User not found. Enter the exact email address or pen name.',
+                        ja: 'ユーザーが見つかりませんでした。メールアドレスまたはペンネームを正確に入力してください。'
+                    }));
+                    return;
+                }
+                await postDirectMessage(data.user.user_id, (subject ? '[' + subject + ']\n' : '') + body);
 
-            // Reset modal
-            document.getElementById('newMsgRecipient').value = '';
-            document.getElementById('newMsgSubject').value = '';
-            document.getElementById('newMsgBody').value = '';
-            bootstrap.Modal.getInstance(document.getElementById('newMessageModal')).hide();
+                // Reset modal
+                document.getElementById('newMsgRecipient').value = '';
+                document.getElementById('newMsgSubject').value = '';
+                document.getElementById('newMsgBody').value = '';
+                bootstrap.Modal.getInstance(document.getElementById('newMessageModal')).hide();
 
-            renderConversationList();
-            openConversation(newConv.id);
-            alert(getL(uiText.messageSent));
+                await fetchConversations();
+                const conv = convCache.find(c => c.other_user_id === data.user.user_id);
+                renderConversationList();
+                if (conv) await openConversation(String(conv.conversation_id));
+                alert(getL(uiText.messageSent));
+            } catch (e) {
+                alert(getL({ en: 'Failed to send: ', ja: '送信に失敗しました: ' }) + e.message);
+            }
         }
 
         // ========== Update All Text ==========
@@ -1628,8 +1606,31 @@
         function escapeHtml(text) { if (!text) return ''; const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
 
         // ========== Init ==========
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             updateAllText();
+            await fetchConversations();
+
+            // ?to=<userId> 指定時: その相手との会話を開く（無ければ新規会話の下書き）
+            const params = new URLSearchParams(window.location.search);
+            const toUserId = params.get('to');
+            if (toUserId) {
+                const existing = convCache.find(c => c.other_user_id === toUserId);
+                if (existing) {
+                    await openConversation(String(existing.conversation_id));
+                } else {
+                    let name = params.get('name') || '';
+                    if (!name) {
+                        try {
+                            const resp = await fetch((window.API_ORIGIN || '') + '/api/users/' + encodeURIComponent(toUserId));
+                            const data = await resp.json();
+                            if (resp.ok && data.user) name = data.user.pen_name || ((data.user.first_name || '') + ' ' + (data.user.last_name || '')).trim();
+                        } catch (e) {}
+                    }
+                    draftPartner = { userId: toUserId, name: name || 'User' };
+                    await openConversation('draft');
+                }
+            }
+
             renderConversationList();
             updateNotifBadge();
 

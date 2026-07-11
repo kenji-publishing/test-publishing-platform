@@ -369,6 +369,29 @@ router.post('/confirm-delete', async (req, res) => {
  * GET /api/users/:userId
  * Get public profile of any user
  */
+/**
+ * GET /api/users/lookup/by-identifier?identifier=<email or pen name>
+ * メッセージの宛先解決用（要ログイン）。メールアドレスは完全一致のみ返す
+ */
+router.get('/lookup/by-identifier', authenticate, async (req, res) => {
+  try {
+    const identifier = (req.query.identifier || '').trim();
+    if (!identifier) return res.status(400).json({ error: 'identifier is required' });
+    const result = await db.query(
+      `SELECT user_id, COALESCE(pen_name, first_name || ' ' || last_name) AS display_name
+       FROM users
+       WHERE (LOWER(email) = LOWER($1) OR LOWER(pen_name) = LOWER($1))
+         AND account_status = 'active'
+       LIMIT 1`,
+      [identifier]
+    );
+    if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
+    res.json({ success: true, user: result.rows[0] });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.get('/:userId', async (req, res) => {
   try {
     const result = await db.query(

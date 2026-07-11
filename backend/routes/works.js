@@ -413,6 +413,9 @@ router.get('/collaboration-requests/incoming', authenticate, async (req, res) =>
         const result = await db.query(
             `SELECT wc.collaborator_id, wc.role, wc.revenue_share, wc.target_language, wc.created_at,
                     w.work_id, w.title,
+                    u.user_id AS applicant_id, u.bio AS applicant_bio,
+                    u.country_code AS applicant_country, u.verified AS applicant_verified,
+                    u.profile_image_url AS applicant_image,
                     COALESCE(u.pen_name, u.first_name || ' ' || u.last_name) AS applicant_name
              FROM work_collaborators wc
              JOIN works w ON wc.work_id = w.work_id

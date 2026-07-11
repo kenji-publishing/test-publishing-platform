@@ -14,6 +14,27 @@ const { authenticate } = require('../middleware/auth');
 router.use(authenticate);
 
 /**
+ * GET /api/messages/unread-count
+ * 未読DM数（ナビバーのバッジ用。通知の未読数と合算して表示する）
+ */
+router.get('/unread-count', async (req, res) => {
+    try {
+        const result = await db.query(
+            `SELECT COUNT(*) AS count
+             FROM messages m
+             JOIN conversations c ON m.conversation_id = c.conversation_id
+             WHERE (c.participant_1 = $1 OR c.participant_2 = $1)
+               AND m.sender_id != $1 AND m.is_read = FALSE`,
+            [req.user.userId]
+        );
+        res.json({ success: true, count: parseInt(result.rows[0].count, 10) });
+    } catch (error) {
+        console.error('Unread messages count error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
  * GET /api/messages/conversations
  * Get all conversations for the authenticated user
  */
@@ -22,9 +43,10 @@ router.get('/conversations', async (req, res) => {
         const userId = req.user.userId;
 
         const result = await db.query(
-            `SELECT c.*, 
+            `SELECT c.*,
                     CASE WHEN c.participant_1 = $1 THEN c.participant_2 ELSE c.participant_1 END as other_user_id,
                     u.first_name, u.last_name, u.email,
+                    COALESCE(u.pen_name, u.first_name || ' ' || u.last_name) AS display_name,
                     (SELECT content FROM messages WHERE conversation_id = c.conversation_id ORDER BY created_at DESC LIMIT 1) as last_message,
                     (SELECT COUNT(*) FROM messages WHERE conversation_id = c.conversation_id AND sender_id != $1 AND is_read = FALSE) as unread_count
              FROM conversations c

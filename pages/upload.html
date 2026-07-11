@@ -1594,8 +1594,7 @@
                     throw new Error((data && (data.error || data.message)) || ('HTTP ' + resp.status));
                 }
 
-                // コラボレーター通知（メッセージ + メール）
-                notifyCollaborators(pendingPayload.title);
+                // コラボレーターへの通知はサーバー側で行われる（同意書発行→通知）
                 alert(getL(uiText.alertSuccess));
                 window.location.href = 'my-works.html';
             } catch (err) {
@@ -1603,63 +1602,6 @@
             } finally {
                 if (btn) { btn.disabled = false; }
             }
-        }
-
-        // コラボレーターにメッセージ＋メール通知を送信
-        function notifyCollaborators(workTitle) {
-            var hasEd = document.getElementById('hasEditor').checked;
-            var hasTr = document.getElementById('hasTranslator').checked;
-            if (!hasEd && !hasTr) return;
-
-            var convs = [];
-            try { convs = JSON.parse(localStorage.getItem('publisher_messages') || '[]'); } catch(e) { convs = []; }
-            var notifications = [];
-
-            if (hasEd) {
-                var edName = document.getElementById('editorName').value || 'Editor';
-                var edEmail = document.getElementById('editorEmail').value || '';
-                var msgText = '--- Collaboration Agreement ---\n';
-                msgText += getL(uiText.editorNote) + '\n\n';
-                msgText += 'Work: ' + workTitle + '\nRole: Editor (10%)\n';
-                msgText += 'Please review and sign the agreement: agreements.html';
-                convs.unshift({
-                    id: 'conv_collab_ed_' + Date.now(),
-                    name: edName,
-                    role: 'editor',
-                    initial: edName.charAt(0).toUpperCase(),
-                    unread: 0,
-                    messages: [{ id: 'm1', text: msgText, sent: true, time: new Date().toISOString() }]
-                });
-                notifications.push({ name: edName, email: edEmail, role: 'Editor' });
-            }
-
-            if (hasTr) {
-                var trName = document.getElementById('translatorName').value || 'Translator';
-                var trEmail = document.getElementById('translatorEmail').value || '';
-                var trLang = document.getElementById('translationLang').value || '';
-                var langNames = { ja: '日本語', en: 'English', zh: '中文', es: 'Español', fr: 'Français', de: 'Deutsch', ko: '한국어', ar: 'العربية', pt: 'Português' };
-                var msgText2 = '--- Collaboration Agreement ---\n';
-                msgText2 += getL(uiText.translatorNote) + '\n\n';
-                msgText2 += 'Work: ' + workTitle + '\nRole: Translator (20%)\n';
-                msgText2 += 'Language: ' + (langNames[trLang] || trLang) + '\n';
-                msgText2 += 'Please review and sign the agreement: agreements.html';
-                convs.unshift({
-                    id: 'conv_collab_tr_' + Date.now(),
-                    name: trName,
-                    role: 'translator',
-                    initial: trName.charAt(0).toUpperCase(),
-                    unread: 0,
-                    messages: [{ id: 'm1', text: msgText2, sent: true, time: new Date().toISOString() }]
-                });
-                notifications.push({ name: trName, email: trEmail, role: 'Translator' });
-            }
-
-            localStorage.setItem('publisher_messages', JSON.stringify(convs));
-
-            // メール通知（デモモード：コンソールにログ出力）
-            notifications.forEach(function(n) {
-                console.log('[Email Notification] To: ' + n.email + ' (' + n.name + ') - Collaboration agreement for "' + workTitle + '" as ' + n.role);
-            });
         }
 
         // ========== Pattern C: DOMContentLoaded ==========

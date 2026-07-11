@@ -407,7 +407,7 @@
                     <i class="fas fa-pen-fancy me-1"></i><span id="tabMyWorksLabel" data-i18n="dashboard.tabMyWorks">My Works</span>
                 </button>
                 <button class="btn btn-soft-custom btn-sm" id="tabCollaborations" onclick="switchDashTab('collabs')">
-                    <i class="fas fa-users me-1"></i><span id="tabCollabsLabel" data-i18n="dashboard.tabCollabs">Collaborations</span>
+                    <i class="fas fa-users me-1"></i><span id="tabCollabsLabel" data-i18n="dashboard.tabCollabs">Collaborations</span><span id="collabTabBadge" style="display:none; background:#dc3545; color:#fff; border-radius:10px; padding:1px 7px; font-size:0.72rem; margin-left:6px; vertical-align:middle;"></span>
                 </button>
             </div>
 
@@ -1274,23 +1274,35 @@
                 console.error('Failed to load collaboration requests:', e);
             }
 
+            updateCollabTabBadge(requests.length);
             if (requests.length === 0) {
                 section.style.display = 'none';
                 return;
             }
             section.style.display = '';
-            listEl.innerHTML = requests.map(r => `
+            listEl.innerHTML = requests.map(r => {
+                const bio = (r.applicant_bio || '').trim();
+                const bioHtml = bio
+                    ? `<div class="collab-card-meta" style="margin-top:4px;"><span style="color:var(--color-text-secondary);">${esc(bio.length > 200 ? bio.slice(0, 200) + '…' : bio)}</span></div>`
+                    : `<div class="collab-card-meta" style="margin-top:4px;"><span style="color:var(--color-text-secondary); font-style:italic;">${getL({ en: 'No profile bio yet.', ja: '自己紹介文は未登録です。', zh: '暂无个人简介。', ko: '자기소개가 없습니다.' })}</span></div>`;
+                const verifiedIcon = r.applicant_verified ? ' <i class="fas fa-circle-check" style="color:#2e7d32;" title="Verified"></i>' : '';
+                const country = r.applicant_country ? ` <span style="color:var(--color-text-secondary);">(${esc(r.applicant_country)})</span>` : '';
+                return `
                 <div class="collab-card">
                     <div class="collab-card-header">
                         <div class="collab-card-icon"><i class="fas fa-user-plus"></i></div>
                         <div>
                             <div class="collab-card-title">「${esc(r.title)}」</div>
                             <div class="collab-card-meta">
-                                <span><strong>${esc(r.applicant_name)}</strong> — ${getL(roleLabel[r.role] || {})} (${parseFloat(r.revenue_share)}%)${r.target_language ? ' → ' + esc(String(r.target_language).toUpperCase()) : ''}</span>
+                                <span><strong>${esc(r.applicant_name)}</strong>${verifiedIcon}${country} — ${getL(roleLabel[r.role] || {})} (${parseFloat(r.revenue_share)}%)${r.target_language ? ' → ' + esc(String(r.target_language).toUpperCase()) : ''}</span>
                             </div>
+                            ${bioHtml}
                         </div>
                     </div>
                     <div class="collab-card-actions">
+                        <a href="messages.html?to=${encodeURIComponent(r.applicant_id)}&name=${encodeURIComponent(r.applicant_name)}" class="btn btn-soft-custom btn-sm">
+                            <i class="fas fa-comments me-1"></i>${getL({ en: 'Message the applicant', ja: 'メッセージでやり取り', zh: '与申请人沟通', ko: '메시지로 대화' })}
+                        </a>
                         <button class="btn btn-custom btn-sm" onclick="decideCollabRequest('${esc(r.collaborator_id)}', true)">
                             <i class="fas fa-check me-1"></i>${getL({ en: 'Approve', ja: '承認する', zh: '批准', ko: '승인' })}
                         </button>
@@ -1298,7 +1310,33 @@
                             <i class="fas fa-times me-1"></i>${getL({ en: 'Decline', ja: '却下する', zh: '拒绝', ko: '거절' })}
                         </button>
                     </div>
-                </div>`).join('');
+                </div>`;
+            }).join('');
+        }
+
+        // コラボタブのバッジ（未処理の申請件数）
+        function updateCollabTabBadge(count) {
+            const badge = document.getElementById('collabTabBadge');
+            if (!badge) return;
+            if (count > 0) {
+                badge.textContent = count > 99 ? '99+' : count;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        // ページ表示時にタブを開かなくてもバッジを出す
+        async function refreshCollabTabBadge() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+                const resp = await fetch((window.API_ORIGIN || '') + '/api/works/collaboration-requests/incoming', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await resp.json();
+                if (resp.ok) updateCollabTabBadge((data.requests || []).length);
+            } catch (e) {}
         }
 
         async function decideCollabRequest(collabId, approve) {
@@ -1369,6 +1407,9 @@
             // Load user info
             // Load dashboard data
             loadDashboardData();
+
+            // コラボタブのバッジ（届いた申請の件数）
+            refreshCollabTabBadge();
 
             // Init analytics charts
             const isDemo = new URLSearchParams(window.location.search).has('demo');
