@@ -11,6 +11,84 @@ const db = require('../config/database');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { REVENUE_SHARES } = require('../config/revenue');
+
+// ===== Collaborators (editor / translator revenue sharing) =====
+
+// Platform-fixed shares per role — clients cannot set arbitrary percentages
+const COLLAB_SHARES = {
+    editor: REVENUE_SHARES.EDITOR,        // 10
+    translator: REVENUE_SHARES.TRANSLATOR // 20
+};
+
+/**
+ * Resolve collaborator identifiers (registered email or pen name) to users.
+ * Input: [{ role: 'editor'|'translator', identifier, targetLanguage? }]
+ * Throws an Error with .code / .role / .identifier on validation failure so
+ * the route can return a 400 the frontend can translate for the author.
+ */
+async function resolveCollaborators(collaborators, authorId) {
+    if (!Array.isArray(collaborators) || collaborators.length === 0) return [];
+    const seenRoles = new Set();
+    const resolved = [];
+    for (const c of collaborators) {
+        const role = c && c.role;
+        const identifier = (c && typeof c.identifier === 'string') ? c.identifier.trim() : '';
+        if (!COLLAB_SHARES[role] || seenRoles.has(role)) continue; // unknown/duplicate roles ignored
+        seenRoles.add(role);
+        if (!identifier) {
+            const err = new Error(`Missing ${role} email or pen name`);
+            err.code = 'COLLABORATOR_IDENTIFIER_REQUIRED';
+            err.role = role;
+            throw err;
+        }
+        const result = await db.query(
+            `SELECT user_id FROM users
+             WHERE (LOWER(email) = LOWER($1) OR LOWER(pen_name) = LOWER($1))
+               AND deleted_at IS NULL
+             LIMIT 1`,
+            [identifier]
+        );
+        if (result.rows.length === 0) {
+            const err = new Error(`${role} not found: ${identifier}`);
+            err.code = 'COLLABORATOR_NOT_FOUND';
+            err.role = role;
+            err.identifier = identifier;
+            throw err;
+        }
+        if (result.rows[0].user_id === authorId) {
+            const err = new Error(`The author cannot be added as ${role}`);
+            err.code = 'COLLABORATOR_IS_AUTHOR';
+            err.role = role;
+            throw err;
+        }
+        resolved.push({
+            userId: result.rows[0].user_id,
+            role,
+            share: COLLAB_SHARES[role],
+            targetLanguage: role === 'translator' ? (c.targetLanguage || null) : null
+        });
+    }
+    return resolved;
+}
+
+/** Replace a work's collaborators with the resolved set (inside caller's transaction). */
+async function syncWorkCollaborators(client, workId, resolved) {
+    await client.query('DELETE FROM work_collaborators WHERE work_id = $1', [workId]);
+    for (const r of resolved) {
+        await client.query(
+            `INSERT INTO work_collaborators (work_id, user_id, role, revenue_share, target_language)
+             VALUES ($1, $2, $3, $4, $5)`,
+            [workId, r.userId, r.role, r.share, r.targetLanguage]
+        );
+    }
+}
+
+/** 400 payload for collaborator validation errors, null for other errors. */
+function collaboratorErrorResponse(error) {
+    if (!error || !String(error.code || '').startsWith('COLLABORATOR_')) return null;
+    return { error: error.message, code: error.code, role: error.role || null, identifier: error.identifier || null };
+}
 
 // Cover image upload (multer) — stored under uploads/covers, served via /uploads
 const COVER_DIR = path.join(__dirname, '..', 'uploads', 'covers');
@@ -83,7 +161,18 @@ router.get('/my/:workId', authenticate, async (req, res) => {
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Work not found' });
         }
-        res.json({ success: true, work: result.rows[0] });
+        const work = result.rows[0];
+        // Collaborators for the edit form (email shown so the author can fix it)
+        const collabs = await db.query(
+            `SELECT wc.role, wc.revenue_share, wc.target_language, u.email,
+                    COALESCE(u.pen_name, u.first_name || ' ' || u.last_name) AS name
+             FROM work_collaborators wc
+             JOIN users u ON wc.user_id = u.user_id
+             WHERE wc.work_id = $1 AND wc.status = 'active'`,
+            [req.params.workId]
+        );
+        work.collaborators = collabs.rows;
+        res.json({ success: true, work });
     } catch (error) {
         console.error('Get my work error:', error);
         res.status(500).json({ error: error.message });
@@ -444,48 +533,73 @@ router.post('/', authenticate, async (req, res) => {
         const wordCount = textContent.replace(/\s+/g, ' ').trim().split(/\s+/).length;
         const pageCount = Math.ceil(wordCount / 250);
 
-        const result = await db.query(
-            `INSERT INTO works (
-                author_id, title, description, synopsis, content,
-                original_language, language, content_type, genre, tags,
-                price, is_free, cover_image, is_adult,
-                is_ai_generated, ai_tools_used, preview_percent,
-                word_count, page_count, currency, status,
-                ai_text_usage, ai_cover_usage, ai_translation_usage
-             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
-             RETURNING *`,
-            [
-                req.user.userId,
-                title,
-                description || '',
-                synopsis || '',
-                content || '',
-                originalLanguage || 'ja',
-                language || originalLanguage || 'ja',
-                workContentType,
-                genre || 'general',
-                tags || [],
-                price || 0,
-                isFree || false,
-                coverImage || null,
-                isAdult || false,
-                isAiGenerated || (aiText !== 'none') || false,
-                aiToolsUsed || null,
-                previewPercent || 10,
-                wordCount,
-                pageCount,
-                workCurrency,
-                workStatus,
-                aiText,
-                aiCover,
-                aiTranslation
-            ]
-        );
+        // Resolve collaborators (editor/translator) BEFORE any write so a
+        // typo'd email fails the publish cleanly with a 400
+        let resolvedCollabs = [];
+        try {
+            resolvedCollabs = await resolveCollaborators(req.body.collaborators, req.user.userId);
+        } catch (collabError) {
+            const payload = collaboratorErrorResponse(collabError);
+            if (payload) return res.status(400).json(payload);
+            throw collabError;
+        }
+
+        // Work + collaborators must be created atomically
+        const client = await db.pool.connect();
+        let work;
+        try {
+            await client.query('BEGIN');
+            const result = await client.query(
+                `INSERT INTO works (
+                    author_id, title, description, synopsis, content,
+                    original_language, language, content_type, genre, tags,
+                    price, is_free, cover_image, is_adult,
+                    is_ai_generated, ai_tools_used, preview_percent,
+                    word_count, page_count, currency, status,
+                    ai_text_usage, ai_cover_usage, ai_translation_usage
+                 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
+                 RETURNING *`,
+                [
+                    req.user.userId,
+                    title,
+                    description || '',
+                    synopsis || '',
+                    content || '',
+                    originalLanguage || 'ja',
+                    language || originalLanguage || 'ja',
+                    workContentType,
+                    genre || 'general',
+                    tags || [],
+                    price || 0,
+                    isFree || false,
+                    coverImage || null,
+                    isAdult || false,
+                    isAiGenerated || (aiText !== 'none') || false,
+                    aiToolsUsed || null,
+                    previewPercent || 10,
+                    wordCount,
+                    pageCount,
+                    workCurrency,
+                    workStatus,
+                    aiText,
+                    aiCover,
+                    aiTranslation
+                ]
+            );
+            work = result.rows[0];
+            await syncWorkCollaborators(client, work.work_id, resolvedCollabs);
+            await client.query('COMMIT');
+        } catch (txError) {
+            await client.query('ROLLBACK');
+            throw txError;
+        } finally {
+            client.release();
+        }
 
         res.status(201).json({
             success: true,
             message: 'Work created successfully',
-            work: result.rows[0]
+            work
         });
     } catch (error) {
         console.error('Create work error:', error);
@@ -574,6 +688,30 @@ router.put('/:workId', authenticate, async (req, res) => {
                 aiText, aiCover, aiTranslation
             ]
         );
+
+        // Sync collaborators only when the client sent the field
+        // (older clients that omit it keep the existing collaborators)
+        if (Object.prototype.hasOwnProperty.call(req.body, 'collaborators')) {
+            let resolvedCollabs;
+            try {
+                resolvedCollabs = await resolveCollaborators(req.body.collaborators, req.user.userId);
+            } catch (collabError) {
+                const payload = collaboratorErrorResponse(collabError);
+                if (payload) return res.status(400).json(payload);
+                throw collabError;
+            }
+            const client = await db.pool.connect();
+            try {
+                await client.query('BEGIN');
+                await syncWorkCollaborators(client, req.params.workId, resolvedCollabs);
+                await client.query('COMMIT');
+            } catch (txError) {
+                await client.query('ROLLBACK');
+                throw txError;
+            } finally {
+                client.release();
+            }
+        }
 
         res.json({
             success: true,

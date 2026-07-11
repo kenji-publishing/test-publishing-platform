@@ -1325,6 +1325,22 @@
                 setSel('aiCoverUsage', editWork.ai_cover_usage);
                 setSel('aiTranslationUsage', editWork.ai_translation_usage);
 
+                // コラボレーター（編集者・翻訳者）を復元
+                (editWork.collaborators || []).forEach(function(c) {
+                    if (c.role === 'editor') {
+                        document.getElementById('hasEditor').checked = true;
+                        toggleCollabSection('editor');
+                        document.getElementById('editorName').value = c.name || '';
+                        document.getElementById('editorEmail').value = c.email || '';
+                    } else if (c.role === 'translator') {
+                        document.getElementById('hasTranslator').checked = true;
+                        toggleCollabSection('translator');
+                        document.getElementById('translatorName').value = c.name || '';
+                        document.getElementById('translatorEmail').value = c.email || '';
+                        setSel('translationLang', c.target_language);
+                    }
+                });
+
                 // ボタン表記を「更新」に変更
                 var btn = document.getElementById('btnPublish');
                 if (btn) {
@@ -1389,8 +1405,28 @@
                     return;
                 }
 
+                // コラボレーター（編集者・翻訳者）: チェックONならメール/ペンネーム必須
+                var collaborators = [];
+                if (document.getElementById('hasEditor').checked) {
+                    var edId = (document.getElementById('editorEmail').value || '').trim();
+                    if (!edId) {
+                        alert(getL({ en: 'Please enter the editor\'s registered email or pen name.', ja: '編集者の登録メールアドレスまたはペンネームを入力してください。' }));
+                        return;
+                    }
+                    collaborators.push({ role: 'editor', identifier: edId });
+                }
+                if (document.getElementById('hasTranslator').checked) {
+                    var trId = (document.getElementById('translatorEmail').value || '').trim();
+                    if (!trId) {
+                        alert(getL({ en: 'Please enter the translator\'s registered email or pen name.', ja: '翻訳者の登録メールアドレスまたはペンネームを入力してください。' }));
+                        return;
+                    }
+                    collaborators.push({ role: 'translator', identifier: trId, targetLanguage: (document.getElementById('translationLang') || {}).value || null });
+                }
+
                 var lang = document.getElementById('workLanguage').value || 'en';
                 pendingPayload = {
+                    collaborators: collaborators,
                     title: workTitle,
                     description: document.getElementById('workDescription').value || '',
                     synopsis: document.getElementById('workDescription').value || '',
@@ -1530,6 +1566,18 @@
                 }
                 var data = null;
                 try { data = await resp.json(); } catch (e) {}
+
+                // コラボレーターの解決エラーは分かりやすい文言で表示
+                if (data && data.code === 'COLLABORATOR_NOT_FOUND') {
+                    var nfRole = data.role === 'translator' ? getL({ en: 'Translator', ja: '翻訳者' }) : getL({ en: 'Editor', ja: '編集者' });
+                    throw new Error(nfRole
+                        + getL({ en: ' not found on AuctLect: ', ja: 'がAuctLectで見つかりません: ' })
+                        + (data.identifier || '')
+                        + getL({ en: '. Enter the email address or pen name they registered with.', ja: ' 。相手がAuctLectに登録した際のメールアドレスかペンネームを入力してください。' }));
+                }
+                if (data && data.code === 'COLLABORATOR_IS_AUTHOR') {
+                    throw new Error(getL({ en: 'You cannot add yourself as a collaborator.', ja: '自分自身をコラボレーターに指定することはできません。' }));
+                }
 
                 if (!resp.ok) {
                     throw new Error((data && (data.error || data.message)) || ('HTTP ' + resp.status));

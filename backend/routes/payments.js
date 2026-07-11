@@ -11,16 +11,10 @@ const db = require('../config/database');
 // Stripe initialization
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-// Revenue distribution percentages.
-// Purchases are currently always of the base work with no translator/editor
-// attached (collaborator relationships are not yet modeled per purchase), so
-// the author receives everything except the platform share (70/30).
-// When per-work translator (20) / editor (10) splits are implemented, derive
-// the author share as 100 - platform - translator - editor per work.
-const REVENUE_SPLIT = {
-  author: 70,
-  platform: 30
-};
+// Revenue distribution: derived per work from work_collaborators
+// (platform 30% fixed, translator 20 / editor 10 when attached,
+// author gets the remainder). See services/revenueSplitService.js.
+const { createRevenueSplits } = require('../services/revenueSplitService');
 
 /**
  * POST /api/payments/create-checkout-session
@@ -158,24 +152,17 @@ router.post('/webhook', async (req, res) => {
         [buyer_id, work_id, amount, currency, session.id]
       );
 
-      // Create revenue splits (rounded to cents to avoid float drift)
-      const authorAmount = Math.round(amount * REVENUE_SPLIT.author) / 100;
-      const platformAmount = Math.round(amount * REVENUE_SPLIT.platform) / 100;
-
-      await client.query(
-        `INSERT INTO revenue_splits (work_id, recipient_id, role, amount, currency, transaction_reference)
-         VALUES ($1, $2, 'author', $3, $4, $5)`,
-        [work_id, author_id, authorAmount, currency, session.id]
-      );
-
-      await client.query(
-        `INSERT INTO revenue_splits (work_id, recipient_id, role, amount, currency, transaction_reference)
-         VALUES ($1, NULL, 'platform', $2, $3, $4)`,
-        [work_id, platformAmount, currency, session.id]
-      );
+      // Create revenue splits (author / collaborators / platform)
+      const splits = await createRevenueSplits(client, {
+        workId: work_id,
+        authorId: author_id,
+        amount,
+        currency,
+        reference: session.id
+      });
 
       await client.query('COMMIT');
-      console.log(`Payment completed: work=${work_id}, buyer=${buyer_id}, amount=${amount} ${currency}`);
+      console.log(`Payment completed: work=${work_id}, buyer=${buyer_id}, amount=${amount} ${currency}, splits=${splits.map(s => `${s.role}:${s.amount}`).join(' ')}`);
     } catch (error) {
       await client.query('ROLLBACK');
       console.error('Error processing webhook:', error);
@@ -290,21 +277,14 @@ router.post('/capture-paypal-order', authenticate, async (req, res) => {
         [req.user.userId, workId, paidAmount, orderId]
       );
 
-      // Revenue splits (same split as the Stripe webhook, rounded to cents)
-      const authorAmount = Math.round(paidAmount * REVENUE_SPLIT.author) / 100;
-      const platformAmount = Math.round(paidAmount * REVENUE_SPLIT.platform) / 100;
-
-      await client.query(
-        `INSERT INTO revenue_splits (work_id, recipient_id, role, amount, currency, transaction_reference)
-         VALUES ($1, $2, 'author', $3, 'USD', $4)`,
-        [workId, work.author_id, authorAmount, orderId]
-      );
-
-      await client.query(
-        `INSERT INTO revenue_splits (work_id, recipient_id, role, amount, currency, transaction_reference)
-         VALUES ($1, NULL, 'platform', $2, 'USD', $3)`,
-        [workId, platformAmount, orderId]
-      );
+      // Revenue splits (same logic as the Stripe webhook)
+      await createRevenueSplits(client, {
+        workId,
+        authorId: work.author_id,
+        amount: paidAmount,
+        currency: 'USD',
+        reference: orderId
+      });
 
       await client.query('COMMIT');
     } catch (error) {
