@@ -367,7 +367,7 @@ router.get('/my/all', authenticate, async (req, res) => {
 router.get('/collaborations/mine', authenticate, async (req, res) => {
     try {
         const result = await db.query(
-            `SELECT wc.role, wc.revenue_share, wc.target_language, wc.created_at, wc.status,
+            `SELECT wc.collaborator_id, wc.role, wc.revenue_share, wc.target_language, wc.created_at, wc.status,
                     w.work_id, w.title, w.status AS work_status,
                     COALESCE(u.pen_name, u.first_name || ' ' || u.last_name) AS author_name,
                     COALESCE((SELECT SUM(rs.amount) FROM revenue_splits rs
@@ -378,13 +378,217 @@ router.get('/collaborations/mine', authenticate, async (req, res) => {
              FROM work_collaborators wc
              JOIN works w ON wc.work_id = w.work_id
              JOIN users u ON w.author_id = u.user_id
-             WHERE wc.user_id = $1 AND wc.status IN ('pending', 'active') AND w.status != 'deleted'
+             WHERE wc.user_id = $1 AND wc.status IN ('requested', 'pending', 'active') AND w.status != 'deleted'
              ORDER BY wc.created_at DESC`,
             [req.user.userId]
         );
         res.json({ success: true, collaborations: result.rows });
     } catch (error) {
         console.error('Get my collaborations error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/** 同意書を1件発行（承認フローとsyncWorkCollaboratorsで共用の形） */
+async function createAgreementRow(client, { collaboratorId, workId, workTitle, authorId, userId, role, share, targetLanguage }) {
+    const terms = {
+        version: '1.0', workId, workTitle: workTitle || '', role,
+        revenueShare: share, platformShare: REVENUE_SHARES.PLATFORM,
+        targetLanguage: targetLanguage || null, authorId, collaboratorUserId: userId,
+        createdAt: new Date().toISOString()
+    };
+    await client.query(
+        `INSERT INTO collaboration_agreements (collaborator_id, work_id, author_id, user_id, terms, terms_hash)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [collaboratorId, workId, authorId, userId, JSON.stringify(terms), generateAgreementHash(terms)]
+    );
+}
+
+/**
+ * GET /api/works/collaboration-requests/incoming
+ * 自分の作品への申請一覧（著者向け）。/:workIdより先に定義すること
+ */
+router.get('/collaboration-requests/incoming', authenticate, async (req, res) => {
+    try {
+        const result = await db.query(
+            `SELECT wc.collaborator_id, wc.role, wc.revenue_share, wc.target_language, wc.created_at,
+                    w.work_id, w.title,
+                    COALESCE(u.pen_name, u.first_name || ' ' || u.last_name) AS applicant_name
+             FROM work_collaborators wc
+             JOIN works w ON wc.work_id = w.work_id
+             JOIN users u ON wc.user_id = u.user_id
+             WHERE w.author_id = $1 AND wc.status = 'requested'
+             ORDER BY wc.created_at DESC`,
+            [req.user.userId]
+        );
+        res.json({ success: true, requests: result.rows });
+    } catch (error) {
+        console.error('Get collaboration requests error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * POST /api/works/:workId/apply
+ * 翻訳者/編集者が作品に「翻訳したい/編集したい」と申請する
+ */
+router.post('/:workId/apply', authenticate, async (req, res) => {
+    try {
+        const { role, targetLanguage } = req.body;
+        if (!COLLAB_SHARES[role]) return res.status(400).json({ error: 'Invalid role' });
+
+        const workResult = await db.query(
+            `SELECT work_id, title, author_id FROM works WHERE work_id = $1 AND status = 'published'`,
+            [req.params.workId]
+        );
+        if (workResult.rows.length === 0) return res.status(404).json({ error: 'Work not found' });
+        const work = workResult.rows[0];
+        if (work.author_id === req.user.userId) {
+            return res.status(400).json({ error: 'You cannot apply to your own work' });
+        }
+
+        // 同役割の既存行を確認（declined/removedなら上書き申請を許可）
+        const existing = (await db.query(
+            `SELECT collaborator_id, status FROM work_collaborators WHERE work_id = $1 AND role = $2`,
+            [work.work_id, role]
+        )).rows[0];
+        if (existing && ['requested', 'pending', 'active'].includes(existing.status)) {
+            return res.status(409).json({ error: 'This role already has an applicant or collaborator', code: 'ROLE_TAKEN' });
+        }
+        if (existing) {
+            await db.query('DELETE FROM work_collaborators WHERE collaborator_id = $1', [existing.collaborator_id]);
+        }
+
+        await db.query(
+            `INSERT INTO work_collaborators (work_id, user_id, role, revenue_share, target_language, status)
+             VALUES ($1, $2, $3, $4, $5, 'requested')`,
+            [work.work_id, req.user.userId, role, COLLAB_SHARES[role], role === 'translator' ? (targetLanguage || null) : null]
+        );
+
+        try {
+            const applicant = (await db.query(
+                `SELECT COALESCE(pen_name, first_name || ' ' || last_name) AS name FROM users WHERE user_id = $1`,
+                [req.user.userId]
+            )).rows[0];
+            await createNotification({
+                userId: work.author_id,
+                type: 'system',
+                title: role === 'translator' ? '翻訳の申請が届きました / Translation request' : '編集の申請が届きました / Editing request',
+                message: `「${work.title}」に${applicant.name}さんから${role === 'translator' ? '翻訳' : '編集'}の申請が届いています。ダッシュボードのコラボレーションタブから承認・却下できます。 / ${applicant.name} applied to ${role === 'translator' ? 'translate' : 'edit'} "${work.title}". Approve or decline from the dashboard collaboration tab.`,
+                actionUrl: '/pages/dashboard.html'
+            });
+        } catch (e) { console.error('Notify author failed:', e.message); }
+
+        res.json({ success: true, status: 'requested' });
+    } catch (error) {
+        console.error('Apply error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * POST /api/works/collaborators/:collaboratorId/approve | /reject
+ * 著者が申請を承認（→pending+同意書発行）または却下
+ */
+async function handleRequestDecision(req, res, approve) {
+    const client = await db.pool.connect();
+    try {
+        await client.query('BEGIN');
+        const row = (await client.query(
+            `SELECT wc.*, w.title, w.author_id FROM work_collaborators wc
+             JOIN works w ON wc.work_id = w.work_id
+             WHERE wc.collaborator_id = $1 FOR UPDATE OF wc`,
+            [req.params.collaboratorId]
+        )).rows[0];
+        if (!row) { await client.query('ROLLBACK'); return res.status(404).json({ error: 'Request not found' }); }
+        if (row.author_id !== req.user.userId) { await client.query('ROLLBACK'); return res.status(403).json({ error: 'Not your work' }); }
+        if (row.status !== 'requested') { await client.query('ROLLBACK'); return res.status(400).json({ error: `Request already ${row.status}` }); }
+
+        if (approve) {
+            await client.query(
+                `UPDATE work_collaborators SET status = 'pending', updated_at = CURRENT_TIMESTAMP WHERE collaborator_id = $1`,
+                [row.collaborator_id]
+            );
+            await createAgreementRow(client, {
+                collaboratorId: row.collaborator_id, workId: row.work_id, workTitle: row.title,
+                authorId: row.author_id, userId: row.user_id, role: row.role,
+                share: parseFloat(row.revenue_share), targetLanguage: row.target_language
+            });
+        } else {
+            await client.query(
+                `UPDATE work_collaborators SET status = 'declined', updated_at = CURRENT_TIMESTAMP WHERE collaborator_id = $1`,
+                [row.collaborator_id]
+            );
+        }
+        await client.query('COMMIT');
+
+        try {
+            await createNotification({
+                userId: row.user_id,
+                type: 'system',
+                title: approve ? '申請が承認されました / Request approved' : '申請が却下されました / Request declined',
+                message: approve
+                    ? `「${row.title}」への${row.role === 'translator' ? '翻訳' : '編集'}申請が承認されました。同意書ページで条件を確認して署名してください。 / Your request for "${row.title}" was approved. Please review and sign the agreement.`
+                    : `「${row.title}」への${row.role === 'translator' ? '翻訳' : '編集'}申請は見送られました。 / Your request for "${row.title}" was declined.`,
+                actionUrl: approve ? '/pages/agreements.html' : '/pages/browse.html'
+            });
+        } catch (e) { console.error('Notify applicant failed:', e.message); }
+
+        res.json({ success: true, status: approve ? 'pending' : 'declined' });
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Request decision error:', error);
+        res.status(500).json({ error: error.message });
+    } finally {
+        client.release();
+    }
+}
+router.post('/collaborators/:collaboratorId/approve', authenticate, (req, res) => handleRequestDecision(req, res, true));
+router.post('/collaborators/:collaboratorId/reject', authenticate, (req, res) => handleRequestDecision(req, res, false));
+
+/**
+ * POST /api/works/collaborators/:collaboratorId/progress
+ * コラボレーター本人が進捗を報告（著者に通知）
+ */
+router.post('/collaborators/:collaboratorId/progress', authenticate, async (req, res) => {
+    try {
+        const { percent, status, comment } = req.body;
+        const pct = parseInt(percent, 10);
+        if (isNaN(pct) || pct < 0 || pct > 100) return res.status(400).json({ error: 'percent must be 0-100' });
+        const st = ['on-track', 'behind', 'need-help'].includes(status) ? status : 'on-track';
+
+        const row = (await db.query(
+            `SELECT wc.*, w.title, w.author_id FROM work_collaborators wc
+             JOIN works w ON wc.work_id = w.work_id WHERE wc.collaborator_id = $1`,
+            [req.params.collaboratorId]
+        )).rows[0];
+        if (!row) return res.status(404).json({ error: 'Collaboration not found' });
+        if (row.user_id !== req.user.userId) return res.status(403).json({ error: 'Not your collaboration' });
+        if (row.status !== 'active') return res.status(400).json({ error: 'Collaboration is not active' });
+
+        await db.query(
+            `INSERT INTO collaboration_progress (collaborator_id, percent, status, comment)
+             VALUES ($1, $2, $3, $4)`,
+            [row.collaborator_id, pct, st, (comment || '').slice(0, 2000)]
+        );
+
+        try {
+            const reporter = (await db.query(
+                `SELECT COALESCE(pen_name, first_name || ' ' || last_name) AS name FROM users WHERE user_id = $1`,
+                [req.user.userId]
+            )).rows[0];
+            await createNotification({
+                userId: row.author_id,
+                type: 'system',
+                title: '進捗報告が届きました / Progress report',
+                message: `「${row.title}」の${row.role === 'translator' ? '翻訳' : '編集'}進捗: ${pct}%（${reporter.name}さん）${comment ? ' — ' + String(comment).slice(0, 100) : ''}`,
+                actionUrl: '/pages/dashboard.html'
+            });
+        } catch (e) { console.error('Notify author failed:', e.message); }
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Progress report error:', error);
         res.status(500).json({ error: error.message });
     }
 });

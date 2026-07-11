@@ -612,6 +612,16 @@
             <!-- Collaborations Tab Content -->
             <div id="collabsContent" style="display:none;">
 
+                <!-- Incoming Collaboration Requests (author view) -->
+                <div class="dashboard-section fade-in mb-4" id="collabRequestsSection" style="display:none;">
+                    <div class="section-header">
+                        <h2><i class="fas fa-inbox me-2 text-accent"></i><span id="collabRequestsTitle">Incoming Requests</span></h2>
+                    </div>
+                    <div class="section-body" id="collabRequestsList">
+                        <!-- Request cards rendered by JS -->
+                    </div>
+                </div>
+
                 <!-- Active Collaborations -->
                 <div class="dashboard-section fade-in mb-4">
                     <div class="section-header">
@@ -642,7 +652,7 @@
                     <label id="progressStatusLabel" data-i18n="dashboard.progressStatusLabel">Status</label>
                     <select id="progressStatus">
                         <option value="on-track" id="optOnTrack" data-i18n="dashboard.optOnTrack">On Track</option>
-                        <option value="slightly-behind" id="optBehind" data-i18n="dashboard.optBehind">Slightly Behind</option>
+                        <option value="behind" id="optBehind" data-i18n="dashboard.optBehind">Slightly Behind</option>
                         <option value="need-help" id="optNeedHelp" data-i18n="dashboard.optNeedHelp">Need Help</option>
                     </select>
                     <label id="progressPercentLabel" data-i18n="dashboard.progressPercentLabel">Progress</label>
@@ -1116,6 +1126,7 @@
                 collabsContent.style.display = '';
                 tabMyWorks.className = 'btn btn-soft-custom btn-sm';
                 tabCollaborations.className = 'btn btn-custom btn-sm active';
+                renderCollabRequests();
                 renderCollaborations();
             }
         }
@@ -1151,12 +1162,17 @@
                 return;
             }
 
-            // 参加中のコラボ一覧（pending=承諾待ち: 同意書への署名が必要）
+            // 参加中のコラボ一覧（requested=著者の承認待ち / pending=同意書への署名が必要）
             listEl.innerHTML = collabs.map(c => {
                 const isPending = c.status === 'pending';
-                const statusBadge = isPending
-                    ? '<span class="collab-status-badge" style="background:#fff3cd; color:#856404;">' + getL({ en: 'Awaiting your signature', ja: '承諾待ち（署名が必要）', zh: '待您签署', ko: '서명 대기 중' }) + '</span>'
-                    : '<span class="collab-status-badge in-progress">' + getL({ en: 'Active', ja: '参加中', zh: '进行中', ko: '참여 중' }) + '</span>';
+                let statusBadge;
+                if (c.status === 'requested') {
+                    statusBadge = '<span class="collab-status-badge" style="background:#e2e3ff; color:#3b3b8f;">' + getL({ en: 'Applied — awaiting author approval', ja: '申請中（著者の承認待ち）', zh: '已申请（等待作者批准）', ko: '신청함(저자 승인 대기)' }) + '</span>';
+                } else if (isPending) {
+                    statusBadge = '<span class="collab-status-badge" style="background:#fff3cd; color:#856404;">' + getL({ en: 'Awaiting your signature', ja: '承諾待ち（署名が必要）', zh: '待您签署', ko: '서명 대기 중' }) + '</span>';
+                } else {
+                    statusBadge = '<span class="collab-status-badge in-progress">' + getL({ en: 'Active', ja: '参加中', zh: '进行中', ko: '참여 중' }) + '</span>';
+                }
                 return `
                 <div class="collab-card">
                     <div class="collab-card-header">
@@ -1174,15 +1190,20 @@
                         <a href="work-detail.html?id=${encodeURIComponent(c.work_id)}" class="btn btn-soft-custom btn-sm">
                             <i class="fas fa-book me-1"></i>${getL({ en: 'View work', ja: '作品を見る', zh: '查看作品', ko: '작품 보기' })}
                         </a>
+                        ${c.status !== 'requested' ? `
                         <a href="agreements.html" class="btn ${isPending ? 'btn-custom' : 'btn-soft-custom'} btn-sm">
                             <i class="fas fa-file-contract me-1"></i>${isPending ? getL({ en: 'Sign agreement', ja: '同意書に署名する', zh: '签署协议', ko: '동의서 서명' }) : getL(uiText.collabViewAgreement)}
-                        </a>
+                        </a>` : ''}
+                        ${c.status === 'active' ? `
+                        <button class="btn btn-custom btn-sm" onclick="openProgressModal('${esc(c.collaborator_id)}')">
+                            <i class="fas fa-tasks me-1"></i>${getL(uiText.collabUpdateProgress)}
+                        </button>` : ''}
                     </div>
                 </div>`;
             }).join('');
 
-            // 収益（配当の実績）
-            revenueEl.innerHTML = collabs.map(c => {
+            // 収益（配当の実績）— 申請中はまだ対象外
+            revenueEl.innerHTML = collabs.filter(c => c.status !== 'requested').map(c => {
                 const earned = parseFloat(c.earned) || 0;
                 const earnedText = (typeof formatWorkPrice === 'function' && c.earned_currency)
                     ? formatWorkPrice(earned, c.earned_currency)
@@ -1210,27 +1231,94 @@
             document.getElementById('progressModalOverlay').classList.remove('show');
         }
 
-        function submitProgressReport() {
+        async function submitProgressReport() {
             const collabId = document.getElementById('progressCollabId').value;
             const status = document.getElementById('progressStatus').value;
-            const percent = document.getElementById('progressRange').value;
+            const percent = parseInt(document.getElementById('progressRange').value, 10);
             const comment = document.getElementById('progressComment').value;
 
-            const report = {
-                collabId: collabId,
-                status: status,
-                percent: parseInt(percent),
-                comment: comment,
-                timestamp: new Date().toISOString()
-            };
+            try {
+                const token = localStorage.getItem('token');
+                const resp = await fetch((window.API_ORIGIN || '') + '/api/works/collaborators/' + encodeURIComponent(collabId) + '/progress', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ percent: percent, status: status, comment: comment })
+                });
+                const data = await resp.json();
+                if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
+                closeProgressModal();
+                alert(getL(uiText.progressSaved));
+            } catch (e) {
+                alert(getL({ en: 'Failed to send progress report: ', ja: '進捗報告の送信に失敗しました: ' }) + e.message);
+            }
+        }
 
-            // Save to localStorage
-            const reports = JSON.parse(localStorage.getItem('collabProgressReports') || '[]');
-            reports.push(report);
-            localStorage.setItem('collabProgressReports', JSON.stringify(reports));
+        // ===== 受信した申請（著者向け: 承認・却下） =====
+        async function renderCollabRequests() {
+            const section = document.getElementById('collabRequestsSection');
+            const listEl = document.getElementById('collabRequestsList');
+            const titleEl = document.getElementById('collabRequestsTitle');
+            titleEl.textContent = getL({ en: 'Incoming Requests', ja: '届いた申請', zh: '收到的申请', ko: '받은 신청' });
+            const esc = function(t) { const d = document.createElement('div'); d.textContent = t == null ? '' : String(t); return d.innerHTML; };
+            const roleLabel = { translator: uiText.collabTranslator, editor: uiText.collabEditor };
 
-            closeProgressModal();
-            alert(getL(uiText.progressSaved));
+            let requests = [];
+            try {
+                const token = localStorage.getItem('token');
+                const resp = await fetch((window.API_ORIGIN || '') + '/api/works/collaboration-requests/incoming', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await resp.json();
+                if (resp.ok) requests = data.requests || [];
+            } catch (e) {
+                console.error('Failed to load collaboration requests:', e);
+            }
+
+            if (requests.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+            section.style.display = '';
+            listEl.innerHTML = requests.map(r => `
+                <div class="collab-card">
+                    <div class="collab-card-header">
+                        <div class="collab-card-icon"><i class="fas fa-user-plus"></i></div>
+                        <div>
+                            <div class="collab-card-title">「${esc(r.title)}」</div>
+                            <div class="collab-card-meta">
+                                <span><strong>${esc(r.applicant_name)}</strong> — ${getL(roleLabel[r.role] || {})} (${parseFloat(r.revenue_share)}%)${r.target_language ? ' → ' + esc(String(r.target_language).toUpperCase()) : ''}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="collab-card-actions">
+                        <button class="btn btn-custom btn-sm" onclick="decideCollabRequest('${esc(r.collaborator_id)}', true)">
+                            <i class="fas fa-check me-1"></i>${getL({ en: 'Approve', ja: '承認する', zh: '批准', ko: '승인' })}
+                        </button>
+                        <button class="btn btn-soft-custom btn-sm" onclick="decideCollabRequest('${esc(r.collaborator_id)}', false)">
+                            <i class="fas fa-times me-1"></i>${getL({ en: 'Decline', ja: '却下する', zh: '拒绝', ko: '거절' })}
+                        </button>
+                    </div>
+                </div>`).join('');
+        }
+
+        async function decideCollabRequest(collabId, approve) {
+            if (!approve && !confirm(getL({ en: 'Decline this request?', ja: 'この申請を却下しますか？' }))) return;
+            try {
+                const token = localStorage.getItem('token');
+                const resp = await fetch((window.API_ORIGIN || '') + '/api/works/collaborators/' + encodeURIComponent(collabId) + (approve ? '/approve' : '/reject'), {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await resp.json();
+                if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
+                alert(approve
+                    ? getL({ en: 'Approved. An agreement has been issued — the applicant will be asked to sign it.', ja: '承認しました。同意書が発行され、申請者に署名の案内が届きます。' })
+                    : getL({ en: 'The request was declined.', ja: '申請を却下しました。' }));
+                renderCollabRequests();
+                renderCollaborations();
+            } catch (e) {
+                alert(getL({ en: 'Operation failed: ', ja: '処理に失敗しました: ' }) + e.message);
+            }
         }
 
         function updateCollabUIText() {

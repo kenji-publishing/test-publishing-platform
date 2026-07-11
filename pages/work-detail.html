@@ -935,32 +935,53 @@ function escapeHtml(text) {
             loadWork();
         }
 
-        function requestCollaboration(type) {
+        async function requestCollaboration(type) {
             var id = getWorkIdFromUrl();
-            var work = workDetails[id];
-            if (!work) return;
-            var msgText = '--- ' + (type === 'translate' ? 'Translation' : 'Collaboration') + ' Request ---\n';
-            msgText += 'Work: ' + work.title + '\n';
-            msgText += 'Author: ' + work.author + '\n';
-            if (type === 'translate') {
-                msgText += 'I would like to translate this work.\n';
-            } else {
-                msgText += "I'd like to edit your next work or collaborate on future projects.\n";
+            var token = localStorage.getItem('token');
+            if (!token) {
+                alert(getL({ en: 'Please log in to apply.', ja: '申請にはログインが必要です。' }));
+                window.location.href = 'login.html';
+                return;
             }
-            msgText += 'Please let me know if you are interested.';
-            // メッセージ機能に会話を自動作成
-            var convs = [];
-            try { convs = JSON.parse(localStorage.getItem('publisher_messages') || '[]'); } catch(e) { convs = []; }
-            convs.unshift({
-                id: 'conv_req_' + Date.now(),
-                name: work.author,
-                role: 'author',
-                initial: work.author.charAt(0),
-                unread: 0,
-                messages: [{ id: 'm1', text: msgText, sent: true, time: new Date().toISOString() }]
-            });
-            localStorage.setItem('publisher_messages', JSON.stringify(convs));
-            alert(getL(uiText.collabRequestSent));
+            var role = (type === 'translate') ? 'translator' : 'editor';
+            var targetLanguage = null;
+            if (role === 'translator') {
+                var input = prompt(getL({
+                    en: 'Which language will you translate into? Enter a code:\nen, ja, zh, es, fr, de, ko, ar, pt, it',
+                    ja: 'どの言語に翻訳しますか？コードを入力してください：\nen, ja, zh, es, fr, de, ko, ar, pt, it'
+                }), 'en');
+                if (input === null) return; // キャンセル
+                input = input.trim().toLowerCase();
+                if (['en','ja','zh','es','fr','de','ko','ar','pt','it'].indexOf(input) === -1) {
+                    alert(getL({ en: 'Invalid language code.', ja: '言語コードが正しくありません。' }));
+                    return;
+                }
+                targetLanguage = input;
+            }
+            try {
+                var resp = await fetch((window.API_ORIGIN || '') + '/api/works/' + encodeURIComponent(id) + '/apply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ role: role, targetLanguage: targetLanguage })
+                });
+                var data = await resp.json();
+                if (!resp.ok) {
+                    if (data.code === 'ROLE_TAKEN') {
+                        alert(getL({
+                            en: 'This work already has an applicant or collaborator for this role.',
+                            ja: 'この作品にはすでにこの役割の申請者またはコラボレーターがいます。'
+                        }));
+                        return;
+                    }
+                    throw new Error(data.error || ('HTTP ' + resp.status));
+                }
+                alert(getL({
+                    en: 'Your application has been sent to the author. You will be notified when the author responds.',
+                    ja: '著者に申請を送信しました。著者が承認・却下すると通知が届きます。'
+                }));
+            } catch (err) {
+                alert(getL({ en: 'Failed to send application: ', ja: '申請の送信に失敗しました: ' }) + err.message);
+            }
         }
 
         function submitReview() {
