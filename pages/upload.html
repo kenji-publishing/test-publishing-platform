@@ -1333,10 +1333,28 @@
             var fl = document.getElementById('fileList');
             if (fl) {
                 fl.innerHTML = '<div class="alert alert-success"><i class="fas fa-pen me-2"></i>'
-                    + getL({ en: 'Manuscript loaded from the Text Editor (', ja: 'テキストエディターから原稿を読み込みました（', zh: '已从文本编辑器载入稿件（', ko: '텍스트 편집기에서 원고를 불러왔습니다（' })
+                    + getL({ en: 'Manuscript loaded (', ja: '原稿を読み込みました（', zh: '已载入稿件（', ko: '원고를 불러왔습니다（' })
                     + editorDraft.text.length
                     + getL({ en: ' characters). Attaching a .txt file will override it.', ja: '文字）。.txtファイルを添付した場合はそちらが優先されます。', zh: '字）。如附加.txt文件则以其为准。', ko: '자）. .txt 파일을 첨부하면 그쪽이 우선됩니다.' })
                     + '</div>';
+            }
+            // まだ公開されていないことと、次にやることを大きく案内（作品が作られない誤解を防ぐ）
+            var form = document.getElementById('uploadForm');
+            if (form && !document.getElementById('handoffBanner')) {
+                var banner = document.createElement('div');
+                banner.id = 'handoffBanner';
+                banner.style.cssText = 'background:#fff3cd;border:1px solid #ffe08a;border-radius:8px;padding:0.9rem 1rem;margin-bottom:1rem;color:#7a5b00;';
+                banner.innerHTML = '<strong><i class="fas fa-circle-info me-1"></i>'
+                    + getL({ en: 'Almost there — this work is NOT published yet.', ja: 'あと少しです。この作品はまだ公開されていません。', zh: '就快好了——此作品尚未发布。', ko: '거의 다 됐습니다 — 이 작품은 아직 게시되지 않았습니다.' })
+                    + '</strong><br>'
+                    + getL({
+                        en: 'Your translated/edited manuscript is loaded below. Enter a title, choose a genre, set the price (or mark it free), check the rights box, then press Publish to finish.',
+                        ja: '翻訳・編集した原稿は下に読み込まれています。タイトルを入力し、ジャンルを選び、価格を設定（または無料に）して、権利確認にチェックを入れ、最後に「公開」を押すと完了します。',
+                        zh: '翻译/编辑后的稿件已在下方载入。请输入标题、选择类型、设置价格（或设为免费）、勾选权利确认，然后点击“发布”完成。',
+                        ko: '번역·편집한 원고가 아래에 불러와졌습니다. 제목을 입력하고 장르를 선택하고 가격을 설정(또는 무료로)한 뒤 권리 확인에 체크하고 마지막으로 “게시”를 누르면 완료됩니다.'
+                    });
+                form.insertBefore(banner, form.firstChild);
+                banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         });
 
@@ -1637,6 +1655,8 @@
                 }
 
                 // コラボレーターへの通知はサーバー側で行われる（同意書発行→通知）
+                // 受け渡し済みの原稿ドラフトを掃除（次回アップロード時に古い原稿が復活しないように）
+                try { localStorage.removeItem('editorDraftForUpload'); } catch (e) {}
                 alert(getL(uiText.alertSuccess));
                 window.location.href = 'my-works.html';
             } catch (err) {

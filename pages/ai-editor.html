@@ -1761,12 +1761,17 @@
 
     // 編集済みの原稿をアップロードページへ引き渡す（テキストエディターと同じ連携）
     function uploadEditedWork() {
+        const L = getLang();
         const text = (document.getElementById('reviewTranslation').value || translatedText || '').trim();
-        if (!text) return;
+        if (!text) {
+            alert(L === 'ja' ? '編集結果が見つかりません。編集が完了してからお試しください。' : 'No edited text found. Please wait until the editing completes.');
+            return;
+        }
         try {
             localStorage.setItem('editorDraftForUpload', JSON.stringify({ title: '', text: text }));
         } catch (e) {
             console.error('Handoff failed:', e);
+            alert(L === 'ja' ? '原稿の受け渡しに失敗しました。原稿をダウンロードしてから手動でアップロードしてください。' : 'Failed to hand off the manuscript. Please download it and upload manually.');
             return;
         }
         window.location.href = 'upload.html?from=editor';
