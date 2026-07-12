@@ -975,10 +975,15 @@ function escapeHtml(text) {
                     }
                     throw new Error(data.error || ('HTTP ' + resp.status));
                 }
-                alert(getL({
-                    en: 'Your application has been sent to the author. You will be notified when the author responds.',
-                    ja: '著者に申請を送信しました。著者が承認・却下すると通知が届きます。'
-                }));
+                alert(role === 'editor'
+                    ? getL({
+                        en: 'Your request to edit this author\'s next work has been sent. If approved, you will discuss the project via messages; the agreement and revenue share are issued when the next work is uploaded.',
+                        ja: 'この著者の次回作を編集したいという申請を送信しました。承認されるとメッセージで相談でき、同意書と収益分配は次回作のアップロード時に発行されます。'
+                    })
+                    : getL({
+                        en: 'Your application has been sent to the author. You will be notified when the author responds.',
+                        ja: '著者に申請を送信しました。著者が承認・却下すると通知が届きます。'
+                    }));
             } catch (err) {
                 alert(getL({ en: 'Failed to send application: ', ja: '申請の送信に失敗しました: ' }) + err.message);
             }

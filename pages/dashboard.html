@@ -1168,6 +1168,8 @@
                 let statusBadge;
                 if (c.status === 'requested') {
                     statusBadge = '<span class="collab-status-badge" style="background:#e2e3ff; color:#3b3b8f;">' + getL({ en: 'Applied — awaiting author approval', ja: '申請中（著者の承認待ち）', zh: '已申请（等待作者批准）', ko: '신청함(저자 승인 대기)' }) + '</span>';
+                } else if (c.status === 'partner') {
+                    statusBadge = '<span class="collab-status-badge" style="background:#d1f0d9; color:#1e6b34;">' + getL({ en: 'Next-work partner (approved)', ja: '次回作パートナー（承認済み）', zh: '下一部作品的合作伙伴（已批准）', ko: '다음 작품 파트너(승인됨)' }) + '</span>';
                 } else if (isPending) {
                     statusBadge = '<span class="collab-status-badge" style="background:#fff3cd; color:#856404;">' + getL({ en: 'Awaiting your signature', ja: '承諾待ち（署名が必要）', zh: '待您签署', ko: '서명 대기 중' }) + '</span>';
                 } else {
@@ -1180,7 +1182,7 @@
                         <div>
                             <div class="collab-card-title">「${esc(c.title)}」</div>
                             <div class="collab-card-meta">
-                                <span><strong>${getL(uiText.collabRole)}:</strong> ${getL(uiText[roleKey[c.role]] || {})} (${parseFloat(c.revenue_share)}%)</span>
+                                <span><strong>${getL(uiText.collabRole)}:</strong> ${getL(uiText[roleKey[c.role]] || {})}${c.status === 'partner' ? ' — ' + getL({ en: 'next work', ja: '次回作', zh: '下一部作品', ko: '다음 작품' }) : ` (${parseFloat(c.revenue_share)}%)`}</span>
                                 <span><strong>${getL(uiText.collabAuthor)}:</strong> ${esc(c.author_name)}</span>
                             </div>
                             <div class="collab-card-meta"><span><strong>${getL(uiText.collabStatus)}:</strong> ${statusBadge}</span></div>
@@ -1190,9 +1192,13 @@
                         <a href="work-detail.html?id=${encodeURIComponent(c.work_id)}" class="btn btn-soft-custom btn-sm">
                             <i class="fas fa-book me-1"></i>${getL({ en: 'View work', ja: '作品を見る', zh: '查看作品', ko: '작품 보기' })}
                         </a>
-                        ${c.status !== 'requested' ? `
+                        ${c.status !== 'requested' && c.status !== 'partner' ? `
                         <a href="agreements.html" class="btn ${isPending ? 'btn-custom' : 'btn-soft-custom'} btn-sm">
                             <i class="fas fa-file-contract me-1"></i>${isPending ? getL({ en: 'Sign agreement', ja: '同意書に署名する', zh: '签署协议', ko: '동의서 서명' }) : getL(uiText.collabViewAgreement)}
+                        </a>` : ''}
+                        ${c.status === 'partner' ? `
+                        <a href="messages.html" class="btn btn-soft-custom btn-sm">
+                            <i class="fas fa-comments me-1"></i>${getL({ en: 'Discuss via messages', ja: 'メッセージで相談する', zh: '通过消息沟通', ko: '메시지로 상담' })}
                         </a>` : ''}
                         ${c.status === 'active' ? `
                         <button class="btn btn-custom btn-sm" onclick="openProgressModal('${esc(c.collaborator_id)}')">
@@ -1202,8 +1208,8 @@
                 </div>`;
             }).join('');
 
-            // 収益（配当の実績）— 申請中はまだ対象外
-            revenueEl.innerHTML = collabs.filter(c => c.status !== 'requested').map(c => {
+            // 収益（配当の実績）— 申請中・次回作パートナーはまだ対象外
+            revenueEl.innerHTML = collabs.filter(c => c.status !== 'requested' && c.status !== 'partner').map(c => {
                 const earned = parseFloat(c.earned) || 0;
                 const earnedText = (typeof formatWorkPrice === 'function' && c.earned_currency)
                     ? formatWorkPrice(earned, c.earned_currency)
@@ -1287,6 +1293,10 @@
                     : `<div class="collab-card-meta" style="margin-top:4px;"><span style="color:var(--color-text-secondary); font-style:italic;">${getL({ en: 'No profile bio yet.', ja: '自己紹介文は未登録です。', zh: '暂无个人简介。', ko: '자기소개가 없습니다.' })}</span></div>`;
                 const verifiedIcon = r.applicant_verified ? ' <i class="fas fa-circle-check" style="color:#2e7d32;" title="Verified"></i>' : '';
                 const country = r.applicant_country ? ` <span style="color:var(--color-text-secondary);">(${esc(r.applicant_country)})</span>` : '';
+                // 翻訳者=この作品への申請（分配%と対象言語）、編集者=次回作パートナー希望
+                const requestDesc = r.role === 'translator'
+                    ? `${getL(roleLabel.translator)} (${parseFloat(r.revenue_share)}%)${r.target_language ? ' → ' + esc(String(r.target_language).toUpperCase()) : ''}`
+                    : getL({ en: 'Wants to edit your next work', ja: '次回作の編集を希望', zh: '希望编辑您的下一部作品', ko: '다음 작품의 편집을 희망' });
                 return `
                 <div class="collab-card">
                     <div class="collab-card-header">
@@ -1294,7 +1304,7 @@
                         <div>
                             <div class="collab-card-title">「${esc(r.title)}」</div>
                             <div class="collab-card-meta">
-                                <span><strong>${esc(r.applicant_name)}</strong>${verifiedIcon}${country} — ${getL(roleLabel[r.role] || {})} (${parseFloat(r.revenue_share)}%)${r.target_language ? ' → ' + esc(String(r.target_language).toUpperCase()) : ''}</span>
+                                <span><strong>${esc(r.applicant_name)}</strong>${verifiedIcon}${country} — ${requestDesc}</span>
                             </div>
                             ${bioHtml}
                         </div>
@@ -1303,10 +1313,10 @@
                         <a href="messages.html?to=${encodeURIComponent(r.applicant_id)}&name=${encodeURIComponent(r.applicant_name)}" class="btn btn-soft-custom btn-sm">
                             <i class="fas fa-comments me-1"></i>${getL({ en: 'Message the applicant', ja: 'メッセージでやり取り', zh: '与申请人沟通', ko: '메시지로 대화' })}
                         </a>
-                        <button class="btn btn-custom btn-sm" onclick="decideCollabRequest('${esc(r.collaborator_id)}', true)">
+                        <button class="btn btn-custom btn-sm" onclick="decideCollabRequest('${esc(r.collaborator_id)}', true, '${esc(r.role)}')">
                             <i class="fas fa-check me-1"></i>${getL({ en: 'Approve', ja: '承認する', zh: '批准', ko: '승인' })}
                         </button>
-                        <button class="btn btn-soft-custom btn-sm" onclick="decideCollabRequest('${esc(r.collaborator_id)}', false)">
+                        <button class="btn btn-soft-custom btn-sm" onclick="decideCollabRequest('${esc(r.collaborator_id)}', false, '${esc(r.role)}')">
                             <i class="fas fa-times me-1"></i>${getL({ en: 'Decline', ja: '却下する', zh: '拒绝', ko: '거절' })}
                         </button>
                     </div>
@@ -1339,7 +1349,7 @@
             } catch (e) {}
         }
 
-        async function decideCollabRequest(collabId, approve) {
+        async function decideCollabRequest(collabId, approve, role) {
             if (!approve && !confirm(getL({ en: 'Decline this request?', ja: 'この申請を却下しますか？' }))) return;
             try {
                 const token = localStorage.getItem('token');
@@ -1349,9 +1359,16 @@
                 });
                 const data = await resp.json();
                 if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
-                alert(approve
-                    ? getL({ en: 'Approved. An agreement has been issued — the applicant will be asked to sign it.', ja: '承認しました。同意書が発行され、申請者に署名の案内が届きます。' })
-                    : getL({ en: 'The request was declined.', ja: '申請を却下しました。' }));
+                if (!approve) {
+                    alert(getL({ en: 'The request was declined.', ja: '申請を却下しました。' }));
+                } else if (role === 'editor') {
+                    alert(getL({
+                        en: 'Approved as your next-work editing partner. No agreement is issued yet — discuss the project via messages, and designate them as the editor when you upload the next work (the agreement and revenue share are issued then).',
+                        ja: '次回作の編集パートナーとして承認しました。この時点では同意書は発行されません。メッセージで作品の内容を相談し、次回作をアップロードする際に編集者として指定すると、同意書と収益分配（10%）が発行されます。'
+                    }));
+                } else {
+                    alert(getL({ en: 'Approved. An agreement has been issued — the applicant will be asked to sign it.', ja: '承認しました。同意書が発行され、申請者に署名の案内が届きます。' }));
+                }
                 renderCollabRequests();
                 renderCollaborations();
             } catch (e) {

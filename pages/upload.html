@@ -320,6 +320,8 @@
                                     <small class="text-secondary d-block" id="labelEditorRevenue" data-i18n="upload.labelEditorRevenue">Editor receives 10% of revenue</small>
                                 </label>
                             </div>
+                            <!-- 承認済みの次回作編集パートナーのサジェスト（指定忘れ=分配漏れ防止） -->
+                            <div id="partnerSuggest" style="display: none; padding: 0.75rem; margin-bottom: 1rem; background: #d1f0d9; border-radius: var(--radius-md); font-size: 0.85rem;"></div>
                             <div id="editorSection" style="display: none; padding: 0.75rem; margin-bottom: 1rem; background: var(--color-bg-hover); border-radius: var(--radius-md);">
                                 <div class="row g-2 mb-2">
                                     <div class="col-sm-6">
@@ -540,6 +542,7 @@
     <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/config.js"></script>
     <script src="../js/i18n.js"></script>
     <script src="../js/navbar.js"></script>
     <script src="../js/lang/ja.js"></script>
@@ -834,6 +837,43 @@
                     reader.readAsDataURL(file);
                 }
             }
+        }
+
+        // 承認済みの次回作編集パートナーを取得し、指定を提案する
+        async function loadPartnerSuggest() {
+            var token = localStorage.getItem('token');
+            if (!token) return;
+            try {
+                var resp = await fetch((window.API_ORIGIN || '') + '/api/works/collaboration-partners/mine', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                var data = await resp.json();
+                if (!resp.ok || !(data.partners || []).length) return;
+                var box = document.getElementById('partnerSuggest');
+                var esc = function(t) { var d = document.createElement('div'); d.textContent = t == null ? '' : String(t); return d.innerHTML; };
+                var intro = getL({
+                    en: 'You have approved editing partner(s). Designate one as this work\'s editor?',
+                    ja: '承認済みの編集パートナーがいます。この作品の編集者として指定しますか？',
+                    zh: '您有已批准的编辑合作伙伴。要将其指定为本作品的编辑吗？',
+                    ko: '승인된 편집 파트너가 있습니다. 이 작품의 편집자로 지정할까요?'
+                });
+                var btnLabel = getL({ en: 'Designate', ja: '指定する', zh: '指定', ko: '지정' });
+                box.innerHTML = '<i class="fas fa-user-check me-1"></i>' + intro + data.partners.map(function(p) {
+                    return '<div style="margin-top:0.5rem; display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">' +
+                        '<strong>' + esc(p.name) + '</strong> <span class="text-secondary">(' + esc(p.email) + ')</span>' +
+                        '<button type="button" class="btn btn-custom btn-sm" onclick="applyPartner(\'' + esc(p.name).replace(/'/g, '&#39;') + '\', \'' + esc(p.email).replace(/'/g, '&#39;') + '\')">' + btnLabel + '</button>' +
+                        '</div>';
+                }).join('');
+                box.style.display = 'block';
+            } catch (e) { /* サジェストは任意機能なので失敗しても無視 */ }
+        }
+
+        function applyPartner(name, email) {
+            document.getElementById('hasEditor').checked = true;
+            document.getElementById('editorName').value = name;
+            document.getElementById('editorEmail').value = email;
+            toggleCollabSection('editor');
+            document.getElementById('partnerSuggest').style.display = 'none';
         }
 
         // Free checkbox toggle
@@ -1373,6 +1413,8 @@
         document.addEventListener('DOMContentLoaded', async function() {
             await initEditMode();
             updateCoverDesignRow(); // 編集モードでは既存の表紙にも文字入れできる
+            // 編集モードで編集者が既に指定されている場合はサジェスト不要
+            if (!document.getElementById('hasEditor').checked) loadPartnerSuggest();
         });
 
         // Step 1: 「公開」ボタン → 入力内容を集めてプレビューを表示（まだ送信しない）

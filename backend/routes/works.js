@@ -378,7 +378,7 @@ router.get('/collaborations/mine', authenticate, async (req, res) => {
              FROM work_collaborators wc
              JOIN works w ON wc.work_id = w.work_id
              JOIN users u ON w.author_id = u.user_id
-             WHERE wc.user_id = $1 AND wc.status IN ('requested', 'pending', 'active') AND w.status != 'deleted'
+             WHERE wc.user_id = $1 AND wc.status IN ('requested', 'pending', 'active', 'partner') AND w.status != 'deleted'
              ORDER BY wc.created_at DESC`,
             [req.user.userId]
         );
@@ -432,8 +432,34 @@ router.get('/collaboration-requests/incoming', authenticate, async (req, res) =>
 });
 
 /**
+ * GET /api/works/collaboration-partners/mine
+ * 承認済みの次回作編集パートナー一覧（著者向け）。
+ * アップロード画面の「この編集者を指定しますか？」サジェスト用。/:workIdより先に定義すること
+ */
+router.get('/collaboration-partners/mine', authenticate, async (req, res) => {
+    try {
+        const result = await db.query(
+            `SELECT DISTINCT ON (u.user_id)
+                    u.user_id, u.email,
+                    COALESCE(u.pen_name, u.first_name || ' ' || u.last_name) AS name,
+                    wc.updated_at AS approved_at
+             FROM work_collaborators wc
+             JOIN works w ON wc.work_id = w.work_id
+             JOIN users u ON wc.user_id = u.user_id
+             WHERE w.author_id = $1 AND wc.role = 'editor' AND wc.status = 'partner'
+             ORDER BY u.user_id, wc.updated_at DESC`,
+            [req.user.userId]
+        );
+        res.json({ success: true, partners: result.rows });
+    } catch (error) {
+        console.error('Get collaboration partners error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
  * POST /api/works/:workId/apply
- * 翻訳者/編集者が作品に「翻訳したい/編集したい」と申請する
+ * 翻訳者「この作品を翻訳したい」/ 編集者「この著者の次回作を編集したい」の申請
  */
 router.post('/:workId/apply', authenticate, async (req, res) => {
     try {
@@ -476,8 +502,10 @@ router.post('/:workId/apply', authenticate, async (req, res) => {
             await createNotification({
                 userId: work.author_id,
                 type: 'system',
-                title: role === 'translator' ? '翻訳の申請が届きました / Translation request' : '編集の申請が届きました / Editing request',
-                message: `「${work.title}」に${applicant.name}さんから${role === 'translator' ? '翻訳' : '編集'}の申請が届いています。ダッシュボードのコラボレーションタブから承認・却下できます。 / ${applicant.name} applied to ${role === 'translator' ? 'translate' : 'edit'} "${work.title}". Approve or decline from the dashboard collaboration tab.`,
+                title: role === 'translator' ? '翻訳の申請が届きました / Translation request' : '次回作の編集パートナー申請が届きました / Editing partner request',
+                message: role === 'translator'
+                    ? `「${work.title}」に${applicant.name}さんから翻訳の申請が届いています。ダッシュボードのコラボレーションタブから承認・却下できます。 / ${applicant.name} applied to translate "${work.title}". Approve or decline from the dashboard collaboration tab.`
+                    : `「${work.title}」を見た${applicant.name}さんが、あなたの次回作の編集を希望しています。ダッシュボードのコラボレーションタブから承認・却下できます。 / ${applicant.name} would like to edit your next work (after seeing "${work.title}"). Approve or decline from the dashboard collaboration tab.`,
                 actionUrl: '/pages/dashboard.html'
             });
         } catch (e) { console.error('Notify author failed:', e.message); }
@@ -507,16 +535,23 @@ async function handleRequestDecision(req, res, approve) {
         if (row.author_id !== req.user.userId) { await client.query('ROLLBACK'); return res.status(403).json({ error: 'Not your work' }); }
         if (row.status !== 'requested') { await client.query('ROLLBACK'); return res.status(400).json({ error: `Request already ${row.status}` }); }
 
+        // 編集者の申請は「次回作パートナー」: 公開済みの現作品には編集の余地がないため、
+        // 同意書・収益は紐付けない。次回作アップロード時に編集者指定→同意書発行（パターンA）で確定する。
+        const isPartner = approve && row.role === 'editor';
+        const newStatus = approve ? (isPartner ? 'partner' : 'pending') : 'declined';
+
         if (approve) {
             await client.query(
-                `UPDATE work_collaborators SET status = 'pending', updated_at = CURRENT_TIMESTAMP WHERE collaborator_id = $1`,
-                [row.collaborator_id]
+                `UPDATE work_collaborators SET status = $2, updated_at = CURRENT_TIMESTAMP WHERE collaborator_id = $1`,
+                [row.collaborator_id, newStatus]
             );
-            await createAgreementRow(client, {
-                collaboratorId: row.collaborator_id, workId: row.work_id, workTitle: row.title,
-                authorId: row.author_id, userId: row.user_id, role: row.role,
-                share: parseFloat(row.revenue_share), targetLanguage: row.target_language
-            });
+            if (!isPartner) {
+                await createAgreementRow(client, {
+                    collaboratorId: row.collaborator_id, workId: row.work_id, workTitle: row.title,
+                    authorId: row.author_id, userId: row.user_id, role: row.role,
+                    share: parseFloat(row.revenue_share), targetLanguage: row.target_language
+                });
+            }
         } else {
             await client.query(
                 `UPDATE work_collaborators SET status = 'declined', updated_at = CURRENT_TIMESTAMP WHERE collaborator_id = $1`,
@@ -526,18 +561,24 @@ async function handleRequestDecision(req, res, approve) {
         await client.query('COMMIT');
 
         try {
-            await createNotification({
-                userId: row.user_id,
-                type: 'system',
-                title: approve ? '申請が承認されました / Request approved' : '申請が却下されました / Request declined',
-                message: approve
-                    ? `「${row.title}」への${row.role === 'translator' ? '翻訳' : '編集'}申請が承認されました。同意書ページで条件を確認して署名してください。 / Your request for "${row.title}" was approved. Please review and sign the agreement.`
-                    : `「${row.title}」への${row.role === 'translator' ? '翻訳' : '編集'}申請は見送られました。 / Your request for "${row.title}" was declined.`,
-                actionUrl: approve ? '/pages/agreements.html' : '/pages/browse.html'
-            });
+            let title, message, actionUrl;
+            if (!approve) {
+                title = '申請が却下されました / Request declined';
+                message = `「${row.title}」への${row.role === 'translator' ? '翻訳' : '編集'}申請は見送られました。 / Your request for "${row.title}" was declined.`;
+                actionUrl = '/pages/browse.html';
+            } else if (isPartner) {
+                title = '次回作パートナーとして承認されました / Approved as next-work partner';
+                message = `「${row.title}」の著者があなたを次回作の編集パートナーとして承認しました。メッセージで作品の内容を相談しましょう。同意書と収益分配は、著者が次回作をアップロードしてあなたを編集者に指定した時点で発行されます。 / The author approved you as an editing partner for their next work. Discuss the project via messages — the agreement and revenue share will be issued when the next work is uploaded with you designated as its editor.`;
+                actionUrl = '/pages/messages.html';
+            } else {
+                title = '申請が承認されました / Request approved';
+                message = `「${row.title}」への翻訳申請が承認されました。同意書ページで条件を確認して署名してください。 / Your request for "${row.title}" was approved. Please review and sign the agreement.`;
+                actionUrl = '/pages/agreements.html';
+            }
+            await createNotification({ userId: row.user_id, type: 'system', title, message, actionUrl });
         } catch (e) { console.error('Notify applicant failed:', e.message); }
 
-        res.json({ success: true, status: approve ? 'pending' : 'declined' });
+        res.json({ success: true, status: newStatus });
     } catch (error) {
         await client.query('ROLLBACK');
         console.error('Request decision error:', error);
