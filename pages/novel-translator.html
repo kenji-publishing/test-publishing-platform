@@ -1199,6 +1199,12 @@
         if (n === 3 && currentStep === 2) {
             const text = document.getElementById('sourceText').value.trim();
             if (!text) { alert(getLang() === 'ja' ? 'テキストを入力してください' : 'Please enter text to translate'); return; }
+            if (text.length > 300000) {
+                alert(getLang() === 'ja'
+                    ? '原稿が長すぎます（現在 ' + text.length.toLocaleString() + ' 文字 / 上限 300,000 文字）。章ごとに分割してご利用ください。'
+                    : 'The manuscript is too long (' + text.length.toLocaleString() + ' / 300,000 characters max). Please split it into parts, e.g. by chapter.');
+                return;
+            }
             sourceTextContent = text;
         }
         if (n === 4) setTimeout(runComparison, 100);
