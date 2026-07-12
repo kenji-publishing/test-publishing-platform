@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="../css/mobile-fixes.css">
 
     <!-- 言語ファイル（9言語） -->
+    <script src="../js/config.js"></script>
     <script src="../js/lang/ja.js"></script>
     <script src="../js/lang/en.js"></script>
     <script src="../js/lang/zh.js"></script>
@@ -1086,6 +1087,10 @@
                             <i class="fas fa-file-word"></i>
                             <span>.docx</span>
                         </button>
+                        <button class="download-btn" onclick="uploadTranslatedWork()">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span id="s9UploadLabel">Upload as a work</span>
+                        </button>
                     </div>
 
                     <div class="step-actions" style="margin-top:2rem;">
@@ -1187,27 +1192,6 @@
         if (minEl) minEl.textContent = minLabels[L] || minLabels['en'];
     }
 
-    // Demo translations for Step 4 comparison
-    const demoTranslations = {
-        'ja-en': {
-            original: '桜の花びらが風に舞い散る中、彼女は古びた手紙を胸に抱きしめた。あの日の約束は、もう叶わないと知りながらも、その言葉だけが彼女を支えていた。',
-            haiku: 'Cherry blossom petals scattered in the wind, and she held an old letter to her chest. Even though she knew the promise from that day would no longer come true, those words alone supported her.',
-            sonnet: 'As cherry blossom petals danced and scattered on the wind, she clutched the weathered letter against her heart. She knew the promise made that day would never be fulfilled, yet those words alone had kept her standing.',
-            opus: 'Cherry blossoms surrendered to the breeze, their petals tracing slow arcs through the spring air, and she pressed the time-worn letter against her chest as though it were the last warm thing left in the world. The promise made on that distant day\u2014she had long since accepted it would go unkept. And yet, those words were the slender thread by which she clung to each passing morning.'
-        },
-        'en-ja': {
-            original: 'The old bookshop smelled of dust and forgotten stories. Eleanor ran her fingers along the spines, each one a doorway she had yet to open.',
-            haiku: '古い書店は埃と忘れられた物語の匂いがした。エレノアは背表紙に沿って指を走らせた。それぞれがまだ開けていない扉だった。',
-            sonnet: '古い書店には、埃と忘れ去られた物語の香りが漂っていた。エレノアは書棚の背表紙をそっと指でなぞった。一冊一冊が、まだ開かれていない扉のようだった。',
-            opus: 'その古書店は、埃と、誰にも読まれなくなった物語たちの匂いに満ちていた。エレノアは棚に並ぶ背表紙を指先でゆっくりとたどった。一冊ごとが、まだ彼女が押し開いたことのない扉だった。'
-        },
-        'default': {
-            original: 'The cherry blossoms danced in the spring breeze. She watched them fall, each petal a whispered goodbye.',
-            haiku: 'The cherry blossoms danced in the spring wind. She watched them fall, each petal was a whispered goodbye.',
-            sonnet: 'Cherry blossoms waltzed through the spring breeze as she watched each petal drift down\u2014a gentle farewell whispered to the retreating winter.',
-            opus: 'The cherry blossoms had given themselves to the spring breeze, pirouetting through the luminous air in their final, exquisite performance. She stood beneath them, watching each petal descend\u2014a silent valediction to the winter that was, at last, loosening its grip on the world.'
-        }
-    };
 
     // ===== Step Navigation =====
     function goStep(n) {
@@ -1384,23 +1368,70 @@
         ).join('');
     }
 
-    // ===== Step 4: Model Comparison =====
-    function runComparison() {
+    // ===== Step 4: Model Comparison — 実際にClaude 3モデルで冒頭を翻訳して比較 =====
+    // 同じ原稿・言語ペアの結果はキャッシュし、ステップを行き来しても即表示にする
+    let comparisonCache = { key: null, samples: null };
+
+    function renderComparisonSamples(samples) {
+        ['haiku', 'sonnet', 'opus'].forEach(m => {
+            const el = document.getElementById('compare' + m.charAt(0).toUpperCase() + m.slice(1) + 'Text');
+            el.innerHTML = '<div style="white-space:pre-wrap;">' + escH(samples[m] || '') + '</div>';
+        });
+    }
+
+    async function runComparison() {
         const srcLang = document.getElementById('sourceLang').value;
         const tgtLang = document.getElementById('targetLang').value;
-        const key = srcLang + '-' + tgtLang;
-        const sample = demoTranslations[key] || demoTranslations['default'];
+        const L = getLang();
 
         const excerpt = sourceTextContent.slice(0, 300) + (sourceTextContent.length > 300 ? '...' : '');
         document.getElementById('previewOriginalText').textContent = excerpt;
 
+        // 同じ原稿・言語ペアなら前回の結果をそのまま表示（戻ってきた時に消えない）
+        const cacheKey = srcLang + '-' + tgtLang + '::' + sourceTextContent.slice(0, 500);
+        if (comparisonCache.key === cacheKey && comparisonCache.samples) {
+            renderComparisonSamples(comparisonCache.samples);
+            return;
+        }
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert(L === 'ja' ? 'AI翻訳の利用にはログインが必要です' : 'Please log in to use AI translation');
+            window.location.href = 'login.html';
+            return;
+        }
+
+        const loadingMsg = L === 'ja'
+            ? '3つのAIモデルで翻訳中です。10〜30秒ほどお待ちください...'
+            : 'Translating with 3 AI models — this takes 10-30 seconds...';
         ['Haiku', 'Sonnet', 'Opus'].forEach(m => {
-            document.getElementById('compare' + m + 'Text').innerHTML = '<div class="compare-loading"><i class="fas fa-spinner fa-spin"></i> ' + (getLang() === 'ja' ? '翻訳中...' : 'Translating...') + '</div>';
+            document.getElementById('compare' + m + 'Text').innerHTML = '<div class="compare-loading"><i class="fas fa-spinner fa-spin"></i> ' + loadingMsg + '</div>';
         });
 
-        setTimeout(() => { document.getElementById('compareHaikuText').innerHTML = '<div style="white-space:pre-wrap;">' + escH(sample.haiku) + '</div>'; }, 800);
-        setTimeout(() => { document.getElementById('compareSonnetText').innerHTML = '<div style="white-space:pre-wrap;">' + escH(sample.sonnet) + '</div>'; }, 1500);
-        setTimeout(() => { document.getElementById('compareOpusText').innerHTML = '<div style="white-space:pre-wrap;">' + escH(sample.opus) + '</div>'; }, 2500);
+        try {
+            const resp = await fetch((window.API_ORIGIN || '') + '/api/ai-translation/sample', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ text: sourceTextContent.slice(0, 500), sourceLang: srcLang, targetLang: tgtLang })
+            });
+            if (resp.status === 401) {
+                alert(L === 'ja' ? 'ログインの有効期限が切れています。もう一度ログインしてください。' : 'Your session has expired. Please log in again.');
+                window.location.href = 'login.html';
+                return;
+            }
+            const data = await resp.json();
+            if (data && data.code === 'SAMPLE_LIMIT') {
+                throw new Error(L === 'ja' ? '本日のお試し翻訳の上限に達しました。明日以降にお試しください。' : 'Daily comparison limit reached. Please try again tomorrow.');
+            }
+            if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
+            comparisonCache = { key: cacheKey, samples: data.samples };
+            renderComparisonSamples(data.samples);
+        } catch (err) {
+            const msg = (L === 'ja' ? 'サンプル翻訳に失敗しました: ' : 'Sample translation failed: ') + err.message;
+            ['Haiku', 'Sonnet', 'Opus'].forEach(m => {
+                document.getElementById('compare' + m + 'Text').innerHTML = '<div style="color:#dc3545; white-space:pre-wrap;">' + escH(msg) + '</div>';
+            });
+        }
     }
 
     function selectModel(model) {
@@ -1502,34 +1533,75 @@
         simulateTranslation();
     }
 
-    // ===== Step 7: Translation Progress =====
-    function simulateTranslation() {
-        const totalChars = sourceTextContent.length;
-        const speeds = { haiku: 40, sonnet: 25, opus: 12 };
-        const speed = speeds[selectedModel] || 25;
-        const totalTicks = Math.max(20, Math.ceil(totalChars / speed));
-        let tick = 0;
+    // ===== Step 7: \u5b9f\u7ffb\u8a33\u306e\u5b9f\u884c\uff08\u975e\u540c\u671f\u30b8\u30e7\u30d6 + \u9032\u6357\u30dd\u30fc\u30ea\u30f3\u30b0\uff09 =====
+    async function simulateTranslation() {
+        const L = getLang();
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert(L === 'ja' ? 'AI\u7ffb\u8a33\u306e\u5229\u7528\u306b\u306f\u30ed\u30b0\u30a4\u30f3\u304c\u5fc5\u8981\u3067\u3059' : 'Please log in to use AI translation');
+            window.location.href = 'login.html';
+            return;
+        }
 
-        const interval = setInterval(() => {
-            tick++;
-            const pct = Math.min(100, Math.round(tick / totalTicks * 100));
-            document.getElementById('progressFill').style.width = pct + '%';
-            document.getElementById('progressPercent').textContent = pct + '%';
-            const remainSec = Math.ceil((totalTicks - tick) * 50 / 1000);
-            document.getElementById('progressEta').textContent = getLang() === 'ja' ? '\u6b8b\u308a\u7d04' + remainSec + '\u79d2' : '~' + remainSec + 's remaining';
+        const fill = document.getElementById('progressFill');
+        const pctEl = document.getElementById('progressPercent');
+        const etaEl = document.getElementById('progressEta');
+        fill.style.width = '2%';
+        pctEl.textContent = '0%';
+        etaEl.textContent = L === 'ja' ? 'AI\u304c\u539f\u7a3f\u3092\u7ffb\u8a33\u3057\u3066\u3044\u307e\u3059...' : 'The AI is translating your manuscript...';
 
-            if (pct >= 100) {
-                clearInterval(interval);
-                generateDemoTranslation();
-                setTimeout(() => goStep(8), 500);
+        try {
+            // \u30b8\u30e7\u30d6\u958b\u59cb
+            const startResp = await fetch((window.API_ORIGIN || '') + '/api/ai-translation/translate-text', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({
+                    text: sourceTextContent,
+                    sourceLang: document.getElementById('sourceLang').value,
+                    targetLang: document.getElementById('targetLang').value,
+                    model: selectedModel,
+                    glossary: glossary
+                })
+            });
+            if (startResp.status === 401) {
+                alert(L === 'ja' ? '\u30ed\u30b0\u30a4\u30f3\u306e\u6709\u52b9\u671f\u9650\u304c\u5207\u308c\u3066\u3044\u307e\u3059\u3002\u3082\u3046\u4e00\u5ea6\u30ed\u30b0\u30a4\u30f3\u3057\u3066\u304f\u3060\u3055\u3044\u3002' : 'Your session has expired. Please log in again.');
+                window.location.href = 'login.html';
+                return;
             }
-        }, 50);
-    }
+            const startData = await startResp.json();
+            if (!startResp.ok) throw new Error(startData.error || ('HTTP ' + startResp.status));
 
-    function generateDemoTranslation() {
-        const modelLabel = selectedModel.charAt(0).toUpperCase() + selectedModel.slice(1);
-        const paragraphs = sourceTextContent.split(/\n+/).filter(p => p.trim());
-        translatedText = paragraphs.map(p => '[' + modelLabel + ' Translation] ' + p).join('\n\n');
+            // \u9032\u6357\u3092\u30dd\u30fc\u30ea\u30f3\u30b0\uff08\u6b8b\u308a\u6642\u9593\u306f\u7d4c\u904e\u6642\u9593\u00d7\u9032\u6357\u304b\u3089\u5b9f\u6e2c\u30d9\u30fc\u30b9\u3067\u63a8\u5b9a\uff09
+            const startedAt = Date.now();
+            while (true) {
+                await new Promise(r => setTimeout(r, 1500));
+                const jobResp = await fetch((window.API_ORIGIN || '') + '/api/ai-translation/job/' + encodeURIComponent(startData.jobId), {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const job = await jobResp.json();
+                if (!jobResp.ok) throw new Error(job.error || ('HTTP ' + jobResp.status));
+                if (job.status === 'failed') throw new Error(job.error || (L === 'ja' ? '\u7ffb\u8a33\u51e6\u7406\u304c\u5931\u6557\u3057\u307e\u3057\u305f' : 'Translation failed'));
+
+                const pct = job.status === 'completed' ? 100 : Math.max(2, job.progress || 0);
+                fill.style.width = pct + '%';
+                pctEl.textContent = pct + '%';
+
+                if (job.status !== 'completed' && pct >= 5) {
+                    const elapsedSec = (Date.now() - startedAt) / 1000;
+                    const remainSec = Math.max(1, Math.round(elapsedSec * (100 - pct) / pct));
+                    etaEl.textContent = L === 'ja' ? '\u6b8b\u308a\u7d04' + remainSec + '\u79d2' : '~' + remainSec + 's remaining';
+                }
+
+                if (job.status === 'completed') {
+                    translatedText = job.translatedText || '';
+                    setTimeout(() => goStep(8), 400);
+                    return;
+                }
+            }
+        } catch (err) {
+            alert((L === 'ja' ? 'AI\u7ffb\u8a33\u306b\u5931\u6557\u3057\u307e\u3057\u305f: ' : 'AI translation failed: ') + err.message);
+            goStep(6);
+        }
     }
 
     // ===== Step 9: Download =====
@@ -1544,6 +1616,29 @@
         URL.revokeObjectURL(url);
     }
 
+    // 翻訳済み原稿をアップロードページへ引き渡す（AIエディタ・テキストエディターと同じ連携）
+    function uploadTranslatedWork() {
+        const text = (document.getElementById('reviewTranslation').value || translatedText || '').trim();
+        if (!text) return;
+        try {
+            localStorage.setItem('editorDraftForUpload', JSON.stringify({ title: '', text: text }));
+        } catch (e) {
+            console.error('Handoff failed:', e);
+            return;
+        }
+        window.location.href = 'upload.html?from=editor';
+    }
+
+    // アップロードボタンの多言語化
+    function updateTranslatorExtraText() {
+        const L = getLang();
+        const uploadLabel = { en: 'Upload as a work', ja: '作品としてアップロード', zh: '作为作品上传', es: 'Subir como obra', fr: 'Publier comme œuvre', de: 'Als Werk hochladen', ko: '작품으로 업로드', ar: 'رفع كعمل', pt: 'Enviar como obra', it: 'Carica come opera' };
+        const up = document.getElementById('s9UploadLabel');
+        if (up) up.textContent = uploadLabel[L] || uploadLabel.en;
+    }
+    document.addEventListener('DOMContentLoaded', updateTranslatorExtraText);
+    document.addEventListener('languageChanged', updateTranslatorExtraText);
+
     function startNewTranslation() {
         document.getElementById('sourceText').value = '';
         updateCharCount();
@@ -1552,6 +1647,7 @@
         translatedText = '';
         sourceTextContent = '';
         selectedModel = 'sonnet';
+        comparisonCache = { key: null, samples: null };
         document.querySelectorAll('.compare-card').forEach(c => c.classList.remove('selected'));
         document.getElementById('compareSonnet').classList.add('selected');
         goStep(1);
