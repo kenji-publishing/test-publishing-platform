@@ -122,6 +122,22 @@ router.post('/webhook', async (req, res) => {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
+
+    // AIツール注文（AIエディタ/AI翻訳）: 注文をpaidにするだけ（分配なし・全額プラットフォーム収入）
+    if (session.metadata && session.metadata.type === 'ai_tool') {
+      try {
+        await db.query(
+          `UPDATE ai_tool_orders SET status = 'paid', updated_at = CURRENT_TIMESTAMP
+           WHERE order_id = $1 AND status = 'pending'`,
+          [session.metadata.order_id]
+        );
+        console.log(`AI tool order paid: ${session.metadata.order_id} (${session.amount_total} ${session.currency})`);
+      } catch (error) {
+        console.error('Error marking AI tool order paid:', error);
+      }
+      return res.json({ received: true });
+    }
+
     const { work_id, buyer_id, author_id } = session.metadata;
     // Zero-decimal currencies (JPY, KRW): amount_total is already the base unit
     const ZERO_DECIMAL = ['jpy', 'krw'];

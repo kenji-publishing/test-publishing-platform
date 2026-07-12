@@ -8,33 +8,21 @@ const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const db = require('../config/database');
 const Anthropic = require('@anthropic-ai/sdk');
-const { translateSample, translateText, MODEL_TIERS } = require('../services/aiTranslationService');
+const { translateSample } = require('../services/aiTranslationService');
 
 // Initialize Anthropic client
 const anthropic = new Anthropic({
   apiKey: process.env.CLAUDE_API_KEY,
 });
 
-// ===== 本文翻訳（novel-translatorウィザード）: 非同期ジョブ =====
-// AIエディタと同じ方式: POST /translate-text → jobId → GET /job/:id をポーリング。
-// NOTE: 決済は未接続（見積のみ）。AIエディタと合わせてローンチ前に接続 or 無料化を判断。
+// ===== 本文翻訳（novel-translatorウィザード） =====
+// 無料のお試し比較 (/sample) のみここに残る。本翻訳の実行は決済必須のため
+// routes/ai-tools.js に移動（POST /api/ai-tools/checkout → 支払い → /orders/:id/run）。
 const SAMPLE_MAX_CHARS = 600;
-const TRANSLATE_MAX_CHARS = 100000;
-const JOB_TTL_MS = 30 * 60 * 1000;
 
 // 3モデル比較はユーザー無料だが運営のAPI費がかかるため1日の上限あり
 const SAMPLE_DAILY_LIMIT = 30;
 const sampleUsage = new Map(); // userId -> { day, count }
-
-// メモリ保持のジョブストア（pm2再起動で消える。v1では許容 — クライアントはエラー表示して再実行）
-const jobs = new Map();
-
-function cleanupJobs() {
-  const now = Date.now();
-  for (const [id, job] of jobs) {
-    if (now - job.createdAt > JOB_TTL_MS) jobs.delete(id);
-  }
-}
 
 const SUPPORTED_LANGS = ['en', 'ja', 'zh', 'es', 'fr', 'de', 'ko', 'ar', 'pt', 'it'];
 
@@ -75,79 +63,6 @@ router.post('/sample', authenticate, async (req, res) => {
   }
 });
 
-/**
- * POST /api/ai-translation/translate-text
- * 本文まるごとの翻訳ジョブを開始。{ jobId } を返し、GET /job/:jobId をポーリング。
- */
-router.post('/translate-text', authenticate, async (req, res) => {
-  try {
-    const { text, sourceLang, targetLang, model, glossary } = req.body;
-    if (!text || !String(text).trim()) {
-      return res.status(400).json({ error: 'Text is required' });
-    }
-    if (String(text).length > TRANSLATE_MAX_CHARS) {
-      return res.status(400).json({
-        error: `Text is too long (max ${TRANSLATE_MAX_CHARS.toLocaleString()} characters per job)`
-      });
-    }
-    if (!SUPPORTED_LANGS.includes(targetLang)) {
-      return res.status(400).json({ error: 'Unsupported target language' });
-    }
-    const tier = MODEL_TIERS[model] ? model : 'sonnet';
-
-    cleanupJobs();
-    const jobId = `tr_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-    const job = {
-      userId: req.user.userId,
-      status: 'processing',
-      progress: 0,
-      translatedText: null,
-      error: null,
-      createdAt: Date.now()
-    };
-    jobs.set(jobId, job);
-
-    translateText({
-      text: String(text),
-      sourceLang,
-      targetLang,
-      tier,
-      glossary,
-      onProgress: (pct) => { job.progress = pct; }
-    }).then((translated) => {
-      job.status = 'completed';
-      job.progress = 100;
-      job.translatedText = translated;
-    }).catch((error) => {
-      console.error(`AI translation job ${jobId} failed:`, error);
-      job.status = 'failed';
-      job.error = error.message;
-    });
-
-    res.json({ success: true, jobId });
-  } catch (error) {
-    console.error('AI translation start error:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-/**
- * GET /api/ai-translation/job/:jobId
- * 翻訳ジョブのポーリング（本人のみ）
- */
-router.get('/job/:jobId', authenticate, (req, res) => {
-  const job = jobs.get(req.params.jobId);
-  if (!job || job.userId !== req.user.userId) {
-    return res.status(404).json({ error: 'Job not found' });
-  }
-  res.json({
-    success: true,
-    status: job.status,
-    progress: job.progress,
-    translatedText: job.status === 'completed' ? job.translatedText : null,
-    error: job.error
-  });
-});
 
 // Translation pricing configuration
 const PRICING = {

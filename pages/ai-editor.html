@@ -1567,74 +1567,88 @@
         document.getElementById('s6Secure').textContent = st[L] || st['en'];
     }
 
-    function processPayment(method) {
-        const cost = calculateCost();
-        const priceStr = formatPrice(cost);
+    // 支払い → Stripe Checkout（原稿はサーバー側に保存されるため、リダイレクトしても消えない）
+    async function processPayment(method) {
         const L = getLang();
-        const confirmMsgs = {
-            en: priceStr + ' will be charged. Proceed?',
-            ja: priceStr + ' \u304c\u8ab2\u91d1\u3055\u308c\u307e\u3059\u3002\u7d9a\u884c\u3057\u307e\u3059\u304b\uff1f',
-            zh: '\u5c07\u6536\u53d6 ' + priceStr + '\u3002\u7e7c\u7e8c\u55ce\uff1f',
-            es: 'Se cobrar\u00e1 ' + priceStr + '. \u00bfContinuar?',
-            fr: priceStr + ' sera factur\u00e9. Continuer ?',
-            de: priceStr + ' wird berechnet. Fortfahren?',
-            ko: priceStr + ' \uc774 \uccad\uad6c\ub429\ub2c8\ub2e4. \uacc4\uc18d\ud558\uc2dc\uaca0\uc2b5\ub2c8\uae4c?',
-            ar: '\u0633\u064a\u062a\u0645 \u062e\u0635\u0645 ' + priceStr + '. \u0647\u0644 \u062a\u0631\u064a\u062f \u0627\u0644\u0645\u062a\u0627\u0628\u0639\u0629\u061f',
-            pt: priceStr + ' ser\u00e1 cobrado. Continuar?',
-            it: priceStr + ' verr\u00e0 addebitato. Continuare?'
-        };
-        if (!confirm(confirmMsgs[L] || confirmMsgs['en'])) return;
-        goStep(7);
-        simulateTranslation();
-    }
-
-    // ===== Step 7: \u5b9f\u7de8\u96c6\u306e\u5b9f\u884c\uff08\u975e\u540c\u671f\u30b8\u30e7\u30d6 + \u9032\u6357\u30dd\u30fc\u30ea\u30f3\u30b0\uff09 =====
-    async function simulateTranslation() {
-        const L = getLang();
+        if (selectedPayMethod === 'paypal') {
+            alert(L === 'ja'
+                ? 'AIツールのPayPal決済は準備中です。お支払い方法で「Stripe」（クレジットカード）を選択してください。'
+                : 'PayPal for AI tools is coming soon. Please select Stripe (credit card) as the payment method.');
+            return;
+        }
         const token = localStorage.getItem('token');
         if (!token) {
-            alert(L === 'ja' ? 'AI\u30a8\u30c7\u30a3\u30bf\u30fc\u306e\u5229\u7528\u306b\u306f\u30ed\u30b0\u30a4\u30f3\u304c\u5fc5\u8981\u3067\u3059' : 'Please log in to use the AI Editor');
+            alert(L === 'ja' ? 'AIエディターの利用にはログインが必要です' : 'Please log in to use the AI Editor');
             window.location.href = 'login.html';
             return;
         }
+        try {
+            const resp = await fetch((window.API_ORIGIN || '') + '/api/ai-tools/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({
+                    tool: 'editor',
+                    model: selectedModel,
+                    text: sourceTextContent,
+                    sourceLang: document.getElementById('sourceLang').value,
+                    glossary: glossary,
+                    currency: selectedCurrency
+                })
+            });
+            if (resp.status === 401) {
+                alert(L === 'ja' ? 'ログインの有効期限が切れています。もう一度ログインしてください。' : 'Your session has expired. Please log in again.');
+                window.location.href = 'login.html';
+                return;
+            }
+            const data = await resp.json();
+            if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
+            window.location.href = data.url; // Stripeがホストする決済ページへ
+        } catch (err) {
+            alert((L === 'ja' ? '決済ページの作成に失敗しました: ' : 'Failed to start checkout: ') + err.message);
+        }
+    }
+
+    // ===== Step 7: 支払い済み注文の編集実行（ジョブ開始 + 進捗ポーリング） =====
+    async function runPaidOrder(orderId) {
+        const L = getLang();
+        const token = localStorage.getItem('token');
 
         const fill = document.getElementById('progressFill');
         const pctEl = document.getElementById('progressPercent');
         const etaEl = document.getElementById('progressEta');
         fill.style.width = '2%';
         pctEl.textContent = '0%';
-        etaEl.textContent = L === 'ja' ? 'AI\u304c\u539f\u7a3f\u3092\u7de8\u96c6\u3057\u3066\u3044\u307e\u3059...' : 'The AI is editing your manuscript...';
+        etaEl.textContent = L === 'ja' ? 'AIが原稿を編集しています...' : 'The AI is editing your manuscript...';
 
         try {
-            // \u30b8\u30e7\u30d6\u958b\u59cb
-            const startResp = await fetch((window.API_ORIGIN || '') + '/api/ai-editor/edit', {
+            // ジョブ開始（支払い済みが前提。未払いなら402）
+            const runResp = await fetch((window.API_ORIGIN || '') + '/api/ai-tools/orders/' + encodeURIComponent(orderId) + '/run', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                body: JSON.stringify({
-                    text: sourceTextContent,
-                    language: document.getElementById('sourceLang').value,
-                    model: selectedModel,
-                    glossary: glossary
-                })
+                headers: { 'Authorization': 'Bearer ' + token }
             });
-            if (startResp.status === 401) {
-                alert(L === 'ja' ? 'ログインの有効期限が切れています。もう一度ログインしてください。' : 'Your session has expired. Please log in again.');
-                window.location.href = 'login.html';
-                return;
+            const runData = await runResp.json();
+            if (runResp.status === 402) {
+                throw new Error(L === 'ja' ? 'お支払いが確認できませんでした。決済完了後にこのページを再読み込みしてください。' : 'Payment could not be confirmed. Please reload this page after completing the payment.');
             }
-            const startData = await startResp.json();
-            if (!startResp.ok) throw new Error(startData.error || ('HTTP ' + startResp.status));
+            if (!runResp.ok) throw new Error(runData.error || ('HTTP ' + runResp.status));
 
-            // \u9032\u6357\u3092\u30dd\u30fc\u30ea\u30f3\u30b0\uff08\u6b8b\u308a\u6642\u9593\u306f\u7d4c\u904e\u6642\u9593\u00d7\u9032\u6357\u304b\u3089\u5b9f\u6e2c\u30d9\u30fc\u30b9\u3067\u63a8\u5b9a\uff09
+            // 進捗をポーリング（残り時間は経過時間×進捗から実測ベースで推定）
             const startedAt = Date.now();
             while (true) {
                 await new Promise(r => setTimeout(r, 1500));
-                const jobResp = await fetch((window.API_ORIGIN || '') + '/api/ai-editor/job/' + encodeURIComponent(startData.jobId), {
+                const jobResp = await fetch((window.API_ORIGIN || '') + '/api/ai-tools/orders/' + encodeURIComponent(orderId) + '/job', {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 const job = await jobResp.json();
                 if (!jobResp.ok) throw new Error(job.error || ('HTTP ' + jobResp.status));
-                if (job.status === 'failed') throw new Error(job.error || (L === 'ja' ? '\u7de8\u96c6\u51e6\u7406\u304c\u5931\u6557\u3057\u307e\u3057\u305f' : 'Editing failed'));
+                if (job.status === 'failed') throw new Error(job.error || (L === 'ja' ? '編集処理が失敗しました' : 'Editing failed'));
+                if (job.status === 'idle') {
+                    // サーバー再起動等でジョブが失われた → 再実行（支払い済みなので追加課金なし）
+                    await fetch((window.API_ORIGIN || '') + '/api/ai-tools/orders/' + encodeURIComponent(orderId) + '/run', {
+                        method: 'POST', headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    continue;
+                }
 
                 const pct = job.status === 'completed' ? 100 : Math.max(2, job.progress || 0);
                 fill.style.width = pct + '%';
@@ -1643,20 +1657,89 @@
                 if (job.status !== 'completed' && pct >= 5) {
                     const elapsedSec = (Date.now() - startedAt) / 1000;
                     const remainSec = Math.max(1, Math.round(elapsedSec * (100 - pct) / pct));
-                    etaEl.textContent = L === 'ja' ? '\u6b8b\u308a\u7d04' + remainSec + '\u79d2' : '~' + remainSec + 's remaining';
+                    etaEl.textContent = L === 'ja' ? '残り約' + remainSec + '秒' : '~' + remainSec + 's remaining';
                 }
 
                 if (job.status === 'completed') {
-                    translatedText = job.editedText || '';
+                    translatedText = job.result || '';
                     setTimeout(() => goStep(8), 400);
                     return;
                 }
             }
         } catch (err) {
-            alert((L === 'ja' ? 'AI\u7de8\u96c6\u306b\u5931\u6557\u3057\u307e\u3057\u305f: ' : 'AI editing failed: ') + err.message);
-            goStep(6);
+            const retryMsg = (L === 'ja' ? 'AI編集に失敗しました: ' : 'AI editing failed: ') + err.message +
+                (L === 'ja' ? '\n\nお支払いは保持されています。再試行しますか？' : '\n\nYour payment is preserved. Retry now?');
+            if (confirm(retryMsg)) return runPaidOrder(orderId);
         }
     }
+
+    // ===== 決済からの戻り処理（?order=...&paid=1 / canceled=1） =====
+    document.addEventListener('DOMContentLoaded', async function () {
+        const params = new URLSearchParams(window.location.search);
+        const orderId = params.get('order');
+        if (!orderId) return;
+        const L = getLang();
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert(L === 'ja' ? 'ログインしてから再度このページを開いてください。' : 'Please log in and reopen this page.');
+            window.location.href = 'login.html';
+            return;
+        }
+        try {
+            const resp = await fetch((window.API_ORIGIN || '') + '/api/ai-tools/orders/' + encodeURIComponent(orderId), {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await resp.json();
+            if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
+            const order = data.order;
+
+            // 注文内容からウィザードの状態を復元（原稿はサーバー保存分が正）
+            sourceTextContent = order.text || '';
+            const ta = document.getElementById('sourceText');
+            if (ta) { ta.value = sourceTextContent; updateCharCount(); }
+            selectedModel = order.model || 'sonnet';
+            if (order.currency && CURRENCIES[order.currency]) {
+                selectedCurrency = order.currency;
+                const curSel = document.getElementById('currencySelect');
+                if (curSel) curSel.value = selectedCurrency;
+            }
+            glossary = Array.isArray(order.glossary) ? order.glossary : [];
+            renderGlossary();
+            if (order.sourceLang) { const el = document.getElementById('sourceLang'); if (el) el.value = order.sourceLang; }
+
+            if (params.get('canceled')) {
+                alert(L === 'ja' ? 'お支払いはキャンセルされました。原稿は保持されています。' : 'Payment was canceled. Your manuscript is preserved.');
+                goStep(5);
+                return;
+            }
+
+            if (order.status === 'completed' && order.result) {
+                translatedText = order.result; // 再読み込みしても結果は消えない
+                goStep(8);
+                return;
+            }
+
+            // Webhookが遅れている場合に備え、Stripeへ支払い状態を直接確認
+            if (order.status === 'pending') {
+                const cResp = await fetch((window.API_ORIGIN || '') + '/api/ai-tools/orders/' + encodeURIComponent(orderId) + '/confirm', {
+                    method: 'POST', headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const cData = await cResp.json();
+                if (!cResp.ok || cData.status !== 'paid') {
+                    alert(L === 'ja'
+                        ? 'お支払いの確認がまだできていません。決済が完了している場合は、少し待ってからこのページを再読み込みしてください。'
+                        : 'Payment is not confirmed yet. If you completed the payment, please reload this page in a moment.');
+                    goStep(5);
+                    return;
+                }
+            }
+
+            goStep(7);
+            runPaidOrder(orderId);
+        } catch (err) {
+            alert((L === 'ja' ? '注文情報の取得に失敗しました: ' : 'Failed to load the order: ') + err.message);
+        }
+    });
 
     // ===== Step 9: Download =====
     function downloadResult(format) {
