@@ -222,7 +222,16 @@ router.post('/orders/:orderId/run', authenticate, async (req, res) => {
             text: order.text_content,
             tier: order.model,
             glossary: order.glossary || [],
-            onProgress: (pct) => { job.progress = pct; }
+            onProgress: (pct) => { job.progress = pct; },
+            // 前回失敗時の完了済みチャンクから再開（API費の二重払い・再待機を防ぐ）
+            completedChunks: Array.isArray(order.partial_chunks) ? order.partial_chunks : [],
+            // チャンク完了ごとに途中経過をDBへ保存（失敗・再起動しても続きから再開できる）
+            onChunkDone: async (idx, chunksSoFar) => {
+                await db.query(
+                    `UPDATE ai_tool_orders SET partial_chunks = $2, updated_at = CURRENT_TIMESTAMP WHERE order_id = $1`,
+                    [order.order_id, JSON.stringify(chunksSoFar)]
+                ).catch((e) => console.error(`Partial save failed for ${order.order_id}:`, e.message));
+            }
         };
         const runPromise = order.tool === 'translator'
             ? translateText({ ...params, sourceLang: order.source_lang, targetLang: order.target_lang })
@@ -232,7 +241,7 @@ router.post('/orders/:orderId/run', authenticate, async (req, res) => {
             job.status = 'completed';
             job.progress = 100;
             await db.query(
-                `UPDATE ai_tool_orders SET status = 'completed', result_text = $2, updated_at = CURRENT_TIMESTAMP WHERE order_id = $1`,
+                `UPDATE ai_tool_orders SET status = 'completed', result_text = $2, partial_chunks = NULL, updated_at = CURRENT_TIMESTAMP WHERE order_id = $1`,
                 [order.order_id, resultText]
             );
         }).catch(async (error) => {

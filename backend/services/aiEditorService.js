@@ -138,13 +138,36 @@ async function editSample({ text, language }) {
     return out;
 }
 
+// 再試行しても解決しないエラー（安全システム拒否・クレジット切れ）は即座に失敗させる
+function isNonRetryable(error) {
+    const msg = String((error && error.message) || '');
+    return msg.includes('declined by the model safety system') || msg.includes('credit balance');
+}
+
+/** 一時的なAPIエラー（過負荷・レート制限等）は間隔を空けて自動リトライ */
+async function withChunkRetry(fn, attempts = 3) {
+    let lastErr;
+    for (let i = 0; i < attempts; i++) {
+        try { return await fn(); } catch (e) {
+            lastErr = e;
+            if (isNonRetryable(e)) throw e;
+            if (i < attempts - 1) await new Promise(r => setTimeout(r, (i + 1) * 15000));
+        }
+    }
+    throw lastErr;
+}
+
 /**
  * Edit a full manuscript with the chosen tier. Long texts are chunked at
  * paragraph boundaries and processed sequentially. onProgress(0-100) is
  * driven by the characters streamed back so far (edited output length is
  * roughly the input length), giving a smooth real progress signal.
+ *
+ * Resumable: completedChunks (edited texts for the first N chunks) are reused
+ * instead of re-edited; onChunkDone(index, allChunksSoFar) fires after each
+ * chunk so the caller can persist progress. (Same contract as translateText.)
  */
-async function editText({ text, language, tier, glossary, onProgress }) {
+async function editText({ text, language, tier, glossary, onProgress, completedChunks = [], onChunkDone }) {
     const chunks = chunkText(text);
     const totalChars = chunks.reduce((sum, c) => sum + c.length, 0) || 1;
     let doneChars = 0;
@@ -152,19 +175,32 @@ async function editText({ text, language, tier, glossary, onProgress }) {
 
     for (let i = 0; i < chunks.length; i++) {
         const chunkLen = chunks[i].length;
+
+        // 前回の実行で完了済みのチャンクは再編集しない（API費・時間の節約）
+        if (i < completedChunks.length && typeof completedChunks[i] === 'string') {
+            edited.push(completedChunks[i]);
+            doneChars += chunkLen;
+            if (onProgress) onProgress(Math.min(99, Math.round((doneChars / totalChars) * 100)));
+            continue;
+        }
+
         let streamedChars = 0;
         const report = () => {
             if (!onProgress) return;
             const current = doneChars + Math.min(streamedChars, chunkLen);
             onProgress(Math.min(99, Math.round((current / totalChars) * 100)));
         };
-        edited.push(await editChunk(
-            { chunk: chunks[i], language, tier, glossary },
-            undefined,
-            (n) => { streamedChars += n; report(); }
-        ));
+        edited.push(await withChunkRetry(() => {
+            streamedChars = 0;
+            return editChunk(
+                { chunk: chunks[i], language, tier, glossary },
+                undefined,
+                (n) => { streamedChars += n; report(); }
+            );
+        }));
         doneChars += chunkLen;
         report();
+        if (onChunkDone) await onChunkDone(i, edited.slice());
     }
     if (onProgress) onProgress(100);
     return edited.join('\n');

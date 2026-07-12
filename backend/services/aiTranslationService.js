@@ -137,12 +137,36 @@ async function translateSample({ text, sourceLang, targetLang }) {
     return out;
 }
 
+// 再試行しても解決しないエラー（安全システム拒否・クレジット切れ）は即座に失敗させる
+function isNonRetryable(error) {
+    const msg = String((error && error.message) || '');
+    return msg.includes('declined by the model safety system') || msg.includes('credit balance');
+}
+
+/** 一時的なAPIエラー（過負荷・レート制限等）は間隔を空けて自動リトライ */
+async function withChunkRetry(fn, attempts = 3) {
+    let lastErr;
+    for (let i = 0; i < attempts; i++) {
+        try { return await fn(); } catch (e) {
+            lastErr = e;
+            if (isNonRetryable(e)) throw e;
+            if (i < attempts - 1) await new Promise(r => setTimeout(r, (i + 1) * 15000));
+        }
+    }
+    throw lastErr;
+}
+
 /**
  * Translate a full manuscript with the chosen tier. Chunked at paragraph
  * boundaries, processed sequentially. onProgress(0-100) is driven by the
  * characters streamed back so far (translated length ~ input length).
+ *
+ * Resumable: completedChunks (translated texts for the first N chunks, e.g.
+ * loaded from the DB after a failure) are reused instead of re-translated;
+ * onChunkDone(index, allChunksSoFar) fires after each chunk so the caller
+ * can persist progress.
  */
-async function translateText({ text, sourceLang, targetLang, tier, glossary, onProgress }) {
+async function translateText({ text, sourceLang, targetLang, tier, glossary, onProgress, completedChunks = [], onChunkDone }) {
     const chunks = chunkText(text);
     const totalChars = chunks.reduce((sum, c) => sum + c.length, 0) || 1;
     let doneChars = 0;
@@ -150,19 +174,32 @@ async function translateText({ text, sourceLang, targetLang, tier, glossary, onP
 
     for (let i = 0; i < chunks.length; i++) {
         const chunkLen = chunks[i].length;
+
+        // 前回の実行で完了済みのチャンクは再翻訳しない（API費・時間の節約）
+        if (i < completedChunks.length && typeof completedChunks[i] === 'string') {
+            translated.push(completedChunks[i]);
+            doneChars += chunkLen;
+            if (onProgress) onProgress(Math.min(99, Math.round((doneChars / totalChars) * 100)));
+            continue;
+        }
+
         let streamedChars = 0;
         const report = () => {
             if (!onProgress) return;
             const current = doneChars + Math.min(streamedChars, chunkLen);
             onProgress(Math.min(99, Math.round((current / totalChars) * 100)));
         };
-        translated.push(await translateChunk(
-            { chunk: chunks[i], sourceLang, targetLang, tier, glossary },
-            undefined,
-            (n) => { streamedChars += n; report(); }
-        ));
+        translated.push(await withChunkRetry(() => {
+            streamedChars = 0;
+            return translateChunk(
+                { chunk: chunks[i], sourceLang, targetLang, tier, glossary },
+                undefined,
+                (n) => { streamedChars += n; report(); }
+            );
+        }));
         doneChars += chunkLen;
         report();
+        if (onChunkDone) await onChunkDone(i, translated.slice());
     }
     if (onProgress) onProgress(100);
     return translated.join('\n');
