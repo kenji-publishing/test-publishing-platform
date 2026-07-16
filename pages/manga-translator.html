@@ -1452,7 +1452,11 @@
 
     function renderBubbleListHtml(data) {
         if (data && data.error) {
-            return '<div style="color:#dc3545; font-size:0.85rem;">' + escH(data.error) + '</div>';
+            const L = getLang();
+            const friendly = data.overloaded || /overloaded|529/i.test(data.error)
+                ? (L === 'ja' ? 'AIが混雑しています。少し待ってから「他モデルと比較」をやり直すか、このモデル以外を選んでください。' : 'The AI is currently overloaded. Please try the comparison again in a moment, or choose another model.')
+                : data.error;
+            return '<div style="color:#dc3545; font-size:0.85rem;">' + escH(friendly) + '</div>';
         }
         const bubbles = Array.isArray(data) ? data : [];
         if (!bubbles.length) {
@@ -1509,7 +1513,9 @@
                 throw new Error(L === 'ja' ? '本日のお試し翻訳の上限に達しました。明日以降にお試しください。' : 'Daily comparison limit reached. Please try again tomorrow.');
             }
             if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
-            comparisonCache = { key: cacheKey, samples: data.samples };
+            // 3モデルすべて成功した時だけキャッシュ（失敗を含む結果を固定しない=再実行で再試行できる）
+            const allOk = ['haiku', 'sonnet', 'opus'].every(m => data.samples[m] && !data.samples[m].error);
+            comparisonCache = allOk ? { key: cacheKey, samples: data.samples } : { key: null, samples: null };
             ['haiku', 'sonnet', 'opus'].forEach(m => {
                 document.getElementById('compare' + m.charAt(0).toUpperCase() + m.slice(1)).innerHTML = renderBubbleListHtml(data.samples[m]);
             });
@@ -1656,10 +1662,15 @@
                 const pct = job.status === 'completed' ? 100 : Math.max(2, job.progress || 0);
                 fill.style.width = pct + '%';
                 pctEl.textContent = pct + '%';
-                if (job.status !== 'completed' && pct >= 5) {
-                    const elapsedSec = (Date.now() - startedAt) / 1000;
-                    const remainSec = Math.max(1, Math.round(elapsedSec * (100 - pct) / pct));
-                    etaEl.textContent = L === 'ja' ? '残り約' + remainSec + '秒' : '~' + remainSec + 's remaining';
+                if (job.status !== 'completed') {
+                    if (job.detail) {
+                        // 「ページ2/3を翻訳中」「混雑のため待機中」などの実況（止まって見えない）
+                        etaEl.textContent = L === 'ja' ? job.detail.split(' / ')[0] : (job.detail.split(' / ')[1] || job.detail);
+                    } else if (pct >= 5) {
+                        const elapsedSec = (Date.now() - startedAt) / 1000;
+                        const remainSec = Math.max(1, Math.round(elapsedSec * (100 - pct) / pct));
+                        etaEl.textContent = L === 'ja' ? '残り約' + remainSec + '秒' : '~' + remainSec + 's remaining';
+                    }
                 }
 
                 if (job.status === 'completed') {

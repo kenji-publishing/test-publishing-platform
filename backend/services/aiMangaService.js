@@ -39,13 +39,23 @@ function isNonRetryable(error) {
     return msg.includes('declined by the model safety system') || msg.includes('credit balance');
 }
 
-async function withRetry(fn, attempts = 3) {
+function isOverloaded(error) {
+    const msg = String((error && error.message) || '');
+    return msg.includes('overloaded') || msg.includes('529') || msg.includes('rate_limit');
+}
+
+// 混雑(529)は時間をおけば通ることが多いので、より粘り強く待つ（10/20/40/80秒）
+async function withRetry(fn, attempts = 5, onWait) {
     let lastErr;
     for (let i = 0; i < attempts; i++) {
         try { return await fn(); } catch (e) {
             lastErr = e;
             if (isNonRetryable(e)) throw e;
-            if (i < attempts - 1) await new Promise(r => setTimeout(r, (i + 1) * 15000));
+            if (i < attempts - 1) {
+                const waitMs = (isOverloaded(e) ? 10000 : 15000) * Math.pow(2, Math.min(i, 3));
+                if (onWait) onWait(i + 1, attempts, isOverloaded(e));
+                await new Promise(r => setTimeout(r, waitMs));
+            }
         }
     }
     throw lastErr;
@@ -79,7 +89,7 @@ If the page has no text at all, respond {"bubbles":[]}.`;
 }
 
 /** 1ページを翻訳（画像ファイル→吹き出しリスト） */
-async function translatePage({ imagePath, sourceLang, targetLang, tier, glossary }) {
+async function translatePage({ imagePath, sourceLang, targetLang, tier, glossary }, requestOptions) {
     const ext = path.extname(imagePath).toLowerCase();
     const mediaType = MEDIA_TYPES[ext] || 'image/jpeg';
     const data = fs.readFileSync(imagePath).toString('base64');
@@ -94,7 +104,7 @@ async function translatePage({ imagePath, sourceLang, targetLang, tier, glossary
                 { type: 'text', text: buildPrompt({ sourceLang, targetLang, tier, glossary }) }
             ]
         }]
-    });
+    }, requestOptions);
 
     if (message.stop_reason === 'refusal') {
         throw new Error('The translation request was declined by the model safety system');
@@ -117,7 +127,7 @@ async function translatePage({ imagePath, sourceLang, targetLang, tier, glossary
  * 全ページを翻訳。ページ=チャンクで逐次処理・途中再開対応。
  * 戻り値: JSON文字列 {pages:[{page:1, bubbles:[...]}]}（result_textにそのまま保存できる形）
  */
-async function translateManga({ pagePaths, sourceLang, targetLang, tier, glossary, onProgress, completedChunks = [], onChunkDone }) {
+async function translateManga({ pagePaths, sourceLang, targetLang, tier, glossary, onProgress, onStatus, completedChunks = [], onChunkDone }) {
     const results = [];
     for (let i = 0; i < pagePaths.length; i++) {
         // 前回完了済みページは再翻訳しない
@@ -126,9 +136,14 @@ async function translateManga({ pagePaths, sourceLang, targetLang, tier, glossar
             if (onProgress) onProgress(Math.min(99, Math.round(((i + 1) / pagePaths.length) * 100)));
             continue;
         }
-        const bubbles = await withRetry(() => translatePage({
-            imagePath: pagePaths[i], sourceLang, targetLang, tier, glossary
-        }));
+        if (onStatus) onStatus({ page: i + 1, total: pagePaths.length, retrying: false });
+        const bubbles = await withRetry(
+            () => translatePage({ imagePath: pagePaths[i], sourceLang, targetLang, tier, glossary }),
+            5,
+            (attempt, attempts, overloaded) => {
+                if (onStatus) onStatus({ page: i + 1, total: pagePaths.length, retrying: true, attempt, attempts, overloaded });
+            }
+        );
         const pageResult = { page: i + 1, bubbles };
         results.push(pageResult);
         if (onProgress) onProgress(Math.min(99, Math.round(((i + 1) / pagePaths.length) * 100)));
@@ -138,17 +153,25 @@ async function translateManga({ pagePaths, sourceLang, targetLang, tier, glossar
     return JSON.stringify({ pages: results });
 }
 
-/** お試し比較: 1ページを3品質で並列翻訳（各25s上限） */
+/** お試し比較: 1ページを3品質で並列翻訳（各30s上限。混雑時は1回だけ短い間隔で再試行） */
 async function sampleManga({ imagePath, sourceLang, targetLang }) {
     const tiers = ['haiku', 'sonnet', 'opus'];
-    const results = await Promise.allSettled(
-        tiers.map(tier => translatePage({ imagePath, sourceLang, targetLang, tier, glossary: [] }))
-    );
+    const runTier = async (tier) => {
+        const opts = { timeout: 30000, maxRetries: 1 };
+        try {
+            return await translatePage({ imagePath, sourceLang, targetLang, tier, glossary: [] }, opts);
+        } catch (e) {
+            if (isNonRetryable(e) || !isOverloaded(e)) throw e;
+            await new Promise(r => setTimeout(r, 4000)); // 混雑は少し待つと通ることが多い
+            return await translatePage({ imagePath, sourceLang, targetLang, tier, glossary: [] }, opts);
+        }
+    };
+    const results = await Promise.allSettled(tiers.map(runTier));
     const out = {};
     tiers.forEach((tier, i) => {
         out[tier] = results[i].status === 'fulfilled'
             ? results[i].value
-            : { error: (results[i].reason && results[i].reason.message) || 'failed' };
+            : { error: (results[i].reason && results[i].reason.message) || 'failed', overloaded: isOverloaded(results[i].reason) };
     });
     return out;
 }

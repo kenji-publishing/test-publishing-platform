@@ -143,14 +143,14 @@ function isNonRetryable(error) {
     return msg.includes('declined by the model safety system') || msg.includes('credit balance');
 }
 
-/** 一時的なAPIエラー（過負荷・レート制限等）は間隔を空けて自動リトライ */
-async function withChunkRetry(fn, attempts = 3) {
+/** 一時的なAPIエラー（過負荷・レート制限等）は間隔を空けて自動リトライ（混雑時は最大5回・指数バックオフ） */
+async function withChunkRetry(fn, attempts = 5) {
     let lastErr;
     for (let i = 0; i < attempts; i++) {
         try { return await fn(); } catch (e) {
             lastErr = e;
             if (isNonRetryable(e)) throw e;
-            if (i < attempts - 1) await new Promise(r => setTimeout(r, (i + 1) * 15000));
+            if (i < attempts - 1) await new Promise(r => setTimeout(r, 10000 * Math.pow(2, Math.min(i, 3))));
         }
     }
     throw lastErr;

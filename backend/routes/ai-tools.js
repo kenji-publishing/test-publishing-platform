@@ -483,6 +483,12 @@ router.post('/orders/:orderId/run', authenticate, async (req, res) => {
         if (order.tool === 'manga') {
             const orderDir = path.join(MANGA_ORDERS_DIR, order.order_id);
             const pagePaths = (Array.isArray(order.pages) ? order.pages : []).map(f => path.join(orderDir, f));
+            // 進捗の詳細（ページ番号・混雑リトライ中）をポーリング応答に載せる
+            params.onStatus = (s) => {
+                job.detail = s.retrying
+                    ? `ページ ${s.page}/${s.total} — ${s.overloaded ? 'AIが混雑中のため待機しています' : 'エラーのため再試行中'}（${s.attempt}/${s.attempts}回目） / Page ${s.page}/${s.total} — retrying`
+                    : `ページ ${s.page}/${s.total} を翻訳中 / Translating page ${s.page}/${s.total}`;
+            };
             runPromise = translateManga({ ...params, pagePaths, sourceLang: order.source_lang, targetLang: order.target_lang });
         } else if (order.tool === 'translator') {
             runPromise = translateText({ ...params, sourceLang: order.source_lang, targetLang: order.target_lang });
@@ -533,6 +539,7 @@ router.get('/orders/:orderId/job', authenticate, async (req, res) => {
                 success: true,
                 status: job.status,
                 progress: job.progress,
+                detail: job.detail || null,
                 result: null,
                 error: job.error || order.error || null
             });
