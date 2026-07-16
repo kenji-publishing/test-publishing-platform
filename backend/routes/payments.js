@@ -15,6 +15,87 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 // (platform 30% fixed, translator 20 / editor 10 when attached,
 // author gets the remainder). See services/revenueSplitService.js.
 const { createRevenueSplits } = require('../services/revenueSplitService');
+const { createNotification } = require('../services/notificationService');
+
+/**
+ * 全額返金の反映（charge.refundedから呼ばれる）
+ * - 作品購入: purchasesをrefundedに（読者アクセスは自動で失効）、返金トランザクション記録、
+ *   収益分配を打ち消すマイナス行を挿入（収益集計が自動で正しくなる。履歴は残る=監査可能）
+ * - AIツール注文: 未完了ならcanceledに（完了済みは成果物提供済みの好意返金なので記録のみ）
+ * 冪等: 同じイベントの再送では二重処理しない
+ */
+async function applyStripeRefund(sessionId) {
+  // --- 作品購入の返金 ---
+  const client = await db.pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // completedのときだけrefundedへ（再送時はここが0件になり二重処理を防ぐ）
+    const purchase = (await client.query(
+      `UPDATE purchases SET payment_status = 'refunded'
+       WHERE transaction_id = $1 AND payment_status = 'completed'
+       RETURNING user_id, work_id, amount, currency`,
+      [sessionId]
+    )).rows[0];
+
+    if (purchase) {
+      await client.query(
+        `INSERT INTO transactions (user_id, work_id, transaction_type, amount, currency, payment_method, payment_gateway_id, status)
+         VALUES ($1, $2, 'refund', $3, $4, 'stripe', $5, 'completed')`,
+        [purchase.user_id, purchase.work_id, purchase.amount, purchase.currency, sessionId]
+      );
+      // 元の分配を打ち消すマイナス行（SUMベースの収益表示・出金計算が自動で補正される）
+      await client.query(
+        `INSERT INTO revenue_splits (work_id, recipient_id, role, amount, currency, transaction_reference, status)
+         SELECT work_id, recipient_id, role, -amount, currency, transaction_reference || ':refund', 'completed'
+         FROM revenue_splits
+         WHERE transaction_reference = $1 AND amount > 0`,
+        [sessionId]
+      );
+      await client.query('COMMIT');
+      console.log(`Refund applied: session=${sessionId}, work=${purchase.work_id}, buyer=${purchase.user_id}, amount=${purchase.amount} ${purchase.currency}`);
+
+      // 購入者へ通知（非致死）
+      try {
+        await createNotification({
+          userId: purchase.user_id,
+          type: 'system',
+          title: '返金が完了しました / Refund completed',
+          message: `ご購入いただいた作品の返金（${purchase.amount} ${purchase.currency}）が完了しました。この作品はライブラリから読めなくなります。 / Your refund (${purchase.amount} ${purchase.currency}) has been processed. The work is no longer available in your library.`,
+          actionUrl: '/pages/library.html'
+        });
+      } catch (e) { console.error('Refund notification failed:', e.message); }
+      return { kind: 'purchase' };
+    }
+    await client.query('ROLLBACK');
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+
+  // --- AIツール注文の返金 ---
+  const order = (await db.query(
+    `SELECT order_id, status FROM ai_tool_orders WHERE stripe_session_id = $1`,
+    [sessionId]
+  )).rows[0];
+  if (order) {
+    if (order.status !== 'completed' && order.status !== 'canceled') {
+      await db.query(
+        `UPDATE ai_tool_orders SET status = 'canceled', updated_at = CURRENT_TIMESTAMP WHERE order_id = $1`,
+        [order.order_id]
+      );
+      console.log(`Refund applied: AI tool order ${order.order_id} canceled (session=${sessionId})`);
+    } else {
+      console.log(`Refund noted: AI tool order ${order.order_id} already ${order.status} (session=${sessionId})`);
+    }
+    return { kind: 'ai_tool' };
+  }
+
+  console.warn(`Refund received but no matching purchase/order for session=${sessionId}`);
+  return { kind: 'none' };
+}
 
 /**
  * POST /api/payments/create-checkout-session
@@ -118,6 +199,32 @@ router.post('/webhook', async (req, res) => {
   } catch (err) {
     console.error('Webhook signature verification failed:', err.message);
     return res.status(400).json({ error: 'Webhook signature verification failed' });
+  }
+
+  // 返金（Stripeダッシュボード等から返金した時に飛んでくる）
+  if (event.type === 'charge.refunded') {
+    const charge = event.data.object;
+    try {
+      // v1は全額返金のみ反映（部分返金は記録だけ残して手動対応）
+      if (!charge.refunded) {
+        console.warn(`Partial refund received (charge=${charge.id}, refunded=${charge.amount_refunded}/${charge.amount}) — not auto-processed`);
+        return res.json({ received: true });
+      }
+      // chargeにはセッションIDが無いため、payment_intentから該当のCheckoutセッションを引く
+      let sessionId = charge.metadata && charge.metadata.session_id; // テスト用の直接指定も許容
+      if (!sessionId && charge.payment_intent) {
+        const sessions = await stripe.checkout.sessions.list({ payment_intent: charge.payment_intent, limit: 1 });
+        if (sessions.data.length > 0) sessionId = sessions.data[0].id;
+      }
+      if (!sessionId) {
+        console.warn(`charge.refunded: no checkout session found for charge=${charge.id}`);
+        return res.json({ received: true });
+      }
+      await applyStripeRefund(sessionId);
+    } catch (error) {
+      console.error('Error processing refund webhook:', error);
+    }
+    return res.json({ received: true });
   }
 
   if (event.type === 'checkout.session.completed') {
