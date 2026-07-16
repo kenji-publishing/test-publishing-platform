@@ -29,6 +29,13 @@ const { translateText } = require('../services/aiTranslationService');
 const MAX_CHARS = 300000;
 const SUPPORTED_LANGS = ['en', 'ja', 'zh', 'es', 'fr', 'de', 'ko', 'ar', 'pt', 'it'];
 
+// 不正なUUIDのパスは即404にする（DBの22P02エラー→500を防ぐ）
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+router.param('orderId', (req, res, next, value) => {
+    if (!UUID_RE.test(value)) return res.status(404).json({ error: 'Order not found' });
+    next();
+});
+
 // ===== Pricing (server-side source of truth) =====
 // Must stay in sync with js/wizard-common.js (display) and the wizards' PRICING_JPY.
 const PRICING_JPY = { haiku: 1, sonnet: 3, opus: 10 }; // per 1,000 chars

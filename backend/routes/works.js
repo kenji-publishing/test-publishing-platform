@@ -9,6 +9,17 @@ const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const db = require('../config/database');
 const multer = require('multer');
+
+// 不正なUUIDのパスは即404にする（そのままDBに渡すと22P02で500になる。ボットの変則URL対策）
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+router.param('workId', (req, res, next, value) => {
+    if (!UUID_RE.test(value)) return res.status(404).json({ error: 'Work not found' });
+    next();
+});
+router.param('collaboratorId', (req, res, next, value) => {
+    if (!UUID_RE.test(value)) return res.status(404).json({ error: 'Not found' });
+    next();
+});
 const path = require('path');
 const fs = require('fs');
 const { REVENUE_SHARES, generateAgreementHash } = require('../config/revenue');
