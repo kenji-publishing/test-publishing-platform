@@ -18,11 +18,16 @@
 
 const express = require('express');
 const router = express.Router();
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
+const multer = require('multer');
 const { authenticate } = require('../middleware/auth');
 const db = require('../config/database');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { editText } = require('../services/aiEditorService');
 const { translateText } = require('../services/aiTranslationService');
+const { translateManga, sampleManga } = require('../services/aiMangaService');
 
 // 30万字 = 長編小説1冊分をカバー（test4は約24万字）。チャンク処理なので長さ自体は問題なく、
 // 上限はジョブ時間の暴走防止のため。それ以上は分割利用を案内する。
@@ -39,6 +44,8 @@ router.param('orderId', (req, res, next, value) => {
 // ===== Pricing (server-side source of truth) =====
 // Must stay in sync with js/wizard-common.js (display) and the wizards' PRICING_JPY.
 const PRICING_JPY = { haiku: 1, sonnet: 3, opus: 10 }; // per 1,000 chars
+const MANGA_PRICING_JPY = { haiku: 3, sonnet: 8, opus: 20 }; // per page（manga-translator.htmlと同期）
+const MANGA_MAX_PAGES = 200;
 const CURRENCIES = {
     JPY: { rate: 1, decimals: 0 },
     USD: { rate: 0.0067, decimals: 2 },
@@ -62,8 +69,170 @@ function computeAmount({ chars, model, currency }) {
 // In-memory progress per order (the durable result lives in ai_tool_orders.result_text)
 const jobs = new Map(); // orderId -> { status, progress }
 
-const TOOL_PAGES = { editor: 'ai-editor.html', translator: 'novel-translator.html' };
-const TOOL_NAMES = { editor: 'AI Editing', translator: 'AI Translation' };
+const TOOL_PAGES = { editor: 'ai-editor.html', translator: 'novel-translator.html', manga: 'manga-translator.html' };
+const TOOL_NAMES = { editor: 'AI Editing', translator: 'AI Translation', manga: 'Manga Translation' };
+
+// ===== マンガページ画像のアップロード =====
+// 15MBのリクエスト上限に収まるよう1枚ずつステージングし、checkout時に注文へ移動する
+const MANGA_STAGING_DIR = path.join(__dirname, '..', 'uploads', 'manga-staging');
+const MANGA_ORDERS_DIR = path.join(__dirname, '..', 'uploads', 'manga-orders');
+fs.mkdirSync(MANGA_STAGING_DIR, { recursive: true });
+fs.mkdirSync(MANGA_ORDERS_DIR, { recursive: true });
+
+const mangaUpload = multer({
+    storage: multer.diskStorage({
+        destination: (req, file, cb) => cb(null, MANGA_STAGING_DIR),
+        filename: (req, file, cb) => {
+            const ext = (path.extname(file.originalname).toLowerCase() || '.jpg').replace(/[^.a-z0-9]/g, '');
+            cb(null, `${req.user.userId}_${crypto.randomBytes(8).toString('hex')}${ext}`);
+        }
+    }),
+    limits: { fileSize: 12 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+        cb(null, ['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype));
+    }
+});
+
+/** 古いステージングファイルの掃除（24時間超）— checkout時についでに実行 */
+function cleanupStaging() {
+    try {
+        const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+        for (const f of fs.readdirSync(MANGA_STAGING_DIR)) {
+            const p = path.join(MANGA_STAGING_DIR, f);
+            try { if (fs.statSync(p).mtimeMs < cutoff) fs.unlinkSync(p); } catch (e) {}
+        }
+    } catch (e) {}
+}
+
+/** ステージングIDの検証: 自分がアップロードしたファイルのみ参照可能（パス注入防止） */
+function resolveStagedFile(userId, stagedId) {
+    if (typeof stagedId !== 'string' || !/^[\w.-]+$/.test(stagedId)) return null;
+    if (!stagedId.startsWith(userId + '_')) return null;
+    const p = path.join(MANGA_STAGING_DIR, stagedId);
+    if (!p.startsWith(MANGA_STAGING_DIR)) return null;
+    return fs.existsSync(p) ? p : null;
+}
+
+/**
+ * POST /api/ai-tools/manga/stage
+ * ページ画像を1枚ステージング（クライアントは縮小済みJPEGを順次送る）
+ */
+router.post('/manga/stage', authenticate, mangaUpload.single('page'), (req, res) => {
+    if (!req.file) return res.status(400).json({ error: 'Image file is required (jpeg/png/webp)' });
+    res.json({ success: true, stagedId: req.file.filename, size: req.file.size });
+});
+
+/**
+ * POST /api/ai-tools/manga/sample
+ * 1ページ目を3品質で抽出+翻訳して比較（お試し・無料。運営API費がかかるため1日上限あり）
+ */
+const MANGA_SAMPLE_DAILY_LIMIT = 10;
+const mangaSampleUsage = new Map(); // userId -> { day, count }
+router.post('/manga/sample', authenticate, async (req, res) => {
+    try {
+        const { stagedId, sourceLang, targetLang } = req.body;
+        if (!SUPPORTED_LANGS.includes(targetLang)) return res.status(400).json({ error: 'Unsupported target language' });
+        const imagePath = resolveStagedFile(req.user.userId, stagedId);
+        if (!imagePath) return res.status(400).json({ error: 'Staged page not found. Please upload pages first.' });
+
+        const today = new Date().toISOString().slice(0, 10);
+        let usage = mangaSampleUsage.get(req.user.userId);
+        if (!usage || usage.day !== today) { usage = { day: today, count: 0 }; mangaSampleUsage.set(req.user.userId, usage); }
+        if (usage.count >= MANGA_SAMPLE_DAILY_LIMIT) {
+            return res.status(429).json({ error: 'Daily comparison limit reached. Please try again tomorrow.', code: 'SAMPLE_LIMIT' });
+        }
+        usage.count++;
+
+        const samples = await sampleManga({ imagePath, sourceLang, targetLang });
+        res.json({ success: true, samples });
+    } catch (error) {
+        console.error('Manga sample error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * POST /api/ai-tools/manga/checkout
+ * ステージング済みページで注文を作成し、Stripe Checkoutへ（金額はサーバー計算=ページ数×単価）
+ */
+router.post('/manga/checkout', authenticate, async (req, res) => {
+    try {
+        const { stagedIds, model, sourceLang, targetLang, glossary, currency } = req.body;
+        if (!MANGA_PRICING_JPY[model]) return res.status(400).json({ error: 'Invalid model' });
+        if (!CURRENCIES[currency]) return res.status(400).json({ error: 'Unsupported currency' });
+        if (!SUPPORTED_LANGS.includes(targetLang)) return res.status(400).json({ error: 'Unsupported target language' });
+        if (!Array.isArray(stagedIds) || stagedIds.length === 0) return res.status(400).json({ error: 'No pages uploaded' });
+        if (stagedIds.length > MANGA_MAX_PAGES) {
+            return res.status(400).json({ error: `Too many pages (max ${MANGA_MAX_PAGES} per order)` });
+        }
+
+        // 全ステージングファイルの存在＋所有を検証してから注文を作る
+        const stagedPaths = [];
+        for (const id of stagedIds) {
+            const p = resolveStagedFile(req.user.userId, id);
+            if (!p) return res.status(400).json({ error: `Staged page missing: upload again`, stagedId: String(id).slice(0, 40) });
+            stagedPaths.push(p);
+        }
+
+        const pages = stagedPaths.length;
+        const cur = CURRENCIES[currency];
+        const rawJpy = pages * MANGA_PRICING_JPY[model];
+        const amount = Math.max(Number((rawJpy * cur.rate).toFixed(cur.decimals)), STRIPE_MINIMUMS[currency]);
+
+        const orderResult = await db.query(
+            `INSERT INTO ai_tool_orders (user_id, tool, model, source_lang, target_lang, glossary, text_content, char_count, currency, amount, pages)
+             VALUES ($1, 'manga', $2, $3, $4, $5, NULL, $6, $7, $8, $9)
+             RETURNING order_id`,
+            [req.user.userId, model, sourceLang || null, targetLang,
+             JSON.stringify(Array.isArray(glossary) ? glossary.slice(0, 50) : []),
+             pages, currency, amount, JSON.stringify([])]
+        );
+        const orderId = orderResult.rows[0].order_id;
+
+        // ステージング→注文ディレクトリへ移動（ページ順を保持）
+        const orderDir = path.join(MANGA_ORDERS_DIR, orderId);
+        fs.mkdirSync(orderDir, { recursive: true });
+        const pageFiles = [];
+        stagedPaths.forEach((src, i) => {
+            const ext = path.extname(src) || '.jpg';
+            const dst = path.join(orderDir, `page_${String(i + 1).padStart(3, '0')}${ext}`);
+            fs.renameSync(src, dst);
+            pageFiles.push(path.basename(dst));
+        });
+        await db.query(`UPDATE ai_tool_orders SET pages = $2 WHERE order_id = $1`, [orderId, JSON.stringify(pageFiles)]);
+        cleanupStaging();
+
+        const modelLabel = model.charAt(0).toUpperCase() + model.slice(1);
+        const unitAmount = ZERO_DECIMAL.includes(currency.toLowerCase()) ? Math.round(amount) : Math.round(amount * 100);
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: [{
+                price_data: {
+                    currency: currency.toLowerCase(),
+                    product_data: {
+                        name: `Manga Translation (${modelLabel})`,
+                        description: `${pages} pages ${sourceLang || '?'}->${targetLang} — AuctLect AI tools`
+                    },
+                    unit_amount: unitAmount
+                },
+                quantity: 1
+            }],
+            mode: 'payment',
+            success_url: `${process.env.FRONTEND_URL}/pages/manga-translator.html?order=${orderId}&paid=1`,
+            cancel_url: `${process.env.FRONTEND_URL}/pages/manga-translator.html?order=${orderId}&canceled=1`,
+            metadata: { type: 'ai_tool', order_id: orderId, user_id: req.user.userId }
+        });
+        await db.query(
+            `UPDATE ai_tool_orders SET stripe_session_id = $2, updated_at = CURRENT_TIMESTAMP WHERE order_id = $1`,
+            [orderId, session.id]
+        );
+
+        res.json({ success: true, orderId, url: session.url, amount, currency, pages });
+    } catch (error) {
+        console.error('Manga checkout error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
 
 /**
  * POST /api/ai-tools/checkout
@@ -162,6 +331,7 @@ router.get('/orders/:orderId', authenticate, async (req, res) => {
                 glossary: order.glossary || [],
                 text: order.text_content,
                 charCount: order.char_count,
+                pageCount: Array.isArray(order.pages) ? order.pages.length : 0,
                 currency: order.currency,
                 amount: parseFloat(order.amount),
                 status: order.status,
@@ -170,6 +340,30 @@ router.get('/orders/:orderId', authenticate, async (req, res) => {
         });
     } catch (error) {
         console.error('Get AI tool order error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/ai-tools/orders/:orderId/page/:pageNo
+ * マンガ注文のページ画像を返す（本人のみ。決済後のレビュー画面用）
+ */
+router.get('/orders/:orderId/page/:pageNo', authenticate, async (req, res) => {
+    try {
+        const order = await getOwnOrder(req, res);
+        if (!order) return;
+        if (order.tool !== 'manga' || !Array.isArray(order.pages)) {
+            return res.status(404).json({ error: 'Not a manga order' });
+        }
+        const idx = parseInt(req.params.pageNo, 10) - 1;
+        if (isNaN(idx) || idx < 0 || idx >= order.pages.length) {
+            return res.status(404).json({ error: 'Page not found' });
+        }
+        const p = path.join(MANGA_ORDERS_DIR, order.order_id, order.pages[idx]);
+        if (!fs.existsSync(p)) return res.status(404).json({ error: 'Page file missing' });
+        res.sendFile(p);
+    } catch (error) {
+        console.error('Serve manga page error:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -197,6 +391,51 @@ router.post('/orders/:orderId/confirm', authenticate, async (req, res) => {
         res.json({ success: true, status: 'pending' });
     } catch (error) {
         console.error('Confirm AI tool order error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * POST /api/ai-tools/orders/:orderId/repay
+ * 未払い注文のStripeセッションを作り直す（決済キャンセル後の再開。
+ * マンガはページ画像がサーバー保存済みなので再アップロード不要）
+ */
+router.post('/orders/:orderId/repay', authenticate, async (req, res) => {
+    try {
+        const order = await getOwnOrder(req, res);
+        if (!order) return;
+        if (order.status !== 'pending') {
+            return res.status(400).json({ error: `Order is already ${order.status}` });
+        }
+        const modelLabel = order.model.charAt(0).toUpperCase() + order.model.slice(1);
+        const unitAmount = ZERO_DECIMAL.includes(order.currency.toLowerCase())
+            ? Math.round(parseFloat(order.amount))
+            : Math.round(parseFloat(order.amount) * 100);
+        const desc = order.tool === 'manga'
+            ? `${Array.isArray(order.pages) ? order.pages.length : order.char_count} pages ${order.source_lang || '?'}->${order.target_lang} — AuctLect AI tools`
+            : `${Number(order.char_count).toLocaleString()} characters — AuctLect AI tools`;
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: [{
+                price_data: {
+                    currency: order.currency.toLowerCase(),
+                    product_data: { name: `${TOOL_NAMES[order.tool]} (${modelLabel})`, description: desc },
+                    unit_amount: unitAmount
+                },
+                quantity: 1
+            }],
+            mode: 'payment',
+            success_url: `${process.env.FRONTEND_URL}/pages/${TOOL_PAGES[order.tool]}?order=${order.order_id}&paid=1`,
+            cancel_url: `${process.env.FRONTEND_URL}/pages/${TOOL_PAGES[order.tool]}?order=${order.order_id}&canceled=1`,
+            metadata: { type: 'ai_tool', order_id: order.order_id, user_id: req.user.userId }
+        });
+        await db.query(
+            `UPDATE ai_tool_orders SET stripe_session_id = $2, updated_at = CURRENT_TIMESTAMP WHERE order_id = $1`,
+            [order.order_id, session.id]
+        );
+        res.json({ success: true, url: session.url });
+    } catch (error) {
+        console.error('Repay error:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -240,9 +479,16 @@ router.post('/orders/:orderId/run', authenticate, async (req, res) => {
                 ).catch((e) => console.error(`Partial save failed for ${order.order_id}:`, e.message));
             }
         };
-        const runPromise = order.tool === 'translator'
-            ? translateText({ ...params, sourceLang: order.source_lang, targetLang: order.target_lang })
-            : editText({ ...params, language: order.source_lang });
+        let runPromise;
+        if (order.tool === 'manga') {
+            const orderDir = path.join(MANGA_ORDERS_DIR, order.order_id);
+            const pagePaths = (Array.isArray(order.pages) ? order.pages : []).map(f => path.join(orderDir, f));
+            runPromise = translateManga({ ...params, pagePaths, sourceLang: order.source_lang, targetLang: order.target_lang });
+        } else if (order.tool === 'translator') {
+            runPromise = translateText({ ...params, sourceLang: order.source_lang, targetLang: order.target_lang });
+        } else {
+            runPromise = editText({ ...params, language: order.source_lang });
+        }
 
         runPromise.then(async (resultText) => {
             job.status = 'completed';

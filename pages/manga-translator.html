@@ -34,6 +34,7 @@
     <script src="../js/lang/ar.js"></script>
     <script src="../js/lang/pt.js"></script>
     <script src="../js/lang/it.js"></script>
+    <script src="../js/config.js"></script>
     <script src="../js/wizard-common.js"></script>
     <!-- 翻訳ベース（共通関数） -->
     
@@ -1225,15 +1226,18 @@
                     <p id="s9Desc">Your manga translation is ready. Download your files below.</p>
 
                     <div class="download-options">
-                        <button class="download-btn" onclick="downloadResult('png')">
-                            <i class="fas fa-images"></i>
-                            <span>PNG</span>
+                        <button class="download-btn" onclick="downloadResult('txt')">
+                            <i class="fas fa-file-alt"></i>
+                            <span id="s9DlLabel">翻訳スクリプト (.txt)</span>
                         </button>
-                        <button class="download-btn" onclick="downloadResult('pdf')">
-                            <i class="fas fa-file-pdf"></i>
-                            <span>PDF</span>
-                        </button>
+                        <a class="download-btn" href="manga-editor.html" style="text-decoration:none;">
+                            <i class="fas fa-pen-nib"></i>
+                            <span id="s9EditorLabel">マンガエディターを開く</span>
+                        </a>
                     </div>
+                    <p id="s9EditorHint" style="font-size:0.85rem; color:var(--color-text-secondary); max-width:520px; margin:0.75rem auto 0;">
+                        翻訳スクリプト（原文と訳文の対訳リスト）をダウンロードし、マンガエディターでページ画像に訳文を配置してください。文字の消去・配置はエディターで自由に調整できます。
+                    </p>
 
                     <div class="step-actions" style="margin-top:2rem;">
                         <button class="btn-wizard-secondary" onclick="goStep(8)"><i class="fas fa-arrow-left me-1"></i> <span id="s9BtnReview">Review again</span></button>
@@ -1335,26 +1339,6 @@
         if (minEl) minEl.textContent = minL[L] || minL['en'];
     }
 
-    const demoTranslations = {
-        'ja-en': {
-            original: '\u4ffa\u306f\u7d76\u5bfe\u306b\u8af8\u3081\u306a\u3044\uff01\u4ef2\u9593\u3092\u5b88\u308b\u305f\u3081\u306a\u3089\u3001\u3053\u306e\u547d\u3092\u61f8\u3051\u3066\u3067\u3082\u6226\u3046\uff01',
-            haiku: 'I will never give up! I will fight even at the cost of my life to protect my friends!',
-            sonnet: 'I absolutely refuse to give up! If it means protecting my companions, I\'ll stake my very life on this battle!',
-            opus: 'There is no surrender in me\u2014not now, not ever. If standing between my friends and oblivion means offering up this life of mine, then so be it. I will fight.'
-        },
-        'en-ja': {
-            original: 'You think you can defeat me? I\'ve trained for a thousand years in the demon realm!',
-            haiku: '\u4ffa\u3092\u5012\u305b\u308b\u3068\u601d\u3063\u3066\u3044\u308b\u306e\u304b\uff1f\u9b54\u754c\u3067\u5343\u5e74\u4fee\u884c\u3057\u305f\u3093\u3060\uff01',
-            sonnet: '\u3053\u306e\u4ffa\u3092\u5012\u305b\u308b\u3068\u601d\u3063\u3066\u3044\u308b\u306e\u304b\uff1f\u9b54\u754c\u3067\u5343\u5e74\u3082\u306e\u9593\u3001\u4fee\u884c\u3092\u7a4d\u3093\u3067\u304d\u305f\u306e\u3060\uff01',
-            opus: '\u3053\u306e\u4ffa\u3092\u2026\u5012\u305b\u308b\u3060\u3068\uff1f\u9b54\u754c\u3067\u5343\u5e74\u3001\u4fee\u7f85\u306e\u9053\u3092\u6b69\u307f\u7d9a\u3051\u305f\u3053\u306e\u4ffa\u3092\u2026\u3002\u601d\u3044\u4e0a\u304c\u308a\u3082\u7518\u3044\u306a\u3002'
-        },
-        'default': {
-            original: 'I will protect everyone! That is my ninja way!',
-            haiku: 'I will protect everyone! That is my ninja way!',
-            sonnet: 'Every last person\u2014I swear I will protect them all! That is the path I walk as a ninja!',
-            opus: 'Not a single soul will fall on my watch\u2014I have sworn it upon everything I am. This is my ninja way, and I will never waver.'
-        }
-    };
 
     function goStep(n) {
         if (n === 3 && currentStep === 2) {
@@ -1363,27 +1347,7 @@
         if (n === 4) setTimeout(runComparison, 100);
         if (n === 5) updateQuote();
         if (n === 6) updatePaymentAmount();
-        if (n === 8) {
-            const rp = document.getElementById('reviewPages');
-            // Remove old scroll hint
-            var oldHint8 = document.getElementById('scrollHintReview');
-            if (oldHint8) oldHint8.remove();
-            if (rp) { rp.innerHTML = ''; uploadedPages.forEach((f, i) => {
-                const div = document.createElement('div'); div.className = 'thumbnail-item';
-                div.onclick = function() { openImgModal(uploadedPages, i); };
-                const img = document.createElement('img'); img.src = pageUrl(f);
-                const label = document.createElement('div'); label.className = 'page-number'; label.textContent = 'P'+(i+1)+' ['+selectedModel+']';
-                div.appendChild(img); div.appendChild(label); rp.appendChild(div);
-            });
-            // Add scroll indicator
-            if (uploadedPages.length > 2) {
-                var hint8 = document.createElement('div');
-                hint8.className = 'scroll-indicator'; hint8.id = 'scrollHintReview';
-                hint8.innerHTML = '<i class="fas fa-arrows-alt-h"></i> ' + (getLang() === 'ja' ? '\u30b9\u30ef\u30a4\u30d7\u3067\u30b9\u30af\u30ed\u30fc\u30eb\u30fb\u30bf\u30c3\u30d7\u3067\u62e1\u5927' : 'Swipe to scroll \u00b7 Tap to enlarge');
-                rp.parentNode.insertBefore(hint8, rp.nextSibling);
-            }
-            }
-        }
+        if (n === 8) { renderReviewPages(); }
         for (let i = 1; i <= 9; i++) { const el = document.getElementById('step'+i); if (el) el.style.display = (i===n)?'':'none'; }
         currentStep = n; updateStepIndicators(); window.scrollTo({top:0,behavior:'smooth'});
     }
@@ -1437,16 +1401,124 @@
         ).join('');
     }
 
-    function runComparison() {
-        const key = document.getElementById('sourceLang').value+'-'+document.getElementById('targetLang').value;
-        const sample = demoTranslations[key] || demoTranslations['default'];
-        document.getElementById('compareSample').textContent = sample.original;
-        ['Haiku','Sonnet','Opus'].forEach(m => {
-            document.getElementById('compare'+m).innerHTML = '<div class="compare-loading"><i class="fas fa-spinner fa-spin"></i> '+(getLang()==='ja'?'\u7ffb\u8a33\u4e2d...':'Translating...')+'</div>';
+    // ===== ページ画像のステージング（1枚ずつ縮小してサーバーへ） =====
+    // 15MBのリクエスト上限とAI側の画像上限に収まるよう、クライアントで長辺1600pxのJPEGに縮小する
+    const stagedIds = new Map(); // File -> stagedId
+    let mangaResult = null;      // {pages:[{page, bubbles:[{type,location,original,translation}]}]}
+    let currentOrderId = null;
+
+    function resizePageImage(file, maxDim = 1600, quality = 0.85) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            const url = URL.createObjectURL(file);
+            img.onload = function() {
+                URL.revokeObjectURL(url);
+                let w = img.naturalWidth, h = img.naturalHeight;
+                if (Math.max(w, h) > maxDim) {
+                    const scale = maxDim / Math.max(w, h);
+                    w = Math.round(w * scale); h = Math.round(h * scale);
+                }
+                const canvas = document.createElement('canvas');
+                canvas.width = w; canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h); // PNG透過対策
+                ctx.drawImage(img, 0, 0, w, h);
+                canvas.toBlob(b => b ? resolve(b) : reject(new Error('resize failed')), 'image/jpeg', quality);
+            };
+            img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('image load failed')); };
+            img.src = url;
         });
-        setTimeout(()=>{document.getElementById('compareHaiku').innerHTML='<div style="white-space:pre-wrap">'+escH(sample.haiku)+'</div>';},800);
-        setTimeout(()=>{document.getElementById('compareSonnet').innerHTML='<div style="white-space:pre-wrap">'+escH(sample.sonnet)+'</div>';},1500);
-        setTimeout(()=>{document.getElementById('compareOpus').innerHTML='<div style="white-space:pre-wrap">'+escH(sample.opus)+'</div>';},2500);
+    }
+
+    async function stagePage(file) {
+        if (stagedIds.has(file)) return stagedIds.get(file);
+        const token = localStorage.getItem('token');
+        const blob = await resizePageImage(file);
+        const fd = new FormData();
+        fd.append('page', blob, 'page.jpg');
+        const resp = await fetch((window.API_ORIGIN || '') + '/api/ai-tools/manga/stage', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token },
+            body: fd
+        });
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
+        stagedIds.set(file, data.stagedId);
+        return data.stagedId;
+    }
+
+    // ===== Step 4: お試し比較（1ページ目を実際に3品質で抽出+翻訳） =====
+    let comparisonCache = { key: null, samples: null };
+
+    function renderBubbleListHtml(data) {
+        if (data && data.error) {
+            return '<div style="color:#dc3545; font-size:0.85rem;">' + escH(data.error) + '</div>';
+        }
+        const bubbles = Array.isArray(data) ? data : [];
+        if (!bubbles.length) {
+            return '<div style="color:var(--color-text-secondary); font-size:0.85rem;">' + (getLang() === 'ja' ? 'テキストが検出されませんでした' : 'No text detected') + '</div>';
+        }
+        return '<ol style="padding-left:1.2rem; margin:0; display:flex; flex-direction:column; gap:0.5rem;">' + bubbles.map(b =>
+            '<li style="font-size:0.85rem;"><span style="color:var(--color-text-secondary);">' + escH(b.original) + '</span><br><strong>' + escH(b.translation) + '</strong></li>'
+        ).join('') + '</ol>';
+    }
+
+    async function runComparison() {
+        const L = getLang();
+        if (!uploadedPages.length) return;
+        const srcLang = document.getElementById('sourceLang').value;
+        const tgtLang = document.getElementById('targetLang').value;
+
+        const sampleEl = document.getElementById('compareSample');
+        if (sampleEl) sampleEl.textContent = (L === 'ja' ? '1ページ目でお試し翻訳します（P1）' : 'Comparing quality using page 1');
+
+        const cacheKey = srcLang + '-' + tgtLang + '::' + uploadedPages[0].name + ':' + uploadedPages[0].size;
+        if (comparisonCache.key === cacheKey && comparisonCache.samples) {
+            ['haiku', 'sonnet', 'opus'].forEach(m => {
+                document.getElementById('compare' + m.charAt(0).toUpperCase() + m.slice(1)).innerHTML = renderBubbleListHtml(comparisonCache.samples[m]);
+            });
+            return;
+        }
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert(L === 'ja' ? 'マンガ翻訳の利用にはログインが必要です' : 'Please log in to use manga translation');
+            window.location.href = 'login.html';
+            return;
+        }
+
+        const loadingMsg = L === 'ja' ? '3つのAIモデルが1ページ目を読み取り中です。20〜40秒ほどお待ちください...' : 'Three AI models are reading page 1 — this takes 20-40 seconds...';
+        ['Haiku', 'Sonnet', 'Opus'].forEach(m => {
+            document.getElementById('compare' + m).innerHTML = '<div class="compare-loading"><i class="fas fa-spinner fa-spin"></i> ' + loadingMsg + '</div>';
+        });
+
+        try {
+            const stagedId = await stagePage(uploadedPages[0]);
+            const resp = await fetch((window.API_ORIGIN || '') + '/api/ai-tools/manga/sample', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ stagedId, sourceLang: srcLang, targetLang: tgtLang })
+            });
+            if (resp.status === 401) {
+                alert(L === 'ja' ? 'ログインの有効期限が切れています。もう一度ログインしてください。' : 'Your session has expired. Please log in again.');
+                window.location.href = 'login.html';
+                return;
+            }
+            const data = await resp.json();
+            if (data && data.code === 'SAMPLE_LIMIT') {
+                throw new Error(L === 'ja' ? '本日のお試し翻訳の上限に達しました。明日以降にお試しください。' : 'Daily comparison limit reached. Please try again tomorrow.');
+            }
+            if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
+            comparisonCache = { key: cacheKey, samples: data.samples };
+            ['haiku', 'sonnet', 'opus'].forEach(m => {
+                document.getElementById('compare' + m.charAt(0).toUpperCase() + m.slice(1)).innerHTML = renderBubbleListHtml(data.samples[m]);
+            });
+        } catch (err) {
+            const msg = (L === 'ja' ? 'サンプル翻訳に失敗しました: ' : 'Sample translation failed: ') + err.message;
+            ['Haiku', 'Sonnet', 'Opus'].forEach(m => {
+                document.getElementById('compare' + m).innerHTML = '<div style="color:#dc3545; white-space:pre-wrap;">' + escH(msg) + '</div>';
+            });
+        }
     }
     function selectModel(model) {
         selectedModel = model;
@@ -1488,30 +1560,278 @@
         const secT = { stripe:{en:'Payments processed securely by Stripe',ja:'Stripe\u306b\u3088\u308b\u5b89\u5168\u306a\u6c7a\u6e08',zh:'\u7531Stripe\u5b89\u5168\u8655\u7406\u4ed8\u6b3e',es:'Pagos procesados de forma segura por Stripe',fr:'Paiements s\u00e9curis\u00e9s par Stripe',de:'Sichere Zahlung \u00fcber Stripe',ko:'Stripe\ub97c \ud1b5\ud55c \uc548\uc804\ud55c \uacb0\uc81c',ar:'\u0645\u062f\u0641\u0648\u0639\u0627\u062a \u0622\u0645\u0646\u0629 \u0639\u0628\u0631 Stripe',pt:'Pagamentos processados com seguran\u00e7a pelo Stripe',it:'Pagamenti elaborati in modo sicuro da Stripe'}, paypal:{en:'Payments processed securely by PayPal',ja:'PayPal\u306b\u3088\u308b\u5b89\u5168\u306a\u6c7a\u6e08',zh:'\u7531PayPal\u5b89\u5168\u8655\u7406\u4ed8\u6b3e',es:'Pagos procesados de forma segura por PayPal',fr:'Paiements s\u00e9curis\u00e9s par PayPal',de:'Sichere Zahlung \u00fcber PayPal',ko:'PayPal\uc744 \ud1b5\ud55c \uc548\uc804\ud55c \uacb0\uc81c',ar:'\u0645\u062f\u0641\u0648\u0639\u0627\u062a \u0622\u0645\u0646\u0629 \u0639\u0628\u0631 PayPal',pt:'Pagamentos processados com seguran\u00e7a pelo PayPal',it:'Pagamenti elaborati in modo sicuro da PayPal'} };
         document.getElementById('s6Secure').textContent = (secT[selectedPayMethod])[L]||(secT[selectedPayMethod])['en'];
     }
-    function processPayment(method) {
-        const cost = calculateCost(); const ps = formatPrice(cost); const L = getLang();
-        const cm = { en:ps+' will be charged. Proceed?', ja:ps+' \u304c\u8ab2\u91d1\u3055\u308c\u307e\u3059\u3002\u7d9a\u884c\u3057\u307e\u3059\u304b\uff1f', zh:'\u5c07\u6536\u53d6 '+ps+'\u3002\u7e7c\u7e8c\u55ce\uff1f', es:'Se cobrar\u00e1 '+ps+'. \u00bfContinuar?', fr:ps+' sera factur\u00e9. Continuer ?', de:ps+' wird berechnet. Fortfahren?', ko:ps+' \uc774 \uccad\uad6c\ub429\ub2c8\ub2e4. \uacc4\uc18d\ud558\uc2dc\uaca0\uc2b5\ub2c8\uae4c?', ar:'\u0633\u064a\u062a\u0645 \u062e\u0635\u0645 '+ps+'. \u0647\u0644 \u062a\u0631\u064a\u062f \u0627\u0644\u0645\u062a\u0627\u0628\u0639\u0629\u061f', pt:ps+' ser\u00e1 cobrado. Continuar?', it:ps+' verr\u00e0 addebitato. Continuare?' };
-        if (!confirm(cm[L]||cm['en'])) return; goStep(7); simulateTranslation();
+    // ===== Step 6: 支払い → 全ページをステージングしてStripe Checkoutへ =====
+    async function processPayment(method) {
+        const L = getLang();
+        if (selectedPayMethod === 'paypal') {
+            alert(L === 'ja'
+                ? 'AIツールのPayPal決済は準備中です。お支払い方法で「Stripe」（クレジットカード）を選択してください。'
+                : 'PayPal for AI tools is coming soon. Please select Stripe (credit card) as the payment method.');
+            return;
+        }
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert(L === 'ja' ? 'マンガ翻訳の利用にはログインが必要です' : 'Please log in to use manga translation');
+            window.location.href = 'login.html';
+            return;
+        }
+        const statusEl = document.getElementById('s6Secure');
+        try {
+            // ページを順次アップロード（縮小済み・1枚ずつなのでサイズ制限に収まる）
+            const ids = [];
+            for (let i = 0; i < uploadedPages.length; i++) {
+                if (statusEl) statusEl.textContent = (L === 'ja'
+                    ? `ページをアップロード中... ${i + 1}/${uploadedPages.length}`
+                    : `Uploading pages... ${i + 1}/${uploadedPages.length}`);
+                ids.push(await stagePage(uploadedPages[i]));
+            }
+            if (statusEl) statusEl.textContent = (L === 'ja' ? '決済ページを準備しています...' : 'Preparing checkout...');
+
+            const resp = await fetch((window.API_ORIGIN || '') + '/api/ai-tools/manga/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({
+                    stagedIds: ids,
+                    model: selectedModel,
+                    sourceLang: document.getElementById('sourceLang').value,
+                    targetLang: document.getElementById('targetLang').value,
+                    glossary: glossary,
+                    currency: selectedCurrency
+                })
+            });
+            if (resp.status === 401) {
+                alert(L === 'ja' ? 'ログインの有効期限が切れています。もう一度ログインしてください。' : 'Your session has expired. Please log in again.');
+                window.location.href = 'login.html';
+                return;
+            }
+            const data = await resp.json();
+            if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
+            window.location.href = data.url; // Stripeがホストする決済ページへ
+        } catch (err) {
+            alert((L === 'ja' ? '決済ページの作成に失敗しました: ' : 'Failed to start checkout: ') + err.message);
+            if (statusEl) statusEl.textContent = '';
+        }
     }
-    function simulateTranslation() {
-        const speeds = {haiku:3,sonnet:2,opus:1}; const totalTicks = Math.max(20, uploadedPages.length*10/speeds[selectedModel]);
-        let tick = 0;
-        const iv = setInterval(()=>{
-            tick++; const pct = Math.min(100, Math.round(tick/totalTicks*100));
-            document.getElementById('progressFill').style.width = pct+'%';
-            document.getElementById('progressPercent').textContent = pct+'%';
-            const rem = Math.ceil((totalTicks-tick)*50/1000);
-            document.getElementById('progressEta').textContent = getLang()==='ja'?'\u6b8b\u308a\u7d04'+rem+'\u79d2':'~'+rem+'s remaining';
-            if(pct>=100){clearInterval(iv);setTimeout(()=>goStep(8),500);}
-        }, 50);
+
+    // ===== Step 7: 支払い済み注文の翻訳実行（ページ単位ジョブ + 進捗ポーリング） =====
+    async function runPaidOrder(orderId) {
+        const L = getLang();
+        const token = localStorage.getItem('token');
+        currentOrderId = orderId;
+
+        const fill = document.getElementById('progressFill');
+        const pctEl = document.getElementById('progressPercent');
+        const etaEl = document.getElementById('progressEta');
+        fill.style.width = '2%';
+        pctEl.textContent = '0%';
+        etaEl.textContent = L === 'ja' ? 'AIがページを読み取り、翻訳しています...' : 'The AI is reading and translating your pages...';
+
+        try {
+            const runResp = await fetch((window.API_ORIGIN || '') + '/api/ai-tools/orders/' + encodeURIComponent(orderId) + '/run', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const runData = await runResp.json();
+            if (runResp.status === 402) {
+                throw new Error(L === 'ja' ? 'お支払いが確認できませんでした。決済完了後にこのページを再読み込みしてください。' : 'Payment could not be confirmed. Please reload this page after completing the payment.');
+            }
+            if (!runResp.ok) throw new Error(runData.error || ('HTTP ' + runResp.status));
+
+            const startedAt = Date.now();
+            while (true) {
+                await new Promise(r => setTimeout(r, 2000));
+                const jobResp = await fetch((window.API_ORIGIN || '') + '/api/ai-tools/orders/' + encodeURIComponent(orderId) + '/job', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const job = await jobResp.json();
+                if (!jobResp.ok) throw new Error(job.error || ('HTTP ' + jobResp.status));
+                if (job.status === 'failed') throw new Error(job.error || (L === 'ja' ? '翻訳処理が失敗しました' : 'Translation failed'));
+                if (job.status === 'idle') {
+                    await fetch((window.API_ORIGIN || '') + '/api/ai-tools/orders/' + encodeURIComponent(orderId) + '/run', {
+                        method: 'POST', headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    continue;
+                }
+
+                const pct = job.status === 'completed' ? 100 : Math.max(2, job.progress || 0);
+                fill.style.width = pct + '%';
+                pctEl.textContent = pct + '%';
+                if (job.status !== 'completed' && pct >= 5) {
+                    const elapsedSec = (Date.now() - startedAt) / 1000;
+                    const remainSec = Math.max(1, Math.round(elapsedSec * (100 - pct) / pct));
+                    etaEl.textContent = L === 'ja' ? '残り約' + remainSec + '秒' : '~' + remainSec + 's remaining';
+                }
+
+                if (job.status === 'completed') {
+                    try { mangaResult = JSON.parse(job.result || '{}'); } catch (e) { mangaResult = { pages: [] }; }
+                    setTimeout(() => goStep(8), 400);
+                    return;
+                }
+            }
+        } catch (err) {
+            const retryMsg = (L === 'ja' ? 'マンガ翻訳に失敗しました: ' : 'Manga translation failed: ') + err.message +
+                (L === 'ja' ? '\n\nお支払いと翻訳済みのページは保持されています。再試行すると続きから再開します。再試行しますか？' : '\n\nYour payment and translated pages are preserved. Retrying resumes from where it stopped. Retry now?');
+            if (confirm(retryMsg)) return runPaidOrder(orderId);
+        }
+    }
+
+    // ===== Step 8: レビュー描画（サーバー画像 + 吹き出し対訳テーブル） =====
+    async function fetchOrderPageUrl(orderId, pageNo) {
+        const token = localStorage.getItem('token');
+        const resp = await fetch((window.API_ORIGIN || '') + '/api/ai-tools/orders/' + encodeURIComponent(orderId) + '/page/' + pageNo, {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!resp.ok) return null;
+        return URL.createObjectURL(await resp.blob());
+    }
+
+    function updateBubbleTranslation(pageIdx, bubbleIdx, value) {
+        try { mangaResult.pages[pageIdx].bubbles[bubbleIdx].translation = value; } catch (e) {}
+    }
+
+    async function renderReviewPages() {
+        const L = getLang();
+        const rp = document.getElementById('reviewPages');
+        if (!rp) return;
+        if (!mangaResult || !Array.isArray(mangaResult.pages)) {
+            rp.innerHTML = '<p class="review-placeholder">' + (L === 'ja' ? '結果がありません' : 'No result') + '</p>';
+            return;
+        }
+        const typeIcons = { speech: '💬', thought: '💭', narration: '📖', sfx: '💥', sign: '🪧' };
+        rp.innerHTML = mangaResult.pages.map((pg, pi) => {
+            const rows = (pg.bubbles || []).map((b, bi) =>
+                '<tr>' +
+                '<td style="white-space:nowrap; color:var(--color-text-secondary);">' + (typeIcons[b.type] || '💬') + ' ' + (bi + 1) + '</td>' +
+                '<td style="color:var(--color-text-secondary); font-size:0.82rem;">' + escH(b.location || '') + '</td>' +
+                '<td style="font-size:0.85rem;">' + escH(b.original) + '</td>' +
+                '<td><input type="text" value="' + escH(b.translation).replace(/"/g, '&quot;') + '" oninput="updateBubbleTranslation(' + pi + ',' + bi + ', this.value)" style="width:100%; border:1px solid var(--color-border); border-radius:6px; padding:4px 8px; font-size:0.85rem;"></td>' +
+                '</tr>'
+            ).join('');
+            return '<div style="border:1px solid var(--color-border); border-radius:10px; margin-bottom:1rem; overflow:hidden;">' +
+                '<div style="padding:0.5rem 1rem; background:var(--color-bg); font-weight:600; font-size:0.9rem;">P' + pg.page + ' — ' + (pg.bubbles || []).length + (L === 'ja' ? '件のテキスト' : ' text items') + '</div>' +
+                '<div style="display:flex; gap:1rem; padding:1rem; flex-wrap:wrap;">' +
+                '<img id="reviewPageImg' + pi + '" alt="P' + pg.page + '" style="width:220px; max-width:100%; border:1px solid var(--color-border); border-radius:6px; align-self:flex-start;">' +
+                '<div style="flex:1; min-width:280px; overflow-x:auto;"><table style="width:100%; border-collapse:collapse;"><thead><tr style="font-size:0.78rem; color:var(--color-text-secondary); text-align:left;"><th>#</th><th>' + (L === 'ja' ? '位置' : 'Location') + '</th><th>' + (L === 'ja' ? '原文' : 'Original') + '</th><th>' + (L === 'ja' ? '訳文（編集可）' : 'Translation (editable)') + '</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+                '</div></div>';
+        }).join('');
+
+        // 画像は認証付きで順次取得
+        if (currentOrderId) {
+            for (let pi = 0; pi < mangaResult.pages.length; pi++) {
+                const img = document.getElementById('reviewPageImg' + pi);
+                if (!img) continue;
+                fetchOrderPageUrl(currentOrderId, mangaResult.pages[pi].page).then(url => { if (url) img.src = url; });
+            }
+        }
+    }
+
+    // ===== 決済からの戻り処理（?order=...&paid=1 / canceled=1） =====
+    document.addEventListener('DOMContentLoaded', async function () {
+        const params = new URLSearchParams(window.location.search);
+        const orderId = params.get('order');
+        if (!orderId) return;
+        const L = getLang();
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert(L === 'ja' ? 'ログインしてから再度このページを開いてください。' : 'Please log in and reopen this page.');
+            window.location.href = 'login.html';
+            return;
+        }
+        try {
+            const resp = await fetch((window.API_ORIGIN || '') + '/api/ai-tools/orders/' + encodeURIComponent(orderId), {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await resp.json();
+            if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
+            const order = data.order;
+            currentOrderId = orderId;
+
+            // 設定を復元（ページ画像はサーバー保存分が正）
+            selectedModel = order.model || 'sonnet';
+            if (order.currency && CURRENCIES[order.currency]) {
+                selectedCurrency = order.currency;
+                const curSel = document.getElementById('currencySelect');
+                if (curSel) curSel.value = selectedCurrency;
+            }
+            glossary = Array.isArray(order.glossary) ? order.glossary : [];
+            renderGlossary();
+            if (order.sourceLang) { const el = document.getElementById('sourceLang'); if (el) el.value = order.sourceLang; }
+            if (order.targetLang) { const el = document.getElementById('targetLang'); if (el) el.value = order.targetLang; }
+
+            if (params.get('canceled')) {
+                if (confirm(L === 'ja'
+                    ? 'お支払いはキャンセルされました。ページ（' + order.pageCount + '枚）はサーバーに保存されています。\nお支払いをやり直しますか？'
+                    : 'Payment was canceled. Your ' + order.pageCount + ' pages are saved on the server.\nRetry the payment now?')) {
+                    const rp = await fetch((window.API_ORIGIN || '') + '/api/ai-tools/orders/' + encodeURIComponent(orderId) + '/repay', {
+                        method: 'POST', headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const rd = await rp.json();
+                    if (rp.ok && rd.url) { window.location.href = rd.url; return; }
+                    alert((L === 'ja' ? '再決済の準備に失敗しました: ' : 'Failed to prepare payment: ') + (rd.error || rp.status));
+                }
+                return;
+            }
+
+            if (order.status === 'completed' && order.result) {
+                try { mangaResult = JSON.parse(order.result); } catch (e) { mangaResult = { pages: [] }; }
+                goStep(8);
+                return;
+            }
+
+            if (order.status === 'pending') {
+                const cResp = await fetch((window.API_ORIGIN || '') + '/api/ai-tools/orders/' + encodeURIComponent(orderId) + '/confirm', {
+                    method: 'POST', headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const cData = await cResp.json();
+                if (!cResp.ok || cData.status !== 'paid') {
+                    alert(L === 'ja'
+                        ? 'お支払いの確認がまだできていません。決済が完了している場合は、少し待ってからこのページを再読み込みしてください。'
+                        : 'Payment is not confirmed yet. If you completed the payment, please reload this page in a moment.');
+                    return;
+                }
+            }
+
+            goStep(7);
+            runPaidOrder(orderId);
+        } catch (err) {
+            alert((L === 'ja' ? '注文情報の取得に失敗しました: ' : 'Failed to load the order: ') + err.message);
+        }
+    });
+
+    // ===== Step 9: 翻訳スクリプトのダウンロード =====
+    function buildScriptText() {
+        const L = getLang();
+        if (!mangaResult || !Array.isArray(mangaResult.pages)) return '';
+        const lines = [];
+        lines.push('AuctLect Manga Translation Script');
+        lines.push('Model: ' + selectedModel + ' / ' + new Date().toISOString().slice(0, 10));
+        lines.push('');
+        for (const pg of mangaResult.pages) {
+            lines.push('===== ' + (L === 'ja' ? 'ページ ' : 'Page ') + pg.page + ' =====');
+            (pg.bubbles || []).forEach((b, i) => {
+                lines.push('[' + (i + 1) + '] (' + (b.type || 'speech') + (b.location ? ' / ' + b.location : '') + ')');
+                lines.push((L === 'ja' ? '原文: ' : 'Original: ') + b.original);
+                lines.push((L === 'ja' ? '訳文: ' : 'Translation: ') + b.translation);
+                lines.push('');
+            });
+        }
+        return lines.join('\n');
     }
     function downloadResult(format) {
-        const blob = new Blob(['[Demo] Translated manga - '+uploadedPages.length+' pages ('+format.toUpperCase()+')'],{type:'text/plain'});
-        const url = URL.createObjectURL(blob); const a = document.createElement('a');
-        a.href=url; a.download='manga_translation_'+selectedModel+'.'+format; a.click(); URL.revokeObjectURL(url);
+        const text = buildScriptText();
+        if (!text) return;
+        const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'manga_translation_' + selectedModel + '.txt'; a.click();
+        URL.revokeObjectURL(url);
     }
     function startNewTranslation() {
         clearPages(); glossary=[]; renderGlossary(); selectedModel='sonnet';
+        stagedIds.clear(); mangaResult = null; currentOrderId = null;
+        comparisonCache = { key: null, samples: null };
+        // 注文パラメータが残っていると戻り処理が再発火するためURLを掃除
+        if (window.location.search) history.replaceState(null, '', window.location.pathname);
         document.querySelectorAll('.compare-card').forEach(c=>c.classList.remove('selected')); goStep(1);
     }
     function escH(text) { const d=document.createElement('div'); d.textContent=text; return d.innerHTML; }
