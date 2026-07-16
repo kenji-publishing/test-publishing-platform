@@ -10,6 +10,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../config/database');
 const { sendEmail, templates } = require('../config/email');
+const { loginLimiter, registerLimiter, emailRequestLimiter } = require('../middleware/rateLimits');
 
 // Configuration
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:8000';
@@ -57,7 +58,7 @@ async function verifyHash(value, hash) {
  * POST /api/auth-magic/register
  * Register a new user with magic link authentication
  */
-router.post('/register', async (req, res) => {
+router.post('/register', registerLimiter, async (req, res) => {
   try {
     const { 
       email, 
@@ -165,7 +166,7 @@ router.post('/register', async (req, res) => {
  * POST /api/auth-magic/login
  * Request a magic link for login
  */
-router.post('/login', async (req, res) => {
+router.post('/login', emailRequestLimiter, async (req, res) => {
   try {
     const { email } = req.body;
 
@@ -229,7 +230,7 @@ router.post('/login', async (req, res) => {
  * POST /api/auth-magic/verify
  * Verify a magic link token and log in
  */
-router.post('/verify', async (req, res) => {
+router.post('/verify', loginLimiter, async (req, res) => {
   try {
     const { token, email } = req.body;
 

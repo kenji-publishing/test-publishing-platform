@@ -8,22 +8,67 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const { body, validationResult } = require('express-validator');
 const db = require('../config/database');
 const { authenticate } = require('../middleware/auth');
+const { sendEmail } = require('../config/email');
+const { loginLimiter, registerLimiter, emailRequestLimiter } = require('../middleware/rateLimits');
+
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:8000';
+const VERIFY_LINK_EXPIRY = 24 * 60 * 60 * 1000; // 確認リンクは24時間有効
+
+/**
+ * メール確認リンクを発行して送信する（登録時・再送時に共用）。
+ * トークンの検証は POST /api/auth-magic/verify（bcrypt比較・使い捨て）が担う。
+ */
+async function sendVerificationEmail(userId, email, firstName) {
+  const token = crypto.randomBytes(32).toString('hex');
+  const tokenHash = await bcrypt.hash(token, 10);
+  const expiresAt = new Date(Date.now() + VERIFY_LINK_EXPIRY);
+
+  // 古い未使用リンクは無効化してから発行（/verifyは最新の未使用リンクを見るため）
+  await db.query(
+    `UPDATE magic_links SET is_used = TRUE WHERE user_id = $1 AND is_used = FALSE`,
+    [userId]
+  );
+  await db.query(
+    `INSERT INTO magic_links (user_id, token_hash, expires_at, link_type)
+     VALUES ($1, $2, $3, 'verify_email')`,
+    [userId, tokenHash, expiresAt]
+  );
+
+  const verifyLink = `${FRONTEND_URL}/pages/verify-email.html?token=${token}&email=${encodeURIComponent(email)}`;
+  return sendEmail(
+    email,
+    'AuctLect メールアドレスの確認 / Verify your email',
+    `${firstName} 様\n\nAuctLectへのご登録ありがとうございます。\n以下のリンクをクリックしてメールアドレスを確認してください（24時間有効）:\n${verifyLink}\n\n心当たりがない場合はこのメールを無視してください。\n\n---\nThank you for registering with AuctLect.\nClick the link below to verify your email (valid for 24 hours):\n${verifyLink}`,
+    `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2>📚 AuctLect メールアドレスの確認</h2>
+      <p>${firstName} 様</p>
+      <p>AuctLectへのご登録ありがとうございます。<br>下のボタンをクリックしてメールアドレスを確認してください（24時間有効）。</p>
+      <p style="text-align:center; margin: 28px 0;">
+        <a href="${verifyLink}" style="background: #8B7355; color: white; padding: 12px 28px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">メールアドレスを確認する / Verify Email</a>
+      </p>
+      <p style="color:#666; font-size: 13px;">ボタンが押せない場合はこちらのURLを開いてください:<br><a href="${verifyLink}">${verifyLink}</a></p>
+      <p style="color:#666; font-size: 13px;">心当たりがない場合はこのメールを無視してください。 / If you didn't create this account, please ignore this email.</p>
+    </div>`
+  );
+}
 
 /**
  * POST /api/auth/register
- * Register a new user
+ * Register a new user（メール確認リンクを送信。確認まではログイン不可）
  */
 router.post('/register',
+  registerLimiter,
   // Validation
   body('email').isEmail().normalizeEmail(),
   body('password').isLength({ min: 6 }),
   body('firstName').trim().notEmpty(),
   body('lastName').trim().notEmpty(),
   body('role').isIn(['author', 'translator', 'editor', 'reader']),
-  
+
   async (req, res) => {
     try {
       // Check validation errors
@@ -71,19 +116,19 @@ router.post('/register',
         console.log('user_roles insert skipped:', e.message);
       }
       
-      // Generate JWT token
-      const token = jwt.sign(
-        { 
-          userId: user.user_id,
-          email: user.email,
-          role: user.role
-        },
-        process.env.JWT_SECRET,
-        { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
-      );
-      
+      // メール確認リンクを送信（確認が済むまでログイン不可）
+      // 送信失敗でもアカウントは作成済み — ログイン画面の「確認メールを再送」から再送できる
+      let emailResult = { success: false };
+      try {
+        emailResult = await sendVerificationEmail(user.user_id, user.email, user.first_name);
+      } catch (e) {
+        console.error('Verification email failed:', e.message);
+      }
+
       res.status(201).json({
-        message: 'User registered successfully',
+        message: 'Registration accepted. Please verify your email.',
+        emailSent: !!emailResult.success,
+        verificationRequired: true,
         user: {
           id: user.user_id,
           email: user.email,
@@ -91,10 +136,9 @@ router.post('/register',
           lastName: user.last_name,
           penName: user.pen_name,
           role: user.role
-        },
-        token
+        }
       });
-      
+
     } catch (error) {
       console.error('Registration error:', error);
       res.status(500).json({
@@ -110,22 +154,23 @@ router.post('/register',
  * User login
  */
 router.post('/login',
+  loginLimiter,
   body('email').isEmail().normalizeEmail(),
   body('password').notEmpty(),
-  
+
   async (req, res) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
       }
-      
+
       const { email, password } = req.body;
-      
+
       // Find user - get role from both users.role and user_roles table
       const result = await db.query(
-        `SELECT u.user_id, u.email, u.password_hash, u.first_name, u.last_name, 
-                u.pen_name, u.account_status, u.role, ur.role_type
+        `SELECT u.user_id, u.email, u.password_hash, u.first_name, u.last_name,
+                u.pen_name, u.account_status, u.role, u.email_verified, ur.role_type
          FROM users u
          LEFT JOIN user_roles ur ON u.user_id = ur.user_id AND ur.is_active = true
          WHERE u.email = $1`,
@@ -158,7 +203,16 @@ router.post('/login',
           message: 'Email or password is incorrect'
         });
       }
-      
+
+      // メール未確認のアカウントはログイン不可（パスワード確認の後に判定し、情報漏えいを防ぐ）
+      if (!user.email_verified) {
+        return res.status(403).json({
+          error: 'Email not verified',
+          code: 'EMAIL_NOT_VERIFIED',
+          message: 'Please verify your email address. Check your inbox for the verification link.'
+        });
+      }
+
       // Update last login
       await db.query(
         'UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE user_id = $1',
@@ -198,6 +252,41 @@ router.post('/login',
         error: 'Login failed',
         message: error.message
       });
+    }
+  }
+);
+
+/**
+ * POST /api/auth/resend-verification
+ * 確認メールの再送。登録の有無を漏らさないため、常に同じ応答を返す
+ */
+router.post('/resend-verification',
+  emailRequestLimiter,
+  body('email').isEmail().normalizeEmail(),
+  async (req, res) => {
+    const genericResponse = {
+      success: true,
+      message: 'If this email is registered and unverified, a verification link has been sent.'
+    };
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+      const { email } = req.body;
+      const result = await db.query(
+        `SELECT user_id, email, first_name, email_verified FROM users
+         WHERE email = $1 AND account_status = 'active'`,
+        [email]
+      );
+      const user = result.rows[0];
+      if (user && !user.email_verified) {
+        await sendVerificationEmail(user.user_id, user.email, user.first_name);
+      }
+      res.json(genericResponse);
+    } catch (error) {
+      console.error('Resend verification error:', error);
+      res.json(genericResponse); // 内部エラーも外には漏らさない
     }
   }
 );

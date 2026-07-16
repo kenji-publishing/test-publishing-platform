@@ -614,13 +614,30 @@
                     // Store token
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('user', JSON.stringify(data.user));
-                    
+
                     // Redirect to dashboard
                     alert('Login successful! Redirecting...');
                     window.location.href = 'dashboard.html';
+                } else if (data.code === 'EMAIL_NOT_VERIFIED') {
+                    // メール未確認: 再送を提案
+                    if (confirm('メールアドレスの確認がまだ完了していません。\n登録時に送られた確認メールのリンクをクリックしてください。\n\n確認メールを再送しますか？\n\nYour email is not verified yet. Resend the verification email?')) {
+                        try {
+                            const r = await fetch((window.API_ORIGIN || '') + '/api/auth/resend-verification', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ email })
+                            });
+                            const rd = await r.json();
+                            alert(r.status === 429 ? (rd.error || 'Too many requests') : '確認メールを再送しました。受信トレイ（迷惑メールフォルダも）をご確認ください。\nA new verification email has been sent.');
+                        } catch (e2) {
+                            alert('再送に失敗しました: ' + e2.message);
+                        }
+                    }
+                } else if (data.code === 'RATE_LIMITED') {
+                    alert(data.error);
                 } else {
                     alert(data.error || 'Login failed. Please try again.');
-                               }
+                }
             } catch (error) {
                 console.error('Login error:', error);
                 alert('Connection error. Please try again later.');

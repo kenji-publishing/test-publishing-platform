@@ -783,9 +783,14 @@
                 });
                 
                 const data = await response.json();
-                
+
                 if (response.ok) {
-                    alert('Registration successful! Please sign in.');
+                    if (data.emailSent === false) {
+                        // アカウントは作成済みだが確認メールの送信に失敗（ログイン画面から再送可能）
+                        alert('アカウントを作成しましたが、確認メールの送信に失敗しました。ログイン画面の「確認メールを再送」からお試しください。\n\nYour account was created but the verification email failed to send. Use "Resend verification email" on the login page.');
+                    } else {
+                        alert('確認メールを ' + formData.email + ' に送信しました。\nメール内のリンクをクリックすると登録が完了し、ログインできるようになります。\n（迷惑メールフォルダもご確認ください）\n\nA verification email has been sent. Click the link in the email to activate your account.');
+                    }
                     window.location.href = 'login.html';
                 } else {
                     alert(data.error || 'Registration failed. Please try again.');
