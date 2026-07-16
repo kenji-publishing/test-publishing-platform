@@ -798,7 +798,6 @@
                 select.addEventListener('change', function(e) {
                     console.log('Language selector changed to:', this.value);
                     const lang = this.value;
-}
                     // 動的コンテンツを再描画
                     setTimeout(function() {
                         if (isDemo) {
@@ -1361,6 +1360,24 @@
                     tagline: 'Conectando leitores e autores em todo o mundo',
                     fontFamily: "'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif",
                     direction: 'ltr'
+                },
+                it: {
+                    title: 'Ricevuta',
+                    receiptNo: 'Numero Ricevuta',
+                    date: 'Data di Emissione',
+                    customer: 'Cliente',
+                    product: 'Prodotto',
+                    payment: 'Metodo di Pagamento',
+                    total: 'Importo Totale',
+                    thanks: 'Grazie per il tuo acquisto',
+                    print: 'Stampa / Salva come PDF',
+                    type: 'Libro Digitale',
+                    creditCard: 'Carta di Credito',
+                    paypal: 'PayPal',
+                    demoUser: 'Mario Rossi',
+                    tagline: 'Colleghiamo lettori e autori in tutto il mondo',
+                    fontFamily: "'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif",
+                    direction: 'ltr'
                 }
             };
             
@@ -1368,24 +1385,11 @@
             const paymentText = purchase.paymentMethodKey === 'creditCard' ? t.creditCard : t.paypal;
             
             // 日付フォーマット（言語別）
-            const localeMap = {
-                ja: 'ja-JP', en: 'en-US', zh: 'zh-CN', es: 'es-ES',
-                fr: 'fr-FR', de: 'de-DE', ko: 'ko-KR', ar: 'ar-SA', pt: 'pt-BR'
-            };
+            const localeMap = { en: 'en-US', ja: 'ja-JP', zh: 'zh-CN', es: 'es-ES', fr: 'fr-FR', de: 'de-DE', ko: 'ko-KR', ar: 'ar-SA', pt: 'pt-BR', it: 'it-IT' };
             const dateStr = new Date(purchase.purchased_at).toLocaleDateString(localeMap[lang] || 'ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
             
             // Google Fonts URL（言語別フォント）
-            const fontUrls = {
-                ja: 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap',
-                en: 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap',
-                zh: 'https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap',
-                es: 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap',
-                fr: 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap',
-                de: 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap',
-                ko: 'https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap',
-                ar: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap',
-                pt: 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap'
-            };
+            const fontUrls = { en: 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap', ja: 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap', zh: 'https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap', es: 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap', fr: 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap', de: 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap', ko: 'https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap', ar: 'https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap', pt: 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap', it: 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap' };
             
             // RTL対応のスタイル
             const rtlStyles = t.direction === 'rtl' ? `
@@ -1401,7 +1405,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${t.title} - AuctLect</title>
-    <script src="../js/config.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="${fontUrls[lang] || fontUrls['ja']}" rel="stylesheet">
