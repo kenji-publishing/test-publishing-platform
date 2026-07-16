@@ -1344,7 +1344,7 @@
         if (n === 3 && currentStep === 2) {
             if (uploadedPages.length === 0) { alert(getLang() === 'ja' ? '\u30da\u30fc\u30b8\u3092\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9\u3057\u3066\u304f\u3060\u3055\u3044' : 'Please upload manga pages first'); return; }
         }
-        if (n === 4) setTimeout(runComparison, 100);
+        if (n === 4) { setTimeout(runComparison, 100); updateCompareTotals(); }
         if (n === 5) updateQuote();
         if (n === 6) updatePaymentAmount();
         if (n === 8) { renderReviewPages(); }
@@ -1538,6 +1538,28 @@
         const pages = uploadedPages.length; const rawJpy = pages * PRICING_JPY[selectedModel].perPage;
         return Math.max(toSelectedCurrency(rawJpy), getMinimum());
     }
+
+    // 比較カードに「この原稿での総額」を表示（単価だけでは選びにくいため）
+    function updateCompareTotals() {
+        const L = getLang();
+        const pages = uploadedPages.length;
+        if (!pages) return;
+        ['haiku', 'sonnet', 'opus'].forEach(m => {
+            const body = document.getElementById('compare' + m.charAt(0).toUpperCase() + m.slice(1));
+            const card = body && body.closest('.compare-card');
+            if (!card) return;
+            let el = card.querySelector('.compare-total');
+            if (!el) {
+                el = document.createElement('div');
+                el.className = 'compare-total';
+                el.style.cssText = 'padding:0.35rem 0.75rem; font-size:0.85rem; font-weight:700; color:var(--color-accent); background:rgba(139,115,85,0.06); border-bottom:1px solid var(--color-border);';
+                const header = card.querySelector('.compare-header');
+                (header || card.firstElementChild).insertAdjacentElement('afterend', el);
+            }
+            const total = Math.max(toSelectedCurrency(pages * PRICING_JPY[m].perPage), getMinimum());
+            el.textContent = (L === 'ja' ? '総額 ' : 'Total ') + formatPrice(total) + (L === 'ja' ? '（' + pages + 'ページ）' : ' (' + pages + ' pages)');
+        });
+    }
     function updateQuote() {
         const L = getLang(); const pages = uploadedPages.length;
         const rateConverted = toSelectedCurrency(PRICING_JPY[selectedModel].perPage);
@@ -1554,6 +1576,21 @@
             const notes = { en:'* Minimum charge '+formatPrice(minCharge)+' applied ('+mLabel+')', ja:'* \u6700\u4f4e\u6599\u91d1 '+formatPrice(minCharge)+' \u304c\u9069\u7528 ('+mLabel+')', zh:'* \u5df2\u5957\u7528\u6700\u4f4e\u6536\u8cbb '+formatPrice(minCharge)+' ('+mLabel+')', es:'* Cargo m\u00ednimo de '+formatPrice(minCharge)+' aplicado ('+mLabel+')', fr:'* Minimum de '+formatPrice(minCharge)+' appliqu\u00e9 ('+mLabel+')', de:'* Mindestgeb\u00fchr von '+formatPrice(minCharge)+' angewendet ('+mLabel+')', ko:'* \ucd5c\uc18c \uc694\uae08 '+formatPrice(minCharge)+' \uc801\uc6a9 ('+mLabel+')', ar:'* \u062a\u0645 \u062a\u0637\u0628\u064a\u0642 \u0627\u0644\u062d\u062f \u0627\u0644\u0623\u062f\u0646\u0649 '+formatPrice(minCharge)+' ('+mLabel+')', pt:'* Valor m\u00ednimo de '+formatPrice(minCharge)+' aplicado ('+mLabel+')', it:'* Importo minimo di '+formatPrice(minCharge)+' applicato ('+mLabel+')' };
             minNoteEl.textContent = notes[L]||notes['en']; minNoteEl.style.display = '';
         } else { minNoteEl.style.display = 'none'; }
+
+        // 所要時間の目安を事前に伝える（AI混雑時に長引くこともここで案内）
+        let timeEl = document.getElementById('s5TimeNote');
+        if (!timeEl) {
+            timeEl = document.createElement('div');
+            timeEl.id = 's5TimeNote';
+            timeEl.style.cssText = 'margin-top:0.6rem; font-size:0.82rem; color:var(--color-text-secondary); line-height:1.6;';
+            minNoteEl.insertAdjacentElement('afterend', timeEl);
+        }
+        const secPerPage = { haiku: 20, sonnet: 40, opus: 90 }[selectedModel];
+        const minMins = Math.max(1, Math.ceil(pages * secPerPage / 60));
+        const maxMins = Math.max(minMins + 1, Math.ceil(pages * secPerPage * 2 / 60));
+        timeEl.textContent = L === 'ja'
+            ? '⏱ 所要時間の目安: 約' + minMins + '〜' + maxMins + '分（AIの混雑状況でさらにかかる場合があります）。お支払い後は画面を閉じても翻訳は続き、注文リンクからいつでも受け取れます。'
+            : '⏱ Estimated time: about ' + minMins + '-' + maxMins + ' min (may take longer when the AI is busy). After payment you can close the page — processing continues and the result stays available via your order link.';
     }
 
     function updatePaymentAmount() {
@@ -1704,25 +1741,31 @@
         const L = getLang();
         const rp = document.getElementById('reviewPages');
         if (!rp) return;
+        // 旧デモの「横並びサムネイル」CSSを上書き（訳文が横スクロールの先に隠れる問題の対策）
+        rp.style.display = 'block';
+        rp.style.overflowX = 'visible';
         if (!mangaResult || !Array.isArray(mangaResult.pages)) {
             rp.innerHTML = '<p class="review-placeholder">' + (L === 'ja' ? '結果がありません' : 'No result') + '</p>';
             return;
         }
         const typeIcons = { speech: '💬', thought: '💭', narration: '📖', sfx: '💥', sign: '🪧' };
         rp.innerHTML = mangaResult.pages.map((pg, pi) => {
+            // 吹き出しごとに「原文 → 訳文入力欄」を縦に並べる（どの画面幅でも訳文が必ず見える）
             const rows = (pg.bubbles || []).map((b, bi) =>
-                '<tr>' +
-                '<td style="white-space:nowrap; color:var(--color-text-secondary);">' + (typeIcons[b.type] || '💬') + ' ' + (bi + 1) + '</td>' +
-                '<td style="color:var(--color-text-secondary); font-size:0.82rem;">' + escH(b.location || '') + '</td>' +
-                '<td style="font-size:0.85rem;">' + escH(b.original) + '</td>' +
-                '<td><input type="text" value="' + escH(b.translation).replace(/"/g, '&quot;') + '" oninput="updateBubbleTranslation(' + pi + ',' + bi + ', this.value)" style="width:100%; border:1px solid var(--color-border); border-radius:6px; padding:4px 8px; font-size:0.85rem;"></td>' +
-                '</tr>'
+                '<div style="border:1px solid var(--color-border); border-radius:8px; padding:0.6rem 0.75rem; margin-bottom:0.5rem;">' +
+                '<div style="font-size:0.75rem; color:var(--color-text-secondary); margin-bottom:2px;">' + (typeIcons[b.type] || '💬') + ' ' + (bi + 1) + (b.location ? ' — ' + escH(b.location) : '') + '</div>' +
+                '<div style="font-size:0.9rem; margin-bottom:4px;">' + escH(b.original) + '</div>' +
+                '<input type="text" value="' + escH(b.translation).replace(/"/g, '&quot;') + '" oninput="updateBubbleTranslation(' + pi + ',' + bi + ', this.value)" ' +
+                'style="width:100%; border:1px solid var(--color-accent-light, #c9b8a3); background:rgba(139,115,85,0.05); border-radius:6px; padding:6px 10px; font-size:0.92rem; font-weight:600;">' +
+                '</div>'
             ).join('');
-            return '<div style="border:1px solid var(--color-border); border-radius:10px; margin-bottom:1rem; overflow:hidden;">' +
+            return '<div style="border:1px solid var(--color-border); border-radius:10px; margin-bottom:1.25rem; overflow:hidden; width:100%;">' +
                 '<div style="padding:0.5rem 1rem; background:var(--color-bg); font-weight:600; font-size:0.9rem;">P' + pg.page + ' — ' + (pg.bubbles || []).length + (L === 'ja' ? '件のテキスト' : ' text items') + '</div>' +
-                '<div style="display:flex; gap:1rem; padding:1rem; flex-wrap:wrap;">' +
-                '<img id="reviewPageImg' + pi + '" alt="P' + pg.page + '" style="width:220px; max-width:100%; border:1px solid var(--color-border); border-radius:6px; align-self:flex-start;">' +
-                '<div style="flex:1; min-width:280px; overflow-x:auto;"><table style="width:100%; border-collapse:collapse;"><thead><tr style="font-size:0.78rem; color:var(--color-text-secondary); text-align:left;"><th>#</th><th>' + (L === 'ja' ? '位置' : 'Location') + '</th><th>' + (L === 'ja' ? '原文' : 'Original') + '</th><th>' + (L === 'ja' ? '訳文（編集可）' : 'Translation (editable)') + '</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+                '<div style="display:flex; gap:1rem; padding:1rem; flex-wrap:wrap; align-items:flex-start;">' +
+                '<img id="reviewPageImg' + pi + '" alt="P' + pg.page + '" style="width:260px; max-width:100%; border:1px solid var(--color-border); border-radius:6px; flex-shrink:0;">' +
+                '<div style="flex:1; min-width:260px;">' +
+                '<div style="font-size:0.78rem; color:var(--color-text-secondary); margin-bottom:0.5rem;">' + (L === 'ja' ? '原文の下の入力欄が訳文です（そのまま編集できます）' : 'The input under each original line is the translation (editable)') + '</div>' +
+                rows + '</div>' +
                 '</div></div>';
         }).join('');
 

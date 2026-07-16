@@ -1207,7 +1207,7 @@
             }
             sourceTextContent = text;
         }
-        if (n === 4) setTimeout(runComparison, 100);
+        if (n === 4) { setTimeout(runComparison, 100); updateCompareTotals(); }
         if (n === 5) updateQuote();
         if (n === 6) updatePaymentAmount();
         if (n === 8) {
@@ -1456,6 +1456,28 @@
         return Math.max(rawConverted, minCharge);
     }
 
+    // 比較カードに「この原稿での総額」を表示（単価だけでは選びにくいため）
+    function updateCompareTotals() {
+        const L = getLang();
+        const chars = sourceTextContent.length;
+        if (!chars) return;
+        ['haiku', 'sonnet', 'opus'].forEach(m => {
+            const body = document.getElementById('compare' + m.charAt(0).toUpperCase() + m.slice(1) + 'Text');
+            const card = body && body.closest('.compare-card');
+            if (!card) return;
+            let el = card.querySelector('.compare-total');
+            if (!el) {
+                el = document.createElement('div');
+                el.className = 'compare-total';
+                el.style.cssText = 'padding:0.35rem 0.75rem; font-size:0.85rem; font-weight:700; color:var(--color-accent); background:rgba(139,115,85,0.06); border-bottom:1px solid var(--color-border);';
+                const header = card.querySelector('.compare-header');
+                (header || card.firstElementChild).insertAdjacentElement('afterend', el);
+            }
+            const total = Math.max(toSelectedCurrency(Math.ceil(chars / 1000 * PRICING_JPY[m].per1k)), getMinimum());
+            el.textContent = (L === 'ja' ? '総額 ' : 'Total ') + formatPrice(total) + (L === 'ja' ? '（' + chars.toLocaleString() + '字）' : ' (' + chars.toLocaleString() + ' chars)');
+        });
+    }
+
     function updateQuote() {
         const L = getLang();
         const chars = sourceTextContent.length;
@@ -1492,6 +1514,22 @@
         } else {
             minNoteEl.style.display = 'none';
         }
+
+        // 所要時間の目安を事前に伝える（AI混雑時に長引くこともここで案内）
+        let timeEl = document.getElementById('s5TimeNote');
+        if (!timeEl) {
+            timeEl = document.createElement('div');
+            timeEl.id = 's5TimeNote';
+            timeEl.style.cssText = 'margin-top:0.6rem; font-size:0.82rem; color:var(--color-text-secondary); line-height:1.6;';
+            minNoteEl.insertAdjacentElement('afterend', timeEl);
+        }
+        const chunksN = Math.max(1, Math.ceil(chars / 6000));
+        const secPerChunk = { haiku: 20, sonnet: 35, opus: 80 }[selectedModel];
+        const minMins = Math.max(1, Math.ceil(chunksN * secPerChunk / 60));
+        const maxMins = Math.max(minMins + 1, Math.ceil(chunksN * secPerChunk * 2 / 60));
+        timeEl.textContent = L === 'ja'
+            ? '⏱ 所要時間の目安: 約' + minMins + '〜' + maxMins + '分（AIの混雑状況でさらにかかる場合があります）。お支払い後は画面を閉じても翻訳は続き、注文リンクからいつでも受け取れます。'
+            : '⏱ Estimated time: about ' + minMins + '-' + maxMins + ' min (may take longer when the AI is busy). After payment you can close the page — processing continues and the result stays available via your order link.';
     }
 
     // ===== Step 6: Payment =====
