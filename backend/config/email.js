@@ -9,16 +9,18 @@ const nodemailer = require('nodemailer');
 let transporter;
 
 if (process.env.NODE_ENV === 'production' && process.env.EMAIL_HOST) {
-  // Production: Use real email service
+  // Production: Use real email service (AWS SES etc. via SMTP)
+  const smtpPort = parseInt(process.env.EMAIL_PORT || '587', 10);
   transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT || 587,
-    secure: false,
+    port: smtpPort,
+    secure: smtpPort === 465, // 465=TLS直結, 587=STARTTLS
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASSWORD
     }
   });
+  console.log(`📧 Email via SMTP: ${process.env.EMAIL_HOST}:${smtpPort}`);
 } else {
   // Development: Use test mode (logs to console)
   transporter = {
@@ -43,7 +45,7 @@ if (process.env.NODE_ENV === 'production' && process.env.EMAIL_HOST) {
 async function sendEmail(to, subject, text, html) {
   try {
     const mailOptions = {
-      from: process.env.EMAIL_FROM || '"AuctLect Platform" <noreply@publisher.com>',
+      from: process.env.EMAIL_FROM || '"AuctLect" <noreply@auctlect.com>',
       to: to,
       subject: subject,
       text: text,
@@ -60,9 +62,9 @@ async function sendEmail(to, subject, text, html) {
 }
 
 /**
- * Base URL for links
+ * Base URL for links（メール内のリンク先。本番はFRONTEND_URL=https://auctlect.com を利用）
  */
-const BASE_URL = process.env.BASE_URL || 'http://localhost:8000';
+const BASE_URL = process.env.BASE_URL || process.env.FRONTEND_URL || 'http://localhost:8000';
 
 /**
  * Common email header HTML
