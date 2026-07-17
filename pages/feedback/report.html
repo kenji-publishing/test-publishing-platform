@@ -487,8 +487,8 @@ function updateAllText() {
         }
 
         async function submitReport() {
-            const userId = localStorage.getItem('userId');
-            if (!userId) { alert(getL(uiText.alertLogin)); window.location.href = '../login.html'; return; }
+            const token = localStorage.getItem('token');
+            if (!token) { alert(getL(uiText.alertLogin)); window.location.href = '../login.html'; return; }
             const workId = document.getElementById('work-id').value;
             const translatedText = document.getElementById('translated-text').value.trim();
             if (!workId) { alert(getL(uiText.alertSelectWork)); return; }
@@ -502,7 +502,7 @@ function updateAllText() {
             try {
                 const response = await fetch(`${API_BASE}/feedback`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-User-ID': userId },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
                     body: JSON.stringify({
                         workId,
                         translatedText,

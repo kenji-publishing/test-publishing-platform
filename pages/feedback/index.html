@@ -511,7 +511,6 @@ function getCatName(cat) { return CATEGORY_NAMES[cat] ? getL(CATEGORY_NAMES[cat]
         }
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                syncSelectors();
                 updateAllText();
                 await loadUserWorks();
             } catch (e) {
@@ -555,11 +554,11 @@ function getCatName(cat) { return CATEGORY_NAMES[cat] ? getL(CATEGORY_NAMES[cat]
         ];
 
         async function loadUserWorks() {
-            const userId = localStorage.getItem('userId');
+            const token = localStorage.getItem('token');
             try {
                 const controller = new AbortController();
                 const timeout = setTimeout(() => controller.abort(), 2000);
-                const response = await fetch(`${API_BASE}/works?author_id=${userId || 'demo'}`, { signal: controller.signal });
+                const response = await fetch(`${API_BASE}/works/my`, { headers: token ? { 'Authorization': 'Bearer ' + token } : {}, signal: controller.signal });
                 clearTimeout(timeout);
                 const data = await response.json();
                 const select = document.getElementById('work-select');
@@ -609,8 +608,8 @@ function getCatName(cat) { return CATEGORY_NAMES[cat] ? getL(CATEGORY_NAMES[cat]
             const sort = document.getElementById('filter-sort').value;
             const params = new URLSearchParams({ status, category, sort, page, limit: 10 });
             try {
-                const userId = localStorage.getItem('userId');
-                const response = await fetch(`${API_BASE}/feedback/work/${currentWorkId}?${params}`, { headers: userId ? { 'X-User-ID': userId } : {} });
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE}/feedback/work/${currentWorkId}?${params}`, { headers: token ? { 'Authorization': 'Bearer ' + token } : {} });
                 const data = await response.json();
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('stats-grid').style.display = 'grid';
@@ -721,11 +720,11 @@ function getCatName(cat) { return CATEGORY_NAMES[cat] ? getL(CATEGORY_NAMES[cat]
                 if (df) { df.agree_count = count; df.hasUserAgreed = !isAgreed; }
                 return;
             }
-            const userId = localStorage.getItem('userId');
-            if (!userId) { alert(getL(uiText.alertLogin)); return; }
+            const token = localStorage.getItem('token');
+            if (!token) { alert(getL(uiText.alertLogin)); return; }
             const isAgreed = btn.classList.contains('agreed');
             try {
-                const response = await fetch(`${API_BASE}/feedback/${feedbackId}/agree`, { method: isAgreed ? 'DELETE' : 'POST', headers: { 'X-User-ID': userId } });
+                const response = await fetch(`${API_BASE}/feedback/${feedbackId}/agree`, { method: isAgreed ? 'DELETE' : 'POST', headers: { 'Authorization': 'Bearer ' + token } });
                 const data = await response.json();
                 if (response.ok) { btn.classList.toggle('agreed'); btn.querySelector('.count').textContent = data.agreeCount; }
                 else { alert(data.error || getL(uiText.alertError)); }
@@ -750,8 +749,8 @@ function getCatName(cat) { return CATEGORY_NAMES[cat] ? getL(CATEGORY_NAMES[cat]
             }
 
             try {
-                const userId = localStorage.getItem('userId');
-                const response = await fetch(`${API_BASE}/feedback/${feedbackId}`, { headers: userId ? { 'X-User-ID': userId } : {} });
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE}/feedback/${feedbackId}`, { headers: token ? { 'Authorization': 'Bearer ' + token } : {} });
                 const data = await response.json();
                 const f = data.feedback;
                 const workTitle = f.work_title || '';
@@ -794,13 +793,13 @@ function getCatName(cat) { return CATEGORY_NAMES[cat] ? getL(CATEGORY_NAMES[cat]
                 loadFeedback(currentPage);
                 return;
             }
-            const userId = localStorage.getItem('userId');
-            if (!userId || !currentFeedbackId) return;
+            const token = localStorage.getItem('token');
+            if (!token || !currentFeedbackId) return;
             const note = status === 'rejected' ? prompt(getL(uiText.promptReject)) : null;
             try {
                 const response = await fetch(`${API_BASE}/feedback/${currentFeedbackId}/resolve`, {
                     method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json', 'X-User-ID': userId },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
                     body: JSON.stringify({ status, resolutionNote: note })
                 });
                 if (response.ok) { bootstrap.Modal.getInstance(document.getElementById('feedbackModal')).hide(); loadFeedback(currentPage); }
