@@ -217,8 +217,23 @@
                             </div>
                         </div>
 
+                        <!-- Manga Pages (content type = manga のとき表示) -->
+                        <div class="form-card" id="mangaPagesCard" style="display:none;">
+                            <h5><i class="fas fa-book-open me-2"></i><span id="mangaPagesTitle">マンガページ</span> *</h5>
+                            <p class="text-secondary small" id="mangaPagesHint">
+                                ページ画像（JPG/PNG/WebP、1枚14MBまで）を選択してください。ファイル名が「1-01.jpg」（章-ページ）形式なら章を自動判定します。
+                                並び順は「◀▶」で調整、「章」ボタンでそのページから新しい章を開始できます。
+                            </p>
+                            <input type="file" id="mangaPagesInput" class="d-none" multiple accept=".jpg,.jpeg,.png,.webp">
+                            <button type="button" class="btn btn-custom mb-2" onclick="document.getElementById('mangaPagesInput').click()">
+                                <i class="fas fa-images me-2"></i><span id="mangaAddPagesBtn">ページを追加</span>
+                            </button>
+                            <span id="mangaPagesCount" class="ms-2 text-secondary small"></span>
+                            <div id="mangaPagesGrid" style="display:flex; flex-wrap:wrap; gap:0.6rem; margin-top:0.75rem;"></div>
+                        </div>
+
                         <!-- File Upload -->
-                        <div class="form-card">
+                        <div class="form-card" id="textUploadCard">
                             <h5 id="sectionUpload" data-i18n="upload.sectionUpload">Upload Files</h5>
 
                             <div class="upload-area" id="uploadArea">
@@ -800,6 +815,17 @@
             document.querySelectorAll('.content-type-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             document.getElementById('contentType').value = type;
+            applyContentTypeUI(type);
+        }
+
+        // マンガ選択時はページ画像カード、それ以外は原稿ファイルカードを表示
+        function applyContentTypeUI(type) {
+            var manga = (type === 'manga');
+            var mangaCard = document.getElementById('mangaPagesCard');
+            var textCard = document.getElementById('textUploadCard');
+            if (mangaCard) mangaCard.style.display = manga ? '' : 'none';
+            if (textCard) textCard.style.display = manga ? 'none' : '';
+            if (manga) initMangaPagesUI();
         }
 
         // Drag and drop functionality
@@ -835,6 +861,198 @@
                         previewArea.appendChild(img);
                     };
                     reader.readAsDataURL(file);
+                }
+            }
+        }
+
+        // ========== マンガページ管理 ==========
+        var mangaPages = [];          // [{ file, chapterTitle|null, thumbUrl }]
+        var mangaUiInited = false;
+        var mangaExistingCount = 0;   // 編集モード: サーバー上の既存ページ数
+        var mangaLastChapterNum = null; // ファイル名「章-ページ」推定用
+
+        var mangaText = {
+            title: { en: 'Manga Pages', ja: 'マンガページ', zh: '漫画页面', es: 'Páginas del manga', fr: 'Pages du manga', de: 'Manga-Seiten', ko: '만화 페이지', ar: 'صفحات المانجا', pt: 'Páginas do mangá', it: 'Pagine del manga' },
+            hint: { en: 'Select page images (JPG/PNG/WebP, up to 14MB each). File names like "1-01.jpg" (chapter-page) are used to auto-detect chapters. Use ◀▶ to reorder and the chapter button to start a new chapter at a page.', ja: 'ページ画像（JPG/PNG/WebP、1枚14MBまで）を選択してください。ファイル名が「1-01.jpg」（章-ページ）形式なら章を自動判定します。並び順は「◀▶」で調整、「章」ボタンでそのページから新しい章を開始できます。', zh: '请选择页面图片（JPG/PNG/WebP，每张最大14MB）。文件名为「1-01.jpg」（章-页）格式时会自动识别章节。用「◀▶」调整顺序，用章节按钮从某页开始新章节。', es: 'Selecciona las imágenes de página (JPG/PNG/WebP, máx. 14MB cada una). Nombres como "1-01.jpg" (capítulo-página) detectan capítulos automáticamente. Usa ◀▶ para reordenar y el botón de capítulo para iniciar un capítulo en una página.', fr: 'Sélectionnez les images de page (JPG/PNG/WebP, 14 Mo max chacune). Les noms comme « 1-01.jpg » (chapitre-page) détectent les chapitres automatiquement. Utilisez ◀▶ pour réordonner et le bouton chapitre pour commencer un chapitre à une page.', de: 'Seitenbilder auswählen (JPG/PNG/WebP, je max. 14MB). Dateinamen wie „1-01.jpg" (Kapitel-Seite) erkennen Kapitel automatisch. Mit ◀▶ umsortieren, mit der Kapitel-Schaltfläche ein neues Kapitel bei einer Seite beginnen.', ko: '페이지 이미지를 선택하세요(JPG/PNG/WebP, 장당 최대 14MB). "1-01.jpg"(장-페이지) 형식의 파일명이면 장을 자동 인식합니다. ◀▶로 순서를 조정하고 장 버튼으로 해당 페이지부터 새 장을 시작할 수 있습니다.', ar: 'اختر صور الصفحات (JPG/PNG/WebP، بحد أقصى 14 ميغابايت لكل صورة). أسماء الملفات مثل «1-01.jpg» (فصل-صفحة) تُكتشف الفصول تلقائيًا. استخدم ◀▶ لإعادة الترتيب وزر الفصل لبدء فصل جديد من صفحة.', pt: 'Selecione as imagens de página (JPG/PNG/WebP, até 14MB cada). Nomes como "1-01.jpg" (capítulo-página) detectam capítulos automaticamente. Use ◀▶ para reordenar e o botão de capítulo para iniciar um capítulo em uma página.', it: 'Seleziona le immagini delle pagine (JPG/PNG/WebP, max 14MB ciascuna). Nomi come "1-01.jpg" (capitolo-pagina) rilevano i capitoli automaticamente. Usa ◀▶ per riordinare e il pulsante capitolo per iniziare un capitolo da una pagina.' },
+            addBtn: { en: 'Add Pages', ja: 'ページを追加', zh: '添加页面', es: 'Añadir páginas', fr: 'Ajouter des pages', de: 'Seiten hinzufügen', ko: '페이지 추가', ar: 'إضافة صفحات', pt: 'Adicionar páginas', it: 'Aggiungi pagine' },
+            pagesWord: { en: 'pages', ja: 'ページ', zh: '页', es: 'páginas', fr: 'pages', de: 'Seiten', ko: '페이지', ar: 'صفحات', pt: 'páginas', it: 'pagine' },
+            chapterPrompt: { en: 'Chapter title starting at this page (leave empty to remove the chapter mark):', ja: 'このページから始まる章のタイトル（空にすると章マークを外します）:', zh: '从此页开始的章节标题（留空则移除章节标记）:', es: 'Título del capítulo que empieza en esta página (vacío = quitar la marca):', fr: 'Titre du chapitre commençant à cette page (vide = retirer la marque) :', de: 'Kapiteltitel ab dieser Seite (leer = Kapitelmarke entfernen):', ko: '이 페이지에서 시작하는 장 제목(비우면 장 표시 제거):', ar: 'عنوان الفصل الذي يبدأ من هذه الصفحة (اتركه فارغًا لإزالة علامة الفصل):', pt: 'Título do capítulo que começa nesta página (vazio = remover a marca):', it: 'Titolo del capitolo che inizia da questa pagina (vuoto = rimuovere il segno):' },
+            needPages: { en: 'Please add at least one page image.', ja: 'ページ画像を1枚以上追加してください。', zh: '请至少添加一张页面图片。', es: 'Añade al menos una imagen de página.', fr: 'Ajoutez au moins une image de page.', de: 'Bitte mindestens ein Seitenbild hinzufügen.', ko: '페이지 이미지를 1장 이상 추가해 주세요.', ar: 'يرجى إضافة صورة صفحة واحدة على الأقل.', pt: 'Adicione pelo menos uma imagem de página.', it: 'Aggiungi almeno un\'immagine di pagina.' },
+            uploading: { en: 'Uploading pages… ', ja: 'ページをアップロード中… ', zh: '正在上传页面… ', es: 'Subiendo páginas… ', fr: 'Envoi des pages… ', de: 'Seiten werden hochgeladen… ', ko: '페이지 업로드 중… ', ar: 'جارٍ رفع الصفحات… ', pt: 'Enviando páginas… ', it: 'Caricamento pagine… ' },
+            uploadFailed: { en: 'Failed to upload page ', ja: 'ページのアップロードに失敗しました: ページ ', zh: '页面上传失败：第 ', es: 'Error al subir la página ', fr: 'Échec de l\'envoi de la page ', de: 'Fehler beim Hochladen von Seite ', ko: '페이지 업로드 실패: ', ar: 'فشل رفع الصفحة ', pt: 'Falha ao enviar a página ', it: 'Caricamento non riuscito della pagina ' },
+            savedAsDraft: { en: '. The work is saved as a draft — open it from My Works (Edit) and upload the pages again.', ja: '。作品は下書きとして保存されています。マイ作品の「編集」からページを再アップロードしてください。', zh: '。作品已保存为草稿——请从「我的作品」的编辑中重新上传页面。', es: '. La obra quedó guardada como borrador: ábrela desde Mis obras (Editar) y vuelve a subir las páginas.', fr: '. L\'œuvre est enregistrée en brouillon — ouvrez-la depuis Mes œuvres (Modifier) et renvoyez les pages.', de: '. Das Werk ist als Entwurf gespeichert — über „Meine Werke" (Bearbeiten) die Seiten erneut hochladen.', ko: '. 작품은 초안으로 저장되었습니다. 내 작품의 편집에서 페이지를 다시 업로드해 주세요.', ar: '. تم حفظ العمل كمسودة — افتحه من «أعمالي» (تعديل) وارفع الصفحات مجددًا.', pt: '. A obra foi salva como rascunho — abra em Minhas obras (Editar) e envie as páginas novamente.', it: '. L\'opera è salvata come bozza: aprila da Le mie opere (Modifica) e ricarica le pagine.' },
+            oversize: { en: 'These files exceed 14MB and were skipped: ', ja: '次のファイルは14MBを超えるため追加できませんでした: ', zh: '以下文件超过14MB，已跳过：', es: 'Estos archivos superan 14MB y se omitieron: ', fr: 'Ces fichiers dépassent 14 Mo et ont été ignorés : ', de: 'Diese Dateien überschreiten 14MB und wurden übersprungen: ', ko: '다음 파일은 14MB를 초과하여 건너뛰었습니다: ', ar: 'هذه الملفات تتجاوز 14 ميغابايت وتم تخطيها: ', pt: 'Estes arquivos excedem 14MB e foram ignorados: ', it: 'Questi file superano 14MB e sono stati saltati: ' },
+            editNote: { en: 'This work currently has {n} page(s) on the server. If you add pages here, they will REPLACE all existing pages. Leave empty to keep the current pages.', ja: 'この作品にはサーバー上に現在 {n} ページあります。ここでページを追加すると、既存の全ページと差し替えになります。ページを維持する場合は空のままにしてください。', zh: '该作品目前在服务器上有 {n} 页。在此添加页面将替换所有现有页面。若要保留现有页面，请留空。', es: 'Esta obra tiene actualmente {n} página(s) en el servidor. Si añades páginas aquí, REEMPLAZARÁN todas las existentes. Déjalo vacío para conservarlas.', fr: 'Cette œuvre compte actuellement {n} page(s) sur le serveur. Les pages ajoutées ici REMPLACERONT toutes les pages existantes. Laissez vide pour les conserver.', de: 'Dieses Werk hat derzeit {n} Seite(n) auf dem Server. Hier hinzugefügte Seiten ERSETZEN alle vorhandenen. Leer lassen, um sie zu behalten.', ko: '이 작품은 현재 서버에 {n}페이지가 있습니다. 여기서 페이지를 추가하면 기존 전체 페이지가 교체됩니다. 유지하려면 비워 두세요.', ar: 'يحتوي هذا العمل حاليًا على {n} صفحة على الخادم. إضافة صفحات هنا ستستبدل جميع الصفحات الحالية. اتركه فارغًا للإبقاء عليها.', pt: 'Esta obra tem atualmente {n} página(s) no servidor. Páginas adicionadas aqui SUBSTITUIRÃO todas as existentes. Deixe vazio para mantê-las.', it: 'Quest\'opera ha attualmente {n} pagina/e sul server. Le pagine aggiunte qui SOSTITUIRANNO tutte quelle esistenti. Lascia vuoto per mantenerle.' },
+            previewManga: { en: 'Manga: {n} page(s), {c} chapter mark(s). Page images are uploaded after you confirm.', ja: 'マンガ: {n}ページ（章マーク {c}箇所）。確認後にページ画像をアップロードします。', zh: '漫画：{n} 页（章节标记 {c} 处）。确认后将上传页面图片。', es: 'Manga: {n} página(s), {c} marca(s) de capítulo. Las imágenes se suben tras confirmar.', fr: 'Manga : {n} page(s), {c} marque(s) de chapitre. Les images seront envoyées après confirmation.', de: 'Manga: {n} Seite(n), {c} Kapitelmarke(n). Die Bilder werden nach der Bestätigung hochgeladen.', ko: '만화: {n}페이지(장 표시 {c}곳). 확인 후 페이지 이미지를 업로드합니다.', ar: 'مانجا: {n} صفحة، {c} علامة فصل. تُرفع صور الصفحات بعد التأكيد.', pt: 'Mangá: {n} página(s), {c} marca(s) de capítulo. As imagens serão enviadas após a confirmação.', it: 'Manga: {n} pagina/e, {c} segni di capitolo. Le immagini verranno caricate dopo la conferma.' },
+            previewKeep: { en: 'Manga: keeping the current {n} page(s) on the server.', ja: 'マンガ: サーバー上の現在の{n}ページを維持します。', zh: '漫画：保留服务器上现有的 {n} 页。', es: 'Manga: se conservan las {n} página(s) actuales del servidor.', fr: 'Manga : conservation des {n} page(s) actuelles sur le serveur.', de: 'Manga: die aktuellen {n} Seite(n) auf dem Server bleiben erhalten.', ko: '만화: 서버의 현재 {n}페이지를 유지합니다.', ar: 'مانجا: سيتم الإبقاء على {n} صفحة الحالية على الخادم.', pt: 'Mangá: mantendo as {n} página(s) atuais no servidor.', it: 'Manga: mantenute le attuali {n} pagina/e sul server.' },
+            chapterWord: { en: 'Chapter', ja: '章', zh: '章', es: 'Capítulo', fr: 'Chapitre', de: 'Kapitel', ko: '장', ar: 'فصل', pt: 'Capítulo', it: 'Capitolo' }
+        };
+
+        function mangaChapterLabel(num) {
+            var lang = (typeof getCurrentLanguage === 'function') ? getCurrentLanguage() : 'en';
+            if (lang === 'ja') return '第' + num + '章';
+            if (lang === 'zh') return '第' + num + '章';
+            if (lang === 'ko') return '제' + num + '장';
+            return getL(mangaText.chapterWord) + ' ' + num;
+        }
+
+        function initMangaPagesUI() {
+            // 表示のたびにラベルを現在の言語で更新
+            document.getElementById('mangaPagesTitle').textContent = getL(mangaText.title);
+            document.getElementById('mangaPagesHint').textContent = getL(mangaText.hint);
+            document.getElementById('mangaAddPagesBtn').textContent = getL(mangaText.addBtn);
+            if (mangaUiInited) return;
+            mangaUiInited = true;
+            document.getElementById('mangaPagesInput').addEventListener('change', function(e) {
+                addMangaFiles(Array.from(e.target.files || []));
+                e.target.value = '';
+            });
+            if (editWorkId) loadExistingPageCount();
+        }
+
+        // 編集モード: サーバー上の既存ページ数を取得して注意書きを表示
+        async function loadExistingPageCount() {
+            var token = localStorage.getItem('token');
+            if (!token) return;
+            try {
+                var resp = await fetch((window.API_ORIGIN || '') + '/api/works/' + encodeURIComponent(editWorkId) + '/pages', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                var data = await resp.json();
+                if (!resp.ok) return;
+                mangaExistingCount = data.totalPages || 0;
+                if (mangaExistingCount > 0) {
+                    var hint = document.getElementById('mangaPagesHint');
+                    var note = document.createElement('p');
+                    note.className = 'small';
+                    note.style.cssText = 'color:#8a6d3b; background:rgba(139,115,85,0.1); padding:0.5rem 0.75rem; border-radius:6px;';
+                    note.textContent = getL(mangaText.editNote).replace('{n}', mangaExistingCount);
+                    hint.parentNode.insertBefore(note, hint.nextSibling);
+                }
+            } catch (e) { /* 表示のみの補助情報なので黙って続行 */ }
+        }
+
+        function addMangaFiles(files) {
+            var imgs = files.filter(function(f) { return /\.(jpe?g|png|webp)$/i.test(f.name); });
+            // ファイル名の自然順（1-2.jpg < 1-10.jpg）で並べてから追加
+            imgs.sort(function(a, b) { return a.name.localeCompare(b.name, undefined, { numeric: true }); });
+            var oversize = [];
+            imgs.forEach(function(f) {
+                if (f.size > 14 * 1024 * 1024) { oversize.push(f.name); return; }
+                // 「1-01.jpg」（章-ページ）形式なら章の切り替わりで章マークを自動付与
+                var chapterTitle = null;
+                var m = f.name.match(/^(\d+)[-_](\d+)/);
+                if (m) {
+                    var num = parseInt(m[1], 10);
+                    if (num !== mangaLastChapterNum) {
+                        chapterTitle = mangaChapterLabel(num);
+                        mangaLastChapterNum = num;
+                    }
+                }
+                mangaPages.push({ file: f, chapterTitle: chapterTitle, thumbUrl: URL.createObjectURL(f) });
+            });
+            if (oversize.length) alert(getL(mangaText.oversize) + oversize.join(', '));
+            renderMangaGrid();
+        }
+
+        function renderMangaGrid() {
+            var grid = document.getElementById('mangaPagesGrid');
+            grid.innerHTML = '';
+            mangaPages.forEach(function(p, i) {
+                var cell = document.createElement('div');
+                cell.style.cssText = 'width:112px; border:1px solid #e0d5c5; border-radius:8px; padding:0.35rem; background:#fff; text-align:center;';
+
+                var img = document.createElement('img');
+                img.src = p.thumbUrl;
+                img.style.cssText = 'width:100%; height:130px; object-fit:cover; border-radius:4px; display:block;';
+                cell.appendChild(img);
+
+                var label = document.createElement('div');
+                label.className = 'small text-secondary';
+                label.style.cssText = 'margin-top:0.2rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;';
+                label.textContent = 'P' + (i + 1) + ' ' + p.file.name;
+                label.title = p.file.name;
+                cell.appendChild(label);
+
+                if (p.chapterTitle) {
+                    var badge = document.createElement('div');
+                    badge.style.cssText = 'font-size:0.7rem; background:#8B7355; color:#fff; border-radius:4px; padding:0.1rem 0.3rem; margin-top:0.2rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;';
+                    badge.textContent = '📖 ' + p.chapterTitle;
+                    badge.title = p.chapterTitle;
+                    cell.appendChild(badge);
+                }
+
+                var btns = document.createElement('div');
+                btns.style.cssText = 'display:flex; gap:0.15rem; justify-content:center; margin-top:0.3rem;';
+                var mkBtn = function(html, titleAttr, onClick, disabled) {
+                    var b = document.createElement('button');
+                    b.type = 'button';
+                    b.className = 'btn btn-sm btn-outline-secondary';
+                    b.style.cssText = 'padding:0.05rem 0.35rem; font-size:0.75rem;';
+                    b.innerHTML = html;
+                    b.title = titleAttr;
+                    b.disabled = !!disabled;
+                    b.addEventListener('click', onClick);
+                    return b;
+                };
+                btns.appendChild(mkBtn('◀', getL({ en: 'Move left', ja: '前へ' }), function() { mangaMove(i, -1); }, i === 0));
+                btns.appendChild(mkBtn('▶', getL({ en: 'Move right', ja: '後ろへ' }), function() { mangaMove(i, 1); }, i === mangaPages.length - 1));
+                btns.appendChild(mkBtn(getL(mangaText.chapterWord), getL({ en: 'Start a chapter here', ja: 'このページから章を開始' }), function() { mangaToggleChapter(i); }));
+                btns.appendChild(mkBtn('×', getL({ en: 'Remove', ja: '削除' }), function() { mangaRemove(i); }));
+                cell.appendChild(btns);
+
+                grid.appendChild(cell);
+            });
+            document.getElementById('mangaPagesCount').textContent =
+                mangaPages.length ? (mangaPages.length + ' ' + getL(mangaText.pagesWord)) : '';
+        }
+
+        function mangaMove(i, d) {
+            var j = i + d;
+            if (j < 0 || j >= mangaPages.length) return;
+            var t = mangaPages[i]; mangaPages[i] = mangaPages[j]; mangaPages[j] = t;
+            renderMangaGrid();
+        }
+
+        function mangaToggleChapter(i) {
+            var p = mangaPages[i];
+            var marks = mangaPages.filter(function(x) { return x.chapterTitle; }).length;
+            var v = prompt(getL(mangaText.chapterPrompt), p.chapterTitle || mangaChapterLabel(marks + 1));
+            if (v === null) return; // キャンセル
+            p.chapterTitle = v.trim() ? v.trim().slice(0, 200) : null;
+            renderMangaGrid();
+        }
+
+        function mangaRemove(i) {
+            var p = mangaPages.splice(i, 1)[0];
+            if (p && p.thumbUrl) { try { URL.revokeObjectURL(p.thumbUrl); } catch (e) {} }
+            renderMangaGrid();
+        }
+
+        // 確認後: ページ画像を1枚ずつアップロード（1リクエスト15MB制限内に収まる）
+        async function uploadMangaPages(workId, token, btn) {
+            for (var i = 0; i < mangaPages.length; i++) {
+                var p = mangaPages[i];
+                if (btn) btn.textContent = getL(mangaText.uploading) + (i + 1) + '/' + mangaPages.length;
+                var fd = new FormData();
+                fd.append('pageNo', String(i + 1));
+                if (p.chapterTitle) fd.append('chapterTitle', p.chapterTitle);
+                fd.append('page', p.file);
+                var ok = false, lastErr = '';
+                for (var attempt = 0; attempt < 2 && !ok; attempt++) {
+                    try {
+                        var r = await fetch((window.API_ORIGIN || '') + '/api/works/' + encodeURIComponent(workId) + '/pages', {
+                            method: 'POST',
+                            headers: { 'Authorization': 'Bearer ' + token },
+                            body: fd
+                        });
+                        var d = null;
+                        try { d = await r.json(); } catch (e) {}
+                        if (r.ok) { ok = true; } else { lastErr = (d && d.error) || ('HTTP ' + r.status); }
+                    } catch (e) { lastErr = e.message; }
+                }
+                if (!ok) {
+                    throw new Error(getL(mangaText.uploadFailed) + (i + 1) + '/' + mangaPages.length + ' — ' + lastErr + getL(mangaText.savedAsDraft));
                 }
             }
         }
@@ -1366,7 +1584,13 @@
                 if (editWork.language) document.getElementById('workLanguage').value = editWork.language;
                 if (editWork.genre) document.getElementById('workGenre').value = editWork.genre;
                 document.getElementById('tags').value = (editWork.tags || []).join(', ');
-                document.getElementById('contentType').value = editWork.content_type || 'text';
+                var ctype = editWork.content_type || 'text';
+                document.getElementById('contentType').value = ctype;
+                // コンテンツ種別ボタンの選択状態と表示カードを復元
+                document.querySelectorAll('.content-type-btn').forEach(function(b) {
+                    b.classList.toggle('active', (b.getAttribute('onclick') || '').indexOf("'" + ctype + "'") !== -1);
+                });
+                applyContentTypeUI(ctype);
 
                 document.getElementById('isFree').checked = !!editWork.is_free;
                 if (typeof togglePriceInput === 'function') { togglePriceInput(); }
@@ -1466,6 +1690,15 @@
                     return;
                 }
 
+                // マンガ: 本文テキストは使わず、ページ画像が必須（新規時）
+                if (contentType === 'manga') {
+                    content = '';
+                    if (!editWorkId && mangaPages.length === 0) {
+                        alert(getL(mangaText.needPages));
+                        return;
+                    }
+                }
+
                 // コラボレーター（編集者・翻訳者）: チェックONならメール/ペンネーム必須
                 var collaborators = [];
                 if (document.getElementById('hasEditor').checked) {
@@ -1548,9 +1781,17 @@
             // 本文プレビュー（Reader風の表示で全文をスクロール確認できる）
             document.getElementById('pvContentHeading').textContent = getL({
                 en: 'Contents preview', ja: '本文プレビュー' });
-            document.getElementById('pvContent').textContent = p.content ||
-                (editWork && editWork.content) ||
-                getL({ en: '(No text content)', ja: '（本文なし）' });
+            if (p.contentType === 'manga') {
+                // マンガ: 本文の代わりにページ数と章マーク数を表示
+                var marks = mangaPages.filter(function(x) { return x.chapterTitle; }).length;
+                document.getElementById('pvContent').textContent = mangaPages.length
+                    ? getL(mangaText.previewManga).replace('{n}', mangaPages.length).replace('{c}', marks)
+                    : getL(mangaText.previewKeep).replace('{n}', mangaExistingCount);
+            } else {
+                document.getElementById('pvContent').textContent = p.content ||
+                    (editWork && editWork.content) ||
+                    getL({ en: '(No text content)', ja: '（本文なし）' });
+            }
 
             // AI利用表示（読者に見える形と同じラベル）
             var aiLabel = getAiBadgeLabel(p.aiTextUsage, p.aiCoverUsage);
@@ -1610,6 +1851,13 @@
                     if (coverResp.ok && coverData.url) { pendingPayload.coverImage = coverData.url; }
                 }
 
+                // マンガ新規作成: まず下書きとして作成し、ページが揃ってから公開する
+                // （アップロード途中で失敗しても中途半端な作品が公開されない）
+                var isMangaPublish = pendingPayload.contentType === 'manga' && mangaPages.length > 0;
+                if (isMangaPublish && !editWorkId) {
+                    pendingPayload.status = 'draft';
+                }
+
                 // 新規作成はPOST、編集モードはPUT（既存作品の更新）
                 var apiUrl = (window.API_ORIGIN || '') + '/api/works' + (editWorkId ? '/' + encodeURIComponent(editWorkId) : '');
                 var resp = await fetch(apiUrl, {
@@ -1642,6 +1890,35 @@
 
                 if (!resp.ok) {
                     throw new Error((data && (data.error || data.message)) || ('HTTP ' + resp.status));
+                }
+
+                // マンガ: ページ画像を1枚ずつアップロードしてから公開状態に切り替える
+                if (isMangaPublish) {
+                    var mangaWorkId = editWorkId || (data && data.work && data.work.work_id);
+                    if (!mangaWorkId) throw new Error('Work ID missing in response');
+                    await uploadMangaPages(mangaWorkId, token, btn);
+
+                    if (!editWorkId) {
+                        // 全ページ揃ったので公開
+                        var pubResp = await fetch((window.API_ORIGIN || '') + '/api/works/' + encodeURIComponent(mangaWorkId), {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                            body: JSON.stringify({ status: 'published' })
+                        });
+                        if (!pubResp.ok) {
+                            var pubData = null;
+                            try { pubData = await pubResp.json(); } catch (e) {}
+                            throw new Error(((pubData && pubData.error) || ('HTTP ' + pubResp.status)) + getL(mangaText.savedAsDraft));
+                        }
+                    } else if (mangaPages.length < mangaExistingCount) {
+                        // 差し替えでページ数が減った場合、余った旧ページを削除
+                        try {
+                            await fetch((window.API_ORIGIN || '') + '/api/works/' + encodeURIComponent(mangaWorkId) + '/pages?from=' + (mangaPages.length + 1), {
+                                method: 'DELETE',
+                                headers: { 'Authorization': 'Bearer ' + token }
+                            });
+                        } catch (e) { console.error('Trim old pages failed:', e); }
+                    }
                 }
 
                 // コラボレーターへの通知はサーバー側で行われる（同意書発行→通知）

@@ -838,6 +838,175 @@ router.get('/:workId/full', authenticate, async (req, res) => {
     }
 });
 
+// ===== マンガ作品のページ画像（migration 035: work_pages） =====
+// 1枚ずつアップロード（15MB制限内）。読者アクセスは/fullと同じ規則。
+const MANGA_PAGES_DIR = path.join(__dirname, '..', 'uploads', 'manga-pages');
+fs.mkdirSync(MANGA_PAGES_DIR, { recursive: true });
+
+const workPageUpload = multer({
+    storage: multer.diskStorage({
+        destination: (req, file, cb) => {
+            const dir = path.join(MANGA_PAGES_DIR, req.params.workId);
+            fs.mkdirSync(dir, { recursive: true });
+            cb(null, dir);
+        },
+        filename: (req, file, cb) => {
+            const ext = (path.extname(file.originalname).toLowerCase() || '.jpg').replace(/[^.a-z0-9]/g, '');
+            cb(null, `p${Date.now()}_${Math.random().toString(36).slice(2, 8)}${ext}`);
+        }
+    }),
+    limits: { fileSize: 14 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => cb(null, ['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype))
+});
+
+/** ページ閲覧の権限判定（/fullと同じ: 著者 / 無料 / 購入済み。下書きは著者のみ） */
+async function checkPageReadAccess(workId, userId) {
+    const result = await db.query(
+        `SELECT w.work_id, w.author_id, w.status, w.is_free, w.price, w.title,
+                COALESCE(u.pen_name, u.first_name || ' ' || u.last_name) AS author_name
+         FROM works w
+         LEFT JOIN users u ON u.user_id = w.author_id
+         WHERE w.work_id = $1 AND w.status != 'deleted'`,
+        [workId]
+    );
+    const work = result.rows[0];
+    if (!work) return { error: 404 };
+    if (work.author_id === userId) return { access: 'author', work };
+    if (work.status !== 'published') return { error: 404 };
+    if (work.is_free || work.price === 0 || work.price === null) return { access: 'free', work };
+    const purchased = await db.query(
+        `SELECT 1 FROM purchases WHERE user_id = $1 AND work_id = $2 AND payment_status = 'completed'`,
+        [userId, workId]
+    );
+    if (purchased.rows.length > 0) return { access: 'purchased', work };
+    return { error: 403, price: work.price };
+}
+
+/**
+ * POST /api/works/:workId/pages
+ * ページ画像を1枚アップロード（著者のみ・マンガ作品のみ）。同じpage_noは置き換え
+ */
+router.post('/:workId/pages', authenticate, workPageUpload.single('page'), async (req, res) => {
+    try {
+        const work = (await db.query(
+            `SELECT author_id, content_type FROM works WHERE work_id = $1 AND status != 'deleted'`,
+            [req.params.workId]
+        )).rows[0];
+        if (!work) return res.status(404).json({ error: 'Work not found' });
+        if (work.author_id !== req.user.userId) return res.status(403).json({ error: 'Not your work' });
+        if (work.content_type !== 'manga') return res.status(400).json({ error: 'Not a manga work' });
+        if (!req.file) return res.status(400).json({ error: 'Image file is required (jpeg/png/webp)' });
+
+        const pageNo = parseInt(req.body.pageNo, 10);
+        if (isNaN(pageNo) || pageNo < 1 || pageNo > 2000) {
+            fs.unlink(req.file.path, () => {});
+            return res.status(400).json({ error: 'pageNo must be 1-2000' });
+        }
+        const chapterTitle = (req.body.chapterTitle || '').trim().slice(0, 200) || null;
+
+        // 同じページ番号の再アップロードは置き換え（旧ファイルも削除）
+        const old = (await db.query(
+            `DELETE FROM work_pages WHERE work_id = $1 AND page_no = $2 RETURNING file_name`,
+            [req.params.workId, pageNo]
+        )).rows[0];
+        if (old) fs.unlink(path.join(MANGA_PAGES_DIR, req.params.workId, old.file_name), () => {});
+
+        await db.query(
+            `INSERT INTO work_pages (work_id, page_no, chapter_title, file_name) VALUES ($1, $2, $3, $4)`,
+            [req.params.workId, pageNo, chapterTitle, req.file.filename]
+        );
+        res.json({ success: true, pageNo });
+    } catch (error) {
+        console.error('Upload work page error:', error);
+        if (req.file) fs.unlink(req.file.path, () => {});
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * DELETE /api/works/:workId/pages?from=N
+ * page_no >= N のページを削除（著者のみ）。差し替えでページ数が減った時の掃除用
+ */
+router.delete('/:workId/pages', authenticate, async (req, res) => {
+    try {
+        const work = (await db.query(
+            `SELECT author_id FROM works WHERE work_id = $1 AND status != 'deleted'`,
+            [req.params.workId]
+        )).rows[0];
+        if (!work) return res.status(404).json({ error: 'Work not found' });
+        if (work.author_id !== req.user.userId) return res.status(403).json({ error: 'Not your work' });
+
+        const from = parseInt(req.query.from, 10);
+        if (isNaN(from) || from < 1) return res.status(400).json({ error: 'from must be >= 1' });
+
+        const removed = (await db.query(
+            `DELETE FROM work_pages WHERE work_id = $1 AND page_no >= $2 RETURNING file_name`,
+            [req.params.workId, from]
+        )).rows;
+        for (const r of removed) {
+            fs.unlink(path.join(MANGA_PAGES_DIR, req.params.workId, r.file_name), () => {});
+        }
+        res.json({ success: true, deleted: removed.length });
+    } catch (error) {
+        console.error('Delete work pages error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/works/:workId/pages
+ * ページ一覧（番号・章タイトル）。閲覧権限が必要
+ */
+router.get('/:workId/pages', authenticate, async (req, res) => {
+    try {
+        const check = await checkPageReadAccess(req.params.workId, req.user.userId);
+        if (check.error === 404) return res.status(404).json({ error: 'Work not found' });
+        if (check.error === 403) return res.status(403).json({ error: 'Purchase required', price: check.price });
+
+        const rows = (await db.query(
+            `SELECT page_no, chapter_title FROM work_pages WHERE work_id = $1 ORDER BY page_no`,
+            [req.params.workId]
+        )).rows;
+        res.json({
+            success: true,
+            access: check.access,
+            title: check.work.title,
+            authorName: check.work.author_name,
+            totalPages: rows.length,
+            pages: rows.map(r => ({ pageNo: r.page_no, chapterTitle: r.chapter_title }))
+        });
+    } catch (error) {
+        console.error('List work pages error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/works/:workId/pages/:pageNo/image
+ * ページ画像の本体。閲覧権限が必要
+ */
+router.get('/:workId/pages/:pageNo/image', authenticate, async (req, res) => {
+    try {
+        const check = await checkPageReadAccess(req.params.workId, req.user.userId);
+        if (check.error === 404) return res.status(404).json({ error: 'Work not found' });
+        if (check.error === 403) return res.status(403).json({ error: 'Purchase required', price: check.price });
+
+        const pageNo = parseInt(req.params.pageNo, 10);
+        const row = (await db.query(
+            `SELECT file_name FROM work_pages WHERE work_id = $1 AND page_no = $2`,
+            [req.params.workId, pageNo]
+        )).rows[0];
+        if (!row) return res.status(404).json({ error: 'Page not found' });
+        const p = path.join(MANGA_PAGES_DIR, req.params.workId, row.file_name);
+        if (!fs.existsSync(p)) return res.status(404).json({ error: 'Page file missing' });
+        res.setHeader('Cache-Control', 'private, max-age=3600');
+        res.sendFile(p);
+    } catch (error) {
+        console.error('Serve work page error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 /**
  * POST /api/works
  * Create new work (authenticated)
