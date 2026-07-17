@@ -324,7 +324,7 @@ window.translations.pt = {
         uploadDragText: 'Arraste e solte arquivos aqui',
         uploadOrText: 'ou clique para navegar',
         btnBrowseFiles: 'Procurar arquivos',
-        uploadFormats: 'Formatos suportados: TXT, DOC, DOCX, PDF (texto) | JPG, PNG, GIF (imagens/mangá)',
+        uploadFormats: 'Formatos suportados: TXT, Word (.docx)',
         sectionCover: 'Imagem de capa (opcional)',
         hintCover: 'Tamanho recomendado: 600x900px',
         sectionAiDisclosure: 'Declaração de uso de IA',

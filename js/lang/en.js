@@ -324,7 +324,7 @@ window.translations.en = {
         uploadDragText: 'Drag & Drop Files Here',
         uploadOrText: 'or click to browse',
         btnBrowseFiles: 'Browse Files',
-        uploadFormats: 'Supported formats: TXT, DOC, DOCX, PDF (text) | JPG, PNG, GIF (images/manga)',
+        uploadFormats: 'Supported formats: TXT, Word (.docx)',
         sectionCover: 'Cover Image (Optional)',
         hintCover: 'Recommended size: 600x900px',
         sectionAiDisclosure: 'AI Usage Disclosure',

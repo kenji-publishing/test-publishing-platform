@@ -324,7 +324,7 @@ window.translations.de = {
         uploadDragText: 'Dateien hierher ziehen',
         uploadOrText: 'oder klicken zum Durchsuchen',
         btnBrowseFiles: 'Dateien durchsuchen',
-        uploadFormats: 'Unterstützte Formate: TXT, DOC, DOCX, PDF (Text) | JPG, PNG, GIF (Bilder/Manga)',
+        uploadFormats: 'Unterstützte Formate: TXT, Word (.docx)',
         sectionCover: 'Coverbild (optional)',
         hintCover: 'Empfohlene Größe: 600x900px',
         sectionAiDisclosure: 'KI-Nutzungserklärung',

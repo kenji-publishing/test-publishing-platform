@@ -324,7 +324,7 @@ window.translations.zh = {
         uploadDragText: '将文件拖放到此处',
         uploadOrText: '或点击浏览',
         btnBrowseFiles: '浏览文件',
-        uploadFormats: '支持格式：TXT, DOC, DOCX, PDF（文本）| JPG, PNG, GIF（图片/漫画）',
+        uploadFormats: '支持格式：TXT、Word（.docx）',
         sectionCover: '封面图片（可选）',
         hintCover: '推荐尺寸：600x900px',
         sectionAiDisclosure: 'AI使用声明',

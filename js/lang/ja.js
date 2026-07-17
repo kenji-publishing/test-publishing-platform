@@ -324,7 +324,7 @@ window.translations.ja = {
         uploadDragText: 'ここにファイルをドラッグ＆ドロップ',
         uploadOrText: 'またはクリックして参照',
         btnBrowseFiles: 'ファイルを選択',
-        uploadFormats: '対応形式: TXT, DOC, DOCX, PDF（テキスト）| JPG, PNG, GIF（画像/マンガ）',
+        uploadFormats: '対応形式: TXT、Word（.docx）',
         sectionCover: 'カバー画像（任意）',
         hintCover: '推奨サイズ: 600x900px',
         sectionAiDisclosure: 'AI使用の明記',

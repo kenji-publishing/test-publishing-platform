@@ -324,7 +324,7 @@ window.translations.it = {
         uploadDragText: 'Trascina &amp; Rilascia i File Qui',
         uploadOrText: 'oppure clicca per sfogliare',
         btnBrowseFiles: 'Sfoglia File',
-        uploadFormats: 'Formati supportati: TXT, DOC, DOCX, PDF (testo) | JPG, PNG, GIF (immagini/manga)',
+        uploadFormats: 'Formati supportati: TXT, Word (.docx)',
         sectionCover: 'Immagine di Copertina (Opzionale)',
         hintCover: 'Dimensione consigliata: 600x900px',
         sectionAiDisclosure: 'Divulgazione Uso AI',

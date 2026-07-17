@@ -324,7 +324,7 @@ window.translations.ko = {
         uploadDragText: '파일을 여기에 드래그 앤 드롭',
         uploadOrText: '또는 클릭하여 찾아보기',
         btnBrowseFiles: '파일 찾아보기',
-        uploadFormats: '지원 형식: TXT, DOC, DOCX, PDF (텍스트) | JPG, PNG, GIF (이미지/만화)',
+        uploadFormats: '지원 형식: TXT, Word(.docx)',
         sectionCover: '커버 이미지 (선택)',
         hintCover: '권장 크기: 600x900px',
         sectionAiDisclosure: 'AI 사용 공개',
