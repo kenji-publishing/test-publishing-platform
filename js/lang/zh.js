@@ -116,6 +116,7 @@ window.translations.zh = {
             translator: '译者',
             translatorDesc: '翻译作品'
         },
+        roleNote: "这只是您的主要用途——每个账户都可以阅读、出版、翻译和编辑。",
         firstName: '名',
         firstNamePlaceholder: '名',
         lastName: '姓',

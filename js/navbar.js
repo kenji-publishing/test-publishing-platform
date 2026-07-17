@@ -147,6 +147,16 @@ var navText = {
         es: 'Cerrar sesi\u00f3n', fr: 'D\u00e9connexion', de: 'Abmelden',
         ko: '로그아웃', ar: 'تسجيل الخروج', pt: 'Sair', it: 'Esci'
     },
+    registerTranslator: {
+        en: 'Register as Translator', ja: '翻訳者登録', zh: '注册为翻译',
+        es: 'Registrarse como traductor', fr: 'Devenir traducteur', de: 'Als Übersetzer registrieren',
+        ko: '번역가 등록', ar: 'التسجيل كمترجم', pt: 'Registrar-se como tradutor', it: 'Registrati come traduttore'
+    },
+    registerEditor: {
+        en: 'Register as Editor', ja: '編集者登録', zh: '注册为编辑',
+        es: 'Registrarse como editor', fr: 'Devenir éditeur', de: 'Als Lektor registrieren',
+        ko: '편집자 등록', ar: 'التسجيل كمحرر', pt: 'Registrar-se como editor', it: 'Registrati come editor'
+    },
     logOutConfirm: {
         en: 'Are you sure you want to log out?', ja: 'ログアウトしますか？', zh: '确定要退出登录吗？',
         es: '\u00bfEst\u00e1s seguro de que quieres cerrar sesi\u00f3n?', fr: '\u00cates-vous s\u00fbr de vouloir vous d\u00e9connecter?', de: 'Sind Sie sicher, dass Sie sich abmelden m\u00f6chten?',
@@ -403,6 +413,12 @@ function renderNavbar(options) {
     html += '<i class="fas fa-th-large"></i> <span id="menuDashboard">Dashboard</span></a>';
     html += '<a href="' + p('account-settings.html') + '" class="user-menu-item">';
     html += '<i class="fas fa-cog"></i> <span id="menuAccountSettings">Account Settings</span></a>';
+    // 翻訳者・編集者としての活動開始（誰でも登録できる。ディレクトリに公開プロフィールが載る）
+    html += '<div class="user-menu-divider"></div>';
+    html += '<a href="' + p('translators/register.html') + '" class="user-menu-item">';
+    html += '<i class="fas fa-language"></i> <span id="menuRegisterTranslator">Register as Translator</span></a>';
+    html += '<a href="' + p('editors/register.html') + '" class="user-menu-item">';
+    html += '<i class="fas fa-pen-nib"></i> <span id="menuRegisterEditor">Register as Editor</span></a>';
     html += '<div class="user-menu-divider"></div>';
     html += '<button class="user-menu-item logout-btn" onclick="handleLogout()">';
     html += '<i class="fas fa-sign-out-alt"></i> <span id="menuLogout">Log Out</span></button>';
@@ -629,6 +645,10 @@ function updateNavText() {
     if (menuDashboard) menuDashboard.textContent = getL(navText.dashboard);
     if (menuAccountSettings) menuAccountSettings.textContent = getL(navText.accountSettings);
     if (menuLogout) menuLogout.textContent = getL(navText.logout);
+    var menuRegTr = document.getElementById('menuRegisterTranslator');
+    var menuRegEd = document.getElementById('menuRegisterEditor');
+    if (menuRegTr) menuRegTr.textContent = getL(navText.registerTranslator);
+    if (menuRegEd) menuRegEd.textContent = getL(navText.registerEditor);
 
     // All nav elements (PC + Mobile)
     var els = {

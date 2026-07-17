@@ -116,6 +116,7 @@ window.translations.ja = {
             translator: '翻訳者',
             translatorDesc: '作品を翻訳'
         },
+        roleNote: "これは主な利用目的の選択です。どのアカウントでも、読む・出版する・翻訳する・編集するすべてが利用できます。",
         firstName: '名',
         firstNamePlaceholder: '名',
         lastName: '姓',

@@ -116,6 +116,7 @@ window.translations.fr = {
             translator: 'Traducteur',
             translatorDesc: 'Traduisez des œuvres'
         },
+        roleNote: "Ce n'est que votre intérêt principal — chaque compte peut lire, publier, traduire et éditer.",
         firstName: 'Prénom',
         firstNamePlaceholder: 'Prénom',
         lastName: 'Nom',

@@ -116,6 +116,7 @@ window.translations.en = {
             translator: 'Translator',
             translatorDesc: 'Translate works'
         },
+        roleNote: "This is just your main interest — every account can read, publish, translate and edit.",
         firstName: 'First Name',
         firstNamePlaceholder: 'First name',
         lastName: 'Last Name',

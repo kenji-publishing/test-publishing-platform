@@ -116,6 +116,7 @@ window.translations.de = {
             translator: 'Übersetzer',
             translatorDesc: 'Werke übersetzen'
         },
+        roleNote: "Dies ist nur Ihr Hauptinteresse — jedes Konto kann lesen, veröffentlichen, übersetzen und lektorieren.",
         firstName: 'Vorname',
         firstNamePlaceholder: 'Vorname',
         lastName: 'Nachname',

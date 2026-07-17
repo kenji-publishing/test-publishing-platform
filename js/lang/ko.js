@@ -116,6 +116,7 @@ window.translations.ko = {
             translator: '번역가',
             translatorDesc: '작품 번역하기'
         },
+        roleNote: "주요 관심사를 선택하는 것일 뿐입니다. 모든 계정은 읽기·출판·번역·편집을 모두 이용할 수 있습니다.",
         firstName: '이름',
         firstNamePlaceholder: '이름',
         lastName: '성',

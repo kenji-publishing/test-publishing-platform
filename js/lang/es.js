@@ -116,6 +116,7 @@ window.translations.es = {
             translator: 'Traductor',
             translatorDesc: 'Traduce obras'
         },
+        roleNote: "Esto es solo tu interés principal: toda cuenta puede leer, publicar, traducir y editar.",
         firstName: 'Nombre',
         firstNamePlaceholder: 'Nombre',
         lastName: 'Apellido',

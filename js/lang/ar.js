@@ -116,6 +116,7 @@ window.translations.ar = {
             translator: 'مترجم',
             translatorDesc: 'ترجم الأعمال'
         },
+        roleNote: "هذا مجرد اهتمامك الرئيسي — يمكن لكل حساب القراءة والنشر والترجمة والتحرير.",
         firstName: 'الاسم الأول',
         firstNamePlaceholder: 'الاسم الأول',
         lastName: 'اسم العائلة',
