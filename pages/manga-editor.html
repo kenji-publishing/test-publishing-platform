@@ -1915,8 +1915,27 @@
                 '</h3><span id="aiTransCount" style="font-size:0.75rem; color:var(--color-text-secondary);"></span></div>' +
                 '<div class="panel-body"><div id="aiTransHint" style="font-size:0.75rem; color:var(--color-text-secondary); margin-bottom:0.5rem;">' +
                 (L === 'ja' ? '「＋枠を作成」で訳文入りのテキスト枠が画像に置かれます。ドラッグで位置を調整してください。' : 'Click "+ Add box" to place a text box with the translation, then drag it into position.') +
-                '</div><div id="aiTransList"></div></div>';
+                // 翻訳が多いページでも領域一覧が押し下げられないよう、リスト部分だけスクロール
+                '</div><div id="aiTransList" style="max-height:45vh; overflow-y:auto; padding-right:2px;"></div></div>';
             sidePanel.insertBefore(panel, sidePanel.firstChild);
+        }
+
+        // ===== ヘッダーに「このページを保存」「作品アップロードへ」ボタンを追加 =====
+        function ensureSaveButtons() {
+            if (document.getElementById('aiBtnSavePage')) return;
+            var actions = document.getElementById('headerActions');
+            if (!actions) return;
+            var save = document.createElement('button');
+            save.className = 'btn-secondary-custom btn-sm';
+            save.id = 'aiBtnSavePage';
+            save.addEventListener('click', function () { window.aiSavePage(); });
+            actions.appendChild(save);
+            var up = document.createElement('button');
+            up.className = 'btn-primary-custom btn-sm';
+            up.id = 'aiBtnGoUpload';
+            up.addEventListener('click', function () { window.aiGoUpload(); });
+            actions.appendChild(up);
+            aiUpdateSaveUi();
         }
 
         function renderAiPanel() {
@@ -1933,12 +1952,25 @@
             }
             var icons = { speech: '💬', thought: '💭', narration: '📖', sfx: '💥', sign: '🪧' };
             listEl.innerHTML = bubbles.map(function (b, bi) {
-                return '<div style="border:1px solid var(--color-border); border-radius:8px; padding:0.5rem 0.6rem; margin-bottom:0.5rem;">' +
-                    '<div style="font-size:0.7rem; color:var(--color-text-secondary);">' + (icons[b.type] || '💬') + ' ' + (bi + 1) + (b.location ? ' — ' + aiEsc(b.location) : '') + '</div>' +
+                // 枠を作成済みかどうか（領域一覧側で削除された場合も追随して未作成に戻る）
+                var hasBox = b.regionId != null && page.regions.some(function (r) { return r.id === b.regionId; });
+                var cardStyle = hasBox
+                    ? 'border:1px solid #4c9a5f; background:rgba(76,154,95,0.12); border-radius:8px; padding:0.5rem 0.6rem; margin-bottom:0.5rem;'
+                    : 'border:1px solid var(--color-border); border-radius:8px; padding:0.5rem 0.6rem; margin-bottom:0.5rem;';
+                var doneMark = hasBox
+                    ? ' <span style="color:#4c9a5f; font-weight:700;">✓ ' + (L === 'ja' ? '配置済み' : 'Placed') + '</span>'
+                    : '';
+                var addBtn = '<button class="btn btn-sm" onclick="aiInsertText(' + bi + ')"' + (hasBox ? ' disabled' : '') +
+                    ' style="font-size:0.75rem; padding:2px 10px; border:1px solid var(--color-accent); color:var(--color-accent); border-radius:6px; background:transparent;' + (hasBox ? ' opacity:0.4;' : '') + '">＋ ' +
+                    (L === 'ja' ? '枠を作成' : 'Add box') + '</button>';
+                var delBtn = '<button class="btn btn-sm" onclick="aiDeleteBox(' + bi + ')"' + (hasBox ? '' : ' disabled') +
+                    ' style="font-size:0.75rem; padding:2px 10px; border:1px solid #c0392b; color:#c0392b; border-radius:6px; background:transparent; margin-left:6px;' + (hasBox ? '' : ' opacity:0.4;') + '">× ' +
+                    (L === 'ja' ? '枠を削除' : 'Remove box') + '</button>';
+                return '<div style="' + cardStyle + '">' +
+                    '<div style="font-size:0.7rem; color:var(--color-text-secondary);">' + (icons[b.type] || '💬') + ' ' + (bi + 1) + (b.location ? ' — ' + aiEsc(b.location) : '') + doneMark + '</div>' +
                     '<div style="font-size:0.8rem; color:var(--color-text-secondary); margin:2px 0;">' + aiEsc(b.original) + '</div>' +
                     '<div style="font-size:0.86rem; font-weight:600; margin-bottom:4px;">' + aiEsc(b.translation) + '</div>' +
-                    '<button class="btn btn-sm" onclick="aiInsertText(' + bi + ')" style="font-size:0.75rem; padding:2px 10px; border:1px solid var(--color-accent); color:var(--color-accent); border-radius:6px; background:transparent;">＋ ' +
-                    (L === 'ja' ? '枠を作成' : 'Add box') + '</button>' +
+                    addBtn + delBtn +
                     '</div>';
             }).join('');
         }
@@ -1965,18 +1997,147 @@
                 writingMode: 'horizontal'
             };
             page.regions.push(region);
+            page.aiBubbles[bi].regionId = region.id; // 「配置済み」表示と削除ボタン用
             selectedRegionId = region.id;
             renderRegionsOnCanvas();
             renderRegionList();
             scrollToRegionCard(region.id);
         };
 
-        // ページ切替のたびに翻訳パネルも更新（既存のrenderPageをラップ）
+        // 「枠を削除」: この訳文から作成したテキスト枠を取り除き、未配置状態に戻す
+        window.aiDeleteBox = function (bi) {
+            var page = pages[currentPageIndex];
+            var b = page && page.aiBubbles && page.aiBubbles[bi];
+            if (!b || b.regionId == null) return;
+            var idx = page.regions.findIndex(function (r) { return r.id === b.regionId; });
+            if (idx !== -1) page.regions.splice(idx, 1);
+            if (selectedRegionId === b.regionId) selectedRegionId = null;
+            b.regionId = null;
+            renderRegionsOnCanvas();
+            renderRegionList();
+        };
+
+        // 領域一覧側での削除にも追随できるよう、renderRegionListをラップして翻訳パネルも更新
+        var origRenderRegionList = window.renderRegionList;
+        window.renderRegionList = function () {
+            origRenderRegionList();
+            renderAiPanel();
+        };
+
+        // ===== ページ保存 → 作品アップロード連携 =====
+        // 各ページを「このページを保存」で完成画像として確定し、全ページ保存後に
+        // upload.html へ引き渡す（IndexedDB経由。画像のダウンロード・再選択は不要）
+        var aiSavedBlobs = {}; // pageIndex -> Blob（文字入れ済みの完成画像）
+
+        function aiUpdateSaveUi() {
+            var L = aiGetLang();
+            var saved = Object.keys(aiSavedBlobs).length;
+            var sp = document.getElementById('aiBtnSavePage');
+            if (sp) {
+                sp.innerHTML = (aiSavedBlobs[currentPageIndex] ? '<i class="fas fa-check" style="color:#4c9a5f;"></i> ' : '<i class="fas fa-save"></i> ') +
+                    (L === 'ja' ? 'このページを保存' : 'Save this page');
+            }
+            var up = document.getElementById('aiBtnGoUpload');
+            if (up) {
+                up.innerHTML = '<i class="fas fa-upload"></i> ' +
+                    (L === 'ja' ? '作品アップロードへ' : 'To Work Upload') +
+                    ' (' + saved + '/' + (pages.length || 0) + ')';
+            }
+        }
+
+        // 表示中のページを完成画像（テキスト焼き込み済みJPEG）としてレンダリング
+        function aiRenderCurrentPageBlob() {
+            return new Promise(function (resolve, reject) {
+                savePageDrawing();
+                var page = pages[currentPageIndex];
+                if (!page) return reject(new Error('no page'));
+                var img = document.getElementById('canvasImg');
+                var canvas = document.createElement('canvas');
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                var ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                drawDrawBackdrops(ctx, canvas, page);
+                var finish = function () {
+                    drawTextRegions(ctx, canvas, img, page);
+                    canvas.toBlob(function (b) {
+                        if (b) resolve(b); else reject(new Error('render failed'));
+                    }, 'image/jpeg', 0.92);
+                };
+                if (page.drawingDataUrl) {
+                    var di = new Image();
+                    di.onload = function () { ctx.drawImage(di, 0, 0, canvas.width, canvas.height); finish(); };
+                    di.onerror = function () { finish(); };
+                    di.src = page.drawingDataUrl;
+                } else {
+                    finish();
+                }
+            });
+        }
+
+        window.aiSavePage = async function () {
+            var L = aiGetLang();
+            try {
+                aiSavedBlobs[currentPageIndex] = await aiRenderCurrentPageBlob();
+                aiUpdateSaveUi();
+            } catch (e) {
+                alert((L === 'ja' ? 'ページの保存に失敗しました: ' : 'Failed to save the page: ') + e.message);
+            }
+        };
+
+        function aiOpenHandoffDb() {
+            return new Promise(function (res, rej) {
+                var rq = indexedDB.open('auctlect-editor-handoff', 1);
+                rq.onupgradeneeded = function () { rq.result.createObjectStore('handoff'); };
+                rq.onsuccess = function () { res(rq.result); };
+                rq.onerror = function () { rej(rq.error); };
+            });
+        }
+
+        window.aiGoUpload = async function () {
+            var L = aiGetLang();
+            // 表示中のページは最新状態で自動保存（保存後に編集した場合の反映漏れ対策）
+            try {
+                if (pages[currentPageIndex]) {
+                    aiSavedBlobs[currentPageIndex] = await aiRenderCurrentPageBlob();
+                    aiUpdateSaveUi();
+                }
+            } catch (e) { /* 失敗時は従来どおり未保存チェックに任せる */ }
+            var missing = [];
+            for (var i = 0; i < pages.length; i++) {
+                if (!aiSavedBlobs[i]) missing.push(i + 1);
+            }
+            if (missing.length) {
+                alert(L === 'ja'
+                    ? '未保存のページがあります: ' + missing.join(', ') + '\n各ページを開いて「このページを保存」を押してから進んでください。'
+                    : 'Some pages are not saved yet: ' + missing.join(', ') + '\nOpen each page and press "Save this page" first.');
+                return;
+            }
+            try {
+                var items = pages.map(function (p, i) {
+                    return { blob: aiSavedBlobs[i], name: 'page_' + String(i + 1).padStart(3, '0') + '.jpg' };
+                });
+                var db = await aiOpenHandoffDb();
+                await new Promise(function (res, rej) {
+                    var tx = db.transaction('handoff', 'readwrite');
+                    tx.objectStore('handoff').put(items, 'mangaPages');
+                    tx.oncomplete = function () { db.close(); res(); };
+                    tx.onerror = function () { rej(tx.error); };
+                });
+                window.location.href = 'upload.html?fromEditor=manga';
+            } catch (e) {
+                alert((L === 'ja' ? 'アップロード画面への引き渡しに失敗しました: ' : 'Failed to hand off to the upload page: ') + e.message);
+            }
+        };
+
+        // ページ切替のたびに翻訳パネルと保存ボタンも更新（既存のrenderPageをラップ）
         var origRenderPage = window.renderPage;
         window.renderPage = function () {
             origRenderPage();
             ensureAiPanel();
+            ensureSaveButtons();
             renderAiPanel();
+            aiUpdateSaveUi();
         };
 
         // ===== 注文の自動読み込み =====
