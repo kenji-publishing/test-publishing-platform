@@ -99,7 +99,11 @@
             min-height: calc(100vh - 200px);
         }
 
-        @media (max-width: 1024px) {
+        /* 中間幅ではパネルを縮めて横並びを維持（縦積みになるのはスマホ幅のみ） */
+        @media (max-width: 1200px) {
+            .editor-layout { grid-template-columns: 1fr 300px; }
+        }
+        @media (max-width: 768px) {
             .editor-layout { grid-template-columns: 1fr; }
         }
 
@@ -1493,8 +1497,9 @@
 
             wrapper.appendChild(box);
 
-            // Preview for text region: show overlay
-            if (r.type === 'text' && r.preview && r.edited.trim()) {
+            // テキスト領域の訳文は入力があれば常に表示（目のトグルは枠線の表示/非表示切替）
+            // オーバーレイはpointer-events:noneなのでドラッグ・リサイズ操作はそのまま効く
+            if (r.type === 'text' && r.edited.trim()) {
                 var overlay = document.createElement('div');
                 overlay.className = 'preview-text-overlay';
                 if (r.writingMode === 'vertical') overlay.className += ' writing-vertical';
@@ -1640,7 +1645,12 @@
     }
     function updateRegionText(id, field, value) {
         var region = findRegion(id);
-        if (region) region[field] = value;
+        if (region) {
+            region[field] = value;
+            // 訳文は常時オーバーレイ表示になったため、入力に合わせて即時反映する
+            // （サイドパネルのtextareaは再構築されないのでフォーカスは失われない）
+            renderRegionsOnCanvas();
+        }
     }
     function updateRegionProp(id, prop, value) {
         var region = findRegion(id);
