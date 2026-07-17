@@ -728,8 +728,9 @@
         }
 
         async function submitRegistration() {
-            const userId = localStorage.getItem('userId');
-            if (!userId) {
+            // 認証はJWT（Bearerトークン）。旧X-User-IDヘッダーはサーバー側で廃止済み
+            const token = localStorage.getItem('token');
+            if (!token) {
                 alert(getL(uiText.alertLoginRequired));
                 window.location.href = '../login.html';
                 return;
@@ -758,7 +759,7 @@
             try {
                 const profileResponse = await fetch(`${API_BASE}/translators/profile`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-User-ID': userId },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
                     body: JSON.stringify({
                         displayName: document.getElementById('display-name').value,
                         bio: document.getElementById('bio').value,
@@ -778,7 +779,7 @@
                 for (const pair of pairs) {
                     await fetch(`${API_BASE}/translators/profile/languages`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-User-ID': userId },
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
                         body: JSON.stringify(pair)
                     });
                 }

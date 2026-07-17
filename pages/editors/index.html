@@ -359,7 +359,7 @@
                     <i class="fas fa-user-plus fa-2x mb-3"></i>
                     <h6 id="ctaTitle" data-i18n="editors.ctaTitle">Become an Editor</h6>
                     <p id="ctaDesc" data-i18n="editors.ctaDesc">Use your skills to earn income</p>
-                    <a href="../register-editor.html" class="btn btn-sm" id="ctaBtn" data-i18n="editors.ctaBtn">Register</a>
+                    <a href="register.html" class="btn btn-sm" id="ctaBtn" data-i18n="editors.ctaBtn">Register</a>
                 </div>
             </div>
 
@@ -653,6 +653,7 @@
         }
 
         let currentPage = 1;
+        let profilesById = {}; // profile_id -> プロフィール（依頼DM送信用）
         function getCurrentLang() { return localStorage.getItem('preferredLanguage') || 'en'; }
         function getL(obj) { if (!obj) return ''; const l = getCurrentLang(); return obj[l] || obj['en'] || ''; }
         function getSpecName(key) { return SPEC_NAMES[key] ? getL(SPEC_NAMES[key]) : key; }
@@ -733,6 +734,9 @@
                 loading.style.display = 'none';
 
                 if (data.editors && data.editors.length > 0) {
+                    // 依頼送信（DM）用に user_id と表示名を控えておく
+                    profilesById = {};
+                    data.editors.forEach(e => { profilesById[e.profile_id] = e; });
                     document.getElementById('results-count').textContent = getL(uiText.resultsFound).replace('{n}', data.pagination.total);
                     list.innerHTML = data.editors.map(t => renderEditorCard(t)).join('');
                     renderPagination(data.pagination);
@@ -764,7 +768,14 @@
             const stars = '\u2605'.repeat(Math.floor(rating)) + (rating % 1 >= 0.5 ? '\u2606' : '');
 
             let langPairsHtml = '';
-            if (editor.language_pairs) {
+            if (Array.isArray(editor.languages) && editor.languages.length > 0) {
+                // \u5b9fAPI: \u5bfe\u5fdc\u8a00\u8a9e\u306e\u5358\u4e00\u30ea\u30b9\u30c8 [{language, is_native}]
+                langPairsHtml = editor.languages.slice(0, 5).map(l => `
+                    <span class="lang-badge">${LANG_NAMES[l.language] || l.language}${l.is_native ? '<span class="native-badge">' + getL(uiText.native) + '</span>' : ''}</span>
+                `).join('');
+                if (editor.languages.length > 5) langPairsHtml += `<span class="lang-badge">+${editor.languages.length - 5}</span>`;
+            } else if (editor.language_pairs) {
+                // \u30c7\u30e2\u30c7\u30fc\u30bf\uff08\u30d0\u30c3\u30af\u30a8\u30f3\u30c9\u672a\u63a5\u7d9a\u6642\uff09\u306f\u8a00\u8a9e\u30da\u30a2\u5f62\u5f0f
                 const pairs = Array.isArray(editor.language_pairs) ? editor.language_pairs : [];
                 langPairsHtml = pairs.slice(0, 4).map(lp => `
                     <span class="lang-badge">${LANG_NAMES[lp.source] || lp.source} \u2192 ${LANG_NAMES[lp.target] || lp.target}${lp.is_native ? '<span class="native-badge">' + getL(uiText.native) + '</span>' : ''}</span>
@@ -832,8 +843,10 @@
 
             try {
                 const response = await fetch(`${API_BASE}/editors/${profileId}`);
+                if (!response.ok) throw new Error('HTTP ' + response.status);
                 const data = await response.json();
                 const profile = data.profile, languages = data.languages || [], reviews = data.reviews || [];
+                if (profile && profile.profile_id) profilesById[profile.profile_id] = profile;
                 renderProfileContent(content, profile, languages, reviews);
             } catch (error) {
                 if (demoEditor) {
@@ -863,7 +876,10 @@
                         <h5>${getL(uiText.profileBio)}</h5>
                         <p>${escapeHtml(profile.bio) || getL(uiText.noBioYet)}</p>
                         <h5>${getL(uiText.profileLanguages)}</h5>
-                        <div class="mb-3">${languages.map(l => `<span class="lang-badge mb-2">${LANG_NAMES[l.source_language] || l.source_language} \u2192 ${LANG_NAMES[l.target_language] || l.target_language}${l.is_native_target ? '<span class="native-badge">' + getL(uiText.native) + '</span>' : ''}</span>`).join('')}</div>
+                        <div class="mb-3">${languages.map(l => l.language
+                            ? `<span class="lang-badge mb-2">${LANG_NAMES[l.language] || l.language}${l.is_native ? '<span class="native-badge">' + getL(uiText.native) + '</span>' : ''}</span>`
+                            : `<span class="lang-badge mb-2">${LANG_NAMES[l.source_language] || l.source_language} \u2192 ${LANG_NAMES[l.target_language] || l.target_language}${l.is_native_target ? '<span class="native-badge">' + getL(uiText.native) + '</span>' : ''}</span>`
+                        ).join('')}</div>
                         <div class="row mb-3">
                             <div class="col-6"><strong>${getL(uiText.profileYearsExp)}</strong> ${profile.years_experience || 0}</div>
                             <div class="col-6"><strong>${getL(uiText.profileCompleted)}</strong> ${profile.completed_projects || 0}</div>
@@ -896,11 +912,15 @@
             modal.show();
 
             try {
-                const userId = localStorage.getItem('userId');
-                if (userId) {
-                    const response = await fetch(`${API_BASE}/works?author_id=${userId}`);
+                const token = localStorage.getItem('token');
+                if (token) {
+                    // 自分の作品一覧（要ログイン）
+                    const response = await fetch(`${API_BASE}/works/my`, {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
                     const data = await response.json();
-                    workSelect.innerHTML = '<option value="">' + getL(uiText.optSelectWork) + '</option>' + (data.works || []).map(w => `<option value="${w.work_id}">${escapeHtml(w.title)}</option>`).join('');
+                    const pub = (data.works || []).filter(w => w.status === 'published');
+                    workSelect.innerHTML = '<option value="">' + getL(uiText.optSelectWork) + '</option>' + pub.map(w => `<option value="${w.work_id}">${escapeHtml(w.title)}</option>`).join('');
                 } else {
                     workSelect.innerHTML = '<option value="">' + getL(uiText.alertLoginRequired) + '</option>';
                 }
@@ -909,58 +929,50 @@
             }
         }
 
+        // 依頼はDMとして送信し、正式な契約は既存フロー（作品ページから申請→承認→次回作パートナー）へ誘導する
         async function submitRequest() {
             var profileId = document.getElementById('request-profile-id').value;
             var workId = document.getElementById('request-work').value;
             var message = document.getElementById('request-message').value;
             var deadline = document.getElementById('request-deadline').value;
 
+            var token = localStorage.getItem('token');
+            if (!token) {
+                alert(getL(uiText.alertLoginRequired));
+                window.location.href = '../login.html';
+                return;
+            }
             if (!workId) { alert(getL(uiText.alertSelectWork)); return; }
 
-            try {
-                var response = await fetch(API_BASE + '/editors/' + profileId + '/request', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
-                    body: JSON.stringify({ workId: workId, title: 'Editing Request', description: message, deadline: deadline || null })
-                });
-                if (response.ok) {
-                    createMessageConversation(profileId, workId, message, deadline, 'editor');
-                    alert(getL(uiText.alertRequestSent));
-                    bootstrap.Modal.getInstance(document.getElementById('requestModal')).hide();
-                } else {
-                    throw new Error('API error');
-                }
-            } catch (error) {
-                // デモモード: メッセージ機能に会話を作成
-                createMessageConversation(profileId, workId, message, deadline, 'editor');
-                alert(getL(uiText.alertRequestSent));
-                bootstrap.Modal.getInstance(document.getElementById('requestModal')).hide();
-            }
-        }
+            var prof = profilesById[profileId];
+            if (!prof || !prof.user_id) { alert(getL(uiText.alertSendFailed)); return; }
 
-        // メッセージ機能に会話を自動作成
-        function createMessageConversation(profileId, workId, message, deadline, role) {
-            var editor = DEMO_EDITORS.find(function(e) { return String(e.id) === String(profileId); });
-            if (!editor) return;
             var workSelect = document.getElementById('request-work');
             var workTitle = workSelect.options[workSelect.selectedIndex].text || 'Work';
-            var convs = [];
-            try { convs = JSON.parse(localStorage.getItem('publisher_messages') || '[]'); } catch(e) { convs = []; }
-            var convId = 'conv_edit_' + Date.now();
-            var msgText = '--- Editing Request ---\nWork: ' + workTitle;
-            if (deadline) msgText += '\nDeadline: ' + deadline;
-            if (message) msgText += '\n\n' + message;
-            convs.unshift({
-                id: convId,
-                name: editor.name,
-                role: role,
-                initial: editor.name.charAt(0),
-                unread: 0,
-                messages: [
-                    { id: 'm1', text: msgText, sent: true, time: new Date().toISOString() }
-                ]
-            });
-            localStorage.setItem('publisher_messages', JSON.stringify(convs));
+            var link = window.location.origin + '/pages/work-detail.html?id=' + workId;
+
+            var content = '📩 編集のご依頼 / Editing request\n'
+                + '作品 / Work: ' + workTitle + '\n'
+                + (deadline ? '希望時期 / Preferred timing: ' + deadline + '\n' : '')
+                + '作品ページ / Work page: ' + link + '\n'
+                + (message ? '\n' + message + '\n' : '')
+                + '\n— お受けいただける場合は、上の作品ページから「編集を申し込む」で申請してください。承認後はメッセージで内容を相談でき、次回作のアップロード時に同意書と収益分配（編集者10%）が正式に発行されます。\n'
+                + '— If you accept, please apply from the work page above. After approval you can discuss details via messages; the agreement and revenue share (editor 10%) are issued when the next work is uploaded.';
+
+            try {
+                var response = await fetch(API_BASE + '/messages/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ recipientId: prof.user_id, content: content })
+                });
+                var data = null;
+                try { data = await response.json(); } catch (e) {}
+                if (!response.ok) throw new Error((data && data.error) || ('HTTP ' + response.status));
+                alert(getL(uiText.alertRequestSent));
+                bootstrap.Modal.getInstance(document.getElementById('requestModal')).hide();
+            } catch (error) {
+                alert(getL(uiText.alertSendFailed) + ': ' + error.message);
+            }
         }
 
         function resetFilters() {
