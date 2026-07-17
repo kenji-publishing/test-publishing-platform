@@ -446,6 +446,10 @@
         }
         .message-bubble.sent .message-time { text-align: right; color: rgba(255,255,255,0.8); }
         .message-bubble.received .message-time { color: var(--color-text-secondary); }
+        /* メッセージ内のURLリンク（送信=白地に白文字にならないよう明示） */
+        .message-bubble .msg-link { word-break: break-all; text-decoration: underline; }
+        .message-bubble.sent .msg-link { color: #fff; }
+        .message-bubble.received .msg-link { color: var(--color-accent); }
 
         .date-separator {
             text-align: center;
@@ -1263,7 +1267,7 @@
                     const sent = myId && msg.sender_id === myId;
                     html += `
                     <div class="message-bubble ${sent ? 'sent' : 'received'}">
-                        <div class="message-text">${escapeHtml(msg.content).replace(/\n/g, '<br>')}</div>
+                        <div class="message-text">${linkify(escapeHtml(msg.content)).replace(/\n/g, '<br>')}</div>
                         <div class="message-time">${formatMessageTime(msg.created_at)}</div>
                     </div>`;
                 });
@@ -1382,6 +1386,18 @@
         }
 
         function escapeHtml(text) { if (!text) return ''; const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
+
+        // エスケープ済みテキスト内のURLをクリック可能なリンクにする
+        // （エスケープ後に適用するので、URL内に " や < は残っておらず属性注入は起きない）
+        function linkify(escapedText) {
+            return escapedText.replace(/https?:\/\/[^\s<]+/g, function(url) {
+                // 文末の句読点・閉じ括弧はリンクに含めない
+                var trail = '';
+                var m = url.match(/[).,、。」）!?]+$/);
+                if (m) { trail = m[0]; url = url.slice(0, url.length - trail.length); }
+                return '<a href="' + url + '" target="_blank" rel="noopener noreferrer" class="msg-link">' + url + '</a>' + trail;
+            });
+        }
 
         // ========== Init ==========
         document.addEventListener('DOMContentLoaded', async () => {
