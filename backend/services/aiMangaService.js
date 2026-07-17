@@ -157,13 +157,18 @@ async function translateManga({ pagePaths, sourceLang, targetLang, tier, glossar
 async function sampleManga({ imagePath, sourceLang, targetLang }) {
     const tiers = ['haiku', 'sonnet', 'opus'];
     const runTier = async (tier) => {
-        const opts = { timeout: 30000, maxRetries: 1 };
+        // セリフが多い・レイアウトが特殊なページは1回の読み取りに1分近くかかることがある。
+        // 75s×1回（+混雑時のみ即時再試行1回）で、全体を必ずCloudflareの約100s上限内に収める
+        // （旧設定の30s×SDK再試行×手動再試行は最悪124sでnginx/CFに切られていた）
+        const started = Date.now();
         try {
-            return await translatePage({ imagePath, sourceLang, targetLang, tier, glossary: [] }, opts);
+            return await translatePage({ imagePath, sourceLang, targetLang, tier, glossary: [] }, { timeout: 75000, maxRetries: 0 });
         } catch (e) {
             if (isNonRetryable(e) || !isOverloaded(e)) throw e;
             await new Promise(r => setTimeout(r, 4000)); // 混雑は少し待つと通ることが多い
-            return await translatePage({ imagePath, sourceLang, targetLang, tier, glossary: [] }, opts);
+            // 再試行は全体90s以内に収まる残り時間だけ使う（混雑エラーは通常数秒で返るため実際はほぼ75s）
+            const remaining = Math.max(90000 - (Date.now() - started), 15000);
+            return await translatePage({ imagePath, sourceLang, targetLang, tier, glossary: [] }, { timeout: Math.min(remaining, 75000), maxRetries: 0 });
         }
     };
     const results = await Promise.allSettled(tiers.map(runTier));

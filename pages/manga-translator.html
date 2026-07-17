@@ -1496,7 +1496,7 @@
             return;
         }
 
-        const loadingMsg = L === 'ja' ? '3つのAIモデルが1ページ目を読み取り中です。20〜40秒ほどお待ちください...' : 'Three AI models are reading page 1 — this takes 20-40 seconds...';
+        const loadingMsg = L === 'ja' ? '3つのAIモデルが1ページ目を読み取り中です。通常20〜40秒、セリフが多いページでは最大2分ほどかかります...' : 'Three AI models are reading page 1 — usually 20-40 seconds, up to ~2 minutes for text-heavy pages...';
         ['Haiku', 'Sonnet', 'Opus'].forEach(m => {
             document.getElementById('compare' + m).innerHTML = '<div class="compare-loading"><i class="fas fa-spinner fa-spin"></i> ' + loadingMsg + '</div>';
         });
@@ -1513,7 +1513,14 @@
                 window.location.href = 'login.html';
                 return;
             }
-            const data = await resp.json();
+            // 504等ではnginx/CloudflareがHTMLを返すことがある → JSONとして読めない場合は
+            // 「時間切れ」として分かりやすいメッセージにする
+            let data = null;
+            try { data = await resp.json(); } catch (parseErr) {
+                throw new Error(L === 'ja'
+                    ? 'サーバーの処理が時間内に終わりませんでした。セリフの多いページや複雑なレイアウトで起きることがあります。少し待ってから「再試行」を押してください。'
+                    : 'The server did not finish in time. This can happen with text-heavy or unusual layouts. Please wait a moment and press Retry.');
+            }
             if (data && data.code === 'SAMPLE_LIMIT') {
                 throw new Error(L === 'ja' ? '本日のお試し翻訳の上限に達しました。明日以降にお試しください。' : 'Daily comparison limit reached. Please try again tomorrow.');
             }
@@ -1526,8 +1533,10 @@
             });
         } catch (err) {
             const msg = (L === 'ja' ? 'サンプル翻訳に失敗しました: ' : 'Sample translation failed: ') + err.message;
+            const retryBtn = '<button class="btn btn-sm" onclick="runComparison()" style="margin-top:0.5rem; border:1px solid var(--color-accent); color:var(--color-accent); background:transparent; border-radius:6px; padding:2px 12px;"><i class="fas fa-redo"></i> ' +
+                (L === 'ja' ? '再試行' : 'Retry') + '</button>';
             ['Haiku', 'Sonnet', 'Opus'].forEach(m => {
-                document.getElementById('compare' + m).innerHTML = '<div style="color:#dc3545; white-space:pre-wrap;">' + escH(msg) + '</div>';
+                document.getElementById('compare' + m).innerHTML = '<div style="color:#dc3545; white-space:pre-wrap;">' + escH(msg) + '</div>' + retryBtn;
             });
         }
     }
