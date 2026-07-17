@@ -49,7 +49,8 @@
         }
 
         .reader-toolbar {
-            position: fixed; top: 66px; left: 0; right: 0;
+            /* --nav-h はナビバーの実際の高さをJSが測って設定（フォールバック80px） */
+            position: fixed; top: var(--nav-h, 80px); left: 0; right: 0;
             background: var(--reader-bg);
             border-bottom: 1px solid var(--reader-border);
             padding: 0.5rem 1rem;
@@ -125,7 +126,7 @@
         }
 
         .settings-panel, .bookmarks-panel, .search-panel {
-            position: fixed; top: 121px;
+            position: fixed; top: calc(var(--nav-h, 80px) + var(--toolbar-h, 55px) + 4px);
             background: var(--reader-bg);
             border: 1px solid var(--reader-border);
             border-radius: 12px;
@@ -160,7 +161,7 @@
         .theme-preview.dark { background: #1A1A1A; }
         .theme-preview.sepia { background: #F4ECD8; }
 
-        .reader-main { padding-top: 126px; padding-bottom: 180px; min-height: 100vh; touch-action: pan-y; }
+        .reader-main { padding-top: calc(var(--nav-h, 80px) + var(--toolbar-h, 50px) + 10px); padding-bottom: 180px; min-height: 100vh; touch-action: pan-y; }
 
         .reader-content {
             max-width: 800px; margin: 0 auto; padding: 1.5rem;
@@ -477,7 +478,7 @@
 
     @media (max-width: 991.98px) {
 
-        .user-menu-nav { position: fixed; top: 66px; right: 10px; left: auto; min-width: 260px; max-width: calc(100vw - 20px); z-index: 9999; }
+        .user-menu-nav { position: fixed; top: var(--nav-h, 80px); right: 10px; left: auto; min-width: 260px; max-width: calc(100vw - 20px); z-index: 9999; }
 
     }
 
@@ -486,7 +487,7 @@
     #textModeUI { display: block; }
     #mangaModeUI { display: none; }
     .viewer-toolbar {
-        position: fixed; top: 66px; left: 0; right: 0;
+        position: fixed; top: var(--nav-h, 80px); left: 0; right: 0;
         background: var(--reader-bg);
         border-bottom: 1px solid var(--reader-border);
         padding: 0.5rem 1rem;
@@ -498,14 +499,14 @@
     .viewer-toolbar .toolbar-divider { color: var(--reader-border); }
     .viewer-toolbar .work-author { font-size: 0.8rem; color: var(--reader-secondary); }
     .viewer-container {
-        position: fixed; top: 116px; left: 0; right: 0; bottom: 0;
+        position: fixed; top: calc(var(--nav-h, 80px) + var(--toolbar-h, 50px)); left: 0; right: 0; bottom: 0;
         display: flex; flex-direction: column;
     }
     .viewer-content {
         flex: 1; display: flex; align-items: center; justify-content: center;
         overflow: hidden; position: relative; background: #EDEAE5;
     }
-    .manga-img { max-width: 100%; max-height: calc(100vh - 258px); object-fit: contain; cursor: pointer; transition: transform 0.2s; }
+    .manga-img { max-width: 100%; max-height: calc(100vh - var(--nav-h, 80px) - 192px); object-fit: contain; cursor: pointer; transition: transform 0.2s; }
     .viewer-controls {
         background: var(--reader-bg); padding: 0.75rem 1rem;
         border-top: 1px solid var(--reader-border);
@@ -857,6 +858,26 @@
             document.getElementById('textModeUI').style.display = 'none';
             document.getElementById('mangaModeUI').style.display = 'block';
         }
+
+        // ===== ナビバーの実際の高さを測り、ツールバー等の位置に反映 =====
+        // （言語・フォント・画面幅で高さが変わるため、固定値ではボタンが隠れることがある）
+        function syncNavHeight() {
+            var nav = document.querySelector('.navbar-custom');
+            if (nav && nav.offsetHeight) {
+                document.documentElement.style.setProperty('--nav-h', nav.offsetHeight + 'px');
+            }
+            // リーダー/ビューアのツールバー実高も測る（ボタンの折返しで高さが変わるため）
+            var tb = document.querySelector(isManga ? '.viewer-toolbar' : '.reader-toolbar');
+            if (tb && tb.offsetHeight) {
+                document.documentElement.style.setProperty('--toolbar-h', tb.offsetHeight + 'px');
+            }
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            syncNavHeight();
+            setTimeout(syncNavHeight, 300); // navbar.js描画・フォント読込後にもう一度
+        });
+        window.addEventListener('load', function() { setTimeout(syncNavHeight, 100); });
+        window.addEventListener('resize', syncNavHeight);
     </script>
     <script>
         // UI Text for 9 languages
