@@ -1230,13 +1230,13 @@
                             <i class="fas fa-file-alt"></i>
                             <span id="s9DlLabel">翻訳スクリプト (.txt)</span>
                         </button>
-                        <a class="download-btn" href="manga-editor.html" style="text-decoration:none;">
+                        <a class="download-btn" href="manga-editor.html" id="s9EditorLink" style="text-decoration:none;">
                             <i class="fas fa-pen-nib"></i>
-                            <span id="s9EditorLabel">マンガエディターを開く</span>
+                            <span id="s9EditorLabel">マンガエディターで配置</span>
                         </a>
                     </div>
                     <p id="s9EditorHint" style="font-size:0.85rem; color:var(--color-text-secondary); max-width:520px; margin:0.75rem auto 0;">
-                        翻訳スクリプト（原文と訳文の対訳リスト）をダウンロードし、マンガエディターでページ画像に訳文を配置してください。文字の消去・配置はエディターで自由に調整できます。
+                        「マンガエディターで配置」を押すと、翻訳したページ画像とAI翻訳がそのままエディターに読み込まれます（再アップロード不要）。各訳文の「＋枠を作成」でテキスト枠が置かれるので、ドラッグで位置を調整してください。
                     </p>
 
                     <div class="step-actions" style="margin-top:2rem;">
@@ -1348,6 +1348,11 @@
         if (n === 5) updateQuote();
         if (n === 6) updatePaymentAmount();
         if (n === 8) { renderReviewPages(); }
+        if (n === 9 && currentOrderId) {
+            // エディターに注文IDを渡す（画像+AI翻訳の自動読み込み）
+            var edLink = document.getElementById('s9EditorLink');
+            if (edLink) edLink.href = 'manga-editor.html?order=' + encodeURIComponent(currentOrderId);
+        }
         for (let i = 1; i <= 9; i++) { const el = document.getElementById('step'+i); if (el) el.style.display = (i===n)?'':'none'; }
         currentStep = n; updateStepIndicators(); window.scrollTo({top:0,behavior:'smooth'});
     }
