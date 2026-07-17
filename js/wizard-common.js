@@ -140,6 +140,89 @@
         });
     }
 
+    // Word (.docx) → リッチ抽出: 本文テキスト + 挿絵画像 + 表
+    // 戻り値: { parts: string[], images: [{blob, name}] }
+    //   parts の中身は 1行 = 1ブロック。挿絵の位置には '[[img:PENDING:<n>]]'、
+    //   表は '[[table]]' 〜 セル行(' | '区切り) 〜 '[[/table]]' のマーカーで表す。
+    //   （リーダー側 pages/reader.html の parseBlocks がこのマーカーを解釈する）
+    function docxToRich(file) {
+        return loadScriptOnce(
+            'https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js',
+            function () { return !!global.mammoth; }
+        ).then(function () {
+            return file.arrayBuffer();
+        }).then(function (buf) {
+            // convertToHtml は画像をdata URIとして本文中の位置に埋め込む
+            return global.mammoth.convertToHtml({ arrayBuffer: buf });
+        }).then(function (result) {
+            var doc = new DOMParser().parseFromString('<div id="r">' + (result.value || '') + '</div>', 'text/html');
+            var root = doc.getElementById('r');
+            var parts = [];
+            var images = [];
+
+            function dataUriToBlob(src) {
+                var m = /^data:([^;,]+);base64,(.*)$/.exec(src);
+                if (!m) return null;
+                var bin = atob(m[2]);
+                var bytes = new Uint8Array(bin.length);
+                for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+                return new Blob([bytes], { type: m[1] });
+            }
+
+            function extToName(type, idx) {
+                var ext = ({ 'image/jpeg': '.jpg', 'image/png': '.png', 'image/gif': '.gif', 'image/webp': '.webp' })[type] || '.png';
+                return 'illustration_' + (idx + 1) + ext;
+            }
+
+            function registerImgs(el) {
+                // 要素内の画像をすべて挿絵として登録し、マーカーを返す
+                var markers = [];
+                el.querySelectorAll('img').forEach(function (img) {
+                    var blob = dataUriToBlob(img.getAttribute('src') || '');
+                    if (!blob) return;
+                    images.push({ blob: blob, name: extToName(blob.type, images.length) });
+                    markers.push('[[img:PENDING:' + (images.length - 1) + ']]');
+                });
+                return markers;
+            }
+
+            Array.prototype.forEach.call(root.children, function (el) {
+                var tag = el.tagName;
+                if (tag === 'TABLE') {
+                    var rows = [];
+                    el.querySelectorAll('tr').forEach(function (tr) {
+                        var cells = [];
+                        tr.querySelectorAll('th,td').forEach(function (td) {
+                            cells.push((td.textContent || '').trim().replace(/\s*\n\s*/g, ' '));
+                        });
+                        if (cells.length) rows.push(cells.join(' | '));
+                    });
+                    if (rows.length) {
+                        parts.push('[[table]]');
+                        rows.forEach(function (r) { parts.push(r); });
+                        parts.push('[[/table]]');
+                    }
+                    return;
+                }
+                if (tag === 'UL' || tag === 'OL') {
+                    el.querySelectorAll('li').forEach(function (li) {
+                        var t = (li.textContent || '').trim();
+                        if (t) parts.push('・' + t);
+                    });
+                    registerImgs(el).forEach(function (mk) { parts.push(mk); });
+                    return;
+                }
+                // 段落・見出しなど: テキスト → その後に段落内の挿絵
+                var markers = registerImgs(el);
+                var text = (el.textContent || '').trim();
+                if (text) parts.push(text);
+                markers.forEach(function (mk) { parts.push(mk); });
+            });
+
+            return { parts: parts, images: images };
+        });
+    }
+
     global.WizardCommon = {
         CURRENCIES: CURRENCIES,
         PAY_MINIMUMS: PAY_MINIMUMS,
@@ -147,6 +230,7 @@
         formatPrice: formatPrice,
         getMinimum: getMinimum,
         docxToText: docxToText,
+        docxToRich: docxToRich,
         pdfToImageFiles: pdfToImageFiles
     };
 })(window);

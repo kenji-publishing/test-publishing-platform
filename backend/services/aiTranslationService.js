@@ -86,6 +86,7 @@ Rules:
 - The text is one part of a longer manuscript; it may start or end mid-scene. Translate it as-is without adding introductions or conclusions.
 - Keep the original paragraph breaks and blank lines.
 - Keep proper nouns consistent throughout.
+- Lines that are markup markers — like [[img src="..." w="..." align="..."]], [[table]] or [[/table]] — must be copied to the output EXACTLY as-is, unchanged and in the same position. Inside a [[table]] block, translate the cell text but keep the " | " separators and the line structure.
 - Respond with ONLY the ${tgtName} translation — no preamble, no explanations, no markdown fences.
 
 Text to translate:

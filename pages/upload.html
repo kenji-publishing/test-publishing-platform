@@ -249,6 +249,13 @@
 
                             <div id="fileList" class="mt-4"></div>
                             <div id="previewArea" class="mt-4 d-flex flex-wrap"></div>
+
+                            <!-- Word原稿から抽出した挿絵（大きさ・配置の指定） -->
+                            <div id="illustrationsPanel" class="mt-3" style="display:none; border:1px solid #e0d5c5; border-radius:8px; padding:0.75rem 1rem; background:rgba(139,115,85,0.04);">
+                                <h6 id="illusTitle"><i class="fas fa-image me-2"></i>挿絵</h6>
+                                <p class="small text-secondary" id="illusHint"></p>
+                                <div id="illustrationsList" style="display:flex; flex-direction:column; gap:0.6rem;"></div>
+                            </div>
                         </div>
 
                         <!-- Cover Image -->
@@ -842,6 +849,103 @@
 
         var selectedContentFiles = [];
 
+        // ===== Word原稿の挿絵・表（リッチ抽出） =====
+        var docxRichByFile = new Map();   // File -> parts（グローバル挿絵番号でマーカー済みの行配列）
+        var pendingIllustrations = [];    // [{blob, name, w, align, thumbUrl}]
+
+        var novelText = {
+            illusTitle: { en: 'Illustrations', ja: '挿絵', zh: '插图', es: 'Ilustraciones', fr: 'Illustrations', de: 'Illustrationen', ko: '삽화', ar: 'الرسوم التوضيحية', pt: 'Ilustrações', it: 'Illustrazioni' },
+            illusHint: { en: 'Images found in your Word file. They will appear at the same position in the reader — set the size and alignment for each.', ja: 'Wordファイル内の画像です。リーダーでは本文の同じ位置に表示されます。それぞれ大きさと配置を指定できます。', zh: '在Word文件中找到的图片。它们将显示在阅读器中的相同位置——可为每张设置大小和对齐方式。', es: 'Imágenes encontradas en tu archivo Word. Aparecerán en la misma posición en el lector; define tamaño y alineación de cada una.', fr: 'Images trouvées dans votre fichier Word. Elles apparaîtront à la même position dans le lecteur — réglez la taille et l\'alignement de chacune.', de: 'In Ihrer Word-Datei gefundene Bilder. Sie erscheinen im Reader an derselben Stelle — Größe und Ausrichtung je Bild festlegen.', ko: 'Word 파일에서 찾은 이미지입니다. 리더에서 본문의 같은 위치에 표시됩니다. 각각 크기와 정렬을 지정하세요.', ar: 'الصور الموجودة في ملف Word. ستظهر في نفس الموضع في القارئ — حدّد الحجم والمحاذاة لكل صورة.', pt: 'Imagens encontradas no seu arquivo Word. Aparecerão na mesma posição no leitor — defina o tamanho e o alinhamento de cada uma.', it: 'Immagini trovate nel file Word. Appariranno nella stessa posizione nel lettore: imposta dimensione e allineamento per ciascuna.' },
+            sizeLabel: { en: 'Size', ja: '大きさ', zh: '大小', es: 'Tamaño', fr: 'Taille', de: 'Größe', ko: '크기', ar: 'الحجم', pt: 'Tamanho', it: 'Dimensione' },
+            posLabel: { en: 'Position', ja: '配置', zh: '位置', es: 'Posición', fr: 'Position', de: 'Ausrichtung', ko: '배치', ar: 'الموضع', pt: 'Posição', it: 'Posizione' },
+            sizeS: { en: 'Small (30%)', ja: '小（30%）', zh: '小（30%）', es: 'Pequeña (30%)', fr: 'Petite (30%)', de: 'Klein (30%)', ko: '작게(30%)', ar: 'صغير (30%)', pt: 'Pequena (30%)', it: 'Piccola (30%)' },
+            sizeM: { en: 'Medium (60%)', ja: '中（60%）', zh: '中（60%）', es: 'Mediana (60%)', fr: 'Moyenne (60%)', de: 'Mittel (60%)', ko: '중간(60%)', ar: 'متوسط (60%)', pt: 'Média (60%)', it: 'Media (60%)' },
+            sizeL: { en: 'Large (100%)', ja: '大（100%）', zh: '大（100%）', es: 'Grande (100%)', fr: 'Grande (100%)', de: 'Groß (100%)', ko: '크게(100%)', ar: 'كبير (100%)', pt: 'Grande (100%)', it: 'Grande (100%)' },
+            alignL: { en: 'Left', ja: '左', zh: '左', es: 'Izquierda', fr: 'Gauche', de: 'Links', ko: '왼쪽', ar: 'يسار', pt: 'Esquerda', it: 'Sinistra' },
+            alignC: { en: 'Center', ja: '中央', zh: '居中', es: 'Centro', fr: 'Centre', de: 'Mitte', ko: '가운데', ar: 'وسط', pt: 'Centro', it: 'Centro' },
+            alignR: { en: 'Right', ja: '右', zh: '右', es: 'Derecha', fr: 'Droite', de: 'Rechts', ko: '오른쪽', ar: 'يمين', pt: 'Direita', it: 'Destra' },
+            uploadingIllus: { en: 'Uploading illustrations… ', ja: '挿絵をアップロード中… ', zh: '正在上传插图… ', es: 'Subiendo ilustraciones… ', fr: 'Envoi des illustrations… ', de: 'Illustrationen werden hochgeladen… ', ko: '삽화 업로드 중… ', ar: 'جارٍ رفع الرسوم… ', pt: 'Enviando ilustrações… ', it: 'Caricamento illustrazioni… ' },
+            illusFailed: { en: 'Failed to upload an illustration: ', ja: '挿絵のアップロードに失敗しました: ', zh: '插图上传失败：', es: 'Error al subir una ilustración: ', fr: 'Échec de l\'envoi d\'une illustration : ', de: 'Fehler beim Hochladen einer Illustration: ', ko: '삽화 업로드에 실패했습니다: ', ar: 'فشل رفع رسم توضيحي: ', pt: 'Falha ao enviar uma ilustração: ', it: 'Caricamento di un\'illustrazione non riuscito: ' },
+            illusWord: { en: 'Illustration', ja: '挿絵', zh: '插图', es: 'Ilustración', fr: 'Illustration', de: 'Illustration', ko: '삽화', ar: 'رسم توضيحي', pt: 'Ilustração', it: 'Illustrazione' },
+            tableWord: { en: 'Table', ja: '表', zh: '表格', es: 'Tabla', fr: 'Tableau', de: 'Tabelle', ko: '표', ar: 'جدول', pt: 'Tabela', it: 'Tabella' }
+        };
+
+        // 選択中のdocxを解析し、挿絵一覧パネルを更新する
+        async function processDocxSelection() {
+            docxRichByFile = new Map();
+            pendingIllustrations.forEach(function(p) { if (p.thumbUrl) { try { URL.revokeObjectURL(p.thumbUrl); } catch (e) {} } });
+            pendingIllustrations = [];
+            var docxFiles = selectedContentFiles.filter(function(f) { return /\.docx$/i.test(f.name); });
+            for (var d = 0; d < docxFiles.length; d++) {
+                var f = docxFiles[d];
+                try {
+                    var rich = await WizardCommon.docxToRich(f);
+                    var offset = pendingIllustrations.length;
+                    // ファイル内の挿絵番号 → 全体の通し番号に付け替え
+                    var parts = rich.parts.map(function(pt) {
+                        return pt.replace(/\[\[img:PENDING:(\d+)\]\]/g, function(mm, n) {
+                            return '[[img:PENDING:' + (offset + parseInt(n, 10)) + ']]';
+                        });
+                    });
+                    rich.images.forEach(function(im) {
+                        pendingIllustrations.push({ blob: im.blob, name: im.name, w: '100', align: 'center', thumbUrl: URL.createObjectURL(im.blob) });
+                    });
+                    docxRichByFile.set(f, parts);
+                } catch (e) {
+                    console.error('docx rich parse failed (will fall back to text-only):', e);
+                }
+            }
+            renderIllustrationsPanel();
+        }
+
+        function renderIllustrationsPanel() {
+            var panel = document.getElementById('illustrationsPanel');
+            var list = document.getElementById('illustrationsList');
+            document.getElementById('illusTitle').innerHTML = '<i class="fas fa-image me-2"></i>' + getL(novelText.illusTitle) + ' (' + pendingIllustrations.length + ')';
+            document.getElementById('illusHint').textContent = getL(novelText.illusHint);
+            list.innerHTML = '';
+            if (!pendingIllustrations.length) { panel.style.display = 'none'; return; }
+            panel.style.display = '';
+            pendingIllustrations.forEach(function(pi, i) {
+                var row = document.createElement('div');
+                row.style.cssText = 'display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;';
+                var img = document.createElement('img');
+                img.src = pi.thumbUrl;
+                img.style.cssText = 'width:64px; height:64px; object-fit:cover; border-radius:6px; border:1px solid #e0d5c5;';
+                row.appendChild(img);
+                var num = document.createElement('span');
+                num.className = 'small text-secondary';
+                num.textContent = getL(novelText.illusWord) + ' ' + (i + 1);
+                row.appendChild(num);
+
+                var mkSelect = function(labelObj, options, current, onChange) {
+                    var wrap = document.createElement('label');
+                    wrap.className = 'small';
+                    wrap.style.cssText = 'display:flex; align-items:center; gap:0.3rem;';
+                    wrap.appendChild(document.createTextNode(getL(labelObj)));
+                    var sel = document.createElement('select');
+                    sel.className = 'form-select form-select-sm';
+                    sel.style.width = 'auto';
+                    options.forEach(function(o) {
+                        var op = document.createElement('option');
+                        op.value = o.v; op.textContent = getL(o.t);
+                        if (o.v === current) op.selected = true;
+                        sel.appendChild(op);
+                    });
+                    sel.addEventListener('change', function() { onChange(sel.value); });
+                    wrap.appendChild(sel);
+                    return wrap;
+                };
+                row.appendChild(mkSelect(novelText.sizeLabel, [
+                    { v: '30', t: novelText.sizeS }, { v: '60', t: novelText.sizeM }, { v: '100', t: novelText.sizeL }
+                ], pi.w, function(v) { pi.w = v; }));
+                row.appendChild(mkSelect(novelText.posLabel, [
+                    { v: 'left', t: novelText.alignL }, { v: 'center', t: novelText.alignC }, { v: 'right', t: novelText.alignR }
+                ], pi.align, function(v) { pi.align = v; }));
+                list.appendChild(row);
+            });
+        }
+
         function handleFiles(files) {
             selectedContentFiles = Array.from(files);
             fileList.innerHTML = '<h6>' + getL(uiText.selectedFiles) + '</h6>';
@@ -864,6 +968,9 @@
                     reader.readAsDataURL(file);
                 }
             }
+
+            // Wordファイルは挿絵・表を先に解析してパネル表示
+            processDocxSelection();
         }
 
         // ========== マンガページ管理 ==========
@@ -1761,7 +1868,9 @@
                         var mf = manuscriptFiles[i];
                         if (/\.docx$/i.test(mf.name)) {
                             try {
-                                parts.push(await WizardCommon.docxToText(mf));
+                                // リッチ解析済みなら挿絵・表マーカー付きの本文を使う
+                                var richParts = docxRichByFile.get(mf);
+                                parts.push(richParts ? richParts.join('\n\n') : await WizardCommon.docxToText(mf));
                             } catch (docxErr) {
                                 alert(getL({
                                     en: 'Could not read the Word file "' + mf.name + '": ',
@@ -1890,9 +1999,15 @@
                     ? getL(mangaText.previewManga).replace('{n}', mangaPages.length).replace('{c}', marks)
                     : getL(mangaText.previewKeep).replace('{n}', mangaExistingCount);
             } else {
-                document.getElementById('pvContent').textContent = p.content ||
-                    (editWork && editWork.content) ||
+                var pvText = p.content || (editWork && editWork.content) ||
                     getL({ en: '(No text content)', ja: '（本文なし）' });
+                // 挿絵・表マーカーは読みやすい表記に置き換えて表示（実際の表示はリーダーで確認）
+                pvText = pvText
+                    .replace(/\[\[img:PENDING:(\d+)\]\]/g, function(mm, n) { return '〔' + getL(novelText.illusWord) + ' ' + (parseInt(n, 10) + 1) + '〕'; })
+                    .replace(/\[\[img [^\]]*\]\]/g, '〔' + getL(novelText.illusWord) + '〕')
+                    .replace(/\[\[table\]\]/g, '〔' + getL(novelText.tableWord) + '〕')
+                    .replace(/\[\[\/table\]\]/g, '');
+                document.getElementById('pvContent').textContent = pvText;
             }
 
             // AI利用表示（読者に見える形と同じラベル）
@@ -1938,6 +2053,7 @@
         async function confirmPublish() {
             var token = localStorage.getItem('token');
             var btn = document.getElementById('pvConfirmBtn');
+            var btnOrigText = btn ? btn.textContent : '';
             if (btn) { btn.disabled = true; }
 
             try {
@@ -1951,6 +2067,32 @@
                     });
                     var coverData = await coverResp.json();
                     if (coverResp.ok && coverData.url) { pendingPayload.coverImage = coverData.url; }
+                }
+
+                // Word原稿の挿絵をアップロードし、本文中のマーカーを実URLに置き換える
+                if (pendingPayload.content && pendingPayload.content.indexOf('[[img:PENDING:') !== -1) {
+                    for (var gi = 0; gi < pendingIllustrations.length; gi++) {
+                        var marker = '[[img:PENDING:' + gi + ']]';
+                        if (pendingPayload.content.indexOf(marker) === -1) continue;
+                        if (btn) btn.textContent = getL(novelText.uploadingIllus) + (gi + 1) + '/' + pendingIllustrations.length;
+                        var pi = pendingIllustrations[gi];
+                        var ifd = new FormData();
+                        ifd.append('illustration', new File([pi.blob], pi.name, { type: pi.blob.type || 'image/png' }));
+                        var ir = await fetch((window.API_ORIGIN || '') + '/api/works/upload-illustration', {
+                            method: 'POST',
+                            headers: { 'Authorization': 'Bearer ' + token },
+                            body: ifd
+                        });
+                        var idata = null;
+                        try { idata = await ir.json(); } catch (e) {}
+                        if (!ir.ok || !idata || !idata.url) {
+                            throw new Error(getL(novelText.illusFailed) + ((idata && idata.error) || ('HTTP ' + ir.status)));
+                        }
+                        pendingPayload.content = pendingPayload.content.split(marker)
+                            .join('[[img src="' + idata.url + '" w="' + pi.w + '" align="' + pi.align + '"]]');
+                    }
+                    // 対応する挿絵が無かったマーカーは本文から取り除く
+                    pendingPayload.content = pendingPayload.content.replace(/\[\[img:PENDING:\d+\]\]/g, '');
                 }
 
                 // マンガ新規作成: まず下書きとして作成し、ページが揃ってから公開する
@@ -2031,7 +2173,7 @@
             } catch (err) {
                 alert(getL({ en: 'Upload failed: ', ja: 'アップロードに失敗しました: ' }) + err.message);
             } finally {
-                if (btn) { btn.disabled = false; }
+                if (btn) { btn.disabled = false; btn.textContent = btnOrigText; }
             }
         }
 

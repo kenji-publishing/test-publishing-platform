@@ -198,6 +198,37 @@ router.post('/upload-cover', authenticate, coverUpload.single('cover'), (req, re
     res.json({ success: true, url: `/uploads/covers/${req.file.filename}` });
 });
 
+// 挿絵（Word原稿内の画像）— 表紙と同じ公開静的配信、uploads/illustrations 配下
+const ILLUST_DIR = path.join(__dirname, '..', 'uploads', 'illustrations');
+fs.mkdirSync(ILLUST_DIR, { recursive: true });
+
+const illustUpload = multer({
+    storage: multer.diskStorage({
+        destination: (req, file, cb) => cb(null, ILLUST_DIR),
+        filename: (req, file, cb) => {
+            const ext = path.extname(file.originalname).toLowerCase() || '.png';
+            cb(null, `il_${req.user.userId}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}${ext}`);
+        }
+    }),
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+    fileFilter: (req, file, cb) => {
+        const ok = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
+            .includes(path.extname(file.originalname).toLowerCase());
+        cb(ok ? null : new Error('Only image files are allowed'), ok);
+    }
+});
+
+/**
+ * POST /api/works/upload-illustration
+ * 本文用の挿絵を1枚アップロード（要ログイン）。公開URLを返す
+ */
+router.post('/upload-illustration', authenticate, illustUpload.single('illustration'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+    }
+    res.json({ success: true, url: `/uploads/illustrations/${req.file.filename}` });
+});
+
 /**
  * GET /api/works/my
  * Get the authenticated user's own works, all statuses (drafts included)

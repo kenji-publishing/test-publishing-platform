@@ -98,6 +98,20 @@
         }
         .reader-cover h1 { margin-top: 1.5rem; font-size: 1.6rem; }
 
+        /* 挿絵・表（Word原稿由来のマーカーから描画） */
+        .reader-illustration { margin: 1.2rem 0; }
+        .reader-illustration.align-left { text-align: left; }
+        .reader-illustration.align-center { text-align: center; }
+        .reader-illustration.align-right { text-align: right; }
+        .reader-illustration img { max-width: 100%; height: auto; border-radius: 6px; }
+        .reader-table-wrap { margin: 1.2rem 0; overflow-x: auto; }
+        .reader-table { border-collapse: collapse; width: 100%; font-size: 0.92em; }
+        .reader-table th, .reader-table td { border: 1px solid rgba(120, 105, 90, 0.45); padding: 0.4rem 0.6rem; text-align: left; }
+        .reader-table th { background: rgba(139, 115, 85, 0.14); font-weight: 600; }
+        /* 縦書きモードでも挿絵・表は横書きのまま表示する */
+        .writing-vertical .reader-illustration,
+        .writing-vertical .reader-table-wrap { writing-mode: horizontal-tb; }
+
         .toc-item-page { float: right; color: var(--reader-secondary); font-size: 0.8rem; margin-left: 0.5rem; }
 
         .lang-selector-reader {
@@ -1069,14 +1083,44 @@ function getL(obj, replacements = {}) {
             return null;
         }
 
-        // 原稿を行ブロックに分解し見出しを判定する
+        // 挿絵マーカー: [[img src="/uploads/..." w="100" align="center"]]（1行1マーカー）
+        var IMG_MARKER_RE = /^\[\[img\s+src="([^"<>\s]+)"(?:\s+w="(\d{1,3})")?(?:\s+align="(left|center|right)")?\s*\]\]$/;
+
+        // 原稿を行ブロックに分解し見出しを判定する。
+        // Word原稿由来の挿絵([[img ...]])・表([[table]]〜[[/table]])マーカーも解釈する
         function parseBlocks(text) {
             var lines = String(text).split(/\r?\n/).map(function(s) { return s.trim(); }).filter(Boolean);
-            var blocks = lines.map(function(s) { return { heading: detectHeading(s), text: s }; });
+            var blocks = [];
+            var i = 0;
+            while (i < lines.length) {
+                var s = lines[i];
+                var im = s.match(IMG_MARKER_RE);
+                if (im) {
+                    // 外部サイトのURLは読み込まない（自サイトのアップロード画像のみ）
+                    if (/^\/uploads\//.test(im[1])) {
+                        blocks.push({ type: 'img', src: im[1], w: Math.min(parseInt(im[2] || '100', 10) || 100, 100), align: im[3] || 'center', heading: null, text: '' });
+                    }
+                    i++;
+                    continue;
+                }
+                if (s === '[[table]]') {
+                    var rows = [];
+                    i++;
+                    while (i < lines.length && lines[i] !== '[[/table]]') {
+                        rows.push(lines[i].split(' | ').map(function(c) { return c.trim(); }));
+                        i++;
+                    }
+                    if (i < lines.length) i++; // [[/table]] を読み飛ばす
+                    if (rows.length) blocks.push({ type: 'table', rows: rows, heading: null, text: '' });
+                    continue;
+                }
+                blocks.push({ heading: detectHeading(s), text: s });
+                i++;
+            }
             // 短い行が大半を占める作品（詩・歌詞など）では弱い見出し判定を無効化
-            var weak = 0;
-            blocks.forEach(function(b) { if (b.heading === 'weak') weak++; });
-            if (weak > 30 || weak > blocks.length * 0.2) {
+            var weak = 0, textBlocks = 0;
+            blocks.forEach(function(b) { if (!b.type) { textBlocks++; if (b.heading === 'weak') weak++; } });
+            if (weak > 30 || weak > textBlocks * 0.2) {
                 blocks.forEach(function(b) { if (b.heading === 'weak') b.heading = null; });
             }
             return blocks;
@@ -1094,6 +1138,16 @@ function getL(obj, replacements = {}) {
             }
 
             blocks.forEach(function(b) {
+                // 挿絵・表はページをまたがない1ブロックとして扱う（文字数換算のコストで詰める）
+                if (b.type === 'img' || b.type === 'table') {
+                    var cost = b.type === 'img'
+                        ? 600
+                        : Math.min(200 + b.rows.reduce(function(n, r) { return n + r.join('').length; }, 0), LIMIT);
+                    if (curLen > 0 && curLen + cost > LIMIT) flush();
+                    cur.push(b);
+                    curLen += cost;
+                    return;
+                }
                 if (b.heading) flush(); // 章の始まりで改ページ
                 var t = b.text;
                 // 1ページを超える長い段落は文末で区切って分割
@@ -1159,6 +1213,37 @@ function getL(obj, replacements = {}) {
                 }
                 blocks.forEach(function(b) {
                     var el;
+                    if (b.type === 'img') {
+                        // 挿絵: DOM生成のみ（innerHTML不使用）。srcは/uploads/配下に限定済み
+                        el = document.createElement('div');
+                        el.className = 'reader-illustration align-' + b.align;
+                        // 挿絵は数枚程度なので全て先読みする（ページをめくった瞬間に表示される）
+                        var ilImg = document.createElement('img');
+                        ilImg.src = (window.API_ORIGIN || '') + b.src;
+                        ilImg.style.width = b.w + '%';
+                        ilImg.alt = '';
+                        el.appendChild(ilImg);
+                        div.appendChild(el);
+                        return;
+                    }
+                    if (b.type === 'table') {
+                        el = document.createElement('div');
+                        el.className = 'reader-table-wrap';
+                        var tb = document.createElement('table');
+                        tb.className = 'reader-table';
+                        b.rows.forEach(function(r, ri) {
+                            var tr = document.createElement('tr');
+                            r.forEach(function(c) {
+                                var td = document.createElement(ri === 0 ? 'th' : 'td');
+                                td.textContent = c;
+                                tr.appendChild(td);
+                            });
+                            tb.appendChild(tr);
+                        });
+                        el.appendChild(tb);
+                        div.appendChild(el);
+                        return;
+                    }
                     if (b.heading) {
                         el = document.createElement('h2');
                         tocEntries.push({ title: b.text, page: pageNum });
