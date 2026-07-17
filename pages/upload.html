@@ -566,7 +566,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/config.js"></script>
     <script src="../js/i18n.js"></script>
-    <script src="../js/wizard-common.js"></script>
+    <script src="../js/wizard-common.js?v=20260717"></script>
     <script src="../js/navbar.js"></script>
     <script src="../js/lang/ja.js"></script>
     <script src="../js/lang/en.js"></script>
@@ -1856,10 +1856,11 @@
                 var cs = document.getElementById('currencySelect');
                 var currency = cs ? cs.value : 'USD';
 
-                // Manuscript content: .txt はそのまま、.docx (Word) はテキスト抽出
+                // Manuscript content: .txt はそのまま、.docx (Word) はテキスト抽出。
+                // 分冊（複数ファイル）は「01.docx, 02.docx…」のようにファイル名の自然順で結合される
                 var manuscriptFiles = selectedContentFiles.filter(function(f) {
                     return /\.(txt|docx)$/i.test(f.name);
-                });
+                }).sort(function(a, b) { return a.name.localeCompare(b.name, undefined, { numeric: true }); });
                 var contentType = document.getElementById('contentType').value || 'text';
                 var content = '';
                 if (manuscriptFiles.length > 0) {
