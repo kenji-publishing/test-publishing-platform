@@ -441,6 +441,11 @@
             <div class="detail-section">
                 <h2><i class="fas fa-star"></i> <span id="reviewsTitle" data-i18n="workDetail.reviews">Reviews</span></h2>
 
+                <!-- 翻訳フィードバック一覧への入口（報告の閲覧・同感・作者の対応管理） -->
+                <a id="translationFeedbackLink" href="#" class="btn btn-soft-custom btn-sm mb-3" style="display:none;">
+                    <i class="fas fa-comment-dots me-1"></i><span id="translationFeedbackLinkText">Translation Feedback</span>
+                </a>
+
                 <!-- Rating Summary -->
                 <div class="rating-summary">
                     <div class="rating-big">
@@ -521,6 +526,7 @@
             translationsAvailable: { en: 'Translations Available', ja: '翻訳言語', zh: '可用翻译', es: 'Traducciones disponibles', fr: 'Traductions disponibles', de: 'Verfügbare Übersetzungen', ko: '번역 가능', ar: 'الترجمات المتاحة', pt: 'Traduções disponíveis', it: 'Traduzioni Disponibili' },
             category: { en: 'Category', ja: 'カテゴリ', zh: '类别', es: 'Categoría', fr: 'Catégorie', de: 'Kategorie', ko: '카테고리', ar: 'الفئة', pt: 'Categoria', it: 'Categoria' },
             reviews: { en: 'Reviews', ja: 'レビュー', zh: '评论', es: 'Reseñas', fr: 'Avis', de: 'Bewertungen', ko: '리뷰', ar: 'المراجعات', pt: 'Avaliações', it: 'Recensioni' },
+            translationFeedback: { en: 'Translation Feedback', ja: '翻訳フィードバックを見る', zh: '查看翻译反馈', es: 'Ver comentarios de traducción', fr: 'Voir les retours de traduction', de: 'Übersetzungsfeedback ansehen', ko: '번역 피드백 보기', ar: 'عرض ملاحظات الترجمة', pt: 'Ver feedback de tradução', it: 'Vedi feedback di traduzione' },
             reviewCount: { en: 'reviews', ja: '件のレビュー', zh: '条评论', es: 'reseñas', fr: 'avis', de: 'Bewertungen', ko: '개 리뷰', ar: 'مراجعة', pt: 'avaliações', it: 'recensioni' },
             writeReview: { en: 'Write a Review', ja: 'レビューを書く', zh: '写评论', es: 'Escribir una reseña', fr: 'Écrire un avis', de: 'Bewertung schreiben', ko: '리뷰 작성', ar: 'اكتب مراجعة', pt: 'Escrever uma avaliação', it: 'Scrivi una Recensione' },
             submitReview: { en: 'Submit Review', ja: 'レビューを送信', zh: '提交评论', es: 'Enviar reseña', fr: 'Soumettre un avis', de: 'Bewertung einreichen', ko: '리뷰 제출', ar: 'إرسال المراجعة', pt: 'Enviar avaliação', it: 'Invia Recensione' },
@@ -717,6 +723,16 @@ function escapeHtml(text) {
 
             // レビュー
             document.getElementById('reviewsTitle').textContent = getL(uiText.reviews);
+            // 翻訳フィードバック一覧への入口（実作品IDがある時だけ表示）
+            var fbLink = document.getElementById('translationFeedbackLink');
+            if (fbLink) {
+                var fbWorkId = getWorkIdFromUrl();
+                if (fbWorkId) {
+                    fbLink.href = 'feedback/index.html?workId=' + encodeURIComponent(fbWorkId);
+                    fbLink.style.display = '';
+                }
+                document.getElementById('translationFeedbackLinkText').textContent = getL(uiText.translationFeedback);
+            }
             renderReviews(work.reviews, work.rating);
 
             // レビューフォーム

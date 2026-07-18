@@ -430,6 +430,7 @@
             btnFixed: { en: 'Fixed', ja: '修正済み', zh: '已修复', es: 'Corregido', fr: 'Corrigé', de: 'Behoben', ko: '수정됨', ar: 'تم الإصلاح', pt: 'Corrigido', it: 'Corretto' },
             btnRejected: { en: 'Reject', ja: '却下', zh: '拒绝', es: 'Rechazar', fr: 'Rejeter', de: 'Ablehnen', ko: '거부', ar: 'رفض', pt: 'Rejeitar', it: 'Rifiuta' },
             footerHelp: { en: 'Help', ja: 'ヘルプ', zh: '帮助', es: 'Ayuda', fr: 'Aide', de: 'Hilfe', ko: '도움말', ar: 'مساعدة', pt: 'Ajuda', it: 'Aiuto' },
+            thisWork: { en: 'This work', ja: 'この作品', zh: '此作品', es: 'Esta obra', fr: 'Cette œuvre', de: 'Dieses Werk', ko: '이 작품', ar: 'هذا العمل', pt: 'Esta obra', it: 'Quest\'opera' },
             footerTerms: { en: 'Terms', ja: '利用規約', zh: '条款', es: 'Términos', fr: 'Conditions', de: 'Bedingungen', ko: '약관', ar: 'الشروط', pt: 'Termos', it: 'Termini' },
             footerPrivacy: { en: 'Privacy', ja: 'プライバシー', zh: '隐私', es: 'Privacidad', fr: 'Confidentialité', de: 'Datenschutz', ko: '개인정보', ar: 'الخصوصية', pt: 'Privacidade', it: 'Privacy' },
             agree: { en: 'Agree', ja: '同意', zh: '同意', es: 'De acuerdo', fr: 'D\'accord', de: 'Zustimmen', ko: '동의', ar: 'موافق', pt: 'Concordar', it: 'Accetto' },
@@ -513,6 +514,20 @@ function getCatName(cat) { return CATEGORY_NAMES[cat] ? getL(CATEGORY_NAMES[cat]
             try {
                 updateAllText();
                 await loadUserWorks();
+                // ?workId=... 付きで開かれたら（マイ作品・作品詳細からのリンク）その作品を自動選択
+                const urlWorkId = new URLSearchParams(window.location.search).get('workId');
+                if (urlWorkId) {
+                    const select = document.getElementById('work-select');
+                    if (!Array.from(select.options).some(o => o.value === urlWorkId)) {
+                        // 自分の作品でない場合（読者が作品詳細から来た場合）も選択肢に加える
+                        const option = document.createElement('option');
+                        option.value = urlWorkId;
+                        option.textContent = getL(uiText.thisWork);
+                        select.appendChild(option);
+                    }
+                    select.value = urlWorkId;
+                    loadFeedback();
+                }
             } catch (e) {
                 console.error('Init error:', e);
                 // Force demo mode on any init error
