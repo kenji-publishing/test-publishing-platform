@@ -80,12 +80,25 @@ Extract EVERY piece of text on the page and translate it into ${tgtName}:
 - speech bubbles, thought bubbles, narration boxes, signs/labels, and sound effects (SFX)
 - List them in the page's natural reading order${sourceLang === 'ja' ? ' (Japanese manga: right-to-left, top-to-bottom)' : ''}
 - For SFX, give the ${tgtName} meaning (e.g. "*crash*"); for signs, translate what they say
+- For each item, also give "bbox": the approximate bounding box of that text on the image, as percentages of the full image size ({"x":left,"y":top,"w":width,"h":height}, each 0-100). A rough estimate is fine — it is only used to pre-place the translated text near the right spot for a human to adjust.
 
 ${TIER_INSTRUCTIONS[tier]}${glossaryNote}
 
 Respond with ONLY this JSON (no markdown fences, no commentary):
-{"bubbles":[{"type":"speech|thought|narration|sfx|sign","location":"short position hint in English (e.g. top-right panel)","original":"text as written","translation":"${tgtName} translation"}]}
+{"bubbles":[{"type":"speech|thought|narration|sfx|sign","location":"short position hint in English (e.g. top-right panel)","bbox":{"x":0,"y":0,"w":0,"h":0},"original":"text as written","translation":"${tgtName} translation"}]}
 If the page has no text at all, respond {"bubbles":[]}.`;
+}
+
+// bboxの検証（%座標）。数値でない・サイズ0以下は捨てて「bbox無し」扱い（手動配置にフォールバック）
+function normalizeBbox(bb) {
+    if (!bb || typeof bb !== 'object') return null;
+    const x = Number(bb.x), y = Number(bb.y), w = Number(bb.w), h = Number(bb.h);
+    if (![x, y, w, h].every(Number.isFinite) || w <= 0 || h <= 0) return null;
+    const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+    return {
+        x: clamp(x, 0, 99), y: clamp(y, 0, 99),
+        w: clamp(w, 1, 100), h: clamp(h, 1, 100)
+    };
 }
 
 /** 1ページを翻訳（画像ファイル→吹き出しリスト） */
@@ -96,7 +109,7 @@ async function translatePage({ imagePath, sourceLang, targetLang, tier, glossary
 
     const message = await anthropic.messages.create({
         model: MODEL_TIERS[tier],
-        max_tokens: 4000,
+        max_tokens: 5000, // bbox追加分の余裕（セリフが多いページの切り詰め防止）
         messages: [{
             role: 'user',
             content: [
@@ -115,12 +128,17 @@ async function translatePage({ imagePath, sourceLang, targetLang, tier, glossary
     if (!parsed || !Array.isArray(parsed.bubbles)) throw new Error('Unexpected extraction result shape');
     return parsed.bubbles
         .filter(b => b && typeof b.original === 'string')
-        .map(b => ({
-            type: String(b.type || 'speech'),
-            location: String(b.location || ''),
-            original: b.original,
-            translation: String(b.translation || '')
-        }));
+        .map(b => {
+            const out = {
+                type: String(b.type || 'speech'),
+                location: String(b.location || ''),
+                original: b.original,
+                translation: String(b.translation || '')
+            };
+            const bbox = normalizeBbox(b.bbox);
+            if (bbox) out.bbox = bbox; // 無効なら省略（エディター側は存在チェックで手動配置に戻る）
+            return out;
+        });
 }
 
 /**

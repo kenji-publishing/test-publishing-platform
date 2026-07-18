@@ -1961,7 +1961,16 @@
                 return;
             }
             var icons = { speech: '💬', thought: '💭', narration: '📖', sfx: '💥', sign: '🪧' };
-            listEl.innerHTML = bubbles.map(function (b, bi) {
+            // bboxを持つ未配置の訳文があれば一括配置ボタンを出す（旧注文はbbox無しのため表示されない）
+            var autoCount = bubbles.filter(function (b) {
+                var placed = b.regionId != null && page.regions.some(function (r) { return r.id === b.regionId; });
+                return !placed && aiValidBbox(b.bbox);
+            }).length;
+            var autoBtn = autoCount
+                ? '<button class="btn btn-sm" onclick="aiAutoPlaceAll()" style="width:100%; margin-bottom:0.6rem; font-size:0.8rem; padding:5px 10px; border:1px solid var(--color-accent); color:#fff; background:var(--color-accent); border-radius:6px; font-weight:600;">⚡ ' +
+                  (L === 'ja' ? '全訳文の枠を自動作成' : 'Auto-place all translations') + ' (' + autoCount + ')</button>'
+                : '';
+            listEl.innerHTML = autoBtn + bubbles.map(function (b, bi) {
                 // 枠を作成済みかどうか（領域一覧側で削除された場合も追随して未作成に戻る）
                 var hasBox = b.regionId != null && page.regions.some(function (r) { return r.id === b.regionId; });
                 var cardStyle = hasBox
@@ -1985,33 +1994,71 @@
             }).join('');
         }
 
-        // 訳文入りのテキスト枠を作成（位置は中央付近に段々ずらして配置 → ユーザーがドラッグで調整）
+        // AI抽出のbbox（%座標）を検証。無効なら null（従来の段々ずらし配置にフォールバック）
+        // 過去の注文にはbboxが無いので、存在チェックが後方互換を兼ねる
+        function aiValidBbox(bb) {
+            if (!bb) return null;
+            var x = parseFloat(bb.x), y = parseFloat(bb.y), w = parseFloat(bb.w), h = parseFloat(bb.h);
+            if (!isFinite(x) || !isFinite(y) || !isFinite(w) || !isFinite(h) || w <= 0 || h <= 0) return null;
+            // 小さすぎる枠は掴めないので最小サイズを確保しつつ、画像内に収める
+            w = Math.min(Math.max(w, 8), 90);
+            h = Math.min(Math.max(h, 4), 60);
+            x = Math.min(Math.max(x, 0), 100 - w);
+            y = Math.min(Math.max(y, 0), 100 - h);
+            return { x: x, y: y, w: w, h: h };
+        }
+
+        // 訳文入りのテキスト枠を作成。bboxがあればAI推定の吹き出し位置に、
+        // 無ければ中央付近に段々ずらして配置 → どちらもユーザーがドラッグで微調整
         var aiInsertOffset = 0;
-        window.aiInsertText = function (bi) {
+        window.aiInsertText = function (bi, skipRender) {
             var page = pages[currentPageIndex];
             if (!page || !page.aiBubbles || !page.aiBubbles[bi]) return;
-            var off = (aiInsertOffset++ % 5) * 8;
+            var b = page.aiBubbles[bi];
+            var bb = aiValidBbox(b.bbox);
             var region = {
                 id: ++regionIdCounter,
                 type: 'text',
-                x: (18 + off).toFixed(2),
-                y: (28 + off).toFixed(2),
-                w: '45.00',
-                h: '10.00',
                 preview: false,
-                edited: page.aiBubbles[bi].translation,
+                edited: b.translation,
                 fontSize: 14,
                 fontWeight: '700',
                 fontColor: '#000000',
                 bgOpacity: 'opaque',
                 writingMode: 'horizontal'
             };
+            if (bb) {
+                region.x = bb.x.toFixed(2);
+                region.y = bb.y.toFixed(2);
+                region.w = bb.w.toFixed(2);
+                region.h = bb.h.toFixed(2);
+            } else {
+                var off = (aiInsertOffset++ % 5) * 8;
+                region.x = (18 + off).toFixed(2);
+                region.y = (28 + off).toFixed(2);
+                region.w = '45.00';
+                region.h = '10.00';
+            }
             page.regions.push(region);
-            page.aiBubbles[bi].regionId = region.id; // 「配置済み」表示と削除ボタン用
+            b.regionId = region.id; // 「配置済み」表示と削除ボタン用
             selectedRegionId = region.id;
+            if (!skipRender) {
+                renderRegionsOnCanvas();
+                renderRegionList();
+                scrollToRegionCard(region.id);
+            }
+        };
+
+        // 「全訳文の枠を自動作成」: bboxを持つ未配置の訳文をまとめて配置（描画は最後に1回）
+        window.aiAutoPlaceAll = function () {
+            var page = pages[currentPageIndex];
+            if (!page || !page.aiBubbles) return;
+            page.aiBubbles.forEach(function (b, bi) {
+                var hasBox = b.regionId != null && page.regions.some(function (r) { return r.id === b.regionId; });
+                if (!hasBox && aiValidBbox(b.bbox)) window.aiInsertText(bi, true);
+            });
             renderRegionsOnCanvas();
             renderRegionList();
-            scrollToRegionCard(region.id);
         };
 
         // 「枠を削除」: この訳文から作成したテキスト枠を取り除き、未配置状態に戻す
