@@ -586,7 +586,6 @@
         .pay-method-option span { font-weight: 600; font-size: 0.9rem; }
         .pay-method-note { font-size: 0.7rem; color: var(--color-text-secondary); font-weight: 400; }
         .payment-method-label { font-size: 0.85rem; color: var(--color-text-secondary); margin-top: 0.3rem; }
-        .paypal-btn { width: 100%; justify-content: center; }
 
         /* Step 2 */
         .lang-bar { display: flex; align-items: flex-end; gap: 0.75rem; margin-bottom: 1.5rem; }
@@ -1117,24 +1116,6 @@
                 <div class="step-card">
                     <h2 id="s5Title">Cost Estimate</h2>
 
-                    <div class="pay-method-selector">
-                        <label id="s5LabelPayMethod"><i class="fas fa-wallet me-1"></i> Payment Method</label>
-                        <div class="pay-method-options">
-                            <label class="pay-method-option selected" onclick="selectPayMethod('stripe')">
-                                <input type="radio" name="payMethod" value="stripe" checked>
-                                <i class="fab fa-stripe"></i>
-                                <span>Stripe</span>
-                                <small id="s5StripeNote" class="pay-method-note">Credit/Debit Card, Apple Pay, Google Pay</small>
-                            </label>
-                            <label class="pay-method-option" onclick="selectPayMethod('paypal')">
-                                <input type="radio" name="payMethod" value="paypal">
-                                <i class="fab fa-paypal"></i>
-                                <span>PayPal</span>
-                                <small id="s5PaypalNote" class="pay-method-note">PayPal balance, Bank account</small>
-                            </label>
-                        </div>
-                    </div>
-
                     <div class="quote-box">
                         <div class="quote-row"><span id="s5LabelModel">Selected Model</span><span id="quoteModel" class="quote-value">Sonnet</span></div>
                         <div class="quote-row"><span id="s5LabelPages">Page Count</span><span id="quotePages" class="quote-value">0</span></div>
@@ -1172,12 +1153,6 @@
                         <button class="payment-btn" onclick="processPayment('googlepay')">
                             <i class="fab fa-google-pay"></i>
                             <span>Google Pay</span>
-                        </button>
-                    </div>
-                    <div class="payment-methods" id="paypalPayMethods" style="display:none;">
-                        <button class="payment-btn paypal-btn" onclick="processPayment('paypal')">
-                            <i class="fab fa-paypal"></i>
-                            <span id="s6PaypalLabel">Pay with PayPal</span>
                         </button>
                     </div>
                     <p class="payment-secure"><i class="fas fa-lock me-1"></i> <span id="s6Secure">Payments processed securely</span></p>
@@ -1271,7 +1246,8 @@
     let currentStep = 1;
     let selectedModel = 'sonnet';
     let selectedCurrency = 'JPY';
-    let selectedPayMethod = 'stripe';
+    // 決済はすべてStripe Checkout経由（カード/Apple Pay/Google Pay/PayPal等は
+    // Stripeの決済ページが通貨に応じて自動表示する）
     let glossary = [];
     let uploadedPages = [];
 
@@ -1290,22 +1266,13 @@
         return WizardCommon.formatPrice(amount, currCode || selectedCurrency);
     }
     function getMinimum(payMethod) {
-        return WizardCommon.getMinimum(selectedCurrency, payMethod || selectedPayMethod);
+        return WizardCommon.getMinimum(selectedCurrency, payMethod || 'stripe');
     }
     function onCurrencyChange() {
         selectedCurrency = document.getElementById('currencySelect').value;
         updateStep1Prices();
         if (currentStep === 5) updateQuote();
     }
-    function selectPayMethod(method) {
-        selectedPayMethod = method;
-        document.querySelectorAll('.pay-method-option').forEach(el => {
-            el.classList.toggle('selected', el.querySelector('input').value === method);
-            el.querySelector('input').checked = (el.querySelector('input').value === method);
-        });
-        updateQuote();
-    }
-
     function updateStep1Prices() {
         const L = getLang();
         const descMap = {
@@ -1322,18 +1289,17 @@
             if (el) el.textContent = '~' + formatPrice(pp) + ' / ' + pl + ' \u2014 ' + desc;
         });
         const sMin = formatPrice(PAY_MINIMUMS.stripe[selectedCurrency]);
-        const pMin = formatPrice(PAY_MINIMUMS.paypal[selectedCurrency]);
         const minL = {
-            en:'Minimum: '+sMin+' (Stripe) / '+pMin+' (PayPal) \u2014 fees included',
-            ja:'\u6700\u4f4e\u6599\u91d1: '+sMin+' (Stripe) / '+pMin+' (PayPal) \u2014 \u624b\u6570\u6599\u8fbc',
-            zh:'\u6700\u4f4e\u6536\u8cbb: '+sMin+' (Stripe) / '+pMin+' (PayPal) \u2014 \u542b\u624b\u7e8c\u8cbb',
-            es:'M\u00ednimo: '+sMin+' (Stripe) / '+pMin+' (PayPal) \u2014 comisiones incluidas',
-            fr:'Minimum : '+sMin+' (Stripe) / '+pMin+' (PayPal) \u2014 frais inclus',
-            de:'Minimum: '+sMin+' (Stripe) / '+pMin+' (PayPal) \u2014 Geb\u00fchren inklusive',
-            ko:'\ucd5c\uc18c: '+sMin+' (Stripe) / '+pMin+' (PayPal) \u2014 \uc218\uc218\ub8cc \ud3ec\ud568',
-            ar:'\u0627\u0644\u062d\u062f \u0627\u0644\u0623\u062f\u0646\u0649: '+sMin+' (Stripe) / '+pMin+' (PayPal) \u2014 \u0634\u0627\u0645\u0644 \u0627\u0644\u0631\u0633\u0648\u0645',
-            pt:'M\u00ednimo: '+sMin+' (Stripe) / '+pMin+' (PayPal) \u2014 taxas inclusas',
-            it:'Minimo: '+sMin+' (Stripe) / '+pMin+' (PayPal) \u2014 commissioni incluse'
+            en:'Minimum: '+sMin+' \u2014 fees included',
+            ja:'\u6700\u4f4e\u6599\u91d1: '+sMin+' \u2014 \u624b\u6570\u6599\u8fbc',
+            zh:'\u6700\u4f4e\u6536\u8cbb: '+sMin+' \u2014 \u542b\u624b\u7e8c\u8cbb',
+            es:'M\u00ednimo: '+sMin+' \u2014 comisiones incluidas',
+            fr:'Minimum : '+sMin+' \u2014 frais inclus',
+            de:'Minimum: '+sMin+' \u2014 Geb\u00fchren inklusive',
+            ko:'\ucd5c\uc18c: '+sMin+' \u2014 \uc218\uc218\ub8cc \ud3ec\ud568',
+            ar:'\u0627\u0644\u062d\u062f \u0627\u0644\u0623\u062f\u0646\u0649: '+sMin+' \u2014 \u0634\u0627\u0645\u0644 \u0627\u0644\u0631\u0633\u0648\u0645',
+            pt:'M\u00ednimo: '+sMin+' \u2014 taxas inclusas',
+            it:'Minimo: '+sMin+' \u2014 commissioni incluse'
         };
         const minEl = document.getElementById('s1Min');
         if (minEl) minEl.textContent = minL[L] || minL['en'];
@@ -1613,8 +1579,7 @@
         document.getElementById('quoteTotal').textContent = formatPrice(cost);
         const minNoteEl = document.getElementById('s5MinNote');
         if (rawConverted < minCharge) {
-            const mLabel = selectedPayMethod==='stripe'?'Stripe':'PayPal';
-            const notes = { en:'* Minimum charge '+formatPrice(minCharge)+' applied ('+mLabel+')', ja:'* \u6700\u4f4e\u6599\u91d1 '+formatPrice(minCharge)+' \u304c\u9069\u7528 ('+mLabel+')', zh:'* \u5df2\u5957\u7528\u6700\u4f4e\u6536\u8cbb '+formatPrice(minCharge)+' ('+mLabel+')', es:'* Cargo m\u00ednimo de '+formatPrice(minCharge)+' aplicado ('+mLabel+')', fr:'* Minimum de '+formatPrice(minCharge)+' appliqu\u00e9 ('+mLabel+')', de:'* Mindestgeb\u00fchr von '+formatPrice(minCharge)+' angewendet ('+mLabel+')', ko:'* \ucd5c\uc18c \uc694\uae08 '+formatPrice(minCharge)+' \uc801\uc6a9 ('+mLabel+')', ar:'* \u062a\u0645 \u062a\u0637\u0628\u064a\u0642 \u0627\u0644\u062d\u062f \u0627\u0644\u0623\u062f\u0646\u0649 '+formatPrice(minCharge)+' ('+mLabel+')', pt:'* Valor m\u00ednimo de '+formatPrice(minCharge)+' aplicado ('+mLabel+')', it:'* Importo minimo di '+formatPrice(minCharge)+' applicato ('+mLabel+')' };
+            const notes = { en:'* Minimum charge '+formatPrice(minCharge)+' applied', ja:'* \u6700\u4f4e\u6599\u91d1 '+formatPrice(minCharge)+' \u304c\u9069\u7528', zh:'* \u5df2\u5957\u7528\u6700\u4f4e\u6536\u8cbb '+formatPrice(minCharge), es:'* Cargo m\u00ednimo de '+formatPrice(minCharge)+' aplicado', fr:'* Minimum de '+formatPrice(minCharge)+' appliqu\u00e9', de:'* Mindestgeb\u00fchr von '+formatPrice(minCharge)+' angewendet', ko:'* \ucd5c\uc18c \uc694\uae08 '+formatPrice(minCharge)+' \uc801\uc6a9', ar:'* \u062a\u0645 \u062a\u0637\u0628\u064a\u0642 \u0627\u0644\u062d\u062f \u0627\u0644\u0623\u062f\u0646\u0649 '+formatPrice(minCharge), pt:'* Valor m\u00ednimo de '+formatPrice(minCharge)+' aplicado', it:'* Importo minimo di '+formatPrice(minCharge)+' applicato' };
             minNoteEl.textContent = notes[L]||notes['en']; minNoteEl.style.display = '';
         } else { minNoteEl.style.display = 'none'; }
 
@@ -1637,22 +1602,14 @@
     function updatePaymentAmount() {
         const L = getLang(); const cost = calculateCost();
         document.getElementById('paymentAmount').textContent = formatPrice(cost);
-        const mLabels = { stripe:{en:'via Stripe',ja:'Stripe\u3067\u304a\u652f\u6255\u3044',zh:'\u900f\u904eStripe\u652f\u4ed8',es:'v\u00eda Stripe',fr:'via Stripe',de:'\u00fcber Stripe',ko:'Stripe\ub85c \uacb0\uc81c',ar:'\u0639\u0628\u0631 Stripe',pt:'via Stripe',it:'tramite Stripe'}, paypal:{en:'via PayPal',ja:'PayPal\u3067\u304a\u652f\u6255\u3044',zh:'\u900f\u904ePayPal\u652f\u4ed8',es:'v\u00eda PayPal',fr:'via PayPal',de:'\u00fcber PayPal',ko:'PayPal\ub85c \uacb0\uc81c',ar:'\u0639\u0628\u0631 PayPal',pt:'via PayPal',it:'tramite PayPal'} };
-        const ml = mLabels[selectedPayMethod]; document.getElementById('s6MethodLabel').textContent = ml[L]||ml['en'];
-        document.getElementById('stripePayMethods').style.display = selectedPayMethod==='stripe'?'':'none';
-        document.getElementById('paypalPayMethods').style.display = selectedPayMethod==='paypal'?'':'none';
-        const secT = { stripe:{en:'Payments processed securely by Stripe',ja:'Stripe\u306b\u3088\u308b\u5b89\u5168\u306a\u6c7a\u6e08',zh:'\u7531Stripe\u5b89\u5168\u8655\u7406\u4ed8\u6b3e',es:'Pagos procesados de forma segura por Stripe',fr:'Paiements s\u00e9curis\u00e9s par Stripe',de:'Sichere Zahlung \u00fcber Stripe',ko:'Stripe\ub97c \ud1b5\ud55c \uc548\uc804\ud55c \uacb0\uc81c',ar:'\u0645\u062f\u0641\u0648\u0639\u0627\u062a \u0622\u0645\u0646\u0629 \u0639\u0628\u0631 Stripe',pt:'Pagamentos processados com seguran\u00e7a pelo Stripe',it:'Pagamenti elaborati in modo sicuro da Stripe'}, paypal:{en:'Payments processed securely by PayPal',ja:'PayPal\u306b\u3088\u308b\u5b89\u5168\u306a\u6c7a\u6e08',zh:'\u7531PayPal\u5b89\u5168\u8655\u7406\u4ed8\u6b3e',es:'Pagos procesados de forma segura por PayPal',fr:'Paiements s\u00e9curis\u00e9s par PayPal',de:'Sichere Zahlung \u00fcber PayPal',ko:'PayPal\uc744 \ud1b5\ud55c \uc548\uc804\ud55c \uacb0\uc81c',ar:'\u0645\u062f\u0641\u0648\u0639\u0627\u062a \u0622\u0645\u0646\u0629 \u0639\u0628\u0631 PayPal',pt:'Pagamentos processados com seguran\u00e7a pelo PayPal',it:'Pagamenti elaborati in modo sicuro da PayPal'} };
-        document.getElementById('s6Secure').textContent = (secT[selectedPayMethod])[L]||(secT[selectedPayMethod])['en'];
+        const mLabels = { stripe:{en:'via Stripe',ja:'Stripe\u3067\u304a\u652f\u6255\u3044',zh:'\u900f\u904eStripe\u652f\u4ed8',es:'v\u00eda Stripe',fr:'via Stripe',de:'\u00fcber Stripe',ko:'Stripe\ub85c \uacb0\uc81c',ar:'\u0639\u0628\u0631 Stripe',pt:'via Stripe',it:'tramite Stripe'} };
+        const ml = mLabels.stripe; document.getElementById('s6MethodLabel').textContent = ml[L]||ml['en'];
+        const secT = { stripe:{en:'Payments processed securely by Stripe',ja:'Stripe\u306b\u3088\u308b\u5b89\u5168\u306a\u6c7a\u6e08',zh:'\u7531Stripe\u5b89\u5168\u8655\u7406\u4ed8\u6b3e',es:'Pagos procesados de forma segura por Stripe',fr:'Paiements s\u00e9curis\u00e9s par Stripe',de:'Sichere Zahlung \u00fcber Stripe',ko:'Stripe\ub97c \ud1b5\ud55c \uc548\uc804\ud55c \uacb0\uc81c',ar:'\u0645\u062f\u0641\u0648\u0639\u0627\u062a \u0622\u0645\u0646\u0629 \u0639\u0628\u0631 Stripe',pt:'Pagamentos processados com seguran\u00e7a pelo Stripe',it:'Pagamenti elaborati in modo sicuro da Stripe'} };
+        document.getElementById('s6Secure').textContent = secT.stripe[L]||secT.stripe['en'];
     }
     // ===== Step 6: 支払い → 全ページをステージングしてStripe Checkoutへ =====
     async function processPayment(method) {
         const L = getLang();
-        if (selectedPayMethod === 'paypal') {
-            alert(L === 'ja'
-                ? 'AIツールのPayPal決済は準備中です。お支払い方法で「Stripe」（クレジットカード）を選択してください。'
-                : 'PayPal for AI tools is coming soon. Please select Stripe (credit card) as the payment method.');
-            return;
-        }
         const token = localStorage.getItem('token');
         if (!token) {
             alert(L === 'ja' ? 'マンガ翻訳の利用にはログインが必要です' : 'Please log in to use manga translation');
@@ -2097,9 +2054,6 @@
             s4OrigLabel: { en:'Sample Speech Bubble', ja:'\u30b5\u30f3\u30d7\u30eb\u306e\u30bb\u30ea\u30d5', zh:'\u7bc4\u4f8b\u5c0d\u8a71\u6846', es:'Globo de di\u00e1logo de muestra', fr:'Bulle de dialogue exemple', de:'Beispiel-Sprechblase', ko:'\uc0d8\ud50c \ub9d0\ud48d\uc120', ar:'\u0641\u0642\u0627\u0639\u0629 \u062d\u0648\u0627\u0631 \u0639\u064a\u0646\u0629', pt:'Bal\u00e3o de fala de exemplo', it:'Fumetto di esempio' },
             s4BtnHaiku: { en:'Use this model', ja:'\u3053\u306e\u30e2\u30c7\u30eb\u3092\u4f7f\u7528', zh:'\u4f7f\u7528\u6b64\u6a21\u578b', es:'Usar este modelo', fr:'Utiliser ce mod\u00e8le', de:'Dieses Modell verwenden', ko:'\uc774 \ubaa8\ub378 \uc0ac\uc6a9', ar:'\u0627\u0633\u062a\u062e\u062f\u0645 \u0647\u0630\u0627', pt:'Usar este modelo', it:'Usa questo modello' },
             s5Title: { en:'Cost Estimate', ja:'\u898b\u7a4d\u3082\u308a', zh:'\u8cbb\u7528\u4f30\u7b97', es:'Presupuesto', fr:'Estimation du co\u00fbt', de:'Kostensch\u00e4tzung', ko:'\ube44\uc6a9 \uacac\uc801', ar:'\u062a\u0642\u062f\u064a\u0631 \u0627\u0644\u062a\u0643\u0644\u0641\u0629', pt:'Estimativa de custo', it:'Stima dei costi' },
-            s5PayMethod: { en:'Payment Method', ja:'\u652f\u6255\u3044\u65b9\u6cd5', zh:'\u4ed8\u6b3e\u65b9\u5f0f', es:'M\u00e9todo de pago', fr:'Mode de paiement', de:'Zahlungsmethode', ko:'\uacb0\uc81c \ubc29\ubc95', ar:'\u0637\u0631\u064a\u0642\u0629 \u0627\u0644\u062f\u0641\u0639', pt:'M\u00e9todo de pagamento', it:'Metodo di pagamento' },
-            s5StripeNote: { en:'Credit/Debit Card, Apple Pay, Google Pay', ja:'\u30af\u30ec\u30b8\u30c3\u30c8/\u30c7\u30d3\u30c3\u30c8\u30ab\u30fc\u30c9, Apple Pay, Google Pay', zh:'\u4fe1\u7528\u5361/\u7c3d\u5e33\u5361, Apple Pay, Google Pay', es:'Tarjeta, Apple Pay, Google Pay', fr:'Carte, Apple Pay, Google Pay', de:'Karte, Apple Pay, Google Pay', ko:'\uc2e0\uc6a9/\uccb4\ud06c\uce74\ub4dc, Apple Pay, Google Pay', ar:'\u0628\u0637\u0627\u0642\u0629, Apple Pay, Google Pay', pt:'Cart\u00e3o, Apple Pay, Google Pay', it:'Carta di credito/debito, Apple Pay, Google Pay' },
-            s5PaypalNote: { en:'PayPal balance, Bank account', ja:'PayPal\u6b8b\u9ad8, \u9280\u884c\u53e3\u5ea7', zh:'PayPal\u9918\u984d, \u9280\u884c\u5e33\u6236', es:'Saldo PayPal, Cuenta bancaria', fr:'Solde PayPal, Compte bancaire', de:'PayPal-Guthaben, Bankkonto', ko:'PayPal \uc794\uc561, \uc740\ud589 \uacc4\uc88c', ar:'\u0631\u0635\u064a\u062f PayPal, \u062d\u0633\u0627\u0628 \u0628\u0646\u0643\u064a', pt:'Saldo PayPal, Conta banc\u00e1ria', it:'Saldo PayPal, Conto bancario' },
             s5LabelModel: { en:'Selected Model', ja:'\u9078\u629e\u30e2\u30c7\u30eb', zh:'\u5df2\u9078\u6a21\u578b', es:'Modelo seleccionado', fr:'Mod\u00e8le s\u00e9lectionn\u00e9', de:'Gew\u00e4hltes Modell', ko:'\uc120\ud0dd\ub41c \ubaa8\ub378', ar:'\u0627\u0644\u0646\u0645\u0648\u0630\u062c \u0627\u0644\u0645\u062e\u062a\u0627\u0631', pt:'Modelo selecionado', it:'Modello selezionato' },
             s5LabelPages: { en:'Page Count', ja:'\u30da\u30fc\u30b8\u6570', zh:'\u9801\u6578', es:'N\u00famero de p\u00e1ginas', fr:'Nombre de pages', de:'Seitenanzahl', ko:'\ud398\uc774\uc9c0 \uc218', ar:'\u0639\u062f\u062f \u0627\u0644\u0635\u0641\u062d\u0627\u062a', pt:'N\u00famero de p\u00e1ginas', it:'Numero di pagine' },
             s5LabelRate: { en:'Rate', ja:'\u5358\u4fa1', zh:'\u55ae\u50f9', es:'Tarifa', fr:'Tarif', de:'Preis', ko:'\ub2e8\uac00', ar:'\u0627\u0644\u0633\u0639\u0631', pt:'Tarifa', it:'Tariffa' },
@@ -2108,7 +2062,6 @@
             s6Title: { en:'Payment', ja:'\u652f\u6255\u3044', zh:'\u4ed8\u6b3e', es:'Pago', fr:'Paiement', de:'Zahlung', ko:'\uacb0\uc81c', ar:'\u0627\u0644\u062f\u0641\u0639', pt:'Pagamento', it:'Pagamento' },
             s6Desc: { en:'Confirm and proceed to payment.', ja:'\u78ba\u8a8d\u3057\u3066\u304a\u652f\u6255\u3044\u3078\u9032\u3093\u3067\u304f\u3060\u3055\u3044\u3002', zh:'\u78ba\u8a8d\u4e26\u7e7c\u7e8c\u4ed8\u6b3e\u3002', es:'Confirme y proceda al pago.', fr:'Confirmez et proc\u00e9dez au paiement.', de:'Best\u00e4tigen und zur Zahlung.', ko:'\ud655\uc778 \ud6c4 \uacb0\uc81c\ub85c \uc9c4\ud589\ud569\ub2c8\ub2e4.', ar:'\u0623\u0643\u062f \u0648\u062a\u0627\u0628\u0639 \u0644\u0644\u062f\u0641\u0639.', pt:'Confirme e prossiga para o pagamento.', it:'Conferma e procedi al pagamento.' },
             s6CardLabel: { en:'Credit / Debit Card', ja:'\u30af\u30ec\u30b8\u30c3\u30c8/\u30c7\u30d3\u30c3\u30c8\u30ab\u30fc\u30c9', zh:'\u4fe1\u7528\u5361/\u7c3d\u5e33\u5361', es:'Tarjeta', fr:'Carte', de:'Karte', ko:'\uc2e0\uc6a9/\uccb4\ud06c\uce74\ub4dc', ar:'\u0628\u0637\u0627\u0642\u0629', pt:'Cart\u00e3o', it:'Carta di credito / debito' },
-            s6PaypalLabel: { en:'Pay with PayPal', ja:'PayPal\u3067\u652f\u6255\u3046', zh:'\u7528PayPal\u652f\u4ed8', es:'Pagar con PayPal', fr:'Payer avec PayPal', de:'Mit PayPal bezahlen', ko:'PayPal\ub85c \uacb0\uc81c', ar:'\u0627\u0644\u062f\u0641\u0639 \u0639\u0628\u0631 PayPal', pt:'Pagar com PayPal', it:'Paga con PayPal' },
             s7Title: { en:'Translating your manga...', ja:'\u30de\u30f3\u30ac\u3092\u7ffb\u8a33\u4e2d...', zh:'\u6b63\u5728\u7ffb\u8b6f\u60a8\u7684\u6f2b\u756b...', es:'Traduciendo su manga...', fr:'Traduction du manga en cours...', de:'Ihr Manga wird \u00fcbersetzt...', ko:'\ub9cc\ud654 \ubc88\uc5ed \uc911...', ar:'\u062c\u0627\u0631\u064a \u062a\u0631\u062c\u0645\u0629 \u0627\u0644\u0645\u0627\u0646\u063a\u0627...', pt:'Traduzindo seu mang\u00e1...', it:'Traduzione del tuo manga in corso...' },
             s7Note: { en:'Please do not close this page.', ja:'\u3053\u306e\u30da\u30fc\u30b8\u3092\u9589\u3058\u306a\u3044\u3067\u304f\u3060\u3055\u3044\u3002', zh:'\u8acb\u52ff\u95dc\u9589\u6b64\u9801\u9762\u3002', es:'No cierre esta p\u00e1gina.', fr:'Ne fermez pas cette page.', de:'Bitte schlie\u00dfen Sie diese Seite nicht.', ko:'\uc774 \ud398\uc774\uc9c0\ub97c \ub2eb\uc9c0 \ub9c8\uc138\uc694.', ar:'\u064a\u0631\u062c\u0649 \u0639\u062f\u0645 \u0625\u063a\u0644\u0627\u0642 \u0647\u0630\u0647 \u0627\u0644\u0635\u0641\u062d\u0629.', pt:'N\u00e3o feche esta p\u00e1gina.', it:'Non chiudere questa pagina.' },
             s8Title: { en:'Review Translation', ja:'\u7ffb\u8a33\u3092\u78ba\u8a8d', zh:'\u5be9\u67e5\u7ffb\u8b6f', es:'Revisar traducci\u00f3n', fr:'V\u00e9rifier la traduction', de:'\u00dcbersetzung pr\u00fcfen', ko:'\ubc88\uc5ed \uac80\ud1a0', ar:'\u0645\u0631\u0627\u062c\u0639\u0629 \u0627\u0644\u062a\u0631\u062c\u0645\u0629', pt:'Revisar tradu\u00e7\u00e3o', it:'Rivedi traduzione' },
@@ -2156,10 +2109,8 @@
         setText('s4BtnText', T.s4BtnHaiku);
         setText('s5Title', T.s5Title); setText('s5LabelModel', T.s5LabelModel); setText('s5LabelPages', T.s5LabelPages);
         setText('s5LabelRate', T.s5LabelRate); setText('s5LabelTotal', T.s5LabelTotal); setText('s5BtnText', T.s5BtnText);
-        setLabel('s5LabelPayMethod', '<i class="fas fa-wallet me-1"></i>', T.s5PayMethod);
-        setText('s5StripeNote', T.s5StripeNote); setText('s5PaypalNote', T.s5PaypalNote);
         setText('s6Title', T.s6Title); setText('s6Desc', T.s6Desc);
-        setText('s6CardLabel', T.s6CardLabel); setText('s6PaypalLabel', T.s6PaypalLabel);
+        setText('s6CardLabel', T.s6CardLabel);
         setText('s7Title', T.s7Title); setText('s7Note', T.s7Note);
         setText('s8Title', T.s8Title); setText('s8Desc', T.s8Desc); setText('s8Placeholder', T.s8Placeholder);
         setText('s8BtnRetranslate', T.s8BtnRetranslate); setText('s8BtnText', T.s8BtnText);

@@ -580,7 +580,6 @@
         .pay-method-option span { font-weight: 600; font-size: 0.9rem; }
         .pay-method-note { font-size: 0.7rem; color: var(--color-text-secondary); font-weight: 400; }
         .payment-method-label { font-size: 0.85rem; color: var(--color-text-secondary); margin-top: 0.3rem; }
-        .paypal-btn { width: 100%; justify-content: center; }
 
         /* Step 2 */
         .lang-bar { display: flex; align-items: flex-end; gap: 0.75rem; margin-bottom: 1.5rem; }
@@ -955,25 +954,6 @@
                 <div class="step-card">
                     <h2 id="s5Title">Cost Estimate</h2>
 
-                    <!-- Payment Method Selection -->
-                    <div class="pay-method-selector">
-                        <label id="s5LabelPayMethod"><i class="fas fa-wallet me-1"></i> Payment Method</label>
-                        <div class="pay-method-options">
-                            <label class="pay-method-option selected" onclick="selectPayMethod('stripe')">
-                                <input type="radio" name="payMethod" value="stripe" checked>
-                                <i class="fab fa-stripe"></i>
-                                <span>Stripe</span>
-                                <small id="s5StripeNote" class="pay-method-note">Credit/Debit Card, Apple Pay, Google Pay</small>
-                            </label>
-                            <label class="pay-method-option" onclick="selectPayMethod('paypal')">
-                                <input type="radio" name="payMethod" value="paypal">
-                                <i class="fab fa-paypal"></i>
-                                <span>PayPal</span>
-                                <small id="s5PaypalNote" class="pay-method-note">PayPal balance, Bank account</small>
-                            </label>
-                        </div>
-                    </div>
-
                     <div class="quote-box">
                         <div class="quote-row"><span id="s5LabelModel">Selected Model</span><span id="quoteModel" class="quote-value">Sonnet</span></div>
                         <div class="quote-row"><span id="s5LabelChars">Character Count</span><span id="quoteChars" class="quote-value">0</span></div>
@@ -1012,13 +992,6 @@
                         <button class="payment-btn" onclick="processPayment('googlepay')">
                             <i class="fab fa-google-pay"></i>
                             <span>Google Pay</span>
-                        </button>
-                    </div>
-                    <!-- PayPal payment -->
-                    <div class="payment-methods" id="paypalPayMethods" style="display:none;">
-                        <button class="payment-btn paypal-btn" onclick="processPayment('paypal')">
-                            <i class="fab fa-paypal"></i>
-                            <span id="s6PaypalLabel">Pay with PayPal</span>
                         </button>
                     </div>
                     <p class="payment-secure"><i class="fas fa-lock me-1"></i> <span id="s6Secure">Payments processed securely</span></p>
@@ -1110,7 +1083,8 @@
     let currentStep = 1;
     let selectedModel = 'sonnet';
     let selectedCurrency = 'JPY';
-    let selectedPayMethod = 'stripe';
+    // 決済はすべてStripe Checkout経由（カード/Apple Pay/Google Pay/PayPal等は
+    // Stripeの決済ページが通貨に応じて自動表示する）
     let glossary = [];
     let translatedText = '';
     let sourceTextContent = '';
@@ -1135,7 +1109,7 @@
         return WizardCommon.formatPrice(amount, currCode || selectedCurrency);
     }
     function getMinimum(payMethod) {
-        return WizardCommon.getMinimum(selectedCurrency, payMethod || selectedPayMethod);
+        return WizardCommon.getMinimum(selectedCurrency, payMethod || 'stripe');
     }
 
     // Currency change handler
@@ -1146,15 +1120,6 @@
     }
 
     // Payment method selection
-    function selectPayMethod(method) {
-        selectedPayMethod = method;
-        document.querySelectorAll('.pay-method-option').forEach(el => {
-            el.classList.toggle('selected', el.querySelector('input').value === method);
-            el.querySelector('input').checked = (el.querySelector('input').value === method);
-        });
-        updateQuote();
-    }
-
     // Update Step 1 prices in selected currency
     function updateStep1Prices() {
         const L = getLang();
@@ -1173,20 +1138,19 @@
             const el = document.getElementById('s1Price' + model.charAt(0).toUpperCase() + model.slice(1));
             if (el) el.textContent = priceStr + ' \u2014 ' + desc;
         });
-        // Minimum display (show both Stripe and PayPal)
+        // Minimum display
         const stripeMin = formatPrice(PAY_MINIMUMS.stripe[selectedCurrency]);
-        const paypalMin = formatPrice(PAY_MINIMUMS.paypal[selectedCurrency]);
         const minLabels = {
-            en: 'Minimum: ' + stripeMin + ' (Stripe) / ' + paypalMin + ' (PayPal) \u2014 fees included',
-            ja: '\u6700\u4f4e\u6599\u91d1: ' + stripeMin + ' (Stripe) / ' + paypalMin + ' (PayPal) \u2014 \u624b\u6570\u6599\u8fbc',
-            zh: '\u6700\u4f4e\u6536\u8cbb: ' + stripeMin + ' (Stripe) / ' + paypalMin + ' (PayPal) \u2014 \u542b\u624b\u7e8c\u8cbb',
-            es: 'M\u00ednimo: ' + stripeMin + ' (Stripe) / ' + paypalMin + ' (PayPal) \u2014 comisiones incluidas',
-            fr: 'Minimum : ' + stripeMin + ' (Stripe) / ' + paypalMin + ' (PayPal) \u2014 frais inclus',
-            de: 'Minimum: ' + stripeMin + ' (Stripe) / ' + paypalMin + ' (PayPal) \u2014 Geb\u00fchren inklusive',
-            ko: '\ucd5c\uc18c: ' + stripeMin + ' (Stripe) / ' + paypalMin + ' (PayPal) \u2014 \uc218\uc218\ub8cc \ud3ec\ud568',
-            ar: '\u0627\u0644\u062d\u062f \u0627\u0644\u0623\u062f\u0646\u0649: ' + stripeMin + ' (Stripe) / ' + paypalMin + ' (PayPal) \u2014 \u0634\u0627\u0645\u0644 \u0627\u0644\u0631\u0633\u0648\u0645',
-            pt: 'M\u00ednimo: ' + stripeMin + ' (Stripe) / ' + paypalMin + ' (PayPal) \u2014 taxas inclusas',
-            it: 'Minimo: ' + stripeMin + ' (Stripe) / ' + paypalMin + ' (PayPal) \u2014 commissioni incluse'
+            en: 'Minimum: ' + stripeMin + ' \u2014 fees included',
+            ja: '\u6700\u4f4e\u6599\u91d1: ' + stripeMin + ' \u2014 \u624b\u6570\u6599\u8fbc',
+            zh: '\u6700\u4f4e\u6536\u8cbb: ' + stripeMin + ' \u2014 \u542b\u624b\u7e8c\u8cbb',
+            es: 'M\u00ednimo: ' + stripeMin + ' \u2014 comisiones incluidas',
+            fr: 'Minimum : ' + stripeMin + ' \u2014 frais inclus',
+            de: 'Minimum: ' + stripeMin + ' \u2014 Geb\u00fchren inklusive',
+            ko: '\ucd5c\uc18c: ' + stripeMin + ' \u2014 \uc218\uc218\ub8cc \ud3ec\ud568',
+            ar: '\u0627\u0644\u062d\u062f \u0627\u0644\u0623\u062f\u0646\u0649: ' + stripeMin + ' \u2014 \u0634\u0627\u0645\u0644 \u0627\u0644\u0631\u0633\u0648\u0645',
+            pt: 'M\u00ednimo: ' + stripeMin + ' \u2014 taxas inclusas',
+            it: 'Minimo: ' + stripeMin + ' \u2014 commissioni incluse'
         };
         const minEl = document.getElementById('s1Min');
         if (minEl) minEl.textContent = minLabels[L] || minLabels['en'];
@@ -1452,7 +1416,7 @@
         const rateJpy = PRICING_JPY[selectedModel].per1k;
         const rawJpy = Math.ceil(chars / 1000 * rateJpy);
         const rawConverted = toSelectedCurrency(rawJpy);
-        const minCharge = getMinimum(selectedPayMethod);
+        const minCharge = getMinimum('stripe');
         return Math.max(rawConverted, minCharge);
     }
 
@@ -1485,7 +1449,7 @@
         const rateConverted = toSelectedCurrency(rateJpy);
         const cost = calculateCost();
         const rawConverted = toSelectedCurrency(Math.ceil(chars / 1000 * rateJpy));
-        const minCharge = getMinimum(selectedPayMethod);
+        const minCharge = getMinimum('stripe');
         const modelNames = { haiku: 'Haiku', sonnet: 'Sonnet', opus: 'Opus' };
         const charsLabel = { en: '1,000 chars', ja: '1,000\u6587\u5b57', zh: '1,000\u5b57', es: '1K car.', fr: '1K car.', de: '1K Zeich.', ko: '1,000\uc790', ar: '1000 \u062d\u0631\u0641', pt: '1K car.', it: '1K car.' };
         const cl = charsLabel[L] || charsLabel['en'];
@@ -1496,18 +1460,17 @@
         // Show minimum note if minimum was applied
         const minNoteEl = document.getElementById('s5MinNote');
         if (rawConverted < minCharge) {
-            const methodLabel = selectedPayMethod === 'stripe' ? 'Stripe' : 'PayPal';
             const minNotes = {
-                en: '* Minimum charge ' + formatPrice(minCharge) + ' applied (' + methodLabel + ')',
-                ja: '* \u6700\u4f4e\u6599\u91d1 ' + formatPrice(minCharge) + ' \u304c\u9069\u7528 (' + methodLabel + ')',
-                zh: '* \u5df2\u5957\u7528\u6700\u4f4e\u6536\u8cbb ' + formatPrice(minCharge) + ' (' + methodLabel + ')',
-                es: '* Cargo m\u00ednimo de ' + formatPrice(minCharge) + ' aplicado (' + methodLabel + ')',
-                fr: '* Minimum de ' + formatPrice(minCharge) + ' appliqu\u00e9 (' + methodLabel + ')',
-                de: '* Mindestgeb\u00fchr von ' + formatPrice(minCharge) + ' angewendet (' + methodLabel + ')',
-                ko: '* \ucd5c\uc18c \uc694\uae08 ' + formatPrice(minCharge) + ' \uc801\uc6a9 (' + methodLabel + ')',
-                ar: '* \u062a\u0645 \u062a\u0637\u0628\u064a\u0642 \u0627\u0644\u062d\u062f \u0627\u0644\u0623\u062f\u0646\u0649 ' + formatPrice(minCharge) + ' (' + methodLabel + ')',
-                pt: '* Valor m\u00ednimo de ' + formatPrice(minCharge) + ' aplicado (' + methodLabel + ')',
-                it: '* Tariffa minima ' + formatPrice(minCharge) + ' applicata (' + methodLabel + ')'
+                en: '* Minimum charge ' + formatPrice(minCharge) + ' applied',
+                ja: '* \u6700\u4f4e\u6599\u91d1 ' + formatPrice(minCharge) + ' \u304c\u9069\u7528',
+                zh: '* \u5df2\u5957\u7528\u6700\u4f4e\u6536\u8cbb ' + formatPrice(minCharge) + '',
+                es: '* Cargo m\u00ednimo de ' + formatPrice(minCharge) + ' aplicado',
+                fr: '* Minimum de ' + formatPrice(minCharge) + ' appliqu\u00e9',
+                de: '* Mindestgeb\u00fchr von ' + formatPrice(minCharge) + ' angewendet',
+                ko: '* \ucd5c\uc18c \uc694\uae08 ' + formatPrice(minCharge) + ' \uc801\uc6a9',
+                ar: '* \u062a\u0645 \u062a\u0637\u0628\u064a\u0642 \u0627\u0644\u062d\u062f \u0627\u0644\u0623\u062f\u0646\u0649 ' + formatPrice(minCharge) + '',
+                pt: '* Valor m\u00ednimo de ' + formatPrice(minCharge) + ' aplicado',
+                it: '* Tariffa minima ' + formatPrice(minCharge) + ' applicata'
             };
             minNoteEl.textContent = minNotes[L] || minNotes['en'];
             minNoteEl.style.display = '';
@@ -1539,32 +1502,22 @@
         document.getElementById('paymentAmount').textContent = formatPrice(cost);
         // Show which payment method
         const methodLabels = {
-            stripe: { en: 'via Stripe', ja: 'Stripe\u3067\u304a\u652f\u6255\u3044', zh: '\u900f\u904eStripe\u652f\u4ed8', es: 'v\u00eda Stripe', fr: 'via Stripe', de: '\u00fcber Stripe', ko: 'Stripe\ub85c \uacb0\uc81c', ar: '\u0639\u0628\u0631 Stripe', pt: 'via Stripe', it: 'tramite Stripe' },
-            paypal: { en: 'via PayPal', ja: 'PayPal\u3067\u304a\u652f\u6255\u3044', zh: '\u900f\u904ePayPal\u652f\u4ed8', es: 'v\u00eda PayPal', fr: 'via PayPal', de: '\u00fcber PayPal', ko: 'PayPal\ub85c \uacb0\uc81c', ar: '\u0639\u0628\u0631 PayPal', pt: 'via PayPal', it: 'tramite PayPal' }
+            stripe: { en: 'via Stripe', ja: 'Stripe\u3067\u304a\u652f\u6255\u3044', zh: '\u900f\u904eStripe\u652f\u4ed8', es: 'v\u00eda Stripe', fr: 'via Stripe', de: '\u00fcber Stripe', ko: 'Stripe\ub85c \uacb0\uc81c', ar: '\u0639\u0628\u0631 Stripe', pt: 'via Stripe', it: 'tramite Stripe' }
         };
-        const ml = methodLabels[selectedPayMethod];
+        const ml = methodLabels.stripe;
         document.getElementById('s6MethodLabel').textContent = ml[L] || ml['en'];
         // Show/hide correct payment buttons
-        document.getElementById('stripePayMethods').style.display = selectedPayMethod === 'stripe' ? '' : 'none';
-        document.getElementById('paypalPayMethods').style.display = selectedPayMethod === 'paypal' ? '' : 'none';
         // Update secure text
         const secureTexts = {
-            stripe: { en: 'Payments processed securely by Stripe', ja: 'Stripe\u306b\u3088\u308b\u5b89\u5168\u306a\u6c7a\u6e08', zh: '\u7531Stripe\u5b89\u5168\u8655\u7406\u4ed8\u6b3e', es: 'Pagos procesados de forma segura por Stripe', fr: 'Paiements s\u00e9curis\u00e9s par Stripe', de: 'Sichere Zahlung \u00fcber Stripe', ko: 'Stripe\ub97c \ud1b5\ud55c \uc548\uc804\ud55c \uacb0\uc81c', ar: '\u0645\u062f\u0641\u0648\u0639\u0627\u062a \u0622\u0645\u0646\u0629 \u0639\u0628\u0631 Stripe', pt: 'Pagamentos processados com seguran\u00e7a pelo Stripe', it: 'Pagamenti elaborati in modo sicuro da Stripe' },
-            paypal: { en: 'Payments processed securely by PayPal', ja: 'PayPal\u306b\u3088\u308b\u5b89\u5168\u306a\u6c7a\u6e08', zh: '\u7531PayPal\u5b89\u5168\u8655\u7406\u4ed8\u6b3e', es: 'Pagos procesados de forma segura por PayPal', fr: 'Paiements s\u00e9curis\u00e9s par PayPal', de: 'Sichere Zahlung \u00fcber PayPal', ko: 'PayPal\uc744 \ud1b5\ud55c \uc548\uc804\ud55c \uacb0\uc81c', ar: '\u0645\u062f\u0641\u0648\u0639\u0627\u062a \u0622\u0645\u0646\u0629 \u0639\u0628\u0631 PayPal', pt: 'Pagamentos processados com seguran\u00e7a pelo PayPal', it: 'Pagamenti elaborati in modo sicuro da PayPal' }
+            stripe: { en: 'Payments processed securely by Stripe', ja: 'Stripe\u306b\u3088\u308b\u5b89\u5168\u306a\u6c7a\u6e08', zh: '\u7531Stripe\u5b89\u5168\u8655\u7406\u4ed8\u6b3e', es: 'Pagos procesados de forma segura por Stripe', fr: 'Paiements s\u00e9curis\u00e9s par Stripe', de: 'Sichere Zahlung \u00fcber Stripe', ko: 'Stripe\ub97c \ud1b5\ud55c \uc548\uc804\ud55c \uacb0\uc81c', ar: '\u0645\u062f\u0641\u0648\u0639\u0627\u062a \u0622\u0645\u0646\u0629 \u0639\u0628\u0631 Stripe', pt: 'Pagamentos processados com seguran\u00e7a pelo Stripe', it: 'Pagamenti elaborati in modo sicuro da Stripe' }
         };
-        const st = secureTexts[selectedPayMethod];
+        const st = secureTexts.stripe;
         document.getElementById('s6Secure').textContent = st[L] || st['en'];
     }
 
     // \u652f\u6255\u3044 \u2192 Stripe Checkout\uff08\u539f\u7a3f\u306f\u30b5\u30fc\u30d0\u30fc\u5074\u306b\u4fdd\u5b58\u3055\u308c\u308b\u305f\u3081\u3001\u30ea\u30c0\u30a4\u30ec\u30af\u30c8\u3057\u3066\u3082\u6d88\u3048\u306a\u3044\uff09
     async function processPayment(method) {
         const L = getLang();
-        if (selectedPayMethod === 'paypal') {
-            alert(L === 'ja'
-                ? 'AI\u30c4\u30fc\u30eb\u306ePayPal\u6c7a\u6e08\u306f\u6e96\u5099\u4e2d\u3067\u3059\u3002\u304a\u652f\u6255\u3044\u65b9\u6cd5\u3067\u300cStripe\u300d\uff08\u30af\u30ec\u30b8\u30c3\u30c8\u30ab\u30fc\u30c9\uff09\u3092\u9078\u629e\u3057\u3066\u304f\u3060\u3055\u3044\u3002'
-                : 'PayPal for AI tools is coming soon. Please select Stripe (credit card) as the payment method.');
-            return;
-        }
         const token = localStorage.getItem('token');
         if (!token) {
             alert(L === 'ja' ? 'AI\u7ffb\u8a33\u306e\u5229\u7528\u306b\u306f\u30ed\u30b0\u30a4\u30f3\u304c\u5fc5\u8981\u3067\u3059' : 'Please log in to use AI translation');
@@ -1820,11 +1773,7 @@
             charLabel: { en: 'characters', ja: '\u6587\u5b57', zh: '\u5b57\u5143', es: 'caracteres', fr: 'caract\u00e8res', de: 'Zeichen', ko: '\uae00\uc790', ar: '\u062d\u0631\u0641', pt: 'caracteres', it: 'caratteri' },
             uploadText: { en: 'Click or drag a file here (.txt, .docx)', ja: '\u30af\u30ea\u30c3\u30af\u307e\u305f\u306f\u30d5\u30a1\u30a4\u30eb\u3092\u30c9\u30e9\u30c3\u30b0 (.txt, .docx)', zh: '\u9ede\u64ca\u6216\u62d6\u66f3\u6a94\u6848 (.txt, .docx)', es: 'Haga clic o arrastre un archivo (.txt, .docx)', fr: 'Cliquez ou glissez un fichier (.txt, .docx)', de: 'Klicken oder Datei hierher ziehen (.txt, .docx)', ko: '\ud074\ub9ad \ub610\ub294 \ud30c\uc77c\uc744 \ub4dc\ub798\uadf8 (.txt, .docx)', ar: '\u0627\u0646\u0642\u0631 \u0623\u0648 \u0627\u0633\u062d\u0628 \u0645\u0644\u0641\u064b\u0627 (.txt, .docx)', pt: 'Clique ou arraste um arquivo (.txt, .docx)', it: 'Clicca o trascina un file qui (.txt, .docx)' },
             s2Placeholder: { en: 'Paste your novel text here...', ja: '\u5c0f\u8aac\u306e\u30c6\u30ad\u30b9\u30c8\u3092\u3053\u3053\u306b\u8cbc\u308a\u4ed8\u3051...', zh: '\u5728\u6b64\u8cbc\u4e0a\u5c0f\u8aaa\u6587\u672c...', es: 'Pegue el texto de su novela aqu\u00ed...', fr: 'Collez votre texte de roman ici...', de: 'F\u00fcgen Sie Ihren Romantext hier ein...', ko: '\uc18c\uc124 \ud14d\uc2a4\ud2b8\ub97c \uc5ec\uae30\uc5d0 \ubd99\uc5ec\ub123\uc73c\uc138\uc694...', ar: '\u0627\u0644\u0635\u0642 \u0646\u0635 \u0631\u0648\u0627\u064a\u062a\u0643 \u0647\u0646\u0627...', pt: 'Cole o texto do seu romance aqui...', it: 'Incolla qui il testo del tuo romanzo...' },
-            s5PayMethod: { en: 'Payment Method', ja: '\u652f\u6255\u3044\u65b9\u6cd5', zh: '\u4ed8\u6b3e\u65b9\u5f0f', es: 'M\u00e9todo de pago', fr: 'Mode de paiement', de: 'Zahlungsmethode', ko: '\uacb0\uc81c \ubc29\ubc95', ar: '\u0637\u0631\u064a\u0642\u0629 \u0627\u0644\u062f\u0641\u0639', pt: 'M\u00e9todo de pagamento', it: 'Metodo di pagamento' },
-            s5StripeNote: { en: 'Credit/Debit Card, Apple Pay, Google Pay', ja: '\u30af\u30ec\u30b8\u30c3\u30c8/\u30c7\u30d3\u30c3\u30c8\u30ab\u30fc\u30c9, Apple Pay, Google Pay', zh: '\u4fe1\u7528\u5361/\u7c3d\u5e33\u5361, Apple Pay, Google Pay', es: 'Tarjeta de cr\u00e9dito/d\u00e9bito, Apple Pay, Google Pay', fr: 'Carte de cr\u00e9dit/d\u00e9bit, Apple Pay, Google Pay', de: 'Kredit-/Debitkarte, Apple Pay, Google Pay', ko: '\uc2e0\uc6a9/\uccb4\ud06c\uce74\ub4dc, Apple Pay, Google Pay', ar: '\u0628\u0637\u0627\u0642\u0629 \u0627\u0626\u062a\u0645\u0627\u0646/\u062e\u0635\u0645, Apple Pay, Google Pay', pt: 'Cart\u00e3o de cr\u00e9dito/d\u00e9bito, Apple Pay, Google Pay', it: 'Carta di credito/debito, Apple Pay, Google Pay' },
-            s5PaypalNote: { en: 'PayPal balance, Bank account', ja: 'PayPal\u6b8b\u9ad8, \u9280\u884c\u53e3\u5ea7', zh: 'PayPal\u9918\u984d, \u9280\u884c\u5e33\u6236', es: 'Saldo PayPal, Cuenta bancaria', fr: 'Solde PayPal, Compte bancaire', de: 'PayPal-Guthaben, Bankkonto', ko: 'PayPal \uc794\uc561, \uc740\ud589 \uacc4\uc88c', ar: '\u0631\u0635\u064a\u062f PayPal, \u062d\u0633\u0627\u0628 \u0628\u0646\u0643\u064a', pt: 'Saldo PayPal, Conta banc\u00e1ria', it: 'Saldo PayPal, Conto bancario' },
             s6CardLabel: { en: 'Credit / Debit Card', ja: '\u30af\u30ec\u30b8\u30c3\u30c8/\u30c7\u30d3\u30c3\u30c8\u30ab\u30fc\u30c9', zh: '\u4fe1\u7528\u5361/\u7c3d\u5e33\u5361', es: 'Tarjeta de cr\u00e9dito/d\u00e9bito', fr: 'Carte de cr\u00e9dit/d\u00e9bit', de: 'Kredit-/Debitkarte', ko: '\uc2e0\uc6a9/\uccb4\ud06c\uce74\ub4dc', ar: '\u0628\u0637\u0627\u0642\u0629 \u0627\u0626\u062a\u0645\u0627\u0646/\u062e\u0635\u0645', pt: 'Cart\u00e3o de cr\u00e9dito/d\u00e9bito', it: 'Carta di credito/debito' },
-            s6PaypalLabel: { en: 'Pay with PayPal', ja: 'PayPal\u3067\u652f\u6255\u3046', zh: '\u7528PayPal\u652f\u4ed8', es: 'Pagar con PayPal', fr: 'Payer avec PayPal', de: 'Mit PayPal bezahlen', ko: 'PayPal\ub85c \uacb0\uc81c', ar: '\u0627\u0644\u062f\u0641\u0639 \u0639\u0628\u0631 PayPal', pt: 'Pagar com PayPal', it: 'Paga con PayPal' },
             s6Desc: { en: 'Confirm and proceed to payment.', ja: '\u78ba\u8a8d\u3057\u3066\u304a\u652f\u6255\u3044\u3078\u9032\u3093\u3067\u304f\u3060\u3055\u3044\u3002', zh: '\u78ba\u8a8d\u4e26\u7e7c\u7e8c\u4ed8\u6b3e\u3002', es: 'Confirme y proceda al pago.', fr: 'Confirmez et proc\u00e9dez au paiement.', de: 'Best\u00e4tigen und zur Zahlung.', ko: '\ud655\uc778 \ud6c4 \uacb0\uc81c\ub85c \uc9c4\ud589\ud569\ub2c8\ub2e4.', ar: '\u0623\u0643\u062f \u0648\u062a\u0627\u0628\u0639 \u0644\u0644\u062f\u0641\u0639.', pt: 'Confirme e prossiga para o pagamento.', it: 'Conferma e procedi al pagamento.' },
             btnBack: { en: 'Back', ja: '\u623b\u308b', zh: '\u8fd4\u56de', es: 'Atr\u00e1s', fr: 'Retour', de: 'Zur\u00fcck', ko: '\ub4a4\ub85c', ar: '\u0631\u062c\u0648\u0639', pt: 'Voltar', it: 'Indietro' },
             btnNext: { en: 'Next', ja: '\u6b21\u3078', zh: '\u4e0b\u4e00\u6b65', es: 'Siguiente', fr: 'Suivant', de: 'Weiter', ko: '\ub2e4\uc74c', ar: '\u0627\u0644\u062a\u0627\u0644\u064a', pt: 'Pr\u00f3ximo', it: 'Avanti' },
@@ -1918,9 +1867,9 @@
         setText('s5Title', T.s5Title); setText('s5LabelModel', T.s5LabelModel); setText('s5LabelChars', T.s5LabelChars);
         setText('s5LabelRate', T.s5LabelRate); setText('s5LabelTotal', T.s5LabelTotal); setText('s5BtnText', T.s5BtnText);
         setLabel2('s5LabelPayMethod', '<i class="fas fa-wallet me-1"></i>', T.s5PayMethod);
-        setText('s5StripeNote', T.s5StripeNote); setText('s5PaypalNote', T.s5PaypalNote);
+        
         setText('s6Title', T.s6Title); setText('s6Desc', T.s6Desc);
-        setText('s6CardLabel', T.s6CardLabel); setText('s6PaypalLabel', T.s6PaypalLabel);
+        setText('s6CardLabel', T.s6CardLabel);
         setText('s7Title', T.s7Title); setText('s7Note', T.s7Note);
         setText('s8Title', T.s8Title); setText('s8Desc', T.s8Desc); setText('s8OrigHeader', T.s8OrigHeader);
         setText('s8EditHint', T.s8EditHint); setText('s8BtnRetranslate', T.s8BtnRetranslate); setText('s8BtnText', T.s8BtnText);

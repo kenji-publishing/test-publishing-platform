@@ -204,8 +204,9 @@ router.post('/manga/checkout', authenticate, async (req, res) => {
 
         const modelLabel = model.charAt(0).toUpperCase() + model.slice(1);
         const unitAmount = ZERO_DECIMAL.includes(currency.toLowerCase()) ? Math.round(amount) : Math.round(amount * 100);
+        // payment_method_typesは指定しない: Stripeダッシュボードで有効化した決済手段
+        // （カード/Apple Pay/Google Pay/PayPal等）が通貨に応じて自動表示される
         const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card'],
             line_items: [{
                 price_data: {
                     currency: currency.toLowerCase(),
@@ -270,8 +271,9 @@ router.post('/checkout', authenticate, async (req, res) => {
             ? Math.round(amount)
             : Math.round(amount * 100);
 
+        // payment_method_typesは指定しない: Stripeダッシュボードで有効化した決済手段
+        // （カード/Apple Pay/Google Pay/PayPal等）が通貨に応じて自動表示される
         const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card'],
             line_items: [{
                 price_data: {
                     currency: currency.toLowerCase(),
@@ -414,8 +416,9 @@ router.post('/orders/:orderId/repay', authenticate, async (req, res) => {
         const desc = order.tool === 'manga'
             ? `${Array.isArray(order.pages) ? order.pages.length : order.char_count} pages ${order.source_lang || '?'}->${order.target_lang} — AuctLect AI tools`
             : `${Number(order.char_count).toLocaleString()} characters — AuctLect AI tools`;
+        // payment_method_typesは指定しない: Stripeダッシュボードで有効化した決済手段
+        // （カード/Apple Pay/Google Pay/PayPal等）が通貨に応じて自動表示される
         const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card'],
             line_items: [{
                 price_data: {
                     currency: order.currency.toLowerCase(),

@@ -130,8 +130,9 @@ router.post('/create-checkout-session', authenticate, async (req, res) => {
       ? Math.round(work.price)
       : Math.round(work.price * 100);
 
+    // payment_method_typesは指定しない: Stripeダッシュボードで有効化した決済手段
+    // （カード/Apple Pay/Google Pay/PayPal等）が通貨に応じて自動表示される
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
       line_items: [
         {
           price_data: {
