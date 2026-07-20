@@ -464,7 +464,8 @@ window.translations.pt = {
         requestReview: 'Solicitar Revisão Profissional'
     },
     profile: {
-        labelAccountType: 'Tipo de conta (contas bancárias japonesas)',
+        labelBeneficiaryAddress: 'Endereço do destinatário (opcional — obrigatório para transferências em USD)',
+        labelAccountType: 'Tipo de conta (Japão / EUA / Brasil, etc.)',
         sectionPayout: 'Conta de recebimento (receitas)',
         payoutIntro: 'As receitas são pagas mensalmente na sua conta bancária: fechamento no fim do mês e pagamento até o dia 15 do mês seguinte. Pagamento mínimo ¥3.000 / $20 / £15 (saldos menores acumulam). Não é necessária conta Stripe ou PayPal.',
         labelAccountHolder: 'Nome do titular da conta',
@@ -473,7 +474,7 @@ window.translations.pt = {
         labelBankName: 'Nome do banco',
         labelBranch: 'Agência / código',
         labelAccountNumber: 'Número da conta / IBAN',
-        labelBankExtra: 'Informações adicionais (SWIFT/BIC, routing number, etc.)',
+        labelBankExtra: 'Informações adicionais (SWIFT/BIC, routing number, CPF, telefone, etc.)',
         payoutSmallOptIn: 'Enviar meu saldo todo mês mesmo abaixo do mínimo (será descontada uma taxa de transferência de ¥300 / $2 / £1,50)',
         btnSavePayout: 'Salvar dados de recebimento',
         payoutSaved: 'Dados de recebimento salvos',

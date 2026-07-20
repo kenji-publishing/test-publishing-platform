@@ -464,7 +464,8 @@ window.translations.fr = {
         requestReview: 'Demander une Révision Professionnelle'
     },
     profile: {
-        labelAccountType: 'Type de compte (comptes bancaires japonais)',
+        labelBeneficiaryAddress: 'Adresse du bénéficiaire (facultative — obligatoire pour les virements en USD)',
+        labelAccountType: 'Type de compte (Japon / États-Unis / Brésil, etc.)',
         sectionPayout: 'Compte de versement (revenus)',
         payoutIntro: 'Les revenus sont versés chaque mois sur votre compte bancaire : clôture en fin de mois, paiement avant le 15 du mois suivant. Versement minimum : ¥3 000 / $20 / £15 (les soldes inférieurs sont reportés). Aucun compte Stripe ou PayPal n\'est requis.',
         labelAccountHolder: 'Nom du titulaire du compte',
@@ -473,7 +474,7 @@ window.translations.fr = {
         labelBankName: 'Nom de la banque',
         labelBranch: 'Agence / code',
         labelAccountNumber: 'Numéro de compte / IBAN',
-        labelBankExtra: 'Informations complémentaires (SWIFT/BIC, routing number, etc.)',
+        labelBankExtra: 'Informations complémentaires (SWIFT/BIC, routing number, CPF, téléphone, etc.)',
         payoutSmallOptIn: 'Verser mon solde chaque mois même sous le minimum (des frais de virement de ¥300 / $2 / £1,50 seront déduits)',
         btnSavePayout: 'Enregistrer le compte de versement',
         payoutSaved: 'Compte de versement enregistré',

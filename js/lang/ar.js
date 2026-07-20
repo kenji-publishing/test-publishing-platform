@@ -464,7 +464,8 @@ window.translations.ar = {
         requestReview: 'طلب مراجعة احترافية'
     },
     profile: {
-        labelAccountType: 'نوع الحساب (للحسابات البنكية اليابانية)',
+        labelBeneficiaryAddress: 'عنوان المستلم (اختياري — مطلوب للتحويلات بالدولار الأمريكي)',
+        labelAccountType: 'نوع الحساب (اليابان / الولايات المتحدة / البرازيل، إلخ)',
         sectionPayout: 'حساب استلام الأرباح',
         payoutIntro: 'تُدفع الأرباح شهريًا إلى حسابك البنكي: الإغلاق في نهاية الشهر والدفع بحلول اليوم 15 من الشهر التالي. الحد الأدنى للدفع ¥3,000 / $20 / £15 (تُرحَّل المبالغ الأقل). لا حاجة لحساب Stripe أو PayPal.',
         labelAccountHolder: 'اسم صاحب الحساب',
@@ -473,7 +474,7 @@ window.translations.ar = {
         labelBankName: 'اسم البنك',
         labelBranch: 'اسم/رمز الفرع',
         labelAccountNumber: 'رقم الحساب / IBAN',
-        labelBankExtra: 'معلومات إضافية (SWIFT/BIC، رقم التوجيه، إلخ)',
+        labelBankExtra: 'معلومات إضافية (SWIFT/BIC، رقم التوجيه، CPF، رقم الهاتف، إلخ)',
         payoutSmallOptIn: 'حوّل رصيدي كل شهر حتى لو كان أقل من الحد الأدنى (تُخصم رسوم تحويل ¥300 / $2 / £1.50)',
         btnSavePayout: 'حفظ بيانات الاستلام',
         payoutSaved: 'تم حفظ بيانات الاستلام',

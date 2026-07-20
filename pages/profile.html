@@ -348,6 +348,10 @@
                             <input type="text" class="form-control" id="payoutHolder" maxlength="200" required placeholder="TARO YAMADA / ヤマダ タロウ">
                         </div>
                         <div class="mb-3">
+                            <label for="payoutAddress" class="form-label" data-i18n="profile.labelBeneficiaryAddress">Recipient address (optional — required for USD transfers)</label>
+                            <input type="text" class="form-control" id="payoutAddress" maxlength="300" placeholder="1-2-3 Chiyoda, Chiyoda-ku, Tokyo 100-0001, Japan">
+                        </div>
+                        <div class="mb-3">
                             <label for="payoutCountry" class="form-label" data-i18n="profile.labelBankCountry">Bank country</label>
                             <input type="text" class="form-control" id="payoutCountry" maxlength="60" required placeholder="Japan / United Kingdom / ...">
                         </div>
@@ -362,6 +366,9 @@
                                 <option value="CAD">CAD</option>
                                 <option value="KRW">KRW ₩</option>
                                 <option value="BRL">BRL</option>
+                                <option value="AED">AED</option>
+                                <option value="SAR">SAR</option>
+                                <option value="EGP">EGP</option>
                             </select>
                         </div>
                         <div class="mb-3">
@@ -377,12 +384,14 @@
                             <input type="text" class="form-control" id="payoutAccount" maxlength="120" required>
                         </div>
                         <div class="mb-3">
-                            <label for="payoutAccountType" class="form-label" data-i18n="profile.labelAccountType">Account type (Japanese bank accounts)</label>
+                            <label for="payoutAccountType" class="form-label" data-i18n="profile.labelAccountType">Account type (Japan / US / Brazil, etc.)</label>
                             <select class="form-select" id="payoutAccountType">
                                 <option value="">—</option>
                                 <option value="普通">普通 (Futsuu / Ordinary)</option>
                                 <option value="貯蓄">貯蓄 (Chochiku / Savings)</option>
                                 <option value="当座">当座 (Touza / Checking)</option>
+                                <option value="Checking">Checking</option>
+                                <option value="Savings">Savings</option>
                             </select>
                         </div>
                         <div class="mb-3">
@@ -641,6 +650,7 @@
                     var p = data.payout;
                     if (!p) return;
                     document.getElementById('payoutHolder').value = p.account_holder || '';
+                    document.getElementById('payoutAddress').value = p.beneficiary_address || '';
                     document.getElementById('payoutCountry').value = p.bank_country || '';
                     document.getElementById('payoutCurrency').value = p.account_currency || 'JPY';
                     document.getElementById('payoutBank').value = p.bank_name || '';
@@ -665,6 +675,7 @@
                 headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
                 body: JSON.stringify({
                     account_holder: document.getElementById('payoutHolder').value.trim(),
+                    beneficiary_address: document.getElementById('payoutAddress').value.trim(),
                     bank_country: document.getElementById('payoutCountry').value.trim(),
                     account_currency: document.getElementById('payoutCurrency').value,
                     bank_name: document.getElementById('payoutBank').value.trim(),

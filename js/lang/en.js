@@ -464,7 +464,8 @@ window.translations.en = {
         requestReview: 'Request Professional Review'
     },
     profile: {
-        labelAccountType: 'Account type (Japanese bank accounts)',
+        labelBeneficiaryAddress: 'Recipient address (optional — required for USD transfers)',
+        labelAccountType: 'Account type (Japan / US / Brazil, etc.)',
         sectionPayout: 'Payout Account (Revenue)',
         payoutIntro: 'Revenue is paid to your bank account monthly: closing at month-end, paid by the 15th of the following month. Minimum payout ¥3,000 / $20 / £15 — smaller balances carry over. No Stripe or PayPal account is required.',
         labelAccountHolder: 'Account holder name',
@@ -473,7 +474,7 @@ window.translations.en = {
         labelBankName: 'Bank name',
         labelBranch: 'Branch name / code',
         labelAccountNumber: 'Account number / IBAN',
-        labelBankExtra: 'Additional info (SWIFT/BIC, routing number, etc.)',
+        labelBankExtra: 'Additional info (SWIFT/BIC, routing number, CPF, phone number, etc.)',
         payoutSmallOptIn: 'Pay out my balance every month even below the minimum (a transfer fee of ¥300 / $2 / £1.50 will be deducted)',
         btnSavePayout: 'Save payout details',
         payoutSaved: 'Payout details saved',

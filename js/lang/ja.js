@@ -464,7 +464,8 @@ window.translations.ja = {
         requestReview: 'プロレビューを依頼'
     },
     profile: {
-        labelAccountType: '口座種別（日本の銀行口座の場合）',
+        labelBeneficiaryAddress: '受取人住所（任意・米ドルでの受け取りは必須）',
+        labelAccountType: '口座種別（日本・米国・ブラジル等の口座）',
         sectionPayout: '受取口座（収益の受け取り）',
         payoutIntro: '収益は毎月末締め・翌月15日までにご登録の銀行口座へお支払いします。最低支払額は ¥3,000 / $20 / £15（未満の残高は翌月に繰り越し）。StripeやPayPalのアカウントは不要です。',
         labelAccountHolder: '口座名義',
@@ -473,7 +474,7 @@ window.translations.ja = {
         labelBankName: '銀行名',
         labelBranch: '支店名・支店コード',
         labelAccountNumber: '口座番号 / IBAN',
-        labelBankExtra: '補足情報（SWIFT/BIC、routing number等）',
+        labelBankExtra: '補足情報（SWIFT/BIC、routing number、CPF、電話番号等）',
         payoutSmallOptIn: '最低額未満でも毎月送金する（送金手数料 ¥300 / $2 / £1.50 を差し引きます）',
         btnSavePayout: '受取口座を保存',
         payoutSaved: '受取口座を保存しました',

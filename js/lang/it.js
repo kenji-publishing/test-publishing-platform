@@ -464,7 +464,8 @@ window.translations.it = {
         requestReview: 'Richiedi Revisione Professionale'
     },
     profile: {
-        labelAccountType: 'Tipo di conto (conti bancari giapponesi)',
+        labelBeneficiaryAddress: 'Indirizzo del destinatario (facoltativo — obbligatorio per i bonifici in USD)',
+        labelAccountType: 'Tipo di conto (Giappone / USA / Brasile, ecc.)',
         sectionPayout: 'Conto di accredito (ricavi)',
         payoutIntro: 'I ricavi vengono pagati ogni mese sul tuo conto bancario: chiusura a fine mese, pagamento entro il 15 del mese successivo. Pagamento minimo ¥3.000 / $20 / £15 (gli importi inferiori vengono riportati). Non serve un account Stripe o PayPal.',
         labelAccountHolder: 'Intestatario del conto',
@@ -473,7 +474,7 @@ window.translations.it = {
         labelBankName: 'Nome della banca',
         labelBranch: 'Filiale / codice',
         labelAccountNumber: 'Numero di conto / IBAN',
-        labelBankExtra: 'Informazioni aggiuntive (SWIFT/BIC, routing number, ecc.)',
+        labelBankExtra: 'Informazioni aggiuntive (SWIFT/BIC, routing number, CPF, telefono, ecc.)',
         payoutSmallOptIn: 'Versa il mio saldo ogni mese anche sotto il minimo (verrà detratta una commissione di ¥300 / $2 / £1,50)',
         btnSavePayout: 'Salva i dati di accredito',
         payoutSaved: 'Dati di accredito salvati',

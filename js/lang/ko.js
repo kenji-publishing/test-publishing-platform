@@ -464,7 +464,8 @@ window.translations.ko = {
         requestReview: '전문 검토 요청'
     },
     profile: {
-        labelAccountType: '계좌 종류 (일본 은행 계좌의 경우)',
+        labelBeneficiaryAddress: '수취인 주소 (선택 사항 — USD 수령 시 필수)',
+        labelAccountType: '계좌 종류 (일본/미국/브라질 등)',
         sectionPayout: '수령 계좌 (수익 지급)',
         payoutIntro: '수익은 매월 말 마감 후 다음 달 15일까지 등록된 은행 계좌로 지급됩니다. 최소 지급액은 ¥3,000 / $20 / £15이며, 미달 금액은 다음 달로 이월됩니다. Stripe나 PayPal 계정은 필요하지 않습니다.',
         labelAccountHolder: '예금주 이름',
@@ -473,7 +474,7 @@ window.translations.ko = {
         labelBankName: '은행명',
         labelBranch: '지점명/지점 코드',
         labelAccountNumber: '계좌번호 / IBAN',
-        labelBankExtra: '추가 정보 (SWIFT/BIC, routing number 등)',
+        labelBankExtra: '추가 정보 (SWIFT/BIC, routing number, CPF, 전화번호 등)',
         payoutSmallOptIn: '최소 금액 미만이어도 매월 지급받기 (송금 수수료 ¥300 / $2 / £1.50 차감)',
         btnSavePayout: '수령 계좌 저장',
         payoutSaved: '수령 계좌가 저장되었습니다',

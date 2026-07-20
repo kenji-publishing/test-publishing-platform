@@ -464,7 +464,8 @@ window.translations.zh = {
         requestReview: '请求专业审核'
     },
     profile: {
-        labelAccountType: '帳戶類型（日本銀行帳戶適用）',
+        labelBeneficiaryAddress: '收款人地址（選填；以美元收款時必填）',
+        labelAccountType: '帳戶類型（日本／美國／巴西等帳戶）',
         sectionPayout: '收款帳戶（收益提領）',
         payoutIntro: '收益每月結算：月底截止，於次月15日前匯入您登記的銀行帳戶。最低支付額為 ¥3,000 / $20 / £15（未達金額將結轉至次月）。無需 Stripe 或 PayPal 帳戶。',
         labelAccountHolder: '帳戶持有人姓名',
@@ -473,7 +474,7 @@ window.translations.zh = {
         labelBankName: '銀行名稱',
         labelBranch: '分行名稱／代碼',
         labelAccountNumber: '帳號 / IBAN',
-        labelBankExtra: '補充資訊（SWIFT/BIC、routing number 等）',
+        labelBankExtra: '補充資訊（SWIFT/BIC、routing number、CPF、電話號碼等）',
         payoutSmallOptIn: '即使未達最低金額也每月匯款（將扣除匯款手續費 ¥300 / $2 / £1.50）',
         btnSavePayout: '儲存收款帳戶',
         payoutSaved: '收款帳戶已儲存',

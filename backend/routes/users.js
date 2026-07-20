@@ -99,7 +99,7 @@ router.put('/profile', authenticate, async (req, res) => {
 router.get('/payout-details', authenticate, async (req, res) => {
   try {
     const result = await db.query(
-      `SELECT method, account_holder, bank_country, account_currency, bank_name,
+      `SELECT method, account_holder, beneficiary_address, bank_country, account_currency, bank_name,
               branch_info, account_number, account_type, extra_info, allow_small_payout, updated_at
        FROM user_payout_details WHERE user_id = $1`,
       [req.user.userId]
@@ -117,7 +117,7 @@ router.get('/payout-details', authenticate, async (req, res) => {
  */
 router.put('/payout-details', authenticate, async (req, res) => {
   try {
-    const { account_holder, bank_country, account_currency, bank_name,
+    const { account_holder, beneficiary_address, bank_country, account_currency, bank_name,
             branch_info, account_number, account_type, extra_info, allow_small_payout } = req.body;
     const required = { account_holder, bank_country, account_currency, bank_name, account_number };
     for (const [key, value] of Object.entries(required)) {
@@ -136,11 +136,12 @@ router.put('/payout-details', authenticate, async (req, res) => {
     };
     await db.query(
       `INSERT INTO user_payout_details
-         (user_id, method, account_holder, bank_country, account_currency, bank_name,
+         (user_id, method, account_holder, beneficiary_address, bank_country, account_currency, bank_name,
           branch_info, account_number, account_type, extra_info, allow_small_payout)
-       VALUES ($1, 'bank', $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       VALUES ($1, 'bank', $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
        ON CONFLICT (user_id) DO UPDATE SET
          account_holder = EXCLUDED.account_holder,
+         beneficiary_address = EXCLUDED.beneficiary_address,
          bank_country = EXCLUDED.bank_country,
          account_currency = EXCLUDED.account_currency,
          bank_name = EXCLUDED.bank_name,
@@ -150,7 +151,7 @@ router.put('/payout-details', authenticate, async (req, res) => {
          extra_info = EXCLUDED.extra_info,
          allow_small_payout = EXCLUDED.allow_small_payout,
          updated_at = CURRENT_TIMESTAMP`,
-      [req.user.userId, clip(account_holder, 200), clip(bank_country, 60), currency,
+      [req.user.userId, clip(account_holder, 200), clip(beneficiary_address, 300), clip(bank_country, 60), currency,
        clip(bank_name, 200), clip(branch_info, 200), clip(account_number, 120),
        clip(account_type, 20), clip(extra_info, 300), !!allow_small_payout]
     );

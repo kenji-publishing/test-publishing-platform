@@ -464,7 +464,8 @@ window.translations.de = {
         requestReview: 'Professionelle Überprüfung Anfordern'
     },
     profile: {
-        labelAccountType: 'Kontoart (japanische Bankkonten)',
+        labelBeneficiaryAddress: 'Adresse des Empfängers (optional — für USD-Überweisungen erforderlich)',
+        labelAccountType: 'Kontoart (Japan / USA / Brasilien usw.)',
         sectionPayout: 'Auszahlungskonto (Einnahmen)',
         payoutIntro: 'Einnahmen werden monatlich auf Ihr Bankkonto ausgezahlt: Abrechnung zum Monatsende, Zahlung bis zum 15. des Folgemonats. Mindestauszahlung ¥3.000 / $20 / £15 (kleinere Beträge werden übertragen). Kein Stripe- oder PayPal-Konto erforderlich.',
         labelAccountHolder: 'Kontoinhaber',
@@ -473,7 +474,7 @@ window.translations.de = {
         labelBankName: 'Bankname',
         labelBranch: 'Filiale / Filialnummer',
         labelAccountNumber: 'Kontonummer / IBAN',
-        labelBankExtra: 'Zusätzliche Angaben (SWIFT/BIC, Routing-Nummer usw.)',
+        labelBankExtra: 'Zusätzliche Angaben (SWIFT/BIC, Routing-Nummer, CPF, Telefonnummer usw.)',
         payoutSmallOptIn: 'Mein Guthaben jeden Monat auch unter dem Minimum auszahlen (eine Überweisungsgebühr von ¥300 / $2 / £1,50 wird abgezogen)',
         btnSavePayout: 'Auszahlungsdaten speichern',
         payoutSaved: 'Auszahlungsdaten gespeichert',
