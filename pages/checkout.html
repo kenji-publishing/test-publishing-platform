@@ -222,7 +222,7 @@
     <!-- Checkout Page Styles -->
     <style>
         .payment-method-card{cursor:pointer;transition:all 0.3s;border:2px solid #dee2e6}.payment-method-card:hover{border-color:#0d6efd;transform:translateY(-3px);box-shadow:0 5px 15px rgba(0,0,0,0.1)}.payment-method-card.selected{border-color:#0d6efd;background-color:#f0f7ff}
-        .payment-icon{font-size:3rem}.stripe-icon{color:#635bff}.paypal-icon{color:#003087}
+        .payment-icon{font-size:3rem}.stripe-icon{color:#635bff}
         .order-summary{background:#f8f9fa;border-radius:10px}
         
         /* ========== Z-index Fix: ドロップダウンをOrder Summaryより上に ========== */
@@ -270,21 +270,10 @@
                         <div class="payment-icon stripe-icon me-4"><i class="fab fa-cc-stripe"></i></div>
                         <div class="flex-grow-1">
                             <h5 class="mb-1" data-i18n="checkout.creditCard">Credit / Debit Card</h5>
-                            <p class="text-muted mb-0"><i class="fab fa-cc-visa me-1"></i><i class="fab fa-cc-mastercard me-1"></i><i class="fab fa-cc-amex me-1"></i><i class="fab fa-cc-jcb me-1"></i><span data-i18n="checkout.securePayment">Secure Payment</span></p>
+                            <p class="text-muted mb-0"><i class="fab fa-cc-visa me-1" title="Visa"></i><i class="fab fa-cc-mastercard me-1" title="Mastercard"></i><i class="fab fa-cc-amex me-1" title="American Express"></i><i class="fab fa-cc-jcb me-1" title="JCB"></i><i class="fab fa-apple-pay me-1" title="Apple Pay"></i><i class="fab fa-google-pay me-1" title="Google Pay"></i><i class="fab fa-paypal me-1" title="PayPal"></i><i class="fab fa-amazon-pay me-1" title="Amazon Pay"></i><span data-i18n="checkout.securePayment">Secure Payment</span></p>
+                            <p class="text-muted mb-0 mt-1" style="font-size:0.78rem;" id="methodsRegionNote"></p>
                         </div>
                         <div><i class="fas fa-check-circle text-primary fa-2x" id="stripeCheck" style="display:none;"></i></div>
-                    </div>
-                </div>
-                <!-- PayPal hidden until the integration is implemented — advertising a
-                     payment method that ends in "coming soon!" breaks buyer trust -->
-                <div class="card payment-method-card mb-3" id="paypalMethod" onclick="selectPaymentMethod('paypal')" style="display:none;">
-                    <div class="card-body d-flex align-items-center">
-                        <div class="payment-icon paypal-icon me-4"><i class="fab fa-paypal"></i></div>
-                        <div class="flex-grow-1">
-                            <h5 class="mb-1" data-i18n="checkout.paypal">PayPal</h5>
-                            <p class="text-muted mb-0" data-i18n="checkout.paySecurely">Pay securely with PayPal</p>
-                        </div>
-                        <div><i class="fas fa-check-circle text-primary fa-2x" id="paypalCheck" style="display:none;"></i></div>
                     </div>
                 </div>
                 <div class="alert alert-light mt-4"><i class="fas fa-lock text-success me-2"></i><small data-i18n="checkout.encryptedSecure">Your payment information is encrypted and secure.</small></div>
@@ -435,19 +424,32 @@
         function selectPaymentMethod(method){
             selectedMethod=method;
             document.querySelectorAll('.payment-method-card').forEach(c=>c.classList.remove('selected'));
-            document.getElementById('stripeCheck').style.display='none';
-            document.getElementById('paypalCheck').style.display='none';
-            if(method==='stripe'){
-                document.getElementById('stripeMethod').classList.add('selected');
-                document.getElementById('stripeCheck').style.display='block';
-                document.getElementById('payButton').innerHTML='<i class="fas fa-credit-card me-2"></i>Pay with Card';
-            }else if(method==='paypal'){
-                document.getElementById('paypalMethod').classList.add('selected');
-                document.getElementById('paypalCheck').style.display='block';
-                document.getElementById('payButton').innerHTML='<i class="fab fa-paypal me-2"></i>Pay with PayPal';
-            }
+            document.getElementById('stripeMethod').classList.add('selected');
+            document.getElementById('stripeCheck').style.display='block';
+            document.getElementById('payButton').innerHTML='<i class="fas fa-lock me-2"></i>Proceed to Payment';
             document.getElementById('payButton').disabled=false;
         }
+
+        // 決済手段の注記（Stripeの決済ページが通貨・地域に応じて自動で出し分ける）
+        function updateMethodsRegionNote(){
+            var lang = (typeof getCurrentLanguage === 'function') ? getCurrentLanguage() : 'en';
+            var notes = {
+                en:'Available payment methods are shown on the payment page based on your currency and region.',
+                ja:'ご利用可能な決済方法は、通貨・地域に応じて決済ページに表示されます。',
+                zh:'可用的付款方式將依貨幣與地區顯示於付款頁面。',
+                es:'Los métodos de pago disponibles se muestran en la página de pago según su moneda y región.',
+                fr:"Les moyens de paiement disponibles s'affichent sur la page de paiement selon votre devise et votre région.",
+                de:'Die verfügbaren Zahlungsmethoden werden auf der Zahlungsseite je nach Währung und Region angezeigt.',
+                ko:'이용 가능한 결제 수단은 통화 및 지역에 따라 결제 페이지에 표시됩니다.',
+                ar:'تُعرض طرق الدفع المتاحة في صفحة الدفع حسب العملة والمنطقة.',
+                pt:'Os métodos de pagamento disponíveis são mostrados na página de pagamento conforme sua moeda e região.',
+                it:'I metodi di pagamento disponibili vengono mostrati nella pagina di pagamento in base a valuta e regione.'
+            };
+            var el = document.getElementById('methodsRegionNote');
+            if (el) el.textContent = notes[lang] || notes['en'];
+        }
+        document.addEventListener('DOMContentLoaded', updateMethodsRegionNote);
+        document.addEventListener('languageChanged', updateMethodsRegionNote);
         
         // ========== ライブラリ管理（localStorage）==========
         function addToLibrary(workId, title) {
@@ -470,9 +472,7 @@
 
         function resetPayButton(btn){
             btn.disabled = false;
-            btn.innerHTML = (selectedMethod === 'paypal')
-                ? '<i class="fab fa-paypal me-2"></i>Pay with PayPal'
-                : '<i class="fas fa-credit-card me-2"></i>Pay with Card';
+            btn.innerHTML = '<i class="fas fa-lock me-2"></i>Proceed to Payment';
         }
 
         async function processPayment(){
@@ -494,9 +494,6 @@
                         window.location.href=d.url;
                     }
                     else{throw new Error(d.error||'Payment failed')}
-                }else if(selectedMethod==='paypal'){
-                    alert('PayPal integration coming soon!');
-                    resetPayButton(btn);
                 }
             }catch(e){
                 if (window.DEMO_MODE) {
