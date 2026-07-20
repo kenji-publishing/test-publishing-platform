@@ -333,6 +333,58 @@
                         </div>
                     </form>
                 </div>
+
+                <!-- Card 4: Payout Account（収益の受取口座。月次の手動送金=Wise一括の宛先） -->
+                <div class="profile-card" id="payoutCard">
+                    <h5><i class="fas fa-university"></i> <span data-i18n="profile.sectionPayout">Payout Account (Revenue)</span></h5>
+                    <p class="text-muted" style="font-size:0.85rem;" data-i18n="profile.payoutIntro">Revenue is paid to your bank account monthly: closing at month-end, paid by the 15th of the following month. Minimum payout ¥3,000 / $20 / £15 — smaller balances carry over. No Stripe or PayPal account is required.</p>
+                    <form id="payoutForm" onsubmit="savePayoutDetails(event)">
+                        <div class="mb-3">
+                            <label for="payoutHolder" class="form-label" data-i18n="profile.labelAccountHolder">Account holder name</label>
+                            <input type="text" class="form-control" id="payoutHolder" maxlength="200" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="payoutCountry" class="form-label" data-i18n="profile.labelBankCountry">Bank country</label>
+                            <input type="text" class="form-control" id="payoutCountry" maxlength="60" required placeholder="Japan / United Kingdom / ...">
+                        </div>
+                        <div class="mb-3">
+                            <label for="payoutCurrency" class="form-label" data-i18n="profile.labelBankCurrency">Account currency</label>
+                            <select class="form-select" id="payoutCurrency">
+                                <option value="JPY">JPY ¥</option>
+                                <option value="USD">USD $</option>
+                                <option value="EUR">EUR €</option>
+                                <option value="GBP">GBP £</option>
+                                <option value="AUD">AUD</option>
+                                <option value="CAD">CAD</option>
+                                <option value="KRW">KRW ₩</option>
+                                <option value="BRL">BRL</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="payoutBank" class="form-label" data-i18n="profile.labelBankName">Bank name</label>
+                            <input type="text" class="form-control" id="payoutBank" maxlength="200" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="payoutBranch" class="form-label" data-i18n="profile.labelBranch">Branch name / code</label>
+                            <input type="text" class="form-control" id="payoutBranch" maxlength="200">
+                        </div>
+                        <div class="mb-3">
+                            <label for="payoutAccount" class="form-label" data-i18n="profile.labelAccountNumber">Account number / IBAN</label>
+                            <input type="text" class="form-control" id="payoutAccount" maxlength="120" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="payoutExtra" class="form-label" data-i18n="profile.labelBankExtra">Additional info (SWIFT/BIC, routing number, etc.)</label>
+                            <input type="text" class="form-control" id="payoutExtra" maxlength="300">
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="payoutSmallOptIn">
+                            <label class="form-check-label" for="payoutSmallOptIn" style="font-size:0.85rem;" data-i18n="profile.payoutSmallOptIn">Pay out my balance every month even below the minimum (a transfer fee of ¥300 / $2 / £1.50 will be deducted)</label>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn-profile-action"><i class="fas fa-save me-1"></i> <span data-i18n="profile.btnSavePayout">Save payout details</span></button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </main>
@@ -566,10 +618,58 @@
             }, 3000);
         }
 
+        // ========== Payout details（収益の受取口座）==========
+        function loadPayoutDetails() {
+            var token = localStorage.getItem('token');
+            if (!token) return;
+            fetch('/api/users/payout-details', { headers: { 'Authorization': 'Bearer ' + token } })
+                .then(function(res) { if (!res.ok) throw new Error('load failed'); return res.json(); })
+                .then(function(data) {
+                    var p = data.payout;
+                    if (!p) return;
+                    document.getElementById('payoutHolder').value = p.account_holder || '';
+                    document.getElementById('payoutCountry').value = p.bank_country || '';
+                    document.getElementById('payoutCurrency').value = p.account_currency || 'JPY';
+                    document.getElementById('payoutBank').value = p.bank_name || '';
+                    document.getElementById('payoutBranch').value = p.branch_info || '';
+                    document.getElementById('payoutAccount').value = p.account_number || '';
+                    document.getElementById('payoutExtra').value = p.extra_info || '';
+                    document.getElementById('payoutSmallOptIn').checked = !!p.allow_small_payout;
+                })
+                .catch(function() { /* 未登録・オフラインは空のままでよい */ });
+        }
+
+        function savePayoutDetails(event) {
+            event.preventDefault();
+            var token = localStorage.getItem('token');
+            if (!token) {
+                showToast((window.i18n ? i18n.t('profile.payoutSaveError') : 'Could not save payout details.'), 'error');
+                return;
+            }
+            fetch('/api/users/payout-details', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({
+                    account_holder: document.getElementById('payoutHolder').value.trim(),
+                    bank_country: document.getElementById('payoutCountry').value.trim(),
+                    account_currency: document.getElementById('payoutCurrency').value,
+                    bank_name: document.getElementById('payoutBank').value.trim(),
+                    branch_info: document.getElementById('payoutBranch').value.trim(),
+                    account_number: document.getElementById('payoutAccount').value.trim(),
+                    extra_info: document.getElementById('payoutExtra').value.trim(),
+                    allow_small_payout: document.getElementById('payoutSmallOptIn').checked
+                })
+            })
+            .then(function(res) { if (!res.ok) throw new Error('save failed'); return res.json(); })
+            .then(function() { showToast((window.i18n ? i18n.t('profile.payoutSaved') : 'Payout details saved'), 'success'); })
+            .catch(function() { showToast((window.i18n ? i18n.t('profile.payoutSaveError') : 'Could not save payout details.'), 'error'); });
+        }
+
         // ========== DOMContentLoaded ==========
         document.addEventListener('DOMContentLoaded', function() {
             updateDynamicText();
             loadProfile();
+            loadPayoutDetails();
             // Close user dropdown on outside click
             document.addEventListener('click', function(e) {
                 if (!e.target.closest('.user-dropdown')) {

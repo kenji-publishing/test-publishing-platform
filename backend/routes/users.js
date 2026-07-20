@@ -93,6 +93,74 @@ router.put('/profile', authenticate, async (req, res) => {
 });
 
 /**
+ * GET /api/users/payout-details
+ * 収益の受取口座（本人のみ）。未登録なら payout: null
+ */
+router.get('/payout-details', authenticate, async (req, res) => {
+  try {
+    const result = await db.query(
+      `SELECT method, account_holder, bank_country, account_currency, bank_name,
+              branch_info, account_number, extra_info, allow_small_payout, updated_at
+       FROM user_payout_details WHERE user_id = $1`,
+      [req.user.userId]
+    );
+    res.json({ payout: result.rows[0] || null });
+  } catch (error) {
+    console.error('Get payout details error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * PUT /api/users/payout-details
+ * 受取口座の登録・更新（upsert）。月次の手動送金（Wise一括）の宛先になる
+ */
+router.put('/payout-details', authenticate, async (req, res) => {
+  try {
+    const { account_holder, bank_country, account_currency, bank_name,
+            branch_info, account_number, extra_info, allow_small_payout } = req.body;
+    const required = { account_holder, bank_country, account_currency, bank_name, account_number };
+    for (const [key, value] of Object.entries(required)) {
+      if (!value || !String(value).trim()) {
+        return res.status(400).json({ error: `${key} is required` });
+      }
+    }
+    const currency = String(account_currency).trim().toUpperCase();
+    if (!/^[A-Z]{3}$/.test(currency)) {
+      return res.status(400).json({ error: 'Invalid currency code' });
+    }
+    const clip = (v, n) => {
+      if (v == null) return null;
+      const s = String(v).trim();
+      return s ? s.slice(0, n) : null;
+    };
+    await db.query(
+      `INSERT INTO user_payout_details
+         (user_id, method, account_holder, bank_country, account_currency, bank_name,
+          branch_info, account_number, extra_info, allow_small_payout)
+       VALUES ($1, 'bank', $2, $3, $4, $5, $6, $7, $8, $9)
+       ON CONFLICT (user_id) DO UPDATE SET
+         account_holder = EXCLUDED.account_holder,
+         bank_country = EXCLUDED.bank_country,
+         account_currency = EXCLUDED.account_currency,
+         bank_name = EXCLUDED.bank_name,
+         branch_info = EXCLUDED.branch_info,
+         account_number = EXCLUDED.account_number,
+         extra_info = EXCLUDED.extra_info,
+         allow_small_payout = EXCLUDED.allow_small_payout,
+         updated_at = CURRENT_TIMESTAMP`,
+      [req.user.userId, clip(account_holder, 200), clip(bank_country, 60), currency,
+       clip(bank_name, 200), clip(branch_info, 200), clip(account_number, 120),
+       clip(extra_info, 300), !!allow_small_payout]
+    );
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Save payout details error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
  * PUT /api/users/notifications
  * Update notification settings
  */
