@@ -411,6 +411,8 @@ function renderNavbar(options) {
     html += '<div class="user-menu-divider"></div>';
     html += '<a href="' + p('dashboard.html') + '" class="user-menu-item">';
     html += '<i class="fas fa-th-large"></i> <span id="menuDashboard">Dashboard</span></a>';
+    html += '<a href="' + p('profile.html') + '" class="user-menu-item">';
+    html += '<i class="fas fa-user-circle"></i> <span id="menuProfile">Profile</span></a>';
     html += '<a href="' + p('account-settings.html') + '" class="user-menu-item">';
     html += '<i class="fas fa-cog"></i> <span id="menuAccountSettings">Account Settings</span></a>';
     // 翻訳者・編集者としての活動開始（誰でも登録できる。ディレクトリに公開プロフィールが載る）

@@ -464,6 +464,7 @@ window.translations.de = {
         requestReview: 'Professionelle Überprüfung Anfordern'
     },
     profile: {
+        labelAccountType: 'Kontoart (japanische Bankkonten)',
         sectionPayout: 'Auszahlungskonto (Einnahmen)',
         payoutIntro: 'Einnahmen werden monatlich auf Ihr Bankkonto ausgezahlt: Abrechnung zum Monatsende, Zahlung bis zum 15. des Folgemonats. Mindestauszahlung ¥3.000 / $20 / £15 (kleinere Beträge werden übertragen). Kein Stripe- oder PayPal-Konto erforderlich.',
         labelAccountHolder: 'Kontoinhaber',

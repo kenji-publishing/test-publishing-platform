@@ -111,6 +111,10 @@
                         <i class="fas fa-th-large"></i>
                         <span id="menuDashboard">Dashboard</span>
                     </a>
+                    <a href="profile.html" class="user-menu-item">
+                        <i class="fas fa-user-circle"></i>
+                        <span id="menuProfile">Profile</span>
+                    </a>
                     <a href="my-works.html" class="user-menu-item">
                         <i class="fas fa-book"></i>
                         <span id="menuMyWorks">My Works</span>
@@ -341,7 +345,7 @@
                     <form id="payoutForm" onsubmit="savePayoutDetails(event)">
                         <div class="mb-3">
                             <label for="payoutHolder" class="form-label" data-i18n="profile.labelAccountHolder">Account holder name</label>
-                            <input type="text" class="form-control" id="payoutHolder" maxlength="200" required>
+                            <input type="text" class="form-control" id="payoutHolder" maxlength="200" required placeholder="TARO YAMADA / ヤマダ タロウ">
                         </div>
                         <div class="mb-3">
                             <label for="payoutCountry" class="form-label" data-i18n="profile.labelBankCountry">Bank country</label>
@@ -371,6 +375,15 @@
                         <div class="mb-3">
                             <label for="payoutAccount" class="form-label" data-i18n="profile.labelAccountNumber">Account number / IBAN</label>
                             <input type="text" class="form-control" id="payoutAccount" maxlength="120" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="payoutAccountType" class="form-label" data-i18n="profile.labelAccountType">Account type (Japanese bank accounts)</label>
+                            <select class="form-select" id="payoutAccountType">
+                                <option value="">—</option>
+                                <option value="普通">普通 (Futsuu / Ordinary)</option>
+                                <option value="貯蓄">貯蓄 (Chochiku / Savings)</option>
+                                <option value="当座">当座 (Touza / Checking)</option>
+                            </select>
                         </div>
                         <div class="mb-3">
                             <label for="payoutExtra" class="form-label" data-i18n="profile.labelBankExtra">Additional info (SWIFT/BIC, routing number, etc.)</label>
@@ -633,6 +646,7 @@
                     document.getElementById('payoutBank').value = p.bank_name || '';
                     document.getElementById('payoutBranch').value = p.branch_info || '';
                     document.getElementById('payoutAccount').value = p.account_number || '';
+                    document.getElementById('payoutAccountType').value = p.account_type || '';
                     document.getElementById('payoutExtra').value = p.extra_info || '';
                     document.getElementById('payoutSmallOptIn').checked = !!p.allow_small_payout;
                 })
@@ -656,6 +670,7 @@
                     bank_name: document.getElementById('payoutBank').value.trim(),
                     branch_info: document.getElementById('payoutBranch').value.trim(),
                     account_number: document.getElementById('payoutAccount').value.trim(),
+                    account_type: document.getElementById('payoutAccountType').value,
                     extra_info: document.getElementById('payoutExtra').value.trim(),
                     allow_small_payout: document.getElementById('payoutSmallOptIn').checked
                 })

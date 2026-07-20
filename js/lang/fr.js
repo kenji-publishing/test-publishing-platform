@@ -464,6 +464,7 @@ window.translations.fr = {
         requestReview: 'Demander une Révision Professionnelle'
     },
     profile: {
+        labelAccountType: 'Type de compte (comptes bancaires japonais)',
         sectionPayout: 'Compte de versement (revenus)',
         payoutIntro: 'Les revenus sont versés chaque mois sur votre compte bancaire : clôture en fin de mois, paiement avant le 15 du mois suivant. Versement minimum : ¥3 000 / $20 / £15 (les soldes inférieurs sont reportés). Aucun compte Stripe ou PayPal n\'est requis.',
         labelAccountHolder: 'Nom du titulaire du compte',

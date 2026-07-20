@@ -464,6 +464,7 @@ window.translations.ja = {
         requestReview: 'プロレビューを依頼'
     },
     profile: {
+        labelAccountType: '口座種別（日本の銀行口座の場合）',
         sectionPayout: '受取口座（収益の受け取り）',
         payoutIntro: '収益は毎月末締め・翌月15日までにご登録の銀行口座へお支払いします。最低支払額は ¥3,000 / $20 / £15（未満の残高は翌月に繰り越し）。StripeやPayPalのアカウントは不要です。',
         labelAccountHolder: '口座名義',

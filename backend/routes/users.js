@@ -100,7 +100,7 @@ router.get('/payout-details', authenticate, async (req, res) => {
   try {
     const result = await db.query(
       `SELECT method, account_holder, bank_country, account_currency, bank_name,
-              branch_info, account_number, extra_info, allow_small_payout, updated_at
+              branch_info, account_number, account_type, extra_info, allow_small_payout, updated_at
        FROM user_payout_details WHERE user_id = $1`,
       [req.user.userId]
     );
@@ -118,7 +118,7 @@ router.get('/payout-details', authenticate, async (req, res) => {
 router.put('/payout-details', authenticate, async (req, res) => {
   try {
     const { account_holder, bank_country, account_currency, bank_name,
-            branch_info, account_number, extra_info, allow_small_payout } = req.body;
+            branch_info, account_number, account_type, extra_info, allow_small_payout } = req.body;
     const required = { account_holder, bank_country, account_currency, bank_name, account_number };
     for (const [key, value] of Object.entries(required)) {
       if (!value || !String(value).trim()) {
@@ -137,8 +137,8 @@ router.put('/payout-details', authenticate, async (req, res) => {
     await db.query(
       `INSERT INTO user_payout_details
          (user_id, method, account_holder, bank_country, account_currency, bank_name,
-          branch_info, account_number, extra_info, allow_small_payout)
-       VALUES ($1, 'bank', $2, $3, $4, $5, $6, $7, $8, $9)
+          branch_info, account_number, account_type, extra_info, allow_small_payout)
+       VALUES ($1, 'bank', $2, $3, $4, $5, $6, $7, $8, $9, $10)
        ON CONFLICT (user_id) DO UPDATE SET
          account_holder = EXCLUDED.account_holder,
          bank_country = EXCLUDED.bank_country,
@@ -146,12 +146,13 @@ router.put('/payout-details', authenticate, async (req, res) => {
          bank_name = EXCLUDED.bank_name,
          branch_info = EXCLUDED.branch_info,
          account_number = EXCLUDED.account_number,
+         account_type = EXCLUDED.account_type,
          extra_info = EXCLUDED.extra_info,
          allow_small_payout = EXCLUDED.allow_small_payout,
          updated_at = CURRENT_TIMESTAMP`,
       [req.user.userId, clip(account_holder, 200), clip(bank_country, 60), currency,
        clip(bank_name, 200), clip(branch_info, 200), clip(account_number, 120),
-       clip(extra_info, 300), !!allow_small_payout]
+       clip(account_type, 20), clip(extra_info, 300), !!allow_small_payout]
     );
     res.json({ success: true });
   } catch (error) {

@@ -464,6 +464,7 @@ window.translations.ko = {
         requestReview: '전문 검토 요청'
     },
     profile: {
+        labelAccountType: '계좌 종류 (일본 은행 계좌의 경우)',
         sectionPayout: '수령 계좌 (수익 지급)',
         payoutIntro: '수익은 매월 말 마감 후 다음 달 15일까지 등록된 은행 계좌로 지급됩니다. 최소 지급액은 ¥3,000 / $20 / £15이며, 미달 금액은 다음 달로 이월됩니다. Stripe나 PayPal 계정은 필요하지 않습니다.',
         labelAccountHolder: '예금주 이름',

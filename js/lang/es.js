@@ -464,6 +464,7 @@ window.translations.es = {
         requestReview: 'Solicitar Revisión Profesional'
     },
     profile: {
+        labelAccountType: 'Tipo de cuenta (cuentas bancarias japonesas)',
         sectionPayout: 'Cuenta de cobro (ingresos)',
         payoutIntro: 'Los ingresos se pagan mensualmente a su cuenta bancaria: cierre a fin de mes y pago antes del día 15 del mes siguiente. Pago mínimo: ¥3.000 / $20 / £15 (los saldos menores se acumulan). No se necesita cuenta de Stripe ni PayPal.',
         labelAccountHolder: 'Nombre del titular',

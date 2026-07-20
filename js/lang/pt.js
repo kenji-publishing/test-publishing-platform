@@ -464,6 +464,7 @@ window.translations.pt = {
         requestReview: 'Solicitar Revisão Profissional'
     },
     profile: {
+        labelAccountType: 'Tipo de conta (contas bancárias japonesas)',
         sectionPayout: 'Conta de recebimento (receitas)',
         payoutIntro: 'As receitas são pagas mensalmente na sua conta bancária: fechamento no fim do mês e pagamento até o dia 15 do mês seguinte. Pagamento mínimo ¥3.000 / $20 / £15 (saldos menores acumulam). Não é necessária conta Stripe ou PayPal.',
         labelAccountHolder: 'Nome do titular da conta',

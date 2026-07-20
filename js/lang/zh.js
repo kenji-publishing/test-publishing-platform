@@ -464,6 +464,7 @@ window.translations.zh = {
         requestReview: '请求专业审核'
     },
     profile: {
+        labelAccountType: '帳戶類型（日本銀行帳戶適用）',
         sectionPayout: '收款帳戶（收益提領）',
         payoutIntro: '收益每月結算：月底截止，於次月15日前匯入您登記的銀行帳戶。最低支付額為 ¥3,000 / $20 / £15（未達金額將結轉至次月）。無需 Stripe 或 PayPal 帳戶。',
         labelAccountHolder: '帳戶持有人姓名',

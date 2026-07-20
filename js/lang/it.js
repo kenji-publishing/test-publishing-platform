@@ -464,6 +464,7 @@ window.translations.it = {
         requestReview: 'Richiedi Revisione Professionale'
     },
     profile: {
+        labelAccountType: 'Tipo di conto (conti bancari giapponesi)',
         sectionPayout: 'Conto di accredito (ricavi)',
         payoutIntro: 'I ricavi vengono pagati ogni mese sul tuo conto bancario: chiusura a fine mese, pagamento entro il 15 del mese successivo. Pagamento minimo ¥3.000 / $20 / £15 (gli importi inferiori vengono riportati). Non serve un account Stripe o PayPal.',
         labelAccountHolder: 'Intestatario del conto',

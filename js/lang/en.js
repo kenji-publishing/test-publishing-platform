@@ -464,6 +464,7 @@ window.translations.en = {
         requestReview: 'Request Professional Review'
     },
     profile: {
+        labelAccountType: 'Account type (Japanese bank accounts)',
         sectionPayout: 'Payout Account (Revenue)',
         payoutIntro: 'Revenue is paid to your bank account monthly: closing at month-end, paid by the 15th of the following month. Minimum payout ¥3,000 / $20 / £15 — smaller balances carry over. No Stripe or PayPal account is required.',
         labelAccountHolder: 'Account holder name',
