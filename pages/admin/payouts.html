@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>収益の支払い - Admin Dashboard</title>
+    <script src="../../js/config.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .admin-wrapper { display: flex; min-height: 100vh; }
+        .admin-sidebar { width: 260px; background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%); color: #fff; position: fixed; height: 100vh; overflow-y: auto; z-index: 1000; }
+        .admin-sidebar .brand { padding: 20px; font-size: 1.4rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; text-decoration: none; color: #fff; }
+        .admin-sidebar .nav-menu { padding: 15px 0; }
+        .admin-sidebar .nav-item { padding: 12px 20px; display: flex; align-items: center; gap: 12px; color: rgba(255,255,255,0.7); text-decoration: none; transition: all 0.3s; border-left: 3px solid transparent; }
+        .admin-sidebar .nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .admin-sidebar .nav-item.active { background: rgba(255,255,255,0.15); color: #fff; border-left-color: #3498db; }
+        .admin-sidebar .nav-item i { font-size: 1.2rem; width: 24px; }
+        .admin-sidebar .nav-section { padding: 15px 20px 8px; font-size: 0.75rem; text-transform: uppercase; color: rgba(255,255,255,0.4); letter-spacing: 1px; }
+        .admin-main { flex: 1; margin-left: 260px; background: #f5f6fa; min-height: 100vh; }
+        .admin-header { background: #fff; padding: 15px 30px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; flex-wrap: wrap; gap: 10px; }
+        .admin-content { padding: 30px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: #fff; border-radius: 12px; padding: 20px 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .stat-card h3 { font-size: 1.5rem; font-weight: bold; margin: 0; color: #2c3e50; }
+        .stat-card p { margin: 5px 0 0; color: #7f8c8d; font-size: 0.85rem; }
+        .content-panel { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .panel-header { padding: 18px 24px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+        .panel-header h2 { font-size: 1.05rem; font-weight: 600; margin: 0; color: #2c3e50; }
+        .panel-body { padding: 20px 24px; overflow-x: auto; }
+        table.list { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+        table.list th { text-align: left; color: #7f8c8d; font-weight: 600; padding: 8px 10px; border-bottom: 2px solid #eee; white-space: nowrap; }
+        table.list td { padding: 9px 10px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+        .st { display: inline-block; padding: 3px 10px; border-radius: 10px; font-size: 0.76rem; font-weight: 600; white-space: nowrap; }
+        .st.payable { background: #e8f5e9; color: #2e7d32; }
+        .st.payable_small { background: #e0f7fa; color: #00838f; }
+        .st.below_minimum { background: #fff8e1; color: #b28704; }
+        .st.no_account { background: #ffebee; color: #c62828; }
+        .st.negative_balance { background: #f5f5f5; color: #757575; }
+        .st.rate_missing, .st.unsupported_currency { background: #fce4ec; color: #ad1457; }
+        .bankinfo { font-size: 0.76rem; color: #7f8c8d; }
+        .amount { font-variant-numeric: tabular-nums; text-align: right; }
+        .muted { color: #95a5a6; }
+        .notice { background: #f0f7ff; border: 1px solid #cfe3f8; border-radius: 10px; padding: 12px 16px; font-size: 0.85rem; color: #2c3e50; margin-bottom: 20px; line-height: 1.7; }
+        #msg { display: none; margin-bottom: 16px; }
+    </style>
+</head>
+<body>
+<div class="admin-wrapper">
+    <aside class="admin-sidebar">
+        <a href="index.html" class="brand"><i class="bi bi-shield-lock"></i> AuctLect Admin</a>
+        <nav class="nav-menu">
+            <a class="nav-item" href="index.html"><i class="bi bi-speedometer2"></i><span>ダッシュボード</span></a>
+            <div class="nav-section">分析</div>
+            <a class="nav-item" href="analytics.html"><i class="bi bi-bar-chart-line"></i><span>アナリティクス</span></a>
+            <div class="nav-section">サポート</div>
+            <a class="nav-item" href="email.html"><i class="bi bi-envelope"></i><span>メール管理</span></a>
+            <a class="nav-item" href="support.html"><i class="bi bi-headset"></i><span>サポートチケット</span></a>
+            <a class="nav-item" href="feedback.html"><i class="bi bi-chat-dots"></i><span>フィードバック</span></a>
+            <div class="nav-section">財務</div>
+            <a class="nav-item" href="finance.html"><i class="bi bi-calculator"></i><span>財務・税務</span></a>
+            <a class="nav-item active" href="payouts.html"><i class="bi bi-cash-coin"></i><span>収益の支払い</span></a>
+        </nav>
+    </aside>
+
+    <main class="admin-main">
+        <header class="admin-header">
+            <div><strong>収益の支払い（月次）</strong> <span style="color:#7f8c8d; font-size:0.85rem; margin-left:10px;">月末締め・翌月15日まで送金</span></div>
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <label style="font-size:0.85rem; color:#7f8c8d;">締め日</label>
+                <input type="date" id="untilInput" class="form-control form-control-sm" style="width:auto;">
+                <button class="btn btn-sm btn-primary" onclick="loadPreview()"><i class="bi bi-search"></i> プレビュー</button>
+            </div>
+        </header>
+
+        <div class="admin-content">
+            <div class="alert" id="msg"></div>
+
+            <div class="notice">
+                <strong>毎月の流れ：</strong>
+                ① 月初にプレビューで内容確認 → ② 「支払いを確定」（対象の分配に印が付き二重払い不能になります）→
+                ③ Wise CSVをダウンロードし、Starlingから合計額をWiseへ入金 → Wiseの一括支払いにCSVをアップロードして送金 →
+                ④ 「支払完了にする」（受取人に通知が届きます）。
+                最低額未満・口座未登録の方は自動的に翌月へ繰り越されます。
+            </div>
+
+            <div class="stats-grid" id="statsGrid" style="display:none;">
+                <div class="stat-card"><h3 id="stPayable">-</h3><p>支払い対象者</p></div>
+                <div class="stat-card"><h3 id="stTotals" style="font-size:1.05rem; line-height:1.6;">-</h3><p>送金総額（通貨別）</p></div>
+                <div class="stat-card"><h3 id="stCarry">-</h3><p>繰越（最低額未満等）</p></div>
+                <div class="stat-card"><h3 id="stNoAccount">-</h3><p>口座未登録</p></div>
+            </div>
+
+            <div class="content-panel" id="previewPanel" style="display:none;">
+                <div class="panel-header">
+                    <h2><i class="bi bi-list-check"></i> 支払いプレビュー（<span id="previewPeriod">-</span> 締め）</h2>
+                    <button class="btn btn-sm btn-success" id="finalizeBtn" onclick="finalizeRun()"><i class="bi bi-check2-circle"></i> この内容で支払いを確定</button>
+                </div>
+                <div class="panel-body">
+                    <table class="list">
+                        <thead><tr>
+                            <th>状態</th><th>受取人</th><th>役割</th><th>件数</th><th>通貨</th>
+                            <th class="amount">対象額</th><th class="amount">手数料</th><th class="amount">送金額</th><th>口座</th>
+                        </tr></thead>
+                        <tbody id="previewBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="content-panel">
+                <div class="panel-header"><h2><i class="bi bi-clock-history"></i> 支払い履歴</h2></div>
+                <div class="panel-body">
+                    <table class="list">
+                        <thead><tr>
+                            <th>締め日</th><th>状態</th><th>人数</th><th>合計</th><th>作成</th><th>操作</th>
+                        </tr></thead>
+                        <tbody id="runsBody"><tr><td colspan="6" class="muted">読み込み中...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    const API = (window.API_ORIGIN || '') + '/api/payouts';
+    const token = localStorage.getItem('token');
+    let currentPreview = null;
+
+    const STATUS_LABELS = {
+        payable: '支払い対象',
+        payable_small: '少額（手数料差引）',
+        below_minimum: '最低額未満・繰越',
+        no_account: '口座未登録',
+        negative_balance: 'マイナス残高・繰越',
+        rate_missing: 'レート未対応',
+        unsupported_currency: '通貨未対応'
+    };
+
+    function showMsg(text, kind) {
+        const el = document.getElementById('msg');
+        el.className = 'alert alert-' + (kind || 'info');
+        el.textContent = text;
+        el.style.display = 'block';
+    }
+
+    async function api(path, opts) {
+        const resp = await fetch(API + path, Object.assign({
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }
+        }, opts));
+        if (resp.status === 401 || resp.status === 403) {
+            throw new Error('管理者アカウントでログインしてください（メインサイトでログイン後にこのページを開きます）');
+        }
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
+        return data;
+    }
+
+    function fmt(n, cur) {
+        const num = Number(n);
+        return num.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' ' + cur;
+    }
+    function esc(t) { const d = document.createElement('div'); d.textContent = t == null ? '' : String(t); return d.innerHTML; }
+
+    // 既定の締め日 = 先月末
+    (function initDate() {
+        const now = new Date();
+        const lastDay = new Date(now.getFullYear(), now.getMonth(), 0);
+        const pad = (v) => String(v).padStart(2, '0');
+        document.getElementById('untilInput').value = lastDay.getFullYear() + '-' + pad(lastDay.getMonth() + 1) + '-' + pad(lastDay.getDate());
+    })();
+
+    async function loadPreview() {
+        try {
+            const until = document.getElementById('untilInput').value;
+            const data = await api('/preview?until=' + encodeURIComponent(until));
+            currentPreview = data;
+            document.getElementById('previewPeriod').textContent = data.periodEnd;
+            const body = document.getElementById('previewBody');
+            if (!data.items.length) {
+                body.innerHTML = '<tr><td colspan="9" class="muted">未払いの収益分配はありません</td></tr>';
+            } else {
+                body.innerHTML = data.items.map(it => {
+                    const d = it.details || {};
+                    const bank = d.account_number
+                        ? esc((d.bank_name || '') + ' ' + (d.branch_info || '')) + '<br>' + esc(maskAccount(d.account_number))
+                        : '<span class="muted">未登録</span>';
+                    return '<tr>' +
+                        '<td><span class="st ' + it.status + '">' + (STATUS_LABELS[it.status] || it.status) + '</span></td>' +
+                        '<td>' + esc(it.name) + '<br><span class="bankinfo">' + esc(it.email) + '</span></td>' +
+                        '<td>' + esc(it.roles) + '</td>' +
+                        '<td>' + it.splitCount + '</td>' +
+                        '<td>' + esc(it.payoutCurrency || '-') + '</td>' +
+                        '<td class="amount">' + fmt(it.gross, '') + '</td>' +
+                        '<td class="amount">' + (it.fee ? fmt(it.fee, '') : '-') + '</td>' +
+                        '<td class="amount"><strong>' + (it.net ? fmt(it.net, '') : '-') + '</strong></td>' +
+                        '<td class="bankinfo">' + bank + '</td>' +
+                        '</tr>';
+                }).join('');
+            }
+            // 集計
+            const payable = data.items.filter(i => i.status === 'payable' || i.status === 'payable_small');
+            const totals = {};
+            payable.forEach(i => { totals[i.payoutCurrency] = (totals[i.payoutCurrency] || 0) + Number(i.net); });
+            document.getElementById('stPayable').textContent = payable.length + '人';
+            document.getElementById('stTotals').textContent = Object.keys(totals).length
+                ? Object.entries(totals).map(([c, v]) => fmt(v, c)).join(' / ') : '-';
+            document.getElementById('stCarry').textContent =
+                data.items.filter(i => i.status === 'below_minimum' || i.status === 'negative_balance').length + '人';
+            document.getElementById('stNoAccount').textContent =
+                data.items.filter(i => i.status === 'no_account').length + '人';
+            document.getElementById('statsGrid').style.display = '';
+            document.getElementById('previewPanel').style.display = '';
+            document.getElementById('finalizeBtn').disabled = payable.length === 0;
+            document.getElementById('msg').style.display = 'none';
+        } catch (e) {
+            showMsg('プレビューの取得に失敗しました: ' + e.message, 'danger');
+        }
+    }
+
+    function maskAccount(num) {
+        const s = String(num);
+        return s.length > 4 ? '****' + s.slice(-4) : s;
+    }
+
+    async function finalizeRun() {
+        if (!currentPreview) return;
+        const payable = currentPreview.items.filter(i => i.status === 'payable' || i.status === 'payable_small');
+        if (!confirm(payable.length + '人への支払いを確定します。確定後は対象の収益に印が付き、二重払いできなくなります。よろしいですか？')) return;
+        try {
+            const data = await api('/runs', { method: 'POST', body: JSON.stringify({ until: currentPreview.periodEnd }) });
+            showMsg('支払いを確定しました（' + data.itemCount + '人）。下の履歴からWise CSVをダウンロードして送金してください。', 'success');
+            document.getElementById('previewPanel').style.display = 'none';
+            document.getElementById('statsGrid').style.display = 'none';
+            currentPreview = null;
+            loadRuns();
+        } catch (e) {
+            showMsg('確定に失敗しました: ' + e.message, 'danger');
+        }
+    }
+
+    async function downloadCsv(runId, kind) {
+        try {
+            const resp = await fetch(API + '/runs/' + runId + '/' + kind, { headers: { 'Authorization': 'Bearer ' + token } });
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
+            const blob = await resp.blob();
+            const cd = resp.headers.get('Content-Disposition') || '';
+            const m = cd.match(/filename="([^"]+)"/);
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = m ? m[1] : kind;
+            a.click();
+            URL.revokeObjectURL(a.href);
+        } catch (e) {
+            showMsg('CSVのダウンロードに失敗しました: ' + e.message, 'danger');
+        }
+    }
+
+    async function markPaid(runId) {
+        if (!confirm('Wiseでの送金は完了しましたか？「支払完了」にすると受取人へ通知が送られます。')) return;
+        try {
+            const data = await api('/runs/' + runId + '/mark-paid', { method: 'POST' });
+            showMsg('支払完了にしました（' + data.notified + '人に通知）', 'success');
+            loadRuns();
+        } catch (e) {
+            showMsg('更新に失敗しました: ' + e.message, 'danger');
+        }
+    }
+
+    async function loadRuns() {
+        try {
+            const data = await api('/runs');
+            const body = document.getElementById('runsBody');
+            if (!data.runs.length) {
+                body.innerHTML = '<tr><td colspan="6" class="muted">まだ支払い履歴はありません</td></tr>';
+                return;
+            }
+            body.innerHTML = data.runs.map(r => {
+                const totals = (r.totals || []).map(t => fmt(t.total, t.currency)).join(' / ') || '-';
+                const stBadge = r.status === 'paid'
+                    ? '<span class="st payable">支払済み</span>'
+                    : '<span class="st below_minimum">送金待ち</span>';
+                const actions =
+                    '<button class="btn btn-sm btn-outline-primary me-1" onclick="downloadCsv(\'' + r.run_id + '\', \'wise.csv\')"><i class="bi bi-download"></i> Wise CSV</button>' +
+                    '<button class="btn btn-sm btn-outline-secondary me-1" onclick="downloadCsv(\'' + r.run_id + '\', \'summary.csv\')"><i class="bi bi-file-earmark-text"></i> 控え</button>' +
+                    (r.status === 'finalized'
+                        ? '<button class="btn btn-sm btn-success" onclick="markPaid(\'' + r.run_id + '\')"><i class="bi bi-check2"></i> 支払完了にする</button>'
+                        : '');
+                return '<tr>' +
+                    '<td>' + String(r.period_end).slice(0, 10) + '</td>' +
+                    '<td>' + stBadge + '</td>' +
+                    '<td>' + r.item_count + '人</td>' +
+                    '<td>' + esc(totals) + '</td>' +
+                    '<td>' + String(r.created_at).slice(0, 10) + '</td>' +
+                    '<td>' + actions + '</td>' +
+                    '</tr>';
+            }).join('');
+        } catch (e) {
+            document.getElementById('runsBody').innerHTML = '<tr><td colspan="6" class="muted">' + esc(e.message) + '</td></tr>';
+        }
+    }
+
+    if (!token) {
+        showMsg('管理者アカウントでログインしてください（メインサイトでログイン後にこのページを開きます）', 'warning');
+    } else {
+        loadRuns();
+    }
+</script>
+</body>
+</html>
