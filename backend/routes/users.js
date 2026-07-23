@@ -443,6 +443,33 @@ router.post('/confirm-delete', async (req, res) => {
  * GET /api/users/lookup/by-identifier?identifier=<email or pen name>
  * メッセージの宛先解決用（要ログイン）。メールアドレスは完全一致のみ返す
  */
+/**
+ * GET /api/users/lookup/search?q=<部分文字列>
+ * メッセージ宛先の候補検索（要ログイン）。
+ * ペンネームは部分一致で検索できるが、メールアドレスは**完全一致のみ**
+ * （部分一致を許すとメールアドレスの総当たり収集ができてしまうため）。
+ */
+router.get('/lookup/search', authenticate, async (req, res) => {
+  try {
+    const q = (req.query.q || '').trim();
+    if (q.length < 2) return res.json({ success: true, users: [] });
+    const result = await db.query(
+      `SELECT user_id, COALESCE(NULLIF(pen_name, ''), TRIM(first_name || ' ' || last_name)) AS display_name
+       FROM users
+       WHERE (pen_name ILIKE '%' || $1 || '%' OR LOWER(email) = LOWER($1))
+         AND account_status = 'active'
+         AND user_id <> $2
+       ORDER BY (LOWER(pen_name) = LOWER($1)) DESC, pen_name
+       LIMIT 10`,
+      [q, req.user.userId]
+    );
+    res.json({ success: true, users: result.rows });
+  } catch (error) {
+    console.error('User search error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.get('/lookup/by-identifier', authenticate, async (req, res) => {
   try {
     const identifier = (req.query.identifier || '').trim();

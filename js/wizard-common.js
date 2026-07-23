@@ -26,10 +26,10 @@
         BRL: { symbol: 'R$',     rate: 0.038,  decimals: 2, name: 'BRL' }
     };
 
-    // Minimum charge per payment method per currency (platform minimums, covering fees)
+    // Minimum charge per currency (platform minimum, covering payment fees).
+    // 決済は全てStripe Checkout経由（PayPal等もStripeが提供）なので単一の表
     var PAY_MINIMUMS = {
-        stripe: { JPY: 100, USD: 1.00, EUR: 1.00, GBP: 0.80, AUD: 1.50, CAD: 1.50, KRW: 1000, BRL: 5.00 },
-        paypal: { JPY: 150, USD: 1.50, EUR: 1.50, GBP: 1.20, AUD: 2.00, CAD: 2.00, KRW: 1500, BRL: 7.00 }
+        stripe: { JPY: 100, USD: 1.00, EUR: 1.00, GBP: 0.80, AUD: 1.50, CAD: 1.50, KRW: 1000, BRL: 5.00 }
     };
 
     function toSelectedCurrency(jpyAmount, currencyCode) {
@@ -44,7 +44,8 @@
     }
 
     function getMinimum(currencyCode, payMethod) {
-        return PAY_MINIMUMS[payMethod][currencyCode] || PAY_MINIMUMS[payMethod]['USD'];
+        var table = PAY_MINIMUMS[payMethod] || PAY_MINIMUMS.stripe;
+        return table[currencyCode] || table['USD'];
     }
 
     // ===== ファイル変換ヘルパー（Word/PDF対応。upload.htmlとウィザードで共用） =====

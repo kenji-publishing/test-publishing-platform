@@ -845,9 +845,13 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
+                    <div class="mb-3 position-relative">
                         <label class="form-label" id="labelRecipient" data-i18n="messages.labelRecipient">Recipient</label>
-                        <input type="text" class="form-control" id="newMsgRecipient" data-i18n-placeholder="messages.recipientPlaceholder" placeholder="Username or email">
+                        <input type="text" class="form-control" id="newMsgRecipient" autocomplete="off" data-i18n-placeholder="messages.recipientPlaceholder" placeholder="Username or email">
+                        <!-- 入力に応じた宛先候補（ペンネーム部分一致 / メールは完全一致） -->
+                        <div id="recipientSuggestions" class="list-group position-absolute w-100 shadow"
+                             style="display:none; z-index:1080; max-height:220px; overflow-y:auto;"></div>
+                        <div id="recipientSelected" class="form-text" style="display:none;"></div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label" id="labelSubject" data-i18n="messages.labelSubject">Subject</label>
@@ -1331,6 +1335,72 @@
             return data.message;
         }
 
+        // ========== 宛先の候補検索（ペンネーム部分一致・メールは完全一致） ==========
+        let recipientSelectedId = null;   // 候補から選ばれた宛先。未選択なら送信時に完全一致で解決
+        let recipientSearchTimer = null;
+
+        function clearRecipientSuggestions() {
+            const box = document.getElementById('recipientSuggestions');
+            box.innerHTML = '';
+            box.style.display = 'none';
+        }
+
+        function setSelectedRecipient(user) {
+            recipientSelectedId = user.user_id;
+            document.getElementById('newMsgRecipient').value = user.display_name;
+            const note = document.getElementById('recipientSelected');
+            note.textContent = getL({ en: 'To: ', ja: '宛先: ' }) + user.display_name;
+            note.style.display = '';
+            clearRecipientSuggestions();
+        }
+
+        async function searchRecipients(q) {
+            const box = document.getElementById('recipientSuggestions');
+            const token = localStorage.getItem('token');
+            if (!token || q.length < 2) { clearRecipientSuggestions(); return; }
+            try {
+                const resp = await fetch((window.API_ORIGIN || '') + '/api/users/lookup/search?q=' + encodeURIComponent(q), {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!resp.ok) { clearRecipientSuggestions(); return; }
+                const data = await resp.json();
+                const users = data.users || [];
+                if (!users.length) {
+                    box.innerHTML = '<div class="list-group-item text-muted small">' +
+                        getL({ en: 'No matching users', ja: '一致するユーザーがいません' }) + '</div>';
+                    box.style.display = '';
+                    return;
+                }
+                box.innerHTML = users.map((u, i) =>
+                    '<button type="button" class="list-group-item list-group-item-action" data-idx="' + i + '">' +
+                    '<i class="fas fa-user me-2 text-muted"></i>' + escapeHtml(u.display_name) + '</button>'
+                ).join('');
+                Array.from(box.querySelectorAll('button')).forEach(btn => {
+                    btn.addEventListener('click', () => setSelectedRecipient(users[parseInt(btn.dataset.idx, 10)]));
+                });
+                box.style.display = '';
+            } catch (e) {
+                clearRecipientSuggestions();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const input = document.getElementById('newMsgRecipient');
+            if (!input) return;
+            input.addEventListener('input', function () {
+                // 手入力し直したら選択済み宛先は解除（別人に誤送信しないため）
+                recipientSelectedId = null;
+                document.getElementById('recipientSelected').style.display = 'none';
+                clearTimeout(recipientSearchTimer);
+                const q = this.value.trim();
+                recipientSearchTimer = setTimeout(() => searchRecipients(q), 250);
+            });
+            // モーダル外クリックで候補を閉じる
+            document.addEventListener('click', function (e) {
+                if (!e.target.closest('#recipientSuggestions') && e.target !== input) clearRecipientSuggestions();
+            });
+        });
+
         // ========== Send New Message (Modal) ==========
         async function sendNewMessage() {
             const recipient = document.getElementById('newMsgRecipient').value.trim();
@@ -1343,29 +1413,36 @@
             }
 
             try {
-                // 宛先解決（メールアドレスまたはペンネームの完全一致）
-                const token = localStorage.getItem('token');
-                const resp = await fetch((window.API_ORIGIN || '') + '/api/users/lookup/by-identifier?identifier=' + encodeURIComponent(recipient), {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                const data = await resp.json();
-                if (!resp.ok) {
-                    alert(getL({
-                        en: 'User not found. Enter the exact email address or pen name.',
-                        ja: 'ユーザーが見つかりませんでした。メールアドレスまたはペンネームを正確に入力してください。'
-                    }));
-                    return;
+                // 候補から選択済みならそのIDを使う。直接入力の場合のみ完全一致で解決
+                let recipientId = recipientSelectedId;
+                if (!recipientId) {
+                    const token = localStorage.getItem('token');
+                    const resp = await fetch((window.API_ORIGIN || '') + '/api/users/lookup/by-identifier?identifier=' + encodeURIComponent(recipient), {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const data = await resp.json();
+                    if (!resp.ok) {
+                        alert(getL({
+                            en: 'User not found. Type part of a pen name and pick from the list, or enter the exact email address.',
+                            ja: 'ユーザーが見つかりませんでした。ペンネームの一部を入力して候補から選ぶか、メールアドレスを正確に入力してください。'
+                        }));
+                        return;
+                    }
+                    recipientId = data.user.user_id;
                 }
-                await postDirectMessage(data.user.user_id, (subject ? '[' + subject + ']\n' : '') + body);
+                await postDirectMessage(recipientId, (subject ? '[' + subject + ']\n' : '') + body);
 
                 // Reset modal
                 document.getElementById('newMsgRecipient').value = '';
                 document.getElementById('newMsgSubject').value = '';
                 document.getElementById('newMsgBody').value = '';
+                recipientSelectedId = null;
+                document.getElementById('recipientSelected').style.display = 'none';
+                clearRecipientSuggestions();
                 bootstrap.Modal.getInstance(document.getElementById('newMessageModal')).hide();
 
                 await fetchConversations();
-                const conv = convCache.find(c => c.other_user_id === data.user.user_id);
+                const conv = convCache.find(c => c.other_user_id === recipientId);
                 renderConversationList();
                 if (conv) await openConversation(String(conv.conversation_id));
                 alert(getL(uiText.messageSent));
