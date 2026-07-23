@@ -18,34 +18,34 @@ router.get('/admin/stats', async (req, res) => {
     try {
         const pool = getPool(req);
         
-        // Get overall statistics
+        // 通貨別の純収益（返金は差し引く）。JPYとUSDを混ぜて合算しない —
+        // 旧実装は全通貨のamountを単純合計し、返金行(transaction_type='refund')まで
+        // 収益に「加算」していた（¥200購入+¥200返金が$400と表示されるバグ）
         const statsQuery = `
-            SELECT 
-                COALESCE(SUM(amount), 0) as total_revenue,
-                COALESCE(SUM(CASE WHEN created_at >= DATE_TRUNC('month', CURRENT_DATE) THEN amount ELSE 0 END), 0) as month_revenue,
-                COALESCE(SUM(CASE WHEN created_at >= DATE_TRUNC('week', CURRENT_DATE) THEN amount ELSE 0 END), 0) as week_revenue,
-                COUNT(*) as total_transactions
+            SELECT currency,
+                COALESCE(SUM(CASE WHEN transaction_type = 'refund' THEN -amount ELSE amount END), 0) AS total,
+                COALESCE(SUM(CASE WHEN created_at >= DATE_TRUNC('month', CURRENT_DATE)
+                    THEN (CASE WHEN transaction_type = 'refund' THEN -amount ELSE amount END) ELSE 0 END), 0) AS month,
+                COALESCE(SUM(CASE WHEN created_at >= DATE_TRUNC('week', CURRENT_DATE)
+                    THEN (CASE WHEN transaction_type = 'refund' THEN -amount ELSE amount END) ELSE 0 END), 0) AS week,
+                COUNT(*) FILTER (WHERE transaction_type = 'purchase')::int AS purchases
             FROM transactions
-            WHERE status = 'completed'
+            WHERE status = 'completed' AND transaction_type IN ('purchase', 'refund')
+            GROUP BY currency
+            ORDER BY currency
         `;
-        
-        let stats = {
-            total_revenue: 0,
-            month_revenue: 0,
-            week_revenue: 0,
-            total_transactions: 0
-        };
-        
+
+        let stats = { by_currency: [], total_transactions: 0 };
+
         try {
             const result = await pool.query(statsQuery);
-            if (result.rows.length > 0) {
-                stats = {
-                    total_revenue: parseFloat(result.rows[0].total_revenue) || 0,
-                    month_revenue: parseFloat(result.rows[0].month_revenue) || 0,
-                    week_revenue: parseFloat(result.rows[0].week_revenue) || 0,
-                    total_transactions: parseInt(result.rows[0].total_transactions) || 0
-                };
-            }
+            stats.by_currency = result.rows.map(r => ({
+                currency: r.currency,
+                total: parseFloat(r.total) || 0,
+                month: parseFloat(r.month) || 0,
+                week: parseFloat(r.week) || 0
+            }));
+            stats.total_transactions = result.rows.reduce((sum, r) => sum + (parseInt(r.purchases) || 0), 0);
         } catch (e) {
             console.log('Transactions table may not exist, using defaults');
         }
@@ -72,14 +72,19 @@ router.get('/admin/stats', async (req, res) => {
         // Get works with sales
         let topWorks = [];
         try {
+            // 作品ごとの純売上（通貨付き・返金差引）。作品は単一通貨で販売されるため
+            // 通貨はその作品の取引から取得。著者名はペンネーム→氏名の順でフォールバック
             const worksQuery = `
-                SELECT w.work_id, w.title, u.pen_name as author_name,
-                       COALESCE(SUM(t.amount), 0) as total_sales,
-                       COUNT(t.transaction_id) as sale_count
-                FROM works w
+                SELECT w.work_id, w.title,
+                       COALESCE(NULLIF(u.pen_name, ''), NULLIF(TRIM(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, '')), '')) AS author_name,
+                       t.currency,
+                       COALESCE(SUM(CASE WHEN t.transaction_type = 'refund' THEN -t.amount ELSE t.amount END), 0) AS total_sales,
+                       COUNT(*) FILTER (WHERE t.transaction_type = 'purchase')::int AS sale_count
+                FROM transactions t
+                JOIN works w ON w.work_id = t.work_id
                 LEFT JOIN users u ON w.author_id = u.user_id
-                LEFT JOIN transactions t ON t.work_id = w.work_id AND t.status = 'completed'
-                GROUP BY w.work_id, w.title, u.pen_name
+                WHERE t.status = 'completed' AND t.transaction_type IN ('purchase', 'refund')
+                GROUP BY w.work_id, w.title, u.pen_name, u.first_name, u.last_name, t.currency
                 ORDER BY total_sales DESC
                 LIMIT 5
             `;

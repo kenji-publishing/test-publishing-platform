@@ -29,51 +29,18 @@
     
     <style>
         /* Admin Analytics Styles */
-        .admin-header {
-            background: linear-gradient(135deg, #1e293b, #334155);
-            color: white;
-            padding: 1.5rem 0;
-        }
-        
-        .admin-header h1 {
-            font-family: var(--font-heading);
-            font-size: 1.5rem;
-            margin-bottom: 0.25rem;
-        }
-        
-        /* Sidebar */
-        .admin-sidebar {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            padding: 1rem 0;
-            position: sticky;
-            top: 1rem;
-        }
-        
-        .admin-sidebar .nav-link {
-            color: var(--color-text);
-            padding: 0.75rem 1.5rem;
-            border-left: 3px solid transparent;
-            transition: all 0.2s;
-        }
-        
-        .admin-sidebar .nav-link:hover {
-            background: var(--color-cream);
-            color: var(--color-accent);
-        }
-        
-        .admin-sidebar .nav-link.active {
-            background: var(--color-cream);
-            color: var(--color-accent);
-            border-left-color: var(--color-accent);
-            font-weight: 500;
-        }
-        
-        .admin-sidebar .nav-link i {
-            width: 20px;
-            margin-right: 0.5rem;
-        }
+        .admin-wrapper { display: flex; min-height: 100vh; }
+        .admin-sidebar { width: 260px; background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%); color: #fff; position: fixed; height: 100vh; overflow-y: auto; z-index: 1000; }
+        .admin-sidebar .brand { padding: 20px; font-size: 1.3rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); display: block; text-decoration: none; color: #fff; }
+        .admin-sidebar .nav-menu { padding: 15px 0; }
+        .admin-sidebar .nav-item { padding: 12px 20px; display: flex; align-items: center; gap: 12px; color: rgba(255,255,255,0.7); text-decoration: none; transition: all 0.3s; border-left: 3px solid transparent; }
+        .admin-sidebar .nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .admin-sidebar .nav-item.active { background: rgba(255,255,255,0.15); color: #fff; border-left-color: #3498db; }
+        .admin-sidebar .nav-item i { font-size: 1.05rem; width: 22px; }
+        .admin-sidebar .nav-section { padding: 15px 20px 8px; font-size: 0.75rem; text-transform: uppercase; color: rgba(255,255,255,0.4); letter-spacing: 1px; }
+        .admin-main { flex: 1; margin-left: 260px; background: #f5f6fa; min-height: 100vh; }
+        .admin-header { background: #fff; padding: 15px 30px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .admin-content { padding: 30px; }
         
         /* Realtime Stats */
         .realtime-card {
@@ -332,64 +299,42 @@
 </head>
 <body>
     <!-- Admin Header -->
-    <header class="admin-header">
-        <div class="container">
-            <div class="d-flex align-items-center justify-content-between">
-                <div>
-                    <h1><i class="fas fa-chart-pie me-2"></i>プラットフォーム分析</h1>
-                    <p class="mb-0 opacity-75 small">AuctLect 管理ダッシュボード</p>
-                </div>
-                <div class="d-flex align-items-center gap-3">
-                    <a href="../notifications.html" class="btn btn-outline-light btn-sm position-relative">
-                        <i class="fas fa-bell"></i>
-                    </a>
-                    <div class="dropdown">
-                        <button class="btn btn-outline-light btn-sm dropdown-toggle" data-bs-toggle="dropdown">
-                            <i class="fas fa-user-shield me-1"></i>
-                            <span id="adminName">管理者</span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="../settings.html"><i class="fas fa-cog me-2"></i>設定</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>ログアウト</a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
+    <div class="admin-wrapper">
+        <aside class="admin-sidebar">
+            <a href="index.html" class="brand"><i class="fas fa-book me-2"></i>AuctLect Admin</a>
+            <nav class="nav-menu">
+                <div class="nav-section">メイン</div>
+                <a class="nav-item" href="index.html"><i class="fas fa-th-large"></i><span>ダッシュボード</span></a>
+                <div class="nav-section">ユーザー管理</div>
+                <a class="nav-item" href="index.html#users"><i class="fas fa-users"></i><span>ユーザー一覧</span></a>
+                <a class="nav-item" href="index.html#verification"><i class="fas fa-user-check"></i><span>本人確認</span></a>
+                <div class="nav-section">コンテンツ</div>
+                <a class="nav-item" href="index.html#moderation"><i class="fas fa-shield-alt"></i><span>コンテンツ審査</span></a>
+                <a class="nav-item" href="index.html#translations"><i class="fas fa-language"></i><span>翻訳キュー</span></a>
+                <a class="nav-item" href="index.html#dmca"><i class="fas fa-exclamation-triangle"></i><span>DMCA管理</span></a>
+                <div class="nav-section">分析</div>
+                <a class="nav-item active" href="analytics.html"><i class="fas fa-chart-line"></i><span>アナリティクス</span></a>
+                <div class="nav-section">サポート</div>
+                <a class="nav-item" href="feedback.html"><i class="fas fa-comment-dots"></i><span>フィードバック</span></a>
+                <div class="nav-section">財務</div>
+                <a class="nav-item" href="index.html#finance"><i class="fas fa-chart-pie"></i><span>収益レポート</span></a>
+                <a class="nav-item" href="payouts.html"><i class="fas fa-hand-holding-usd"></i><span>収益の支払い</span></a>
+            </nav>
+        </aside>
 
-    <div class="container py-4">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-lg-2 mb-4">
-                <nav class="admin-sidebar">
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link" href="index.html"><i class="fas fa-tachometer-alt"></i>概要</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="index.html#users"><i class="fas fa-users"></i>ユーザー</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="index.html#moderation"><i class="fas fa-shield-alt"></i>コンテンツ</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="index.html#finance"><i class="fas fa-yen-sign"></i>収益レポート</a>
-                            <a class="nav-link" href="payouts.html"><i class="fas fa-hand-holding-usd"></i>収益の支払い</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active" href="analytics.html"><i class="fas fa-chart-line"></i>分析</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="feedback.html"><i class="fas fa-comment-dots"></i>フィードバック</a>
-                        </li>
+        <main class="admin-main">
+            <header class="admin-header">
+                <div><strong>アナリティクス</strong> <span style="color:#7f8c8d; font-size:0.85rem; margin-left:10px;">プラットフォーム分析</span></div>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown"><i class="fas fa-user-shield me-1"></i><span id="adminName">管理者</span></button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="../dashboard.html">ユーザー画面へ</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" onclick="logout()">ログアウト</a></li>
                     </ul>
-                </nav>
-            </div>
-            
-            <!-- Main Content -->
-            <div class="col-lg-10">
+                </div>
+            </header>
+            <div class="admin-content">
                 
                 <!-- Realtime Stats -->
                 <div class="realtime-card">
@@ -566,7 +511,7 @@
                 </div>
                 
             </div>
-        </div>
+        </main>
     </div>
 
     <!-- Bootstrap JS -->

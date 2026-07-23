@@ -548,7 +548,9 @@
                     const stats = await response.json();
                     document.getElementById('stat-users').textContent = stats.users.toLocaleString();
                     document.getElementById('stat-works').textContent = stats.works.toLocaleString();
-                    document.getElementById('stat-revenue').textContent = '$' + stats.revenue.toLocaleString();
+                    const revRows = (stats.revenueByCurrency || []).filter(r => Number(r.total) !== 0);
+                    document.getElementById('stat-revenue').textContent = revRows.length
+                        ? revRows.map(r => formatMoney(r.total, r.currency)).join(' / ') : '0';
                     document.getElementById('stat-tasks').textContent = stats.pendingTasks.toLocaleString();
                 }
             } catch (error) { console.error('Failed to load stats:', error); }
@@ -1396,27 +1398,40 @@
         }
         
         // ===== FINANCE =====
+        // 収益は通貨別に表示する（換算して混ぜない）。返金差引済みの純額がAPIから返る
+        const CURRENCY_SYMBOLS = { JPY: '¥', USD: '$', EUR: '€', GBP: '£', KRW: '₩' };
+        function formatMoney(amount, currency) {
+            const sym = CURRENCY_SYMBOLS[currency];
+            const num = Number(amount).toLocaleString();
+            return sym ? sym + num : num + ' ' + (currency || '');
+        }
         async function loadFinanceData() {
             try {
                 const response = await authFetch(`${API_BASE}/finance/admin/stats`);
                 if (response.ok) {
                     const data = await response.json();
-                    document.getElementById('finance-total').textContent = '$' + data.stats.total_revenue.toLocaleString();
-                    document.getElementById('finance-month').textContent = '$' + data.stats.month_revenue.toLocaleString();
-                    document.getElementById('finance-week').textContent = '$' + data.stats.week_revenue.toLocaleString();
-                    
+                    const byCur = data.stats.by_currency || [];
+                    const fmtField = (key) => {
+                        const rows = byCur.filter(r => Number(r[key]) !== 0);
+                        if (!rows.length) return '0';
+                        return rows.map(r => formatMoney(r[key], r.currency)).join(' / ');
+                    };
+                    document.getElementById('finance-total').textContent = fmtField('total');
+                    document.getElementById('finance-month').textContent = fmtField('month');
+                    document.getElementById('finance-week').textContent = fmtField('week');
+
                     const loading = document.getElementById('top-works-loading');
                     const list = document.getElementById('top-works-list');
                     const empty = document.getElementById('top-works-empty');
                     loading.style.display = 'none';
-                    
+
                     if (data.topWorks && data.topWorks.length > 0) {
-                        list.innerHTML = '<table class="revenue-table"><thead><tr><th>作品</th><th>著者</th><th>売上</th><th>販売数</th></tr></thead><tbody>' +
+                        list.innerHTML = '<table class="revenue-table"><thead><tr><th>作品</th><th>著者</th><th>売上（純額）</th><th>販売数</th></tr></thead><tbody>' +
                             data.topWorks.map(work => `
                                 <tr>
                                     <td>${escapeHtml(work.title)}</td>
-                                    <td>${escapeHtml(work.author_name) || '不明'}</td>
-                                    <td><strong>$${parseFloat(work.total_sales).toLocaleString()}</strong></td>
+                                    <td>${escapeHtml(work.author_name || '') || '不明'}</td>
+                                    <td><strong>${formatMoney(work.total_sales, work.currency)}</strong></td>
                                     <td>${work.sale_count}件</td>
                                 </tr>
                             `).join('') + '</tbody></table>';

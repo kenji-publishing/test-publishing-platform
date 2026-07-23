@@ -31,19 +31,23 @@ router.get('/stats', async (req, res) => {
     // Get works count
     const worksResult = await db.query('SELECT COUNT(*) as count FROM works');
     
-    // Get this month's revenue (placeholder - transactions table may not exist yet)
-    let revenue = 0;
+    // 今月の純収益（通貨別・返金差引）。通貨を混ぜて合算しない
+    let revenueByCurrency = [];
     try {
       const revenueResult = await db.query(`
-        SELECT COALESCE(SUM(amount), 0) as total
+        SELECT currency,
+               COALESCE(SUM(CASE WHEN transaction_type = 'refund' THEN -amount ELSE amount END), 0) AS total
         FROM transactions
         WHERE created_at >= date_trunc('month', CURRENT_DATE)
           AND status = 'completed'
+          AND transaction_type IN ('purchase', 'refund')
+        GROUP BY currency
+        ORDER BY currency
       `);
-      revenue = parseFloat(revenueResult.rows[0].total) || 0;
+      revenueByCurrency = revenueResult.rows.map(r => ({ currency: r.currency, total: parseFloat(r.total) || 0 }));
     } catch (e) {
       // transactions table doesn't exist yet, that's OK
-      console.log('Note: transactions table not found, showing $0 revenue');
+      console.log('Note: transactions table not found, showing 0 revenue');
     }
     
     // Get pending tasks count
@@ -67,7 +71,7 @@ router.get('/stats', async (req, res) => {
     res.json({
       users: parseInt(usersResult.rows[0].count),
       works: parseInt(worksResult.rows[0].count),
-      revenue: revenue,
+      revenueByCurrency: revenueByCurrency,
       pendingTasks: totalPendingTasks
     });
   } catch (error) {
