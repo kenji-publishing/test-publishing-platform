@@ -37,6 +37,7 @@
         .admin-sidebar .nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
         .admin-sidebar .nav-item.active { background: rgba(255,255,255,0.15); color: #fff; border-left-color: #3498db; }
         .admin-sidebar .nav-item i { font-size: 1.05rem; width: 22px; }
+        .badge-pending { background: #e74c3c; color: #fff; font-size: 0.7rem; padding: 3px 8px; border-radius: 10px; margin-left: auto; }
         .admin-sidebar .nav-section { padding: 15px 20px 8px; font-size: 0.75rem; text-transform: uppercase; color: rgba(255,255,255,0.4); letter-spacing: 1px; }
         .admin-main { flex: 1; margin-left: 260px; background: #f5f6fa; min-height: 100vh; }
         .admin-header { background: #fff; padding: 15px 30px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
@@ -307,15 +308,15 @@
                 <a class="nav-item" href="index.html"><i class="fas fa-th-large"></i><span>ダッシュボード</span></a>
                 <div class="nav-section">ユーザー管理</div>
                 <a class="nav-item" href="index.html#users"><i class="fas fa-users"></i><span>ユーザー一覧</span></a>
-                <a class="nav-item" href="index.html#verification"><i class="fas fa-user-check"></i><span>本人確認</span></a>
+                <a class="nav-item" href="index.html#verification"><i class="fas fa-user-check"></i><span>本人確認</span><span class="badge-pending" id="verification-badge" style="display:none;">0</span></a>
                 <div class="nav-section">コンテンツ</div>
-                <a class="nav-item" href="index.html#moderation"><i class="fas fa-shield-alt"></i><span>コンテンツ審査</span></a>
-                <a class="nav-item" href="index.html#translations"><i class="fas fa-language"></i><span>翻訳キュー</span></a>
-                <a class="nav-item" href="index.html#dmca"><i class="fas fa-exclamation-triangle"></i><span>DMCA管理</span></a>
+                <a class="nav-item" href="index.html#moderation"><i class="fas fa-shield-alt"></i><span>コンテンツ審査</span><span class="badge-pending" id="moderation-badge" style="display:none;">0</span></a>
+                <a class="nav-item" href="index.html#translations"><i class="fas fa-language"></i><span>翻訳キュー</span><span class="badge-pending" id="translation-badge" style="display:none;">0</span></a>
+                <a class="nav-item" href="index.html#dmca"><i class="fas fa-exclamation-triangle"></i><span>DMCA管理</span><span class="badge-pending" id="dmca-badge" style="display:none;">0</span></a>
                 <div class="nav-section">分析</div>
                 <a class="nav-item active" href="analytics.html"><i class="fas fa-chart-line"></i><span>アナリティクス</span></a>
                 <div class="nav-section">サポート</div>
-                <a class="nav-item" href="feedback.html"><i class="fas fa-comment-dots"></i><span>フィードバック</span></a>
+                <a class="nav-item" href="feedback.html"><i class="fas fa-comment-dots"></i><span>フィードバック</span><span class="badge-pending" id="feedback-badge" style="display:none;">0</span></a>
                 <div class="nav-section">財務</div>
                 <a class="nav-item" href="index.html#finance"><i class="fas fa-chart-pie"></i><span>収益レポート</span></a>
                 <a class="nav-item" href="payouts.html"><i class="fas fa-hand-holding-usd"></i><span>収益の支払い</span></a>
@@ -855,6 +856,32 @@
                 setInterval(fetchRealtime, 30000);
             }
         });
+    </script>
+
+    <script>
+    // サイドバーの審査待ち件数バッジ（ダッシュボードと同じ数字を全ページで表示。1件以上のみ）
+    (async function loadSidebarBadges() {
+        const t = localStorage.getItem('token');
+        if (!t) return;
+        const get = (u) => fetch((window.API_ORIGIN || '') + u, { headers: { 'Authorization': 'Bearer ' + t } })
+            .then(r => r.ok ? r.json() : null).catch(() => null);
+        const show = (id, n) => {
+            const el = document.getElementById(id);
+            if (el && n > 0) { el.textContent = n; el.style.display = ''; }
+        };
+        const [ver, mod, dmca, trans, fb] = await Promise.all([
+            get('/api/verification/admin/stats'),
+            get('/api/moderation/admin/stats'),
+            get('/api/dmca/admin/stats'),
+            get('/api/translation-queue/admin/stats'),
+            get('/api/feedback/admin/stats')
+        ]);
+        if (fb) show('feedback-badge', parseInt(fb.highPriority) || 0);
+        if (ver) show('verification-badge', parseInt(ver.pending) || 0);
+        if (mod) show('moderation-badge', parseInt(mod.draft) || 0);
+        if (dmca && dmca.stats) show('dmca-badge', parseInt(dmca.stats.new) || 0);
+        if (trans && trans.stats) show('translation-badge', parseInt(trans.stats.pending) || 0);
+    })();
     </script>
 </body>
 </html>

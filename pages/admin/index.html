@@ -126,15 +126,15 @@
                 <a class="nav-item active" data-section="dashboard"><i class="bi bi-grid-1x2"></i><span>ダッシュボード</span></a>
                 <div class="nav-section">ユーザー管理</div>
                 <a class="nav-item" data-section="users"><i class="bi bi-people"></i><span>ユーザー一覧</span></a>
-                <a class="nav-item" data-section="verification"><i class="bi bi-person-check"></i><span>本人確認</span><span class="badge-pending" id="verification-badge">0</span></a>
+                <a class="nav-item" data-section="verification"><i class="bi bi-person-check"></i><span>本人確認</span><span class="badge-pending" id="verification-badge" style="display:none;">0</span></a>
                 <div class="nav-section">コンテンツ</div>
-                <a class="nav-item" data-section="moderation"><i class="bi bi-shield-check"></i><span>コンテンツ審査</span><span class="badge-pending" id="moderation-badge">0</span></a>
-                <a class="nav-item" data-section="translations"><i class="bi bi-translate"></i><span>翻訳キュー</span><span class="badge-pending" id="translation-badge">0</span></a>
-                <a class="nav-item" data-section="dmca"><i class="bi bi-exclamation-triangle"></i><span>DMCA管理</span><span class="badge-pending" id="dmca-badge">0</span></a>
+                <a class="nav-item" data-section="moderation"><i class="bi bi-shield-check"></i><span>コンテンツ審査</span><span class="badge-pending" id="moderation-badge" style="display:none;">0</span></a>
+                <a class="nav-item" data-section="translations"><i class="bi bi-translate"></i><span>翻訳キュー</span><span class="badge-pending" id="translation-badge" style="display:none;">0</span></a>
+                <a class="nav-item" data-section="dmca"><i class="bi bi-exclamation-triangle"></i><span>DMCA管理</span><span class="badge-pending" id="dmca-badge" style="display:none;">0</span></a>
                 <div class="nav-section">分析</div>
                 <a class="nav-item" href="analytics.html"><i class="bi bi-bar-chart-line"></i><span>アナリティクス</span></a>
                 <div class="nav-section">サポート</div>
-                <a class="nav-item" href="feedback.html"><i class="bi bi-chat-dots"></i><span>フィードバック</span></a>
+                <a class="nav-item" href="feedback.html"><i class="bi bi-chat-dots"></i><span>フィードバック</span><span class="badge-pending" id="feedback-badge" style="display:none;">0</span></a>
                 <div class="nav-section">財務</div>
                 <a class="nav-item" data-section="finance"><i class="bi bi-graph-up"></i><span>収益レポート</span></a>
                 <a class="nav-item" href="payouts.html"><i class="bi bi-cash-coin"></i><span>収益の支払い</span></a>
@@ -505,6 +505,14 @@
             ...opts,
             headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token'), ...(opts.headers || {}) }
         });
+
+        // サイドバーの件数バッジ: 1件以上のときだけ表示（0の赤丸はノイズ）
+        function setBadge(id, count) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.textContent = count;
+            el.style.display = count > 0 ? '' : 'none';
+        }
         
         const navItems = document.querySelectorAll('.nav-item[data-section]');
         const sections = document.querySelectorAll('.tool-section');
@@ -565,7 +573,7 @@
                     document.getElementById('m-stat-draft').textContent = stats.draft || 0;
                     document.getElementById('m-stat-published').textContent = stats.published || 0;
                     document.getElementById('m-stat-suspended').textContent = stats.suspended || 0;
-                    document.getElementById('moderation-badge').textContent = stats.draft || 0;
+                    setBadge('moderation-badge', stats.draft || 0);
                 }
             } catch (error) { console.error('Failed to load moderation stats:', error); }
         }
@@ -585,7 +593,7 @@
                     document.getElementById('d-stat-reviewing').textContent = stats.reviewing || 0;
                     document.getElementById('d-stat-action').textContent = stats.action_taken || 0;
                     document.getElementById('d-stat-rejected').textContent = stats.rejected || 0;
-                    document.getElementById('dmca-badge').textContent = stats.new || 0;
+                    setBadge('dmca-badge', stats.new || 0);
                 }
             } catch (error) { console.error('Failed to load DMCA stats:', error); }
         }
@@ -609,7 +617,7 @@
                     document.getElementById('t-stat-inprogress').textContent = stats.in_progress || 0;
                     document.getElementById('t-stat-review').textContent = stats.review || 0;
                     document.getElementById('t-stat-completed').textContent = stats.completed || 0;
-                    document.getElementById('translation-badge').textContent = stats.pending || 0;
+                    setBadge('translation-badge', stats.pending || 0);
                 }
             } catch (error) { console.error('Failed to load translation stats:', error); }
         }
@@ -1505,11 +1513,33 @@
             window.location.href = '../login.html'; 
         });
         
+        async function loadVerificationBadge() {
+            try {
+                const response = await authFetch(`${API_BASE}/verification/admin/stats`);
+                if (response.ok) {
+                    const stats = await response.json();
+                    setBadge('verification-badge', parseInt(stats.pending) || 0);
+                }
+            } catch (error) { console.error('Failed to load verification stats:', error); }
+        }
+
+        async function loadFeedbackBadge() {
+            try {
+                const response = await authFetch(`${API_BASE}/feedback/admin/stats`);
+                if (response.ok) {
+                    const stats = await response.json();
+                    setBadge('feedback-badge', parseInt(stats.highPriority) || 0);
+                }
+            } catch (error) { console.error('Failed to load feedback stats:', error); }
+        }
+
         document.addEventListener('DOMContentLoaded', () => { 
             loadDashboardStats(); 
             loadModerationStats();
             loadDmcaStats();
             loadTranslationStats();
+            loadVerificationBadge();
+            loadFeedbackBadge();
         });
 
         // 他ページのサイドバーからの #users 等の深いリンクでセクションを直接開く
