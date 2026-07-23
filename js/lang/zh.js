@@ -61,7 +61,7 @@ window.translations.zh = {
             },
             step3: {
                 title: '获得收益',
-                desc: '最高60%'
+                desc: '最高70%'
             }
         },
         stats: {
@@ -74,7 +74,7 @@ window.translations.zh = {
             title: '为创作者',
             desc: '加入社区',
             feature1: '免费AI翻译',
-            feature2: '60%收益',
+            feature2: '70%收益',
             feature3: '全球触达',
             feature4: '保留权利',
             button: '开始创作'

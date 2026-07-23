@@ -61,7 +61,7 @@ window.translations.en = {
             },
             step3: {
                 title: 'Earn Revenue',
-                desc: 'Earn up to 60%.'
+                desc: 'Earn up to 70%.'
             }
         },
         stats: {
@@ -74,7 +74,7 @@ window.translations.en = {
             title: 'For Creators',
             desc: 'Join our community.',
             feature1: 'Free AI translation',
-            feature2: 'Up to 60% revenue',
+            feature2: 'Up to 70% revenue',
             feature3: 'Global reach',
             feature4: 'Keep your rights',
             button: 'Start Creating'

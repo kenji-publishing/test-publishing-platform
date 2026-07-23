@@ -485,7 +485,6 @@ function renderNavbar(options) {
     html += '<a class="nav-link dropdown-toggle' + (supportActive ? ' active' : '') + '" href="#" role="button" data-bs-toggle="dropdown">';
     html += '<i class="fas fa-headset me-1"></i> <span id="navSupportPC">' + getL(navText.support) + '</span></a>';
     html += '<ul class="dropdown-menu">';
-    html += '<li><a class="dropdown-item" href="' + p('support/faq.html') + '"><i class="fas fa-question-circle me-2"></i><span id="navFaqPC">' + getL(navText.faq) + '</span></a></li>';
     html += '<li><a class="dropdown-item" href="' + p('support/troubleshoot.html') + '"><i class="fas fa-tools me-2"></i><span id="navTroubleshootPC">' + getL(navText.troubleshooting) + '</span></a></li>';
     html += '</ul></li>';
 
@@ -544,10 +543,6 @@ function renderNavbar(options) {
     html += '<li><hr class="dropdown-divider"></li>';
 
     // Support (mobile - flat links)
-    html += '<li class="nav-item">';
-    html += '<a class="nav-link' + ac('faq') + '" href="' + p('support/faq.html') + '">';
-    html += '<i class="fas fa-question-circle me-2"></i><span id="navFaqMobile">' + getL(navText.faq) + '</span></a></li>';
-
     html += '<li class="nav-item">';
     html += '<a class="nav-link' + ac('troubleshoot') + '" href="' + p('support/troubleshoot.html') + '">';
     html += '<i class="fas fa-tools me-2"></i><span id="navTroubleshootMobile">' + getL(navText.troubleshooting) + '</span></a></li>';

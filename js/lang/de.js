@@ -61,7 +61,7 @@ window.translations.de = {
             },
             step3: {
                 title: 'Einnahmen Erzielen',
-                desc: 'Verdienen Sie bis zu 60%.'
+                desc: 'Verdienen Sie bis zu 70%.'
             }
         },
         stats: {
@@ -74,7 +74,7 @@ window.translations.de = {
             title: 'Für Kreative',
             desc: 'Treten Sie unserer Gemeinschaft bei.',
             feature1: 'Kostenlose KI-Übersetzung',
-            feature2: 'Bis zu 60% Einnahmen',
+            feature2: 'Bis zu 70% Einnahmen',
             feature3: 'Globale Reichweite',
             feature4: 'Behalten Sie Ihre Rechte',
             button: 'Jetzt Erstellen'

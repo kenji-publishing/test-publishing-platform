@@ -61,7 +61,7 @@ window.translations.ja = {
             },
             step3: {
                 title: '収益を得る',
-                desc: '最大60%獲得'
+                desc: '最大70%獲得'
             }
         },
         stats: {
@@ -74,7 +74,7 @@ window.translations.ja = {
             title: 'クリエイターのために',
             desc: 'コミュニティに参加',
             feature1: '無料AI翻訳',
-            feature2: '最大60%収益',
+            feature2: '最大70%収益',
             feature3: 'グローバルリーチ',
             feature4: '権利を保持',
             button: '創作を始める'

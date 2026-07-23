@@ -61,7 +61,7 @@ window.translations.ar = {
             },
             step3: {
                 title: 'اكسب الإيرادات',
-                desc: 'اكسب حتى 60%.'
+                desc: 'اكسب حتى 70%.'
             }
         },
         stats: {
@@ -74,7 +74,7 @@ window.translations.ar = {
             title: 'للمبدعين',
             desc: 'انضم إلى مجتمعنا.',
             feature1: 'ترجمة ذكاء اصطناعي مجانية',
-            feature2: 'حتى 60% إيرادات',
+            feature2: 'حتى 70% إيرادات',
             feature3: 'وصول عالمي',
             feature4: 'احتفظ بحقوقك',
             button: 'ابدأ الإبداع'

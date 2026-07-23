@@ -61,7 +61,7 @@ window.translations.pt = {
             },
             step3: {
                 title: 'Ganhe Receita',
-                desc: 'Ganhe até 60%.'
+                desc: 'Ganhe até 70%.'
             }
         },
         stats: {
@@ -74,7 +74,7 @@ window.translations.pt = {
             title: 'Para Criadores',
             desc: 'Junte-se à nossa comunidade.',
             feature1: 'Tradução IA gratuita',
-            feature2: 'Até 60% de receita',
+            feature2: 'Até 70% de receita',
             feature3: 'Alcance global',
             feature4: 'Mantenha seus direitos',
             button: 'Começar a Criar'

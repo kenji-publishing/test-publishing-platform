@@ -61,7 +61,7 @@ window.translations.fr = {
             },
             step3: {
                 title: 'Gagnez des Revenus',
-                desc: 'Gagnez jusqu\'à 60%.'
+                desc: 'Gagnez jusqu\'à 70%.'
             }
         },
         stats: {
@@ -74,7 +74,7 @@ window.translations.fr = {
             title: 'Pour les Créateurs',
             desc: 'Rejoignez notre communauté.',
             feature1: 'Traduction IA gratuite',
-            feature2: 'Jusqu\'à 60% de revenus',
+            feature2: 'Jusqu\'à 70% de revenus',
             feature3: 'Portée mondiale',
             feature4: 'Gardez vos droits',
             button: 'Commencer à Créer'
