@@ -459,9 +459,13 @@ router.get('/lookup/search', authenticate, async (req, res) => {
     const q = (req.query.q || '').trim();
     if (q.length < 2) return res.json({ success: true, users: [] });
     const result = await db.query(
+      // 氏名でも探せるようにする（ペンネーム未設定のアカウントは
+      // display_nameが氏名になるため、氏名で引けないと事実上メール以外で辿れない）
       `SELECT user_id, COALESCE(NULLIF(pen_name, ''), TRIM(first_name || ' ' || last_name)) AS display_name
        FROM users
-       WHERE (pen_name ILIKE '%' || $1 || '%' OR LOWER(email) = LOWER($1))
+       WHERE (pen_name ILIKE '%' || $1 || '%'
+              OR TRIM(first_name || ' ' || last_name) ILIKE '%' || $1 || '%'
+              OR LOWER(email) = LOWER($1))
          AND account_status = 'active'
          AND user_id <> $2
        ORDER BY (LOWER(pen_name) = LOWER($1)) DESC, pen_name
