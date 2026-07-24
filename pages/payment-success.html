@@ -121,8 +121,36 @@
             document.getElementById('amountPaid').textContent = (typeof formatWorkPrice === 'function') ? formatWorkPrice(amount, currency) : (currency + ' ' + amount);
             document.getElementById('purchaseDate').textContent = new Date().toLocaleDateString();
 
+            // プレゼントは「相手のもの」なので自分のライブラリには入れない
+            if (p.get('gift') === '1') {
+                showGiftSuccess(p.get('to') || '');
+                return;
+            }
+
             // 購入した作品をライブラリに自動追加
             addToLibrary(workId, title, amount, orderId);
+        }
+
+        // プレゼント購入時の表示に差し替える（贈った相手を明示する）
+        function showGiftSuccess(recipientName) {
+            const lang = localStorage.getItem('preferredLanguage') || 'en';
+            const t = {
+                title: { en: 'Gift sent!', ja: 'プレゼントを贈りました！', zh: '礼物已送出！', es: '¡Regalo enviado!', fr: 'Cadeau envoyé !', de: 'Geschenk gesendet!', ko: '선물을 보냈습니다!', ar: 'تم إرسال الهدية!', pt: 'Presente enviado!', it: 'Regalo inviato!' },
+                lead: { en: '{name} has been notified and can read it right away.', ja: '{name}さんに通知が届き、すぐに読めるようになりました。', zh: '已通知{name}，对方可以立即阅读。', es: '{name} ha recibido una notificación y ya puede leerlo.', fr: '{name} a été notifié(e) et peut lire immédiatement.', de: '{name} wurde benachrichtigt und kann sofort lesen.', ko: '{name}님에게 알림이 전송되어 바로 읽을 수 있습니다.', ar: 'تم إشعار {name} ويمكنه القراءة فورًا.', pt: '{name} foi notificado e já pode ler.', it: '{name} è stato avvisato e può leggere subito.' },
+                note: { en: 'The work is added to their library, not yours.', ja: 'この作品は相手のライブラリに追加されます（あなたのライブラリには入りません）。', zh: '作品将加入对方的书库，而非您的书库。', es: 'La obra se añade a su biblioteca, no a la tuya.', fr: "L'œuvre est ajoutée à sa bibliothèque, pas à la vôtre.", de: 'Das Werk wird dessen Bibliothek hinzugefügt, nicht Ihrer.', ko: '작품은 상대방의 라이브러리에 추가됩니다(회원님의 라이브러리가 아닙니다).', ar: 'يُضاف العمل إلى مكتبته، وليس إلى مكتبتك.', pt: 'A obra é adicionada à biblioteca dele, não à sua.', it: "L'opera viene aggiunta alla sua libreria, non alla tua." }
+            };
+            const pick = (o) => o[lang] || o.en;
+            const name = decodeURIComponent(recipientName || '');
+            const h1 = document.querySelector('h1');
+            const lead = document.querySelector('.lead');
+            // data-i18nが残っているとi18n.jsが通常購入の文言で上書きしてしまう
+            h1.removeAttribute('data-i18n');
+            lead.removeAttribute('data-i18n');
+            h1.textContent = pick(t.title);
+            lead.textContent = pick(t.lead).replace('{name}', name);
+            document.querySelector('.success-icon i').className = 'fas fa-gift';
+            const info = document.querySelector('.alert-info');
+            if (info) info.innerHTML = '<i class="fas fa-info-circle me-2"></i>' + pick(t.note);
         }
 
         // ライブラリに追加（localStorageで管理）

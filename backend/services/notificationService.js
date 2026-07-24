@@ -45,8 +45,9 @@ const NotificationIcons = {
  * @returns {Promise<Object>} 作成された通知
  */
 async function createNotification(options) {
-    const { userId, type, title, message, actionUrl = null, metadata = {} } = options;
-    
+    const { userId, type, title, message, actionUrl = null, metadata = {},
+            icon = null, iconColor = null } = options;
+
     try {
         // ユーザーの通知設定を確認（設定は「通知タイプごとの行」で保持される。
         // 行が無ければデフォルトで通知ON。in_app_enabled=false の時だけスキップ）
@@ -60,11 +61,12 @@ async function createNotification(options) {
         }
         
         // 通知を作成（列名は notification_type — DBスキーマに合わせる）
+        // icon/iconColorは任意。省略時はDBの既定値（fa-bell / primary）と同じ値になる
         const result = await pool.query(`
-            INSERT INTO notifications (user_id, notification_type, title, message, action_url, metadata)
-            VALUES ($1, $2, $3, $4, $5, $6)
+            INSERT INTO notifications (user_id, notification_type, title, message, action_url, metadata, icon, icon_color)
+            VALUES ($1, $2, $3, $4, $5, $6, COALESCE($7, 'fa-bell'), COALESCE($8, 'primary'))
             RETURNING *
-        `, [userId, type, title, message, actionUrl, JSON.stringify(metadata)]);
+        `, [userId, type, title, message, actionUrl, JSON.stringify(metadata), icon, iconColor]);
         
         console.log(`[NotificationService] Created notification for user ${userId}: ${type}`);
         return result.rows[0];

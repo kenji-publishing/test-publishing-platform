@@ -230,10 +230,15 @@ router.get('/purchases', authenticate, async (req, res) => {
         p.payment_method,
         p.payment_status,
         p.created_at as purchased_at,
-        p.transaction_id
+        p.transaction_id,
+        COALESCE(NULLIF(g_from.pen_name, ''), TRIM(g_from.first_name || ' ' || g_from.last_name)) as gift_from,
+        g.message as gift_message
        FROM purchases p
        LEFT JOIN works w ON p.work_id = w.work_id
        LEFT JOIN users u ON w.author_id = u.user_id
+       -- プレゼントで受け取った作品には贈り主を添える（ライブラリで🎁表示）
+       LEFT JOIN gifts g ON g.work_id = p.work_id AND g.recipient_id = p.user_id AND g.status = 'delivered'
+       LEFT JOIN users g_from ON g_from.user_id = g.sender_id
        WHERE p.user_id = $1
        ORDER BY p.created_at DESC
        LIMIT 50`,

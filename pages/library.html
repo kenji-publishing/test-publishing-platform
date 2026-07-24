@@ -233,6 +233,13 @@
             color: var(--color-text-secondary);
             margin-bottom: 0.5rem;
         }
+
+        .gift-from {
+            font-size: 0.72rem;
+            color: var(--color-accent);
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+        }
         
         .book-meta {
             display: flex;
@@ -466,6 +473,7 @@
         const uiText = {
             // --- Library-specific ---
             myLibrary: { en: 'My Library', ja: 'マイライブラリ', zh: '我的书库', es: 'Mi Biblioteca', fr: 'Ma Bibliothèque', de: 'Meine Bibliothek', ko: '내 라이브러리', ar: 'مكتبتي', pt: 'Minha Biblioteca', it: 'Mia Libreria' },
+            giftFrom: { en: 'Gift from {name}', ja: '{name}さんからのプレゼント', zh: '来自{name}的礼物', es: 'Regalo de {name}', fr: 'Cadeau de {name}', de: 'Geschenk von {name}', ko: '{name}님의 선물', ar: 'هدية من {name}', pt: 'Presente de {name}', it: 'Regalo di {name}' },
             searchLibrary: { en: 'Search your library...', ja: 'ライブラリを検索...', zh: '搜索书库...', es: 'Buscar en tu biblioteca...', fr: 'Rechercher dans votre bibliothèque...', de: 'Bibliothek durchsuchen...', ko: '라이브러리 검색...', ar: 'ابحث في مكتبتك...', pt: 'Pesquisar na biblioteca...', it: 'Cerca nella tua libreria...' },
             recentlyRead: { en: 'Recently Read', ja: '最近読んだ', zh: '最近阅读', es: 'Leído recientemente', fr: 'Lu récemment', de: 'Zuletzt gelesen', ko: '최근 읽은', ar: 'قرأت مؤخراً', pt: 'Lidos recentemente', it: 'Letti Recentemente' },
             titleAZ: { en: 'Title A-Z', ja: 'タイトル順', zh: '标题 A-Z', es: 'Título A-Z', fr: 'Titre A-Z', de: 'Titel A-Z', ko: '제목 A-Z', ar: 'العنوان أ-ي', pt: 'Título A-Z', it: 'Titolo A-Z' },
@@ -526,6 +534,7 @@
                         if (!existing.cover && cover) existing.cover = cover;
                         if (!existing.author && p.author_name) existing.author = p.author_name;
                         existing.purchased = true;
+                        existing.giftFrom = p.gift_from || null;
                         return;
                     }
                     books.push({
@@ -539,7 +548,8 @@
                         wishlist: false,
                         lastRead: null,
                         addedAt: p.purchased_at || new Date().toISOString(),
-                        purchased: true
+                        purchased: true,
+                        giftFrom: p.gift_from || null
                     });
                 });
             } catch (err) {
@@ -704,6 +714,7 @@ function getL(obj, replacements = {}) {
                     <div class="book-info">
                         <div class="book-title">${escapeHtml(book.title)}</div>
                         <div class="book-author">${escapeHtml(book.author)}</div>
+                        ${book.giftFrom ? `<div class="gift-from"><i class="fas fa-gift me-1"></i>${getL(uiText.giftFrom).replace('{name}', escapeHtml(book.giftFrom))}</div>` : ''}
                         <div class="book-meta">
                             <span class="book-status ${book.status === 'reading' ? 'status-reading' : book.status === 'completed' ? 'status-completed' : 'status-new'}">
                                 ${book.status === 'reading'

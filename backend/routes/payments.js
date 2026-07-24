@@ -18,6 +18,9 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { createRevenueSplits } = require('../services/revenueSplitService');
 const { createNotification } = require('../services/notificationService');
 
+// 不正なUUIDをそのままSQLに渡すと 22P02 で500になるため、入口で弾く
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /**
  * 全額返金の反映（charge.refundedから呼ばれる）
  * - 作品購入: purchasesをrefundedに（読者アクセスは自動で失効）、返金トランザクション記録、
@@ -40,11 +43,22 @@ async function applyStripeRefund(sessionId) {
     )).rows[0];
 
     if (purchase) {
+      // プレゼントなら支払ったのは贈った人。返金の記録も贈った人名義にして
+      // 購入(+)と返金(-)が同じ人の下で相殺されるようにする
+      const gift = (await client.query(
+        `SELECT gift_id, sender_id, recipient_id FROM gifts WHERE stripe_session_id = $1`,
+        [sessionId]
+      )).rows[0];
+      const payerId = gift ? gift.sender_id : purchase.user_id;
+
       await client.query(
         `INSERT INTO transactions (user_id, work_id, transaction_type, amount, currency, payment_method, payment_gateway_id, status)
          VALUES ($1, $2, 'refund', $3, $4, 'stripe', $5, 'completed')`,
-        [purchase.user_id, purchase.work_id, purchase.amount, purchase.currency, sessionId]
+        [payerId, purchase.work_id, purchase.amount, purchase.currency, sessionId]
       );
+      if (gift) {
+        await client.query(`UPDATE gifts SET status = 'refunded' WHERE gift_id = $1`, [gift.gift_id]);
+      }
       // 元の分配を打ち消すマイナス行（SUMベースの収益表示・出金計算が自動で補正される）
       await client.query(
         `INSERT INTO revenue_splits (work_id, recipient_id, role, amount, currency, transaction_reference, status)
@@ -56,15 +70,33 @@ async function applyStripeRefund(sessionId) {
       await client.query('COMMIT');
       console.log(`Refund applied: session=${sessionId}, work=${purchase.work_id}, buyer=${purchase.user_id}, amount=${purchase.amount} ${purchase.currency}`);
 
-      // 購入者へ通知（非致死）
+      // 通知（非致死）。プレゼントは「返金を受けた人」と「読めなくなる人」が別
       try {
-        await createNotification({
-          userId: purchase.user_id,
-          type: 'system',
-          title: '返金が完了しました / Refund completed',
-          message: `ご購入いただいた作品の返金（${purchase.amount} ${purchase.currency}）が完了しました。この作品はライブラリから読めなくなります。 / Your refund (${purchase.amount} ${purchase.currency}) has been processed. The work is no longer available in your library.`,
-          actionUrl: '/pages/library.html'
-        });
+        if (gift) {
+          await createNotification({
+            userId: gift.sender_id,
+            type: 'gift',
+            title: '返金が完了しました / Refund completed',
+            message: `プレゼントの返金（${purchase.amount} ${purchase.currency}）が完了しました。贈った作品は相手のライブラリから読めなくなります。 / Your gift refund (${purchase.amount} ${purchase.currency}) has been processed.`,
+            actionUrl: '/pages/library.html',
+            icon: 'fa-gift'
+          });
+          await createNotification({
+            userId: gift.recipient_id,
+            type: 'system',
+            title: 'プレゼントが取り消されました / Gift cancelled',
+            message: `贈られていた作品の支払いが返金されたため、この作品はライブラリから読めなくなります。 / The gifted work has been refunded and is no longer available in your library.`,
+            actionUrl: '/pages/library.html'
+          });
+        } else {
+          await createNotification({
+            userId: purchase.user_id,
+            type: 'system',
+            title: '返金が完了しました / Refund completed',
+            message: `ご購入いただいた作品の返金（${purchase.amount} ${purchase.currency}）が完了しました。この作品はライブラリから読めなくなります。 / Your refund (${purchase.amount} ${purchase.currency}) has been processed. The work is no longer available in your library.`,
+            actionUrl: '/pages/library.html'
+          });
+        }
       } catch (e) { console.error('Refund notification failed:', e.message); }
       return { kind: 'purchase' };
     }
@@ -99,13 +131,172 @@ async function applyStripeRefund(sessionId) {
 }
 
 /**
+ * プレゼントの支払い完了処理（checkout.session.completed から呼ばれる）
+ *
+ * 通常購入との違いは「所有権は受取人・支払い記録は贈った人」という点だけで、
+ * 収益分配は通常購入とまったく同じ。
+ * 冪等: giftsのstatusで二重処理を防ぐ（Webhookは再送されうる）
+ */
+async function applyGiftPayment(session) {
+  const giftId = session.metadata.gift_id;
+  const ZERO_DECIMAL = ['jpy', 'krw'];
+  const amount = ZERO_DECIMAL.includes(session.currency)
+    ? session.amount_total
+    : session.amount_total / 100;
+  const currency = session.currency.toUpperCase();
+
+  const client = await db.pool.connect();
+  let outcome = null;
+  try {
+    await client.query('BEGIN');
+
+    const gift = (await client.query(
+      `SELECT g.gift_id, g.work_id, g.sender_id, g.recipient_id, g.message, g.status,
+              w.title AS work_title, w.author_id,
+              COALESCE(NULLIF(s.pen_name, ''), TRIM(s.first_name || ' ' || s.last_name)) AS sender_name,
+              COALESCE(NULLIF(r.pen_name, ''), TRIM(r.first_name || ' ' || r.last_name)) AS recipient_name
+       FROM gifts g
+       JOIN works w ON w.work_id = g.work_id
+       JOIN users s ON s.user_id = g.sender_id
+       JOIN users r ON r.user_id = g.recipient_id
+       WHERE g.gift_id = $1
+       FOR UPDATE OF g`,
+      [giftId]
+    )).rows[0];
+
+    if (!gift) {
+      await client.query('ROLLBACK');
+      console.warn(`Gift payment: no gift row for gift_id=${giftId} (session=${session.id})`);
+      return;
+    }
+    if (gift.status !== 'pending') {
+      await client.query('ROLLBACK');
+      console.log(`Gift payment: gift ${giftId} already ${gift.status} — skipped (webhook resend)`);
+      return;
+    }
+
+    // 受取人に所有権を作る。過去に返金された行が残っていれば復活させる。
+    // 「すでに所有」なら0件になり、その場合は課金だけが残るので返金対応に回す
+    const deliveredRow = await client.query(
+      `INSERT INTO purchases (user_id, work_id, amount, currency, payment_method, payment_status, transaction_id)
+       VALUES ($1, $2, $3, $4, 'stripe', 'completed', $5)
+       ON CONFLICT (user_id, work_id) DO UPDATE
+         SET amount = EXCLUDED.amount,
+             currency = EXCLUDED.currency,
+             payment_method = EXCLUDED.payment_method,
+             payment_status = 'completed',
+             transaction_id = EXCLUDED.transaction_id,
+             created_at = CURRENT_TIMESTAMP
+         WHERE purchases.payment_status <> 'completed'
+       RETURNING purchase_id`,
+      [gift.recipient_id, gift.work_id, amount, currency, session.id]
+    );
+
+    if (deliveredRow.rowCount === 0) {
+      // 事前チェックをすり抜けた場合（決済中に受取人本人が購入した等）。
+      // 取引も分配も作らない＝Stripe側で返金するだけで帳尻が合う状態にしておく
+      await client.query(
+        `UPDATE gifts SET status = 'undeliverable', amount = $2, currency = $3 WHERE gift_id = $1`,
+        [giftId, amount, currency]
+      );
+      await client.query('COMMIT');
+      console.warn(`Gift undeliverable (recipient already owns): gift=${giftId}, session=${session.id} — REFUND REQUIRED`);
+      outcome = { delivered: false, gift };
+    } else {
+      // 支払ったのは贈った人なので、取引履歴は贈った人名義で残す
+      await client.query(
+        `INSERT INTO transactions (user_id, work_id, transaction_type, amount, currency, payment_method, payment_gateway_id, status)
+         VALUES ($1, $2, 'purchase', $3, $4, 'stripe', $5, 'completed')`,
+        [gift.sender_id, gift.work_id, amount, currency, session.id]
+      );
+
+      const splits = await createRevenueSplits(client, {
+        workId: gift.work_id,
+        authorId: gift.author_id,
+        amount,
+        currency,
+        reference: session.id
+      });
+
+      await client.query(
+        `UPDATE gifts SET status = 'delivered', delivered_at = CURRENT_TIMESTAMP, amount = $2, currency = $3
+         WHERE gift_id = $1`,
+        [giftId, amount, currency]
+      );
+      await client.query('COMMIT');
+      console.log(`Gift delivered: work=${gift.work_id}, from=${gift.sender_id}, to=${gift.recipient_id}, amount=${amount} ${currency}, splits=${splits.map(s => `${s.role}:${s.amount}`).join(' ')}`);
+      outcome = { delivered: true, gift };
+    }
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+
+  // 通知はトランザクションの外で（失敗しても決済処理は巻き戻さない）
+  const { gift, delivered } = outcome;
+  try {
+    if (delivered) {
+      const note = gift.message ? `\n「${gift.message}」` : '';
+      await createNotification({
+        userId: gift.recipient_id,
+        type: 'gift',
+        title: 'プレゼントが届きました / You received a gift',
+        message: `${gift.sender_name}さんから「${gift.work_title}」が贈られました。ライブラリからお読みいただけます。${note}`,
+        actionUrl: `/pages/work-detail.html?id=${gift.work_id}`,
+        icon: 'fa-gift',
+        iconColor: 'success',
+        metadata: { giftId: gift.gift_id, workId: gift.work_id, senderName: gift.sender_name }
+      });
+      await createNotification({
+        userId: gift.sender_id,
+        type: 'gift',
+        title: 'プレゼントを贈りました / Gift sent',
+        message: `「${gift.work_title}」を${gift.recipient_name}さんへ贈りました。相手のライブラリに追加されています。`,
+        actionUrl: `/pages/work-detail.html?id=${gift.work_id}`,
+        icon: 'fa-gift',
+        iconColor: 'success',
+        metadata: { giftId: gift.gift_id, workId: gift.work_id }
+      });
+    } else {
+      await createNotification({
+        userId: gift.sender_id,
+        type: 'gift',
+        title: 'プレゼントをお届けできませんでした / Gift could not be delivered',
+        message: `${gift.recipient_name}さんはすでに「${gift.work_title}」をお持ちでした。お支払いいただいた金額は返金いたします。`,
+        actionUrl: '/pages/support/contact.html',
+        icon: 'fa-gift',
+        iconColor: 'warning',
+        metadata: { giftId: gift.gift_id, workId: gift.work_id }
+      });
+      // 管理者に返金対応を促す（自動返金はしない＝金銭操作は人の目を通す）
+      const admins = (await db.query(`SELECT user_id FROM users WHERE role = 'admin'`)).rows;
+      for (const a of admins) {
+        await createNotification({
+          userId: a.user_id,
+          type: 'system',
+          title: '要対応: プレゼントの返金',
+          message: `受取人が既に所有していたためプレゼントを配達できませんでした。Stripeで返金してください。session=${session.id}`,
+          actionUrl: '/pages/admin/index.html#finance',
+          icon: 'fa-triangle-exclamation',
+          iconColor: 'warning'
+        });
+      }
+    }
+  } catch (e) {
+    console.error('Gift notification failed:', e.message);
+  }
+}
+
+/**
  * POST /api/payments/create-checkout-session
  * Create a Stripe checkout session for purchasing a work
  */
 router.post('/create-checkout-session', authenticate, async (req, res) => {
   try {
-    const { workId } = req.body;
-    
+    const { workId, giftTo, giftMessage } = req.body;
+
     const workResult = await db.query(
       `SELECT w.*, u.pen_name as author_name
        FROM works w
@@ -113,23 +304,72 @@ router.post('/create-checkout-session', authenticate, async (req, res) => {
        WHERE w.work_id = $1 AND w.status = 'published'`,
       [workId]
     );
-    
+
     if (workResult.rows.length === 0) {
       return res.status(404).json({ error: 'Work not found' });
     }
-    
+
     const work = workResult.rows[0];
-    
+
     if (work.is_free) {
       return res.status(400).json({ error: 'This work is free' });
     }
-    
+
+    // --- プレゼントの場合の事前チェック ---
+    // 「すでに所有している人には贈れない」をここで止めるのが肝心。
+    // 支払い後に発覚すると手動返金が必要になるため（Webhook側は最後の砦）
+    const isGift = !!giftTo;
+    let recipient = null;
+    let message = null;
+    if (isGift) {
+      if (!UUID_RE.test(String(giftTo))) {
+        return res.status(400).json({ error: 'Invalid recipient' });
+      }
+      if (String(giftTo) === String(req.user.userId)) {
+        return res.status(400).json({ error: 'You cannot gift a work to yourself', code: 'GIFT_SELF' });
+      }
+      recipient = (await db.query(
+        `SELECT user_id, COALESCE(NULLIF(pen_name, ''), TRIM(first_name || ' ' || last_name)) AS display_name
+         FROM users WHERE user_id = $1 AND account_status = 'active'`,
+        [giftTo]
+      )).rows[0];
+      if (!recipient) {
+        return res.status(404).json({ error: 'Recipient not found', code: 'GIFT_RECIPIENT_NOT_FOUND' });
+      }
+      if (String(work.author_id) === String(giftTo)) {
+        return res.status(400).json({ error: 'The author already has access to this work', code: 'GIFT_ALREADY_OWNED' });
+      }
+      const owned = await db.query(
+        `SELECT 1 FROM purchases
+         WHERE user_id = $1 AND work_id = $2 AND payment_status = 'completed'`,
+        [giftTo, workId]
+      );
+      if (owned.rows.length > 0) {
+        return res.status(400).json({ error: 'The recipient already owns this work', code: 'GIFT_ALREADY_OWNED' });
+      }
+      message = (giftMessage || '').trim().slice(0, 500) || null;
+    }
+
     // Zero-decimal currencies (JPY, KRW) use the base unit directly in Stripe
     const ZERO_DECIMAL = ['jpy', 'krw'];
     const currency = (work.currency || 'USD').toLowerCase();
     const unitAmount = ZERO_DECIMAL.includes(currency)
       ? Math.round(work.price)
       : Math.round(work.price * 100);
+
+    // プレゼントは先に台帳（gifts）を作り、そのIDだけをStripeに渡す。
+    // メッセージ本文はStripeに送らない（個人的な文章を外部に預けない）
+    let giftId = null;
+    if (isGift) {
+      giftId = (await db.query(
+        `INSERT INTO gifts (work_id, sender_id, recipient_id, message, amount, currency)
+         VALUES ($1, $2, $3, $4, $5, $6) RETURNING gift_id`,
+        [workId, req.user.userId, giftTo, message, work.price, (work.currency || 'USD').toUpperCase()]
+      )).rows[0].gift_id;
+    }
+
+    const successUrl = `${process.env.FRONTEND_URL}/pages/payment-success.html?session_id={CHECKOUT_SESSION_ID}&work_id=${workId}&title=${encodeURIComponent(work.title)}&amount=${work.price}&currency=${work.currency || 'USD'}`
+      + (isGift ? `&gift=1&to=${encodeURIComponent(recipient.display_name || '')}` : '');
 
     // payment_method_typesは指定しない: Stripeダッシュボードで有効化した決済手段
     // （カード/Apple Pay/Google Pay/PayPal等）が通貨に応じて自動表示される
@@ -139,7 +379,7 @@ router.post('/create-checkout-session', authenticate, async (req, res) => {
           price_data: {
             currency: currency,
             product_data: {
-              name: work.title,
+              name: isGift ? `${work.title}（プレゼント / Gift）` : work.title,
               description: work.description || 'Digital content from AuctLect',
             },
             unit_amount: unitAmount,
@@ -148,17 +388,28 @@ router.post('/create-checkout-session', authenticate, async (req, res) => {
         },
       ],
       mode: 'payment',
-      success_url: `${process.env.FRONTEND_URL}/pages/payment-success.html?session_id={CHECKOUT_SESSION_ID}&work_id=${workId}&title=${encodeURIComponent(work.title)}&amount=${work.price}&currency=${work.currency || 'USD'}`,
+      success_url: successUrl,
       cancel_url: `${process.env.FRONTEND_URL}/pages/payment-cancel.html`,
-      metadata: {
+      metadata: isGift ? {
+        type: 'gift',
+        gift_id: giftId,
+        work_id: workId,
+        buyer_id: req.user.userId,
+        author_id: work.author_id,
+        recipient_id: giftTo
+      } : {
         work_id: workId,
         buyer_id: req.user.userId,
         author_id: work.author_id
       }
     });
-    
+
+    if (isGift) {
+      await db.query(`UPDATE gifts SET stripe_session_id = $1 WHERE gift_id = $2`, [session.id, giftId]);
+    }
+
     res.json({ sessionId: session.id, url: session.url });
-    
+
   } catch (error) {
     console.error('Stripe error:', error);
     res.status(500).json({ error: error.message });
@@ -243,6 +494,16 @@ router.post('/webhook', async (req, res) => {
         console.log(`AI tool order paid: ${session.metadata.order_id} (${session.amount_total} ${session.currency})`);
       } catch (error) {
         console.error('Error marking AI tool order paid:', error);
+      }
+      return res.json({ received: true });
+    }
+
+    // プレゼント: 所有権は受取人、支払い記録は贈った人
+    if (session.metadata && session.metadata.type === 'gift') {
+      try {
+        await applyGiftPayment(session);
+      } catch (error) {
+        console.error('Error processing gift payment:', error);
       }
       return res.json({ received: true });
     }

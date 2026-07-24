@@ -139,6 +139,21 @@
             text-decoration: none;
         }
         .btn-purchase:hover { background: #4a8a47; color: #FFFFFF; }
+        .btn-gift {
+            background: transparent;
+            color: var(--color-accent);
+            border: 1px solid var(--color-accent);
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-gift:hover { background: var(--color-accent); color: #FFFFFF; }
+        .gift-suggest { max-height: 220px; overflow-y: auto; }
         .collab-request-buttons { display: flex; gap: var(--spacing-sm); flex-wrap: wrap; }
         .btn-collab-request {
             background: transparent; color: var(--color-accent); border: 1px solid var(--color-accent);
@@ -385,6 +400,10 @@
                             <i class="fas fa-plus-circle"></i>
                             <span id="btnGetFreeText" data-i18n="workDetail.getFree">Get Free</span>
                         </button>
+                        <button class="btn-gift" id="btnGift" onclick="openGiftModal()" style="display:none;">
+                            <i class="fas fa-gift"></i>
+                            <span id="btnGiftText">Gift this work</span>
+                        </button>
                         <a class="btn-read" id="btnReadNow" href="#" style="display:none;">
                             <i class="fas fa-book-open"></i>
                             <span id="btnReadText" data-i18n="workDetail.readNow">Read Now</span>
@@ -488,6 +507,45 @@
         </div>
     </main>
 
+    <!-- ========== プレゼント用モーダル ========== -->
+    <div class="modal fade" id="giftModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-gift me-2" style="color:var(--color-accent);"></i><span id="giftModalTitle">Gift this work</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted" style="font-size:0.87rem;" id="giftIntro"></p>
+
+                    <div class="mb-3 position-relative">
+                        <label class="form-label" for="giftRecipient" id="giftRecipientLabel">Recipient</label>
+                        <input type="text" class="form-control" id="giftRecipient" autocomplete="off">
+                        <div class="list-group position-absolute w-100 shadow gift-suggest" id="giftSuggest" style="display:none; z-index:10;"></div>
+                        <div class="form-text" id="giftRecipientHelp"></div>
+                        <div class="mt-2" id="giftSelected" style="display:none;">
+                            <span class="badge bg-success"><i class="fas fa-check me-1"></i><span id="giftSelectedName"></span></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="giftMessage" id="giftMessageLabel">Message (optional)</label>
+                        <textarea class="form-control" id="giftMessage" rows="3" maxlength="500"></textarea>
+                    </div>
+
+                    <div class="alert alert-light border" style="font-size:0.83rem;" id="giftNote"></div>
+                    <div class="alert alert-danger" id="giftError" style="display:none; font-size:0.85rem;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" id="giftCancelBtn">Cancel</button>
+                    <button type="button" class="btn-purchase" id="giftSubmitBtn" onclick="submitGift()">
+                        <i class="fas fa-credit-card"></i><span id="giftSubmitText">Continue to payment</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -513,6 +571,17 @@
             free: { en: 'Free', ja: '無料', zh: '免费', es: 'Gratis', fr: 'Gratuit', de: 'Kostenlos', ko: '무료', ar: 'مجاني', pt: 'Grátis', it: 'Gratuito' },
             purchase: { en: 'Purchase', ja: '購入する', zh: '购买', es: 'Comprar', fr: 'Acheter', de: 'Kaufen', ko: '구매', ar: 'شراء', pt: 'Comprar', it: 'Acquista' },
             getFree: { en: 'Get Free', ja: '無料で入手', zh: '免费获取', es: 'Obtener gratis', fr: 'Obtenir gratuitement', de: 'Kostenlos erhalten', ko: '무료로 받기', ar: 'احصل مجانًا', pt: 'Obter grátis', it: 'Ottieni Gratis' },
+            giftThis: { en: 'Gift this work', ja: 'プレゼントする', zh: '赠送这部作品', es: 'Regalar esta obra', fr: 'Offrir cette œuvre', de: 'Dieses Werk verschenken', ko: '이 작품 선물하기', ar: 'أهدِ هذا العمل', pt: 'Presentear esta obra', it: 'Regala questa opera' },
+            giftIntro: { en: 'Choose an AuctLect member to give this work to. You pay, and the work appears in their library.', ja: 'この作品を贈る相手（AuctLect利用者）を選んでください。お支払いはあなた、作品は相手のライブラリに追加されます。', zh: '请选择要赠送的AuctLect用户。由您付款，作品将加入对方的书库。', es: 'Elige a un miembro de AuctLect para regalarle esta obra. Tú pagas y la obra aparece en su biblioteca.', fr: "Choisissez un membre AuctLect à qui offrir cette œuvre. Vous payez et l'œuvre apparaît dans sa bibliothèque.", de: 'Wählen Sie ein AuctLect-Mitglied, dem Sie dieses Werk schenken möchten. Sie zahlen, das Werk erscheint in dessen Bibliothek.', ko: '이 작품을 선물할 AuctLect 회원을 선택하세요. 결제는 회원님이 하고, 작품은 상대방의 라이브러리에 추가됩니다.', ar: 'اختر عضوًا في AuctLect لإهدائه هذا العمل. أنت تدفع، ويظهر العمل في مكتبته.', pt: 'Escolha um membro do AuctLect para presentear. Você paga e a obra aparece na biblioteca dele.', it: 'Scegli un membro AuctLect a cui regalare questa opera. Paghi tu e l\'opera appare nella sua libreria.' },
+            giftRecipient: { en: 'Recipient', ja: '贈る相手', zh: '收件人', es: 'Destinatario', fr: 'Destinataire', de: 'Empfänger', ko: '받는 사람', ar: 'المستلم', pt: 'Destinatário', it: 'Destinatario' },
+            giftRecipientHelp: { en: 'Search by pen name, or type their full email address.', ja: 'ペンネームで検索、またはメールアドレスを正確に入力してください。', zh: '可用笔名搜索，或输入完整的电子邮件地址。', es: 'Busca por seudónimo o escribe su correo completo.', fr: 'Recherchez par nom de plume ou saisissez son adresse e-mail complète.', de: 'Nach Künstlernamen suchen oder die vollständige E-Mail-Adresse eingeben.', ko: '필명으로 검색하거나 이메일 주소를 정확히 입력하세요.', ar: 'ابحث بالاسم المستعار أو اكتب عنوان بريده الإلكتروني كاملًا.', pt: 'Busque pelo pseudônimo ou digite o e-mail completo.', it: 'Cerca per pseudonimo o digita il suo indirizzo email completo.' },
+            giftMessageLabel: { en: 'Message (optional)', ja: 'メッセージ（任意）', zh: '留言（可选）', es: 'Mensaje (opcional)', fr: 'Message (facultatif)', de: 'Nachricht (optional)', ko: '메시지(선택)', ar: 'رسالة (اختياري)', pt: 'Mensagem (opcional)', it: 'Messaggio (facoltativo)' },
+            giftNote: { en: 'The recipient is notified in the app and can read it right away. Your name is shown to them.', ja: '相手にはアプリ内で通知が届き、すぐに読めるようになります。あなたのお名前は相手に表示されます。', zh: '对方会收到应用内通知并可立即阅读。您的名字会显示给对方。', es: 'El destinatario recibe una notificación en la app y puede leerla enseguida. Tu nombre se le muestra.', fr: "Le destinataire reçoit une notification dans l'application et peut lire immédiatement. Votre nom lui est indiqué.", de: 'Der Empfänger wird in der App benachrichtigt und kann sofort lesen. Ihr Name wird angezeigt.', ko: '받는 분에게 앱 내 알림이 가고 바로 읽을 수 있습니다. 보낸 사람 이름이 표시됩니다.', ar: 'يتلقى المستلم إشعارًا داخل التطبيق ويمكنه القراءة فورًا. سيظهر اسمك له.', pt: 'O destinatário recebe uma notificação no app e pode ler na hora. Seu nome é exibido para ele.', it: 'Il destinatario riceve una notifica nell\'app e può leggere subito. Il tuo nome gli viene mostrato.' },
+            giftContinue: { en: 'Continue to payment', ja: '支払いへ進む', zh: '前往付款', es: 'Ir al pago', fr: 'Passer au paiement', de: 'Weiter zur Zahlung', ko: '결제로 진행', ar: 'المتابعة إلى الدفع', pt: 'Ir para o pagamento', it: 'Vai al pagamento' },
+            giftPickRecipient: { en: 'Please choose a recipient from the list.', ja: '候補から贈る相手を選んでください。', zh: '请从列表中选择收件人。', es: 'Elige un destinatario de la lista.', fr: 'Veuillez choisir un destinataire dans la liste.', de: 'Bitte wählen Sie einen Empfänger aus der Liste.', ko: '목록에서 받는 사람을 선택해 주세요.', ar: 'يرجى اختيار مستلم من القائمة.', pt: 'Escolha um destinatário na lista.', it: 'Scegli un destinatario dall\'elenco.' },
+            giftNoUsers: { en: 'No matching users', ja: '一致するユーザーがいません', zh: '没有匹配的用户', es: 'No hay usuarios coincidentes', fr: 'Aucun utilisateur correspondant', de: 'Keine passenden Nutzer', ko: '일치하는 사용자가 없습니다', ar: 'لا يوجد مستخدمون مطابقون', pt: 'Nenhum usuário correspondente', it: 'Nessun utente corrispondente' },
+            giftAlreadyOwned: { en: 'That person already owns this work.', ja: 'その方はすでにこの作品をお持ちです。', zh: '对方已拥有这部作品。', es: 'Esa persona ya tiene esta obra.', fr: 'Cette personne possède déjà cette œuvre.', de: 'Diese Person besitzt dieses Werk bereits.', ko: '그분은 이미 이 작품을 가지고 있습니다.', ar: 'هذا الشخص يمتلك هذا العمل بالفعل.', pt: 'Essa pessoa já possui esta obra.', it: 'Quella persona possiede già questa opera.' },
+            cancel: { en: 'Cancel', ja: 'キャンセル', zh: '取消', es: 'Cancelar', fr: 'Annuler', de: 'Abbrechen', ko: '취소', ar: 'إلغاء', pt: 'Cancelar', it: 'Annulla' },
             readNow: { en: 'Read Now', ja: '読む', zh: '阅读', es: 'Leer ahora', fr: 'Lire maintenant', de: 'Jetzt lesen', ko: '지금 읽기', ar: 'اقرأ الآن', pt: 'Ler agora', it: 'Leggi Ora' },
             inLibrary: { en: 'In Library', ja: 'ライブラリに追加済み', zh: '已在书架', es: 'En biblioteca', fr: 'Dans la bibliothèque', de: 'In Bibliothek', ko: '내 서재', ar: 'في المكتبة', pt: 'Na biblioteca', it: 'In Libreria' },
             wantTranslate: { en: 'I want to translate this work', ja: 'この作品を翻訳したい', zh: '我想翻译这部作品', es: 'Quiero traducir esta obra', fr: 'Je veux traduire cette œuvre', de: 'Ich möchte dieses Werk übersetzen', ko: '이 작품을 번역하고 싶습니다', ar: 'أريد ترجمة هذا العمل', pt: 'Quero traduzir esta obra', it: 'Voglio tradurre questa opera' },
@@ -622,7 +691,8 @@ function escapeHtml(text) {
                         reviews: [],
                         aiTextUsage: w.ai_text_usage || 'none',
                         aiCoverUsage: w.ai_cover_usage || 'none',
-                        cover: w.cover_image || w.cover_image_url || null
+                        cover: w.cover_image || w.cover_image_url || null,
+                        authorId: w.author_id || null
                     };
                 } catch (err) {
                     console.error('Failed to load work:', err);
@@ -679,6 +749,14 @@ function escapeHtml(text) {
             // 言語
             document.getElementById('workLanguage').innerHTML =
                 `<i class="fas fa-globe me-1"></i>${getLanguageName(work.language)}`;
+
+            // プレゼントボタン: 有料作品なら所有の有無に関わらず出す
+            // （持っている本を人に贈るのは自然な行為）。自分の作品と未ログインは除く
+            var myId = (JSON.parse(localStorage.getItem('user') || '{}') || {}).id;
+            var canGift = priceNum > 0 && !!localStorage.getItem('token') &&
+                String(work.authorId || '') !== String(myId || '');
+            document.getElementById('btnGift').style.display = canGift ? 'inline-flex' : 'none';
+            document.getElementById('btnGiftText').textContent = getL(uiText.giftThis);
 
             // 購入/ライブラリボタン
             var owned = isInLibrary(id);
@@ -846,6 +924,127 @@ function escapeHtml(text) {
                 alert(getL({ en: 'Purchase failed: ', ja: '購入処理に失敗しました: ' }) + err.message);
             }
         }
+
+        // ========== プレゼント ==========
+        // 相手は必ず候補リストから選ばせる（打ち間違いで別人に贈らないため）。
+        // 支払い自体は通常購入と同じStripe Checkout
+        let giftRecipientId = null;
+        let giftSearchTimer = null;
+
+        function openGiftModal() {
+            const t = localStorage.getItem('token');
+            if (!t) { window.location.href = 'login.html'; return; }
+            giftRecipientId = null;
+            document.getElementById('giftRecipient').value = '';
+            document.getElementById('giftMessage').value = '';
+            document.getElementById('giftSelected').style.display = 'none';
+            document.getElementById('giftSuggest').style.display = 'none';
+            document.getElementById('giftError').style.display = 'none';
+            applyGiftModalText();
+            new bootstrap.Modal(document.getElementById('giftModal')).show();
+        }
+
+        function applyGiftModalText() {
+            document.getElementById('giftModalTitle').textContent = getL(uiText.giftThis);
+            document.getElementById('giftIntro').textContent = getL(uiText.giftIntro);
+            document.getElementById('giftRecipientLabel').textContent = getL(uiText.giftRecipient);
+            document.getElementById('giftRecipientHelp').textContent = getL(uiText.giftRecipientHelp);
+            document.getElementById('giftMessageLabel').textContent = getL(uiText.giftMessageLabel);
+            document.getElementById('giftNote').textContent = getL(uiText.giftNote);
+            document.getElementById('giftSubmitText').textContent = getL(uiText.giftContinue);
+            document.getElementById('giftCancelBtn').textContent = getL(uiText.cancel);
+        }
+
+        async function searchGiftRecipient(q) {
+            const box = document.getElementById('giftSuggest');
+            const token = localStorage.getItem('token');
+            if (!token || q.length < 2) { box.style.display = 'none'; return; }
+            try {
+                const resp = await fetch((window.API_ORIGIN || '') + '/api/users/lookup/search?q=' + encodeURIComponent(q), {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!resp.ok) { box.style.display = 'none'; return; }
+                const users = (await resp.json()).users || [];
+                if (!users.length) {
+                    box.innerHTML = '<div class="list-group-item text-muted small">' + escapeHtml(getL(uiText.giftNoUsers)) + '</div>';
+                    box.style.display = '';
+                    return;
+                }
+                box.innerHTML = users.map((u, i) =>
+                    '<button type="button" class="list-group-item list-group-item-action" data-idx="' + i + '">' +
+                    '<i class="fas fa-user me-2 text-muted"></i>' + escapeHtml(u.display_name) + '</button>'
+                ).join('');
+                Array.from(box.querySelectorAll('button')).forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const u = users[parseInt(btn.dataset.idx, 10)];
+                        giftRecipientId = u.user_id;
+                        document.getElementById('giftRecipient').value = u.display_name;
+                        document.getElementById('giftSelectedName').textContent = u.display_name;
+                        document.getElementById('giftSelected').style.display = '';
+                        box.style.display = 'none';
+                    });
+                });
+                box.style.display = '';
+            } catch (e) {
+                box.style.display = 'none';
+            }
+        }
+
+        async function submitGift() {
+            const err = document.getElementById('giftError');
+            err.style.display = 'none';
+            if (!giftRecipientId) {
+                err.textContent = getL(uiText.giftPickRecipient);
+                err.style.display = '';
+                return;
+            }
+            const btn = document.getElementById('giftSubmitBtn');
+            btn.disabled = true;
+            try {
+                const resp = await fetch((window.API_ORIGIN || '') + '/api/payments/create-checkout-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    },
+                    body: JSON.stringify({
+                        workId: getWorkIdFromUrl(),
+                        giftTo: giftRecipientId,
+                        giftMessage: document.getElementById('giftMessage').value
+                    })
+                });
+                const data = await resp.json();
+                if (!resp.ok) {
+                    throw new Error(data.code === 'GIFT_ALREADY_OWNED'
+                        ? getL(uiText.giftAlreadyOwned)
+                        : (data.error || ('HTTP ' + resp.status)));
+                }
+                window.location.href = data.url; // Stripeの決済ページへ
+            } catch (e) {
+                err.textContent = e.message;
+                err.style.display = '';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // モーダルを開いたまま言語を変えても文言が追従するように
+        document.addEventListener('languageChanged', function () {
+            if (document.getElementById('giftModal').classList.contains('show')) applyGiftModalText();
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const input = document.getElementById('giftRecipient');
+            if (!input) return;
+            input.addEventListener('input', function () {
+                // 入力し直したら選択を解除（表示名だけ残って別人に贈るのを防ぐ）
+                giftRecipientId = null;
+                document.getElementById('giftSelected').style.display = 'none';
+                clearTimeout(giftSearchTimer);
+                const q = this.value.trim();
+                giftSearchTimer = setTimeout(() => searchGiftRecipient(q), 250);
+            });
+        });
 
         function getFreeWork() {
             const id = getWorkIdFromUrl();
