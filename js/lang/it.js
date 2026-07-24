@@ -464,6 +464,7 @@ window.translations.it = {
         requestReview: 'Richiedi Revisione Professionale'
     },
     profile: {
+        payoutFaqLink: 'Sul ricevimento dei ricavi (Assistenza)',
         labelBeneficiaryAddress: 'Indirizzo del destinatario (facoltativo — obbligatorio per i bonifici in USD)',
         labelAccountType: 'Tipo di conto (Giappone / USA / Brasile, ecc.)',
         sectionPayout: 'Conto di accredito (ricavi)',
@@ -1079,6 +1080,12 @@ window.translations.it = {
         createAccount: 'Crea Account Autore'
     },
     support: {
+        help: {
+            pageTitle: 'Centro assistenza - AuctLect',
+            title: 'Centro assistenza',
+            subtitle: 'Trova le risposte per categoria o con la ricerca. Se non risolvi, contattaci in fondo a questa pagina.',
+            contactHint: 'Non hai trovato una risposta? Scrivici tramite il modulo di feedback — di solito rispondiamo entro 1–2 giorni lavorativi e le domande frequenti vengono aggiunte a questa pagina.',
+        },
         faq: {
             pageTitle: 'FAQ - AuctLect',
             title: 'FAQ',

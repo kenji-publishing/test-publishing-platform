@@ -165,7 +165,8 @@ router.get('/faq', async (req, res) => {
                 c.name_de as category_name_de,
                 c.name_ko as category_name_ko,
                 c.name_ar as category_name_ar,
-                c.name_pt as category_name_pt
+                c.name_pt as category_name_pt,
+                c.name_it as category_name_it
             FROM faq_items f
             JOIN faq_categories c ON f.category_id = c.id
             WHERE f.is_active = true AND c.is_active = true
@@ -223,7 +224,8 @@ router.get('/faq/search', async (req, res) => {
                 c.name_de as category_name_de,
                 c.name_ko as category_name_ko,
                 c.name_ar as category_name_ar,
-                c.name_pt as category_name_pt
+                c.name_pt as category_name_pt,
+                c.name_it as category_name_it
             FROM faq_items f
             JOIN faq_categories c ON f.category_id = c.id
             WHERE f.is_active = true AND c.is_active = true

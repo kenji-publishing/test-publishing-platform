@@ -464,6 +464,7 @@ window.translations.zh = {
         requestReview: '请求专业审核'
     },
     profile: {
+        payoutFaqLink: '關於收益提領（幫助）',
         labelBeneficiaryAddress: '收款人地址（選填；以美元收款時必填）',
         labelAccountType: '帳戶類型（日本／美國／巴西等帳戶）',
         sectionPayout: '收款帳戶（收益提領）',
@@ -1079,6 +1080,12 @@ window.translations.zh = {
         createAccount: '创建作者账户'
     },
     support: {
+        help: {
+            pageTitle: '幫助中心 - AuctLect',
+            title: '幫助中心',
+            subtitle: '可依分類或搜尋尋找解決方法。若仍未解決，請從頁面底部與我們聯繫。',
+            contactHint: '找不到答案嗎？請透過意見回饋表單與我們聯繫。我們通常會在1〜2個工作天內回覆，常見問題也會新增到本頁。',
+        },
         faq: {
             pageTitle: '常见问题 - AuctLect',
             title: '常见问题',

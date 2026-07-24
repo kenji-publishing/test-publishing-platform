@@ -445,8 +445,21 @@
                 pt:'Os métodos de pagamento disponíveis são mostrados na página de pagamento conforme sua moeda e região.',
                 it:'I metodi di pagamento disponibili vengono mostrati nella pagina di pagamento in base a valuta e regione.'
             };
+            // 決済カテゴリのヘルプへの文脈リンク（疑問が生まれる場所に置く）
+            var links = {
+                en: 'Payment FAQ', ja: '決済のよくある質問', zh: '付款常見問題',
+                es: 'Preguntas sobre pagos', fr: 'FAQ paiement', de: 'Zahlungs-FAQ',
+                ko: '결제 FAQ', ar: 'أسئلة الدفع الشائعة', pt: 'FAQ de pagamento', it: 'FAQ sui pagamenti'
+            };
             var el = document.getElementById('methodsRegionNote');
-            if (el) el.textContent = notes[lang] || notes['en'];
+            if (el) {
+                el.textContent = notes[lang] || notes['en'];
+                var a = document.createElement('a');
+                a.href = 'support/help.html#cat-2';
+                a.textContent = links[lang] || links['en'];
+                a.style.marginLeft = '0.4rem';
+                el.appendChild(a);
+            }
         }
         document.addEventListener('DOMContentLoaded', updateMethodsRegionNote);
         document.addEventListener('languageChanged', updateMethodsRegionNote);

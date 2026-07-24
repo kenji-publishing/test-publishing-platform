@@ -464,6 +464,7 @@ window.translations.ko = {
         requestReview: '전문 검토 요청'
     },
     profile: {
+        payoutFaqLink: '수익 수령 안내 (도움말)',
         labelBeneficiaryAddress: '수취인 주소 (선택 사항 — USD 수령 시 필수)',
         labelAccountType: '계좌 종류 (일본/미국/브라질 등)',
         sectionPayout: '수령 계좌 (수익 지급)',
@@ -1079,6 +1080,12 @@ window.translations.ko = {
         createAccount: '작가 계정 만들기'
     },
     support: {
+        help: {
+            pageTitle: '도움말 센터 - AuctLect',
+            title: '도움말 센터',
+            subtitle: '카테고리나 검색으로 해결 방법을 찾아보세요. 해결되지 않으면 페이지 하단에서 문의해 주세요.',
+            contactHint: '답을 찾지 못하셨나요? 피드백 양식으로 문의해 주세요. 보통 1~2영업일 내에 답변드리며, 자주 묻는 질문은 이 페이지에 추가됩니다.',
+        },
         faq: {
             pageTitle: 'FAQ - AuctLect',
             title: 'FAQ',

@@ -464,6 +464,7 @@ window.translations.fr = {
         requestReview: 'Demander une Révision Professionnelle'
     },
     profile: {
+        payoutFaqLink: 'À propos du versement des revenus (Aide)',
         labelBeneficiaryAddress: 'Adresse du bénéficiaire (facultative — obligatoire pour les virements en USD)',
         labelAccountType: 'Type de compte (Japon / États-Unis / Brésil, etc.)',
         sectionPayout: 'Compte de versement (revenus)',
@@ -1079,6 +1080,12 @@ window.translations.fr = {
         createAccount: 'Créer un Compte Auteur'
     },
     support: {
+        help: {
+            pageTitle: 'Centre d\'aide - AuctLect',
+            title: 'Centre d\'aide',
+            subtitle: 'Trouvez des réponses par catégorie ou via la recherche. Si le problème persiste, contactez-nous en bas de page.',
+            contactHint: 'Vous n\'avez pas trouvé de réponse ? Écrivez-nous via le formulaire de commentaires — nous répondons généralement sous 1 à 2 jours ouvrés, et les questions fréquentes sont ajoutées à cette page.',
+        },
         faq: {
             pageTitle: 'FAQ - AuctLect',
             title: 'FAQ',

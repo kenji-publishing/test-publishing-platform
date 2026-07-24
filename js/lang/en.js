@@ -464,6 +464,7 @@ window.translations.en = {
         requestReview: 'Request Professional Review'
     },
     profile: {
+        payoutFaqLink: 'About receiving revenue (Help)',
         labelBeneficiaryAddress: 'Recipient address (optional — required for USD transfers)',
         labelAccountType: 'Account type (Japan / US / Brazil, etc.)',
         sectionPayout: 'Payout Account (Revenue)',
@@ -1079,6 +1080,12 @@ window.translations.en = {
         createAccount: 'Create Author Account'
     },
     support: {
+        help: {
+            pageTitle: 'Help Center - AuctLect',
+            title: 'Help Center',
+            subtitle: 'Find answers by category or search below. If you cannot solve it, contact us at the bottom of this page.',
+            contactHint: 'Could not find an answer? Send us a message via the feedback form — we usually reply within 1–2 business days, and common questions are added to this page.',
+        },
         faq: {
             pageTitle: 'FAQ - AuctLect',
             title: 'FAQ',

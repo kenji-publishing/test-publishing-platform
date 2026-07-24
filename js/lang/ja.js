@@ -464,6 +464,7 @@ window.translations.ja = {
         requestReview: 'プロレビューを依頼'
     },
     profile: {
+        payoutFaqLink: '収益の受け取りについて（ヘルプ）',
         labelBeneficiaryAddress: '受取人住所（任意・米ドルでの受け取りは必須）',
         labelAccountType: '口座種別（日本・米国・ブラジル等の口座）',
         sectionPayout: '受取口座（収益の受け取り）',
@@ -1079,6 +1080,12 @@ window.translations.ja = {
         createAccount: '著者アカウントを作成'
     },
     support: {
+        help: {
+            pageTitle: 'ヘルプセンター - AuctLect',
+            title: 'ヘルプセンター',
+            subtitle: 'カテゴリや検索で解決方法を探せます。解決しない場合は、ページ下部からご連絡ください。',
+            contactHint: '答えが見つかりませんでしたか？フィードバックフォームからご連絡ください。通常1〜2営業日以内に返信し、よくある質問はこのページに追加していきます。',
+        },
         faq: {
             pageTitle: 'FAQ - AuctLect',
             title: 'FAQ',

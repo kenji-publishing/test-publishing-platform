@@ -370,7 +370,7 @@ function renderNavbar(options) {
     var toolsActive = toolsPages.indexOf(activePage) !== -1;
 
     // Support dropdown items
-    var supportPages = ['faq', 'troubleshoot', 'support', 'contact', 'tickets'];
+    var supportPages = ['help', 'faq', 'troubleshoot', 'support', 'contact', 'tickets'];
     var supportActive = supportPages.indexOf(activePage) !== -1;
 
     var html = '';
@@ -485,7 +485,7 @@ function renderNavbar(options) {
     html += '<a class="nav-link dropdown-toggle' + (supportActive ? ' active' : '') + '" href="#" role="button" data-bs-toggle="dropdown">';
     html += '<i class="fas fa-headset me-1"></i> <span id="navSupportPC">' + getL(navText.support) + '</span></a>';
     html += '<ul class="dropdown-menu">';
-    html += '<li><a class="dropdown-item" href="' + p('support/troubleshoot.html') + '"><i class="fas fa-tools me-2"></i><span id="navTroubleshootPC">' + getL(navText.troubleshooting) + '</span></a></li>';
+    html += '<li><a class="dropdown-item" href="' + p('support/help.html') + '"><i class="fas fa-life-ring me-2"></i><span id="navHelpPC">' + getL(navText.help) + '</span></a></li>';
     html += '</ul></li>';
 
     // Messages (auth) with unread badge
@@ -544,8 +544,8 @@ function renderNavbar(options) {
 
     // Support (mobile - flat links)
     html += '<li class="nav-item">';
-    html += '<a class="nav-link' + ac('troubleshoot') + '" href="' + p('support/troubleshoot.html') + '">';
-    html += '<i class="fas fa-tools me-2"></i><span id="navTroubleshootMobile">' + getL(navText.troubleshooting) + '</span></a></li>';
+    html += '<a class="nav-link' + ac('help') + '" href="' + p('support/help.html') + '">';
+    html += '<i class="fas fa-life-ring me-2"></i><span id="navHelpMobile">' + getL(navText.help) + '</span></a></li>';
 
     html += '<li><hr class="dropdown-divider"></li>';
 
@@ -620,7 +620,7 @@ function renderFooter(options) {
     html += '<div class="d-flex flex-wrap justify-content-between align-items-center">';
     html += '<p class="small mb-0" id="footerCopyright">&copy; 2025 AuctLect. ' + getL(navText.allRights) + '</p>';
     html += '<div class="d-flex gap-3">';
-    html += '<a href="' + p('support/faq.html') + '" class="text-secondary" id="footerHelp">' + getL(navText.help) + '</a>';
+    html += '<a href="' + p('support/help.html') + '" class="text-secondary" id="footerHelp">' + getL(navText.help) + '</a>';
     html += '<a href="' + p('terms.html') + '" class="text-secondary" id="footerTerms">' + getL(navText.terms) + '</a>';
     html += '<a href="' + p('privacy.html') + '" class="text-secondary" id="footerPrivacy">' + getL(navText.privacy) + '</a>';
     html += '</div></div></div></footer>';
@@ -664,7 +664,7 @@ function updateNavText() {
         navFindEditorsPC: navText.findEditors,
         navSupportPC: navText.support,
         navFaqPC: navText.faq,
-        navTroubleshootPC: navText.troubleshooting,
+        navHelpPC: navText.help,
         navMessagesPC: navText.messages,
         navSignInPC: navText.signIn,
         navGetStartedPC: navText.getStarted,
@@ -682,7 +682,7 @@ function updateNavText() {
         navFindTranslatorsMobile: navText.findTranslators,
         navFindEditorsMobile: navText.findEditors,
         navFaqMobile: navText.faq,
-        navTroubleshootMobile: navText.troubleshooting,
+        navHelpMobile: navText.help,
         navMessagesMobile: navText.messages,
         navSignInMobile: navText.signIn,
         navGetStartedMobile: navText.getStarted

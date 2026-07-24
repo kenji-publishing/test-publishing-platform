@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+    <title data-i18n="support.help.pageTitle">Help Center - AuctLect</title>
+    <script src="../../js/config.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="../../css/variables.css" rel="stylesheet">
+    <link href="../../css/style-new.css" rel="stylesheet">
+    <link href="../../css/components.css" rel="stylesheet">
+    <link href="../../css/navbar.css" rel="stylesheet">
+    <link href="../../css/mobile-fixes.css" rel="stylesheet">
+    <style>
+        .help-hero { background: linear-gradient(135deg, rgba(139,115,85,0.12), rgba(139,115,85,0.04)); padding: 2.5rem 0 2rem; text-align: center; }
+        .help-hero h1 { font-family: var(--font-serif); font-size: 1.9rem; margin-bottom: 0.4rem; }
+        .help-hero p { color: var(--color-text-secondary); margin-bottom: 1.25rem; }
+        .help-search { max-width: 560px; margin: 0 auto; position: relative; }
+        .help-search input { width: 100%; padding: 0.8rem 2.8rem 0.8rem 2.6rem; border: 2px solid var(--color-border); border-radius: 999px; font-size: 1rem; background: #fff; }
+        .help-search input:focus { outline: none; border-color: var(--color-accent); }
+        .help-search .search-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--color-text-secondary); }
+        .help-search .clear-btn { position: absolute; right: 0.7rem; top: 50%; transform: translateY(-50%); border: none; background: none; color: var(--color-text-secondary); cursor: pointer; padding: 0.3rem 0.5rem; display: none; }
+        .help-main { max-width: 860px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+        .cat-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 1.75rem; }
+        .cat-chip { border: 1px solid var(--color-border); background: #fff; border-radius: 999px; padding: 0.35rem 0.9rem; font-size: 0.85rem; cursor: pointer; color: var(--color-text); }
+        .cat-chip .cnt { color: var(--color-text-secondary); font-size: 0.75rem; margin-left: 0.25rem; }
+        .cat-chip.active { background: var(--color-accent); border-color: var(--color-accent); color: #fff; }
+        .cat-chip.active .cnt { color: rgba(255,255,255,0.8); }
+        .cat-section { margin-bottom: 1.75rem; scroll-margin-top: 90px; }
+        .cat-section h2 { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.6rem; color: var(--color-accent); display: flex; align-items: center; gap: 0.5rem; }
+        .qa-item { border: 1px solid var(--color-border); border-radius: 10px; background: #fff; margin-bottom: 0.6rem; overflow: hidden; }
+        .qa-q { width: 100%; text-align: left; border: none; background: none; padding: 0.85rem 1rem; font-size: 0.95rem; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; color: var(--color-text); }
+        .qa-q .chev { transition: transform 0.2s; color: var(--color-text-secondary); flex-shrink: 0; }
+        .qa-item.open .qa-q .chev { transform: rotate(180deg); }
+        .qa-a { display: none; padding: 0 1rem 0.9rem; color: var(--color-text-secondary); font-size: 0.92rem; line-height: 1.8; white-space: pre-line; }
+        .qa-item.open .qa-a { display: block; }
+        .qa-vote { font-size: 0.78rem; color: var(--color-text-secondary); margin-top: 0.6rem; }
+        .qa-vote button { border: 1px solid var(--color-border); background: #fff; border-radius: 6px; padding: 0.1rem 0.7rem; margin-left: 0.4rem; cursor: pointer; font-size: 0.78rem; }
+        .qa-vote button:hover { border-color: var(--color-accent); color: var(--color-accent); }
+        .help-empty { text-align: center; color: var(--color-text-secondary); padding: 2rem 0; display: none; }
+        .contact-panel { background: rgba(139,115,85,0.08); border: 1px solid rgba(139,115,85,0.3); border-radius: 12px; padding: 1.5rem; text-align: center; margin-top: 2.5rem; }
+        .contact-panel h3 { font-size: 1.05rem; margin-bottom: 0.4rem; }
+        .contact-panel p { color: var(--color-text-secondary); font-size: 0.88rem; margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+<div id="navbar-container"></div>
+
+<section class="help-hero">
+    <div class="container">
+        <h1><i class="fas fa-life-ring me-2" style="color: var(--color-accent);"></i><span data-i18n="support.help.title">Help Center</span></h1>
+        <p data-i18n="support.help.subtitle">Find answers by category or search below.</p>
+        <div class="help-search">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="helpSearch" data-i18n-placeholder="support.faq.searchPlaceholder" placeholder="Search for answers...">
+            <button type="button" class="clear-btn" id="clearSearch" onclick="clearHelpSearch()"><i class="fas fa-times"></i></button>
+        </div>
+    </div>
+</section>
+
+<main class="help-main">
+    <div class="cat-chips" id="catChips"></div>
+    <div id="helpContent"></div>
+    <div class="help-empty" id="helpEmpty"></div>
+    <div id="helpError" class="alert alert-warning" style="display:none;"></div>
+
+    <!-- 問い合わせ導線はページ末尾にのみ置く（自己解決を先に通す動線） -->
+    <div class="contact-panel">
+        <h3><i class="fas fa-comments me-2"></i><span data-i18n="support.faq.notResolved">Still have questions?</span></h3>
+        <p data-i18n="support.help.contactHint">Could not find an answer? Send us a message via the feedback form.</p>
+        <a href="../feedback/index.html" class="btn btn-primary-custom" data-i18n="support.troubleshoot.contactSupport">Contact Support</a>
+    </div>
+</main>
+
+<div id="footer-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../js/i18n.js"></script>
+<script src="../../js/navbar.js"></script>
+<script src="../../js/lang/ja.js"></script>
+<script src="../../js/lang/en.js"></script>
+<script src="../../js/lang/zh.js"></script>
+<script src="../../js/lang/es.js"></script>
+<script src="../../js/lang/fr.js"></script>
+<script src="../../js/lang/de.js"></script>
+<script src="../../js/lang/ko.js"></script>
+<script src="../../js/lang/ar.js"></script>
+<script src="../../js/lang/pt.js"></script>
+<script src="../../js/lang/it.js"></script>
+
+<script>
+// ========== ヘルプセンター ==========
+// FAQ+トラブルシューティングを統合した1ページ。データは faq_items（DB・10言語）。
+// 検索はクライアント側の絞り込み（件数が少ないため即時応答を優先）
+const API_BASE = (window.API_ORIGIN || '') + '/api';
+let helpCats = [];   // [{id, name_xx, ...}]
+let helpItems = [];  // [{id, category_id, question_xx, answer_xx, ...}]
+let activeCat = 0;   // 0 = すべて
+let searchTerm = '';
+
+function lang() {
+    try { if (typeof getCurrentLanguage === 'function') return getCurrentLanguage(); } catch (e) {}
+    return localStorage.getItem('preferredLanguage') || 'en';
+}
+// DBの多言語カラムから現在言語→英語の順で取得
+function local(row, field) {
+    return row[field + '_' + lang()] || row[field + '_en'] || '';
+}
+function t(key, fallback) {
+    try { if (window.i18n && i18n.t) { const v = i18n.t(key); if (v && v !== key) return v; } } catch (e) {}
+    return fallback;
+}
+function esc(s) { const d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+
+async function loadHelp() {
+    try {
+        const [catResp, faqResp] = await Promise.all([
+            fetch(`${API_BASE}/support/faq/categories`),
+            fetch(`${API_BASE}/support/faq`)
+        ]);
+        const catData = await catResp.json();
+        const faqData = await faqResp.json();
+        if (!catResp.ok || !faqResp.ok) throw new Error('load failed');
+        helpCats = (catData.categories || []).filter(c => parseInt(c.item_count, 10) > 0);
+        helpItems = faqData.faqs || [];
+        renderHelp();
+        // #cat-2 等のアンカーで該当カテゴリへスクロール（決済画面などからの文脈リンク用）
+        if (location.hash) {
+            const el = document.getElementById(location.hash.slice(1));
+            if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth' }), 150);
+        }
+    } catch (e) {
+        document.getElementById('helpError').textContent = t('support.faq.loadError', 'Unable to load. Please try again later.');
+        document.getElementById('helpError').style.display = '';
+    }
+}
+
+function matches(item) {
+    if (activeCat && item.category_id !== activeCat) return false;
+    if (!searchTerm) return true;
+    const hay = (local(item, 'question') + ' ' + local(item, 'answer') + ' ' + (item.keywords || '')).toLowerCase();
+    return hay.includes(searchTerm);
+}
+
+function renderHelp() {
+    // カテゴリチップ
+    const chips = document.getElementById('catChips');
+    const allLabel = t('support.faq.allCategories', 'All Categories');
+    let html = `<button class="cat-chip${activeCat === 0 ? ' active' : ''}" data-cat="0">${esc(allLabel)}</button>`;
+    for (const c of helpCats) {
+        html += `<button class="cat-chip${activeCat === c.id ? ' active' : ''}" data-cat="${c.id}">${esc(local(c, 'name'))}<span class="cnt">${c.item_count}</span></button>`;
+    }
+    chips.innerHTML = html;
+    chips.querySelectorAll('.cat-chip').forEach(btn => {
+        btn.addEventListener('click', () => {
+            activeCat = parseInt(btn.dataset.cat, 10);
+            renderHelp();
+        });
+    });
+
+    // カテゴリごとのQ&A
+    const content = document.getElementById('helpContent');
+    let out = '';
+    let shown = 0;
+    for (const c of helpCats) {
+        const items = helpItems.filter(i => i.category_id === c.id && matches(i));
+        if (!items.length) continue;
+        out += `<section class="cat-section" id="cat-${c.id}"><h2><i class="fas fa-folder-open"></i>${esc(local(c, 'name'))}</h2>`;
+        for (const item of items) {
+            shown++;
+            out += `
+            <div class="qa-item" data-id="${item.id}">
+                <button type="button" class="qa-q">${esc(local(item, 'question'))}<i class="fas fa-chevron-down chev"></i></button>
+                <div class="qa-a">${esc(local(item, 'answer'))}
+                    <div class="qa-vote" data-voted="0">
+                        ${esc(t('support.faq.wasHelpful', 'Was this helpful?'))}
+                        <button type="button" data-vote="yes">${esc(t('support.faq.yes', 'Yes'))}</button>
+                        <button type="button" data-vote="no">${esc(t('support.faq.no', 'No'))}</button>
+                    </div>
+                </div>
+            </div>`;
+        }
+        out += '</section>';
+    }
+    content.innerHTML = out;
+
+    // 開閉と「役に立ちましたか」投票
+    content.querySelectorAll('.qa-q').forEach(btn => {
+        btn.addEventListener('click', () => btn.parentElement.classList.toggle('open'));
+    });
+    content.querySelectorAll('.qa-vote button').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const wrap = btn.closest('.qa-vote');
+            if (wrap.dataset.voted === '1') return;
+            wrap.dataset.voted = '1';
+            const id = btn.closest('.qa-item').dataset.id;
+            try {
+                await fetch(`${API_BASE}/support/faq/${id}/vote`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ helpful: btn.dataset.vote === 'yes' })
+                });
+            } catch (e) { /* 投票は補助機能。失敗しても黙って続行 */ }
+            wrap.textContent = t('support.faq.thanksFeedback', 'Thank you for your feedback!');
+        });
+    });
+
+    // 検索結果ゼロの表示
+    const empty = document.getElementById('helpEmpty');
+    if (shown === 0 && (searchTerm || activeCat)) {
+        empty.textContent = t('support.faq.noResults', 'No results found for') + (searchTerm ? ' "' + searchTerm + '"' : '');
+        empty.style.display = '';
+    } else {
+        empty.style.display = 'none';
+    }
+}
+
+function clearHelpSearch() {
+    const input = document.getElementById('helpSearch');
+    input.value = '';
+    searchTerm = '';
+    document.getElementById('clearSearch').style.display = 'none';
+    renderHelp();
+}
+
+document.getElementById('helpSearch').addEventListener('input', function () {
+    searchTerm = this.value.trim().toLowerCase();
+    document.getElementById('clearSearch').style.display = searchTerm ? '' : 'none';
+    renderHelp();
+});
+
+// 言語切替で全体を描き直す（DBデータの言語カラムも切り替わる）
+document.addEventListener('languageChanged', () => { if (helpItems.length) renderHelp(); });
+
+document.addEventListener('DOMContentLoaded', loadHelp);
+</script>
+</body>
+</html>

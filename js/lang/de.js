@@ -464,6 +464,7 @@ window.translations.de = {
         requestReview: 'Professionelle Überprüfung Anfordern'
     },
     profile: {
+        payoutFaqLink: 'Zur Auszahlung der Einnahmen (Hilfe)',
         labelBeneficiaryAddress: 'Adresse des Empfängers (optional — für USD-Überweisungen erforderlich)',
         labelAccountType: 'Kontoart (Japan / USA / Brasilien usw.)',
         sectionPayout: 'Auszahlungskonto (Einnahmen)',
@@ -1079,6 +1080,12 @@ window.translations.de = {
         createAccount: 'Autor-Konto Erstellen'
     },
     support: {
+        help: {
+            pageTitle: 'Hilfe-Center - AuctLect',
+            title: 'Hilfe-Center',
+            subtitle: 'Finden Sie Antworten nach Kategorie oder über die Suche. Wenn das nicht hilft, kontaktieren Sie uns unten auf dieser Seite.',
+            contactHint: 'Keine Antwort gefunden? Schreiben Sie uns über das Feedback-Formular — wir antworten in der Regel innerhalb von 1–2 Werktagen, und häufige Fragen werden dieser Seite hinzugefügt.',
+        },
         faq: {
             pageTitle: 'FAQ - AuctLect',
             title: 'FAQ',
