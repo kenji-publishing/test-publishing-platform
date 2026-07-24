@@ -23,4 +23,9 @@
     // the operation succeeded.
     window.DEMO_MODE = location.protocol === 'file:' ||
         new URLSearchParams(location.search).has('demo');
+
+    // Google Sign-In のクライアントID。
+    // これは公開情報（ブラウザに配信される）であり、秘密ではない。
+    // 対になるクライアントシークレットはこの方式では使わない（IDトークン検証方式）。
+    window.GOOGLE_CLIENT_ID = '215577027503-59q469f71p9efgig1993hjeg4n0euqna.apps.googleusercontent.com';
 })();

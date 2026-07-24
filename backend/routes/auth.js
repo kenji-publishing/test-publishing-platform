@@ -14,6 +14,7 @@ const db = require('../config/database');
 const { authenticate } = require('../middleware/auth');
 const { sendEmail } = require('../config/email');
 const { loginLimiter, registerLimiter, emailRequestLimiter } = require('../middleware/rateLimits');
+const { OAuth2Client } = require('google-auth-library');
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:8000';
 const VERIFY_LINK_EXPIRY = 24 * 60 * 60 * 1000; // 確認リンクは24時間有効
@@ -194,6 +195,16 @@ router.post('/login',
         });
       }
       
+      // Googleのみで登録したアカウントはパスワードを持たない（password_hash IS NULL）。
+      // bcrypt.compare に null を渡すと例外になるため、その前に案内を返す
+      if (!user.password_hash) {
+        return res.status(403).json({
+          error: 'Google account',
+          code: 'USE_GOOGLE_SIGN_IN',
+          message: 'This account was created with Google. Please use "Sign in with Google".'
+        });
+      }
+
       // Verify password
       const isValidPassword = await bcrypt.compare(password, user.password_hash);
       
@@ -255,6 +266,132 @@ router.post('/login',
     }
   }
 );
+
+/**
+ * POST /api/auth/google
+ * Googleでログイン / 新規登録（Google Identity Services のIDトークン方式）
+ *
+ * フロントが受け取ったIDトークン(credential)をここで検証する。改ざんは
+ * Googleの署名検証で弾かれ、audienceが自分のクライアントIDであることも
+ * verifyIdToken が確認するため、他サイト向けトークンの使い回しもできない。
+ * クライアントシークレットは使わない（リダイレクト方式ではないため）。
+ *
+ * 紐付けの方針:
+ *   1. google_id 一致 → そのアカウントでログイン
+ *   2. メール一致 → 既存アカウントにgoogle_idを紐付け（Googleが確認済みの
+ *      メールに限る。乗っ取り防止のためemail_verifiedが必須）
+ *   3. どちらも無ければ新規作成（パスワード無し・メール確認済み扱い）
+ */
+router.post('/google', loginLimiter, async (req, res) => {
+  try {
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    if (!clientId) {
+      return res.status(503).json({ error: 'Google Sign-In is not configured on this server' });
+    }
+    const { credential } = req.body;
+    if (!credential) {
+      return res.status(400).json({ error: 'credential is required' });
+    }
+
+    // ===== IDトークンの検証（署名・有効期限・audienceをまとめて確認） =====
+    let payload;
+    try {
+      const ticket = await new OAuth2Client(clientId).verifyIdToken({
+        idToken: credential,
+        audience: clientId
+      });
+      payload = ticket.getPayload();
+    } catch (e) {
+      console.warn('Google token verification failed:', e.message);
+      return res.status(401).json({ error: 'Invalid Google credential' });
+    }
+
+    // Google側で未確認のメールは信用しない（他人のメールで登録される恐れ）
+    if (!payload || !payload.email || !payload.email_verified) {
+      return res.status(401).json({ error: 'Google account email is not verified' });
+    }
+
+    const googleId = payload.sub;
+    const email = String(payload.email).toLowerCase();
+    const firstName = payload.given_name || (payload.name || '').split(' ')[0] || 'User';
+    const lastName = payload.family_name || '';
+
+    // ===== 1. google_id で既存アカウントを探す =====
+    let user = (await db.query(
+      `SELECT u.user_id, u.email, u.first_name, u.last_name, u.pen_name,
+              u.account_status, u.role, ur.role_type
+       FROM users u
+       LEFT JOIN user_roles ur ON u.user_id = ur.user_id AND ur.is_active = true
+       WHERE u.google_id = $1`,
+      [googleId]
+    )).rows[0];
+
+    // ===== 2. 同じメールの既存アカウントに紐付け =====
+    if (!user) {
+      user = (await db.query(
+        `UPDATE users SET google_id = $1,
+                          email_verified = true,
+                          updated_at = CURRENT_TIMESTAMP
+         WHERE LOWER(email) = $2 AND google_id IS NULL
+         RETURNING user_id, email, first_name, last_name, pen_name, account_status, role`,
+        [googleId, email]
+      )).rows[0];
+      if (user) console.log(`Google account linked to existing user: ${user.user_id}`);
+    }
+
+    // ===== 3. 新規作成（パスワード無し・Googleが確認済みなのでメール確認も完了扱い） =====
+    let isNew = false;
+    if (!user) {
+      user = (await db.query(
+        `INSERT INTO users (email, password_hash, first_name, last_name, google_id, email_verified, role)
+         VALUES ($1, NULL, $2, $3, $4, true, 'reader')
+         RETURNING user_id, email, first_name, last_name, pen_name, account_status, role`,
+        [email, firstName, lastName, googleId]
+      )).rows[0];
+      isNew = true;
+      try {
+        await db.query('INSERT INTO user_roles (user_id, role_type) VALUES ($1, $2)', [user.user_id, 'reader']);
+      } catch (e) {
+        console.log('user_roles insert skipped:', e.message);
+      }
+      console.log(`New user created via Google Sign-In: ${user.user_id}`);
+    }
+
+    if (user.account_status && user.account_status !== 'active') {
+      return res.status(403).json({
+        error: 'Account inactive',
+        message: 'Your account has been suspended or deleted'
+      });
+    }
+
+    await db.query('UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE user_id = $1', [user.user_id]);
+
+    // 通常ログインと同じ形のJWT・レスポンス（フロントの保存処理を共用するため）
+    const userRole = user.role || user.role_type || 'reader';
+    const token = jwt.sign(
+      { userId: user.user_id, email: user.email, role: userRole },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    );
+
+    res.json({
+      message: 'Login successful',
+      isNewAccount: isNew,
+      user: {
+        id: user.user_id,
+        email: user.email,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        penName: user.pen_name,
+        role: userRole
+      },
+      token
+    });
+  } catch (error) {
+    console.error('Google Sign-In error:', error);
+    res.status(500).json({ error: 'Google Sign-In failed', message: error.message });
+  }
+});
 
 /**
  * POST /api/auth/resend-verification
@@ -452,6 +589,15 @@ router.put('/password', authenticate, async (req, res) => {
 
     if (userResult.rows.length === 0) {
       return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Googleのみのアカウントは変更元パスワードが無い（別途「パスワードを設定」機能が必要）
+    if (!userResult.rows[0].password_hash) {
+      return res.status(400).json({
+        error: 'Google account',
+        code: 'USE_GOOGLE_SIGN_IN',
+        message: 'This account signs in with Google and has no password to change.'
+      });
     }
 
     const bcrypt = require('bcryptjs');

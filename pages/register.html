@@ -652,8 +652,15 @@
                 </button>
             </form>
 
-            <!-- Social register (Google/Apple) は未実装のダミーだったため削除。
-                 実装する場合はOAuth設定後にここへ戻す -->
+            <!-- Google Sign-In（Google Identity Services のIDトークン方式）。
+                 スクリプトが読めない/未設定の場合はこのブロックごと非表示にする -->
+            <div id="googleBlock" style="display:none;">
+                <div class="divider">
+                    <span data-i18n="register.orSignUpWith">or sign up with</span>
+                </div>
+                <div id="googleBtn" style="display:flex; justify-content:center;"></div>
+                <div id="googleError" class="alert alert-danger mt-3" style="display:none; font-size:0.9rem;"></div>
+            </div>
 
             <!-- Login Link -->
             <div class="login-link">
@@ -794,5 +801,76 @@
     <!-- (Old "Pattern C Navbar JS" block removed: it called the deleted
          updateUIText() and referenced navbar elements that don't exist at
          this point — navbar.js and i18n.js handle all of it now.) -->
+
+    <!-- ========== Google Sign-In ==========
+         login.htmlと同じIDトークン方式。新規・既存どちらでも同じエンドポイントが
+         受け付ける（未登録なら自動でアカウント作成、既存なら紐付けてログイン）。 -->
+    <script>
+    (function () {
+        var L = { ja: 'ja', en: 'en', zh: 'zh_CN', es: 'es', fr: 'fr', de: 'de', ko: 'ko', ar: 'ar', pt: 'pt_BR', it: 'it' };
+
+        function currentLang() {
+            try {
+                if (typeof getCurrentLanguage === 'function') return getCurrentLanguage();
+            } catch (e) {}
+            return localStorage.getItem('preferredLanguage') || 'en';
+        }
+
+        function showError(msg) {
+            var el = document.getElementById('googleError');
+            if (el) { el.textContent = msg; el.style.display = ''; }
+        }
+
+        window.handleGoogleCredential = async function (response) {
+            try {
+                var resp = await fetch((window.API_ORIGIN || '') + '/api/auth/google', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ credential: response.credential })
+                });
+                var data = await resp.json();
+                if (!resp.ok) {
+                    showError(data.message || data.error || 'Google sign-in failed');
+                    return;
+                }
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                window.location.href = 'dashboard.html';
+            } catch (e) {
+                showError('Connection error. Please try again later.');
+            }
+        };
+
+        function initGoogle() {
+            if (!window.google || !google.accounts || !google.accounts.id) return;
+            var clientId = window.GOOGLE_CLIENT_ID;
+            if (!clientId) return;
+            try {
+                google.accounts.id.initialize({
+                    client_id: clientId,
+                    callback: window.handleGoogleCredential
+                });
+                google.accounts.id.renderButton(document.getElementById('googleBtn'), {
+                    theme: 'outline',
+                    size: 'large',
+                    width: 320,
+                    text: 'signup_with',
+                    locale: L[currentLang()] || 'en'
+                });
+                document.getElementById('googleBlock').style.display = '';
+            } catch (e) {
+                console.warn('Google Sign-In init failed:', e);
+            }
+        }
+
+        var s = document.createElement('script');
+        s.src = 'https://accounts.google.com/gsi/client';
+        s.async = true;
+        s.defer = true;
+        s.onload = initGoogle;
+        s.onerror = function () { console.warn('Google Sign-In script could not be loaded'); };
+        document.head.appendChild(s);
+    })();
+    </script>
 </body>
 </html>

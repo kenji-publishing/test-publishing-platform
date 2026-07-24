@@ -523,8 +523,15 @@
                 </button>
             </form>
 
-            <!-- Social login (Google/Apple) は未実装のダミーだったため削除。
-                 実装する場合はOAuth設定後にここへ戻す -->
+            <!-- Google Sign-In（Google Identity Services のIDトークン方式）。
+                 スクリプトが読めない/未設定の場合はこのブロックごと非表示にする -->
+            <div id="googleBlock" style="display:none;">
+                <div class="divider">
+                    <span data-i18n="login.orContinueWith">or continue with</span>
+                </div>
+                <div id="googleBtn" style="display:flex; justify-content:center;"></div>
+                <div id="googleError" class="alert alert-danger mt-3" style="display:none; font-size:0.9rem;"></div>
+            </div>
 
             <!-- Sign Up Link -->
             <div class="signup-link">
@@ -614,6 +621,9 @@
                             alert('再送に失敗しました: ' + e2.message);
                         }
                     }
+                } else if (data.code === 'USE_GOOGLE_SIGN_IN') {
+                    // Googleのみで登録したアカウント（パスワード未設定）
+                    alert('このアカウントはGoogleで登録されています。下の「Googleでログイン」からお進みください。\n\nThis account was created with Google. Please use "Sign in with Google" below.');
                 } else if (data.code === 'RATE_LIMITED') {
                     alert(data.error);
                 } else {
@@ -624,6 +634,80 @@
                 alert('Connection error. Please try again later.');
             }
         });
+    </script>
+
+    <!-- ========== Google Sign-In ==========
+         Google Identity Services のIDトークン方式。ブラウザがGoogleから
+         受け取った署名付きトークンをサーバー(/api/auth/google)が検証する。
+         クライアントIDは公開情報なのでconfig.jsに置いている。 -->
+    <script>
+    (function () {
+        var L = { ja: 'ja', en: 'en', zh: 'zh_CN', es: 'es', fr: 'fr', de: 'de', ko: 'ko', ar: 'ar', pt: 'pt_BR', it: 'it' };
+
+        function currentLang() {
+            try {
+                if (typeof getCurrentLanguage === 'function') return getCurrentLanguage();
+            } catch (e) {}
+            return localStorage.getItem('preferredLanguage') || 'en';
+        }
+
+        function showError(msg) {
+            var el = document.getElementById('googleError');
+            if (el) { el.textContent = msg; el.style.display = ''; }
+        }
+
+        // Googleから受け取ったIDトークンをサーバーで検証してログイン
+        window.handleGoogleCredential = async function (response) {
+            try {
+                var resp = await fetch((window.API_ORIGIN || '') + '/api/auth/google', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ credential: response.credential })
+                });
+                var data = await resp.json();
+                if (!resp.ok) {
+                    showError(data.message || data.error || 'Google sign-in failed');
+                    return;
+                }
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                window.location.href = 'dashboard.html';
+            } catch (e) {
+                showError('Connection error. Please try again later.');
+            }
+        };
+
+        function initGoogle() {
+            if (!window.google || !google.accounts || !google.accounts.id) return;
+            var clientId = window.GOOGLE_CLIENT_ID;
+            if (!clientId) return; // 未設定なら何も表示しない
+            try {
+                google.accounts.id.initialize({
+                    client_id: clientId,
+                    callback: window.handleGoogleCredential
+                });
+                google.accounts.id.renderButton(document.getElementById('googleBtn'), {
+                    theme: 'outline',
+                    size: 'large',
+                    width: 320,
+                    text: 'signin_with',
+                    locale: L[currentLang()] || 'en'
+                });
+                document.getElementById('googleBlock').style.display = '';
+            } catch (e) {
+                console.warn('Google Sign-In init failed:', e);
+            }
+        }
+
+        // スクリプトを遅延読込。失敗してもページの他機能に影響させない
+        var s = document.createElement('script');
+        s.src = 'https://accounts.google.com/gsi/client';
+        s.async = true;
+        s.defer = true;
+        s.onload = initGoogle;
+        s.onerror = function () { console.warn('Google Sign-In script could not be loaded'); };
+        document.head.appendChild(s);
+    })();
     </script>
 </body>
 </html>
