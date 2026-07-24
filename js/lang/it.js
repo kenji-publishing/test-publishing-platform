@@ -1084,7 +1084,7 @@ window.translations.it = {
             pageTitle: 'Centro assistenza - AuctLect',
             title: 'Centro assistenza',
             subtitle: 'Trova le risposte per categoria o con la ricerca. Se non risolvi, contattaci in fondo a questa pagina.',
-            contactHint: 'Non hai trovato una risposta? Scrivici tramite il modulo di feedback — di solito rispondiamo entro 1–2 giorni lavorativi e le domande frequenti vengono aggiunte a questa pagina.',
+            contactHint: 'Non hai trovato una risposta? Scrivici a info@auctlect.com — di solito rispondiamo entro 1–2 giorni lavorativi e le domande frequenti vengono aggiunte a questa pagina.',
         },
         faq: {
             pageTitle: 'FAQ - AuctLect',

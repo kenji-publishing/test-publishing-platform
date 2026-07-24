@@ -1084,7 +1084,7 @@ window.translations.en = {
             pageTitle: 'Help Center - AuctLect',
             title: 'Help Center',
             subtitle: 'Find answers by category or search below. If you cannot solve it, contact us at the bottom of this page.',
-            contactHint: 'Could not find an answer? Send us a message via the feedback form — we usually reply within 1–2 business days, and common questions are added to this page.',
+            contactHint: 'Could not find an answer? Email us at info@auctlect.com — we usually reply within 1–2 business days, and common questions are added to this page.',
         },
         faq: {
             pageTitle: 'FAQ - AuctLect',

@@ -1084,7 +1084,7 @@ window.translations.ja = {
             pageTitle: 'ヘルプセンター - AuctLect',
             title: 'ヘルプセンター',
             subtitle: 'カテゴリや検索で解決方法を探せます。解決しない場合は、ページ下部からご連絡ください。',
-            contactHint: '答えが見つかりませんでしたか？フィードバックフォームからご連絡ください。通常1〜2営業日以内に返信し、よくある質問はこのページに追加していきます。',
+            contactHint: '答えが見つかりませんでしたか？ info@auctlect.com までメールでご連絡ください。通常1〜2営業日以内に返信し、よくある質問はこのページに追加していきます。',
         },
         faq: {
             pageTitle: 'FAQ - AuctLect',

@@ -1084,7 +1084,7 @@ window.translations.pt = {
             pageTitle: 'Central de ajuda - AuctLect',
             title: 'Central de ajuda',
             subtitle: 'Encontre respostas por categoria ou pela busca. Se não resolver, fale conosco no fim desta página.',
-            contactHint: 'Não encontrou resposta? Fale conosco pelo formulário de feedback — normalmente respondemos em 1–2 dias úteis, e as perguntas comuns são adicionadas a esta página.',
+            contactHint: 'Não encontrou resposta? Escreva para info@auctlect.com — normalmente respondemos em 1–2 dias úteis, e as perguntas comuns são adicionadas a esta página.',
         },
         faq: {
             pageTitle: 'FAQ - AuctLect',

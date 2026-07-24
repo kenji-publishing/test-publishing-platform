@@ -1084,7 +1084,7 @@ window.translations.de = {
             pageTitle: 'Hilfe-Center - AuctLect',
             title: 'Hilfe-Center',
             subtitle: 'Finden Sie Antworten nach Kategorie oder über die Suche. Wenn das nicht hilft, kontaktieren Sie uns unten auf dieser Seite.',
-            contactHint: 'Keine Antwort gefunden? Schreiben Sie uns über das Feedback-Formular — wir antworten in der Regel innerhalb von 1–2 Werktagen, und häufige Fragen werden dieser Seite hinzugefügt.',
+            contactHint: 'Keine Antwort gefunden? Schreiben Sie uns an info@auctlect.com — wir antworten in der Regel innerhalb von 1–2 Werktagen, und häufige Fragen werden dieser Seite hinzugefügt.',
         },
         faq: {
             pageTitle: 'FAQ - AuctLect',

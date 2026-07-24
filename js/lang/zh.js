@@ -1084,7 +1084,7 @@ window.translations.zh = {
             pageTitle: '幫助中心 - AuctLect',
             title: '幫助中心',
             subtitle: '可依分類或搜尋尋找解決方法。若仍未解決，請從頁面底部與我們聯繫。',
-            contactHint: '找不到答案嗎？請透過意見回饋表單與我們聯繫。我們通常會在1〜2個工作天內回覆，常見問題也會新增到本頁。',
+            contactHint: '找不到答案嗎？請寄信至 info@auctlect.com 與我們聯繫。我們通常會在1〜2個工作天內回覆，常見問題也會新增到本頁。',
         },
         faq: {
             pageTitle: '常见问题 - AuctLect',
