@@ -1080,11 +1080,28 @@ window.translations.ja = {
         createAccount: '著者アカウントを作成'
     },
     support: {
+        inquiry: {
+            pageTitle: 'お問い合わせ - AuctLect',
+            title: 'お問い合わせ',
+            subtitle: 'まずお困りごとの種類をお選びください。すでに答えが用意されている場合があります。',
+            loginRequired: 'お問い合わせにはログインが必要です。返信はアプリ内のメッセージに届きます。',
+            step1: 'どのようなお困りごとですか？',
+            step2: 'こちらで解決しませんか？',
+            notSolved: '解決しなかったので問い合わせる',
+            subjectLabel: '件名',
+            bodyLabel: 'お困りごとの内容',
+            submit: '送信する',
+            expectNote: '通常1〜2営業日以内に、アプリ内のメッセージで返信します。よくいただく質問はヘルプセンターにも追加していきます。',
+            sentTitle: 'お問い合わせを送信しました',
+            sentMessage: '通常1〜2営業日以内に返信します。返信はメッセージ（ナビバーの封筒アイコン）に届きます。',
+            cantLogin: 'ログインできない場合:',
+            fillBoth: '件名と内容の両方を入力してください。',
+        },
         help: {
             pageTitle: 'ヘルプセンター - AuctLect',
             title: 'ヘルプセンター',
             subtitle: 'カテゴリや検索で解決方法を探せます。解決しない場合は、ページ下部からご連絡ください。',
-            contactHint: '答えが見つかりませんでしたか？ info@auctlect.com までメールでご連絡ください。通常1〜2営業日以内に返信し、よくある質問はこのページに追加していきます。',
+            contactHint: '答えが見つかりませんでしたか？お問い合わせからご連絡ください。通常1〜2営業日以内に返信し、よくある質問はこのページに追加していきます。',
         },
         faq: {
             pageTitle: 'FAQ - AuctLect',

@@ -1080,11 +1080,28 @@ window.translations.fr = {
         createAccount: 'Créer un Compte Auteur'
     },
     support: {
+        inquiry: {
+            pageTitle: 'Contact - AuctLect',
+            title: 'Nous contacter',
+            subtitle: 'Choisissez d\'abord un sujet — la réponse est peut-être déjà prête.',
+            loginRequired: 'Connectez-vous pour nous contacter. Les réponses arrivent dans vos Messages.',
+            step1: 'Quel est le sujet de votre question ?',
+            step2: 'L\'une de ces réponses résout-elle votre question ?',
+            notSolved: 'Cela n\'a pas résolu mon problème — contacter le support',
+            subjectLabel: 'Objet',
+            bodyLabel: 'Décrivez votre question ou problème',
+            submit: 'Envoyer',
+            expectNote: 'Nous répondons généralement sous 1 à 2 jours ouvrés via les Messages. Les questions fréquentes sont aussi ajoutées au Centre d\'aide.',
+            sentTitle: 'Votre demande a été envoyée',
+            sentMessage: 'Nous répondons généralement sous 1 à 2 jours ouvrés. La réponse arrivera dans vos Messages (l\'icône enveloppe de la barre de navigation).',
+            cantLogin: 'Si vous ne pouvez pas vous connecter :',
+            fillBoth: 'Veuillez renseigner l\'objet et le message.',
+        },
         help: {
             pageTitle: 'Centre d\'aide - AuctLect',
             title: 'Centre d\'aide',
             subtitle: 'Trouvez des réponses par catégorie ou via la recherche. Si le problème persiste, contactez-nous en bas de page.',
-            contactHint: 'Vous n\'avez pas trouvé de réponse ? Écrivez-nous à info@auctlect.com — nous répondons généralement sous 1 à 2 jours ouvrés, et les questions fréquentes sont ajoutées à cette page.',
+            contactHint: 'Vous n\'avez pas trouvé de réponse ? Contactez-nous — nous répondons généralement sous 1 à 2 jours ouvrés, et les questions fréquentes sont ajoutées à cette page.',
         },
         faq: {
             pageTitle: 'FAQ - AuctLect',

@@ -64,6 +64,7 @@
                 <div class="nav-section">分析</div>
                 <a class="nav-item" href="analytics.html"><i class="bi bi-bar-chart-line"></i><span>アナリティクス</span></a>
                 <div class="nav-section">サポート</div>
+                <a class="nav-item" href="inquiries.html"><i class="bi bi-envelope-open"></i><span>お問い合わせ</span><span class="badge-pending" id="inquiry-badge" style="display:none;">0</span></a>
                 <a class="nav-item" href="feedback.html"><i class="bi bi-chat-dots"></i><span>フィードバック</span><span class="badge-pending" id="feedback-badge" style="display:none;">0</span></a>
                 <div class="nav-section">財務</div>
                 <a class="nav-item" href="index.html#finance"><i class="bi bi-graph-up"></i><span>収益レポート</span></a>
@@ -326,18 +327,20 @@
             const el = document.getElementById(id);
             if (el && n > 0) { el.textContent = n; el.style.display = ''; }
         };
-        const [ver, mod, dmca, trans, fb] = await Promise.all([
+        const [ver, mod, dmca, trans, fb, inq] = await Promise.all([
             get('/api/verification/admin/stats'),
             get('/api/moderation/admin/stats'),
             get('/api/dmca/admin/stats'),
             get('/api/translation-queue/admin/stats'),
-            get('/api/feedback/admin/stats')
+            get('/api/feedback/admin/stats'),
+            get('/api/inquiries/admin/stats')
         ]);
         if (fb) show('feedback-badge', parseInt(fb.highPriority) || 0);
         if (ver) show('verification-badge', parseInt(ver.pending) || 0);
         if (mod) show('moderation-badge', parseInt(mod.draft) || 0);
         if (dmca && dmca.stats) show('dmca-badge', parseInt(dmca.stats.new) || 0);
         if (trans && trans.stats) show('translation-badge', parseInt(trans.stats.pending) || 0);
+        if (inq) show('inquiry-badge', parseInt(inq.open) || 0);
     })();
     </script>
 </body>

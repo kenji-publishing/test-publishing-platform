@@ -1080,11 +1080,28 @@ window.translations.zh = {
         createAccount: '创建作者账户'
     },
     support: {
+        inquiry: {
+            pageTitle: '聯絡我們 - AuctLect',
+            title: '聯絡我們',
+            subtitle: '請先選擇問題類型——答案可能已經準備好了。',
+            loginRequired: '聯絡我們需要先登入。回覆將送達您的站內訊息。',
+            step1: '您的問題屬於哪一類？',
+            step2: '以下內容能解決您的問題嗎？',
+            notSolved: '仍未解決——聯絡支援',
+            subjectLabel: '主旨',
+            bodyLabel: '請描述您的問題',
+            submit: '送出',
+            expectNote: '我們通常會在1〜2個工作天內透過站內訊息回覆。常見問題也會新增到幫助中心。',
+            sentTitle: '您的問題已送出',
+            sentMessage: '我們通常會在1〜2個工作天內回覆。回覆將送達您的訊息（導覽列的信封圖示）。',
+            cantLogin: '若無法登入：',
+            fillBoth: '請填寫主旨與內容。',
+        },
         help: {
             pageTitle: '幫助中心 - AuctLect',
             title: '幫助中心',
             subtitle: '可依分類或搜尋尋找解決方法。若仍未解決，請從頁面底部與我們聯繫。',
-            contactHint: '找不到答案嗎？請寄信至 info@auctlect.com 與我們聯繫。我們通常會在1〜2個工作天內回覆，常見問題也會新增到本頁。',
+            contactHint: '找不到答案嗎？請透過聯絡我們與我們聯繫。我們通常會在1〜2個工作天內回覆，常見問題也會新增到本頁。',
         },
         faq: {
             pageTitle: '常见问题 - AuctLect',

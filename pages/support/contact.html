@@ -1,955 +1,250 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
-    <title data-i18n="support.contact.title">Contact Us - AuctLect</title>
+    <title data-i18n="support.inquiry.pageTitle">Contact - AuctLect</title>
     <script src="../../js/config.js"></script>
-    
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
-    <!-- Custom Styles -->
     <link href="../../css/variables.css" rel="stylesheet">
     <link href="../../css/style-new.css" rel="stylesheet">
     <link href="../../css/components.css" rel="stylesheet">
     <link href="../../css/navbar.css" rel="stylesheet">
     <link href="../../css/mobile-fixes.css" rel="stylesheet">
-    <link href="../../css/navbar.css" rel="stylesheet">
-
-    <!-- Contact Page Styles -->
     <style>
-        /* ========== Mobile Language Selector ========== */
-        .navbar-lang-selector {
-            display: flex;
-            align-items: center;
-            margin-right: 0.5rem;
-        }
-        
-        @media (max-width: 991.98px) {
-            .navbar-lang-selector {
-                order: 1;
-            }
-            .navbar-toggler {
-                order: 2;
-            }
-        }
-        
-        /* ========== PC Navbar - 横並び維持 ========== */
-        @media (min-width: 992px) {
-            .navbar-nav {
-                flex-wrap: nowrap !important;
-                flex-direction: row !important;
-            }
-            .navbar-nav .nav-item {
-                white-space: nowrap !important;
-            }
-            .navbar-nav .nav-link {
-                white-space: nowrap !important;
-                padding: 0.5rem 0.6rem !important;
-                font-size: 0.9rem;
-            }
-
-            .dropdown-menu {
-                white-space: nowrap;
-            }
-            .navbar-buttons-guest {
-                display: flex !important;
-                flex-wrap: nowrap !important;
-                gap: 0.5rem;
-            }
-            .navbar-buttons-guest .btn {
-                white-space: nowrap !important;
-                flex-shrink: 0;
-            }
-        }
-        
-        /* ========== Auth Visibility Control ========== */
-        .auth-only {
-            display: none !important;
-        }
-        .guest-only {
-            display: block;
-        }
-        body.logged-in .auth-only {
-            display: block !important;
-        }
-        body.logged-in .auth-only.nav-item {
-            display: list-item !important;
-        }
-        body.logged-in .auth-only.dropdown {
-            display: block !important;
-        }
-        body.logged-in .guest-only {
-            display: none !important;
-        }
-        @media (min-width: 992px) {
-            body.logged-in .navbar-buttons-guest {
-                display: none !important;
-            }
-        }
-        
-        /* ========== User Dropdown Menu ========== */
-        .user-dropdown {
-            position: relative;
-        }
-        .user-dropdown-toggle {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: transparent;
-            border: 1px solid var(--color-border);
-            border-radius: 25px;
-            padding: 0.4rem 0.75rem;
-            cursor: pointer;
-            color: var(--color-text);
-            transition: all 0.2s;
-        }
-        .user-dropdown-toggle:hover {
-            border-color: var(--color-accent);
-            background: rgba(139, 115, 85, 0.05);
-        }
-        .user-dropdown-toggle i:first-child {
-            font-size: 1.25rem;
-            color: var(--color-accent);
-        }
-        .user-name {
-            font-weight: 500;
-            font-size: 0.9rem;
-            max-width: 120px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .user-chevron {
-            font-size: 0.7rem;
-            color: var(--color-text-secondary);
-            transition: transform 0.2s;
-        }
-        .user-dropdown.open .user-chevron {
-            transform: rotate(180deg);
-        }
-        .user-menu {
-            position: absolute;
-            top: calc(100% + 0.5rem);
-            right: 0;
-            background: var(--color-bg-card);
-            border: 1px solid var(--color-border);
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            min-width: 240px;
-            z-index: 1001;
-            display: none;
-            overflow: hidden;
-        }
-        .user-menu.show {
-            display: block;
-        }
-        .user-menu-header {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 1rem;
-            background: var(--color-bg-main);
-        }
-        .user-avatar {
-            font-size: 2.5rem;
-            color: var(--color-accent);
-        }
-        .user-info {
-            flex: 1;
-            min-width: 0;
-        }
-        .user-display-name {
-            font-weight: 600;
-            font-size: 0.95rem;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .user-email {
-            font-size: 0.8rem;
-            color: var(--color-text-secondary);
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .user-menu-divider {
-            height: 1px;
-            background: var(--color-border);
-        }
-        .user-menu-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
-            color: var(--color-text);
-            text-decoration: none;
-            font-size: 0.9rem;
-            cursor: pointer;
-            border: none;
-            background: transparent;
-            width: 100%;
-            text-align: left;
-        }
-        .user-menu-item:hover {
-            background: var(--color-bg-hover);
-            color: var(--color-accent);
-        }
-        .user-menu-item i {
-            width: 20px;
-            text-align: center;
-            color: var(--color-text-secondary);
-        }
-        .user-menu-item:hover i {
-            color: var(--color-accent);
-        }
-        .logout-btn {
-            color: var(--color-error);
-        }
-        .logout-btn i {
-            color: var(--color-error);
-        }
-        .logout-btn:hover {
-            background: rgba(199, 93, 93, 0.1);
-            color: var(--color-error);
-        }
-        
-        /* ========== Navbar Overlay ========== */
-
-        /* ========== Mobile Adjustments ========== */
-        @media (max-width: 991.98px) {
-
-        }
-
-        /* ========== Contact Page Styles ========== */
-
-        /* Contact Hero Section */
-        .contact-hero {
-            background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
-            padding: var(--spacing-2xl) 0;
-            color: white;
-            text-align: center;
-        }
-        .contact-hero h1 { color: white; font-size: var(--font-size-3xl); margin-bottom: var(--spacing-sm); }
-        .contact-hero p { color: rgba(255, 255, 255, 0.9); }
-
-        /* Redirect Notice */
-        .redirect-notice {
-            background: var(--color-bg-card);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-lg);
-            margin-top: -60px;
-            position: relative;
-            z-index: 10;
-            padding: var(--spacing-2xl);
-            text-align: center;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .redirect-icon {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--color-accent), var(--color-accent-light));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto var(--spacing-lg);
-            color: white;
-            font-size: 2rem;
-        }
-        .redirect-notice h2 { margin-bottom: var(--spacing-md); }
-        .redirect-notice p { color: var(--color-text-secondary); margin-bottom: var(--spacing-lg); }
-        .redirect-steps {
-            background: var(--color-bg-hover);
-            border-radius: var(--radius-md);
-            padding: var(--spacing-lg);
-            margin-bottom: var(--spacing-lg);
-            text-align: left;
-        }
-        .redirect-steps h5 { margin-bottom: var(--spacing-md); color: var(--color-text-primary); }
-        .redirect-step {
-            display: flex;
-            align-items: flex-start;
-            gap: var(--spacing-md);
-            margin-bottom: var(--spacing-sm);
-        }
-        .redirect-step:last-child { margin-bottom: 0; }
-        .redirect-step i { color: var(--color-accent); margin-top: 3px; }
-        .redirect-step span { color: var(--color-text-secondary); }
-
-        /* Contact Form Card */
-        .contact-card {
-            background: var(--color-bg-card);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-lg);
-            margin-top: -60px;
-            position: relative;
-            z-index: 10;
-        }
-        .contact-card-body { padding: var(--spacing-xl); }
-
-        /* Category Selection */
-        .category-select-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: var(--spacing-md);
-            margin-bottom: var(--spacing-lg);
-        }
-        .category-select-card {
-            border: 2px solid var(--color-border);
-            border-radius: var(--radius-md);
-            padding: var(--spacing-lg);
-            text-align: center;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-            background: var(--color-bg-card);
-        }
-        .category-select-card:hover { border-color: var(--color-accent); background: var(--color-bg-hover); }
-        .category-select-card.selected { border-color: var(--color-accent); background: rgba(139, 115, 85, 0.1); }
-        .category-select-card .icon { font-size: 1.5rem; color: var(--color-accent); margin-bottom: var(--spacing-sm); }
-        .category-select-card h4 { font-size: var(--font-size-base); margin-bottom: var(--spacing-xs); }
-        .category-select-card p { font-size: var(--font-size-sm); color: var(--color-text-secondary); margin: 0; }
-
-        /* Info Sidebar */
-        .info-card {
-            background: var(--color-bg-card);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-xl);
-            height: 100%;
-            margin-top: -60px;
-        }
-        .info-item {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: var(--spacing-lg);
-            padding-bottom: var(--spacing-lg);
-            border-bottom: 1px solid var(--color-border);
-        }
-        .info-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        .info-item .icon {
-            width: 40px;
-            height: 40px;
-            border-radius: var(--radius-md);
-            background: var(--color-accent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            margin-right: var(--spacing-md);
-            flex-shrink: 0;
-        }
-        .info-item h5 { font-size: var(--font-size-base); margin-bottom: var(--spacing-xs); }
-        .info-item p { font-size: var(--font-size-sm); color: var(--color-text-secondary); margin: 0; }
-
-        /* Success Section */
-        .success-section { text-align: center; padding: var(--spacing-2xl); }
-        .success-icon {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: var(--color-success);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto var(--spacing-lg);
-            color: white;
-            font-size: 2rem;
-        }
-
-        /* FAQ Suggestion */
-        .faq-suggestion {
-            background: var(--color-bg-hover);
-            border-radius: var(--radius-md);
-            padding: var(--spacing-lg);
-            margin-top: var(--spacing-lg);
-        }
-        .faq-suggestion h5 { font-size: var(--font-size-base); margin-bottom: var(--spacing-md); }
-        .faq-suggestion-item {
-            display: flex;
-            align-items: center;
-            padding: var(--spacing-sm) 0;
-            cursor: pointer;
-            transition: color var(--transition-fast);
-            color: var(--color-text-primary);
-        }
-        .faq-suggestion-item:hover { color: var(--color-accent); }
-        .faq-suggestion-item i { color: var(--color-accent); margin-right: var(--spacing-sm); }
-
-        /* Step Indicator */
-        .step-indicator {
-            display: flex;
-            justify-content: center;
-            gap: var(--spacing-xl);
-            margin-bottom: var(--spacing-xl);
-            padding-bottom: var(--spacing-lg);
-            border-bottom: 1px solid var(--color-border);
-        }
-        .step {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-            color: var(--color-text-secondary);
-        }
-        .step.active { color: var(--color-accent); }
-        .step .number {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: var(--color-border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: var(--font-size-sm);
-            font-weight: 600;
-        }
-        .step.active .number { background: var(--color-accent); color: white; }
-
-        /* Form Styles */
-        .form-control:focus { border-color: var(--color-accent); box-shadow: 0 0 0 3px rgba(139, 115, 85, 0.1); }
-        .form-label { font-weight: 500; color: var(--color-text-primary); margin-bottom: var(--spacing-xs); }
-
-        /* Wizard Notice Banner */
-        .wizard-notice {
-            background: rgba(139, 115, 85, 0.1);
-            border: 1px solid var(--color-accent);
-            border-radius: var(--radius-md);
-            padding: var(--spacing-md);
-            margin-bottom: var(--spacing-lg);
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-md);
-        }
-        .wizard-notice i { color: var(--color-accent); font-size: 1.5rem; }
-        .wizard-notice p { margin: 0; font-size: var(--font-size-sm); }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .category-select-grid { grid-template-columns: repeat(2, 1fr); }
-            .info-card { margin-top: var(--spacing-xl); }
-        }
-        @media (max-width: 576px) {
-            .category-select-grid { grid-template-columns: 1fr; }
-            .step-indicator { flex-direction: column; align-items: center; gap: var(--spacing-sm); }
-        }
+        .contact-main { max-width: 720px; margin: 0 auto; padding: 2rem 1rem 3rem; }
+        .contact-main h1 { font-family: var(--font-serif); font-size: 1.7rem; text-align: center; margin-bottom: 0.4rem; }
+        .contact-main .lead-sub { text-align: center; color: var(--color-text-secondary); font-size: 0.92rem; margin-bottom: 1.75rem; }
+        .step-label { font-size: 0.8rem; font-weight: 700; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.4rem; }
+        .step-block { background: #fff; border: 1px solid var(--color-border); border-radius: 12px; padding: 1.25rem 1.4rem; margin-bottom: 1.25rem; }
+        .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.6rem; }
+        .cat-card { border: 1.5px solid var(--color-border); border-radius: 10px; background: #fff; padding: 0.7rem 0.9rem; cursor: pointer; text-align: left; font-size: 0.9rem; font-weight: 600; color: var(--color-text); display: flex; align-items: center; gap: 0.5rem; }
+        .cat-card:hover { border-color: var(--color-accent); }
+        .cat-card.active { border-color: var(--color-accent); background: rgba(139,115,85,0.08); }
+        .faq-suggest { display: none; }
+        .qa-item { border: 1px solid var(--color-border); border-radius: 10px; background: #fff; margin-bottom: 0.5rem; overflow: hidden; }
+        .qa-q { width: 100%; text-align: left; border: none; background: none; padding: 0.75rem 0.9rem; font-size: 0.9rem; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 0.6rem; color: var(--color-text); }
+        .qa-q .chev { transition: transform 0.2s; color: var(--color-text-secondary); flex-shrink: 0; }
+        .qa-item.open .qa-q .chev { transform: rotate(180deg); }
+        .qa-a { display: none; padding: 0 0.9rem 0.8rem; color: var(--color-text-secondary); font-size: 0.87rem; line-height: 1.8; white-space: pre-line; }
+        .qa-item.open .qa-a { display: block; }
+        .not-solved { text-align: center; margin-top: 1rem; }
+        .not-solved button { border: 1px solid var(--color-border); background: none; color: var(--color-text-secondary); border-radius: 8px; padding: 0.45rem 1.1rem; font-size: 0.85rem; cursor: pointer; }
+        .not-solved button:hover { border-color: var(--color-accent); color: var(--color-accent); }
+        .inquiry-form { display: none; }
+        .expect-note { font-size: 0.8rem; color: var(--color-text-secondary); margin-top: 0.75rem; line-height: 1.7; }
+        .login-note { display: none; text-align: center; background: rgba(139,115,85,0.08); border: 1px solid rgba(139,115,85,0.3); border-radius: 12px; padding: 1.5rem; }
+        .cant-login { text-align: center; font-size: 0.78rem; color: var(--color-text-secondary); margin-top: 2rem; }
+        .sent-panel { display: none; text-align: center; background: rgba(76,154,95,0.08); border: 1px solid rgba(76,154,95,0.4); border-radius: 12px; padding: 2rem 1.5rem; }
+        .sent-panel i { font-size: 2rem; color: #4c9a5f; margin-bottom: 0.6rem; }
     </style>
 </head>
 <body>
-    <!-- Navbar Overlay -->
-    <div id="navbar-container"></div>
+<div id="navbar-container"></div>
 
-<!-- Hero Section -->
-    <section class="contact-hero">
-        <div class="container">
-            <h1><i class="fas fa-envelope me-2"></i><span data-i18n="support.contact.heroTitle">Contact Us</span></h1>
-            <p data-i18n="support.contact.heroSubtitle">Have a question or need help? We're here for you.</p>
+<main class="contact-main">
+    <h1><i class="fas fa-comments me-2" style="color: var(--color-accent);"></i><span data-i18n="support.inquiry.title">Contact Us</span></h1>
+    <p class="lead-sub" data-i18n="support.inquiry.subtitle">Choose a topic — we may already have the answer.</p>
+
+    <!-- 未ログイン時はフォームを出さずログインへ誘導（ログイン必須・kenjiさん決定） -->
+    <div class="login-note" id="loginNote">
+        <p style="margin-bottom: 1rem;"><i class="fas fa-lock me-2"></i><span data-i18n="support.inquiry.loginRequired">Please sign in to contact us.</span></p>
+        <a href="../login.html" class="btn btn-primary-custom" data-i18n="login.signIn">Sign In</a>
+    </div>
+
+    <div id="funnel" style="display:none;">
+        <!-- ステップ1: カテゴリ選択 -->
+        <div class="step-block">
+            <div class="step-label">1</div>
+            <p style="font-weight:600; margin-bottom:0.75rem;" data-i18n="support.inquiry.step1">What is your question about?</p>
+            <div class="cat-grid" id="catGrid"></div>
         </div>
-    </section>
 
-    <!-- Main Content -->
-    <main class="container pb-5">
-        <!-- Redirect Notice (shown when accessed directly) -->
-        <div id="redirectNotice" style="display: none;">
-            <div class="redirect-notice fade-in">
-                <div class="redirect-icon">
-                    <i class="fas fa-tools"></i>
-                </div>
-                <h2 data-i18n="support.contact.tryTroubleshootFirst">Please try troubleshooting first</h2>
-                <p data-i18n="support.contact.redirectDesc">Many issues can be resolved with our troubleshooting wizard. You can access the contact form if the wizard doesn't help.</p>
-                
-                <div class="redirect-steps">
-                    <h5><i class="fas fa-list-ol me-2"></i><span data-i18n="support.contact.steps">Steps</span></h5>
-                    <div class="redirect-step">
-                        <i class="fas fa-check-circle"></i>
-                        <span data-i18n="support.contact.step1">1. Select your issue in the troubleshooting wizard</span>
-                    </div>
-                    <div class="redirect-step">
-                        <i class="fas fa-check-circle"></i>
-                        <span data-i18n="support.contact.step2">2. Try the suggested solutions</span>
-                    </div>
-                    <div class="redirect-step">
-                        <i class="fas fa-check-circle"></i>
-                        <span data-i18n="support.contact.step3">3. If unresolved, a contact link will appear</span>
-                    </div>
-                </div>
-                
-                <a href="troubleshoot.html" class="btn btn-primary-custom btn-lg">
-                    <i class="fas fa-magic me-2"></i><span data-i18n="support.troubleshoot.startTroubleshoot">Start Troubleshooting</span>
-                </a>
-                
-                <div class="mt-4">
-                    <a href="faq.html" class="text-muted">
-                        <i class="fas fa-question-circle me-1"></i><span data-i18n="support.contact.viewFaq">View FAQ</span>
-                    </a>
-                </div>
+        <!-- ステップ2: 選択カテゴリの関連FAQ（先に答えを見せる） -->
+        <div class="step-block faq-suggest" id="faqSuggest">
+            <div class="step-label">2</div>
+            <p style="font-weight:600; margin-bottom:0.75rem;" data-i18n="support.inquiry.step2">Does one of these answer your question?</p>
+            <div id="faqList"></div>
+            <div class="not-solved">
+                <button type="button" id="notSolvedBtn" onclick="showForm()" data-i18n="support.inquiry.notSolved">It didn't solve my problem — contact support</button>
             </div>
         </div>
 
-        <!-- Contact Form (shown when accessed from wizard) -->
-        <div id="contactFormSection" style="display: none;">
-            <div class="row">
-                <!-- Contact Form -->
-                <div class="col-lg-8">
-                    <div class="contact-card fade-in">
-                        <div class="contact-card-body">
-                            <!-- Wizard Notice -->
-                            <div class="wizard-notice">
-                                <i class="fas fa-check-circle"></i>
-                                <p data-i18n="support.contact.wizardNotice">Thank you for trying the troubleshooting wizard. Please use the form below to contact us about your unresolved issue.</p>
-                            </div>
-
-                            <!-- Step Indicator -->
-                            <div class="step-indicator">
-                                <div class="step active" id="stepIndicator1">
-                                    <div class="number">1</div>
-                                    <span data-i18n="support.contact.selectCategory">Select Category</span>
-                                </div>
-                                <div class="step" id="stepIndicator2">
-                                    <div class="number">2</div>
-                                    <span data-i18n="support.contact.enterDetails">Enter Details</span>
-                                </div>
-                            </div>
-
-                            <!-- Step 1: Category Selection -->
-                            <div id="step1">
-                                <h3 class="mb-4"><i class="fas fa-th-large me-2 text-accent"></i><span data-i18n="support.contact.whatHelp">What can we help you with?</span></h3>
-                                <div class="category-select-grid" id="categorySelection">
-                                    <div class="category-select-card" data-category="account">
-                                        <div class="icon"><i class="fas fa-user-circle"></i></div>
-                                        <h4 data-i18n="support.tickets.categories.account">Account</h4>
-                                        <p data-i18n="support.contact.categoryAccountDesc">Login & registration</p>
-                                    </div>
-                                    <div class="category-select-card" data-category="payment">
-                                        <div class="icon"><i class="fas fa-credit-card"></i></div>
-                                        <h4 data-i18n="support.tickets.categories.payment">Payment</h4>
-                                        <p data-i18n="support.contact.categoryPaymentDesc">Purchases & refunds</p>
-                                    </div>
-                                    <div class="category-select-card" data-category="translation">
-                                        <div class="icon"><i class="fas fa-language"></i></div>
-                                        <h4 data-i18n="support.tickets.categories.translation">Translation</h4>
-                                        <p data-i18n="support.contact.categoryTranslationDesc">AI & human translation</p>
-                                    </div>
-                                    <div class="category-select-card" data-category="technical">
-                                        <div class="icon"><i class="fas fa-cog"></i></div>
-                                        <h4 data-i18n="support.tickets.categories.technical">Technical</h4>
-                                        <p data-i18n="support.contact.categoryTechnicalDesc">Bugs & errors</p>
-                                    </div>
-                                    <div class="category-select-card" data-category="copyright">
-                                        <div class="icon"><i class="fas fa-shield-alt"></i></div>
-                                        <h4 data-i18n="support.tickets.categories.copyright">Copyright</h4>
-                                        <p data-i18n="support.contact.categoryCopyrightDesc">DMCA & violations</p>
-                                    </div>
-                                    <div class="category-select-card" data-category="other">
-                                        <div class="icon"><i class="fas fa-question-circle"></i></div>
-                                        <h4 data-i18n="support.tickets.categories.other">Other</h4>
-                                        <p data-i18n="support.contact.categoryOtherDesc">General inquiries</p>
-                                    </div>
-                                </div>
-
-                                <!-- FAQ Suggestion -->
-                                <div class="faq-suggestion" id="faqSuggestion" style="display: none;">
-                                    <h5><i class="fas fa-lightbulb me-2 text-warning"></i><span data-i18n="support.contact.mightHelp">These might help:</span></h5>
-                                    <div id="faqSuggestionList"></div>
-                                    <div class="text-end mt-3">
-                                        <button class="btn btn-soft-custom btn-sm" onclick="proceedToStep2()">
-                                            <span data-i18n="support.contact.notHelpful">Not helpful? Continue</span> <i class="fas fa-arrow-right ms-1"></i>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div class="text-end mt-4" id="step1NextBtn" style="display: none;">
-                                    <button class="btn btn-primary-custom" onclick="proceedToStep2()">
-                                        <span data-i18n="common.next">Continue</span> <i class="fas fa-arrow-right ms-1"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Step 2: Contact Form -->
-                            <div id="step2" style="display: none;">
-                                <div class="d-flex align-items-center mb-4">
-                                    <button class="btn btn-soft-custom btn-sm me-3" onclick="backToStep1()">
-                                        <i class="fas fa-arrow-left"></i>
-                                    </button>
-                                    <h3 class="mb-0"><i class="fas fa-edit me-2 text-accent"></i><span data-i18n="support.contact.tellUsMore">Tell us more</span></h3>
-                                </div>
-
-                                <form id="contactForm">
-                                    <!-- Guest Fields -->
-                                    <div id="guestFields">
-                                        <div class="row">
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label" data-i18n="support.contact.name">Your Name</label> <span class="text-danger">*</span>
-                                                <input type="text" class="form-control" id="guestName" required>
-                                            </div>
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label" data-i18n="support.contact.email">Email Address</label> <span class="text-danger">*</span>
-                                                <input type="email" class="form-control" id="guestEmail" required>
-                                                <small class="text-muted" data-i18n="support.contact.emailNote">We'll send our response here</small>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Subject -->
-                                    <div class="mb-3">
-                                        <label class="form-label" data-i18n="support.contact.subject">Subject</label> <span class="text-danger">*</span>
-                                        <input type="text" class="form-control" id="subject" required
-                                               data-i18n-placeholder="support.contact.subjectPlaceholder" placeholder="Brief description of your issue">
-                                    </div>
-
-                                    <!-- Message -->
-                                    <div class="mb-3">
-                                        <label class="form-label" data-i18n="support.contact.message">Message</label> <span class="text-danger">*</span>
-                                        <textarea class="form-control" id="message" rows="6" required
-                                                  data-i18n-placeholder="support.contact.messagePlaceholder" placeholder="Please describe your issue in detail. Include any error messages if applicable."></textarea>
-                                        <small class="text-muted">
-                                            <span id="charCount">0</span> / 2000 <span data-i18n="support.contact.characters">characters</span>
-                                        </small>
-                                    </div>
-
-                                    <!-- Related Order -->
-                                    <div class="mb-4">
-                                        <label class="form-label" data-i18n="support.contact.orderId">Order ID (optional)</label>
-                                        <input type="text" class="form-control" id="relatedOrderId"
-                                               placeholder="e.g., ORD-20240115-0001">
-                                    </div>
-
-                                    <!-- Privacy Agreement -->
-                                    <div class="form-check mb-4">
-                                        <input class="form-check-input" type="checkbox" id="agreePrivacy" required>
-                                        <label class="form-check-label" for="agreePrivacy">
-                                            <span data-i18n="support.contact.agreePrivacy">I agree to the</span> <a href="../privacy.html" target="_blank" data-i18n="footer.privacy">Privacy Policy</a>
-                                        </label>
-                                    </div>
-
-                                    <!-- Submit -->
-                                    <div class="d-grid">
-                                        <button type="submit" class="btn btn-primary-custom btn-lg" id="submitBtn">
-                                            <i class="fas fa-paper-plane me-2"></i><span data-i18n="support.contact.send">Submit Request</span>
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-
-                            <!-- Success Section -->
-                            <div id="successSection" style="display: none;">
-                                <div class="success-section">
-                                    <div class="success-icon">
-                                        <i class="fas fa-check"></i>
-                                    </div>
-                                    <h3 class="mb-3" data-i18n="support.contact.successTitle">Request Submitted!</h3>
-                                    <p class="text-muted mb-2">
-                                        <span data-i18n="support.contact.ticketNumber">Ticket Number:</span> <strong id="ticketNumber" class="text-accent"></strong>
-                                    </p>
-                                    <p class="mb-4" data-i18n="support.contact.successMessage">We'll respond within a few business days. Check your email for updates.</p>
-                                    <div class="d-flex justify-content-center gap-3 flex-wrap">
-                                        <a href="faq.html" class="btn btn-soft-custom">
-                                            <i class="fas fa-question-circle me-1"></i> <span data-i18n="support.faq.title">Browse FAQ</span>
-                                        </a>
-                                        <a href="../../index.html" class="btn btn-primary-custom">
-                                            <i class="fas fa-home me-1"></i> <span data-i18n="nav.home">Back to Home</span>
-                                        </a>
-                                    </div>
-                                    <div id="ticketLink" class="mt-4" style="display: none;">
-                                        <a href="tickets.html" class="btn btn-outline-custom">
-                                            <i class="fas fa-list me-1"></i><span data-i18n="support.contact.viewTickets">View My Tickets</span>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sidebar -->
-                <div class="col-lg-4 mt-4 mt-lg-0">
-                    <div class="info-card fade-in">
-                        <h4 class="mb-4"><i class="fas fa-info-circle me-2 text-accent"></i><span data-i18n="support.contact.info.title">Support Information</span></h4>
-                        
-                        <div class="info-item">
-                            <div class="icon">
-                                <i class="fas fa-clock"></i>
-                            </div>
-                            <div>
-                                <h5 data-i18n="support.contact.info.response">Response Time</h5>
-                                <p data-i18n="support.contact.info.responseValue">We'll respond within a few business days.</p>
-                            </div>
-                        </div>
-
-                        <div class="info-item">
-                            <div class="icon">
-                                <i class="fas fa-envelope"></i>
-                            </div>
-                            <div>
-                                <h5 data-i18n="support.contact.info.checkEmail">Check Your Email</h5>
-                                <p data-i18n="support.contact.info.checkEmailDesc">Responses are sent via email. Please check your spam folder too.</p>
-                            </div>
-                        </div>
-
-                        <div class="info-item">
-                            <div class="icon">
-                                <i class="fas fa-shield-alt"></i>
-                            </div>
-                            <div>
-                                <h5 data-i18n="support.contact.info.dmca">Copyright Reports</h5>
-                                <p data-i18n="support.contact.info.dmcaDesc">For DMCA takedown requests, please use our dedicated form.</p>
-                            </div>
-                        </div>
-
-                        <div class="info-item">
-                            <div class="icon">
-                                <i class="fas fa-tools"></i>
-                            </div>
-                            <div>
-                                <h5 data-i18n="support.contact.info.otherIssue">Other Issues?</h5>
-                                <p><a href="troubleshoot.html" data-i18n="support.contact.info.backToTroubleshoot">Go back to troubleshooting</a></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <!-- ステップ3: フォーム（FAQを見た後にだけ出現） -->
+        <div class="step-block inquiry-form" id="inquiryForm">
+            <div class="step-label">3</div>
+            <div class="mb-3">
+                <label class="form-label" for="inqSubject" data-i18n="support.inquiry.subjectLabel">Subject</label>
+                <input type="text" class="form-control" id="inqSubject" maxlength="200">
             </div>
+            <div class="mb-2">
+                <label class="form-label" for="inqBody" data-i18n="support.inquiry.bodyLabel">Describe your question or problem</label>
+                <textarea class="form-control" id="inqBody" rows="6" maxlength="5000"></textarea>
+            </div>
+            <div class="text-center" style="margin-top:1rem;">
+                <button type="button" class="btn btn-primary-custom" id="inqSubmit" onclick="submitInquiry()">
+                    <i class="fas fa-paper-plane me-2"></i><span data-i18n="support.inquiry.submit">Send</span>
+                </button>
+            </div>
+            <p class="expect-note" data-i18n="support.inquiry.expectNote">We usually reply within 1–2 business days via in-app Messages. Frequently asked questions are also added to the Help Center.</p>
+            <div id="inqError" class="alert alert-danger mt-2" style="display:none; font-size:0.85rem;"></div>
         </div>
-    </main>
 
-    <!-- Footer -->
-    <div id="footer-container"></div>
+        <!-- 送信完了 -->
+        <div class="sent-panel" id="sentPanel">
+            <i class="fas fa-check-circle"></i>
+            <h3 style="font-size:1.1rem;" data-i18n="support.inquiry.sentTitle">Your inquiry has been sent</h3>
+            <p style="color:var(--color-text-secondary); font-size:0.88rem; margin:0.5rem 0 1rem;" data-i18n="support.inquiry.sentMessage">We usually reply within 1–2 business days. The reply will arrive in your Messages (check the envelope icon in the navigation bar).</p>
+            <a href="../messages.html" class="btn btn-soft-custom" data-i18n="nav.messages">Messages</a>
+        </div>
+    </div>
 
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../../js/i18n.js"></script>
-    <script src="../../js/navbar.js"></script>
-    <script src="../../js/lang/ja.js"></script>
-    <script src="../../js/lang/en.js"></script>
-    <script src="../../js/lang/zh.js"></script>
-    <script src="../../js/lang/es.js"></script>
-    <script src="../../js/lang/fr.js"></script>
-    <script src="../../js/lang/de.js"></script>
-    <script src="../../js/lang/ko.js"></script>
-    <script src="../../js/lang/ar.js"></script>
-    <script src="../../js/lang/pt.js"></script>
-    <script src="../../js/lang/it.js"></script>
-    
-    <script>
-        // ========== Pattern C: Navbar Multi-language UI Text ==========
-        const uiText = {
-        };
+    <!-- ログインできない人だけの逃げ道（メール） -->
+    <p class="cant-login"><span data-i18n="support.inquiry.cantLogin">If you cannot sign in:</span> info@auctlect.com</p>
+</main>
 
-        // updateUIText removed - handled by i18n.js
-        // ========== Contact Form Logic ==========
-        const API_BASE = (window.API_ORIGIN || '') + '/api';
-        let selectedCategory = null;
-        let isLoggedIn = false;
+<div id="footer-container"></div>
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // Language selectors sync
-            const desktopSelector = document.getElementById('languageSelector');
-            const mobileSelector = document.getElementById('languageSelectorMobile');
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../js/i18n.js"></script>
+<script src="../../js/navbar.js"></script>
+<script src="../../js/lang/ja.js"></script>
+<script src="../../js/lang/en.js"></script>
+<script src="../../js/lang/zh.js"></script>
+<script src="../../js/lang/es.js"></script>
+<script src="../../js/lang/fr.js"></script>
+<script src="../../js/lang/de.js"></script>
+<script src="../../js/lang/ko.js"></script>
+<script src="../../js/lang/ar.js"></script>
+<script src="../../js/lang/pt.js"></script>
+<script src="../../js/lang/it.js"></script>
 
-            if (desktopSelector && mobileSelector) {
-                const savedLang = localStorage.getItem('preferredLanguage') || 'en';
-                desktopSelector.value = savedLang;
-                mobileSelector.value = savedLang;
+<script>
+// ========== お問い合わせ（絞り込み動線） ==========
+// カテゴリ選択 → そのカテゴリの関連FAQを提示 → 解決しなければフォーム。
+// フォームは最初から見せない（通過点すべてが自己解決のチャンスになる構成）。
+// ログイン必須。返信はアプリ内メッセージで届く。
+const API_BASE = (window.API_ORIGIN || '') + '/api';
+let cCats = [];
+let cItems = [];
+let selectedCat = null;
 
-                mobileSelector.addEventListener('change', function() {
-                    desktopSelector.value = this.value;
-                    if (typeof changeLanguage === 'function') changeLanguage(this.value);
-                    updateUIText();
-                });
+function lang() {
+    try { if (typeof getCurrentLanguage === 'function') return getCurrentLanguage(); } catch (e) {}
+    return localStorage.getItem('preferredLanguage') || 'en';
+}
+function local(row, field) { return row[field + '_' + lang()] || row[field + '_en'] || ''; }
+function t(key, fallback) {
+    try { if (window.i18n && i18n.t) { const v = i18n.t(key); if (v && v !== key) return v; } } catch (e) {}
+    return fallback;
+}
+function esc(s) { const d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
 
-                desktopSelector.addEventListener('change', function() {
-                    mobileSelector.value = this.value;
-                    updateUIText();
-                });
-            }
+const CAT_ICONS = { 1: 'fa-user', 2: 'fa-credit-card', 3: 'fa-book', 4: 'fa-language', 5: 'fa-pen-fancy', 6: 'fa-user-edit', 7: 'fa-wrench', 8: 'fa-ellipsis-h' };
 
-            updateUIText();
-// User dropdown close on outside click
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.user-dropdown')) {
-                    const dropdown = document.getElementById('userDropdown');
-                    const dropdownMenu = document.getElementById('userMenu');
-                    if (dropdown) dropdown.classList.remove('open');
-                    if (dropdownMenu) dropdownMenu.classList.remove('show');
-                }
-            });
+async function loadContact() {
+    if (!localStorage.getItem('token')) {
+        document.getElementById('loginNote').style.display = '';
+        return;
+    }
+    document.getElementById('funnel').style.display = '';
+    try {
+        const [catResp, faqResp] = await Promise.all([
+            fetch(`${API_BASE}/support/faq/categories`),
+            fetch(`${API_BASE}/support/faq`)
+        ]);
+        cCats = ((await catResp.json()).categories || []);
+        cItems = ((await faqResp.json()).faqs || []);
+    } catch (e) { cCats = []; cItems = []; }
+    renderCats();
+}
 
-            // Navbar overlay
+function renderCats() {
+    const grid = document.getElementById('catGrid');
+    // 問い合わせは全カテゴリから選べる（FAQが0件のカテゴリはステップ2を飛ばしてフォームへ）
+    grid.innerHTML = cCats.map(c =>
+        `<button type="button" class="cat-card${selectedCat === c.id ? ' active' : ''}" data-cat="${c.id}">
+            <i class="fas ${CAT_ICONS[c.id] || 'fa-folder'}" style="color:var(--color-accent);"></i>${esc(local(c, 'name'))}
+        </button>`
+    ).join('');
+    grid.querySelectorAll('.cat-card').forEach(btn => {
+        btn.addEventListener('click', () => selectCat(parseInt(btn.dataset.cat, 10)));
+    });
+}
 
-
-            if (navbarOverlay) {
-                navbarOverlay.addEventListener('click', function() {
-                    const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
-                    if (bsCollapse) bsCollapse.hide();
-                });
-            }
-
-            // Language changed event
-            document.addEventListener('languageChanged', function() {
-                updateUIText();
-            });
-
-            // Check if accessed from wizard
-            const params = new URLSearchParams(window.location.search);
-            const fromWizard = params.get('from') === 'wizard';
-
-            if (fromWizard) {
-                document.getElementById('redirectNotice').style.display = 'none';
-                document.getElementById('contactFormSection').style.display = 'block';
-                setupCategorySelection();
-                setupForm();
-            } else {
-                document.getElementById('redirectNotice').style.display = 'block';
-                document.getElementById('contactFormSection').style.display = 'none';
-            }
+function selectCat(catId) {
+    selectedCat = catId;
+    renderCats();
+    document.getElementById('sentPanel').style.display = 'none';
+    const items = cItems.filter(i => i.category_id === catId).slice(0, 5);
+    const suggest = document.getElementById('faqSuggest');
+    const form = document.getElementById('inquiryForm');
+    if (items.length === 0) {
+        // 見せる答えが無ければフォームを直接開く
+        suggest.style.display = 'none';
+        form.style.display = 'block';
+    } else {
+        document.getElementById('faqList').innerHTML = items.map(item => `
+            <div class="qa-item">
+                <button type="button" class="qa-q">${esc(local(item, 'question'))}<i class="fas fa-chevron-down chev"></i></button>
+                <div class="qa-a">${esc(local(item, 'answer'))}</div>
+            </div>`).join('');
+        document.querySelectorAll('#faqList .qa-q').forEach(btn => {
+            btn.addEventListener('click', () => btn.parentElement.classList.toggle('open'));
         });
+        suggest.style.display = 'block';
+        form.style.display = 'none'; // カテゴリを変えたらフォームは畳み直す
+    }
+    suggest.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
 
-        function setupCategorySelection() {
-            const cards = document.querySelectorAll('.category-select-card');
-            
-            cards.forEach(card => {
-                card.addEventListener('click', function() {
-                    cards.forEach(c => c.classList.remove('selected'));
-                    this.classList.add('selected');
-                    selectedCategory = this.dataset.category;
-                    
-                    showFaqSuggestions(selectedCategory);
-                    document.getElementById('step1NextBtn').style.display = 'block';
-                });
-            });
-        }
+function showForm() {
+    document.getElementById('inquiryForm').style.display = 'block';
+    document.getElementById('inquiryForm').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
 
-        async function showFaqSuggestions(category) {
-            try {
-                const categoryMap = {
-                    'account': 1, 'payment': 2, 'translation': 4,
-                    'technical': 7, 'copyright': null, 'other': 8
-                };
-                
-                const categoryId = categoryMap[category];
-                if (!categoryId) {
-                    document.getElementById('faqSuggestion').style.display = 'none';
-                    return;
-                }
+async function submitInquiry() {
+    const errEl = document.getElementById('inqError');
+    errEl.style.display = 'none';
+    const subject = document.getElementById('inqSubject').value.trim();
+    const body = document.getElementById('inqBody').value.trim();
+    if (!subject || !body) {
+        errEl.textContent = t('support.inquiry.fillBoth', 'Please fill in both the subject and the message.');
+        errEl.style.display = '';
+        return;
+    }
+    const btn = document.getElementById('inqSubmit');
+    btn.disabled = true;
+    try {
+        const resp = await fetch(`${API_BASE}/inquiries`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+            body: JSON.stringify({ category: String(selectedCat), subject, body })
+        });
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
+        // フォーム類を隠して完了表示
+        document.getElementById('faqSuggest').style.display = 'none';
+        document.getElementById('inquiryForm').style.display = 'none';
+        document.getElementById('sentPanel').style.display = 'block';
+        document.getElementById('inqSubject').value = '';
+        document.getElementById('inqBody').value = '';
+        document.getElementById('sentPanel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } catch (e) {
+        errEl.textContent = e.message;
+        errEl.style.display = '';
+    } finally {
+        btn.disabled = false;
+    }
+}
 
-                const response = await fetch(`${API_BASE}/support/faq?category_id=${categoryId}`);
-                const data = await response.json();
-                
-                if (data.success && data.faqs.length > 0) {
-                    const container = document.getElementById('faqSuggestionList');
-                    container.innerHTML = data.faqs.slice(0, 3).map(faq => `
-                        <div class="faq-suggestion-item" onclick="window.open('faq.html#faq${faq.id}', '_blank')">
-                            <i class="fas fa-question-circle"></i>
-                            <span>${faq.question_en}</span>
-                        </div>
-                    `).join('');
-                    
-                    document.getElementById('faqSuggestion').style.display = 'block';
-                } else {
-                    document.getElementById('faqSuggestion').style.display = 'none';
-                }
-            } catch (error) {
-                console.error('FAQ fetch error:', error);
-                document.getElementById('faqSuggestion').style.display = 'none';
-            }
-        }
-
-        function proceedToStep2() {
-            if (!selectedCategory) {
-                alert(t('support.contact.selectCategoryAlert') || 'Please select a category');
-                return;
-            }
-            
-            document.getElementById('step1').style.display = 'none';
-            document.getElementById('step2').style.display = 'block';
-            document.getElementById('stepIndicator1').classList.remove('active');
-            document.getElementById('stepIndicator2').classList.add('active');
-        }
-
-        function backToStep1() {
-            document.getElementById('step2').style.display = 'none';
-            document.getElementById('step1').style.display = 'block';
-            document.getElementById('stepIndicator2').classList.remove('active');
-            document.getElementById('stepIndicator1').classList.add('active');
-        }
-
-        function setupForm() {
-            const form = document.getElementById('contactForm');
-            const messageInput = document.getElementById('message');
-            const charCount = document.getElementById('charCount');
-
-            messageInput.addEventListener('input', function() {
-                charCount.textContent = this.value.length;
-                charCount.classList.toggle('text-danger', this.value.length > 2000);
-            });
-
-            form.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                const submitBtn = document.getElementById('submitBtn');
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>' + (t('support.contact.sending') || 'Submitting...');
-
-                try {
-                    const data = {
-                        category: selectedCategory,
-                        subject: document.getElementById('subject').value.trim(),
-                        message: document.getElementById('message').value.trim(),
-                        related_order_id: document.getElementById('relatedOrderId').value.trim() || null
-                    };
-
-                    if (!isLoggedIn) {
-                        data.guest_name = document.getElementById('guestName').value.trim();
-                        data.guest_email = document.getElementById('guestEmail').value.trim();
-                    }
-
-                    const response = await fetch(`${API_BASE}/support/tickets`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include',
-                        body: JSON.stringify(data)
-                    });
-
-                    const result = await response.json();
-
-                    if (result.success) {
-                        showSuccess(result.ticket.ticket_number);
-                    } else {
-                        alert(result.error || t('support.contact.error') || 'Failed to submit. Please try again.');
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>' + (t('support.contact.send') || 'Submit Request');
-                    }
-                } catch (error) {
-                    console.error('Submit error:', error);
-                    alert(t('support.contact.error') || 'Failed to submit. Please try again later.');
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>' + (t('support.contact.send') || 'Submit Request');
-                }
-            });
-        }
-
-        function showSuccess(ticketNumber) {
-            document.getElementById('step2').style.display = 'none';
-            document.getElementById('successSection').style.display = 'block';
-            document.getElementById('ticketNumber').textContent = ticketNumber;
-            document.querySelector('.step-indicator').style.display = 'none';
-            document.querySelector('.wizard-notice').style.display = 'none';
-            
-            if (isLoggedIn) {
-                document.getElementById('ticketLink').style.display = 'block';
-            }
-        }
-    </script>
+document.addEventListener('languageChanged', () => { if (cCats.length) { renderCats(); if (selectedCat) selectCat(selectedCat); } });
+document.addEventListener('DOMContentLoaded', loadContact);
+</script>
 </body>
 </html>
