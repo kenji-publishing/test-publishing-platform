@@ -347,7 +347,7 @@ window.translations.en = {
         uploadDragText: 'Drag & Drop Files Here',
         uploadOrText: 'or click to browse',
         btnBrowseFiles: 'Browse Files',
-        uploadFormats: 'Supported formats: TXT, Word (.docx)',
+        uploadFormats: 'Manuscript: TXT or Word (.docx). Manga pages are uploaded separately as JPG, PNG, WEBP or PDF.',
         sectionCover: 'Cover Image (Optional)',
         hintCover: 'Recommended size: 600x900px',
         sectionAiDisclosure: 'AI Usage Disclosure',

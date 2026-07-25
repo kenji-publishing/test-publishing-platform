@@ -347,7 +347,7 @@ window.translations.de = {
         uploadDragText: 'Dateien hierher ziehen',
         uploadOrText: 'oder klicken zum Durchsuchen',
         btnBrowseFiles: 'Dateien durchsuchen',
-        uploadFormats: 'Unterstützte Formate: TXT, Word (.docx)',
+        uploadFormats: 'Manuskript: TXT oder Word (.docx). Manga-Seiten werden separat als JPG, PNG, WEBP oder PDF hochgeladen.',
         sectionCover: 'Coverbild (optional)',
         hintCover: 'Empfohlene Größe: 600x900px',
         sectionAiDisclosure: 'KI-Nutzungserklärung',

@@ -347,7 +347,7 @@ window.translations.ar = {
         uploadDragText: 'اسحب وأفلت الملفات هنا',
         uploadOrText: 'أو انقر للتصفح',
         btnBrowseFiles: 'تصفح الملفات',
-        uploadFormats: 'الصيغ المدعومة: TXT، Word (.docx)',
+        uploadFormats: 'المخطوطة: TXT أو Word (.docx). تُرفع صفحات المانغا بشكل منفصل بصيغة JPG أو PNG أو WEBP أو PDF.',
         sectionCover: 'صورة الغلاف (اختياري)',
         hintCover: 'الحجم الموصى به: 600×900 بكسل',
         sectionAiDisclosure: 'إفصاح استخدام الذكاء الاصطناعي',

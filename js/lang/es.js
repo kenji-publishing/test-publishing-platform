@@ -347,7 +347,7 @@ window.translations.es = {
         uploadDragText: 'Arrastra y suelta archivos aquí',
         uploadOrText: 'o haz clic para explorar',
         btnBrowseFiles: 'Explorar archivos',
-        uploadFormats: 'Formatos compatibles: TXT, Word (.docx)',
+        uploadFormats: 'Manuscrito: TXT o Word (.docx). Las páginas de manga se suben aparte en JPG, PNG, WEBP o PDF.',
         sectionCover: 'Imagen de portada (opcional)',
         hintCover: 'Tamaño recomendado: 600x900px',
         sectionAiDisclosure: 'Declaración de uso de IA',
