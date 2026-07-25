@@ -564,22 +564,6 @@
 
                 <!-- Right Column -->
                 <div class="col-lg-4">
-                    <!-- AI Translation Usage -->
-                    <div class="usage-card fade-in mb-4">
-                        <div class="usage-header">
-                            <h3><i class="fas fa-robot me-2 text-accent"></i><span data-i18n="dashboard.aiTranslation.title">AI Translation</span></h3>
-                            <span class="badge badge-accent" data-i18n="dashboard.aiTranslation.freeTier">Free Tier</span>
-                        </div>
-                        <div class="text-center my-4">
-                            <div class="usage-count" id="aiUsageCount">0 / 5</div>
-                            <div class="usage-label" data-i18n="dashboard.aiTranslation.worksTranslated">Works translated this month</div>
-                        </div>
-                        <div class="progress-custom mb-3">
-                            <div class="progress-bar" id="aiUsageBar" style="width: 0%"></div>
-                        </div>
-                        <p class="text-center mb-0" style="font-size: var(--font-size-sm); color: var(--color-text-secondary);" id="aiUsageRemaining" data-i18n="dashboard.aiTranslation.freeRemaining">5 free translations remaining</p>
-                    </div>
-
                     <!-- Quick Actions -->
                     <h3 class="mb-3" style="font-size: var(--font-size-lg);" data-i18n="dashboard.quickActions">Quick Actions</h3>
                     <div class="quick-actions fade-in">
@@ -697,6 +681,8 @@
         // 多言語対応テキスト
         const uiText = {
             profile: { en: 'Profile', ja: 'プロフィール', zh: '个人资料', es: 'Perfil', fr: 'Profil', de: 'Profil', ko: '프로필', ar: 'الملف الشخصي', pt: 'Perfil', it: 'Profilo' },
+            freeLabel: { en: 'Free', ja: '無料', zh: '免费', es: 'Gratis', fr: 'Gratuit', de: 'Kostenlos', ko: '무료', ar: 'مجاني', pt: 'Grátis', it: 'Gratis' },
+            viewsLabel: { en: 'views', ja: '閲覧', zh: '浏览', es: 'vistas', fr: 'vues', de: 'Aufrufe', ko: '조회', ar: 'مشاهدات', pt: 'visualizações', it: 'visualizzazioni' },
             emptyWorksTitle: { en: 'No works yet', ja: 'まだ作品がありません', zh: '暂无作品', es: 'Aún no hay obras', fr: 'Pas encore d\'œuvres', de: 'Noch keine Werke', ko: '아직 작품이 없습니다', ar: 'لا توجد أعمال بعد', pt: 'Ainda não há obras', it: 'Ancora nessuna opera' },
             emptyWorksDesc: { en: 'Start by uploading your first work to share with the world.', ja: '最初の作品をアップロードして、世界中の読者に届けましょう。', zh: '上传您的第一部作品，与全世界分享。', es: 'Comienza subiendo tu primera obra para compartir con el mundo.', fr: 'Commencez par télécharger votre première œuvre à partager avec le monde.', de: 'Beginnen Sie damit, Ihr erstes Werk hochzuladen und mit der Welt zu teilen.', ko: '첫 번째 작품을 업로드하여 전 세계와 공유하세요.', ar: 'ابدأ بتحميل عملك الأول لمشاركته مع العالم.', pt: 'Comece enviando seu primeiro trabalho para compartilhar com o mundo.', it: 'Inizia caricando la tua prima opera per condividerla con il mondo.' },
             emptyWorksBtn: { en: 'Upload Your First Work', ja: '最初の作品をアップロード', zh: '上传您的第一部作品', es: 'Sube tu primera obra', fr: 'Téléchargez votre première œuvre', de: 'Laden Sie Ihr erstes Werk hoch', ko: '첫 번째 작품 업로드', ar: 'حمّل عملك الأول', pt: 'Envie seu primeiro trabalho', it: 'Carica la Tua Prima Opera' },
@@ -795,110 +781,111 @@
         }
         
         // Load user info
-// Load dashboard data (demo - replace with API calls)
-        function loadDashboardData() {
-            // This is demo mode - in production, this would fetch from API
-            const isDemo = new URLSearchParams(window.location.search).has('demo');
-            
-            if (isDemo) {
-                // Show demo data
-                document.getElementById('statEarnings').textContent = '$1,234.56';
-                document.getElementById('statWorks').textContent = '12';
-                document.getElementById('statViews').textContent = '8,456';
-                document.getElementById('statTranslations').textContent = '28';
-                
-                document.getElementById('statEarningsChange').innerHTML = '<i class="fas fa-arrow-up"></i> +12.5% this month';
-                document.getElementById('statWorksChange').innerHTML = '<i class="fas fa-arrow-up"></i> +2 this month';
-                document.getElementById('statViewsChange').innerHTML = '<i class="fas fa-arrow-up"></i> +15.2% this month';
-                document.getElementById('statTranslationsChange').innerHTML = '<i class="fas fa-arrow-up"></i> +8 this month';
-                
-                // Show demo works
-                document.getElementById('emptyWorksState').style.display = 'none';
-                document.getElementById('worksList').style.display = 'block';
-                document.getElementById('worksList').innerHTML = `
-                    <div class="work-item">
-                        <div class="work-cover"><i class="fas fa-book"></i></div>
-                        <div class="work-info">
-                            <div class="work-title">The Adventure of Magic Academy</div>
-                            <div class="work-meta"><span class="badge badge-soft me-2">Fiction</span>Translated to 5 languages</div>
-                        </div>
-                        <div class="work-stats">
-                            <div class="work-earnings">$234.50</div>
-                            <div class="work-views">1,234 views</div>
-                        </div>
-                    </div>
-                    <div class="work-item">
-                        <div class="work-cover"><i class="fas fa-book"></i></div>
-                        <div class="work-info">
-                            <div class="work-title">Whispers of Tomorrow</div>
-                            <div class="work-meta"><span class="badge badge-soft me-2">Romance</span>Translated to 3 languages</div>
-                        </div>
-                        <div class="work-stats">
-                            <div class="work-earnings">$156.00</div>
-                            <div class="work-views">892 views</div>
-                        </div>
-                    </div>
-                    <div class="work-item">
-                        <div class="work-cover"><i class="fas fa-book"></i></div>
-                        <div class="work-info">
-                            <div class="work-title">Digital Dreams: A Cyberpunk Story</div>
-                            <div class="work-meta"><span class="badge badge-soft me-2">Sci-Fi</span>Translated to 7 languages</div>
-                        </div>
-                        <div class="work-stats">
-                            <div class="work-earnings">$89.25</div>
-                            <div class="work-views">567 views</div>
-                        </div>
-                    </div>
-                `;
-                
-                // Show demo translations
-                document.getElementById('emptyTranslationsState').style.display = 'none';
-                document.getElementById('translationsList').style.display = 'block';
-                document.getElementById('translationsList').innerHTML = `
-                    <div class="translation-item">
-                        <div class="lang-flag">🇬🇧</div>
-                        <div class="translation-info">
-                            <div class="translation-title">The Adventure of Magic Academy → English</div>
-                            <div class="translation-progress">Completed 2 hours ago</div>
-                        </div>
-                        <span class="status-badge completed"><i class="fas fa-check me-1"></i>Completed</span>
-                    </div>
-                    <div class="translation-item">
-                        <div class="lang-flag">🇪🇸</div>
-                        <div class="translation-info">
-                            <div class="translation-title">Whispers of Tomorrow → Spanish</div>
-                            <div class="translation-progress">65% complete • 3 min remaining</div>
-                        </div>
-                        <span class="status-badge in-progress"><i class="fas fa-spinner fa-spin me-1"></i>In Progress</span>
-                    </div>
-                    <div class="translation-item">
-                        <div class="lang-flag">🇰🇷</div>
-                        <div class="translation-info">
-                            <div class="translation-title">Digital Dreams → Korean</div>
-                            <div class="translation-progress">Waiting in queue • Position 2</div>
-                        </div>
-                        <span class="status-badge pending"><i class="fas fa-clock me-1"></i>Pending</span>
-                    </div>
-                `;
-                
-                // Update AI usage
-                document.getElementById('aiUsageCount').textContent = '3 / 5';
-                document.getElementById('aiUsageBar').style.width = '60%';
-                document.getElementById('aiUsageRemaining').textContent = getL(uiText.freeRemaining).replace('{count}', '2');
-                
-                // Load analytics demo data
-                loadAnalyticsDemoData();
+        // ダッシュボードの数字と一覧を実データで描画する。
+        // 作品・閲覧数は /api/works/my、収益は /api/analytics/author/overview が正。
+        // （以前はデモ用の固定値か全部ゼロを出していて、実績があっても
+        //   「まだ作品がありません」と表示されていた）
+        async function loadDashboardData() {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+            const headers = { 'Authorization': 'Bearer ' + token };
+            const api = (window.API_ORIGIN || '');
+
+            // 挨拶に実名を出す（従来は "Creator" のまま固定だった）
+            try {
+                const me = JSON.parse(localStorage.getItem('user') || '{}');
+                const name = me.penName || me.firstName || (me.email ? String(me.email).split('@')[0] : '');
+                if (name) document.getElementById('welcomeName').textContent = name;
+            } catch (e) { /* 表示名が取れなければ既定のまま */ }
+
+            let works = [];
+            try {
+                const resp = await fetch(api + '/api/works/my', { headers });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    works = data.works || (Array.isArray(data) ? data : []);
+                }
+            } catch (e) { console.error('Failed to load works:', e); }
+
+            const published = works.filter(w => w.status === 'published');
+            const totalViews = works.reduce((sum, w) => sum + (parseInt(w.view_count, 10) || 0), 0);
+            // 翻訳版＝原語と表示言語が異なる作品
+            const translated = works.filter(w => w.language && w.original_language && w.language !== w.original_language);
+
+            document.getElementById('statWorks').textContent = published.length.toLocaleString();
+            document.getElementById('statViews').textContent = totalViews.toLocaleString();
+            document.getElementById('statTranslations').textContent = translated.length.toLocaleString();
+
+            // 収益は通貨つきで表示する（以前は通貨に関わらず $ 固定だった）
+            try {
+                const resp = await fetch(api + '/api/analytics/author/overview', { headers });
+                if (resp.ok) {
+                    const d = await resp.json();
+                    const rev = (d.overview && d.overview.revenue) || {};
+                    const cur = rev.currency || 'JPY';
+                    const val = Number(rev.value || 0);
+                    document.getElementById('statEarnings').textContent =
+                        (typeof formatWorkPrice === 'function') ? formatWorkPrice(val, cur) : (cur + ' ' + val.toLocaleString());
+                }
+            } catch (e) { console.error('Failed to load revenue:', e); }
+
+            renderDashboardWorks(published, works);
+        }
+
+        function renderDashboardWorks(published, allWorks) {
+            const listEl = document.getElementById('worksList');
+            const emptyEl = document.getElementById('emptyWorksState');
+            const esc = (t) => { const d = document.createElement('div'); d.textContent = t == null ? '' : String(t); return d.innerHTML; };
+
+            if (!published.length) {
+                emptyEl.style.display = 'block';
+                listEl.style.display = 'none';
             } else {
-                // Empty state - no data
-                document.getElementById('emptyWorksState').style.display = 'block';
-                document.getElementById('worksList').style.display = 'none';
-                document.getElementById('emptyTranslationsState').style.display = 'block';
-                document.getElementById('translationsList').style.display = 'none';
-                
-                // Update AI usage for empty state
-                document.getElementById('aiUsageCount').textContent = '0 / 5';
-                document.getElementById('aiUsageBar').style.width = '0%';
-                document.getElementById('aiUsageRemaining').textContent = getL(uiText.freeRemaining).replace('{count}', '5');
+                emptyEl.style.display = 'none';
+                listEl.style.display = 'block';
+                listEl.innerHTML = published
+                    .slice()
+                    .sort((a, b) => (parseInt(b.view_count, 10) || 0) - (parseInt(a.view_count, 10) || 0))
+                    .slice(0, 5)
+                    .map(w => {
+                        const views = (parseInt(w.view_count, 10) || 0).toLocaleString();
+                        const price = w.is_free
+                            ? getL(uiText.freeLabel)
+                            : ((typeof formatWorkPrice === 'function') ? formatWorkPrice(w.price, w.currency) : (w.currency + ' ' + w.price));
+                        const cover = (w.cover_image || w.cover_image_url)
+                            ? '<img src="' + esc(w.cover_image || w.cover_image_url) + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:6px;">'
+                            : '<i class="fas fa-book"></i>';
+                        return '<a class="work-item" href="work-detail.html?id=' + esc(w.work_id) + '" style="text-decoration:none;color:inherit;">' +
+                            '<div class="work-cover">' + cover + '</div>' +
+                            '<div class="work-info">' +
+                                '<div class="work-title">' + esc(w.title) + '</div>' +
+                                '<div class="work-meta">' + (w.genre ? '<span class="badge badge-soft me-2">' + esc(w.genre) + '</span>' : '') + esc(price) + '</div>' +
+                            '</div>' +
+                            '<div class="work-stats">' +
+                                '<div class="work-views">' + views + ' ' + esc(getL(uiText.viewsLabel)) + '</div>' +
+                            '</div>' +
+                        '</a>';
+                    }).join('');
+            }
+
+            // 翻訳版の一覧（原語と異なる言語の作品）
+            const trList = document.getElementById('translationsList');
+            const trEmpty = document.getElementById('emptyTranslationsState');
+            const translations = (allWorks || []).filter(w => w.language && w.original_language && w.language !== w.original_language);
+            if (!translations.length) {
+                trEmpty.style.display = 'block';
+                trList.style.display = 'none';
+            } else {
+                trEmpty.style.display = 'none';
+                trList.style.display = 'block';
+                trList.innerHTML = translations.slice(0, 5).map(w =>
+                    '<a class="work-item" href="work-detail.html?id=' + esc(w.work_id) + '" style="text-decoration:none;color:inherit;">' +
+                        '<div class="work-cover"><i class="fas fa-language"></i></div>' +
+                        '<div class="work-info">' +
+                            '<div class="work-title">' + esc(w.title) + '</div>' +
+                            '<div class="work-meta">' + esc(String(w.original_language).toUpperCase()) + ' → ' + esc(String(w.language).toUpperCase()) + '</div>' +
+                        '</div>' +
+                    '</a>').join('');
             }
         }
 

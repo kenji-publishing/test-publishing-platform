@@ -790,6 +790,7 @@
         function initPage() {
             updateAuthNav();
             loadUserData();
+            refreshUserFromServer();
             setupTabs();
             setupDeleteConfirmation();
             handleHashNavigation();
@@ -886,6 +887,20 @@
             });
         }
         
+        // localStorageのユーザー情報にはメール確認状態が入っていないため、
+        // サーバーの現在値で上書きする（入っていないと全員が「未確認」表示になっていた）
+        async function refreshUserFromServer() {
+            const token = localStorage.getItem('token');
+            if (!token || isDemo) return;
+            try {
+                const resp = await fetch(`${API_BASE}/users/profile`, { headers: { 'Authorization': 'Bearer ' + token } });
+                if (!resp.ok) return;
+                const data = await resp.json();
+                const u = data.user || data;
+                if (u) { currentUser = Object.assign({}, currentUser, u); loadUserData(); }
+            } catch (e) { /* 取得できなければlocalStorageの内容のまま表示する */ }
+        }
+
         function loadUserData() {
             if (!currentUser) return;
             document.getElementById('firstName').value = currentUser.first_name || currentUser.firstName || '';
@@ -895,10 +910,13 @@
             document.getElementById('preferredLanguage').value = currentUser.preferred_language || currentUser.preferredLanguage || 'ja';
             document.getElementById('currentEmail').textContent = currentUser.email || 'N/A';
             const emailVerified = currentUser.email_verified || currentUser.emailVerified;
+            const evEl = document.getElementById('emailVerified');
             if (!emailVerified) {
-                document.getElementById('emailVerified').innerHTML = '<i class="fas fa-exclamation-circle text-warning me-1"></i> <span data-i18n="accountSettings.security.notVerified">未確認</span>';
-                if (typeof applyTranslations === 'function') applyTranslations();
+                evEl.innerHTML = '<i class="fas fa-exclamation-circle text-warning me-1"></i> <span data-i18n="accountSettings.security.notVerified">未確認</span>';
+            } else {
+                evEl.innerHTML = '<i class="fas fa-check-circle text-success me-1"></i> <span data-i18n="accountSettings.security.verified">確認済み</span>';
             }
+            if (typeof applyTranslations === 'function') applyTranslations();
             const avatarUrl = currentUser.avatar_url || currentUser.avatarUrl;
             if (avatarUrl) {
                 document.getElementById('avatarPreview').innerHTML = `<img src="${avatarUrl}" alt="Avatar">`;
