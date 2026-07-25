@@ -38,6 +38,7 @@ window.translations.en = {
         contact: 'Contact'
     },
     home: {
+        pageTitle: 'AuctLect - Discover Stories from Around the World',
         hero: {
             title: 'Discover Stories from Around the World',
             subtitle: 'Read and publish stories in 10 languages.',
@@ -91,7 +92,14 @@ window.translations.en = {
             goToDashboard: 'Go to Dashboard'
         }
     },
+    revenueSharing: {
+        pageTitle: 'Revenue Sharing - AuctLect',
+    },
+    verifyEmail: {
+        pageTitle: 'Verify your email - AuctLect',
+    },
     login: {
+        pageTitle: 'Sign In - AuctLect',
         welcomeBack: 'Welcome Back',
         subtitle: 'Sign in to continue',
         email: 'Email',
@@ -2072,10 +2080,12 @@ window.translations.en = {
         profileLoadFailed: 'Failed to load profile'
     },
     confirmDelete: {
+        pageTitle: 'Confirm Account Deletion - AuctLect',
         default: 'Deletion failed',
         tryAgain: 'An error occurred. Please try again later.'
     },
     editor: {
+        pageTitle: 'Editor - AuctLect',
         paragraph: 'Paragraph',
         h1: 'Heading 1',
         h2: 'Heading 2',

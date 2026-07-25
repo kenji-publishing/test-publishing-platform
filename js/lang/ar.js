@@ -38,6 +38,7 @@ window.translations.ar = {
         contact: 'اتصل بنا'
     },
     home: {
+        pageTitle: 'AuctLect - اكتشف قصصًا من جميع أنحاء العالم',
         hero: {
             title: 'اكتشف قصصاً من جميع أنحاء العالم',
             subtitle: 'اقرأ وانشر القصص بـ 10 لغات.',
@@ -91,7 +92,14 @@ window.translations.ar = {
             goToDashboard: 'الذهاب إلى لوحة التحكم'
         }
     },
+    revenueSharing: {
+        pageTitle: 'تقاسم الإيرادات - AuctLect',
+    },
+    verifyEmail: {
+        pageTitle: 'تأكيد بريدك الإلكتروني - AuctLect',
+    },
     login: {
+        pageTitle: 'تسجيل الدخول - AuctLect',
         welcomeBack: 'مرحباً بعودتك',
         subtitle: 'سجل الدخول للمتابعة',
         email: 'البريد الإلكتروني',
@@ -2072,10 +2080,12 @@ window.translations.ar = {
         profileLoadFailed: 'فشل تحميل الملف الشخصي'
     },
     confirmDelete: {
+        pageTitle: 'تأكيد حذف الحساب - AuctLect',
         default: 'فشل الحذف',
         tryAgain: 'حدث خطأ. يرجى المحاولة لاحقاً.'
     },
     editor: {
+        pageTitle: 'المحرر - AuctLect',
         paragraph: 'فقرة',
         h1: 'عنوان 1',
         h2: 'عنوان 2',

@@ -1389,47 +1389,6 @@
             }
         });
 
-        // ========== Notification Bell Dropdown ==========
-        var NOTIF_DEMO = [
-            { type: 'sale', icon: 'fa-dollar-sign', color: 'var(--color-success)', title: 'Work purchased!', msg: 'Magic Academy Adventure was purchased. You earned $9.80.', time: new Date(Date.now()-30*60000).toISOString(), read: false },
-            { type: 'deadline_warning', icon: 'fa-exclamation-triangle', color: 'var(--color-warning)', title: 'Deadline approaching', msg: 'Deadline for "Magic Academy" is in 3 days.', time: new Date(Date.now()-60*60000).toISOString(), read: false },
-            { type: 'message_received', icon: 'fa-envelope', color: 'var(--color-accent)', title: 'New message', msg: 'New message from Yuki Tanaka.', time: new Date(Date.now()-2*60*60000).toISOString(), read: false },
-            { type: 'agreement_signed', icon: 'fa-check-circle', color: 'var(--color-success)', title: 'Agreement signed', msg: 'Tanaka Yuki signed the agreement for "Digital Dreams".', time: new Date(Date.now()-3*60*60000).toISOString(), read: true },
-            { type: 'progress_report', icon: 'fa-tasks', color: 'var(--color-info)', title: 'Progress report', msg: 'Sophie Martin submitted a progress report: 75% complete.', time: new Date(Date.now()-4*60*60000).toISOString(), read: true }
-        ];
-        var NOTIF_LINKS = { sale:'dashboard.html', deadline_warning:'dashboard.html?tab=collabs', message_received:'messages.html', agreement_signed:'agreements.html', progress_report:'dashboard.html?tab=collabs', translation_request:'messages.html', editing_request:'messages.html' };
-
-        function toggleNotifDropdown(e) {
-            e.preventDefault(); e.stopPropagation();
-            var dd = document.getElementById('notifDropdown');
-            dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
-            if (dd.style.display === 'block') renderNotifDropdown();
-        }
-        function renderNotifDropdown() {
-            var list = document.getElementById('notifDropdownList');
-            if (!NOTIF_DEMO.length) { list.innerHTML = '<div style="padding:1rem;text-align:center;color:var(--color-text-secondary);font-size:var(--font-size-sm);">No notifications</div>'; return; }
-            list.innerHTML = NOTIF_DEMO.slice(0,5).map(function(n) {
-                var ago = Math.round((Date.now() - new Date(n.time).getTime()) / 60000);
-                var agoStr = ago < 60 ? ago + 'm' : Math.round(ago/60) + 'h';
-                return '<a href="' + (NOTIF_LINKS[n.type] || 'messages.html') + '" style="display:flex;gap:0.5rem;padding:0.6rem 1rem;text-decoration:none;color:inherit;border-bottom:1px solid var(--color-border);' + (!n.read ? 'background:rgba(139,115,85,0.05);' : '') + '">' +
-                    '<div style="width:28px;height:28px;border-radius:50%;background:' + n.color + ';color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.7rem;"><i class="fas ' + n.icon + '"></i></div>' +
-                    '<div style="flex:1;min-width:0;"><div style="font-size:var(--font-size-xs);font-weight:' + (!n.read ? '600' : '400') + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + n.title + '</div>' +
-                    '<div style="font-size:var(--font-size-xs);color:var(--color-text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + n.msg + '</div></div>' +
-                    '<div style="font-size:var(--font-size-xs);color:var(--color-text-secondary);flex-shrink:0;">' + agoStr + '</div></a>';
-            }).join('');
-        }
-        document.addEventListener('click', function(e) {
-            var wrapper = document.getElementById('notifDropdownWrapper');
-            if (wrapper && !wrapper.contains(e.target)) {
-                document.getElementById('notifDropdown').style.display = 'none';
-            }
-        });
-        // Update badge
-        (function() {
-            var unread = NOTIF_DEMO.filter(function(n) { return !n.read; }).length;
-            var badge = document.getElementById('notificationBadge');
-            if (badge && unread > 0) { badge.textContent = unread; badge.style.display = 'inline-block'; }
-        })();
     </script>
 </body>
 </html>

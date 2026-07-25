@@ -38,6 +38,7 @@ window.translations.ko = {
         contact: '문의하기'
     },
     home: {
+        pageTitle: 'AuctLect - 전 세계의 이야기를 만나다',
         hero: {
             title: '전 세계의 이야기를 발견하세요',
             subtitle: '10개 언어로 이야기를 읽고 출판하세요.',
@@ -91,7 +92,14 @@ window.translations.ko = {
             goToDashboard: '대시보드로 이동'
         }
     },
+    revenueSharing: {
+        pageTitle: '수익 배분 - AuctLect',
+    },
+    verifyEmail: {
+        pageTitle: '이메일 주소 확인 - AuctLect',
+    },
     login: {
+        pageTitle: '로그인 - AuctLect',
         welcomeBack: '다시 오신 것을 환영합니다',
         subtitle: '계속하려면 로그인하세요',
         email: '이메일',
@@ -2072,10 +2080,12 @@ window.translations.ko = {
         profileLoadFailed: '프로필 로드 실패'
     },
     confirmDelete: {
+        pageTitle: '계정 삭제 확인 - AuctLect',
         default: '삭제 실패',
         tryAgain: '오류가 발생했습니다. 나중에 다시 시도해 주세요.'
     },
     editor: {
+        pageTitle: '텍스트 편집기 - AuctLect',
         paragraph: '단락',
         h1: '제목 1',
         h2: '제목 2',

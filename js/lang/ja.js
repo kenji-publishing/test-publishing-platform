@@ -38,6 +38,7 @@ window.translations.ja = {
         contact: 'お問い合わせ'
     },
     home: {
+        pageTitle: 'AuctLect - 世界中の物語に出会う',
         hero: {
             title: '世界中の物語を発見しよう',
             subtitle: '10言語で物語を読んで出版',
@@ -91,7 +92,14 @@ window.translations.ja = {
             goToDashboard: 'ダッシュボードへ'
         }
     },
+    revenueSharing: {
+        pageTitle: '収益の分配について - AuctLect',
+    },
+    verifyEmail: {
+        pageTitle: 'メールアドレスの確認 - AuctLect',
+    },
     login: {
+        pageTitle: 'ログイン - AuctLect',
         welcomeBack: 'おかえりなさい',
         subtitle: 'ログインして続ける',
         email: 'メールアドレス',
@@ -2072,10 +2080,12 @@ window.translations.ja = {
         profileLoadFailed: 'プロフィールの読み込みに失敗しました'
     },
     confirmDelete: {
+        pageTitle: 'アカウント削除の確認 - AuctLect',
         default: '削除に失敗しました',
         tryAgain: 'エラーが発生しました。後でもう一度お試しください。'
     },
     editor: {
+        pageTitle: 'テキストエディター - AuctLect',
         paragraph: '段落',
         h1: '見出し1',
         h2: '見出し2',

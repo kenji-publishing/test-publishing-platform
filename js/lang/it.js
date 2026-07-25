@@ -38,6 +38,7 @@ window.translations.it = {
         contact: 'Contatto'
     },
     home: {
+        pageTitle: 'AuctLect - Scopri storie da tutto il mondo',
         hero: {
             title: 'Scopri Storie da Tutto il Mondo',
             subtitle: 'Leggi e pubblica storie in 10 lingue.',
@@ -91,7 +92,14 @@ window.translations.it = {
             goToDashboard: 'Vai al Pannello'
         }
     },
+    revenueSharing: {
+        pageTitle: 'Ripartizione dei ricavi - AuctLect',
+    },
+    verifyEmail: {
+        pageTitle: 'Verifica la tua email - AuctLect',
+    },
     login: {
+        pageTitle: 'Accedi - AuctLect',
         welcomeBack: 'Bentornato',
         subtitle: 'Accedi per continuare',
         email: 'Email',
@@ -2072,10 +2080,12 @@ window.translations.it = {
         profileLoadFailed: 'Caricamento profilo fallito'
     },
     confirmDelete: {
+        pageTitle: 'Conferma eliminazione account - AuctLect',
         default: 'Eliminazione fallita',
         tryAgain: 'Si è verificato un errore. Riprova più tardi.'
     },
     editor: {
+        pageTitle: 'Editor - AuctLect',
         paragraph: 'Paragrafo',
         h1: 'Intestazione 1',
         h2: 'Intestazione 2',

@@ -38,6 +38,7 @@ window.translations.zh = {
         contact: '联系我们'
     },
     home: {
+        pageTitle: 'AuctLect - 發現來自世界各地的故事',
         hero: {
             title: '发现世界各地的故事',
             subtitle: '用10种语言阅读和发布',
@@ -91,7 +92,14 @@ window.translations.zh = {
             goToDashboard: '前往控制台'
         }
     },
+    revenueSharing: {
+        pageTitle: '收益分配 - AuctLect',
+    },
+    verifyEmail: {
+        pageTitle: '確認電子郵件地址 - AuctLect',
+    },
     login: {
+        pageTitle: '登入 - AuctLect',
         welcomeBack: '欢迎回来',
         subtitle: '登录继续',
         email: '邮箱',
@@ -2072,10 +2080,12 @@ window.translations.zh = {
         profileLoadFailed: '加载资料失败'
     },
     confirmDelete: {
+        pageTitle: '確認刪除帳戶 - AuctLect',
         default: '删除失败',
         tryAgain: '发生错误。请稍后重试。'
     },
     editor: {
+        pageTitle: '文字編輯器 - AuctLect',
         paragraph: '段落',
         h1: '标题1',
         h2: '标题2',
