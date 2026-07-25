@@ -315,10 +315,28 @@ router.post('/create-checkout-session', authenticate, async (req, res) => {
       return res.status(400).json({ error: 'This work is free' });
     }
 
+    // --- 通常購入の事前チェック（二重課金防止）---
+    // 所有判定をフロントのlocalStorageに任せると、別ブラウザ・別端末から
+    // 「購入する」が再び押せてしまう。サーバー側で必ず止める。
+    // 返金済み(refunded)は再購入を許す（買い直しは正当な操作）
+    const isGift = !!giftTo;
+    if (!isGift) {
+      if (String(work.author_id) === String(req.user.userId)) {
+        return res.status(400).json({ error: 'You already have access to your own work', code: 'ALREADY_OWNED' });
+      }
+      const owned = await db.query(
+        `SELECT 1 FROM purchases
+         WHERE user_id = $1 AND work_id = $2 AND payment_status = 'completed'`,
+        [req.user.userId, workId]
+      );
+      if (owned.rows.length > 0) {
+        return res.status(400).json({ error: 'You already own this work', code: 'ALREADY_OWNED' });
+      }
+    }
+
     // --- プレゼントの場合の事前チェック ---
     // 「すでに所有している人には贈れない」をここで止めるのが肝心。
     // 支払い後に発覚すると手動返金が必要になるため（Webhook側は最後の砦）
-    const isGift = !!giftTo;
     let recipient = null;
     let message = null;
     if (isGift) {
@@ -520,40 +538,97 @@ router.post('/webhook', async (req, res) => {
     // draws a different pooled connection per call, which silently breaks
     // the transaction (partial writes under failure).
     const client = await db.pool.connect();
+    let undeliverable = null;
     try {
       await client.query('BEGIN');
 
-      // Record the purchase (schema: payment_status / transaction_id — see phase8d)
-      await client.query(
+      // 冪等性: Webhookは再送されうる。同じセッションの取引が既に記録済みなら
+      // 何もしない（従来はここが無く、再送で取引・分配が二重記録された）
+      const seen = await client.query(
+        `SELECT 1 FROM transactions
+         WHERE payment_gateway_id = $1 AND transaction_type = 'purchase'`,
+        [session.id]
+      );
+      if (seen.rows.length > 0) {
+        await client.query('ROLLBACK');
+        console.log(`Payment webhook resend ignored: session=${session.id}`);
+        return res.json({ received: true });
+      }
+
+      // 所有権の記録。返金済み(refunded)の行は買い直しとして復活させる。
+      // completed の行が既にある（＝決済ページを開いたまま別画面で購入済みの
+      // レース）場合は0件になる → 取引も分配も作らず、返金対応に回す
+      const deliveredRow = await client.query(
         `INSERT INTO purchases (user_id, work_id, amount, currency, payment_method, payment_status, transaction_id)
          VALUES ($1, $2, $3, $4, 'stripe', 'completed', $5)
-         ON CONFLICT (user_id, work_id) DO NOTHING`,
+         ON CONFLICT (user_id, work_id) DO UPDATE
+           SET amount = EXCLUDED.amount,
+               currency = EXCLUDED.currency,
+               payment_method = EXCLUDED.payment_method,
+               payment_status = 'completed',
+               transaction_id = EXCLUDED.transaction_id,
+               created_at = CURRENT_TIMESTAMP
+           WHERE purchases.payment_status <> 'completed'
+         RETURNING purchase_id`,
         [buyer_id, work_id, amount, currency, session.id]
       );
 
-      // Record the transaction
-      await client.query(
-        `INSERT INTO transactions (user_id, work_id, transaction_type, amount, currency, payment_method, payment_gateway_id, status)
-         VALUES ($1, $2, 'purchase', $3, $4, 'stripe', $5, 'completed')`,
-        [buyer_id, work_id, amount, currency, session.id]
-      );
+      if (deliveredRow.rowCount === 0) {
+        await client.query('COMMIT');
+        console.warn(`Duplicate purchase (already owned): work=${work_id}, buyer=${buyer_id}, session=${session.id} — REFUND REQUIRED`);
+        undeliverable = { work_id, buyer_id, amount, currency };
+      } else {
+        // Record the transaction
+        await client.query(
+          `INSERT INTO transactions (user_id, work_id, transaction_type, amount, currency, payment_method, payment_gateway_id, status)
+           VALUES ($1, $2, 'purchase', $3, $4, 'stripe', $5, 'completed')`,
+          [buyer_id, work_id, amount, currency, session.id]
+        );
 
-      // Create revenue splits (author / collaborators / platform)
-      const splits = await createRevenueSplits(client, {
-        workId: work_id,
-        authorId: author_id,
-        amount,
-        currency,
-        reference: session.id
-      });
+        // Create revenue splits (author / collaborators / platform)
+        const splits = await createRevenueSplits(client, {
+          workId: work_id,
+          authorId: author_id,
+          amount,
+          currency,
+          reference: session.id
+        });
 
-      await client.query('COMMIT');
-      console.log(`Payment completed: work=${work_id}, buyer=${buyer_id}, amount=${amount} ${currency}, splits=${splits.map(s => `${s.role}:${s.amount}`).join(' ')}`);
+        await client.query('COMMIT');
+        console.log(`Payment completed: work=${work_id}, buyer=${buyer_id}, amount=${amount} ${currency}, splits=${splits.map(s => `${s.role}:${s.amount}`).join(' ')}`);
+      }
     } catch (error) {
       await client.query('ROLLBACK');
       console.error('Error processing webhook:', error);
     } finally {
       client.release();
+    }
+
+    // 二重購入だった場合の通知（トランザクション外・非致死）。
+    // 金銭の返金は自動化しない＝管理者がStripeで手動返金する
+    if (undeliverable) {
+      try {
+        const workTitle = (await db.query(`SELECT title FROM works WHERE work_id = $1`, [undeliverable.work_id])).rows[0];
+        await createNotification({
+          userId: undeliverable.buyer_id,
+          type: 'system',
+          title: '二重のご購入を確認しました / Duplicate purchase detected',
+          message: `「${(workTitle && workTitle.title) || ''}」はすでにご購入済みのため、今回のお支払い（${undeliverable.amount} ${undeliverable.currency}）は返金いたします。作品はこれまでどおりお読みいただけます。`,
+          actionUrl: '/pages/library.html'
+        });
+        const admins = (await db.query(`SELECT user_id FROM users WHERE role = 'admin'`)).rows;
+        for (const a of admins) {
+          await createNotification({
+            userId: a.user_id,
+            type: 'system',
+            title: '要対応: 二重購入の返金',
+            message: `同じ作品への二重の支払いを検出しました。Stripeで返金してください。session=${session.id}`,
+            actionUrl: '/pages/admin/index.html#finance',
+            icon: 'fa-triangle-exclamation',
+            iconColor: 'warning'
+          });
+        }
+      } catch (e) { console.error('Duplicate purchase notification failed:', e.message); }
     }
   }
 

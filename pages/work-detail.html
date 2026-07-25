@@ -881,7 +881,13 @@ function escapeHtml(text) {
             document.getElementById('btnReportText').textContent = getL(uiText.reportTitle);
 
             // 購入/ライブラリボタン
-            var owned = isInLibrary(id);
+            // 有料作品の所有判定は**サーバーの購入記録**が正
+            // （localStorageだけだと別ブラウザで「購入する」が再表示され二重課金になる）。
+            // 無料作品は従来どおりlocalStorage管理
+            await fetchServerOwned();
+            var owned = priceNum > 0
+                ? serverOwnedIds.has(String(id))
+                : isInLibrary(id);
             if (owned) {
                 document.getElementById('btnPurchase').style.display = 'none';
                 document.getElementById('btnGetFree').style.display = 'none';
@@ -1021,6 +1027,25 @@ function escapeHtml(text) {
         }
 
         // ========== アクションハンドラー ==========
+        // サーバー上の購入済み作品ID（有料作品の所有判定の正）。ページ表示ごとに1回取得
+        var serverOwnedIds = new Set();
+        var serverOwnedLoaded = false;
+        async function fetchServerOwned() {
+            if (serverOwnedLoaded) return;
+            serverOwnedLoaded = true;
+            var token = localStorage.getItem('token');
+            if (!token) return;
+            try {
+                var resp = await fetch((window.API_ORIGIN || '') + '/api/users/purchases', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!resp.ok) return;
+                ((await resp.json()).purchases || []).forEach(function (p) {
+                    if (p.work_id && p.payment_status === 'completed') serverOwnedIds.add(String(p.work_id));
+                });
+            } catch (e) { /* 取得失敗時は未所有扱い（購入時はサーバーが二重課金を止める） */ }
+        }
+
         async function purchaseWork() {
             const id = getWorkIdFromUrl();
             const token = localStorage.getItem('token');
@@ -1039,7 +1064,18 @@ function escapeHtml(text) {
                     body: JSON.stringify({ workId: id })
                 });
                 const data = await resp.json();
-                if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
+                if (!resp.ok) {
+                    if (data.code === 'ALREADY_OWNED') {
+                        alert(getL({
+                            en: 'You already own this work. It is available in your library.',
+                            ja: 'この作品はすでにご購入済みです。ライブラリからお読みいただけます。'
+                        }));
+                        serverOwnedLoaded = false; // 再取得してボタンを「読む」に切り替える
+                        loadWork();
+                        return;
+                    }
+                    throw new Error(data.error || ('HTTP ' + resp.status));
+                }
                 // Stripeがホストする決済ページへ移動
                 window.location.href = data.url;
             } catch (err) {
