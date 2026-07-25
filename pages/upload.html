@@ -329,6 +329,40 @@
                             </div>
                         </div>
 
+                        <!-- 対象年齢と内容の注意表示（migration 047）
+                             露骨な性的描写は禁止のため18+の選択肢は置かない。
+                             ガイドラインへのリンクを添えて、迷ったら読める形にする -->
+                        <div class="form-card">
+                            <h5><i class="fas fa-user-shield me-2"></i><span id="sectionAudience" data-i18n="upload.sectionAudience">Audience &amp; Content Notices</span></h5>
+                            <p class="text-secondary small mb-3" id="audienceDesc" data-i18n="upload.audienceDesc">Tell readers who this work is suitable for. This is shown on the work page.</p>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold" id="labelAgeRating" data-i18n="upload.labelAgeRating">Suitable for</label>
+                                <select class="form-select" id="ageRating">
+                                    <option value="all" id="ageOptAll" data-i18n="upload.ageOptAll">All ages</option>
+                                    <option value="15" id="ageOpt15" data-i18n="upload.ageOpt15">15+ (contains violence, fear, or suggestive themes)</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-2">
+                                <label class="form-label fw-semibold" id="labelWarnings" data-i18n="upload.labelWarnings">Content notices (tick all that apply)</label>
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.4rem;">
+                                    <label class="form-check"><input class="form-check-input" type="checkbox" name="contentWarning" value="violence"> <span data-i18n="upload.warnViolence">Violence</span></label>
+                                    <label class="form-check"><input class="form-check-input" type="checkbox" name="contentWarning" value="horror"> <span data-i18n="upload.warnHorror">Horror / gore</span></label>
+                                    <label class="form-check"><input class="form-check-input" type="checkbox" name="contentWarning" value="sexual_themes"> <span data-i18n="upload.warnSexualThemes">Suggestive themes</span></label>
+                                    <label class="form-check"><input class="form-check-input" type="checkbox" name="contentWarning" value="substances"> <span data-i18n="upload.warnSubstances">Alcohol, smoking or drugs</span></label>
+                                    <label class="form-check"><input class="form-check-input" type="checkbox" name="contentWarning" value="discrimination"> <span data-i18n="upload.warnDiscrimination">Depicts discrimination</span></label>
+                                    <label class="form-check"><input class="form-check-input" type="checkbox" name="contentWarning" value="self_harm"> <span data-i18n="upload.warnSelfHarm">Self-harm or suicide</span></label>
+                                </div>
+                            </div>
+
+                            <div style="background:rgba(200,80,80,0.07); border:1px solid rgba(200,80,80,0.3); border-radius:8px; padding:0.7rem 0.9rem; font-size:0.83rem;">
+                                <i class="fas fa-circle-exclamation me-1" style="color:#b34747;"></i>
+                                <span data-i18n="upload.explicitBanned">Sexually explicit content is not allowed on AuctLect and will be removed.</span>
+                                <a href="content-guidelines.html" target="_blank" rel="noopener" data-i18n="upload.seeGuidelines">See the Content Guidelines</a>
+                            </div>
+                        </div>
+
                         <!-- 収益受け取りの案内（Stripe等のアカウント不要・受取口座はプロフィールで登録） -->
                         <div style="background:rgba(139,115,85,0.08); border:1px solid rgba(139,115,85,0.35); border-radius:8px; padding:0.75rem 1rem; margin-bottom:1rem; font-size:0.85rem;">
                             <i class="fas fa-university me-1"></i>
@@ -1911,6 +1945,11 @@
                 setSel('aiTextUsage', editWork.ai_text_usage);
                 setSel('aiCoverUsage', editWork.ai_cover_usage);
                 setSel('aiTranslationUsage', editWork.ai_translation_usage);
+                setSel('ageRating', editWork.age_rating);
+                (editWork.content_warnings || []).forEach(function (w) {
+                    var cb = document.querySelector('input[name="contentWarning"][value="' + w + '"]');
+                    if (cb) cb.checked = true;
+                });
 
                 // コラボレーター（編集者・翻訳者）を復元
                 (editWork.collaborators || []).forEach(function(c) {
@@ -2065,7 +2104,10 @@
                     status: editWorkId ? (editWork && editWork.status) || 'published' : 'published',
                     aiTextUsage: (document.getElementById('aiTextUsage') || {}).value || 'none',
                     aiCoverUsage: (document.getElementById('aiCoverUsage') || {}).value || 'none',
-                    aiTranslationUsage: (document.getElementById('aiTranslationUsage') || {}).value || 'none'
+                    aiTranslationUsage: (document.getElementById('aiTranslationUsage') || {}).value || 'none',
+                    ageRating: (document.getElementById('ageRating') || {}).value || 'all',
+                    contentWarnings: Array.prototype.map.call(
+                        document.querySelectorAll('input[name="contentWarning"]:checked'), function (c) { return c.value; })
                 };
 
                 var coverInput = document.getElementById('coverImage');

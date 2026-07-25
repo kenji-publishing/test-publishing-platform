@@ -25,6 +25,20 @@ const fs = require('fs');
 const { REVENUE_SHARES, generateAgreementHash } = require('../config/revenue');
 const { createNotification } = require('../services/notificationService');
 
+// ===== 対象年齢と内容の注意表示（migration 047）=====
+// 運用方針: 露骨な性的描写は禁止のため '18' は受け付けない（全年齢に丸める）。
+// 解禁する場合はここを緩め、年齢確認の実装とセットで行うこと。
+const ALLOWED_AGE_RATINGS = ['all', '15'];
+const ALLOWED_WARNINGS = ['violence', 'horror', 'sexual_themes', 'substances', 'discrimination', 'self_harm'];
+
+function normalizeAgeRating(v) {
+    return ALLOWED_AGE_RATINGS.includes(v) ? v : 'all';
+}
+function normalizeWarnings(v) {
+    if (!Array.isArray(v)) return [];
+    return ALLOWED_WARNINGS.filter(w => v.includes(w)); // 未知の値は捨てる・順序も固定
+}
+
 /** 同意書発行をコラボレーターに通知（失敗しても本処理は止めない） */
 async function notifyNewCollaborators(newCollabs, workTitle) {
     for (const n of newCollabs) {
@@ -303,7 +317,8 @@ router.get('/', async (req, res) => {
                    w.content_type, w.price, w.currency, w.is_free,
                    w.view_count, w.like_count, w.comment_count,
                    w.rating_average, w.rating_count, w.published_at,
-                   w.is_adult, w.is_ai_generated, w.ai_tools_used,
+                   w.is_adult, w.age_rating, w.content_warnings,
+                   w.is_ai_generated, w.ai_tools_used,
                    w.ai_text_usage, w.ai_cover_usage, w.ai_translation_usage,
                    u.user_id as author_id, u.pen_name as author_name,
                    u.first_name, u.last_name
@@ -1065,7 +1080,9 @@ router.post('/', authenticate, async (req, res) => {
             status,
             aiTextUsage,
             aiCoverUsage,
-            aiTranslationUsage
+            aiTranslationUsage,
+            ageRating,
+            contentWarnings
         } = req.body;
 
         // Whitelist currency and publish status
@@ -1081,6 +1098,10 @@ router.post('/', authenticate, async (req, res) => {
         const aiText = aiLevel(aiTextUsage);
         const aiCover = aiLevel(aiCoverUsage);
         const aiTranslation = aiLevel(aiTranslationUsage);
+        // 対象年齢。'18'は方針上まだ受け付けない（露骨な性的描写は禁止）ため
+        // 全年齢に丸める。解禁する時はここと works_age_rating_check を見直す
+        const rating = normalizeAgeRating(ageRating);
+        const warnings = normalizeWarnings(contentWarnings);
 
         // Calculate word count
         const textContent = content || '';
@@ -1110,8 +1131,9 @@ router.post('/', authenticate, async (req, res) => {
                     price, is_free, cover_image, is_adult,
                     is_ai_generated, ai_tools_used, preview_percent,
                     word_count, page_count, currency, status,
-                    ai_text_usage, ai_cover_usage, ai_translation_usage
-                 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
+                    ai_text_usage, ai_cover_usage, ai_translation_usage,
+                    age_rating, content_warnings
+                 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)
                  RETURNING *`,
                 [
                     req.user.userId,
@@ -1127,7 +1149,7 @@ router.post('/', authenticate, async (req, res) => {
                     price || 0,
                     isFree || false,
                     coverImage || null,
-                    isAdult || false,
+                    rating === '18',   // is_adult は一覧除外に使われているので同期させる
                     isAiGenerated || (aiText !== 'none') || false,
                     aiToolsUsed || null,
                     previewPercent || 10,
@@ -1137,7 +1159,9 @@ router.post('/', authenticate, async (req, res) => {
                     workStatus,
                     aiText,
                     aiCover,
-                    aiTranslation
+                    aiTranslation,
+                    rating,
+                    JSON.stringify(warnings)
                 ]
             );
             work = result.rows[0];
@@ -1186,12 +1210,16 @@ router.put('/:workId', authenticate, async (req, res) => {
             title, description, synopsis, content, genre, tags,
             price, status, isFree, coverImage, isAdult,
             isAiGenerated, aiToolsUsed, previewPercent, currency,
-            aiTextUsage, aiCoverUsage, aiTranslationUsage
+            aiTextUsage, aiCoverUsage, aiTranslationUsage,
+            ageRating, contentWarnings
         } = req.body;
 
         const SUPPORTED_CURRENCIES = ['USD', 'JPY', 'EUR', 'GBP', 'KRW', 'CNY', 'BRL', 'SAR'];
         const workCurrency = SUPPORTED_CURRENCIES.includes((currency || '').toUpperCase())
             ? currency.toUpperCase() : null;
+        // 送られてこなければ既存値のまま（COALESCE）
+        const rating = ageRating === undefined ? null : normalizeAgeRating(ageRating);
+        const warnings = contentWarnings === undefined ? null : JSON.stringify(normalizeWarnings(contentWarnings));
         const AI_LEVELS = ['none', 'assisted', 'generated', 'full_ai', 'na'];
         const aiLevel = (v) => AI_LEVELS.includes(v) ? v : null; // null = keep existing
         const aiText = aiLevel(aiTextUsage);
@@ -1218,7 +1246,6 @@ router.put('/:workId', authenticate, async (req, res) => {
                  status = COALESCE($8, status),
                  is_free = COALESCE($9, is_free),
                  cover_image = COALESCE($10, cover_image),
-                 is_adult = COALESCE($11, is_adult),
                  is_ai_generated = COALESCE($12, is_ai_generated),
                  ai_tools_used = COALESCE($13, ai_tools_used),
                  preview_percent = COALESCE($14, preview_percent),
@@ -1228,6 +1255,9 @@ router.put('/:workId', authenticate, async (req, res) => {
                  ai_text_usage = COALESCE($19, ai_text_usage),
                  ai_cover_usage = COALESCE($20, ai_cover_usage),
                  ai_translation_usage = COALESCE($21, ai_translation_usage),
+                 age_rating = COALESCE($22, age_rating),
+                 content_warnings = COALESCE($23::jsonb, content_warnings),
+                 is_adult = CASE WHEN $22 IS NULL THEN COALESCE($11, is_adult) ELSE ($22 = '18') END,
                  updated_at = CURRENT_TIMESTAMP,
                  published_at = CASE
                      WHEN $8 = 'published' AND published_at IS NULL THEN CURRENT_TIMESTAMP
@@ -1240,7 +1270,7 @@ router.put('/:workId', authenticate, async (req, res) => {
                 price, status, isFree, coverImage, isAdult,
                 isAiGenerated, aiToolsUsed, previewPercent,
                 wordCount, pageCount, req.params.workId, workCurrency,
-                aiText, aiCover, aiTranslation
+                aiText, aiCover, aiTranslation, rating, warnings
             ]
         );
 

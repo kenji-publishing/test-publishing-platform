@@ -153,6 +153,25 @@
             gap: 0.5rem;
         }
         .btn-gift:hover { background: var(--color-accent); color: #FFFFFF; }
+        .age-badge {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            padding: 0.2rem 0.7rem; border-radius: 999px;
+            font-size: 0.78rem; font-weight: 700;
+            background: rgba(179,71,71,0.12); color: #b34747; border: 1px solid rgba(179,71,71,0.35);
+        }
+        .content-warnings {
+            margin-top: 0.5rem; font-size: 0.8rem; color: var(--color-text-secondary);
+            display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center;
+        }
+        .content-warnings .cw {
+            background: var(--color-bg-secondary, #f2efe9); border: 1px solid var(--color-border);
+            border-radius: 6px; padding: 0.1rem 0.5rem;
+        }
+        .btn-report {
+            background: none; border: none; color: var(--color-text-secondary);
+            font-size: 0.8rem; cursor: pointer; padding: 0.25rem 0.5rem; border-radius: 6px;
+        }
+        .btn-report:hover { color: #b34747; background: rgba(179,71,71,0.08); }
         .gift-suggest { max-height: 220px; overflow-y: auto; }
         .collab-request-buttons { display: flex; gap: var(--spacing-sm); flex-wrap: wrap; }
         .btn-collab-request {
@@ -390,7 +409,9 @@
                         <span class="language-badge" id="workLanguage">
                             <i class="fas fa-globe me-1"></i>
                         </span>
+                        <span class="age-badge" id="workAgeRating" style="display:none;"></span>
                     </div>
+                    <div id="workWarnings" class="content-warnings" style="display:none;"></div>
                     <div class="action-buttons">
                         <button class="btn-purchase" id="btnPurchase" onclick="purchaseWork()" style="display:none;">
                             <i class="fas fa-shopping-cart"></i>
@@ -425,6 +446,13 @@
                         </button>
                     </div>
                 </div>
+            </div>
+
+            <!-- 通報導線: 目立たせすぎず、必要な人には見つかる位置に置く -->
+            <div style="text-align:right; margin-top:-0.5rem;">
+                <button class="btn-report" id="btnReport" onclick="openReportModal()" style="display:none;">
+                    <i class="fas fa-flag me-1"></i><span id="btnReportText">Report this work</span>
+                </button>
             </div>
 
             <!-- Synopsis Section -->
@@ -507,6 +535,46 @@
         </div>
     </main>
 
+    <!-- ========== 通報モーダル ========== -->
+    <div class="modal fade" id="reportModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-flag me-2" style="color:#b34747;"></i><span id="reportModalTitle">Report this work</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted" style="font-size:0.87rem;" id="reportIntro"></p>
+                    <div class="mb-3">
+                        <label class="form-label" for="reportReason" id="reportReasonLabel">Reason</label>
+                        <select class="form-select" id="reportReason">
+                            <option value="sexual">Sexual content</option>
+                            <option value="violence">Excessive violence</option>
+                            <option value="hate">Discrimination or hate</option>
+                            <option value="illegal">Illegal or dangerous</option>
+                            <option value="wrong_rating">Age rating looks wrong</option>
+                            <option value="copyright">Possible copyright infringement</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label" for="reportDetails" id="reportDetailsLabel">Details (optional)</label>
+                        <textarea class="form-control" id="reportDetails" rows="4" maxlength="2000"></textarea>
+                    </div>
+                    <p class="text-muted" style="font-size:0.78rem;" id="reportPrivacyNote"></p>
+                    <div class="alert alert-danger" id="reportError" style="display:none; font-size:0.85rem;"></div>
+                    <div class="alert alert-success" id="reportSent" style="display:none; font-size:0.88rem;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" id="reportCancelBtn">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="reportSubmitBtn" onclick="submitReport()">
+                        <i class="fas fa-flag me-1"></i><span id="reportSubmitText">Send report</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ========== プレゼント用モーダル ========== -->
     <div class="modal fade" id="giftModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -585,6 +653,30 @@
             giftSelfError: { en: 'You cannot gift a work to yourself.', ja: '自分自身にプレゼントすることはできません。', zh: '不能赠送给自己。', es: 'No puedes regalarte una obra a ti mismo.', fr: 'Vous ne pouvez pas vous offrir une œuvre à vous-même.', de: 'Sie können sich selbst kein Werk schenken.', ko: '자기 자신에게는 선물할 수 없습니다.', ar: 'لا يمكنك إهداء عمل لنفسك.', pt: 'Você não pode presentear a si mesmo.', it: 'Non puoi regalare un\'opera a te stesso.' },
             giftAlreadyOwned: { en: 'That person already owns this work.', ja: 'その方はすでにこの作品をお持ちです。', zh: '对方已拥有这部作品。', es: 'Esa persona ya tiene esta obra.', fr: 'Cette personne possède déjà cette œuvre.', de: 'Diese Person besitzt dieses Werk bereits.', ko: '그분은 이미 이 작품을 가지고 있습니다.', ar: 'هذا الشخص يمتلك هذا العمل بالفعل.', pt: 'Essa pessoa já possui esta obra.', it: 'Quella persona possiede già questa opera.' },
             cancel: { en: 'Cancel', ja: 'キャンセル', zh: '取消', es: 'Cancelar', fr: 'Annuler', de: 'Abbrechen', ko: '취소', ar: 'إلغاء', pt: 'Cancelar', it: 'Annulla' },
+            contentNotice: { en: 'Contains:', ja: '内容に含まれるもの:', zh: '内容包含：', es: 'Contiene:', fr: 'Contient :', de: 'Enthält:', ko: '포함 내용:', ar: 'يحتوي على:', pt: 'Contém:', it: 'Contiene:' },
+            warn_violence: { en: 'Violence', ja: '暴力表現', zh: '暴力描写', es: 'Violencia', fr: 'Violence', de: 'Gewalt', ko: '폭력 묘사', ar: 'عنف', pt: 'Violência', it: 'Violenza' },
+            warn_horror: { en: 'Horror / gore', ja: '恐怖・グロテスク', zh: '恐怖・血腥', es: 'Terror / gore', fr: 'Horreur / gore', de: 'Horror / Gore', ko: '공포・고어', ar: 'رعب / دموي', pt: 'Terror / gore', it: 'Horror / gore' },
+            warn_sexual_themes: { en: 'Suggestive themes', ja: '性的示唆', zh: '性暗示', es: 'Temas sugerentes', fr: 'Thèmes suggestifs', de: 'Anzügliche Themen', ko: '성적 암시', ar: 'إيحاءات جنسية', pt: 'Temas sugestivos', it: 'Temi allusivi' },
+            warn_substances: { en: 'Alcohol, smoking or drugs', ja: '飲酒・喫煙・薬物', zh: '饮酒・吸烟・药物', es: 'Alcohol, tabaco o drogas', fr: 'Alcool, tabac ou drogues', de: 'Alkohol, Rauchen oder Drogen', ko: '음주・흡연・약물', ar: 'كحول أو تدخين أو مخدرات', pt: 'Álcool, tabaco ou drogas', it: 'Alcol, fumo o droghe' },
+            warn_discrimination: { en: 'Depicts discrimination', ja: '差別的な描写', zh: '歧视描写', es: 'Representa discriminación', fr: 'Représente la discrimination', de: 'Stellt Diskriminierung dar', ko: '차별적 묘사', ar: 'يصور التمييز', pt: 'Retrata discriminação', it: 'Rappresenta discriminazione' },
+            warn_self_harm: { en: 'Self-harm or suicide', ja: '自傷・自殺への言及', zh: '自残・自杀', es: 'Autolesión o suicidio', fr: 'Automutilation ou suicide', de: 'Selbstverletzung oder Suizid', ko: '자해・자살', ar: 'إيذاء النفس أو الانتحار', pt: 'Automutilação ou suicídio', it: 'Autolesionismo o suicidio' },
+            reportTitle: { en: 'Report this work', ja: 'この作品を通報する', zh: '举报这部作品', es: 'Denunciar esta obra', fr: 'Signaler cette œuvre', de: 'Dieses Werk melden', ko: '이 작품 신고하기', ar: 'الإبلاغ عن هذا العمل', pt: 'Denunciar esta obra', it: 'Segnala questa opera' },
+            reportIntro: { en: 'Tell us what looks wrong. A moderator checks every report and may warn the author or unpublish the work.', ja: '気になった点をお知らせください。運営が内容を確認し、著者への警告や作品の非公開などの対応を行います。', zh: '请告诉我们哪里有问题。管理员会确认每一份举报，可能会警告作者或下架作品。', es: 'Cuéntanos qué parece incorrecto. Un moderador revisa cada denuncia y puede advertir al autor o retirar la obra.', fr: "Dites-nous ce qui semble problématique. Un modérateur vérifie chaque signalement et peut avertir l'auteur ou dépublier l'œuvre.", de: 'Sagen Sie uns, was falsch erscheint. Ein Moderator prüft jede Meldung und kann den Autor verwarnen oder das Werk sperren.', ko: '문제라고 느낀 점을 알려 주세요. 운영자가 모든 신고를 확인하며, 작가에게 경고하거나 작품을 비공개할 수 있습니다.', ar: 'أخبرنا بما يبدو خاطئًا. يراجع المشرف كل بلاغ وقد يحذر المؤلف أو يلغي نشر العمل.', pt: 'Conte-nos o que parece errado. Um moderador verifica cada denúncia e pode advertir o autor ou despublicar a obra.', it: "Dicci cosa non va. Un moderatore controlla ogni segnalazione e può avvertire l'autore o rimuovere l'opera." },
+            reportReason: { en: 'Reason', ja: '理由', zh: '理由', es: 'Motivo', fr: 'Motif', de: 'Grund', ko: '사유', ar: 'السبب', pt: 'Motivo', it: 'Motivo' },
+            reportDetails: { en: 'Details (optional)', ja: '詳しい内容（任意）', zh: '详细说明（可选）', es: 'Detalles (opcional)', fr: 'Détails (facultatif)', de: 'Details (optional)', ko: '자세한 내용(선택)', ar: 'تفاصيل (اختياري)', pt: 'Detalhes (opcional)', it: 'Dettagli (facoltativo)' },
+            reportPrivacyNote: { en: 'Your name is shown to moderators only, never to the author.', ja: 'お名前は運営のみが確認します。著者には伝わりません。', zh: '您的姓名仅管理员可见，不会告知作者。', es: 'Tu nombre solo lo ven los moderadores, nunca el autor.', fr: "Votre nom n'est visible que par les modérateurs, jamais par l'auteur.", de: 'Ihr Name ist nur für Moderatoren sichtbar, nie für den Autor.', ko: '이름은 운영자만 확인하며 작가에게는 전달되지 않습니다.', ar: 'اسمك مرئي للمشرفين فقط، ولن يُكشف للمؤلف.', pt: 'Seu nome é visto apenas pelos moderadores, nunca pelo autor.', it: "Il tuo nome è visibile solo ai moderatori, mai all'autore." },
+            reportSubmit: { en: 'Send report', ja: '通報する', zh: '提交举报', es: 'Enviar denuncia', fr: 'Envoyer le signalement', de: 'Meldung senden', ko: '신고 보내기', ar: 'إرسال البلاغ', pt: 'Enviar denúncia', it: 'Invia segnalazione' },
+            reportThanks: { en: 'Thank you. A moderator will review this shortly.', ja: 'ありがとうございます。運営が確認いたします。', zh: '感谢您。管理员将尽快确认。', es: 'Gracias. Un moderador lo revisará en breve.', fr: 'Merci. Un modérateur va vérifier rapidement.', de: 'Vielen Dank. Ein Moderator prüft dies in Kürze.', ko: '감사합니다. 운영자가 곧 확인합니다.', ar: 'شكرًا لك. سيراجع المشرف ذلك قريبًا.', pt: 'Obrigado. Um moderador irá revisar em breve.', it: 'Grazie. Un moderatore lo esaminerà a breve.' },
+            reportAlready: { en: 'You have already reported this work. It is in the review queue.', ja: 'この作品はすでに通報済みです。確認待ちの状態です。', zh: '您已举报过这部作品，正在等待确认。', es: 'Ya has denunciado esta obra. Está en la cola de revisión.', fr: 'Vous avez déjà signalé cette œuvre. Elle est en attente de vérification.', de: 'Sie haben dieses Werk bereits gemeldet. Es wartet auf Prüfung.', ko: '이미 신고하신 작품입니다. 확인 대기 중입니다.', ar: 'لقد أبلغت عن هذا العمل من قبل. إنه قيد المراجعة.', pt: 'Você já denunciou esta obra. Está na fila de revisão.', it: 'Hai già segnalato questa opera. È in attesa di revisione.' },
+            reportOwnWork: { en: 'You cannot report your own work.', ja: '自分の作品は通報できません。', zh: '不能举报自己的作品。', es: 'No puedes denunciar tu propia obra.', fr: 'Vous ne pouvez pas signaler votre propre œuvre.', de: 'Sie können Ihr eigenes Werk nicht melden.', ko: '자신의 작품은 신고할 수 없습니다.', ar: 'لا يمكنك الإبلاغ عن عملك الخاص.', pt: 'Você não pode denunciar sua própria obra.', it: 'Non puoi segnalare la tua opera.' },
+            reportLoginRequired: { en: 'Please sign in to report a work.', ja: '通報にはログインが必要です。', zh: '举报需要先登录。', es: 'Inicia sesión para denunciar una obra.', fr: 'Connectez-vous pour signaler une œuvre.', de: 'Bitte melden Sie sich an, um ein Werk zu melden.', ko: '신고하려면 로그인이 필요합니다.', ar: 'يرجى تسجيل الدخول للإبلاغ عن عمل.', pt: 'Faça login para denunciar uma obra.', it: "Accedi per segnalare un'opera." },
+            reason_sexual: { en: 'Sexual content', ja: '性的表現', zh: '性描写', es: 'Contenido sexual', fr: 'Contenu sexuel', de: 'Sexueller Inhalt', ko: '성적 표현', ar: 'محتوى جنسي', pt: 'Conteúdo sexual', it: 'Contenuto sessuale' },
+            reason_violence: { en: 'Excessive violence', ja: '過度な暴力・残虐表現', zh: '过度暴力', es: 'Violencia excesiva', fr: 'Violence excessive', de: 'Übermäßige Gewalt', ko: '과도한 폭력', ar: 'عنف مفرط', pt: 'Violência excessiva', it: 'Violenza eccessiva' },
+            reason_hate: { en: 'Discrimination or hate', ja: '差別・ヘイト', zh: '歧视或仇恨', es: 'Discriminación u odio', fr: 'Discrimination ou haine', de: 'Diskriminierung oder Hass', ko: '차별・혐오', ar: 'تمييز أو كراهية', pt: 'Discriminação ou ódio', it: 'Discriminazione o odio' },
+            reason_illegal: { en: 'Illegal or dangerous', ja: '違法・危険な内容', zh: '违法或危险内容', es: 'Ilegal o peligroso', fr: 'Illégal ou dangereux', de: 'Illegal oder gefährlich', ko: '불법・위험한 내용', ar: 'غير قانوني أو خطير', pt: 'Ilegal ou perigoso', it: 'Illegale o pericoloso' },
+            reason_wrong_rating: { en: 'Age rating looks wrong', ja: '対象年齢の表示が実態と違う', zh: '年龄分级与实际不符', es: 'La clasificación de edad parece incorrecta', fr: "La classification d'âge semble incorrecte", de: 'Altersfreigabe scheint falsch', ko: '연령 표시가 실제와 다름', ar: 'التصنيف العمري يبدو خاطئًا', pt: 'A classificação etária parece errada', it: "La classificazione per età sembra errata" },
+            reason_copyright: { en: 'Possible copyright infringement', ja: '著作権侵害の疑い', zh: '疑似侵犯著作权', es: 'Posible infracción de derechos de autor', fr: "Possible violation du droit d'auteur", de: 'Mögliche Urheberrechtsverletzung', ko: '저작권 침해 의심', ar: 'انتهاك محتمل لحقوق النشر', pt: 'Possível violação de direitos autorais', it: 'Possibile violazione del copyright' },
+            reason_other: { en: 'Other', ja: 'その他', zh: '其他', es: 'Otro', fr: 'Autre', de: 'Sonstiges', ko: '기타', ar: 'أخرى', pt: 'Outro', it: 'Altro' },
             readNow: { en: 'Read Now', ja: '読む', zh: '阅读', es: 'Leer ahora', fr: 'Lire maintenant', de: 'Jetzt lesen', ko: '지금 읽기', ar: 'اقرأ الآن', pt: 'Ler agora', it: 'Leggi Ora' },
             inLibrary: { en: 'In Library', ja: 'ライブラリに追加済み', zh: '已在书架', es: 'En biblioteca', fr: 'Dans la bibliothèque', de: 'In Bibliothek', ko: '내 서재', ar: 'في المكتبة', pt: 'Na biblioteca', it: 'In Libreria' },
             wantTranslate: { en: 'I want to translate this work', ja: 'この作品を翻訳したい', zh: '我想翻译这部作品', es: 'Quiero traducir esta obra', fr: 'Je veux traduire cette œuvre', de: 'Ich möchte dieses Werk übersetzen', ko: '이 작품을 번역하고 싶습니다', ar: 'أريد ترجمة هذا العمل', pt: 'Quero traduzir esta obra', it: 'Voglio tradurre questa opera' },
@@ -695,7 +787,9 @@ function escapeHtml(text) {
                         aiTextUsage: w.ai_text_usage || 'none',
                         aiCoverUsage: w.ai_cover_usage || 'none',
                         cover: w.cover_image || w.cover_image_url || null,
-                        authorId: w.author_id || null
+                        authorId: w.author_id || null,
+                        ageRating: w.age_rating || 'all',
+                        contentWarnings: Array.isArray(w.content_warnings) ? w.content_warnings : []
                     };
                 } catch (err) {
                     console.error('Failed to load work:', err);
@@ -753,6 +847,26 @@ function escapeHtml(text) {
             document.getElementById('workLanguage').innerHTML =
                 `<i class="fas fa-globe me-1"></i>${getLanguageName(work.language)}`;
 
+            // 対象年齢と内容の注意表示
+            var ageEl = document.getElementById('workAgeRating');
+            if (work.ageRating === '15' || work.ageRating === '18') {
+                ageEl.textContent = work.ageRating === '18' ? '18+' : '15+';
+                ageEl.style.display = 'inline-flex';
+            } else {
+                ageEl.style.display = 'none';
+            }
+            var warnEl = document.getElementById('workWarnings');
+            var warns = work.contentWarnings || [];
+            if (warns.length) {
+                warnEl.innerHTML = '<i class="fas fa-triangle-exclamation"></i><span>' + getL(uiText.contentNotice) + '</span>' +
+                    warns.map(function (w) {
+                        return '<span class="cw">' + escapeHtml(getL(uiText['warn_' + w] || { en: w })) + '</span>';
+                    }).join('');
+                warnEl.style.display = 'flex';
+            } else {
+                warnEl.style.display = 'none';
+            }
+
             // プレゼントボタン: 有料作品なら所有の有無に関わらず出す
             // （持っている本を人に贈るのは自然な行為）。自分の作品と未ログインは除く
             var myId = (JSON.parse(localStorage.getItem('user') || '{}') || {}).id;
@@ -760,6 +874,11 @@ function escapeHtml(text) {
                 String(work.authorId || '') !== String(myId || '');
             document.getElementById('btnGift').style.display = canGift ? 'inline-flex' : 'none';
             document.getElementById('btnGiftText').textContent = getL(uiText.giftThis);
+
+            // 通報ボタン: 自分の作品には出さない（未ログインには出す＝押すとログインへ）
+            var isMine = String(work.authorId || '') === String(myId || '') && !!myId;
+            document.getElementById('btnReport').style.display = isMine ? 'none' : 'inline-flex';
+            document.getElementById('btnReportText').textContent = getL(uiText.reportTitle);
 
             // 購入/ライブラリボタン
             var owned = isInLibrary(id);
@@ -925,6 +1044,73 @@ function escapeHtml(text) {
                 window.location.href = data.url;
             } catch (err) {
                 alert(getL({ en: 'Purchase failed: ', ja: '購入処理に失敗しました: ' }) + err.message);
+            }
+        }
+
+        // ========== 通報 ==========
+        // 読者が「おかしい」と思った描写を知らせる。管理者が確認して
+        // 却下／著者へ警告／作品を非公開、のいずれかを選ぶ
+        const REPORT_REASONS = ['sexual', 'violence', 'hate', 'illegal', 'wrong_rating', 'copyright', 'other'];
+
+        function openReportModal() {
+            if (!localStorage.getItem('token')) {
+                alert(getL(uiText.reportLoginRequired));
+                window.location.href = 'login.html';
+                return;
+            }
+            document.getElementById('reportError').style.display = 'none';
+            document.getElementById('reportSent').style.display = 'none';
+            document.getElementById('reportDetails').value = '';
+            document.getElementById('reportSubmitBtn').style.display = '';
+            applyReportModalText();
+            new bootstrap.Modal(document.getElementById('reportModal')).show();
+        }
+
+        function applyReportModalText() {
+            document.getElementById('reportModalTitle').textContent = getL(uiText.reportTitle);
+            document.getElementById('reportIntro').textContent = getL(uiText.reportIntro);
+            document.getElementById('reportReasonLabel').textContent = getL(uiText.reportReason);
+            document.getElementById('reportDetailsLabel').textContent = getL(uiText.reportDetails);
+            document.getElementById('reportPrivacyNote').textContent = getL(uiText.reportPrivacyNote);
+            document.getElementById('reportSubmitText').textContent = getL(uiText.reportSubmit);
+            document.getElementById('reportCancelBtn').textContent = getL(uiText.cancel);
+            const sel = document.getElementById('reportReason');
+            REPORT_REASONS.forEach(function (r, i) {
+                if (sel.options[i]) sel.options[i].textContent = getL(uiText['reason_' + r]);
+            });
+        }
+
+        async function submitReport() {
+            const err = document.getElementById('reportError');
+            const ok = document.getElementById('reportSent');
+            err.style.display = 'none';
+            const btn = document.getElementById('reportSubmitBtn');
+            btn.disabled = true;
+            try {
+                const resp = await fetch((window.API_ORIGIN || '') + '/api/reports', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    },
+                    body: JSON.stringify({
+                        workId: getWorkIdFromUrl(),
+                        reason: document.getElementById('reportReason').value,
+                        details: document.getElementById('reportDetails').value
+                    })
+                });
+                const data = await resp.json();
+                if (!resp.ok) {
+                    throw new Error(data.code === 'OWN_WORK' ? getL(uiText.reportOwnWork) : (data.error || ('HTTP ' + resp.status)));
+                }
+                ok.textContent = data.alreadyReported ? getL(uiText.reportAlready) : getL(uiText.reportThanks);
+                ok.style.display = '';
+                btn.style.display = 'none'; // 二度押しさせない
+            } catch (e) {
+                err.textContent = e.message;
+                err.style.display = '';
+            } finally {
+                btn.disabled = false;
             }
         }
 

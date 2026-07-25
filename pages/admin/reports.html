@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>通報の確認 - Admin Dashboard</title>
+    <script src="../../js/config.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .admin-wrapper { display: flex; min-height: 100vh; }
+        .admin-sidebar { width: 260px; background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%); color: #fff; position: fixed; height: 100vh; overflow-y: auto; z-index: 1000; }
+        .admin-sidebar .brand { padding: 20px; font-size: 1.4rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; text-decoration: none; color: #fff; }
+        .admin-sidebar .nav-menu { padding: 15px 0; }
+        .admin-sidebar .nav-item { padding: 12px 20px; display: flex; align-items: center; gap: 12px; color: rgba(255,255,255,0.7); text-decoration: none; transition: all 0.3s; border-left: 3px solid transparent; }
+        .admin-sidebar .nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .admin-sidebar .nav-item.active { background: rgba(255,255,255,0.15); color: #fff; border-left-color: #3498db; }
+        .admin-sidebar .nav-item i { font-size: 1.2rem; width: 24px; }
+        .badge-pending { background: #e74c3c; color: #fff; font-size: 0.7rem; padding: 3px 8px; border-radius: 10px; margin-left: auto; }
+        .admin-sidebar .nav-section { padding: 15px 20px 8px; font-size: 0.75rem; text-transform: uppercase; color: rgba(255,255,255,0.4); letter-spacing: 1px; }
+        .admin-main { flex: 1; margin-left: 260px; background: #f5f6fa; min-height: 100vh; }
+        .admin-header { background: #fff; padding: 15px 30px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; flex-wrap: wrap; gap: 10px; }
+        .admin-content { padding: 30px; }
+        .content-panel { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .panel-header { padding: 18px 24px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+        .panel-header h2 { font-size: 1.05rem; font-weight: 600; margin: 0; color: #2c3e50; }
+        .panel-body { padding: 20px 24px; }
+        .rep-item { border: 1px solid #eee; border-radius: 10px; margin-bottom: 12px; overflow: hidden; }
+        .rep-head { padding: 13px 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .rep-head:hover { background: #fafbfc; }
+        .rep-detail { display: none; border-top: 1px solid #eee; padding: 16px; background: #fafbfc; }
+        .rep-item.open .rep-detail { display: block; }
+        .rep-body-text { white-space: pre-wrap; background: #fff; border: 1px solid #eee; border-radius: 8px; padding: 12px 14px; font-size: 0.88rem; margin-bottom: 14px; }
+        .st { display: inline-block; padding: 3px 10px; border-radius: 10px; font-size: 0.76rem; font-weight: 600; white-space: nowrap; }
+        .st.open { background: #ffebee; color: #c62828; }
+        .st.dismissed { background: #f5f5f5; color: #757575; }
+        .st.warned { background: #fff8e1; color: #b28704; }
+        .st.removed { background: #ede7f6; color: #5e35b1; }
+        .muted { color: #95a5a6; font-size: 0.82rem; }
+        .chip { background: #eef2f7; color: #2c3e50; border-radius: 8px; padding: 2px 9px; font-size: 0.76rem; white-space: nowrap; }
+        .chip.warn { background: #fdecea; color: #b34747; }
+        #msg { display: none; margin-bottom: 16px; }
+        .filter-btns .btn { font-size: 0.82rem; }
+        .guide { background: #f0f7ff; border: 1px solid #cfe3f8; border-radius: 10px; padding: 12px 16px; font-size: 0.85rem; color: #2c3e50; margin-bottom: 20px; line-height: 1.8; }
+    </style>
+</head>
+<body>
+<div class="admin-wrapper">
+    <aside class="admin-sidebar">
+        <a href="index.html" class="brand"><i class="bi bi-shield-lock"></i> AuctLect Admin</a>
+        <nav class="nav-menu">
+                <div class="nav-section">メイン</div>
+                <a class="nav-item" href="index.html"><i class="bi bi-grid-1x2"></i><span>ダッシュボード</span></a>
+                <div class="nav-section">ユーザー管理</div>
+                <a class="nav-item" href="index.html#users"><i class="bi bi-people"></i><span>ユーザー一覧</span></a>
+                <a class="nav-item" href="index.html#verification"><i class="bi bi-person-check"></i><span>本人確認</span><span class="badge-pending" id="verification-badge" style="display:none;">0</span></a>
+                <div class="nav-section">コンテンツ</div>
+                <a class="nav-item" href="index.html#moderation"><i class="bi bi-shield-check"></i><span>コンテンツ審査</span><span class="badge-pending" id="moderation-badge" style="display:none;">0</span></a>
+                <a class="nav-item active" href="reports.html"><i class="bi bi-flag"></i><span>通報の確認</span><span class="badge-pending" id="report-badge" style="display:none;">0</span></a>
+                <a class="nav-item" href="index.html#translations"><i class="bi bi-translate"></i><span>翻訳キュー</span><span class="badge-pending" id="translation-badge" style="display:none;">0</span></a>
+                <a class="nav-item" href="index.html#dmca"><i class="bi bi-exclamation-triangle"></i><span>DMCA管理</span><span class="badge-pending" id="dmca-badge" style="display:none;">0</span></a>
+                <div class="nav-section">分析</div>
+                <a class="nav-item" href="analytics.html"><i class="bi bi-bar-chart-line"></i><span>アナリティクス</span></a>
+                <div class="nav-section">サポート</div>
+                <a class="nav-item" href="inquiries.html"><i class="bi bi-envelope-open"></i><span>お問い合わせ</span><span class="badge-pending" id="inquiry-badge" style="display:none;">0</span></a>
+                <a class="nav-item" href="feedback.html"><i class="bi bi-chat-dots"></i><span>フィードバック</span><span class="badge-pending" id="feedback-badge" style="display:none;">0</span></a>
+                <div class="nav-section">財務</div>
+                <a class="nav-item" href="index.html#finance"><i class="bi bi-graph-up"></i><span>収益レポート</span></a>
+                <a class="nav-item" href="payouts.html"><i class="bi bi-cash-coin"></i><span>収益の支払い</span></a>
+            </nav>
+    </aside>
+
+    <main class="admin-main">
+        <header class="admin-header">
+            <div><strong>通報の確認</strong> <span style="color:#7f8c8d; font-size:0.85rem; margin-left:10px;">読者から届いた作品への通報</span></div>
+            <div class="filter-btns btn-group" role="group">
+                <button class="btn btn-sm btn-outline-secondary active" data-filter="open" onclick="setFilter(this)">未対応</button>
+                <button class="btn btn-sm btn-outline-secondary" data-filter="" onclick="setFilter(this)">すべて</button>
+                <button class="btn btn-sm btn-outline-secondary" data-filter="warned" onclick="setFilter(this)">警告済み</button>
+                <button class="btn btn-sm btn-outline-secondary" data-filter="removed" onclick="setFilter(this)">非公開にした</button>
+                <button class="btn btn-sm btn-outline-secondary" data-filter="dismissed" onclick="setFilter(this)">却下</button>
+            </div>
+        </header>
+
+        <div class="admin-content">
+            <div class="alert" id="msg"></div>
+
+            <div class="guide">
+                <strong>対応の選び方：</strong>
+                <b>却下</b>＝ガイドライン違反ではない（通報を閉じるだけ・著者には通知しません）／
+                <b>著者へ警告</b>＝作品は公開のまま、著者に修正を求める通知を送る／
+                <b>作品を非公開</b>＝すぐ見えなくする（差し止め）。<b>購入済みの読者は引き続き読めます</b>（買った本を取り上げないため）。
+                <br>警告・非公開には理由の記入が必須です（そのまま著者に伝わります）。同じ作品への他の未対応通報も一緒に閉じられます。
+            </div>
+
+            <div class="content-panel">
+                <div class="panel-header"><h2><i class="bi bi-flag"></i> 通報一覧 <span class="muted" id="countLabel"></span></h2></div>
+                <div class="panel-body" id="repList"><p class="muted">読み込み中...</p></div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    const API = (window.API_ORIGIN || '') + '/api/reports/admin';
+    const token = localStorage.getItem('token');
+    let currentFilter = 'open';
+
+    const REASONS = {
+        sexual: '性的表現', violence: '暴力・残虐表現', hate: '差別・ヘイト',
+        illegal: '違法・危険な内容', wrong_rating: '対象年齢の申告が実態と違う',
+        copyright: '著作権侵害の疑い', other: 'その他'
+    };
+    const STATUS_LABELS = { open: '未対応', dismissed: '却下', warned: '警告済み', removed: '非公開にした' };
+    const AGE_LABELS = { all: '全年齢', '15': '15+', '18': '18+' };
+
+    function showMsg(text, kind) {
+        const el = document.getElementById('msg');
+        el.className = 'alert alert-' + (kind || 'info');
+        el.textContent = text;
+        el.style.display = 'block';
+    }
+    function esc(t) { const d = document.createElement('div'); d.textContent = t == null ? '' : String(t); return d.innerHTML; }
+
+    async function api(path, opts) {
+        const resp = await fetch(API + path, Object.assign({
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }
+        }, opts));
+        if (resp.status === 401 || resp.status === 403) {
+            throw new Error('管理者アカウントでログインしてください（メインサイトでログイン後にこのページを開きます）');
+        }
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
+        return data;
+    }
+
+    function setFilter(btn) {
+        document.querySelectorAll('.filter-btns .btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        loadReports();
+    }
+
+    async function loadReports() {
+        try {
+            const data = await api(currentFilter ? '?status=' + currentFilter : '');
+            const list = document.getElementById('repList');
+            document.getElementById('countLabel').textContent = '（' + data.reports.length + '件）';
+            if (!data.reports.length) {
+                list.innerHTML = '<p class="muted">該当する通報はありません</p>';
+                return;
+            }
+            list.innerHTML = data.reports.map(r => {
+                const created = String(r.created_at).replace('T', ' ').slice(0, 16);
+                const actions = r.status !== 'open' ? (
+                    r.status === 'removed'
+                        ? '<button class="btn btn-sm btn-outline-success" onclick="restoreWork(\'' + r.work_id + '\')"><i class="bi bi-arrow-counterclockwise"></i> 作品を再公開する</button>'
+                        : ''
+                ) : (
+                    '<label class="form-label" style="font-size:0.85rem; font-weight:600;">理由（警告・非公開の場合は必須。著者にそのまま伝わります）</label>' +
+                    '<textarea class="form-control mb-2" id="note-' + r.report_id + '" rows="3" placeholder="例: 15+の申告ですが、暴力表現の程度がガイドラインの範囲を超えています。該当箇所の修正をお願いします。"></textarea>' +
+                    '<button class="btn btn-sm btn-outline-secondary me-1" onclick="resolve(\'' + r.report_id + '\',\'dismiss\')">問題なし（却下）</button>' +
+                    '<button class="btn btn-sm btn-warning me-1" onclick="resolve(\'' + r.report_id + '\',\'warn\')"><i class="bi bi-exclamation-triangle"></i> 著者へ警告</button>' +
+                    '<button class="btn btn-sm btn-danger" onclick="resolve(\'' + r.report_id + '\',\'remove\')"><i class="bi bi-eye-slash"></i> 作品を非公開にする</button>'
+                );
+                const multi = r.open_reports_for_work > 1
+                    ? '<span class="chip warn">同じ作品に未対応 ' + r.open_reports_for_work + '件</span>' : '';
+                const warned = r.author_warning_count > 0
+                    ? '<span class="chip warn">この著者への警告 ' + r.author_warning_count + '回</span>' : '';
+                return '<div class="rep-item" id="rep-' + r.report_id + '">' +
+                    '<div class="rep-head" onclick="this.parentElement.classList.toggle(\'open\')">' +
+                        '<div style="min-width:0;">' +
+                            '<div style="font-weight:600; font-size:0.92rem;">' + esc(r.work_title) + '' +
+                                ' <span class="muted">/ ' + esc(r.author_name || '') + '</span></div>' +
+                            '<div class="muted">通報者: ' + esc(r.reporter_name || '') + ' ・ ' + created +
+                                ' ・ 申告: ' + (AGE_LABELS[r.age_rating] || r.age_rating || '-') + '</div>' +
+                        '</div>' +
+                        '<div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">' +
+                            multi + warned +
+                            '<span class="chip">' + (REASONS[r.reason] || esc(r.reason)) + '</span>' +
+                            '<span class="st ' + r.status + '">' + (STATUS_LABELS[r.status] || r.status) + '</span>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="rep-detail">' +
+                        (r.details ? '<div class="rep-body-text">' + esc(r.details) + '</div>' : '<p class="muted">詳細の記入はありません</p>') +
+                        '<p style="font-size:0.85rem;"><a href="../work-detail.html?id=' + r.work_id + '" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right"></i> 作品ページを開いて確認する</a>' +
+                        (r.work_status === 'suspended' ? ' <span class="st removed">現在: 非公開</span>' : '') + '</p>' +
+                        (r.admin_note ? '<p class="muted">対応時の理由: ' + esc(r.admin_note) + '</p>' : '') +
+                        actions +
+                    '</div>' +
+                '</div>';
+            }).join('');
+        } catch (e) {
+            document.getElementById('repList').innerHTML = '<p class="muted">' + esc(e.message) + '</p>';
+        }
+    }
+
+    async function resolve(id, action) {
+        const note = (document.getElementById('note-' + id) || {}).value || '';
+        if (action !== 'dismiss' && !note.trim()) {
+            showMsg('警告・非公開には理由の記入が必要です（著者にそのまま伝わります）', 'warning');
+            return;
+        }
+        const confirmText = action === 'remove'
+            ? 'この作品を非公開にします。著者に通知が届きます。よろしいですか？\n（購入済みの読者は引き続き読めます）'
+            : action === 'warn'
+                ? '著者に警告の通知を送ります。よろしいですか？'
+                : 'この通報を「問題なし」として閉じます。よろしいですか？';
+        if (!confirm(confirmText)) return;
+        try {
+            const data = await api('/' + id + '/resolve', { method: 'POST', body: JSON.stringify({ action, note }) });
+            const extra = data.alsoClosed ? '（同じ作品の他の通報 ' + data.alsoClosed + '件も一緒に閉じました）' : '';
+            showMsg('対応しました: ' + (STATUS_LABELS[data.status] || data.status) + extra, 'success');
+            loadReports();
+        } catch (e) {
+            showMsg('対応に失敗しました: ' + e.message, 'danger');
+        }
+    }
+
+    async function restoreWork(workId) {
+        if (!confirm('この作品を再公開します。よろしいですか？')) return;
+        try {
+            await api('/works/' + workId + '/restore', { method: 'POST' });
+            showMsg('作品を再公開しました（著者に通知しました）', 'success');
+            loadReports();
+        } catch (e) {
+            showMsg('再公開に失敗しました: ' + e.message, 'danger');
+        }
+    }
+
+    if (!token) {
+        showMsg('管理者アカウントでログインしてください（メインサイトでログイン後にこのページを開きます）', 'warning');
+        document.getElementById('repList').innerHTML = '';
+    } else {
+        loadReports();
+    }
+</script>
+
+    <script>
+    // サイドバーの審査待ち件数バッジ（ダッシュボードと同じ数字を全ページで表示。1件以上のみ）
+    (async function loadSidebarBadges() {
+        const t = localStorage.getItem('token');
+        if (!t) return;
+        const get = (u) => fetch((window.API_ORIGIN || '') + u, { headers: { 'Authorization': 'Bearer ' + t } })
+            .then(r => r.ok ? r.json() : null).catch(() => null);
+        const show = (id, n) => {
+            const el = document.getElementById(id);
+            if (el && n > 0) { el.textContent = n; el.style.display = ''; }
+        };
+        const [ver, mod, dmca, trans, fb, inq, rep] = await Promise.all([
+            get('/api/verification/admin/stats'),
+            get('/api/moderation/admin/stats'),
+            get('/api/dmca/admin/stats'),
+            get('/api/translation-queue/admin/stats'),
+            get('/api/feedback/admin/stats'),
+            get('/api/inquiries/admin/stats'),
+            get('/api/reports/admin/stats')
+        ]);
+        if (fb) show('feedback-badge', parseInt(fb.highPriority) || 0);
+        if (ver) show('verification-badge', parseInt(ver.pending) || 0);
+        if (mod) show('moderation-badge', parseInt(mod.draft) || 0);
+        if (dmca && dmca.stats) show('dmca-badge', parseInt(dmca.stats.new) || 0);
+        if (trans && trans.stats) show('translation-badge', parseInt(trans.stats.pending) || 0);
+        if (inq) show('inquiry-badge', parseInt(inq.open) || 0);
+        if (rep) show('report-badge', parseInt(rep.open) || 0);
+    })();
+    </script>
+</body>
+</html>
