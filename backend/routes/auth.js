@@ -18,6 +18,7 @@ const { OAuth2Client } = require('google-auth-library');
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:8000';
 const VERIFY_LINK_EXPIRY = 24 * 60 * 60 * 1000; // 確認リンクは24時間有効
+const RESET_LINK_EXPIRY = 60 * 60 * 1000;       // パスワード再設定リンクは1時間有効
 
 /**
  * メール確認リンクを発行して送信する（登録時・再送時に共用）。
@@ -563,6 +564,129 @@ router.put('/profile', authenticate, async (req, res) => {
   } catch (error) {
     console.error('Update profile error:', error);
     res.status(500).json({ error: 'Failed to update profile' });
+  }
+});
+
+/**
+ * POST /api/auth/forgot-password
+ * パスワード再設定リンクの送信。
+ *
+ * 「メールでログイン」(auth-magic) とは別物にしている:
+ *   - こちらは**パスワードを設定し直す**ための一時リンク（link_type='reset_password'）
+ *   - リンクだけでログインはできない（/auth-magic/verify は reset_password を受け付けない）
+ * 登録の有無を漏らさないため、応答は常に同じ
+ */
+router.post('/forgot-password',
+  emailRequestLimiter,
+  body('email').isEmail().normalizeEmail(),
+  async (req, res) => {
+    const genericResponse = {
+      success: true,
+      message: 'If this email is registered, a password reset link has been sent.'
+    };
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+      const { email } = req.body;
+      const user = (await db.query(
+        `SELECT user_id, email, first_name FROM users
+         WHERE email = $1 AND account_status = 'active'`,
+        [email]
+      )).rows[0];
+
+      if (user) {
+        const token = crypto.randomBytes(32).toString('hex');
+        const tokenHash = await bcrypt.hash(token, 10);
+        const expiresAt = new Date(Date.now() + RESET_LINK_EXPIRY);
+
+        // 未使用の再設定リンクは1本だけにする（古いものは無効化）
+        await db.query(
+          `UPDATE magic_links SET is_used = TRUE
+           WHERE user_id = $1 AND is_used = FALSE AND link_type = 'reset_password'`,
+          [user.user_id]
+        );
+        await db.query(
+          `INSERT INTO magic_links (user_id, token_hash, expires_at, link_type)
+           VALUES ($1, $2, $3, 'reset_password')`,
+          [user.user_id, tokenHash, expiresAt]
+        );
+
+        const link = `${FRONTEND_URL}/pages/reset-password.html?token=${token}&email=${encodeURIComponent(user.email)}`;
+        await sendEmail(
+          user.email,
+          'AuctLect パスワードの再設定 / Reset your password',
+          `${user.first_name || ''} 様\n\n下のリンクからパスワードを再設定してください（1時間有効）:\n${link}\n\n心当たりがない場合はこのメールを無視してください。パスワードは変更されません。\n\n---\nReset your password using the link below (valid for 1 hour):\n${link}\n\nIf you did not request this, ignore this email — your password stays unchanged.`,
+          `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color:#8B7355;">パスワードの再設定 / Reset your password</h2>
+            <p>${user.first_name || ''} 様</p>
+            <p>下のボタンからパスワードを再設定してください（1時間有効）。</p>
+            <p style="text-align:center; margin:28px 0;">
+              <a href="${link}" style="display:inline-block; padding:12px 28px; background:#8B7355; color:#fff; text-decoration:none; border-radius:6px;">パスワードを再設定 / Reset password</a>
+            </p>
+            <p style="color:#888; font-size:13px;">心当たりがない場合はこのメールを無視してください。パスワードは変更されません。<br>
+            If you did not request this, ignore this email — your password stays unchanged.</p>
+          </div>`
+        );
+      }
+      res.json(genericResponse);
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      res.json(genericResponse); // 内部エラーも外には漏らさない
+    }
+  }
+);
+
+/**
+ * POST /api/auth/reset-password
+ * 再設定リンクのトークンを検証して新しいパスワードを設定する。
+ * Googleのみで登録したアカウント（password_hash IS NULL）が
+ * パスワードを設定する経路にもなる
+ */
+router.post('/reset-password', loginLimiter, async (req, res) => {
+  try {
+    const { token, email, newPassword } = req.body;
+    if (!token || !email || !newPassword) {
+      return res.status(400).json({ error: 'Token, email and new password are required' });
+    }
+    if (String(newPassword).length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters', code: 'PASSWORD_TOO_SHORT' });
+    }
+
+    const user = (await db.query(
+      `SELECT user_id FROM users WHERE email = $1 AND account_status = 'active'`,
+      [String(email).toLowerCase()]
+    )).rows[0];
+    // 存在しないアドレスでもリンク不正と同じ応答にする
+    if (!user) return res.status(400).json({ error: 'Invalid or expired link', code: 'INVALID_LINK' });
+
+    const link = (await db.query(
+      `SELECT link_id, token_hash FROM magic_links
+       WHERE user_id = $1 AND is_used = FALSE AND expires_at > NOW()
+         AND link_type = 'reset_password'
+       ORDER BY created_at DESC LIMIT 1`,
+      [user.user_id]
+    )).rows[0];
+    if (!link) return res.status(400).json({ error: 'Invalid or expired link', code: 'INVALID_LINK' });
+
+    const ok = await bcrypt.compare(token, link.token_hash);
+    if (!ok) return res.status(400).json({ error: 'Invalid or expired link', code: 'INVALID_LINK' });
+
+    const hashed = await bcrypt.hash(newPassword, await bcrypt.genSalt(10));
+    await db.query(
+      `UPDATE users SET password_hash = $1, updated_at = NOW() WHERE user_id = $2`,
+      [hashed, user.user_id]
+    );
+    await db.query(
+      `UPDATE magic_links SET is_used = TRUE, used_at = NOW() WHERE link_id = $1`,
+      [link.link_id]
+    );
+
+    console.log(`Password reset completed: user=${user.user_id}`);
+    res.json({ success: true, message: 'Your password has been reset. Please sign in.' });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ error: 'Failed to reset password' });
   }
 });
 

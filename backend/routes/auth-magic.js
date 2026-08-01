@@ -249,9 +249,13 @@ router.post('/verify', loginLimiter, async (req, res) => {
 
     const user = userResult.rows[0];
 
+    // パスワード再設定リンク(reset_password)はここでは受け付けない。
+    // 受け付けると「再設定用に送ったリンクでそのままログインできる」ことになり、
+    // 用途の分離（ログイン用リンク／再設定用リンク）が崩れるため
     const linkResult = await db.query(
-      `SELECT link_id, token_hash, link_type FROM magic_links 
+      `SELECT link_id, token_hash, link_type FROM magic_links
        WHERE user_id = $1 AND is_used = FALSE AND expires_at > NOW()
+         AND link_type <> 'reset_password'
        ORDER BY created_at DESC LIMIT 1`,
       [user.user_id]
     );
