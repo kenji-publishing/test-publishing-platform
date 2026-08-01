@@ -245,6 +245,17 @@ async function applyGiftPayment(session) {
         title: 'プレゼントが届きました / You received a gift',
         message: `${gift.sender_name}さんから「${gift.work_title}」が贈られました。ライブラリからお読みいただけます。${note}`,
         actionUrl: `/pages/work-detail.html?id=${gift.work_id}`,
+        // 受け取った人はアプリを開いていない可能性が高いのでメールでも知らせる
+        email: {
+          subject: `プレゼントが届きました / You received a gift on AuctLect`,
+          lines: [
+            `${gift.recipient_name} 様`,
+            `${gift.sender_name}さんから「${gift.work_title}」が贈られました。`,
+            ...(gift.message ? [`${gift.sender_name}さんからのメッセージ:\n「${gift.message}」`] : []),
+            'ライブラリからいつでもお読みいただけます。'
+          ],
+          actionLabel: '作品を開く'
+        },
         icon: 'fa-gift',
         iconColor: 'success',
         metadata: { giftId: gift.gift_id, workId: gift.work_id, senderName: gift.sender_name }

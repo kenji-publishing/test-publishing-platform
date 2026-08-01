@@ -8,6 +8,29 @@
 // このモジュールは長らく未使用で、works.js から読み込んだ際に
 // MODULE_NOT_FOUND でサーバーが起動できなくなった事故あり（2026-07-11）
 const { pool } = require('../config/database');
+const { sendEmail, BASE_URL } = require('../config/email');
+
+/**
+ * 通知メールの共通の体裁。本文はプレーンテキストとHTMLの両方を作る
+ * （HTMLを表示しないメールソフトでも読めるように）
+ */
+function buildEmailHtml({ title, lines, actionUrl, actionLabel }) {
+    const esc = (t) => String(t == null ? '' : t)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const body = lines.map(l => `<p style="margin:0 0 12px; line-height:1.8;">${esc(l).replace(/\n/g, '<br>')}</p>`).join('');
+    const button = actionUrl
+        ? `<p style="text-align:center; margin:28px 0;">
+             <a href="${BASE_URL}${actionUrl}" style="display:inline-block; padding:12px 28px; background:#8B7355; color:#fff; text-decoration:none; border-radius:6px;">${esc(actionLabel || 'AuctLectで見る')}</a>
+           </p>`
+        : '';
+    return `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color:#8B7355;">${esc(title)}</h2>
+      ${body}${button}
+      <hr style="border:none; border-top:1px solid #eee; margin:24px 0;">
+      <p style="font-size:12px; color:#888;">このメールはAuctLectからの自動送信です。通知の設定はアカウント設定から変更できます。<br>
+      This is an automated message from AuctLect. You can change notification settings in your account settings.</p>
+    </div>`;
+}
 
 // 通知タイプの定義
 const NotificationTypes = {
@@ -42,24 +65,30 @@ const NotificationIcons = {
  * @param {string} options.message - 通知メッセージ
  * @param {string} [options.actionUrl] - アクションURL
  * @param {Object} [options.metadata] - 追加メタデータ
+ * @param {Object} [options.email] - メールでも知らせる場合の内容
+ *   { subject, lines: string[], actionLabel } — 受信者のメールアドレスは自動で引く。
+ *   notification_preferences.email_enabled=false の人には送らない。
+ *   メール送信に失敗してもアプリ内通知は成立させる（例外は投げない）
  * @returns {Promise<Object>} 作成された通知
  */
 async function createNotification(options) {
     const { userId, type, title, message, actionUrl = null, metadata = {},
-            icon = null, iconColor = null } = options;
+            icon = null, iconColor = null, email = null } = options;
 
+    let prefs = null;
     try {
         // ユーザーの通知設定を確認（設定は「通知タイプごとの行」で保持される。
         // 行が無ければデフォルトで通知ON。in_app_enabled=false の時だけスキップ）
         const prefResult = await pool.query(
-            `SELECT in_app_enabled FROM notification_preferences
+            `SELECT in_app_enabled, email_enabled FROM notification_preferences
              WHERE user_id = $1 AND notification_type = $2`,
             [userId, type]
         );
-        if (prefResult.rows.length > 0 && prefResult.rows[0].in_app_enabled === false) {
+        prefs = prefResult.rows[0] || null;
+        if (prefs && prefs.in_app_enabled === false) {
             return null;
         }
-        
+
         // 通知を作成（列名は notification_type — DBスキーマに合わせる）
         // icon/iconColorは任意。省略時はDBの既定値（fa-bell / primary）と同じ値になる
         const result = await pool.query(`
@@ -67,12 +96,34 @@ async function createNotification(options) {
             VALUES ($1, $2, $3, $4, $5, $6, COALESCE($7, 'fa-bell'), COALESCE($8, 'primary'))
             RETURNING *
         `, [userId, type, title, message, actionUrl, JSON.stringify(metadata), icon, iconColor]);
-        
+
         console.log(`[NotificationService] Created notification for user ${userId}: ${type}`);
+
+        if (email) await sendNotificationEmail(userId, prefs, { title, actionUrl, ...email });
         return result.rows[0];
     } catch (error) {
         console.error('[NotificationService] Error creating notification:', error);
         throw error;
+    }
+}
+
+/**
+ * 通知メールを送る。アプリ内通知の付随処理なので、失敗しても呼び出し元は止めない
+ */
+async function sendNotificationEmail(userId, prefs, { subject, title, lines, actionUrl, actionLabel }) {
+    try {
+        if (prefs && prefs.email_enabled === false) return;
+        const row = (await pool.query(
+            `SELECT email FROM users WHERE user_id = $1 AND account_status = 'active'`,
+            [userId]
+        )).rows[0];
+        // 退会済み・削除済みのアドレス（deleted_*@deleted.local）には送らない
+        if (!row || !row.email || row.email.endsWith('@deleted.local')) return;
+
+        const text = lines.join('\n\n') + (actionUrl ? `\n\n${BASE_URL}${actionUrl}` : '');
+        await sendEmail(row.email, subject, text, buildEmailHtml({ title, lines, actionUrl, actionLabel }));
+    } catch (e) {
+        console.error('[NotificationService] Email notification failed:', e.message);
     }
 }
 

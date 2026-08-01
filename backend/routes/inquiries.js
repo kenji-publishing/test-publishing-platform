@@ -11,6 +11,7 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const db = require('../config/database');
 const { emailRequestLimiter } = require('../middleware/rateLimits');
+const { createNotification } = require('../services/notificationService');
 
 const VALID_CATEGORIES = ['1', '2', '3', '4', '5', '6', '7', '8']; // faq_categories.id
 
@@ -145,6 +146,30 @@ router.post('/admin/:inquiryId/reply', async (req, res) => {
              WHERE inquiry_id = $1`,
             [inquiry.inquiry_id]
         );
+
+        // 返信はアプリ内メッセージが本体。ただし問い合わせた人はアプリを
+        // 開いていないことが多いので、通知＋メールでも届いたことを知らせる
+        // （返信本文もメールに載せる＝ログインしなくても読める）
+        try {
+            await createNotification({
+                userId,
+                type: 'system',
+                title: 'お問い合わせに返信しました / We replied to your enquiry',
+                message: `「${inquiry.subject}」への返信が届いています。メッセージからご確認ください。`,
+                actionUrl: '/pages/messages.html',
+                icon: 'fa-headset',
+                email: {
+                    subject: `お問い合わせへの返信 / Re: ${inquiry.subject}`,
+                    lines: [
+                        'AuctLectサポートです。お問い合わせいただいた件について回答いたします。',
+                        `件名: ${inquiry.subject}`,
+                        message,
+                        '続けてご相談がある場合は、アプリ内のメッセージからそのままご返信いただけます。'
+                    ],
+                    actionLabel: 'メッセージを開く'
+                }
+            });
+        } catch (e) { console.error('Inquiry reply notification failed:', e.message); }
 
         res.json({ success: true, conversationId });
     } catch (error) {
