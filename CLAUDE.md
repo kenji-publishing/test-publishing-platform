@@ -147,6 +147,21 @@ test-publishing-platform/
 - RTL対応: アラビア語選択時に `dir="rtl"` を設定
 - 変更完了後は毎回 Git Commit + Push する
 
+## アセットのキャッシュ（?v= バージョン付け）
+CSS/JS/画像を更新したとき、読者のブラウザが古いファイルを使い続けないようにする仕組み。
+
+**フロントエンドのファイル（HTML/CSS/JS/翻訳）を変更したら、コミット前に必ず実行:**
+```
+node tools/bump-assets.js          # 全HTMLの ?v= を今の日時に付け直す
+node tools/bump-assets.js --check  # 付け忘れがないか確認（変更しない）
+```
+- HTML は常に no-cache、`?v=` 付きアセットは1年キャッシュ（nginx: `map $arg_v`）
+- `?v=` 無しのリクエストは今までどおり毎回確認するので、付け忘れても固まらない
+- 翻訳JSON（js/lang/*.json）はHTMLに書かれていないため、i18n.js が
+  自分の script src に付いた `?v=` を読み取ってJSONにも引き継ぐ（`_assetVersion`）
+- **i18n.js の `_detectBasePath()` は script src の文字列置換でパスを作る。**
+  クエリを外さずに置換すると `js/lang/?v=...` になり全翻訳が壊れる（対策済み・削除しないこと）
+
 ## Common Pitfalls
 - ナビバーの変更は navbar.js の1箇所のみ。各ページのHTMLを直接編集しないこと
 - 新言語追加時、Privacy/Terms等のlang-contentページは手動でコンテンツブロック追加が必要
