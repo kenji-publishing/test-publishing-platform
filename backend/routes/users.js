@@ -410,56 +410,67 @@ router.post('/confirm-delete', async (req, res) => {
       [userId]
     );
     
-    // 退会時は「アカウントを止める」だけでなく、その人の作品も販売停止にする。
-    // 退会後も作品が売れ続けると、支払先が失われたまま売上が立ってしまう。
-    // status='archived'（削除ではない）にするので、**購入済みの読者は引き続き読める**
-    // （works.jsのアクセス判定が購入済みを公開状態より優先する）
+    // 退会時の作品の扱いは、共同制作者がいるかどうかで分ける。
+    //
+    //  単独作品 → 非公開(archived)。支払先が失われたまま売れ続けるのを防ぐ。
+    //             削除ではないので**購入済みの読者は引き続き読める**
+    //             （works.jsのアクセス判定が購入済みを公開状態より優先する）
+    //  共同制作作品 → **公開のまま販売を継続**。同意書「契約の終了」に
+    //             「終了時点で既に公開されている翻訳作品は、指定された収益配分条件に
+    //             基づき引き続き販売される」と定めており、著者の退会だけで
+    //             翻訳者・編集者の取り分を止めるのは契約違反になるため。
+    //             退会した著者の取り分も登録済みの口座へ通常どおり支払われる
+    //             （payoutsはrevenue_splitsのみを見ておりログイン不要）
     const archived = (await db.query(
       `UPDATE works SET status = 'archived', updated_at = CURRENT_TIMESTAMP
        WHERE author_id = $1 AND status = 'published'
+         AND NOT EXISTS (
+           SELECT 1 FROM work_collaborators c
+           WHERE c.work_id = works.work_id AND c.status = 'active' AND c.user_id <> $1
+         )
        RETURNING work_id, title`,
       [userId]
     )).rows;
 
-    // 共同制作者（翻訳者・編集者）は収益が止まるので必ず知らせる。
-    // 既に確定した分配は revenue_splits に残り、通常どおり支払われる
+    // 販売を継続する共同制作作品。共同制作者には「継続する」ことを知らせる
+    // （黙って著者が消えると、相手は何が起きたか分からないため）
+    const kept = (await db.query(
+      `SELECT DISTINCT w.work_id, w.title, c.user_id AS collaborator_id
+       FROM works w
+       JOIN work_collaborators c ON c.work_id = w.work_id
+       WHERE w.author_id = $1 AND w.status = 'published'
+         AND c.status = 'active' AND c.user_id <> $1`,
+      [userId]
+    )).rows;
+
     let notifiedCollaborators = 0;
-    if (archived.length) {
-      const collabs = (await db.query(
-        `SELECT DISTINCT c.user_id, c.role, w.title
-         FROM work_collaborators c
-         JOIN works w ON w.work_id = c.work_id
-         WHERE c.work_id = ANY($1::uuid[]) AND c.status = 'active' AND c.user_id <> $2`,
-        [archived.map(w => w.work_id), userId]
-      )).rows;
-      for (const c of collabs) {
-        try {
-          await createNotification({
-            userId: c.user_id,
-            type: 'system',
-            title: '共同制作作品の販売が停止されました / A work you worked on is no longer on sale',
-            message: `著者の退会により「${c.title}」の販売を停止しました。すでに確定した収益はこれまでどおりお支払いします。`,
-            actionUrl: '/pages/dashboard.html',
-            icon: 'fa-circle-info',
-            email: {
-              subject: `共同制作作品の販売停止のお知らせ / ${c.title}`,
-              lines: [
-                `「${c.title}」は、著者の退会にともない販売を停止しました。`,
-                'すでに確定している収益は、通常どおり毎月のお支払いに含まれます。',
-                'すでにご購入済みの読者は、引き続きこの作品を読むことができます。'
-              ],
-              actionLabel: 'ダッシュボードを開く'
-            }
-          });
-          notifiedCollaborators++;
-        } catch (e) { console.error('Collaborator notice failed:', e.message); }
-      }
+    for (const k of kept) {
+      try {
+        await createNotification({
+          userId: k.collaborator_id,
+          type: 'system',
+          title: '共同制作作品の著者が退会しました / The author of a work you worked on has left',
+          message: `「${k.title}」の著者が退会しましたが、同意書に基づき販売と収益配分はこれまでどおり継続します。`,
+          actionUrl: '/pages/dashboard.html',
+          icon: 'fa-circle-info',
+          email: {
+            subject: `共同制作作品についてのお知らせ / ${k.title}`,
+            lines: [
+              `「${k.title}」の著者がAuctLectを退会しました。`,
+              '同意書「契約の終了」の定めに従い、すでに公開されているこの作品は引き続き販売され、収益配分もこれまでどおりです。',
+              'お手続きは必要ありません。'
+            ],
+            actionLabel: 'ダッシュボードを開く'
+          }
+        });
+        notifiedCollaborators++;
+      } catch (e) { console.error('Collaborator notice failed:', e.message); }
     }
 
     await db.query('DELETE FROM account_deletion_requests WHERE user_id = $1', [userId]);
     await db.query('UPDATE users SET account_status = $1, email = $2, deleted_at = NOW() WHERE user_id = $3',
       ['deleted', `deleted_${userId}@deleted.local`, userId]);
-    console.log(`Account deleted: user=${userId}, works archived=${archived.length}, collaborators notified=${notifiedCollaborators}`);
+    console.log(`Account deleted: user=${userId}, works archived=${archived.length}, works kept on sale=${kept.length}, collaborators notified=${notifiedCollaborators}`);
 
     // Send final confirmation
     if (userResult.rows.length > 0) {
