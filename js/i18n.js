@@ -49,6 +49,7 @@
     var _loaded = {};  // loaded language codes
     var _listeners = [];  // language change callbacks
     var _basePath = '';  // path to js/lang/ directory
+    var _assetVersion = '';  // i18n.js 自身に付いている ?v= の値（翻訳JSONにも引き継ぐ）
 
     // ========== パス検出 ==========
 
@@ -57,6 +58,14 @@
         var scripts = document.querySelectorAll('script[src*="i18n.js"]');
         if (scripts.length > 0) {
             var src = scripts[scripts.length - 1].getAttribute('src');
+            // キャッシュ対策の ?v=... が付いている場合はここで切り離す。
+            // 付けたまま置換すると "../js/lang/?v=20260801" になり、翻訳JSONを読めなくなる。
+            var q = src.indexOf('?');
+            if (q >= 0) {
+                var m = src.slice(q + 1).match(/(?:^|&)v=([^&]*)/);
+                if (m) _assetVersion = m[1];
+                src = src.slice(0, q);
+            }
             // src might be "js/i18n.js", "../js/i18n.js", "../../js/i18n.js"
             return src.replace('js/i18n.js', 'js/lang/');
         }
@@ -87,7 +96,9 @@
 
         // Step 2: Try loading JSON for additional keys (works on HTTP servers)
         try {
-            var url = _basePath + lang + '.json';
+            // 翻訳JSONにもHTML側と同じバージョンを付ける。
+            // これがないと、翻訳を直してもブラウザが古いJSONを使い続けることがある
+            var url = _basePath + lang + '.json' + (_assetVersion ? '?v=' + encodeURIComponent(_assetVersion) : '');
             var xhr = new XMLHttpRequest();
             xhr.open('GET', url, true);
             xhr.onreadystatechange = function() {
