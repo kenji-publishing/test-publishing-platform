@@ -831,8 +831,11 @@ router.get('/:workId/full', authenticate, async (req, res) => {
         // anyone read paid content for free.
         const userId = req.user.userId;
 
+        // 公開停止（著者の退会=archived、規約違反の差し止め=suspended）でも、
+        // **すでに購入した人は読めるままにする**（買った本を取り上げないため）。
+        // 完全削除(deleted)だけは誰も読めない
         const result = await db.query(
-            `SELECT * FROM works WHERE work_id = $1 AND status = 'published'`,
+            `SELECT * FROM works WHERE work_id = $1 AND status <> 'deleted'`,
             [req.params.workId]
         );
 
@@ -851,8 +854,8 @@ router.get('/:workId/full', authenticate, async (req, res) => {
             });
         }
 
-        // Check if work is free
-        if (work.is_free || work.price === 0 || work.price === null) {
+        // 無料作品は「公開中」の間だけ誰でも読める（取り下げ後に新規で読めるのは不適切）
+        if (work.status === 'published' && (work.is_free || work.price === 0 || work.price === null)) {
             return res.json({
                 success: true,
                 work,
@@ -872,6 +875,11 @@ router.get('/:workId/full', authenticate, async (req, res) => {
                 work,
                 access: 'purchased'
             });
+        }
+
+        // 未購入で、かつ公開されていない作品は存在を伏せる
+        if (work.status !== 'published') {
+            return res.status(404).json({ error: 'Work not found' });
         }
 
         return res.status(403).json({
@@ -918,13 +926,17 @@ async function checkPageReadAccess(workId, userId) {
     const work = result.rows[0];
     if (!work) return { error: 404 };
     if (work.author_id === userId) return { access: 'author', work };
-    if (work.status !== 'published') return { error: 404 };
-    if (work.is_free || work.price === 0 || work.price === null) return { access: 'free', work };
+    // 無料で読めるのは公開中の間だけ
+    if (work.status === 'published' && (work.is_free || work.price === 0 || work.price === null)) {
+        return { access: 'free', work };
+    }
+    // 購入済みなら公開停止後（archived/suspended）でも読める（/fullと同じ規則）
     const purchased = await db.query(
         `SELECT 1 FROM purchases WHERE user_id = $1 AND work_id = $2 AND payment_status = 'completed'`,
         [userId, workId]
     );
     if (purchased.rows.length > 0) return { access: 'purchased', work };
+    if (work.status !== 'published') return { error: 404 };
     return { error: 403, price: work.price };
 }
 
