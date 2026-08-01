@@ -96,52 +96,9 @@
                     </div>
                     
                     <form id="uploadForm">
-                        <!-- Upload Route Selection -->
-                        <div class="form-card">
-                            <h5><i class="fas fa-route me-2"></i><span id="sectionUploadRoute" data-i18n="upload.sectionUploadRoute">Upload Type</span></h5>
-                            <div class="d-flex gap-3 flex-wrap">
-                                <div class="content-type-btn active" id="routeNew" onclick="selectUploadRoute('new')">
-                                    <i class="fas fa-plus-circle"></i>
-                                    <span id="routeNewLabel" data-i18n="upload.routeNewLabel">New Original Work</span>
-                                </div>
-                                <div class="content-type-btn" id="routeTranslation" onclick="selectUploadRoute('translation')">
-                                    <i class="fas fa-language"></i>
-                                    <span id="routeTranslationLabel" data-i18n="upload.routeTranslationLabel">Translation of Existing Work</span>
-                                </div>
-                            </div>
-                            <input type="hidden" id="uploadRoute" value="new">
-                        </div>
-
-                        <!-- Original Work Selector (Translation route only) -->
-                        <div class="form-card" id="originalWorkSection" style="display: none;">
-                            <h5><i class="fas fa-link me-2"></i><span id="sectionOriginalWork" data-i18n="upload.sectionOriginalWork">Select Original Work</span></h5>
-                            <p class="text-secondary small mb-3" id="originalWorkDesc" data-i18n="upload.originalWorkDesc">Select the work you are translating. Basic info will be inherited.</p>
-                            <select class="form-select mb-3" id="originalWorkSelect">
-                                <option value="" id="optSelectOriginalWork" data-i18n="upload.optSelectOriginalWork">-- Select original work --</option>
-                            </select>
-                            <div id="originalWorkInfo" style="display: none; padding: 0.75rem; background: var(--color-bg-hover); border-radius: var(--radius-md);">
-                                <div class="d-flex align-items-center gap-2 mb-2">
-                                    <i class="fas fa-book text-accent"></i>
-                                    <strong id="originalWorkTitle"></strong>
-                                </div>
-                                <small class="text-secondary" id="originalWorkMeta"></small>
-                            </div>
-                            <div class="mb-3 mt-3">
-                                <label class="form-label" id="labelTranslationLangUpload" data-i18n="upload.labelTranslationLangUpload">Translation Language *</label>
-                                <select class="form-select" id="translationLangUpload">
-                                    <option value="">-- Select --</option>
-                                    <option value="en">English</option>
-                                    <option value="ja">日本語</option>
-                                    <option value="zh">中文</option>
-                                    <option value="es">Español</option>
-                                    <option value="fr">Français</option>
-                                    <option value="de">Deutsch</option>
-                                    <option value="ko">한국어</option>
-                                    <option value="ar">العربية</option>
-                                    <option value="pt">Português</option>
-                                </select>
-                            </div>
-                        </div>
+                        <!-- 投稿タイプの選択は廃止（翻訳版ルートは未実装のダミーだった）。
+                             翻訳版は作品に翻訳者を共同制作者として招く流れに一本化 -->
+                        <input type="hidden" id="uploadRoute" value="new">
 
                         <!-- Content Type -->
                         <div class="form-card">
@@ -747,11 +704,6 @@
             document.title = getL(uiText.pageTitle) + ' - AuctLect';
             const pageEls = {
                 pageTitle: uiText.pageTitle, pageSubtitle: uiText.pageSubtitle,
-                // Upload Route
-                sectionUploadRoute: uiText.sectionUploadRoute, routeNewLabel: uiText.routeNewLabel,
-                routeTranslationLabel: uiText.routeTranslationLabel,
-                sectionOriginalWork: uiText.sectionOriginalWork, originalWorkDesc: uiText.originalWorkDesc,
-                optSelectOriginalWork: uiText.optSelectOriginalWork, labelTranslationLangUpload: uiText.labelTranslationLangUpload,
                 sectionContentType: uiText.sectionContentType, typeText: uiText.typeText,
                 typeManga: uiText.typeManga, typeArt: uiText.typeArt,
                 sectionDetails: uiText.sectionDetails, labelTitle: uiText.labelTitle,
@@ -807,59 +759,6 @@
 
         // ========== Pattern C: User Dropdown ==========
         // ========== Upload Page: 固有機能 ==========
-        // Upload Route Selection
-        function selectUploadRoute(route) {
-            document.getElementById('uploadRoute').value = route;
-            document.getElementById('routeNew').classList.toggle('active', route === 'new');
-            document.getElementById('routeTranslation').classList.toggle('active', route === 'translation');
-            document.getElementById('originalWorkSection').style.display = route === 'translation' ? 'block' : 'none';
-            // 翻訳版ルートではタイトル・言語が自動入力されるため、一部フィールドの必須を変更
-            var titleInput = document.getElementById('workTitle');
-            if (route === 'translation') {
-                loadOriginalWorks();
-                document.getElementById('translationLangUpload').required = true;
-            } else {
-                document.getElementById('translationLangUpload').required = false;
-            }
-        }
-
-        function loadOriginalWorks() {
-            // デモモード: ダミーの自作品リスト
-            var select = document.getElementById('originalWorkSelect');
-            if (select.options.length > 1) return; // already loaded
-            var demoWorks = [
-                { id: 1, title: 'The Adventure of Magic Academy', lang: 'en', genre: 'Fiction' },
-                { id: 2, title: '月光の庭', lang: 'ja', genre: 'Literary Fiction' },
-                { id: 3, title: 'Midnight Stories', lang: 'en', genre: 'Mystery' }
-            ];
-            demoWorks.forEach(function(w) {
-                var opt = document.createElement('option');
-                opt.value = w.id;
-                opt.textContent = w.title + ' (' + w.lang.toUpperCase() + ')';
-                opt.dataset.title = w.title;
-                opt.dataset.lang = w.lang;
-                opt.dataset.genre = w.genre;
-                select.appendChild(opt);
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            var origSelect = document.getElementById('originalWorkSelect');
-            if (origSelect) {
-                origSelect.addEventListener('change', function() {
-                    var opt = this.options[this.selectedIndex];
-                    var infoDiv = document.getElementById('originalWorkInfo');
-                    if (this.value) {
-                        infoDiv.style.display = 'block';
-                        document.getElementById('originalWorkTitle').textContent = opt.dataset.title || '';
-                        document.getElementById('originalWorkMeta').textContent = 'Language: ' + (opt.dataset.lang || '').toUpperCase() + ' | Genre: ' + (opt.dataset.genre || '');
-                    } else {
-                        infoDiv.style.display = 'none';
-                    }
-                });
-            }
-        });
-
         function selectContentType(type, btn) {
             document.querySelectorAll('.content-type-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
