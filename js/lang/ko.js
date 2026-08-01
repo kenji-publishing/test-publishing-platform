@@ -98,6 +98,21 @@ window.translations.ko = {
     verifyEmail: {
         pageTitle: '이메일 주소 확인 - AuctLect',
     },
+    magicLogin: {
+        pageTitle: '이메일로 로그인 - AuctLect',
+        title: '이메일로 로그인',
+        lead: '비밀번호를 잊으셨나요? 이메일 주소를 입력하시면 바로 로그인할 수 있는 링크를 보내드립니다. 비밀번호는 필요 없습니다.',
+        emailLabel: '이메일 주소',
+        send: '로그인 링크 보내기',
+        sentTitle: '메일함을 확인해 주세요',
+        sentBody: '해당 주소가 등록되어 있다면 로그인 링크를 보냈습니다. 링크는 15분간 유효합니다. 도착하지 않으면 스팸함도 확인해 주세요.',
+        verifying: '로그인 중입니다...',
+        invalidTitle: '이 링크는 사용할 수 없습니다',
+        invalidBody: '로그인 링크는 15분 후 만료되며 한 번만 사용할 수 있습니다. 다시 요청해 주세요.',
+        requestAgain: '링크 다시 보내기',
+        backToLogin: '로그인 화면으로 돌아가기',
+        needEmail: '이메일 주소를 입력해 주세요.',
+    },
     login: {
         pageTitle: '로그인 - AuctLect',
         welcomeBack: '다시 오신 것을 환영합니다',

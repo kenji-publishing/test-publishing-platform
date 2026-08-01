@@ -98,6 +98,21 @@ window.translations.ja = {
     verifyEmail: {
         pageTitle: 'メールアドレスの確認 - AuctLect',
     },
+    magicLogin: {
+        pageTitle: 'メールでログイン - AuctLect',
+        title: 'メールでログイン',
+        lead: 'パスワードをお忘れですか？メールアドレスを入力すると、そのままログインできるリンクをお送りします。パスワードの入力は不要です。',
+        emailLabel: 'メールアドレス',
+        send: 'ログイン用リンクを送る',
+        sentTitle: 'メールをご確認ください',
+        sentBody: 'そのアドレスが登録されていれば、ログイン用のリンクをお送りしました。リンクは15分間有効です。届かない場合は迷惑メールフォルダもご確認ください。',
+        verifying: 'ログインしています...',
+        invalidTitle: 'このリンクは使えません',
+        invalidBody: 'ログイン用リンクは15分で期限切れになり、一度しか使えません。もう一度お送りします。',
+        requestAgain: 'もう一度リンクを送る',
+        backToLogin: 'ログイン画面に戻る',
+        needEmail: 'メールアドレスを入力してください。',
+    },
     login: {
         pageTitle: 'ログイン - AuctLect',
         welcomeBack: 'おかえりなさい',

@@ -98,6 +98,21 @@ window.translations.en = {
     verifyEmail: {
         pageTitle: 'Verify your email - AuctLect',
     },
+    magicLogin: {
+        pageTitle: 'Sign in by email - AuctLect',
+        title: 'Sign in by email',
+        lead: 'Forgot your password? Enter your email address and we will send you a link that signs you in. No password needed.',
+        emailLabel: 'Email address',
+        send: 'Send the link',
+        sentTitle: 'Check your inbox',
+        sentBody: 'If that address is registered, a sign-in link is on its way. The link works for 15 minutes. If nothing arrives, check your spam folder.',
+        verifying: 'Signing you in...',
+        invalidTitle: 'This link no longer works',
+        invalidBody: 'Sign-in links expire after 15 minutes and can only be used once. Please request a new one.',
+        requestAgain: 'Request a new link',
+        backToLogin: 'Back to sign in',
+        needEmail: 'Please enter your email address.',
+    },
     login: {
         pageTitle: 'Sign In - AuctLect',
         welcomeBack: 'Welcome Back',

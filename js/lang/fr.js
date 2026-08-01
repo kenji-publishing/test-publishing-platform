@@ -98,6 +98,21 @@ window.translations.fr = {
     verifyEmail: {
         pageTitle: 'Vérifiez votre e-mail - AuctLect',
     },
+    magicLogin: {
+        pageTitle: 'Connexion par e-mail - AuctLect',
+        title: 'Connexion par e-mail',
+        lead: 'Mot de passe oublié ? Saisissez votre e-mail et nous vous enverrons un lien de connexion. Aucun mot de passe requis.',
+        emailLabel: 'Adresse e-mail',
+        send: 'Envoyer le lien',
+        sentTitle: 'Consultez votre boîte mail',
+        sentBody: 'Si cette adresse est enregistrée, le lien est en route. Il est valable 15 minutes. S\'il n\'arrive pas, vérifiez vos spams.',
+        verifying: 'Connexion en cours...',
+        invalidTitle: 'Ce lien ne fonctionne plus',
+        invalidBody: 'Les liens expirent au bout de 15 minutes et ne servent qu\'une fois. Demandez-en un nouveau.',
+        requestAgain: 'Demander un nouveau lien',
+        backToLogin: 'Retour à la connexion',
+        needEmail: 'Veuillez saisir votre adresse e-mail.',
+    },
     login: {
         pageTitle: 'Connexion - AuctLect',
         welcomeBack: 'Bon Retour',

@@ -98,6 +98,21 @@ window.translations.zh = {
     verifyEmail: {
         pageTitle: '確認電子郵件地址 - AuctLect',
     },
+    magicLogin: {
+        pageTitle: '用電子郵件登入 - AuctLect',
+        title: '用電子郵件登入',
+        lead: '忘記密碼了嗎？輸入電子郵件地址，我們會寄送可直接登入的連結，無需輸入密碼。',
+        emailLabel: '電子郵件地址',
+        send: '寄送登入連結',
+        sentTitle: '請查看您的信箱',
+        sentBody: '若該地址已註冊，登入連結已寄出。連結有效期為15分鐘。若未收到，請查看垃圾郵件匣。',
+        verifying: '正在登入...',
+        invalidTitle: '此連結已失效',
+        invalidBody: '登入連結15分鐘後失效，且僅能使用一次。請重新申請。',
+        requestAgain: '重新寄送連結',
+        backToLogin: '返回登入頁',
+        needEmail: '請輸入電子郵件地址。',
+    },
     login: {
         pageTitle: '登入 - AuctLect',
         welcomeBack: '欢迎回来',
