@@ -69,18 +69,26 @@ router.get('/profile', authenticate, async (req, res) => {
 router.put('/profile', authenticate, async (req, res) => {
   try {
     const { first_name, last_name, display_name, bio, preferred_language } = req.body;
-    
+
+    // ペンネームは「空にする＝本名で出す」という意思表示なので、空欄はNULLとして扱う。
+    // 空文字のまま保存すると COALESCE(pen_name, 本名) が空文字を返し、
+    // 作品ページの著者名が空白になる（本名に戻らない）
+    const penName = (typeof display_name === 'string' && display_name.trim() === '')
+      ? null
+      : display_name;
+    const clearPen = typeof display_name === 'string' && display_name.trim() === '';
+
     const result = await db.query(
-      `UPDATE users 
+      `UPDATE users
        SET first_name = COALESCE($1, first_name),
            last_name = COALESCE($2, last_name),
-           pen_name = COALESCE($3, pen_name),
+           pen_name = CASE WHEN $7::boolean THEN NULL ELSE COALESCE($3, pen_name) END,
            bio = COALESCE($4, bio),
            preferred_language = COALESCE($5, preferred_language),
            updated_at = CURRENT_TIMESTAMP
        WHERE user_id = $6
        RETURNING *`,
-      [first_name, last_name, display_name, bio, preferred_language, req.user.userId]
+      [first_name, last_name, penName, bio, preferred_language, req.user.userId, clearPen]
     );
     
     res.json({
