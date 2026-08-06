@@ -22,6 +22,36 @@ const { createNotification } = require('../services/notificationService');
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
+ * 購入者の国（ISO 3166-1 alpha-2）を取る。
+ *
+ * EU圏の読者への販売が始まった時点で気づけるようにするために記録する。
+ * 将来VATの登録が必要になった場合、EUは顧客の所在地の証拠の保存を求めるが、
+ * それは取引の時点でしか取れない。後から遡って作ることはできない。
+ *
+ * 請求先の国が取れればそれを使う。Stripeは決済手段によっては住所を集めないので、
+ * 取れなければカード発行国で代用する（どちらもVAT上の所在地証拠として使われる種類のもの）。
+ * どうしても取れなければ null。取れないこと自体で決済を止めはしない。
+ */
+async function resolveBuyerCountry(session) {
+  try {
+    const billing = session.customer_details && session.customer_details.address
+      && session.customer_details.address.country;
+    if (billing) return billing;
+
+    const full = await stripe.checkout.sessions.retrieve(session.id, {
+      expand: ['payment_intent.latest_charge']
+    });
+    const card = full.payment_intent && full.payment_intent.latest_charge
+      && full.payment_intent.latest_charge.payment_method_details
+      && full.payment_intent.latest_charge.payment_method_details.card;
+    return (card && card.country) || null;
+  } catch (error) {
+    console.error('Buyer country lookup failed (continuing):', error.message);
+    return null;
+  }
+}
+
+/**
  * 全額返金の反映（charge.refundedから呼ばれる）
  * - 作品購入: purchasesをrefundedに（読者アクセスは自動で失効）、返金トランザクション記録、
  *   収益分配を打ち消すマイナス行を挿入（収益集計が自動で正しくなる。履歴は残る=監査可能）
@@ -51,9 +81,13 @@ async function applyStripeRefund(sessionId) {
       )).rows[0];
       const payerId = gift ? gift.sender_id : purchase.user_id;
 
+      // 返金は購入の打ち消しなので、国も元の購入と同じものを持たせる。
+      // 空にすると「EU圏の売上」を数えたときに購入だけが残って相殺されない
       await client.query(
-        `INSERT INTO transactions (user_id, work_id, transaction_type, amount, currency, payment_method, payment_gateway_id, status)
-         VALUES ($1, $2, 'refund', $3, $4, 'stripe', $5, 'completed')`,
+        `INSERT INTO transactions (user_id, work_id, transaction_type, amount, currency, payment_method, payment_gateway_id, status, buyer_country)
+         VALUES ($1, $2, 'refund', $3, $4, 'stripe', $5, 'completed',
+                 (SELECT buyer_country FROM transactions
+                   WHERE payment_gateway_id = $5 AND transaction_type = 'purchase' LIMIT 1))`,
         [payerId, purchase.work_id, purchase.amount, purchase.currency, sessionId]
       );
       if (gift) {
@@ -144,6 +178,9 @@ async function applyGiftPayment(session) {
     ? session.amount_total
     : session.amount_total / 100;
   const currency = session.currency.toUpperCase();
+  // トランザクションを開く前に取る。StripeへのAPI呼び出しなので、
+  // BEGIN...COMMIT の中で待つとその間ずっと接続を握ってしまう
+  const buyerCountry = await resolveBuyerCountry(session);
 
   const client = await db.pool.connect();
   let outcome = null;
@@ -203,11 +240,12 @@ async function applyGiftPayment(session) {
       console.warn(`Gift undeliverable (recipient already owns): gift=${giftId}, session=${session.id} — REFUND REQUIRED`);
       outcome = { delivered: false, gift };
     } else {
-      // 支払ったのは贈った人なので、取引履歴は贈った人名義で残す
+      // 支払ったのは贈った人なので、取引履歴は贈った人名義で残す。
+      // 国も支払った人のもの（課税地の判定は支払う側で見るため）
       await client.query(
-        `INSERT INTO transactions (user_id, work_id, transaction_type, amount, currency, payment_method, payment_gateway_id, status)
-         VALUES ($1, $2, 'purchase', $3, $4, 'stripe', $5, 'completed')`,
-        [gift.sender_id, gift.work_id, amount, currency, session.id]
+        `INSERT INTO transactions (user_id, work_id, transaction_type, amount, currency, payment_method, payment_gateway_id, status, buyer_country)
+         VALUES ($1, $2, 'purchase', $3, $4, 'stripe', $5, 'completed', $6)`,
+        [gift.sender_id, gift.work_id, amount, currency, session.id, buyerCountry]
       );
 
       const splits = await createRevenueSplits(client, {
@@ -544,6 +582,8 @@ router.post('/webhook', async (req, res) => {
       ? session.amount_total
       : session.amount_total / 100;
     const currency = session.currency.toUpperCase();
+    // トランザクションを開く前に取る（Stripeへの往復を BEGIN...COMMIT の中で待たない）
+    const buyerCountry = await resolveBuyerCountry(session);
 
     // BEGIN/COMMIT must run on a single dedicated connection. db.query()
     // draws a different pooled connection per call, which silently breaks
@@ -591,9 +631,9 @@ router.post('/webhook', async (req, res) => {
       } else {
         // Record the transaction
         await client.query(
-          `INSERT INTO transactions (user_id, work_id, transaction_type, amount, currency, payment_method, payment_gateway_id, status)
-           VALUES ($1, $2, 'purchase', $3, $4, 'stripe', $5, 'completed')`,
-          [buyer_id, work_id, amount, currency, session.id]
+          `INSERT INTO transactions (user_id, work_id, transaction_type, amount, currency, payment_method, payment_gateway_id, status, buyer_country)
+           VALUES ($1, $2, 'purchase', $3, $4, 'stripe', $5, 'completed', $6)`,
+          [buyer_id, work_id, amount, currency, session.id, buyerCountry]
         );
 
         // Create revenue splits (author / collaborators / platform)
