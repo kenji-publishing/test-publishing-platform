@@ -320,8 +320,11 @@ router.get('/', async (req, res) => {
                    w.is_adult, w.age_rating, w.content_warnings,
                    w.is_ai_generated, w.ai_tools_used,
                    w.ai_text_usage, w.ai_cover_usage, w.ai_translation_usage,
-                   u.user_id as author_id, u.pen_name as author_name,
-                   u.first_name, u.last_name
+                   u.user_id as author_id,
+                   -- ペンネームが無いときの本名への切り替えはここで済ませる。
+                   -- 本名をそのまま返して画面側で選ばせると、ペンネームを設定した
+                   -- 著者の本名まで全員のブラウザに配ることになる
+                   COALESCE(u.pen_name, NULLIF(TRIM(COALESCE(u.first_name,'') || ' ' || COALESCE(u.last_name,'')), '')) AS author_name
             FROM works w
             JOIN users u ON w.author_id = u.user_id
             WHERE w.status = 'published'
@@ -704,8 +707,8 @@ router.get('/:workId', async (req, res) => {
 
         const result = await db.query(
             `SELECT w.*, 
-                    u.pen_name as author_name, u.user_id as author_id,
-                    u.first_name, u.last_name,
+                    COALESCE(u.pen_name, NULLIF(TRIM(COALESCE(u.first_name,'') || ' ' || COALESCE(u.last_name,'')), '')) AS author_name,
+                    u.user_id as author_id,
                     COALESCE(w.like_count, 0) as like_count,
                     COALESCE(w.comment_count, 0) as comment_count
              FROM works w
@@ -760,7 +763,7 @@ router.get('/:workId/preview', async (req, res) => {
             `SELECT w.work_id, w.title, w.description, w.synopsis, 
                     w.content, w.preview_percent, w.is_free, w.price,
                     w.word_count, w.page_count,
-                    u.pen_name as author_name, u.first_name, u.last_name
+                    COALESCE(u.pen_name, NULLIF(TRIM(COALESCE(u.first_name,'') || ' ' || COALESCE(u.last_name,'')), '')) AS author_name
              FROM works w
              JOIN users u ON w.author_id = u.user_id
              WHERE w.work_id = $1 AND w.status = 'published'`,
@@ -801,7 +804,7 @@ router.get('/:workId/preview', async (req, res) => {
             preview: {
                 workId: work.work_id,
                 title: work.title,
-                authorName: work.author_name || `${work.first_name} ${work.last_name}`,
+                authorName: work.author_name || 'Unknown',
                 description: work.description,
                 synopsis: work.synopsis,
                 previewContent: previewContent,
