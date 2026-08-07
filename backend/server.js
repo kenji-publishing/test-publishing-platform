@@ -113,7 +113,10 @@ app.get('/api/health', (req, res) => {
     status: 'ok',
     message: 'AuctLect API is running',
     timestamp: new Date().toISOString(),
-    database: db.pool ? 'connected' : 'disconnected'
+    database: db.pool ? 'connected' : 'disconnected',
+    // EU圏の購入をこのヘッダーで止めているので、届かなくなったら気づけるようにする。
+    // 国名そのものは出さない（訪問者の所在地を返す必要はない）
+    geo: req.headers['cf-ipcountry'] ? 'available' : 'unavailable'
   });
 });
 

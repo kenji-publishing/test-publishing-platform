@@ -18,7 +18,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { createRevenueSplits } = require('../services/revenueSplitService');
 const { createNotification } = require('../services/notificationService');
 // 分配の前に、購入者の国のVATを総額から抜く。config/vatRates.js を参照
-const { getVatRate, splitTaxFromGross } = require('../config/vatRates');
+const { getVatRate, splitTaxFromGross, VAT_REGISTERED, EU27 } = require('../config/vatRates');
 
 // 不正なUUIDをそのままSQLに渡すと 22P02 で500になるため、入口で弾く
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -50,6 +50,67 @@ async function resolveBuyerCountry(session) {
   } catch (error) {
     console.error('Buyer country lookup failed (continuing):', error.message);
     return null;
+  }
+}
+
+/**
+ * EU圏の読者への販売を、税率表が揃うまで受け付けないための門番。
+ *
+ * EUはデジタル役務について、非EU事業者に免税枠を認めていない（アイルランド歳入庁に
+ * 確認済み 2026-08-07）。1件でも売れば、その国の税率で徴収する義務が生じる。
+ * 税率が空のまま売ると0%で徴収してしまい、不足分は当社が自腹で納めることになる。
+ *
+ * 国の判定には Cloudflare が付ける cf-ipcountry を使う。判定できない場合は通す。
+ * ここで一律に止めると、ヘッダーが来ないだけで全世界の販売が死ぬ。
+ * 取りこぼしは、決済後のもう一段の警告（notifyEuSaleWhileUnregistered）で拾う。
+ */
+function checkEuSaleAllowed(req) {
+  if (VAT_REGISTERED) return { allowed: true, country: null };
+
+  const country = (req.headers['cf-ipcountry'] || '').toUpperCase();
+  if (!country || country === 'XX' || country === 'T1') {
+    // Cloudflare の国判定が無効か、Tor 経由。止めずに通し、決済後の網に任せる
+    return { allowed: true, country: country || null };
+  }
+  if (EU27.includes(country)) {
+    return { allowed: false, country };
+  }
+  return { allowed: true, country };
+}
+
+/**
+ * 門番をすり抜けてEU圏の購入が成立してしまった場合に知らせる。
+ *
+ * VPN経由などで国の判定が外れることはある。そのときに黙って進むと、
+ * 「その月の翌月10日まで」の届け出期限を逃す。期限を過ぎると、EU27か国すべてに
+ * 個別登録して申告する義務が生じるので、その日のうちに気づける状態にしておく。
+ */
+async function notifyEuSaleWhileUnregistered({ country, amount, currency, sessionId }) {
+  if (VAT_REGISTERED || !country || !EU27.includes(country.toUpperCase())) return;
+
+  const deadline = new Date();
+  deadline.setMonth(deadline.getMonth() + 1, 10);
+  const by = deadline.toISOString().slice(0, 10);
+
+  console.error(
+    `EU SALE WHILE NOT VAT REGISTERED: country=${country}, amount=${amount} ${currency}, ` +
+    `session=${sessionId}. Notify Irish Revenue (ossnsd@revenue.ie) by ${by}.`
+  );
+
+  try {
+    const { sendEmail } = require('../config/email');
+    const text =
+      `EU圏（${country}）の読者への販売が成立しました。\n\n` +
+      `金額: ${amount} ${currency}\n決済ID: ${sessionId}\n\n` +
+      `当社はまだVAT登録が有効になっていません。EUはデジタル役務に免税枠を認めていないため、` +
+      `この販売にはVATの申告義務があります。\n\n` +
+      `【${by} までに】アイルランド歳入庁（ossnsd@revenue.ie）へ、供給を開始した旨を届け出てください。\n` +
+      `この期限を過ぎると、EU加盟国すべてに個別に登録して申告する義務が生じます。\n\n` +
+      `次にClaudeを開いたときに、このメールを見せてください。`;
+    await sendEmail('info@auctlect.com', '【至急】EU圏への販売が発生しました（VAT未登録）', text,
+      text.replace(/\n/g, '<br>'));
+  } catch (e) {
+    console.error('EU sale alert email failed:', e.message);
   }
 }
 
@@ -301,6 +362,11 @@ async function applyGiftPayment(session) {
     client.release();
   }
 
+  // 門番をすり抜けてEU圏の購入が成立していないか、決済後にもう一度見る
+  await notifyEuSaleWhileUnregistered({
+    country: buyerCountry, amount, currency, sessionId: session.id
+  });
+
   // 通知はトランザクションの外で（失敗しても決済処理は巻き戻さない）
   const { gift, delivered } = outcome;
   try {
@@ -373,6 +439,19 @@ async function applyGiftPayment(session) {
  */
 router.post('/create-checkout-session', authenticate, async (req, res) => {
   try {
+    // EU圏の消費者への販売は、1件目からVATの申告義務が生じる（免税枠なし）。
+    // 税率表が揃うまでは受け付けない。売ってしまってから気づくと、その月の
+    // 翌月10日までに届け出ないと、消費国すべてに個別登録する義務が生じる。
+    const euBlock = checkEuSaleAllowed(req);
+    if (!euBlock.allowed) {
+      console.warn(`EU sale blocked (VAT not registered): country=${euBlock.country}, user=${req.user.userId}`);
+      return res.status(451).json({
+        error: 'Purchases from EU countries are temporarily unavailable while we complete our EU VAT registration.',
+        code: 'EU_VAT_PENDING',
+        country: euBlock.country
+      });
+    }
+
     const { workId, giftTo, giftMessage } = req.body;
 
     const workResult = await db.query(
@@ -686,6 +765,11 @@ router.post('/webhook', async (req, res) => {
     } finally {
       client.release();
     }
+
+    // 門番をすり抜けてEU圏の購入が成立していないか、決済後にもう一度見る
+    await notifyEuSaleWhileUnregistered({
+      country: buyerCountry, amount, currency, sessionId: session.id
+    });
 
     // 二重購入だった場合の通知（トランザクション外・非致死）。
     // 金銭の返金は自動化しない＝管理者がStripeで手動返金する
