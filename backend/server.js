@@ -160,12 +160,20 @@ app.use((err, req, res, next) => {
   });
 });
 
+// VAT登録を有効にしたのに税率表が埋まっていない、という事故をここで止める。
+// 決済のたびに気づくのでは遅い。起動しなければ必ず気づく。
+const { assertRateTableComplete, VAT_REGISTERED, missingCountries } = require('./config/vatRates');
+assertRateTableComplete();
+
 // Start server
 app.listen(PORT, () => {
   console.log(`\n🚀 AuctLect API Server is running!`);
   console.log(`📍 URL: http://localhost:${PORT}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`💾 Database: ${process.env.DB_NAME}@${process.env.DB_HOST}:${process.env.DB_PORT}`);
+  console.log(`🧾 VAT: ${VAT_REGISTERED
+    ? '登録済み（税率表 完備）'
+    : `未登録のため課税なし（税率表は残り ${missingCountries().length} か国が未確認）`}`);
   console.log(`\n📚 Available endpoints:`);
   console.log(`   - GET  /api/health`);
   console.log(`   - POST /api/auth/register`);
