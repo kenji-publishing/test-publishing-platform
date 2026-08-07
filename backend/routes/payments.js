@@ -17,6 +17,8 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 // author gets the remainder). See services/revenueSplitService.js.
 const { createRevenueSplits } = require('../services/revenueSplitService');
 const { createNotification } = require('../services/notificationService');
+// 分配の前に、購入者の国のVATを総額から抜く。config/vatRates.js を参照
+const { getVatRate, splitTaxFromGross } = require('../config/vatRates');
 
 // 不正なUUIDをそのままSQLに渡すと 22P02 で500になるため、入口で弾く
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -52,6 +54,28 @@ async function resolveBuyerCountry(session) {
 }
 
 /**
+ * 総額から税額と税抜き額を出す。
+ *
+ * 現在はVAT未登録なので、必ず 0% / 税額0 / 税抜き=総額 になる。
+ * OSS登録後、config/vatRates.js の VAT_REGISTERED を true にすると効き始める。
+ *
+ * 登録後に税率表へ無い国が来た場合は、決済は通したうえで警告を出す。
+ * ここで例外を投げると購入自体が失敗し、記録も残らない。徴収漏れは後から
+ * 是正できるが、失った決済は取り戻せない。
+ */
+function resolveTax(grossAmount, buyerCountry) {
+  const { rate, registered, unknownCountry } = getVatRate(buyerCountry);
+  if (registered && unknownCountry) {
+    console.error(
+      `VAT rate missing for buyer country "${buyerCountry || '(unknown)'}" — charged as 0%. ` +
+      `Add it to config/vatRates.js and correct the return for this period.`
+    );
+  }
+  const { vatAmount, netAmount } = splitTaxFromGross(grossAmount, rate);
+  return { rate, vatAmount, netAmount };
+}
+
+/**
  * 全額返金の反映（charge.refundedから呼ばれる）
  * - 作品購入: purchasesをrefundedに（読者アクセスは自動で失効）、返金トランザクション記録、
  *   収益分配を打ち消すマイナス行を挿入（収益集計が自動で正しくなる。履歴は残る=監査可能）
@@ -81,13 +105,16 @@ async function applyStripeRefund(sessionId) {
       )).rows[0];
       const payerId = gift ? gift.sender_id : purchase.user_id;
 
-      // 返金は購入の打ち消しなので、国も元の購入と同じものを持たせる。
-      // 空にすると「EU圏の売上」を数えたときに購入だけが残って相殺されない
+      // 返金は購入の打ち消しなので、国・税率・税額も元の購入からそのまま引き継ぐ。
+      // 空にすると「EU圏の売上」や納付済みVATを数えたときに購入だけが残り、相殺されない。
+      // 税率は購入時点のものを使う（申告のやり直しは、その期の税率で行うため）
       await client.query(
-        `INSERT INTO transactions (user_id, work_id, transaction_type, amount, currency, payment_method, payment_gateway_id, status, buyer_country)
-         VALUES ($1, $2, 'refund', $3, $4, 'stripe', $5, 'completed',
-                 (SELECT buyer_country FROM transactions
-                   WHERE payment_gateway_id = $5 AND transaction_type = 'purchase' LIMIT 1))`,
+        `INSERT INTO transactions (user_id, work_id, transaction_type, amount, currency, payment_method, payment_gateway_id, status, buyer_country, vat_rate, vat_amount, net_amount)
+         SELECT $1, $2, 'refund', $3, $4, 'stripe', $5, 'completed',
+                t.buyer_country, t.vat_rate, t.vat_amount, t.net_amount
+           FROM transactions t
+          WHERE t.payment_gateway_id = $5 AND t.transaction_type = 'purchase'
+          LIMIT 1`,
         [payerId, purchase.work_id, purchase.amount, purchase.currency, sessionId]
       );
       if (gift) {
@@ -181,6 +208,7 @@ async function applyGiftPayment(session) {
   // トランザクションを開く前に取る。StripeへのAPI呼び出しなので、
   // BEGIN...COMMIT の中で待つとその間ずっと接続を握ってしまう
   const buyerCountry = await resolveBuyerCountry(session);
+  const tax = resolveTax(amount, buyerCountry);
 
   const client = await db.pool.connect();
   let outcome = null;
@@ -243,15 +271,16 @@ async function applyGiftPayment(session) {
       // 支払ったのは贈った人なので、取引履歴は贈った人名義で残す。
       // 国も支払った人のもの（課税地の判定は支払う側で見るため）
       await client.query(
-        `INSERT INTO transactions (user_id, work_id, transaction_type, amount, currency, payment_method, payment_gateway_id, status, buyer_country)
-         VALUES ($1, $2, 'purchase', $3, $4, 'stripe', $5, 'completed', $6)`,
-        [gift.sender_id, gift.work_id, amount, currency, session.id, buyerCountry]
+        `INSERT INTO transactions (user_id, work_id, transaction_type, amount, currency, payment_method, payment_gateway_id, status, buyer_country, vat_rate, vat_amount, net_amount)
+         VALUES ($1, $2, 'purchase', $3, $4, 'stripe', $5, 'completed', $6, $7, $8, $9)`,
+        [gift.sender_id, gift.work_id, amount, currency, session.id, buyerCountry, tax.rate, tax.vatAmount, tax.netAmount]
       );
 
+      // 通常の購入と同じく、分配は税抜き額に対して行う
       const splits = await createRevenueSplits(client, {
         workId: gift.work_id,
         authorId: gift.author_id,
-        amount,
+        amount: tax.netAmount,
         currency,
         reference: session.id
       });
@@ -584,6 +613,7 @@ router.post('/webhook', async (req, res) => {
     const currency = session.currency.toUpperCase();
     // トランザクションを開く前に取る（Stripeへの往復を BEGIN...COMMIT の中で待たない）
     const buyerCountry = await resolveBuyerCountry(session);
+    const tax = resolveTax(amount, buyerCountry);
 
     // BEGIN/COMMIT must run on a single dedicated connection. db.query()
     // draws a different pooled connection per call, which silently breaks
@@ -629,18 +659,20 @@ router.post('/webhook', async (req, res) => {
         console.warn(`Duplicate purchase (already owned): work=${work_id}, buyer=${buyer_id}, session=${session.id} — REFUND REQUIRED`);
         undeliverable = { work_id, buyer_id, amount, currency };
       } else {
-        // Record the transaction
+        // Record the transaction, with the tax breakdown of the amount charged
         await client.query(
-          `INSERT INTO transactions (user_id, work_id, transaction_type, amount, currency, payment_method, payment_gateway_id, status, buyer_country)
-           VALUES ($1, $2, 'purchase', $3, $4, 'stripe', $5, 'completed', $6)`,
-          [buyer_id, work_id, amount, currency, session.id, buyerCountry]
+          `INSERT INTO transactions (user_id, work_id, transaction_type, amount, currency, payment_method, payment_gateway_id, status, buyer_country, vat_rate, vat_amount, net_amount)
+           VALUES ($1, $2, 'purchase', $3, $4, 'stripe', $5, 'completed', $6, $7, $8, $9)`,
+          [buyer_id, work_id, amount, currency, session.id, buyerCountry, tax.rate, tax.vatAmount, tax.netAmount]
         );
 
-        // Create revenue splits (author / collaborators / platform)
+        // Create revenue splits (author / collaborators / platform).
+        // 分配は税抜き額に対して行う。VATは誰の取り分でもなく国に納めるお金なので、
+        // 分ける前に抜く。総額のまま分けると、納税分を当社の取り分から持ち出すことになる
         const splits = await createRevenueSplits(client, {
           workId: work_id,
           authorId: author_id,
-          amount,
+          amount: tax.netAmount,
           currency,
           reference: session.id
         });
