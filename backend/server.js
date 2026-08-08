@@ -70,6 +70,11 @@ app.use(cors({
 // Stripe webhook needs raw body for signature verification
 app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
 
+// SESの不達通知（SNS）。署名の検証に生の本文が要るので、JSONパーサより前に登録する。
+// SNSは Content-Type: text/plain で送ってくることがあり、express.json では読めない
+const sesWebhookRoutes = require('./routes/ses-webhook');
+app.use('/api/ses', sesWebhookRoutes);
+
 // Long manuscripts exceed the 100kb default; nginx caps requests at 15M
 app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ extended: true, limit: '15mb' }));
