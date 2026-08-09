@@ -224,6 +224,72 @@
         });
     }
 
+    // ===== プレーンテキスト → Word (.docx) =====
+    // 1行=1段落として最小構成の.docx（中身はZIP）をブラウザ内で組み立てる。
+    // 外部の変換サービスには一切送らない。JSZipは必要になった時だけ読み込む。
+    function escapeXml(s) {
+        return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    var DOCX_CONTENT_TYPES =
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+        '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+        '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+        '<Default Extension="xml" ContentType="application/xml"/>' +
+        '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>' +
+        '</Types>';
+
+    var DOCX_RELS =
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>' +
+        '</Relationships>';
+
+    function textToDocxBlob(text) {
+        return loadScriptOnce(
+            'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
+            function () { return !!global.JSZip; }
+        ).then(function () {
+            // XMLに入れられない制御文字が1つでも混ざるとWordが「開けません」になるので落とす
+            var clean = String(text == null ? '' : text).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '');
+            var body = clean.split(/\r\n|\r|\n/).map(function (line) {
+                if (!line) return '<w:p/>';   // 空行はそのまま空の段落に
+                return '<w:p><w:r><w:t xml:space="preserve">' + escapeXml(line) + '</w:t></w:r></w:p>';
+            }).join('');
+
+            var documentXml =
+                '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+                '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">' +
+                '<w:body>' + body +
+                '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/>' +   // A4縦
+                '<w:pgMar w:top="1418" w:right="1418" w:bottom="1418" w:left="1418"/></w:sectPr>' +
+                '</w:body></w:document>';
+
+            var zip = new global.JSZip();
+            zip.file('[Content_Types].xml', DOCX_CONTENT_TYPES);
+            zip.folder('_rels').file('.rels', DOCX_RELS);
+            zip.folder('word').file('document.xml', documentXml);
+            return zip.generateAsync({
+                type: 'blob',
+                mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                compression: 'DEFLATE'
+            });
+        });
+    }
+
+    // Blobを名前付きでダウンロードさせる（ウィザード共通）
+    function saveBlob(blob, filename) {
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        // Safariはclick直後にrevokeするとダウンロードが始まらないことがある
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    }
+
     global.WizardCommon = {
         CURRENCIES: CURRENCIES,
         PAY_MINIMUMS: PAY_MINIMUMS,
@@ -232,6 +298,8 @@
         getMinimum: getMinimum,
         docxToText: docxToText,
         docxToRich: docxToRich,
-        pdfToImageFiles: pdfToImageFiles
+        pdfToImageFiles: pdfToImageFiles,
+        textToDocxBlob: textToDocxBlob,
+        saveBlob: saveBlob
     };
 })(window);
