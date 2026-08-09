@@ -127,16 +127,48 @@ test-publishing-platform/
 │   ├── translators/        # 翻訳者一覧・登録
 │   ├── editors/            # 編集者一覧
 │   └── admin/              # 管理者向け
+│   ├── login.html          # ログイン
+│   ├── magic-login.html    # メールでログイン（パスワード不要）
+│   ├── reset-password.html # パスワードの再設定（magic-loginとは別物）
+│   ├── revenue-sharing.html # 収益分配の説明
+│   ├── confirm-delete.html # 退会の最終確認
+│   ├── support/            # FAQ, トラブルシューティング
+│   ├── feedback/           # フィードバック
+│   ├── translators/        # 翻訳者一覧・登録
+│   ├── editors/            # 編集者一覧
+│   └── admin/              # 管理者向け
 ├── backend/
 │   ├── server.js           # Express サーバー
-│   ├── routes/             # API ルート (21ファイル)
-│   ├── services/           # 通知サービス等
+│   ├── routes/             # API ルート
+│   │   └── ses-webhook.js  # SESの不達通知を受ける（署名検証あり）
+│   ├── services/           # 通知・収益分配・OSS申告・SNS署名検証
 │   ├── middleware/         # 認証ミドルウェア (authenticate/authorize)
 │   ├── migrations/         # SQL マイグレーション
-│   └── config/             # DB, メール, 収益設定
+│   ├── scripts/
+│   │   └── oss-return.js   # EU OSS 四半期申告用データの書き出し
+│   └── config/             # DB, メール, 収益, VAT税率
+│       └── vatRates.js     # VAT税率表。VAT_REGISTERED=false の間は常に0%
+├── deploy/                 # 本番サーバーに置くもの
+│   ├── nginx-auctlect.conf # 本体（certbotが443ブロックを追記済み。cpだけで上書きしない）
+│   ├── nginx-hooks.conf    # hooks.auctlect.com（Cloudflareを通さないwebhook専用）
+│   ├── backup-db.sh        # 日次バックアップ（毎日 02:30 UTC）
+│   └── health-check.sh     # 健康診断（毎日 02:40 UTC・基準超過時のみ通知）
 └── services/
     └── emailService.js     # フロントエンドメールサービス
 ```
+
+## 運用の仕組み（本番で動いているもの）
+| 何 | いつ | 通知先 |
+|---|---|---|
+| DBバックアップ（`backup-db.sh`） | 毎日 02:30 UTC | 失敗時のみ info@auctlect.com |
+| 健康診断（`health-check.sh`） | 毎日 02:40 UTC | 基準超過時のみ |
+| Lightsailスナップショット | 毎日 03:00 UTC | — |
+| 月次の控えをkenjiさんのPCへ | 毎月1日 | 定期タスク |
+| メール不達の検知 | 随時 | 管理者＋info@auctlect.com |
+
+- **メールは 受信=Microsoft 365 / 送信=AWS SES**。`mail.auctlect.com` のDNSは送信用で、消すと通知が止まる
+- **VATは現在未登録**。EU圏の購入は `checkEuSaleAllowed()` が機械的にブロック中
+- 管理者アカウントは2つ（Google と Microsoft）。片方を失っても運営できるようにしてある
 
 ## Key Conventions
 - ナビバー・フッターは navbar.js が動的生成（38ページ共通）
