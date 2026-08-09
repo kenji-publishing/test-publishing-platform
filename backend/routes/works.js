@@ -324,7 +324,7 @@ router.get('/', async (req, res) => {
                    -- ペンネームが無いときの本名への切り替えはここで済ませる。
                    -- 本名をそのまま返して画面側で選ばせると、ペンネームを設定した
                    -- 著者の本名まで全員のブラウザに配ることになる
-                   COALESCE(u.pen_name, NULLIF(TRIM(COALESCE(u.first_name,'') || ' ' || COALESCE(u.last_name,'')), '')) AS author_name
+                   COALESCE(NULLIF(w.author_name, ''), u.pen_name, NULLIF(TRIM(COALESCE(u.first_name,'') || ' ' || COALESCE(u.last_name,'')), '')) AS author_name
             FROM works w
             JOIN users u ON w.author_id = u.user_id
             WHERE w.status = 'published'
@@ -429,7 +429,7 @@ router.get('/collaborations/mine', authenticate, async (req, res) => {
         const result = await db.query(
             `SELECT wc.collaborator_id, wc.role, wc.revenue_share, wc.target_language, wc.created_at, wc.status,
                     w.work_id, w.title, w.status AS work_status,
-                    COALESCE(u.pen_name, u.first_name || ' ' || u.last_name) AS author_name,
+                    COALESCE(NULLIF(w.author_name, ''), u.pen_name, u.first_name || ' ' || u.last_name) AS author_name,
                     COALESCE((SELECT SUM(rs.amount) FROM revenue_splits rs
                               WHERE rs.recipient_id = wc.user_id AND rs.work_id = wc.work_id), 0) AS earned,
                     (SELECT rs2.currency FROM revenue_splits rs2
@@ -707,7 +707,7 @@ router.get('/:workId', async (req, res) => {
 
         const result = await db.query(
             `SELECT w.*, 
-                    COALESCE(u.pen_name, NULLIF(TRIM(COALESCE(u.first_name,'') || ' ' || COALESCE(u.last_name,'')), '')) AS author_name,
+                    COALESCE(NULLIF(w.author_name, ''), u.pen_name, NULLIF(TRIM(COALESCE(u.first_name,'') || ' ' || COALESCE(u.last_name,'')), '')) AS author_name,
                     u.user_id as author_id,
                     COALESCE(w.like_count, 0) as like_count,
                     COALESCE(w.comment_count, 0) as comment_count
@@ -763,7 +763,7 @@ router.get('/:workId/preview', async (req, res) => {
             `SELECT w.work_id, w.title, w.description, w.synopsis, 
                     w.content, w.preview_percent, w.is_free, w.price,
                     w.word_count, w.page_count,
-                    COALESCE(u.pen_name, NULLIF(TRIM(COALESCE(u.first_name,'') || ' ' || COALESCE(u.last_name,'')), '')) AS author_name
+                    COALESCE(NULLIF(w.author_name, ''), u.pen_name, NULLIF(TRIM(COALESCE(u.first_name,'') || ' ' || COALESCE(u.last_name,'')), '')) AS author_name
              FROM works w
              JOIN users u ON w.author_id = u.user_id
              WHERE w.work_id = $1 AND w.status = 'published'`,
@@ -920,7 +920,7 @@ const workPageUpload = multer({
 async function checkPageReadAccess(workId, userId) {
     const result = await db.query(
         `SELECT w.work_id, w.author_id, w.status, w.is_free, w.price, w.title,
-                COALESCE(u.pen_name, u.first_name || ' ' || u.last_name) AS author_name
+                COALESCE(NULLIF(w.author_name, ''), u.pen_name, u.first_name || ' ' || u.last_name) AS author_name
          FROM works w
          LEFT JOIN users u ON u.user_id = w.author_id
          WHERE w.work_id = $1 AND w.status != 'deleted'`,
@@ -1076,6 +1076,7 @@ router.post('/', authenticate, async (req, res) => {
     try {
         const {
             title,
+            authorName,
             description,
             synopsis,
             content,
@@ -1117,6 +1118,8 @@ router.post('/', authenticate, async (req, res) => {
         // 全年齢に丸める。解禁する時はここと works_age_rating_check を見直す
         const rating = normalizeAgeRating(ageRating);
         const warnings = normalizeWarnings(contentWarnings);
+        // 作品ごとの著者表示名。空ならNULL＝アカウントのpen_nameを使う
+        const workAuthorName = (authorName || '').trim().slice(0, 150) || null;
 
         // Calculate word count
         const textContent = content || '';
@@ -1147,8 +1150,8 @@ router.post('/', authenticate, async (req, res) => {
                     is_ai_generated, ai_tools_used, preview_percent,
                     word_count, page_count, currency, status,
                     ai_text_usage, ai_cover_usage, ai_translation_usage,
-                    age_rating, content_warnings
-                 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)
+                    age_rating, content_warnings, author_name
+                 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27)
                  RETURNING *`,
                 [
                     req.user.userId,
@@ -1176,7 +1179,8 @@ router.post('/', authenticate, async (req, res) => {
                     aiCover,
                     aiTranslation,
                     rating,
-                    JSON.stringify(warnings)
+                    JSON.stringify(warnings),
+                    workAuthorName
                 ]
             );
             work = result.rows[0];
@@ -1222,7 +1226,7 @@ router.put('/:workId', authenticate, async (req, res) => {
         }
 
         const {
-            title, description, synopsis, content, genre, tags,
+            title, authorName, description, synopsis, content, genre, tags,
             price, status, isFree, coverImage, isAdult,
             isAiGenerated, aiToolsUsed, previewPercent, currency,
             aiTextUsage, aiCoverUsage, aiTranslationUsage,
@@ -1240,6 +1244,10 @@ router.put('/:workId', authenticate, async (req, res) => {
         const aiText = aiLevel(aiTextUsage);
         const aiCover = aiLevel(aiCoverUsage);
         const aiTranslation = aiLevel(aiTranslationUsage);
+        // 著者表示名: 送られてこなければ既存のまま。空文字で送られたら「未設定に戻す」
+        const workAuthorName = authorName === undefined
+            ? null
+            : String(authorName || '').trim().slice(0, 150);
 
         // Calculate word count if content changed
         let wordCount = null;
@@ -1272,6 +1280,7 @@ router.put('/:workId', authenticate, async (req, res) => {
                  ai_translation_usage = COALESCE($21, ai_translation_usage),
                  age_rating = COALESCE($22, age_rating),
                  content_warnings = COALESCE($23::jsonb, content_warnings),
+                 author_name = COALESCE($24, author_name),
                  is_adult = CASE WHEN $22 IS NULL THEN COALESCE($11, is_adult) ELSE ($22 = '18') END,
                  updated_at = CURRENT_TIMESTAMP,
                  published_at = CASE
@@ -1285,7 +1294,7 @@ router.put('/:workId', authenticate, async (req, res) => {
                 price, status, isFree, coverImage, isAdult,
                 isAiGenerated, aiToolsUsed, previewPercent,
                 wordCount, pageCount, req.params.workId, workCurrency,
-                aiText, aiCover, aiTranslation, rating, warnings
+                aiText, aiCover, aiTranslation, rating, warnings, workAuthorName
             ]
         );
 

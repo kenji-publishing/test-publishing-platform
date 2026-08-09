@@ -233,7 +233,7 @@ router.get('/purchases', authenticate, async (req, res) => {
         w.cover_image_url,
         w.language,
         w.original_language,
-        COALESCE(u.pen_name, u.first_name || ' ' || u.last_name) as author_name,
+        COALESCE(NULLIF(w.author_name, ''), u.pen_name, u.first_name || ' ' || u.last_name) as author_name,
         p.amount,
         p.currency,
         p.payment_method,

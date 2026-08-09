@@ -137,6 +137,7 @@ const setupDatabase = async () => {
       CREATE TABLE IF NOT EXISTS works (
         work_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         author_id UUID NOT NULL REFERENCES users(user_id),
+        author_name VARCHAR(150),   -- 作品ごとの著者表示名。空ならアカウントのpen_nameを使う
         title VARCHAR(500) NOT NULL,
         description TEXT,
         original_language VARCHAR(5) NOT NULL,

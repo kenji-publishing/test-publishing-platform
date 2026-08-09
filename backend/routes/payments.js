@@ -455,7 +455,9 @@ router.post('/create-checkout-session', authenticate, async (req, res) => {
     const { workId, giftTo, giftMessage } = req.body;
 
     const workResult = await db.query(
-      `SELECT w.*, u.pen_name as author_name
+      // works.author_name（作品ごとの著者表示名）が w.* に含まれるため、
+      // 同名の別列を足すと後勝ちで上書きされる。ここでは使っていないので外す
+      `SELECT w.*
        FROM works w
        JOIN users u ON w.author_id = u.user_id
        WHERE w.work_id = $1 AND w.status = 'published'`,
