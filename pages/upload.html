@@ -2,20 +2,20 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608101429">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608101505">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608101429">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608101505">
     <title>Upload Work - AuctLect</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="../css/variables.css?v=202608101429" rel="stylesheet">
-    <link href="../css/style-new.css?v=202608101429" rel="stylesheet">
-    <link href="../css/components.css?v=202608101429" rel="stylesheet">
-    <link href="../css/navbar.css?v=202608101429" rel="stylesheet">
-    <link href="../css/mobile-fixes.css?v=202608101429" rel="stylesheet">
+    <link href="../css/variables.css?v=202608101505" rel="stylesheet">
+    <link href="../css/style-new.css?v=202608101505" rel="stylesheet">
+    <link href="../css/components.css?v=202608101505" rel="stylesheet">
+    <link href="../css/navbar.css?v=202608101505" rel="stylesheet">
+    <link href="../css/mobile-fixes.css?v=202608101505" rel="stylesheet">
     <style>
         /* ========== Upload Page Specific Styles ========== */
         .upload-container { padding: var(--spacing-xl) 0; }
@@ -581,20 +581,20 @@
     <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/config.js?v=202608101429"></script>
-    <script src="../js/i18n.js?v=202608101429"></script>
-    <script src="../js/wizard-common.js?v=202608101429"></script>
-    <script src="../js/navbar.js?v=202608101429"></script>
-    <script src="../js/lang/ja.js?v=202608101429"></script>
-    <script src="../js/lang/en.js?v=202608101429"></script>
-    <script src="../js/lang/zh.js?v=202608101429"></script>
-    <script src="../js/lang/es.js?v=202608101429"></script>
-    <script src="../js/lang/fr.js?v=202608101429"></script>
-    <script src="../js/lang/de.js?v=202608101429"></script>
-    <script src="../js/lang/ko.js?v=202608101429"></script>
-    <script src="../js/lang/ar.js?v=202608101429"></script>
-    <script src="../js/lang/pt.js?v=202608101429"></script>
-    <script src="../js/lang/it.js?v=202608101429"></script>
+    <script src="../js/config.js?v=202608101505"></script>
+    <script src="../js/i18n.js?v=202608101505"></script>
+    <script src="../js/wizard-common.js?v=202608101505"></script>
+    <script src="../js/navbar.js?v=202608101505"></script>
+    <script src="../js/lang/ja.js?v=202608101505"></script>
+    <script src="../js/lang/en.js?v=202608101505"></script>
+    <script src="../js/lang/zh.js?v=202608101505"></script>
+    <script src="../js/lang/es.js?v=202608101505"></script>
+    <script src="../js/lang/fr.js?v=202608101505"></script>
+    <script src="../js/lang/de.js?v=202608101505"></script>
+    <script src="../js/lang/ko.js?v=202608101505"></script>
+    <script src="../js/lang/ar.js?v=202608101505"></script>
+    <script src="../js/lang/pt.js?v=202608101505"></script>
+    <script src="../js/lang/it.js?v=202608101505"></script>
     
     <script>
         // ========== Pattern C: Navbar 多言語対応テキスト（9言語）==========
@@ -1553,6 +1553,15 @@
             return { dw: cdSourceImage.naturalWidth * s, dh: cdSourceImage.naturalHeight * s };
         }
 
+        // 画像を動かせる余地（符号付き・キャンバス座標）。
+        // 正 = 枠より小さく余白がある / 負 = 枠からはみ出している。どちらもドラッグで位置を選べる
+        function coverFitRoom() {
+            if (!cdSourceImage) return { x: 0, y: 0 };
+            var d = coverDrawnSize();
+            var rx = CD_OUT_W - d.dw, ry = CD_OUT_H - d.dh;
+            return { x: Math.abs(rx) < 1 ? 0 : rx, y: Math.abs(ry) < 1 ? 0 : ry };
+        }
+
         var cdImageDrag = null;  // 画像そのものをドラッグ中の開始状態
 
         function initCoverDrag() {
@@ -1565,9 +1574,10 @@
                     cdDragging = key;
                     cdDragOffset.dx = cdPos[key].x * cv.width - p.x;
                     cdDragOffset.dy = cdPos[key].y * cv.height - p.y;
-                } else if (cdSourceImage) {
+                } else if (cdSourceImage && cdFit) {
                     // 文字の上でなければ画像自体を動かす（見せたい部分を枠に入れる）
                     cdImageDrag = { p: p, ox: cdFit.ox, oy: cdFit.oy };
+                    cv.style.cursor = 'grabbing';
                 } else {
                     return;
                 }
@@ -1583,19 +1593,23 @@
                     };
                     redrawCoverDesign();
                 } else if (cdImageDrag) {
-                    var d = coverDrawnSize();
-                    var overX = d.dw - cv.width, overY = d.dh - cv.height;
-                    // ドラッグした向きに画像が動くよう、はみ出し量に対する割合で位置を更新
-                    var ox = overX > 0 ? cdImageDrag.ox - (p.x - cdImageDrag.p.x) / overX : 0.5;
-                    var oy = overY > 0 ? cdImageDrag.oy - (p.y - cdImageDrag.p.y) / overY : 0.5;
+                    var room = coverFitRoom();
+                    // 動かせる幅（枠より大きければはみ出し分、小さければ余白分）に対する割合で更新。
+                    // ドラッグした向きにそのまま画像が動く
+                    var ox = room.x ? cdImageDrag.ox + (p.x - cdImageDrag.p.x) / room.x : cdImageDrag.ox;
+                    var oy = room.y ? cdImageDrag.oy + (p.y - cdImageDrag.p.y) / room.y : cdImageDrag.oy;
                     cdFit = { ox: Math.min(1, Math.max(0, ox)), oy: Math.min(1, Math.max(0, oy)) };
                     redrawCoverDesign();
                 } else {
-                    cv.style.cursor = cdHitBlock(p) ? 'move' : (cdSourceImage ? 'grab' : 'default');
+                    var free = coverFitRoom();
+                    cv.style.cursor = cdHitBlock(p) ? 'move' : ((free.x || free.y) ? 'grab' : 'default');
                 }
             });
             ['pointerup', 'pointercancel'].forEach(function(ev) {
-                cv.addEventListener(ev, function() { cdDragging = null; cdImageDrag = null; });
+                cv.addEventListener(ev, function() {
+                    cdDragging = null;
+                    if (cdImageDrag) { cdImageDrag = null; cv.style.cursor = 'grab'; }
+                });
             });
         }
 
@@ -1783,8 +1797,10 @@
             var zoom = (parseInt(document.getElementById('cdZoom').value, 10) || 100) / 100;
             var dw = cdSourceImage.naturalWidth * coverContainScale() * zoom;
             var dh = cdSourceImage.naturalHeight * coverContainScale() * zoom;
-            var dx = (w - dw) * (dw > w ? cdFit.ox : 0.5);
-            var dy = (h - dh) * (dh > h ? cdFit.oy : 0.5);
+            // ox/oy は 0=左（上）寄せ、1=右（下）寄せ、0.5=中央。
+            // 枠より大きい時は「どこを見せるか」、小さい時は「余白の中でどこに置くか」になる
+            var dx = (w - dw) * cdFit.ox;
+            var dy = (h - dh) * cdFit.oy;
             ctx.drawImage(cdSourceImage, dx, dy, dw, dh);
 
             var text1 = document.getElementById('cdText1').value.replace(/\r/g, '');
