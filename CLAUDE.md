@@ -199,4 +199,11 @@ node tools/bump-assets.js --check  # 付け忘れがないか確認（変更し�
 - 新言語追加時、Privacy/Terms等のlang-contentページは手動でコンテンツブロック追加が必要
 - i18n.js の languageChanged イベントの detail は `{ language: 'ja' }` 形式
 - ページ固有の getL() が残っているページ（library, reader, my-works等）は削除しないこと
+- **同じ文言が4か所にあることがある。1か所直しても読み込み順で古い方が勝つ。**
+  ① ページ内の `uiText`（getL経由） ② `js/lang/*.json` ③ `js/lang/*.js`（フォールバック）
+  ④ HTMLの `data-i18n` 既定値。文言を変えたら4つとも grep して揃えること
+  （例: upload.html の `aiDisclosureDesc`）
+- **`getL()` の値は `textContent` で入ることが多い。** `&mdash;` 等のHTML実体を書くと
+  そのまま文字として表示される。実体ではなく実際の文字（—、’）を使うこと
+- 言語の保存キーは **`preferredLanguage`**（`language` ではない）
 - 古い language-switcher.js / translations-base.js は削除済み。復活させないこと
