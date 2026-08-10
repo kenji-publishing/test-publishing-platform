@@ -392,7 +392,7 @@ window.translations.pt = {
         sectionCover: 'Imagem de capa (opcional)',
         hintCover: 'Tamanho recomendado: 600x900px',
         sectionAiDisclosure: 'Declaração de uso de IA',
-        aiDisclosureDesc: 'Declare as ferramentas de IA utilizadas. Esta informação será exibida aos leitores.',
+        aiDisclosureDesc: 'Declare as ferramentas de IA utilizadas. Esta informação será exibida aos leitores. Se utilizou IA, verifique o resultado antes de publicar: é responsável pelo que publica.',
         labelAiText: 'Texto / Conteúdo',
         labelAiCover: 'Capa / Ilustrações',
         labelAiTranslation: 'Tradução',

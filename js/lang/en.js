@@ -392,7 +392,7 @@ window.translations.en = {
         sectionCover: 'Cover Image (Optional)',
         hintCover: 'Recommended size: 600x900px',
         sectionAiDisclosure: 'AI Usage Disclosure',
-        aiDisclosureDesc: 'Please disclose any AI tools used in creating this work. This information will be displayed to readers.',
+        aiDisclosureDesc: 'Please disclose any AI tools used in creating this work. This information will be displayed to readers. If you used AI, check the result yourself before publishing — you are responsible for what you publish.',
         labelAiText: 'Text / Content',
         labelAiCover: 'Cover / Illustrations',
         labelAiTranslation: 'Translation',

@@ -392,7 +392,7 @@ window.translations.ko = {
         sectionCover: '커버 이미지 (선택)',
         hintCover: '권장 크기: 600x900px',
         sectionAiDisclosure: 'AI 사용 공개',
-        aiDisclosureDesc: 'AI 도구 사용 여부를 공개해 주세요. 이 정보는 독자에게 표시됩니다.',
+        aiDisclosureDesc: 'AI 도구 사용 여부를 공개해 주세요. 이 정보는 독자에게 표시됩니다. AI를 사용한 경우 공개 전에 결과를 직접 확인해 주세요. 공개하는 내용의 책임은 게시자에게 있습니다.',
         labelAiText: '텍스트 / 콘텐츠',
         labelAiCover: '표지 / 일러스트',
         labelAiTranslation: '번역',

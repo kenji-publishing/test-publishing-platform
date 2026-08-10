@@ -392,7 +392,7 @@ window.translations.ja = {
         sectionCover: 'カバー画像（任意）',
         hintCover: '推奨サイズ: 600x900px',
         sectionAiDisclosure: 'AI使用の明記',
-        aiDisclosureDesc: 'この作品の制作に使用したAIツールを明記してください。この情報は読者に表示されます。',
+        aiDisclosureDesc: 'この作品の制作に使用したAIツールを明記してください。この情報は読者に表示されます。AIを使った場合は、公開前にご自身で内容を確認してください。公開する内容の責任は投稿者にあります。',
         labelAiText: '本文 / コンテンツ',
         labelAiCover: '表紙 / イラスト',
         labelAiTranslation: '翻訳',

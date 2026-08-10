@@ -392,7 +392,7 @@ window.translations.it = {
         sectionCover: 'Immagine di Copertina (Opzionale)',
         hintCover: 'Dimensione consigliata: 600x900px',
         sectionAiDisclosure: 'Divulgazione Uso AI',
-        aiDisclosureDesc: 'Indica eventuali strumenti AI utilizzati nella creazione di questa opera. Questa informazione sarà mostrata ai lettori.',
+        aiDisclosureDesc: 'Indica eventuali strumenti AI utilizzati nella creazione di questa opera. Questa informazione sarà mostrata ai lettori. Se hai usato l’IA, verifica il risultato prima di pubblicare: sei responsabile di ciò che pubblichi.',
         labelAiText: 'Testo / Contenuto',
         labelAiCover: 'Copertina / Illustrazioni',
         labelAiTranslation: 'Traduzione',

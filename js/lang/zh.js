@@ -392,7 +392,7 @@ window.translations.zh = {
         sectionCover: '封面图片（可选）',
         hintCover: '推荐尺寸：600x900px',
         sectionAiDisclosure: 'AI使用声明',
-        aiDisclosureDesc: '请说明创作本作品时使用的AI工具。此信息将向读者展示。',
+        aiDisclosureDesc: '请说明创作本作品时使用的AI工具。此信息将向读者展示。若使用了AI，请在发布前自行确认内容。所发布内容的责任由投稿者承担。',
         labelAiText: '文本/内容',
         labelAiCover: '封面/插图',
         labelAiTranslation: '翻译',

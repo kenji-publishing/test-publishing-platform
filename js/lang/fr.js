@@ -392,7 +392,7 @@ window.translations.fr = {
         sectionCover: 'Image de couverture (optionnel)',
         hintCover: 'Taille recommandée : 600x900px',
         sectionAiDisclosure: 'Déclaration d\'utilisation de l\'IA',
-        aiDisclosureDesc: 'Veuillez déclarer les outils d\'IA utilisés. Cette information sera affichée aux lecteurs.',
+        aiDisclosureDesc: 'Veuillez déclarer les outils d\'IA utilisés. Cette information sera affichée aux lecteurs. Si vous avez utilisé l’IA, vérifiez le résultat avant publication : vous êtes responsable de ce que vous publiez.',
         labelAiText: 'Texte / Contenu',
         labelAiCover: 'Couverture / Illustrations',
         labelAiTranslation: 'Traduction',

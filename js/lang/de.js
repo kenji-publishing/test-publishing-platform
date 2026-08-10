@@ -392,7 +392,7 @@ window.translations.de = {
         sectionCover: 'Coverbild (optional)',
         hintCover: 'Empfohlene Größe: 600x900px',
         sectionAiDisclosure: 'KI-Nutzungserklärung',
-        aiDisclosureDesc: 'Bitte geben Sie verwendete KI-Tools an. Diese Information wird den Lesern angezeigt.',
+        aiDisclosureDesc: 'Bitte geben Sie verwendete KI-Tools an. Diese Information wird den Lesern angezeigt. Wenn Sie KI verwendet haben, prüfen Sie das Ergebnis vor der Veröffentlichung — Sie sind für das verantwortlich, was Sie veröffentlichen.',
         labelAiText: 'Text / Inhalt',
         labelAiCover: 'Cover / Illustrationen',
         labelAiTranslation: 'Übersetzung',
