@@ -765,8 +765,33 @@ function loadUserInfo() {
     }
 }
 
+// ========== 言語を選ぶ欄の文字方向 ==========
+// 「原作の言語」「翻訳先」などの選択欄は、選ばれている言語そのものの文字で表示される
+// （アラビア語なら العربية）。アラビア語を選んだときはその読み方向に合わせて右寄せにする。
+// 対象は data-lang-select が付いた <select>。ジャンルやAI開示のように画面の言語で
+// 書かれた選択欄は対象外（そちらは画面の言語に従うのが正しい）。
+function applyLangSelectDir(el) {
+    if (!el) return;
+    if (el.value === 'ar') el.setAttribute('dir', 'rtl');
+    else el.removeAttribute('dir');
+}
+
+function initLangSelectDir(root) {
+    var scope = root || document;
+    scope.querySelectorAll('select[data-lang-select]').forEach(function(el) {
+        applyLangSelectDir(el);
+        if (el.dataset.langDirBound) return;   // 二重登録を防ぐ
+        el.dataset.langDirBound = '1';
+        el.addEventListener('change', function() { applyLangSelectDir(el); });
+    });
+}
+window.applyLangSelectDir = applyLangSelectDir;
+window.initLangSelectDir = initLangSelectDir;
+
 // ========== DOMContentLoaded: Auto-initialization ==========
 document.addEventListener('DOMContentLoaded', function() {
+
+    initLangSelectDir();
 
     // 1. Render navbar if container exists
     var navContainer = document.getElementById('navbar-container');
