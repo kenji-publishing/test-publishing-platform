@@ -2,20 +2,20 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608101647">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608101652">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608101647">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608101652">
     <title>Upload Work - AuctLect</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="../css/variables.css?v=202608101647" rel="stylesheet">
-    <link href="../css/style-new.css?v=202608101647" rel="stylesheet">
-    <link href="../css/components.css?v=202608101647" rel="stylesheet">
-    <link href="../css/navbar.css?v=202608101647" rel="stylesheet">
-    <link href="../css/mobile-fixes.css?v=202608101647" rel="stylesheet">
+    <link href="../css/variables.css?v=202608101652" rel="stylesheet">
+    <link href="../css/style-new.css?v=202608101652" rel="stylesheet">
+    <link href="../css/components.css?v=202608101652" rel="stylesheet">
+    <link href="../css/navbar.css?v=202608101652" rel="stylesheet">
+    <link href="../css/mobile-fixes.css?v=202608101652" rel="stylesheet">
     <style>
         /* ========== Upload Page Specific Styles ========== */
         .upload-container { padding: var(--spacing-xl) 0; }
@@ -488,7 +488,7 @@
                             <div id="pvDesc" dir="auto" style="white-space:pre-wrap; border-top:1px solid var(--color-border, #e5ddd3); padding-top:1rem; margin-bottom:1.5rem;"></div>
                             <div style="border-top:1px solid var(--color-border, #e5ddd3); padding-top:1rem; margin-bottom:1.5rem;">
                                 <h5 style="margin-bottom:0.75rem;"><i class="fas fa-book-open me-2" style="color:#8B7355;"></i><span id="pvContentHeading"></span></h5>
-                                <div id="pvContent" style="max-height:320px; overflow-y:auto; white-space:pre-wrap; font-family:'Noto Serif JP', Georgia, serif; font-size:1.05rem; line-height:2; background:var(--color-bg-main, #faf7f2); padding:1.25rem; border-radius:8px;"></div>
+                                <div id="pvContent" dir="auto" style="max-height:320px; overflow-y:auto; white-space:pre-wrap; font-family:'Noto Serif JP', Georgia, serif; font-size:1.05rem; line-height:2; background:var(--color-bg-main, #faf7f2); padding:1.25rem; border-radius:8px;"></div>
                             </div>
                             <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
                                 <button type="button" class="btn" id="pvConfirmBtn" onclick="confirmPublish()" style="background:#8B7355; color:#fff;">
@@ -584,20 +584,20 @@
     <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/config.js?v=202608101647"></script>
-    <script src="../js/i18n.js?v=202608101647"></script>
-    <script src="../js/wizard-common.js?v=202608101647"></script>
-    <script src="../js/navbar.js?v=202608101647"></script>
-    <script src="../js/lang/ja.js?v=202608101647"></script>
-    <script src="../js/lang/en.js?v=202608101647"></script>
-    <script src="../js/lang/zh.js?v=202608101647"></script>
-    <script src="../js/lang/es.js?v=202608101647"></script>
-    <script src="../js/lang/fr.js?v=202608101647"></script>
-    <script src="../js/lang/de.js?v=202608101647"></script>
-    <script src="../js/lang/ko.js?v=202608101647"></script>
-    <script src="../js/lang/ar.js?v=202608101647"></script>
-    <script src="../js/lang/pt.js?v=202608101647"></script>
-    <script src="../js/lang/it.js?v=202608101647"></script>
+    <script src="../js/config.js?v=202608101652"></script>
+    <script src="../js/i18n.js?v=202608101652"></script>
+    <script src="../js/wizard-common.js?v=202608101652"></script>
+    <script src="../js/navbar.js?v=202608101652"></script>
+    <script src="../js/lang/ja.js?v=202608101652"></script>
+    <script src="../js/lang/en.js?v=202608101652"></script>
+    <script src="../js/lang/zh.js?v=202608101652"></script>
+    <script src="../js/lang/es.js?v=202608101652"></script>
+    <script src="../js/lang/fr.js?v=202608101652"></script>
+    <script src="../js/lang/de.js?v=202608101652"></script>
+    <script src="../js/lang/ko.js?v=202608101652"></script>
+    <script src="../js/lang/ar.js?v=202608101652"></script>
+    <script src="../js/lang/pt.js?v=202608101652"></script>
+    <script src="../js/lang/it.js?v=202608101652"></script>
     
     <script>
         // ========== Pattern C: Navbar 多言語対応テキスト（9言語）==========
@@ -2209,6 +2209,14 @@
         function showPreview() {
             var p = pendingPayload;
             if (!p) return;
+
+            // プレビューも入力欄と同じ扱い。アラビア語の作品は右から左に固定し、
+            // それ以外は中身から自動判定する（本文が数字や英単語で始まっても崩れないように）
+            var pvDir = p.language === 'ar' ? 'rtl' : 'auto';
+            ['pvTitle', 'pvAuthor', 'pvDesc', 'pvContent'].forEach(function (id) {
+                var el = document.getElementById(id);
+                if (el) el.setAttribute('dir', pvDir);
+            });
 
             document.getElementById('pvHeading').textContent = getL({
                 en: 'Preview — how readers will see it', ja: 'プレビュー — 読者からの見え方' });
