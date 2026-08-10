@@ -115,22 +115,51 @@ async function notifyEuSaleWhileUnregistered({ country, amount, currency, sessio
 }
 
 /**
+ * 作品が成人向けかどうかを取る。
+ *
+ * ルクセンブルク・ドイツ・ラトビア・ポルトガル・エストニアでは、成人向けは
+ * 軽減税率の対象外になる（3%が17%になる等）。国だけでは税率が決まらない。
+ *
+ * 引けなかったときは「成人向けとみなす」＝高い方の税率を使う。
+ * 低い方に倒すと徴収不足になり、その差額は当社が国に納めることになる。
+ * 高い方に倒した場合は当社の取り分から出るだけで、後から社内で是正できる。
+ */
+async function resolveWorkIsAdult(workId) {
+  if (!workId) return false;
+  try {
+    const r = await db.query('SELECT is_adult FROM works WHERE work_id = $1', [workId]);
+    if (r.rows.length === 0) {
+      console.error(`is_adult lookup: work ${workId} not found — treating as adult (higher rate)`);
+      return true;
+    }
+    return !!r.rows[0].is_adult;
+  } catch (e) {
+    console.error(`is_adult lookup failed for work ${workId} — treating as adult (higher rate):`, e.message);
+    return true;
+  }
+}
+
+/**
  * 総額から税額と税抜き額を出す。
  *
- * 現在はVAT未登録なので、必ず 0% / 税額0 / 税抜き=総額 になる。
- * OSS登録後、config/vatRates.js の VAT_REGISTERED を true にすると効き始める。
+ * 税率は「購入者の国」と「成人向けかどうか」の組み合わせで決まる。
+ * VAT未登録の間は config/vatRates.js が常に 0 を返すので、税額0・税抜き=総額 になる。
  *
- * 登録後に税率表へ無い国が来た場合は、決済は通したうえで警告を出す。
+ * 税率表に無い国が来た場合は、決済は通したうえで警告を出す。
  * ここで例外を投げると購入自体が失敗し、記録も残らない。徴収漏れは後から
  * 是正できるが、失った決済は取り戻せない。
  */
-function resolveTax(grossAmount, buyerCountry) {
-  const { rate, registered, unknownCountry } = getVatRate(buyerCountry);
+function resolveTax(grossAmount, buyerCountry, isAdult) {
+  const { rate, registered, unknownCountry, adultRateApplied } =
+    getVatRate(buyerCountry, { isAdult });
   if (registered && unknownCountry) {
     console.error(
       `VAT rate missing for buyer country "${buyerCountry || '(unknown)'}" — charged as 0%. ` +
       `Add it to config/vatRates.js and correct the return for this period.`
     );
+  }
+  if (adultRateApplied) {
+    console.log(`VAT: adult rate ${rate}% applied for ${buyerCountry}`);
   }
   const { vatAmount, netAmount } = splitTaxFromGross(grossAmount, rate);
   return { rate, vatAmount, netAmount };
@@ -269,7 +298,8 @@ async function applyGiftPayment(session) {
   // トランザクションを開く前に取る。StripeへのAPI呼び出しなので、
   // BEGIN...COMMIT の中で待つとその間ずっと接続を握ってしまう
   const buyerCountry = await resolveBuyerCountry(session);
-  const tax = resolveTax(amount, buyerCountry);
+  const isAdult = await resolveWorkIsAdult(session.metadata.work_id);
+  const tax = resolveTax(amount, buyerCountry, isAdult);
 
   const client = await db.pool.connect();
   let outcome = null;
@@ -694,7 +724,8 @@ router.post('/webhook', async (req, res) => {
     const currency = session.currency.toUpperCase();
     // トランザクションを開く前に取る（Stripeへの往復を BEGIN...COMMIT の中で待たない）
     const buyerCountry = await resolveBuyerCountry(session);
-    const tax = resolveTax(amount, buyerCountry);
+    const isAdult = await resolveWorkIsAdult(work_id);
+    const tax = resolveTax(amount, buyerCountry, isAdult);
 
     // BEGIN/COMMIT must run on a single dedicated connection. db.query()
     // draws a different pooled connection per call, which silently breaks
