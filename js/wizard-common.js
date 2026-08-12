@@ -277,6 +277,34 @@
         });
     }
 
+    // ===== 残り時間の表示 =====
+    // 「残り3000秒」では長さが掴めないので、時間・分・秒に直す。
+    // 30秒未満は数字が細かく動いても意味がないので「まもなく完了」にまとめる。
+    function formatRemaining(totalSeconds, lang) {
+        var ja = lang === 'ja';
+        var s = Math.max(0, Math.round(totalSeconds));
+        if (s < 30) return ja ? 'まもなく完了します' : 'almost done';
+
+        var h = Math.floor(s / 3600);
+        var m = Math.floor((s % 3600) / 60);
+        var sec = s % 60;
+
+        // 0の単位は出さない（「1時間0分」ではなく「1時間」）。
+        // 1時間以上あるときの秒数は誤差の範囲なので省く
+        var parts = [];
+        if (h > 0) {
+            parts.push(ja ? h + '時間' : h + 'h');
+            if (m > 0) parts.push(ja ? m + '分' : m + 'm');
+        } else if (m > 0) {
+            parts.push(ja ? m + '分' : m + 'm');
+            if (sec > 0) parts.push(ja ? sec + '秒' : sec + 's');
+        } else {
+            parts.push(ja ? sec + '秒' : sec + 's');
+        }
+
+        return ja ? '残り約' + parts.join('') : '~' + parts.join(' ') + ' remaining';
+    }
+
     // Blobを名前付きでダウンロードさせる（ウィザード共通）
     function saveBlob(blob, filename) {
         var url = URL.createObjectURL(blob);
@@ -300,6 +328,7 @@
         docxToRich: docxToRich,
         pdfToImageFiles: pdfToImageFiles,
         textToDocxBlob: textToDocxBlob,
-        saveBlob: saveBlob
+        saveBlob: saveBlob,
+        formatRemaining: formatRemaining
     };
 })(window);
