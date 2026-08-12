@@ -305,6 +305,34 @@
         return ja ? '残り約' + parts.join('') : '~' + parts.join(' ') + ' remaining';
     }
 
+    // ===== ダウンロードするファイルの名前 =====
+    // 「edited_sonnet.docx」では何の原稿か分からないので、作品（原稿）の名前を使う。
+    // 元となる名前は 1) アップロードしたファイル名 2) 本文の1行目（短ければ見出しとみなす）
+    // の順で拾い、どちらも無ければ呼び出し側の既定値にする。
+    function cleanFileName(name) {
+        return String(name || '')
+            .replace(/\.(txt|docx)$/i, '')          // 二重拡張子を防ぐ
+            .replace(/[\\/:*?"<>|]/g, ' ')          // WindowsやmacOSで使えない文字
+            .replace(/\s+/g, ' ')
+            .trim()
+            .slice(0, 80);                          // 長すぎる名前はOSが扱いにくい
+    }
+
+    function workFileBaseName(sourceFileName, sourceText, fallback) {
+        var fromFile = cleanFileName(sourceFileName);
+        if (fromFile) return fromFile;
+
+        // 貼り付けた原稿は1行目がタイトルや章題のことが多い。長い行は本文なので使わない
+        var firstLine = String(sourceText || '').split(/\r?\n/)
+            .map(function (s) { return s.trim(); })
+            .filter(Boolean)[0] || '';
+        if (firstLine && Array.from(firstLine).length <= 40) {
+            var fromLine = cleanFileName(firstLine);
+            if (fromLine) return fromLine;
+        }
+        return fallback;
+    }
+
     // Blobを名前付きでダウンロードさせる（ウィザード共通）
     function saveBlob(blob, filename) {
         var url = URL.createObjectURL(blob);
@@ -329,6 +357,7 @@
         pdfToImageFiles: pdfToImageFiles,
         textToDocxBlob: textToDocxBlob,
         saveBlob: saveBlob,
-        formatRemaining: formatRemaining
+        formatRemaining: formatRemaining,
+        workFileBaseName: workFileBaseName
     };
 })(window);
