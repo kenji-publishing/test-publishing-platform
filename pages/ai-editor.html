@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608121719">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608131746">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Editor - AuctLect</title>
 
@@ -16,24 +16,24 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <!-- Platform CSS -->
-    <link href="../css/variables.css?v=202608121719" rel="stylesheet">
-    <link rel="stylesheet" href="../css/style-new.css?v=202608121719">
-    <link href="../css/components.css?v=202608121719" rel="stylesheet">
-    <link href="../css/navbar.css?v=202608121719" rel="stylesheet">
-    <link rel="stylesheet" href="../css/mobile-fixes.css?v=202608121719">
+    <link href="../css/variables.css?v=202608131746" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style-new.css?v=202608131746">
+    <link href="../css/components.css?v=202608131746" rel="stylesheet">
+    <link href="../css/navbar.css?v=202608131746" rel="stylesheet">
+    <link rel="stylesheet" href="../css/mobile-fixes.css?v=202608131746">
 
     <!-- 言語ファイル（9言語） -->
-    <script src="../js/lang/ja.js?v=202608121719"></script>
-    <script src="../js/lang/en.js?v=202608121719"></script>
-    <script src="../js/lang/zh.js?v=202608121719"></script>
-    <script src="../js/lang/es.js?v=202608121719"></script>
-    <script src="../js/lang/fr.js?v=202608121719"></script>
-    <script src="../js/lang/de.js?v=202608121719"></script>
-    <script src="../js/lang/ko.js?v=202608121719"></script>
-    <script src="../js/lang/ar.js?v=202608121719"></script>
-    <script src="../js/lang/pt.js?v=202608121719"></script>
-    <script src="../js/lang/it.js?v=202608121719"></script>
-    <script src="../js/wizard-common.js?v=202608121719"></script>
+    <script src="../js/lang/ja.js?v=202608131746"></script>
+    <script src="../js/lang/en.js?v=202608131746"></script>
+    <script src="../js/lang/zh.js?v=202608131746"></script>
+    <script src="../js/lang/es.js?v=202608131746"></script>
+    <script src="../js/lang/fr.js?v=202608131746"></script>
+    <script src="../js/lang/de.js?v=202608131746"></script>
+    <script src="../js/lang/ko.js?v=202608131746"></script>
+    <script src="../js/lang/ar.js?v=202608131746"></script>
+    <script src="../js/lang/pt.js?v=202608131746"></script>
+    <script src="../js/lang/it.js?v=202608131746"></script>
+    <script src="../js/wizard-common.js?v=202608131746"></script>
 
     <style>
         :root {
@@ -1071,6 +1071,10 @@
                             <i class="fas fa-file-word"></i>
                             <span>.docx</span>
                         </button>
+                        <button class="download-btn" onclick="downloadTrackedChanges()" id="btnTrackedDl">
+                            <i class="fas fa-highlighter"></i>
+                            <span id="s9TrackedLabel">Word with changes marked</span>
+                        </button>
                         <button class="download-btn" onclick="uploadEditedWork()" style="border-color: var(--color-accent, #8B7355);">
                             <i class="fas fa-upload" style="color: var(--color-accent, #8B7355);"></i>
                             <span id="s9UploadLabel">Upload as a work</span>
@@ -1771,6 +1775,43 @@
         WizardCommon.saveBlob(new Blob([text], { type: 'text/plain;charset=utf-8' }), base + '.txt');
     }
 
+    // 校正の差分を「変更履歴つきWord」として書き出す。
+    // 長編では画面のスクロールだけで全部の修正を追えないため、Word上で1件ずつ
+    // 確認・承諾できる形にする
+    async function downloadTrackedChanges() {
+        const L = getLang();
+        const btn = document.getElementById('btnTrackedDl');
+        const edited = document.getElementById('reviewTranslation').value;
+
+        const paragraphs = buildDiffParagraphs(sourceTextContent, edited);
+        if (!paragraphs) {
+            alert(L === 'ja'
+                ? '原稿が大きすぎて変更箇所を書き出せませんでした。章ごとに分けて校正すると出力できます。'
+                : 'The manuscript is too large to export the changes. Editing it chapter by chapter will work.');
+            return;
+        }
+
+        if (btn) btn.disabled = true;
+        try {
+            const title = WizardCommon.workFileBaseName(sourceFileName, sourceTextContent,
+                L === 'ja' ? '原稿' : 'manuscript');
+            const blob = await WizardCommon.trackedChangesDocxBlob(paragraphs, {
+                author: L === 'ja' ? 'AuctLect AI校正' : 'AuctLect AI',
+                heading: L === 'ja'
+                    ? 'この文書はWordの変更履歴として校正箇所を記録しています。［校閲］タブから1件ずつ承諾・元に戻すができます。'
+                    : 'Changes are recorded as Word tracked changes. Use the Review tab to accept or reject each one.'
+            });
+            WizardCommon.saveBlob(blob, title + (L === 'ja' ? ' - 変更履歴つき' : ' (tracked changes)') + '.docx');
+        } catch (err) {
+            console.error('tracked-changes docx failed:', err);
+            alert(L === 'ja'
+                ? 'Wordファイルの作成に失敗しました。通信環境を確認してもう一度お試しください。'
+                : 'Could not create the Word file. Please check your connection and try again.');
+        } finally {
+            if (btn) btn.disabled = false;
+        }
+    }
+
     // 編集済みの原稿をアップロードページへ引き渡す（テキストエディターと同じ連携）
     function uploadEditedWork() {
         const L = getLang();
@@ -1794,8 +1835,11 @@
         const L = getLang();
         const uploadLabel = { en: 'Upload as a work', ja: '作品としてアップロード', zh: '作为作品上传', es: 'Subir como obra', fr: 'Publier comme œuvre', de: 'Als Werk hochladen', ko: '작품으로 업로드', ar: 'رفع كعمل', pt: 'Enviar como obra', it: 'Carica come opera' };
         const showLabel = { en: 'Show changes', ja: '変更箇所を表示', zh: '显示修改处', es: 'Mostrar cambios', fr: 'Afficher les modifications', de: 'Änderungen anzeigen', ko: '변경 사항 표시', ar: 'إظهار التغييرات', pt: 'Mostrar alterações', it: 'Mostra modifiche' };
+        const trackedLabel = { en: 'Word with changes marked', ja: '変更履歴つきWord', zh: '带修订记录的Word', es: 'Word con cambios marcados', fr: 'Word avec modifications suivies', de: 'Word mit Änderungsverfolgung', ko: '변경 내용이 표시된 Word', ar: 'Word مع تعقب التغييرات', pt: 'Word com alterações marcadas', it: 'Word con revisioni' };
         const up = document.getElementById('s9UploadLabel');
         if (up) up.textContent = uploadLabel[L] || uploadLabel.en;
+        const tr = document.getElementById('s9TrackedLabel');
+        if (tr) tr.textContent = trackedLabel[L] || trackedLabel.en;
         const dt = document.getElementById('btnDiffToggleText');
         if (dt && !diffVisible) dt.textContent = showLabel[L] || showLabel.en;
     }
@@ -1869,57 +1913,83 @@
         return ops;
     }
 
-    // 文字単位の差分（連続する同種の文字をまとめる）
-    function charDiffHtml(a, b) {
-        if (a === b) return escH(a);
+    // 文字単位の差分を [type, text] の列で返す（連続する同種の文字をまとめる）。
+    // 画面表示（HTML）とWordの変更履歴の両方がこれを使う
+    function charDiffSegments(a, b) {
+        if (a === b) return [['eq', a]];
         const ops = lcsDiff(Array.from(a), Array.from(b));
-        if (!ops) return '<span class="diff-del">' + escH(a) + '</span><span class="diff-ins">' + escH(b) + '</span>';
+        if (!ops) return [['del', a], ['ins', b]];   // 大きすぎる段落は丸ごと置換として扱う
         const merged = [];
         for (const [t, s] of ops) {
             if (merged.length && merged[merged.length - 1][0] === t) merged[merged.length - 1][1] += s;
             else merged.push([t, s]);
         }
-        return merged.map(([t, s]) =>
+        return merged;
+    }
+
+    function charDiffHtml(a, b) {
+        return charDiffSegments(a, b).map(([t, s]) =>
             t === 'eq' ? escH(s)
             : t === 'del' ? '<span class="diff-del">' + escH(s) + '</span>'
             : '<span class="diff-ins">' + escH(s) + '</span>'
         ).join('');
     }
 
-    // 全体の差分HTML: 段落単位で対応付けし、各段落内は文字単位でハイライト
-    function buildDiffHtml(orig, edited) {
-        const L = getLang();
+    // 段落単位で原文と校正後を対応付ける。戻り値は
+    //   ['pair', 原文, 校正後] = 同じ位置の段落（中身は文字単位で比べる）
+    //   ['del', 原文] / ['ins', 校正後] = 段落ごと削除・追加された
+    // 大きすぎて比較できない場合は null
+    function buildDiffPairs(orig, edited) {
         const aParas = String(orig).split('\n');
         const bParas = String(edited).split('\n');
-        let pairs = [];
+        const pairs = [];
 
         if (aParas.length === bParas.length) {
             for (let k = 0; k < aParas.length; k++) pairs.push(['pair', aParas[k], bParas[k]]);
-        } else {
-            const ops = lcsDiff(aParas, bParas);
-            if (!ops) {
-                const msg = { en: 'The text is too large to show differences.', ja: 'テキストが大きすぎるため変更箇所を表示できません。' };
-                return '<em>' + (msg[L] || msg.en) + '</em>';
-            }
-            // 連続する削除段落群と挿入段落群を位置で対応付けて「書き換え」として文字差分にする
-            let k = 0;
-            while (k < ops.length) {
-                if (ops[k][0] === 'eq') { pairs.push(['pair', ops[k][1], ops[k][1]]); k++; continue; }
-                const dels = [], inss = [];
-                while (k < ops.length && ops[k][0] === 'del') { dels.push(ops[k][1]); k++; }
-                while (k < ops.length && ops[k][0] === 'ins') { inss.push(ops[k][1]); k++; }
-                const nPairs = Math.min(dels.length, inss.length);
-                for (let x = 0; x < nPairs; x++) pairs.push(['pair', dels[x], inss[x]]);
-                for (let x = nPairs; x < dels.length; x++) pairs.push(['del', dels[x]]);
-                for (let x = nPairs; x < inss.length; x++) pairs.push(['ins', inss[x]]);
-            }
+            return pairs;
         }
 
+        const ops = lcsDiff(aParas, bParas);
+        if (!ops) return null;
+
+        // 連続する削除段落群と挿入段落群を位置で対応付けて「書き換え」として文字差分にする
+        let k = 0;
+        while (k < ops.length) {
+            if (ops[k][0] === 'eq') { pairs.push(['pair', ops[k][1], ops[k][1]]); k++; continue; }
+            const dels = [], inss = [];
+            while (k < ops.length && ops[k][0] === 'del') { dels.push(ops[k][1]); k++; }
+            while (k < ops.length && ops[k][0] === 'ins') { inss.push(ops[k][1]); k++; }
+            const nPairs = Math.min(dels.length, inss.length);
+            for (let x = 0; x < nPairs; x++) pairs.push(['pair', dels[x], inss[x]]);
+            for (let x = nPairs; x < dels.length; x++) pairs.push(['del', dels[x]]);
+            for (let x = nPairs; x < inss.length; x++) pairs.push(['ins', inss[x]]);
+        }
+        return pairs;
+    }
+
+    // 全体の差分HTML: 段落単位で対応付けし、各段落内は文字単位でハイライト
+    function buildDiffHtml(orig, edited) {
+        const L = getLang();
+        const pairs = buildDiffPairs(orig, edited);
+        if (!pairs) {
+            const msg = { en: 'The text is too large to show differences.', ja: 'テキストが大きすぎるため変更箇所を表示できません。' };
+            return '<em>' + (msg[L] || msg.en) + '</em>';
+        }
         return pairs.map(p =>
             p[0] === 'pair' ? charDiffHtml(p[1], p[2])
             : p[0] === 'del' ? '<span class="diff-del">' + escH(p[1]) + '</span>'
             : '<span class="diff-ins">' + escH(p[1]) + '</span>'
         ).join('\n');
+    }
+
+    // 差分を「1段落 = [type, text] の列」に整えてWordの変更履歴に渡せる形にする
+    function buildDiffParagraphs(orig, edited) {
+        const pairs = buildDiffPairs(orig, edited);
+        if (!pairs) return null;
+        return pairs.map(p =>
+            p[0] === 'pair' ? charDiffSegments(p[1], p[2])
+            : [[p[0], p[1]]]
+        );
     }
 
     // ===== i18n Update =====
@@ -2133,8 +2203,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- JSZip: lets us crack open .docx (which is a ZIP) to read the text inside -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="../js/config.js?v=202608121719"></script>
-    <script src="../js/i18n.js?v=202608121719"></script>
-    <script src="../js/navbar.js?v=202608121719"></script>
+    <script src="../js/config.js?v=202608131746"></script>
+    <script src="../js/i18n.js?v=202608131746"></script>
+    <script src="../js/navbar.js?v=202608131746"></script>
 </body>
 </html>

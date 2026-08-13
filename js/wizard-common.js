@@ -227,6 +227,13 @@
     // ===== プレーンテキスト → Word (.docx) =====
     // 1行=1段落として最小構成の.docx（中身はZIP）をブラウザ内で組み立てる。
     // 外部の変換サービスには一切送らない。JSZipは必要になった時だけ読み込む。
+    // XMLに入れられない制御文字が1つでも混ざるとWordが「開けません」になるので落とす。
+    // 文字クラスは new RegExp で組み立てる（ソースに制御文字そのものを書かないため）
+    var XML_CTRL_RE = new RegExp('[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F]', 'g');
+    function stripControlChars(s) {
+        return String(s == null ? '' : s).replace(XML_CTRL_RE, '');
+    }
+
     function escapeXml(s) {
         return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
@@ -251,7 +258,7 @@
             function () { return !!global.JSZip; }
         ).then(function () {
             // XMLに入れられない制御文字が1つでも混ざるとWordが「開けません」になるので落とす
-            var clean = String(text == null ? '' : text).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '');
+            var clean = stripControlChars(text);
             var body = clean.split(/\r\n|\r|\n/).map(function (line) {
                 if (!line) return '<w:p/>';   // 空行はそのまま空の段落に
                 return '<w:p><w:r><w:t xml:space="preserve">' + escapeXml(line) + '</w:t></w:r></w:p>';
@@ -303,6 +310,68 @@
         }
 
         return ja ? '残り約' + parts.join('') : '~' + parts.join(' ') + ' remaining';
+    }
+
+    // ===== 変更履歴つきWord =====
+    // 校正の差分を、Wordが標準で扱える「変更履歴」として書き出す。
+    // Wordで開くと修正箇所が色と取り消し線で表示され、1件ずつ承諾/元に戻すができる。
+    // paragraphs は [[type, text], ...] の配列を段落ぶん並べたもの（type: eq|del|ins）
+    function trackedChangesDocxBlob(paragraphs, options) {
+        var opt = options || {};
+        var author = opt.author || 'AuctLect AI';
+        var stamp = opt.date || new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
+        var heading = opt.heading || '';
+
+        return loadScriptOnce(
+            'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
+            function () { return !!global.JSZip; }
+        ).then(function () {
+            var revId = 1;
+            var attrs = function () {
+                return ' w:id="' + (revId++) + '" w:author="' + escapeXml(author) + '" w:date="' + stamp + '"';
+            };
+            var textRun = function (s, tag) {
+                return '<w:r><w:' + tag + ' xml:space="preserve">' + escapeXml(stripControlChars(s)) + '</w:' + tag + '></w:r>';
+            };
+
+            var body = '';
+            if (heading) {
+                body += '<w:p><w:pPr><w:jc w:val="center"/></w:pPr>'
+                     + '<w:r><w:rPr><w:b/><w:sz w:val="20"/><w:color w:val="808080"/></w:rPr>'
+                     + '<w:t xml:space="preserve">' + escapeXml(heading) + '</w:t></w:r></w:p>';
+            }
+
+            paragraphs.forEach(function (segs) {
+                var runs = '';
+                segs.forEach(function (seg) {
+                    var type = seg[0], text = seg[1];
+                    if (!text) return;
+                    if (type === 'eq') runs += textRun(text, 't');
+                    // 削除した文字は w:delText に入れる決まり（w:t のままだと本文として残る）
+                    else if (type === 'del') runs += '<w:del' + attrs() + '>' + textRun(text, 'delText') + '</w:del>';
+                    else runs += '<w:ins' + attrs() + '>' + textRun(text, 't') + '</w:ins>';
+                });
+                body += runs ? '<w:p>' + runs + '</w:p>' : '<w:p/>';
+            });
+
+            var documentXml =
+                '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+                '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">' +
+                '<w:body>' + body +
+                '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/>' +
+                '<w:pgMar w:top="1418" w:right="1418" w:bottom="1418" w:left="1418"/></w:sectPr>' +
+                '</w:body></w:document>';
+
+            var zip = new global.JSZip();
+            zip.file('[Content_Types].xml', DOCX_CONTENT_TYPES);
+            zip.folder('_rels').file('.rels', DOCX_RELS);
+            zip.folder('word').file('document.xml', documentXml);
+            return zip.generateAsync({
+                type: 'blob',
+                mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                compression: 'DEFLATE'
+            });
+        });
     }
 
     // ===== ダウンロードするファイルの名前 =====
@@ -358,6 +427,7 @@
         textToDocxBlob: textToDocxBlob,
         saveBlob: saveBlob,
         formatRemaining: formatRemaining,
-        workFileBaseName: workFileBaseName
+        workFileBaseName: workFileBaseName,
+        trackedChangesDocxBlob: trackedChangesDocxBlob
     };
 })(window);
