@@ -10,6 +10,7 @@
  */
 
 const Anthropic = require('@anthropic-ai/sdk');
+const { styleNote } = require('./workProfile');
 
 const anthropic = new Anthropic({ apiKey: process.env.CLAUDE_API_KEY });
 
@@ -63,7 +64,7 @@ function chunkText(text, limit = MAX_CHUNK_CHARS) {
     return chunks.length ? chunks : [''];
 }
 
-function buildPrompt({ chunk, sourceLang, targetLang, tier, glossary }) {
+function buildPrompt({ chunk, sourceLang, targetLang, tier, glossary, style, genre }) {
     const srcName = LANG_NAMES[sourceLang] || sourceLang || 'the source language';
     const tgtName = LANG_NAMES[targetLang] || targetLang || 'the target language';
     let glossaryNote = '';
@@ -80,11 +81,11 @@ function buildPrompt({ chunk, sourceLang, targetLang, tier, glossary }) {
 
     return `You are a professional literary translator translating a novel or long-form text from ${srcName} to ${tgtName}.
 
-${TIER_INSTRUCTIONS[tier]}${glossaryNote}
+${TIER_INSTRUCTIONS[tier]}${styleNote({ style, genre })}${glossaryNote}
 
 Rules:
 - The text is one part of a longer manuscript; it may start or end mid-scene. Translate it as-is without adding introductions or conclusions.
-- Keep the original paragraph breaks and blank lines.
+- Keep the original paragraph breaks and blank lines. Output exactly as many lines as the input has: do not merge or split paragraphs, and do not add or remove blank lines.
 - Keep proper nouns consistent throughout.
 - Lines that are markup markers — like [[img src="..." w="..." align="..."]], [[table]] or [[/table]] — must be copied to the output EXACTLY as-is, unchanged and in the same position. Inside a [[table]] block, translate the cell text but keep the " | " separators and the line structure.
 - Respond with ONLY the ${tgtName} translation — no preamble, no explanations, no markdown fences.
@@ -97,12 +98,12 @@ ${chunk}`;
  * Translate one chunk (streaming to avoid HTTP timeouts on long outputs).
  * onText(charCount) fires per streamed delta for smooth real progress.
  */
-async function translateChunk({ chunk, sourceLang, targetLang, tier, glossary }, requestOptions, onText) {
+async function translateChunk({ chunk, sourceLang, targetLang, tier, glossary, style, genre }, requestOptions, onText) {
     if (!chunk.trim()) return chunk;
     const stream = anthropic.messages.stream({
         model: MODEL_TIERS[tier],
         max_tokens: 16000,
-        messages: [{ role: 'user', content: buildPrompt({ chunk, sourceLang, targetLang, tier, glossary }) }]
+        messages: [{ role: 'user', content: buildPrompt({ chunk, sourceLang, targetLang, tier, glossary, style, genre }) }]
     }, requestOptions);
     if (onText) stream.on('text', (t) => onText(t.length));
     const message = await stream.finalMessage();
@@ -167,7 +168,7 @@ async function withChunkRetry(fn, attempts = 5) {
  * onChunkDone(index, allChunksSoFar) fires after each chunk so the caller
  * can persist progress.
  */
-async function translateText({ text, sourceLang, targetLang, tier, glossary, onProgress, completedChunks = [], onChunkDone }) {
+async function translateText({ text, sourceLang, targetLang, tier, glossary, style, genre, onProgress, completedChunks = [], onChunkDone }) {
     const chunks = chunkText(text);
     const totalChars = chunks.reduce((sum, c) => sum + c.length, 0) || 1;
     let doneChars = 0;

@@ -24,6 +24,7 @@ const crypto = require('crypto');
 const multer = require('multer');
 const { authenticate } = require('../middleware/auth');
 const db = require('../config/database');
+const { normalizeStyle, normalizeGenre } = require('../services/workProfile');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { editText } = require('../services/aiEditorService');
 const { translateText } = require('../services/aiTranslationService');
@@ -241,7 +242,7 @@ router.post('/manga/checkout', authenticate, async (req, res) => {
  */
 router.post('/checkout', authenticate, async (req, res) => {
     try {
-        const { tool, model, text, sourceLang, targetLang, glossary, currency } = req.body;
+        const { tool, model, text, sourceLang, targetLang, glossary, currency, style, genre } = req.body;
         if (!TOOL_PAGES[tool]) return res.status(400).json({ error: 'Invalid tool' });
         if (!PRICING_JPY[model]) return res.status(400).json({ error: 'Invalid model' });
         if (!text || !String(text).trim()) return res.status(400).json({ error: 'Text is required' });
@@ -257,11 +258,12 @@ router.post('/checkout', authenticate, async (req, res) => {
         const amount = computeAmount({ chars, model, currency });
 
         const orderResult = await db.query(
-            `INSERT INTO ai_tool_orders (user_id, tool, model, source_lang, target_lang, glossary, text_content, char_count, currency, amount)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+            `INSERT INTO ai_tool_orders (user_id, tool, model, source_lang, target_lang, glossary, text_content, char_count, currency, amount, style, genre)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
              RETURNING order_id`,
             [req.user.userId, tool, model, sourceLang || null, tool === 'translator' ? targetLang : null,
-             JSON.stringify(Array.isArray(glossary) ? glossary.slice(0, 50) : []), String(text), chars, currency, amount]
+             JSON.stringify(Array.isArray(glossary) ? glossary.slice(0, 50) : []), String(text), chars, currency, amount,
+             normalizeStyle(style), normalizeGenre(genre)]
         );
         const orderId = orderResult.rows[0].order_id;
 
@@ -471,6 +473,8 @@ router.post('/orders/:orderId/run', authenticate, async (req, res) => {
             text: order.text_content,
             tier: order.model,
             glossary: order.glossary || [],
+            style: order.style || null,
+            genre: order.genre || null,
             onProgress: (pct) => { job.progress = pct; },
             // 前回失敗時の完了済みチャンクから再開（API費の二重払い・再待機を防ぐ）
             completedChunks: Array.isArray(order.partial_chunks) ? order.partial_chunks : [],

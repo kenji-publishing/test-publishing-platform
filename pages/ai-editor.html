@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608131746">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608152017">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Editor - AuctLect</title>
 
@@ -16,24 +16,24 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <!-- Platform CSS -->
-    <link href="../css/variables.css?v=202608131746" rel="stylesheet">
-    <link rel="stylesheet" href="../css/style-new.css?v=202608131746">
-    <link href="../css/components.css?v=202608131746" rel="stylesheet">
-    <link href="../css/navbar.css?v=202608131746" rel="stylesheet">
-    <link rel="stylesheet" href="../css/mobile-fixes.css?v=202608131746">
+    <link href="../css/variables.css?v=202608152017" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style-new.css?v=202608152017">
+    <link href="../css/components.css?v=202608152017" rel="stylesheet">
+    <link href="../css/navbar.css?v=202608152017" rel="stylesheet">
+    <link rel="stylesheet" href="../css/mobile-fixes.css?v=202608152017">
 
     <!-- 言語ファイル（9言語） -->
-    <script src="../js/lang/ja.js?v=202608131746"></script>
-    <script src="../js/lang/en.js?v=202608131746"></script>
-    <script src="../js/lang/zh.js?v=202608131746"></script>
-    <script src="../js/lang/es.js?v=202608131746"></script>
-    <script src="../js/lang/fr.js?v=202608131746"></script>
-    <script src="../js/lang/de.js?v=202608131746"></script>
-    <script src="../js/lang/ko.js?v=202608131746"></script>
-    <script src="../js/lang/ar.js?v=202608131746"></script>
-    <script src="../js/lang/pt.js?v=202608131746"></script>
-    <script src="../js/lang/it.js?v=202608131746"></script>
-    <script src="../js/wizard-common.js?v=202608131746"></script>
+    <script src="../js/lang/ja.js?v=202608152017"></script>
+    <script src="../js/lang/en.js?v=202608152017"></script>
+    <script src="../js/lang/zh.js?v=202608152017"></script>
+    <script src="../js/lang/es.js?v=202608152017"></script>
+    <script src="../js/lang/fr.js?v=202608152017"></script>
+    <script src="../js/lang/de.js?v=202608152017"></script>
+    <script src="../js/lang/ko.js?v=202608152017"></script>
+    <script src="../js/lang/ar.js?v=202608152017"></script>
+    <script src="../js/lang/pt.js?v=202608152017"></script>
+    <script src="../js/lang/it.js?v=202608152017"></script>
+    <script src="../js/wizard-common.js?v=202608152017"></script>
 
     <style>
         :root {
@@ -822,24 +822,16 @@
 
                     <div class="settings-grid">
                         <div class="setting-group">
-                            <label id="s3LabelStyle"><i class="fas fa-pen-fancy me-1"></i> Style</label>
+                            <label id="s3LabelStyle"><i class="fas fa-pen-fancy me-1"></i> Style &amp; tone</label>
                             <select class="form-select-custom" id="tsStyle">
                                 <option value="">-- Not specified --</option>
+                                <option value="plain">Plain</option>
                                 <option value="formal">Formal</option>
-                                <option value="informal">Informal / Casual</option>
+                                <option value="casual">Casual</option>
                                 <option value="literary">Literary</option>
-                                <option value="novel">Novel</option>
                                 <option value="lightnovel">Light Novel</option>
-                            </select>
-                        </div>
-                        <div class="setting-group">
-                            <label id="s3LabelTone"><i class="fas fa-theater-masks me-1"></i> Tone</label>
-                            <select class="form-select-custom" id="tsTone">
-                                <option value="">-- Not specified --</option>
-                                <option value="friendly">Friendly</option>
-                                <option value="neutral">Neutral</option>
                                 <option value="dramatic">Dramatic</option>
-                                <option value="romantic">Romantic</option>
+                                <option value="warm">Warm</option>
                                 <option value="humorous">Humorous</option>
                             </select>
                         </div>
@@ -1046,6 +1038,11 @@
                             <i class="fas fa-highlighter me-1"></i> <span id="btnDiffToggleText">Show changes</span>
                         </button>
                         <div id="reviewDiff" style="display:none; margin-top:0.75rem; padding:1rem; border:1px solid var(--color-border, #e5ddd3); border-radius:8px; white-space:pre-wrap; line-height:2; max-height:420px; overflow-y:auto; background:#fff;"></div>
+                    </div>
+
+                    <!-- AIの結果は必ず著者が確認する、という前提を作業の場で伝える -->
+                    <div style="margin-top:1rem; padding:0.9rem 1rem; background:#fff8e5; border:1px solid #ffe08a; border-radius:8px; color:#7a5b00; font-size:0.9rem;">
+                        <i class="fas fa-circle-exclamation me-1"></i><span id="s8ReviewNotice">Please read the result before you publish it.</span>
                     </div>
 
                     <div class="step-actions">
@@ -1601,6 +1598,9 @@
                     text: sourceTextContent,
                     sourceLang: document.getElementById('sourceLang').value,
                     glossary: glossary,
+                    // 作品の性格。指示文に反映される（未選択なら空文字＝従来どおり）
+                    style: (document.getElementById('tsStyle') || {}).value || '',
+                    genre: (document.getElementById('tsGenre') || {}).value || '',
                     currency: selectedCurrency
                 })
             });
@@ -1835,6 +1835,21 @@
         const L = getLang();
         const uploadLabel = { en: 'Upload as a work', ja: '作品としてアップロード', zh: '作为作品上传', es: 'Subir como obra', fr: 'Publier comme œuvre', de: 'Als Werk hochladen', ko: '작품으로 업로드', ar: 'رفع كعمل', pt: 'Enviar como obra', it: 'Carica come opera' };
         const showLabel = { en: 'Show changes', ja: '変更箇所を表示', zh: '显示修改处', es: 'Mostrar cambios', fr: 'Afficher les modifications', de: 'Änderungen anzeigen', ko: '변경 사항 표시', ar: 'إظهار التغييرات', pt: 'Mostrar alterações', it: 'Mostra modifiche' };
+        const reviewNotice = {
+            en: 'AI editing is not final. Read the result before you publish it — "Show changes" here, or download the Word file with changes marked and work through them in Word.',
+            ja: 'AIの校正は完成品ではありません。公開の前に必ずご自身で目を通してください。この画面の「変更箇所を表示」か、「変更履歴つきWord」をダウンロードしてWord上で1件ずつ確認できます。',
+            zh: 'AI校对并非最终稿。发布前请务必自行通读。可使用本页的"显示修改处"，或下载"带修订记录的Word"在Word中逐条确认。',
+            es: 'La edición por IA no es definitiva. Lee el resultado antes de publicarlo: usa "Mostrar cambios" aquí o descarga el Word con los cambios marcados y revísalos en Word.',
+            fr: 'L\'édition par IA n\'est pas définitive. Relisez le résultat avant de publier : « Afficher les modifications » ici, ou téléchargez le Word avec le suivi des modifications et vérifiez-les une par une.',
+            de: 'Die KI-Bearbeitung ist nicht endgültig. Lesen Sie das Ergebnis vor der Veröffentlichung — hier über „Änderungen anzeigen" oder als Word-Datei mit Änderungsverfolgung.',
+            ko: 'AI 교정은 완성본이 아닙니다. 게시 전에 반드시 직접 읽어 주세요. 이 화면의 "변경 사항 표시" 또는 "변경 내용이 표시된 Word"를 내려받아 Word에서 하나씩 확인할 수 있습니다.',
+            ar: 'التحرير بالذكاء الاصطناعي ليس نهائيًا. اقرأ النتيجة قبل النشر — عبر «إظهار التغييرات» هنا، أو نزّل ملف Word مع تعقب التغييرات وراجعها واحدة تلو الأخرى.',
+            pt: 'A edição por IA não é definitiva. Leia o resultado antes de publicar — use "Mostrar alterações" aqui ou baixe o Word com as alterações marcadas e revise no Word.',
+            it: 'La revisione con IA non è definitiva. Leggi il risultato prima di pubblicare — con "Mostra modifiche" qui, oppure scarica il Word con le revisioni e controllale una a una.'
+        };
+        const rn = document.getElementById('s8ReviewNotice');
+        if (rn) rn.textContent = reviewNotice[L] || reviewNotice.en;
+
         const trackedLabel = { en: 'Word with changes marked', ja: '変更履歴つきWord', zh: '带修订记录的Word', es: 'Word con cambios marcados', fr: 'Word avec modifications suivies', de: 'Word mit Änderungsverfolgung', ko: '변경 내용이 표시된 Word', ar: 'Word مع تعقب التغييرات', pt: 'Word com alterações marcadas', it: 'Word con revisioni' };
         const up = document.getElementById('s9UploadLabel');
         if (up) up.textContent = uploadLabel[L] || uploadLabel.en;
@@ -2027,7 +2042,9 @@
             btnNext: { en: 'Next', ja: '\u6b21\u3078', zh: '\u4e0b\u4e00\u6b65', es: 'Siguiente', fr: 'Suivant', de: 'Weiter', ko: '\ub2e4\uc74c', ar: '\u0627\u0644\u062a\u0627\u0644\u064a', pt: 'Pr\u00f3ximo', it: 'Avanti' },
             s3Title: { en: 'Editing Settings', ja: '\u7de8\u96c6\u8a2d\u5b9a', zh: '\u7de8\u8f2f\u8a2d\u5b9a', es: 'Configuraci\u00f3n de edici\u00f3n', fr: 'Param\u00e8tres d\'\u00e9dition', de: 'Bearbeitungseinstellungen', ko: '\ud3b8\uc9d1 \uc124\uc815', ar: '\u0625\u0639\u062f\u0627\u062f\u0627\u062a \u0627\u0644\u062a\u062d\u0631\u064a\u0631', pt: 'Configura\u00e7\u00f5es de edi\u00e7\u00e3o', it: 'Impostazioni di revisione' },
             s3Desc: { en: 'Tell the AI what kind of text it\'s editing so it applies the right tone and conventions. All settings are optional.', ja: '\u539f\u7a3f\u306e\u7a2e\u985e\u3092\u6307\u5b9a\u3059\u308b\u3068\u3001AI\u304c\u9069\u5207\u306a\u6587\u4f53\u30fb\u898f\u5247\u3067\u6821\u6b63\u30fb\u6821\u95b2\u3057\u307e\u3059\u3002\u3059\u3079\u3066\u4efb\u610f\u3067\u3059\u3002', zh: '\u544a\u8a34AI\u9019\u662f\u4ec0\u9ebc\u985e\u578b\u7684\u6587\u672c\uff0c\u4ee5\u4fbf\u61c9\u7528\u5408\u9069\u7684\u6587\u9ad4\u8207\u898f\u7bc4\u3002\u6240\u6709\u8a2d\u5b9a\u5747\u70ba\u53ef\u9078\u3002', es: 'Indique a la IA qu\u00e9 tipo de texto est\u00e1 editando para que aplique el tono adecuado. Todos los ajustes son opcionales.', fr: 'Indiquez \u00e0 l\'IA quel type de texte elle \u00e9dite pour appliquer le ton appropri\u00e9. Tous les param\u00e8tres sont optionnels.', de: 'Teilen Sie der KI mit, welche Art von Text bearbeitet wird, damit sie den richtigen Ton anwendet. Alle Einstellungen sind optional.', ko: 'AI\uac00 \uc801\uc808\ud55c \uc5b4\uc870\uc640 \uaddc\uce59\uc73c\ub85c \ud3b8\uc9d1\ud560 \uc218 \uc788\ub3c4\ub85d \uc6d0\uace0\uc758 \uc885\ub958\ub97c \uc54c\ub824\uc8fc\uc138\uc694. \ubaa8\ub4e0 \uc124\uc815\uc740 \uc120\ud0dd \uc0ac\ud56d\uc785\ub2c8\ub2e4.', ar: '\u0623\u062e\u0628\u0631 \u0627\u0644\u0630\u0643\u0627\u0621 \u0627\u0644\u0627\u0635\u0637\u0646\u0627\u0639\u064a \u0628\u0646\u0648\u0639 \u0627\u0644\u0646\u0635 \u0644\u064a\u0637\u0628\u0642 \u0627\u0644\u0623\u0633\u0644\u0648\u0628 \u0627\u0644\u0645\u0646\u0627\u0633\u0628. \u062c\u0645\u064a\u0639 \u0627\u0644\u0625\u0639\u062f\u0627\u062f\u0627\u062a \u0627\u062e\u062a\u064a\u0627\u0631\u064a\u0629.', pt: 'Diga \u00e0 IA que tipo de texto est\u00e1 editando para aplicar o tom adequado. Todas as configura\u00e7\u00f5es s\u00e3o opcionais.', it: 'Indica all\'IA che tipo di testo sta revisionando affinché applichi il tono e le convenzioni giuste. Tutte le impostazioni sono facoltative.' },
-            s3Style: { en: 'Style', ja: '\u30b9\u30bf\u30a4\u30eb', zh: '\u98a8\u683c', es: 'Estilo', fr: 'Style', de: 'Stil', ko: '\uc2a4\ud0c0\uc77c', ar: '\u0627\u0644\u0623\u0633\u0644\u0648\u0628', pt: 'Estilo', it: 'Stile' },
+            s3Style: { en: 'Style & tone', ja: '\u6587\u4f53\u30fb\u30c8\u30fc\u30f3', zh: '\u6587\u4f53\u4e0e\u8bed\u6c14', es: 'Estilo y tono', fr: 'Style et ton', de: 'Stil & Ton', ko: '\ubb38\uccb4\u00b7\ud1a4', ar: '\u0627\u0644\u0623\u0633\u0644\u0648\u0628 \u0648\u0627\u0644\u0646\u0628\u0631\u0629', pt: 'Estilo e tom', it: 'Stile e tono' },
+            s3Plain: { en: 'Plain', ja: '\u5e73\u660e', zh: '\u5e73\u5b9e', es: 'Sencillo', fr: 'Sobre', de: 'Schlicht', ko: '\ud3c9\uc774\ud568', ar: '\u0628\u0633\u064a\u0637', pt: 'Simples', it: 'Semplice' },
+            s3Warm: { en: 'Warm', ja: '\u3084\u308f\u3089\u304b\u3044', zh: '\u6e29\u548c', es: 'C\u00e1lido', fr: 'Chaleureux', de: 'Warm', ko: '\ub530\ub73b\ud568', ar: '\u062f\u0627\u0641\u0626', pt: 'Acolhedor', it: 'Caloroso' },
             s3Tone: { en: 'Tone', ja: '\u30c8\u30fc\u30f3', zh: '\u8a9e\u6c23', es: 'Tono', fr: 'Ton', de: 'Ton', ko: '\ud1a4', ar: '\u0627\u0644\u0646\u0628\u0631\u0629', pt: 'Tom', it: 'Tono' },
             s3Genre: { en: 'Genre', ja: '\u30b8\u30e3\u30f3\u30eb', zh: '\u985e\u578b', es: 'G\u00e9nero', fr: 'Genre', de: 'Genre', ko: '\uc7a5\ub974', ar: '\u0627\u0644\u0646\u0648\u0639', pt: 'G\u00eanero', it: 'Genere' },
             s3Context: { en: 'Context Note (optional)', ja: '\u30b3\u30f3\u30c6\u30ad\u30b9\u30c8\uff08\u4efb\u610f\uff09', zh: '\u80cc\u666f\u8aaa\u660e\uff08\u53ef\u9078\uff09', es: 'Nota de contexto (opcional)', fr: 'Note de contexte (optionnel)', de: 'Kontexthinweis (optional)', ko: '\ucee8\ud14d\uc2a4\ud2b8 \ub178\ud2b8 (\uc120\ud0dd)', ar: '\u0645\u0644\u0627\u062d\u0638\u0629 \u0627\u0644\u0633\u064a\u0627\u0642 (\u0627\u062e\u062a\u064a\u0627\u0631\u064a)', pt: 'Nota de contexto (opcional)', it: 'Nota di contesto (facoltativa)' },
@@ -2099,15 +2116,13 @@
         // Step 3 labels
         const setLabel = (id, icon, obj) => { const el = document.getElementById(id); if (el) el.innerHTML = icon + ' ' + t(obj); };
         setLabel('s3LabelStyle', '<i class="fas fa-pen-fancy me-1"></i>', T.s3Style);
-        setLabel('s3LabelTone', '<i class="fas fa-theater-masks me-1"></i>', T.s3Tone);
         setLabel('s3LabelGenre', '<i class="fas fa-bookmark me-1"></i>', T.s3Genre);
         setLabel('s3LabelContext', '<i class="fas fa-info-circle me-1"></i>', T.s3Context);
         setLabel('s3LabelGlossary', '<i class="fas fa-book me-1"></i>', T.s3Glossary);
         setText('thSource', T.s3ThSource); setText('thTarget', T.s3ThTarget);
         // Step 3 select options
         const setOpts = (selId, optMap) => { const sel = document.getElementById(selId); if (!sel) return; sel.querySelectorAll('option').forEach(o => { if (o.value === '') o.textContent = t(T.s3NotSpecified); else if (optMap[o.value]) o.textContent = t(optMap[o.value]); }); };
-        setOpts('tsStyle', { formal: T.s3Formal, informal: T.s3Informal, literary: T.s3Literary, novel: T.s3Novel, lightnovel: T.s3LightNovel });
-        setOpts('tsTone', { friendly: T.s3Friendly, neutral: T.s3Neutral, dramatic: T.s3Dramatic, romantic: T.s3Romantic, humorous: T.s3Humorous });
+        setOpts('tsStyle', { plain: T.s3Plain, formal: T.s3Formal, casual: T.s3Informal, literary: T.s3Literary, lightnovel: T.s3LightNovel, dramatic: T.s3Dramatic, warm: T.s3Warm, humorous: T.s3Humorous });
         setOpts('tsGenre', { fantasy: T.s3Fantasy, romance: T.s3Romance, scifi: T.s3SciFi, mystery: T.s3Mystery, horror: T.s3Horror, historical: T.s3Historical, isekai: T.s3Isekai, slice: T.s3SliceOfLife });
         // Step 3 placeholders
         setPh('tsContext', T.s3ContextPh); setPh('glossarySrc', T.s3SrcTermPh); setPh('glossaryTgt', T.s3TgtTermPh);
@@ -2203,8 +2218,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- JSZip: lets us crack open .docx (which is a ZIP) to read the text inside -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="../js/config.js?v=202608131746"></script>
-    <script src="../js/i18n.js?v=202608131746"></script>
-    <script src="../js/navbar.js?v=202608131746"></script>
+    <script src="../js/config.js?v=202608152017"></script>
+    <script src="../js/i18n.js?v=202608152017"></script>
+    <script src="../js/navbar.js?v=202608152017"></script>
 </body>
 </html>
