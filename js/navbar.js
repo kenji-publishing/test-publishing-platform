@@ -788,7 +788,10 @@ function handleSessionExpired() {
         it: 'La tua sessione è scaduta. Accedi di nuovo: tornerai a questa pagina.'
     };
     try {
-        localStorage.setItem(SESSION_RETURN_KEY, window.location.href);
+        // ログイン・登録の画面自身を戻り先にすると、ログイン後にまたそこへ戻って堂々巡りになる
+        if (!/\/(login|magic-login|register|register-author|register-editor|reset-password)\.html/.test(window.location.pathname)) {
+            localStorage.setItem(SESSION_RETURN_KEY, window.location.href);
+        }
         localStorage.removeItem('token');
         localStorage.removeItem('user');
     } catch (e) {}
