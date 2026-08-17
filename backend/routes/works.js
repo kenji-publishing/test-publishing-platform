@@ -306,7 +306,7 @@ router.get('/my/:workId', authenticate, async (req, res) => {
 router.get('/', async (req, res) => {
     try {
         const {
-            page = 1, limit = 20, genre, language, authorId, search,
+            page = 1, limit = 20, genre, language, authorId, search, preferLang,
             sort = 'newest', excludeAdult = 'true'
         } = req.query;
         const offset = (page - 1) * limit;
@@ -343,6 +343,9 @@ router.get('/', async (req, res) => {
         }
 
         const whereSql = where.join(' AND ');
+        // 件数の集計はWHERE分のパラメータだけを使う。
+        // このあと並べ替え用のパラメータが params に足されるため、ここで控えておく
+        const whereParams = params.slice();
 
         let query = `
             SELECT w.work_id, w.title, w.description, w.synopsis, w.cover_image_url,
@@ -363,25 +366,35 @@ router.get('/', async (req, res) => {
             WHERE ${whereSql}
         `;
 
+        // 読者の言語の作品を先に出す（絞り込みではなく並び順。他の言語も後ろに残す）。
+        // 10言語のプラットフォームでは、同じ本の各言語版が混ざって並ぶため、
+        // 読めない言語の版が先頭を占めると探しにくい
+        let preferSql = '';
+        const pl = String(preferLang || '').trim().toLowerCase();
+        if (/^[a-z]{2}$/.test(pl)) {
+            params.push(pl);
+            preferSql = `CASE WHEN w.language = $${params.length} OR w.original_language = $${params.length} THEN 0 ELSE 1 END, `;
+        }
+
         // Sorting
         switch (sort) {
             case 'popular':
-                query += ` ORDER BY w.like_count DESC NULLS LAST, w.view_count DESC NULLS LAST`;
+                query += ` ORDER BY ${preferSql}w.like_count DESC NULLS LAST, w.view_count DESC NULLS LAST`;
                 break;
             case 'views':
-                query += ` ORDER BY w.view_count DESC NULLS LAST`;
+                query += ` ORDER BY ${preferSql}w.view_count DESC NULLS LAST`;
                 break;
             case 'oldest':
-                query += ` ORDER BY w.published_at ASC NULLS LAST`;
+                query += ` ORDER BY ${preferSql}w.published_at ASC NULLS LAST`;
                 break;
             default:
-                query += ` ORDER BY w.published_at DESC NULLS LAST`;
+                query += ` ORDER BY ${preferSql}w.published_at DESC NULLS LAST`;
         }
 
-        // 件数は絞り込み後の総数。LIMIT用の値を足す前のparamsを使う
+        // 件数は絞り込み後の総数（並べ替え用のパラメータは含めない）
         const countResult = await db.query(
             `SELECT COUNT(*) FROM works w JOIN users u ON w.author_id = u.user_id WHERE ${whereSql}`,
-            params
+            whereParams
         );
 
         query += ` LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
