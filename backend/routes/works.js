@@ -331,8 +331,14 @@ router.get('/', async (req, res) => {
         // ブラウザ側で絞ると読み込み済みの分しか探せないため、ここで検索する
         const q = String(search || '').trim();
         if (q) {
-            params.push('%' + q.replace(/[%_\\]/g, '\\$&') + '%');
+            const esc = (s) => s.replace(/[%_\\]/g, '\\$&');
+            params.push('%' + esc(q) + '%');
             const p = `$${params.length}`;
+            // 空白を無視した比較も併せて行う。日本語の名前は「木鳥 建欠」と「木鳥建欠」の
+            // どちらでも書かれるため、そのままだと片方で探して0件になる
+            params.push('%' + esc(q.replace(/[\s　]/g, '')) + '%');
+            const pns = `$${params.length}`;
+            const noSpace = (col) => `REPLACE(REPLACE(REPLACE(COALESCE(${col}, ''), ' ', ''), '　', ''), E'\\t', '')`;
             // どれか1つの版が当たれば、同じ作品の全ての版を返す。
             // 題名も著者表記も版ごとに違うため、当たった版だけを返すと
             // 「木鳥建欠」で漢字表記の版しか出ない、といったことになる
@@ -346,6 +352,9 @@ router.get('/', async (req, res) => {
                     OR COALESCE(m.synopsis, '') ILIKE ${p}
                     OR COALESCE(NULLIF(m.author_name, ''), mu.pen_name, NULLIF(TRIM(COALESCE(mu.first_name,'') || ' ' || COALESCE(mu.last_name,'')), '')) ILIKE ${p}
                     OR EXISTS (SELECT 1 FROM unnest(COALESCE(m.tags, ARRAY[]::text[])) tag WHERE tag ILIKE ${p})
+                    -- 空白の有無だけが違う書き方でも見つかるようにする
+                    OR ${noSpace('m.title')} ILIKE ${pns}
+                    OR ${noSpace(`COALESCE(NULLIF(m.author_name, ''), mu.pen_name, TRIM(COALESCE(mu.first_name,'') || ' ' || COALESCE(mu.last_name,'')))`)} ILIKE ${pns}
                 )
             )`);
         }
