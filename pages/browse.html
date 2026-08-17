@@ -2,21 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608152017">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608172021">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608152017">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608172021">
     <title>Browse Works - AuctLect</title>
-    <script src="../js/config.js?v=202608152017"></script>
+    <script src="../js/config.js?v=202608172021"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="../css/variables.css?v=202608152017" rel="stylesheet">
-    <link href="../css/style-new.css?v=202608152017" rel="stylesheet">
-    <link href="../css/components.css?v=202608152017" rel="stylesheet">
-    <link href="../css/navbar.css?v=202608152017" rel="stylesheet">
-    <link href="../css/mobile-fixes.css?v=202608152017" rel="stylesheet">
+    <link href="../css/variables.css?v=202608172021" rel="stylesheet">
+    <link href="../css/style-new.css?v=202608172021" rel="stylesheet">
+    <link href="../css/components.css?v=202608172021" rel="stylesheet">
+    <link href="../css/navbar.css?v=202608172021" rel="stylesheet">
+    <link href="../css/mobile-fixes.css?v=202608172021" rel="stylesheet">
     <!-- Pattern C Navbar Styles -->
     <style>
         /* ========== Mobile Language Selector ========== */
@@ -264,8 +264,8 @@
                         <div class="filter-section">
                             <h3 id="filterSearch" data-i18n="browse.filterSearch">Search</h3>
                             <div class="input-group">
-                                <input type="text" class="form-control" id="searchInput" data-i18n-placeholder="browse.searchPlaceholder" placeholder="Title or author..." onkeyup="if(event.key==='Enter')applyFilters()">
-                                <button class="btn btn-custom" onclick="applyFilters()"><i class="fas fa-search"></i></button>
+                                <input type="text" class="form-control" id="searchInput" data-i18n-placeholder="browse.searchPlaceholder" placeholder="Title or author..." onkeyup="if(event.key==='Enter')applyFilters(true)">
+                                <button class="btn btn-custom" onclick="applyFilters(true)"><i class="fas fa-search"></i></button>
                             </div>
                         </div>
                         <div class="filter-section">
@@ -303,7 +303,7 @@
                                 <option value="price-low" id="optPriceLow" data-i18n="browse.optPriceLow">Price: Low to High</option>
                             </select>
                         </div>
-                        <button class="btn btn-custom w-100 mb-2" onclick="applyFilters()" id="btnApplyFilters" data-i18n="browse.btnApplyFilters">Apply Filters</button>
+                        <button class="btn btn-custom w-100 mb-2" onclick="applyFilters(true)" id="btnApplyFilters" data-i18n="browse.btnApplyFilters">Apply Filters</button>
                         <button class="btn btn-outline-custom w-100" onclick="showRecommended()" id="btnRecommended">
                             <i class="fas fa-magic me-1"></i><span id="btnRecommendedText" data-i18n="browse.btnRecommended">Recommended for You</span>
                         </button>
@@ -329,18 +329,18 @@
     <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/i18n.js?v=202608152017"></script>
-    <script src="../js/navbar.js?v=202608152017"></script>
-    <script src="../js/lang/ja.js?v=202608152017"></script>
-    <script src="../js/lang/en.js?v=202608152017"></script>
-    <script src="../js/lang/zh.js?v=202608152017"></script>
-    <script src="../js/lang/es.js?v=202608152017"></script>
-    <script src="../js/lang/fr.js?v=202608152017"></script>
-    <script src="../js/lang/de.js?v=202608152017"></script>
-    <script src="../js/lang/ko.js?v=202608152017"></script>
-    <script src="../js/lang/ar.js?v=202608152017"></script>
-    <script src="../js/lang/pt.js?v=202608152017"></script>
-    <script src="../js/lang/it.js?v=202608152017"></script>
+    <script src="../js/i18n.js?v=202608172021"></script>
+    <script src="../js/navbar.js?v=202608172021"></script>
+    <script src="../js/lang/ja.js?v=202608172021"></script>
+    <script src="../js/lang/en.js?v=202608172021"></script>
+    <script src="../js/lang/zh.js?v=202608172021"></script>
+    <script src="../js/lang/es.js?v=202608172021"></script>
+    <script src="../js/lang/fr.js?v=202608172021"></script>
+    <script src="../js/lang/de.js?v=202608172021"></script>
+    <script src="../js/lang/ko.js?v=202608172021"></script>
+    <script src="../js/lang/ar.js?v=202608172021"></script>
+    <script src="../js/lang/pt.js?v=202608172021"></script>
+    <script src="../js/lang/it.js?v=202608172021"></script>
     
     <!-- Pattern C Navbar Script -->
     <script>
@@ -411,9 +411,22 @@
         // Sample works data
         let sampleWorks = [];
 
+        // 検索・絞り込みはサーバーに任せる。ブラウザ側で絞ると、先に読み込んだ分しか
+        // 探せず、作品が増えたときに「あるのに出てこない」状態になる
         async function loadWorksFromApi() {
+            const params = new URLSearchParams({ limit: '100' });
+            const q = (document.getElementById('searchInput').value || '').trim();
+            const category = document.getElementById('categoryFilter').value;
+            const language = document.getElementById('languageFilter').value;
+            const sort = document.getElementById('sortFilter').value;
+            if (q) params.set('search', q);
+            if (category) params.set('genre', category);
+            if (language) params.set('language', language);
+            // 価格順はサーバーに無いので、その時だけ既定の並びで取得してから並べ替える
+            if (sort && sort !== 'price-low') params.set('sort', sort);
+
             try {
-                const resp = await fetch((window.API_ORIGIN || '') + '/api/works?limit=100');
+                const resp = await fetch((window.API_ORIGIN || '') + '/api/works?' + params.toString());
                 const data = await resp.json();
                 if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
                 sampleWorks = (data.works || []).map(function(w) {
@@ -429,21 +442,20 @@
                         cover: w.cover_image || w.cover_image_url || null,
                         aiText: w.ai_text_usage || 'none',
                         aiCover: w.ai_cover_usage || 'none',
-                        tags: [],
-                        description: w.description || '',
-                        reviews: ''
+                        tags: Array.isArray(w.tags) ? w.tags : [],
+                        description: w.description || ''
                     };
                 });
             } catch (err) {
                 console.error('Failed to load works:', err);
             }
-            applyFilters();
+            renderCurrent();
         }
 function updateAllText() {
             document.title = getL(uiText.pageTitle) + ' - AuctLect';
             if (typeof i18n !== 'undefined') i18n.applyToDOM();
             // Re-render works to update "by" and "Free" text
-            applyFilters();
+            renderCurrent();
         }
         function renderWorks(works) {
             const grid = document.getElementById('workGrid');
@@ -484,32 +496,24 @@ function updateAllText() {
             `).join('');
         }
 
-        function applyFilters() {
+        // 絞り込み条件が変わったらサーバーに問い合わせ直す。
+        // 連続入力でリクエストが飛び続けないよう、少し待ってからまとめて送る
+        let filterTimer = null;
+        function applyFilters(immediate) {
             document.getElementById('recommendedBadge').style.display = 'none';
-            const searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
-            const category = document.getElementById('categoryFilter').value;
-            const language = document.getElementById('languageFilter').value;
-            const sort = document.getElementById('sortFilter').value;
+            clearTimeout(filterTimer);
+            if (immediate) loadWorksFromApi();
+            else filterTimer = setTimeout(loadWorksFromApi, 300);
+        }
 
-            let filtered = [...sampleWorks];
-
-            if (searchQuery) filtered = filtered.filter(w =>
-                w.title.toLowerCase().includes(searchQuery) ||
-                w.author.toLowerCase().includes(searchQuery) ||
-                (w.description && w.description.toLowerCase().includes(searchQuery)) ||
-                (w.reviews && w.reviews.toLowerCase().includes(searchQuery))
-            );
-            if (category) filtered = filtered.filter(w => w.category === category);
-            if (language) filtered = filtered.filter(w => w.language === language);
-
-            switch(sort) {
-                case 'newest': filtered.reverse(); break;
-                case 'rating': filtered.sort((a, b) => b.rating - a.rating); break;
-                case 'price-low': filtered.sort((a, b) => a.price - b.price); break;
-                default: filtered.sort((a, b) => b.rating - a.rating);
+        // 取得済みの一覧を描き直すだけ（言語切替など、条件が変わらない場合に使う）
+        function renderCurrent() {
+            let list = [...sampleWorks];
+            // 価格順だけはサーバーに無いのでここで並べ替える
+            if (document.getElementById('sortFilter').value === 'price-low') {
+                list.sort((a, b) => a.price - b.price);
             }
-
-            renderWorks(filtered);
+            renderWorks(list);
         }
 
         function showRecommended() {
@@ -579,7 +583,7 @@ function updateAllText() {
         if (typeof i18n !== 'undefined') {
             i18n.onLanguageChange(function() {
                 i18n.applyToDOM();
-                applyFilters();
+                renderCurrent();
             });
         }
     </script>

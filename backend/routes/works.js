@@ -305,15 +305,48 @@ router.get('/my/:workId', authenticate, async (req, res) => {
  */
 router.get('/', async (req, res) => {
     try {
-        const { 
-            page = 1, limit = 20, genre, language, authorId,
+        const {
+            page = 1, limit = 20, genre, language, authorId, search,
             sort = 'newest', excludeAdult = 'true'
         } = req.query;
         const offset = (page - 1) * limit;
 
+        // 著者名の式は検索でも並べ替えでも使うので1つにまとめる
+        const AUTHOR_NAME_SQL = `COALESCE(NULLIF(w.author_name, ''), u.pen_name, NULLIF(TRIM(COALESCE(u.first_name,'') || ' ' || COALESCE(u.last_name,'')), ''))`;
+
+        // 絞り込み条件は一覧と件数で同じものを使う。
+        // 別々に書くと「該当2件」と言いながら5件出る、といったずれが起きる
+        const where = [`w.status = 'published'`];
+        const params = [];
+
+        if (genre) { params.push(genre); where.push(`w.genre = $${params.length}`); }
+        if (language) {
+            params.push(language);
+            where.push(`(w.original_language = $${params.length} OR w.language = $${params.length})`);
+        }
+        if (authorId) { params.push(authorId); where.push(`w.author_id = $${params.length}`); }
+        if (excludeAdult === 'true') where.push(`(w.is_adult = FALSE OR w.is_adult IS NULL)`);
+
+        // 検索: 題名・著者名・あらすじ・タグを大文字小文字を区別せず部分一致。
+        // ブラウザ側で絞ると読み込み済みの分しか探せないため、ここで検索する
+        const q = String(search || '').trim();
+        if (q) {
+            params.push('%' + q.replace(/[%_\\]/g, '\\$&') + '%');
+            const p = `$${params.length}`;
+            where.push(`(
+                w.title ILIKE ${p}
+                OR COALESCE(w.description, '') ILIKE ${p}
+                OR COALESCE(w.synopsis, '') ILIKE ${p}
+                OR ${AUTHOR_NAME_SQL} ILIKE ${p}
+                OR EXISTS (SELECT 1 FROM unnest(COALESCE(w.tags, ARRAY[]::text[])) tag WHERE tag ILIKE ${p})
+            )`);
+        }
+
+        const whereSql = where.join(' AND ');
+
         let query = `
             SELECT w.work_id, w.title, w.description, w.synopsis, w.cover_image_url,
-                   w.cover_image, w.genre, w.original_language, w.language,
+                   w.cover_image, w.genre, w.tags, w.original_language, w.language,
                    w.content_type, w.price, w.currency, w.is_free,
                    w.view_count, w.like_count, w.comment_count,
                    w.rating_average, w.rating_count, w.published_at,
@@ -324,36 +357,11 @@ router.get('/', async (req, res) => {
                    -- ペンネームが無いときの本名への切り替えはここで済ませる。
                    -- 本名をそのまま返して画面側で選ばせると、ペンネームを設定した
                    -- 著者の本名まで全員のブラウザに配ることになる
-                   COALESCE(NULLIF(w.author_name, ''), u.pen_name, NULLIF(TRIM(COALESCE(u.first_name,'') || ' ' || COALESCE(u.last_name,'')), '')) AS author_name
+                   ${AUTHOR_NAME_SQL} AS author_name
             FROM works w
             JOIN users u ON w.author_id = u.user_id
-            WHERE w.status = 'published'
+            WHERE ${whereSql}
         `;
-
-        const params = [];
-        let paramCount = 1;
-
-        if (genre) {
-            query += ` AND w.genre = $${paramCount}`;
-            params.push(genre);
-            paramCount++;
-        }
-
-        if (language) {
-            query += ` AND (w.original_language = $${paramCount} OR w.language = $${paramCount})`;
-            params.push(language);
-            paramCount++;
-        }
-
-        if (authorId) {
-            query += ` AND w.author_id = $${paramCount}`;
-            params.push(authorId);
-            paramCount++;
-        }
-
-        if (excludeAdult === 'true') {
-            query += ` AND (w.is_adult = FALSE OR w.is_adult IS NULL)`;
-        }
 
         // Sorting
         switch (sort) {
@@ -370,17 +378,14 @@ router.get('/', async (req, res) => {
                 query += ` ORDER BY w.published_at DESC NULLS LAST`;
         }
 
-        query += ` LIMIT $${paramCount} OFFSET $${paramCount + 1}`;
-        params.push(limit, offset);
+        // 件数は絞り込み後の総数。LIMIT用の値を足す前のparamsを使う
+        const countResult = await db.query(
+            `SELECT COUNT(*) FROM works w JOIN users u ON w.author_id = u.user_id WHERE ${whereSql}`,
+            params
+        );
 
-        const result = await db.query(query, params);
-
-        // Get total count
-        let countQuery = `SELECT COUNT(*) FROM works WHERE status = 'published'`;
-        if (excludeAdult === 'true') {
-            countQuery += ` AND (is_adult = FALSE OR is_adult IS NULL)`;
-        }
-        const countResult = await db.query(countQuery);
+        query += ` LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+        const result = await db.query(query, params.concat([limit, offset]));
 
         res.json({
             success: true,
