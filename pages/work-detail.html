@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608172058">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608172113">
     <title>Work Detail - AuctLect</title>
-    <script src="../js/config.js?v=202608172058"></script>
+    <script src="../js/config.js?v=202608172113"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="../css/variables.css?v=202608172058" rel="stylesheet">
-    <link href="../css/style-new.css?v=202608172058" rel="stylesheet">
-    <link href="../css/components.css?v=202608172058" rel="stylesheet">
-    <link href="../css/mobile-fixes.css?v=202608172058" rel="stylesheet">
-    <link href="../css/navbar.css?v=202608172058" rel="stylesheet">
+    <link href="../css/variables.css?v=202608172113" rel="stylesheet">
+    <link href="../css/style-new.css?v=202608172113" rel="stylesheet">
+    <link href="../css/components.css?v=202608172113" rel="stylesheet">
+    <link href="../css/mobile-fixes.css?v=202608172113" rel="stylesheet">
+    <link href="../css/navbar.css?v=202608172113" rel="stylesheet">
 <!-- Work Detail Page Styles -->
     <style>
         .work-detail-container { padding: var(--spacing-xl) 0; }
@@ -459,6 +459,12 @@
             <div class="detail-section">
                 <h2><i class="fas fa-align-left"></i> <span id="synopsisTitle" data-i18n="workDetail.synopsis">Synopsis</span></h2>
                 <div class="synopsis-text" id="synopsisContent" dir="auto"></div>
+
+                <!-- 同じ作品の他の言語版。同一言語に複数の訳がある場合もここに並ぶ -->
+                <div id="versionsSection" style="display:none; margin-top:2rem;">
+                    <h2><i class="fas fa-language"></i> <span id="versionsTitle">Other languages</span></h2>
+                    <div id="versionsList" style="display:flex; flex-direction:column; gap:0.5rem; margin-top:0.75rem;"></div>
+                </div>
             </div>
 
             <!-- Work Details / Metadata Section -->
@@ -617,18 +623,18 @@
     <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/lang/ja.js?v=202608172058"></script>
-    <script src="../js/lang/en.js?v=202608172058"></script>
-    <script src="../js/lang/zh.js?v=202608172058"></script>
-    <script src="../js/lang/es.js?v=202608172058"></script>
-    <script src="../js/lang/fr.js?v=202608172058"></script>
-    <script src="../js/lang/de.js?v=202608172058"></script>
-    <script src="../js/lang/ko.js?v=202608172058"></script>
-    <script src="../js/lang/ar.js?v=202608172058"></script>
-    <script src="../js/lang/pt.js?v=202608172058"></script>
-    <script src="../js/lang/it.js?v=202608172058"></script>
-    <script src="../js/i18n.js?v=202608172058"></script>
-    <script src="../js/navbar.js?v=202608172058"></script>
+    <script src="../js/lang/ja.js?v=202608172113"></script>
+    <script src="../js/lang/en.js?v=202608172113"></script>
+    <script src="../js/lang/zh.js?v=202608172113"></script>
+    <script src="../js/lang/es.js?v=202608172113"></script>
+    <script src="../js/lang/fr.js?v=202608172113"></script>
+    <script src="../js/lang/de.js?v=202608172113"></script>
+    <script src="../js/lang/ko.js?v=202608172113"></script>
+    <script src="../js/lang/ar.js?v=202608172113"></script>
+    <script src="../js/lang/pt.js?v=202608172113"></script>
+    <script src="../js/lang/it.js?v=202608172113"></script>
+    <script src="../js/i18n.js?v=202608172113"></script>
+    <script src="../js/navbar.js?v=202608172113"></script>
 
 <!-- Work Detail Page Script -->
     <script>
@@ -736,8 +742,77 @@ function escapeHtml(text) {
 
         function getLanguageName(code) {
             const names = { en: 'English', ja: '日本語', zh: '中文', es: 'Español', fr: 'Français', de: 'Deutsch', ko: '한국어', ar: 'العربية', pt: 'Português', it: 'Italiano' };
-            return names[code] || code;
+            return names[code] || String(code || '').toUpperCase();
         }
+
+        // 同じ作品の他の版を並べる。同一言語に複数の訳がある場合に読者が選べるよう、
+        // AI訳か人手か・訳者名まで出す
+        const versionsText = {
+            title: { en: 'Other editions of this book', ja: 'この作品の他の版', zh: '本作的其他版本', es: 'Otras ediciones de este libro', fr: 'Autres éditions de ce livre', de: 'Andere Ausgaben dieses Buches', ko: '이 작품의 다른 판', ar: 'طبعات أخرى من هذا الكتاب', pt: 'Outras edições deste livro', it: 'Altre edizioni di questo libro' },
+            reading: { en: 'You are reading this one', ja: 'いま見ている版', zh: '当前查看的版本', es: 'Estás viendo esta', fr: 'Vous consultez celle-ci', de: 'Diese Ausgabe sehen Sie gerade', ko: '지금 보고 있는 판', ar: 'هذه التي تطالعها', pt: 'Você está vendo esta', it: 'Stai vedendo questa' },
+            aiTranslated: { en: 'AI translation', ja: 'AI翻訳', zh: 'AI翻译', es: 'Traducción por IA', fr: 'Traduction par IA', de: 'KI-Übersetzung', ko: 'AI 번역', ar: 'ترجمة بالذكاء الاصطناعي', pt: 'Tradução por IA', it: 'Traduzione IA' },
+            aiAssisted: { en: 'AI-assisted, human-checked', ja: 'AI翻訳＋人が確認', zh: 'AI翻译＋人工校对', es: 'IA con revisión humana', fr: 'IA relue par un humain', de: 'KI, von Menschen geprüft', ko: 'AI 번역＋사람 확인', ar: 'ذكاء اصطناعي بمراجعة بشرية', pt: 'IA com revisão humana', it: 'IA con revisione umana' },
+            human: { en: 'Translated by', ja: '翻訳', zh: '译者', es: 'Traducido por', fr: 'Traduit par', de: 'Übersetzt von', ko: '번역', ar: 'ترجمة', pt: 'Tradução de', it: 'Tradotto da' },
+            free: { en: 'Free', ja: '無料', zh: '免费', es: 'Gratis', fr: 'Gratuit', de: 'Kostenlos', ko: '무료', ar: 'مجاني', pt: 'Grátis', it: 'Gratis' }
+        };
+
+        function renderVersions(versions) {
+            const section = document.getElementById('versionsSection');
+            const list = document.getElementById('versionsList');
+            if (!section || !list) return;
+            if (!versions.length) { section.style.display = 'none'; return; }
+
+            document.getElementById('versionsTitle').textContent = getL(versionsText.title);
+            list.innerHTML = '';
+            const currentId = new URLSearchParams(window.location.search).get('id');
+
+            versions.forEach(function (v) {
+                const isCurrent = String(v.work_id) === String(currentId);
+                const row = document.createElement(isCurrent ? 'div' : 'a');
+                if (!isCurrent) row.href = 'work-detail.html?id=' + encodeURIComponent(v.work_id);
+                row.style.cssText = 'display:flex; gap:0.75rem; align-items:center; padding:0.7rem 0.9rem;'
+                    + ' border:1px solid var(--color-border, #e5ddd3); border-radius:8px; text-decoration:none;'
+                    + ' color:inherit;' + (isCurrent ? ' background:var(--color-bg-hover, #f5f0eb);' : '');
+
+                const lang = document.createElement('strong');
+                lang.style.cssText = 'min-width:6.5rem;';
+                lang.textContent = getLanguageName(v.language || v.original_language);
+
+                const mid = document.createElement('div');
+                mid.style.cssText = 'flex:1; min-width:0;';
+                const t = document.createElement('div');
+                t.dir = 'auto';
+                t.textContent = v.title;
+                const sub = document.createElement('div');
+                sub.className = 'text-muted';
+                sub.style.fontSize = '0.85rem';
+                // 誰の訳か・AIかどうかを1行で示す
+                var how = '';
+                if (v.translator_name) how = getL(versionsText.human) + ': ' + v.translator_name;
+                else if (v.ai_translation_usage === 'full_ai') how = getL(versionsText.aiTranslated);
+                else if (v.ai_translation_usage === 'assisted') how = getL(versionsText.aiAssisted);
+                sub.textContent = [v.author_name, how].filter(Boolean).join(' ・ ');
+                mid.appendChild(t);
+                mid.appendChild(sub);
+
+                const right = document.createElement('div');
+                right.style.cssText = 'text-align:right; white-space:nowrap;';
+                right.textContent = isCurrent
+                    ? getL(versionsText.reading)
+                    : (v.is_free || Number(v.price) === 0
+                        ? getL(versionsText.free)
+                        : (typeof formatWorkPrice === 'function'
+                            ? formatWorkPrice(v.price, v.currency)
+                            : (v.currency || '') + ' ' + v.price));
+
+                row.appendChild(lang);
+                row.appendChild(mid);
+                row.appendChild(right);
+                list.appendChild(row);
+            });
+            section.style.display = 'block';
+        }
+
 
         function getGenreLabel(genre) {
             const genreLabels = {
@@ -789,7 +864,8 @@ function escapeHtml(text) {
                         cover: w.cover_image || w.cover_image_url || null,
                         authorId: w.author_id || null,
                         ageRating: w.age_rating || 'all',
-                        contentWarnings: Array.isArray(w.content_warnings) ? w.content_warnings : []
+                        contentWarnings: Array.isArray(w.content_warnings) ? w.content_warnings : [],
+                        versions: Array.isArray(w.versions) ? w.versions : []
                     };
                 } catch (err) {
                     console.error('Failed to load work:', err);
@@ -914,6 +990,8 @@ function escapeHtml(text) {
             // あらすじ
             document.getElementById('synopsisTitle').textContent = getL(uiText.synopsis);
             document.getElementById('synopsisContent').textContent = work.description;
+
+            renderVersions(work.versions || []);
 
             // 詳細情報
             document.getElementById('detailsTitle').textContent = getL(uiText.details);

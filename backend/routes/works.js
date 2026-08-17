@@ -333,12 +333,20 @@ router.get('/', async (req, res) => {
         if (q) {
             params.push('%' + q.replace(/[%_\\]/g, '\\$&') + '%');
             const p = `$${params.length}`;
-            where.push(`(
-                w.title ILIKE ${p}
-                OR COALESCE(w.description, '') ILIKE ${p}
-                OR COALESCE(w.synopsis, '') ILIKE ${p}
-                OR ${AUTHOR_NAME_SQL} ILIKE ${p}
-                OR EXISTS (SELECT 1 FROM unnest(COALESCE(w.tags, ARRAY[]::text[])) tag WHERE tag ILIKE ${p})
+            // どれか1つの版が当たれば、同じ作品の全ての版を返す。
+            // 題名も著者表記も版ごとに違うため、当たった版だけを返すと
+            // 「木鳥建欠」で漢字表記の版しか出ない、といったことになる
+            where.push(`COALESCE(w.original_work_id, w.work_id) IN (
+                SELECT COALESCE(m.original_work_id, m.work_id)
+                FROM works m
+                JOIN users mu ON m.author_id = mu.user_id
+                WHERE m.status = 'published' AND (
+                    m.title ILIKE ${p}
+                    OR COALESCE(m.description, '') ILIKE ${p}
+                    OR COALESCE(m.synopsis, '') ILIKE ${p}
+                    OR COALESCE(NULLIF(m.author_name, ''), mu.pen_name, NULLIF(TRIM(COALESCE(mu.first_name,'') || ' ' || COALESCE(mu.last_name,'')), '')) ILIKE ${p}
+                    OR EXISTS (SELECT 1 FROM unnest(COALESCE(m.tags, ARRAY[]::text[])) tag WHERE tag ILIKE ${p})
+                )
             )`);
         }
 
@@ -757,11 +765,32 @@ router.get('/:workId', async (req, res) => {
             [req.params.workId]
         );
 
-        res.json({ 
+        // 同じ作品の他の言語版（自分自身も含む）。同一言語に複数の訳がある場合も並ぶので、
+        // AI訳か人手か・訳者は誰かを添えて読者が選べるようにする
+        const versions = await db.query(
+            `SELECT v.work_id, v.title, v.language, v.original_language,
+                    v.price, v.currency, v.is_free, v.rating_average, v.rating_count,
+                    v.ai_translation_usage, v.published_at,
+                    COALESCE(NULLIF(v.author_name, ''), vu.pen_name, NULLIF(TRIM(COALESCE(vu.first_name,'') || ' ' || COALESCE(vu.last_name,'')), '')) AS author_name,
+                    (SELECT COALESCE(NULLIF(tu.pen_name, ''), NULLIF(TRIM(COALESCE(tu.first_name,'') || ' ' || COALESCE(tu.last_name,'')), ''))
+                       FROM work_collaborators wc JOIN users tu ON wc.user_id = tu.user_id
+                      WHERE wc.work_id = v.work_id AND wc.role = 'translator' AND wc.status <> 'removed'
+                      LIMIT 1) AS translator_name
+             FROM works v
+             JOIN users vu ON v.author_id = vu.user_id
+             WHERE v.status = 'published'
+               AND COALESCE(v.original_work_id, v.work_id) = COALESCE($1::uuid, $2::uuid)
+             ORDER BY (v.work_id = $2::uuid) DESC, v.language, v.published_at`,
+            [work.original_work_id || null, req.params.workId]
+        );
+
+        res.json({
             success: true,
             work: {
                 ...work,
                 userLiked,
+                // 1件だけ（＝他の版が無い）ときは出す意味がないので空にする
+                versions: versions.rows.length > 1 ? versions.rows : [],
                 content: undefined // Don't send full content
             }
         });
@@ -1090,6 +1119,35 @@ router.get('/:workId/pages/:pageNo/image', authenticate, async (req, res) => {
  * POST /api/works
  * Create new work (authenticated)
  */
+/**
+ * 「この作品は○○の翻訳版」の指定を検証して、実際に保存する値を返す。
+ *
+ * - 未指定・空 → null（原作あつかい）
+ * - 自分の作品でなければ 400（他人の作品の版として並んでしまうのを防ぐ）
+ * - 自分自身は指せない
+ * - 指定先がすでに翻訳版なら、その大元に付け替える（版の集まりが枝分かれしないように）
+ */
+async function resolveOriginalWork(originalWorkId, userId, selfWorkId) {
+    const id = String(originalWorkId || '').trim();
+    if (!id) return null;
+    if (selfWorkId && id === String(selfWorkId)) {
+        const err = new Error('A work cannot be a translation of itself');
+        err.status = 400;
+        throw err;
+    }
+    const found = await db.query(
+        'SELECT work_id, author_id, original_work_id FROM works WHERE work_id = $1',
+        [id]
+    );
+    const row = found.rows[0];
+    if (!row || String(row.author_id) !== String(userId)) {
+        const err = new Error('The original work was not found among your works');
+        err.status = 400;
+        throw err;
+    }
+    return row.original_work_id ? String(row.original_work_id) : String(row.work_id);
+}
+
 router.post('/', authenticate, async (req, res) => {
     try {
         const {
@@ -1116,7 +1174,8 @@ router.post('/', authenticate, async (req, res) => {
             aiCoverUsage,
             aiTranslationUsage,
             ageRating,
-            contentWarnings
+            contentWarnings,
+            originalWorkId
         } = req.body;
 
         // Whitelist currency and publish status
@@ -1138,6 +1197,10 @@ router.post('/', authenticate, async (req, res) => {
         const warnings = normalizeWarnings(contentWarnings);
         // 作品ごとの著者表示名。空ならNULL＝アカウントのpen_nameを使う
         const workAuthorName = (authorName || '').trim().slice(0, 150) || null;
+
+        // 翻訳元の指定。自分の作品だけを指せる（他人の作品にぶら下げられないように）。
+        // 翻訳元がさらに翻訳版だった場合は、その大元に付け替えて版の集まりを1つに保つ
+        const originalId = await resolveOriginalWork(originalWorkId, req.user.userId, null);
 
         // Calculate word count
         const textContent = content || '';
@@ -1168,8 +1231,8 @@ router.post('/', authenticate, async (req, res) => {
                     is_ai_generated, ai_tools_used, preview_percent,
                     word_count, page_count, currency, status,
                     ai_text_usage, ai_cover_usage, ai_translation_usage,
-                    age_rating, content_warnings, author_name
-                 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27)
+                    age_rating, content_warnings, author_name, original_work_id
+                 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28)
                  RETURNING *`,
                 [
                     req.user.userId,
@@ -1198,7 +1261,8 @@ router.post('/', authenticate, async (req, res) => {
                     aiTranslation,
                     rating,
                     JSON.stringify(warnings),
-                    workAuthorName
+                    workAuthorName,
+                    originalId
                 ]
             );
             work = result.rows[0];
@@ -1219,7 +1283,7 @@ router.post('/', authenticate, async (req, res) => {
         });
     } catch (error) {
         console.error('Create work error:', error);
-        res.status(500).json({ error: error.message });
+        res.status(error.status || 500).json({ error: error.message });
     }
 });
 
@@ -1248,7 +1312,7 @@ router.put('/:workId', authenticate, async (req, res) => {
             price, status, isFree, coverImage, isAdult,
             isAiGenerated, aiToolsUsed, previewPercent, currency,
             aiTextUsage, aiCoverUsage, aiTranslationUsage,
-            ageRating, contentWarnings
+            ageRating, contentWarnings, originalWorkId
         } = req.body;
 
         const SUPPORTED_CURRENCIES = ['USD', 'JPY', 'EUR', 'GBP', 'KRW', 'CNY', 'BRL', 'SAR'];
@@ -1266,6 +1330,10 @@ router.put('/:workId', authenticate, async (req, res) => {
         const workAuthorName = authorName === undefined
             ? null
             : String(authorName || '').trim().slice(0, 150);
+        // 翻訳元: 送られてこなければ既存のまま。空文字なら紐づけを外す
+        const originalId = originalWorkId === undefined
+            ? undefined
+            : await resolveOriginalWork(originalWorkId, req.user.userId, req.params.workId);
 
         // Calculate word count if content changed
         let wordCount = null;
@@ -1299,6 +1367,9 @@ router.put('/:workId', authenticate, async (req, res) => {
                  age_rating = COALESCE($22, age_rating),
                  content_warnings = COALESCE($23::jsonb, content_warnings),
                  author_name = COALESCE($24, author_name),
+                 -- 紐づけは「外す」操作もあるためCOALESCEでは扱えない。
+                 -- $25 が真のときだけ $26 の値（NULL可）で置き換える
+                 original_work_id = CASE WHEN $25::boolean THEN $26::uuid ELSE original_work_id END,
                  is_adult = CASE WHEN $22 IS NULL THEN COALESCE($11, is_adult) ELSE ($22 = '18') END,
                  updated_at = CURRENT_TIMESTAMP,
                  published_at = CASE
@@ -1312,7 +1383,8 @@ router.put('/:workId', authenticate, async (req, res) => {
                 price, status, isFree, coverImage, isAdult,
                 isAiGenerated, aiToolsUsed, previewPercent,
                 wordCount, pageCount, req.params.workId, workCurrency,
-                aiText, aiCover, aiTranslation, rating, warnings, workAuthorName
+                aiText, aiCover, aiTranslation, rating, warnings, workAuthorName,
+                originalId !== undefined, originalId === undefined ? null : originalId
             ]
         );
 
@@ -1348,7 +1420,8 @@ router.put('/:workId', authenticate, async (req, res) => {
         });
     } catch (error) {
         console.error('Update work error:', error);
-        res.status(500).json({ error: error.message });
+        // 翻訳元の指定が不正な場合など、原因が利用者側にあるものは400で返す
+        res.status(error.status || 500).json({ error: error.message });
     }
 });
 
