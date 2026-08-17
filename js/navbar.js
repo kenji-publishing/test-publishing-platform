@@ -765,6 +765,63 @@ function loadUserInfo() {
     }
 }
 
+// ========== ログインの有効期限切れ ==========
+// トークンの有効期限は7日。切れたあとの画面は「作品の読み込みに失敗しました:
+// Token expired」のように理由の分からない表示になり、利用者は何をすればよいか
+// 分からなかった。
+//
+// fetchを1か所で包んでいるのは、24ページが個別に401を扱う必要があり、
+// 書き写すと必ず抜けが出るため（実際、扱っていたのは7ページだけだった）。
+var SESSION_RETURN_KEY = 'returnAfterLogin';
+
+function handleSessionExpired() {
+    var msg = {
+        en: 'Your session has expired. Please log in again — you will come back to this page.',
+        ja: 'ログインの有効期限が切れました。もう一度ログインしてください。ログイン後、このページに戻ります。',
+        zh: '登录已过期。请重新登录，登录后将返回本页。',
+        es: 'Tu sesión ha expirado. Vuelve a iniciar sesión; regresarás a esta página.',
+        fr: 'Votre session a expiré. Reconnectez-vous : vous reviendrez sur cette page.',
+        de: 'Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an — Sie kehren zu dieser Seite zurück.',
+        ko: '로그인이 만료되었습니다. 다시 로그인해 주세요. 로그인 후 이 페이지로 돌아옵니다.',
+        ar: 'انتهت صلاحية جلستك. يرجى تسجيل الدخول مرة أخرى — ستعود إلى هذه الصفحة.',
+        pt: 'Sua sessão expirou. Faça login novamente — você voltará a esta página.',
+        it: 'La tua sessione è scaduta. Accedi di nuovo: tornerai a questa pagina.'
+    };
+    try {
+        localStorage.setItem(SESSION_RETURN_KEY, window.location.href);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+    } catch (e) {}
+    alert(getL(msg));
+    var prefix = detectPathPrefix();
+    window.location.href = (prefix === 'pages/' ? 'pages/' : prefix) + 'login.html';
+}
+
+(function wrapFetchForSessionExpiry(global) {
+    if (!global.fetch || global.__sessionExpiryWrapped) return;
+    global.__sessionExpiryWrapped = true;
+
+    // ログイン・登録などは401が「合言葉が違う」の意味なので対象外
+    var AUTH_ENDPOINTS = /\/api\/auth\//;
+    var original = global.fetch.bind(global);
+    var handled = false;
+
+    global.fetch = function (input, init) {
+        return original(input, init).then(function (resp) {
+            try {
+                if (handled || resp.status !== 401) return resp;
+                var url = typeof input === 'string' ? input : ((input && input.url) || '');
+                if (url.indexOf('/api/') === -1 || AUTH_ENDPOINTS.test(url)) return resp;
+                // ログイン済みのつもりだった人にだけ知らせる
+                if (!localStorage.getItem('token')) return resp;
+                handled = true;
+                handleSessionExpired();
+            } catch (e) { /* 通知に失敗しても本来の応答は返す */ }
+            return resp;
+        });
+    };
+})(window);
+
 // ========== 言語を選ぶ欄の文字方向 ==========
 // 「原作の言語」「翻訳先」などの選択欄は、選ばれている言語そのものの文字で表示される
 // （アラビア語なら العربية）。アラビア語を選んだときはその読み方向に合わせて右寄せにする。
