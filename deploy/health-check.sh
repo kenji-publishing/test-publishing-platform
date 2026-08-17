@@ -71,6 +71,9 @@ EU_COUNTRIES=$($PSQL "SELECT coalesce(string_agg(DISTINCT buyer_country, ','), '
     AND buyer_country IN ($EU_LIST);" 2>/dev/null || echo '-')
 UNKNOWN_N=$($PSQL "SELECT count(*) FROM transactions
   WHERE status='completed' AND transaction_type='purchase' AND buyer_country IS NULL;" 2>/dev/null || echo 0)
+
+# 公開中の作品数。トップページの見せ方を変える時期の判断に使う
+WORKS_N=$($PSQL "SELECT count(*) FROM works WHERE status='published';" 2>/dev/null || echo 0)
 unset PGPASSWORD
 
 LATEST=$(ls -t "$BACKUP_DIR"/*.dump 2>/dev/null | head -1)
@@ -91,6 +94,15 @@ add() { WARN="${WARN}${1}"$'\n'; }
 [ "${TX30:-0}" -ge 300 ] && add "・直近30日の取引が ${TX30} 件（1日あたり10件超）。1日1回のバックアップでは、障害時に失う取引が無視できない量になります。管理型DB（5分刻みの巻き戻し）への移行時期です。"
 [ "$AGE_H" -ge 72 ] && add "・最新のバックアップが ${AGE_H} 時間前のままです。日次バックアップが止まっている可能性があります。"
 
+# --- 作品が増えたときに、見せ方を変える時期の目安 ---
+# トップページは「新着12件」だけを出している。作品が少ないうちはそれで全体像が見えるが、
+# 増えると新しく出しただけの作品が上位を占め、良作が二度と浮かばなくなる。
+# 50件は「新着12件が全体の1/4を切る」あたり。ここから並べ方の設計が意味を持ち始める。
+[ "${WORKS_N:-0}" -ge 50 ] && add "・公開中の作品が ${WORKS_N} 件になりました。トップページは今も『新着12件』だけです。『新着 / 人気 / 編集部から』の3つに分ける時期です（人気は累計ではなく、反応を経過日数で割った値で並べること。累計だと古い作品が居座ります）。"
+# 作品一覧は1回に100件ずつ読み込む。それを超えると101件目以降が一覧に出てこない
+# （検索はサーバー側なので全件から探せるが、絞り込まずに眺める人には見えない）。
+[ "${WORKS_N:-0}" -ge 100 ] && add "・公開中の作品が ${WORKS_N} 件になりました。作品一覧は一度に100件までしか読み込まないため、それ以降は『もっと見る』などの続き読み込みが必要です。"
+
 # --- 専門家に相談する時期の目安 ---
 # 金額のしきい値は「相談料を売上で賄えるようになったか」で決めている。
 # 早すぎると払えず、遅すぎると手遅れになる。
@@ -105,6 +117,7 @@ add() { WARN="${WARN}${1}"$'\n'; }
   echo "メモリ空き: ${MEM_AVAIL}MB"
   echo "作品ファイル: ${UPLOADS_H}"
   echo "データベース: ${DB_MB}MB"
+  echo "公開中の作品: ${WORKS_N}件"
   echo "直近30日の取引: ${TX30}件"
   echo "累計売上: 約£${REV_GBP}（概算・返金差引後）"
   echo "EU圏への販売: ${EU_N}件${EU_COUNTRIES:+ (${EU_COUNTRIES})}"
