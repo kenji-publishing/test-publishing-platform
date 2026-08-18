@@ -80,6 +80,16 @@ const num = v => Number(v || 0).toFixed(2);
     if (orphans.length > 5) console.log(`   ... 他 ${orphans.length - 5} 件`);
   }
 
+  // 集計は取引種別の許可リストで絞っている。新しい売上の種類を足したとき
+  // そこに入れ忘れると申告から丸ごと消えるので、取りこぼしを必ず表に出す
+  const excluded = await oss.getExcludedButTaxable(label);
+  if (excluded.length) {
+    console.log(`\n🔴 申告の集計から外れているのに、EU圏の購入かVATが付いている取引があります。`);
+    console.log(`   services/ossReport.js の transaction_type の一覧に追加が要るかもしれません。`);
+    excluded.forEach(e =>
+      console.log(`   種別 "${e.transaction_type}": ${e.count}件 / ${num(e.total_amount)} ${e.currency}`));
+  }
+
   const records = await oss.getTransactionRecords(label);
   console.log(`\n--- 保存が必要な取引記録: ${records.length} 件（10年保存）---`);
 

@@ -149,9 +149,9 @@ async function resolveWorkIsAdult(workId) {
  * ここで例外を投げると購入自体が失敗し、記録も残らない。徴収漏れは後から
  * 是正できるが、失った決済は取り戻せない。
  */
-function resolveTax(grossAmount, buyerCountry, isAdult) {
+function resolveTax(grossAmount, buyerCountry, isAdult, kind) {
   const { rate, registered, unknownCountry, adultRateApplied } =
-    getVatRate(buyerCountry, { isAdult });
+    getVatRate(buyerCountry, { isAdult, kind });
   if (registered && unknownCountry) {
     console.error(
       `VAT rate missing for buyer country "${buyerCountry || '(unknown)'}" — charged as 0%. ` +
@@ -699,6 +699,28 @@ router.post('/webhook', async (req, res) => {
           [session.metadata.order_id]
         );
         console.log(`AI tool order paid: ${session.metadata.order_id} (${session.amount_total} ${session.currency})`);
+
+        // AIツールの売上もVATの対象。**標準税率**を使う（役務であって出版物ではないため）。
+        // ここで transactions に残さないと、OSSの四半期申告から丸ごと抜け落ちる。
+        // 冪等: 同じセッションの行が既にあれば作らない（Webhookは再送されうる）
+        const seen = await db.query(
+          `SELECT 1 FROM transactions WHERE payment_gateway_id = $1 AND transaction_type = 'ai_tool'`,
+          [session.id]
+        );
+        if (seen.rows.length === 0) {
+          const ZD = ['jpy', 'krw'];
+          const amount = ZD.includes(session.currency) ? session.amount_total : session.amount_total / 100;
+          const buyerCountry = await resolveBuyerCountry(session);
+          const tax = resolveTax(amount, buyerCountry, false, 'service');
+          await db.query(
+            `INSERT INTO transactions (user_id, work_id, transaction_type, amount, currency,
+                                       payment_method, payment_gateway_id, status,
+                                       buyer_country, vat_rate, vat_amount, net_amount)
+             VALUES ($1, NULL, 'ai_tool', $2, $3, 'stripe', $4, 'completed', $5, $6, $7, $8)`,
+            [session.metadata.user_id, amount, session.currency.toUpperCase(), session.id,
+             buyerCountry, tax.rate, tax.vatAmount, tax.netAmount]
+          );
+        }
       } catch (error) {
         console.error('Error marking AI tool order paid:', error);
       }

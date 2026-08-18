@@ -31,8 +31,22 @@
  *   4. 利用規約 8.4 と、収益分配の説明の文言を「登録済み」の内容に更新する
  */
 
-// アイルランドで non-Union OSS 登録済み（2026-08-10 発効）
+// アイルランドで non-Union OSS 登録済み（2026-08-10 発効）＝**EUのVAT**のみ
 const VAT_REGISTERED = true;
+
+/**
+ * **英国のVAT登録は別物で、まだしていません。**
+ *
+ * 課税売上高が英国の登録閾値（£90,000）に達していないため。
+ * 未登録の事業者がVATを徴収するのは違法なので、英国内の販売では常に税率0にします。
+ *
+ * 電子書籍は英国ではゼロ税率なので、どちらでも0%で結果は同じです。
+ * 危ないのは**AI翻訳・AI校正**で、これは標準税率20%の対象。
+ * このフラグが無いと、登録していないのに20%を徴収してしまいます。
+ *
+ * 英国のVAT登録をしたら true にし、利用規約8.4の「英国では未登録」の記述も直すこと。
+ */
+const UK_VAT_REGISTERED = false;
 
 // non-Union OSS で申告が必要になる国（EU27）＋ 自国
 const EU27 = ['AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR',
@@ -92,6 +106,23 @@ const RATES = {
 };
 
 /**
+ * 標準税率（%）。**電子書籍以外**の電子的役務に使う。
+ *
+ * AI翻訳・AI校正は「出版物」ではなく役務なので、上の軽減税率は適用できません。
+ * 例: ドイツの電子書籍は7%だが、AI校正サービスは19%。
+ * 軽減税率を当てると徴収不足になり、差額は当社が納めることになります。
+ *
+ * 出典: EU委員会 TEDB（基準日2026-07-01）の各国STANDARD税率。確認日2026-08-18。
+ */
+const STANDARD_RATES = {
+  GB: 20,
+  AT: 20,   BE: 21,   BG: 20,   HR: 25,   CY: 19,   CZ: 21,   DK: 25,
+  EE: 24,   FI: 25.5, FR: 20,   DE: 19,   GR: 24,   HU: 27,   IE: 23,
+  IT: 22,   LV: 21,   LT: 21,   LU: 17,   MT: 18,   NL: 21,   PL: 23,
+  PT: 23,   RO: 21,   SK: 23,   SI: 22,   ES: 21,   SE: 25,
+};
+
+/**
  * 税率表だけでは表現しきれない条件のうち、**まだ実装していないもの**。
  *
  * 成人向け（adultRate）とイタリアのISBN（IT を常に22%）は上の RATES で対応済み。
@@ -141,6 +172,14 @@ function assertRateTableComplete() {
       '\n未確認のまま動かすと、誤った税額で納付することになります。'
     );
   }
+  // 標準税率の表も同じく揃っていないと、AIツールの売上で誤徴収になる
+  const missingStd = REQUIRED_COUNTRIES.filter(cc => STANDARD_RATES[cc] === undefined);
+  if (missingStd.length) {
+    throw new Error(
+      'VAT_REGISTERED = true ですが、標準税率が未登録の国があります: ' + missingStd.join(', ') +
+      '\nconfig/vatRates.js の STANDARD_RATES に追加してください（AI翻訳・AI校正に使います）。'
+    );
+  }
 }
 
 /**
@@ -158,6 +197,20 @@ function getVatRate(countryCode, options = {}) {
   const cc = (countryCode || '').toUpperCase();
   if (!cc) return { rate: 0, registered: true, unknownCountry: true, adultRateApplied: false };
 
+  // 英国は別の登録。未登録の間に徴収すると違法なので、必ず0で返す。
+  // （電子書籍は元々0%だが、AI翻訳・AI校正は標準税率20%の対象なので、ここが無いと事故る）
+  if (cc === 'GB' && !UK_VAT_REGISTERED) {
+    return { rate: 0, registered: true, unknownCountry: false, adultRateApplied: false };
+  }
+
+  // kind: 'ebook'（既定）= 電子書籍・電子コミック／'service' = AI翻訳・AI校正などの役務。
+  // 役務は出版物ではないので軽減税率の対象外。標準税率の表を使う。
+  if (options.kind === 'service') {
+    const std = STANDARD_RATES[cc];
+    if (std === undefined) return { rate: 0, registered: true, unknownCountry: true, adultRateApplied: false };
+    return { rate: std, registered: true, unknownCountry: false, adultRateApplied: false };
+  }
+
   const entry = RATES[cc];
   if (!entry) return { rate: 0, registered: true, unknownCountry: true, adultRateApplied: false };
 
@@ -170,6 +223,21 @@ function getVatRate(countryCode, options = {}) {
     unknownCountry: false,
     adultRateApplied: useAdult
   };
+}
+
+/**
+ * 未登録の間、EU圏への販売を機械的に止めるかどうか。
+ *
+ * 純粋関数にしてあるのは、決済ルートが複数あるため（作品購入とAIツールで別ルート）。
+ * 片方だけに判定を書くと、もう片方がすり抜ける。実際そうなっていた。
+ */
+function isEuSaleBlocked(countryCode) {
+  if (VAT_REGISTERED) return false;
+  const cc = (countryCode || '').toUpperCase();
+  // 国が判定できない場合（Cloudflare未経由・Tor等）は止めない。
+  // 決済後に notifyEuSaleWhileUnregistered が拾う。
+  if (!cc || cc === 'XX' || cc === 'T1') return false;
+  return EU27.includes(cc);
 }
 
 /**
@@ -196,6 +264,6 @@ function round2(v) {
 }
 
 module.exports = {
-  VAT_REGISTERED, RATES, EU27, REQUIRED_COUNTRIES,
-  getVatRate, splitTaxFromGross, missingCountries, assertRateTableComplete
+  VAT_REGISTERED, UK_VAT_REGISTERED, RATES, STANDARD_RATES, EU27, REQUIRED_COUNTRIES, EXCEPTIONS,
+  getVatRate, splitTaxFromGross, missingCountries, assertRateTableComplete, isEuSaleBlocked
 };

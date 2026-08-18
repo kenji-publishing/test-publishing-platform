@@ -59,11 +59,11 @@ async function getReturnSummary(quarterLabel) {
         t.currency                                        AS currency,
         SUM(CASE WHEN t.transaction_type = 'refund' THEN -t.net_amount ELSE t.net_amount END) AS taxable_amount,
         SUM(CASE WHEN t.transaction_type = 'refund' THEN -t.vat_amount ELSE t.vat_amount END) AS vat_amount,
-        COUNT(*) FILTER (WHERE t.transaction_type = 'purchase') AS sales,
+        COUNT(*) FILTER (WHERE t.transaction_type IN ('purchase','ai_tool')) AS sales,
         COUNT(*) FILTER (WHERE t.transaction_type = 'refund')   AS refunds
        FROM transactions t
       WHERE t.status = 'completed'
-        AND t.transaction_type IN ('purchase', 'refund')
+        AND t.transaction_type IN ('purchase', 'refund', 'ai_tool')
         AND t.created_at >= $1 AND t.created_at < $2
         AND t.buyer_country = ANY($3::varchar[])
       GROUP BY 1, 2, 3
@@ -96,7 +96,7 @@ async function getTransactionRecords(quarterLabel) {
        FROM transactions t
        LEFT JOIN works w ON w.work_id = t.work_id
       WHERE t.status = 'completed'
-        AND t.transaction_type IN ('purchase', 'refund')
+        AND t.transaction_type IN ('purchase', 'refund', 'ai_tool')
         AND t.created_at >= $1 AND t.created_at < $2
         AND t.buyer_country = ANY($3::varchar[])
       ORDER BY t.created_at`,
@@ -115,11 +115,35 @@ async function getUnattributed(quarterLabel) {
     `SELECT t.created_at, t.amount, t.currency, t.payment_gateway_id, t.transaction_type
        FROM transactions t
       WHERE t.status = 'completed'
-        AND t.transaction_type IN ('purchase', 'refund')
+        AND t.transaction_type IN ('purchase', 'refund', 'ai_tool')
         AND t.created_at >= $1 AND t.created_at < $2
         AND t.buyer_country IS NULL
       ORDER BY t.created_at`,
     [start, end]
+  );
+  return rows;
+}
+
+/**
+ * 申告の対象から外れているのに、EU圏の購入かVATが付いている取引。
+ *
+ * 上の集計は transaction_type の許可リストで絞っている。新しい売上の種類を足したとき、
+ * ここに追加し忘れると**申告から丸ごと消える**（実際にAIツールでそうなっていた）。
+ * 忘れても気づけるよう、取りこぼしを検出して報告に出す。
+ */
+async function getExcludedButTaxable(quarterLabel) {
+  const { start, end } = quarterRange(quarterLabel);
+  const { rows } = await db.query(
+    `SELECT t.transaction_type, COUNT(*) AS count,
+            SUM(t.amount) AS total_amount, t.currency
+       FROM transactions t
+      WHERE t.status = 'completed'
+        AND t.transaction_type NOT IN ('purchase', 'refund', 'ai_tool')
+        AND t.created_at >= $1 AND t.created_at < $2
+        AND (t.vat_amount > 0 OR t.buyer_country = ANY($3))
+      GROUP BY t.transaction_type, t.currency
+      ORDER BY t.transaction_type`,
+    [start, end, require('../config/vatRates').EU27]
   );
   return rows;
 }
@@ -150,6 +174,6 @@ function filingDeadline(quarterLabel) {
 
 module.exports = {
   quarterRange, quarterLastDay, filingDeadline,
-  getReturnSummary, getTransactionRecords, getUnattributed,
+  getReturnSummary, getTransactionRecords, getUnattributed, getExcludedButTaxable,
   toCsv, SUMMARY_COLUMNS, RECORD_COLUMNS
 };

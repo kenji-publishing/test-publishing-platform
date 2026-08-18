@@ -29,6 +29,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { editText } = require('../services/aiEditorService');
 const { translateText } = require('../services/aiTranslationService');
 const { translateManga, sampleManga } = require('../services/aiMangaService');
+const { isEuSaleBlocked } = require('../config/vatRates');
 
 // 30万字 = 長編小説1冊分をカバー（test4は約24万字）。チャンク処理なので長さ自体は問題なく、
 // 上限はジョブ時間の暴走防止のため。それ以上は分割利用を案内する。
@@ -207,6 +208,16 @@ router.post('/manga/checkout', authenticate, async (req, res) => {
         const unitAmount = ZERO_DECIMAL.includes(currency.toLowerCase()) ? Math.round(amount) : Math.round(amount * 100);
         // payment_method_typesは指定しない: Stripeダッシュボードで有効化した決済手段
         // （カード/Apple Pay/Google Pay/PayPal等）が通貨に応じて自動表示される
+        // VAT未登録の間はEU圏への販売を止める。作品購入と同じ判定を使う
+        // （片方だけに書くと、もう片方がすり抜ける）
+        const euCc = (req.headers['cf-ipcountry'] || '').toUpperCase();
+        if (isEuSaleBlocked(euCc)) {
+            return res.status(451).json({
+                error: 'Sales to the EU are temporarily unavailable.',
+                code: 'EU_SALE_BLOCKED', country: euCc
+            });
+        }
+
         const session = await stripe.checkout.sessions.create({
             line_items: [{
                 price_data: {
@@ -275,6 +286,16 @@ router.post('/checkout', authenticate, async (req, res) => {
 
         // payment_method_typesは指定しない: Stripeダッシュボードで有効化した決済手段
         // （カード/Apple Pay/Google Pay/PayPal等）が通貨に応じて自動表示される
+        // VAT未登録の間はEU圏への販売を止める。作品購入と同じ判定を使う
+        // （片方だけに書くと、もう片方がすり抜ける）
+        const euCc = (req.headers['cf-ipcountry'] || '').toUpperCase();
+        if (isEuSaleBlocked(euCc)) {
+            return res.status(451).json({
+                error: 'Sales to the EU are temporarily unavailable.',
+                code: 'EU_SALE_BLOCKED', country: euCc
+            });
+        }
+
         const session = await stripe.checkout.sessions.create({
             line_items: [{
                 price_data: {
@@ -420,6 +441,16 @@ router.post('/orders/:orderId/repay', authenticate, async (req, res) => {
             : `${Number(order.char_count).toLocaleString()} characters — AuctLect AI tools`;
         // payment_method_typesは指定しない: Stripeダッシュボードで有効化した決済手段
         // （カード/Apple Pay/Google Pay/PayPal等）が通貨に応じて自動表示される
+        // VAT未登録の間はEU圏への販売を止める。作品購入と同じ判定を使う
+        // （片方だけに書くと、もう片方がすり抜ける）
+        const euCc = (req.headers['cf-ipcountry'] || '').toUpperCase();
+        if (isEuSaleBlocked(euCc)) {
+            return res.status(451).json({
+                error: 'Sales to the EU are temporarily unavailable.',
+                code: 'EU_SALE_BLOCKED', country: euCc
+            });
+        }
+
         const session = await stripe.checkout.sessions.create({
             line_items: [{
                 price_data: {
