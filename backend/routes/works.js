@@ -253,8 +253,8 @@ router.get('/my', authenticate, async (req, res) => {
             `SELECT work_id, title, status, cover_image, cover_image_url,
                     view_count, like_count, comment_count, page_count,
                     price, currency, is_free, language, original_language,
-                    content_type, genre, ai_text_usage, ai_cover_usage,
-                    created_at, updated_at, published_at
+                    content_type, genre, ai_text_usage, ai_cover_usage, ai_translation_usage,
+                    original_work_id, created_at, updated_at, published_at
              FROM works
              WHERE author_id = $1 AND status != 'deleted'
              ORDER BY updated_at DESC`,

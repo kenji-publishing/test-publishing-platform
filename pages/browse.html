@@ -2,21 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608172127">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608202116">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608172127">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608202116">
     <title>Browse Works - AuctLect</title>
-    <script src="../js/config.js?v=202608172127"></script>
+    <script src="../js/config.js?v=202608202116"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="../css/variables.css?v=202608172127" rel="stylesheet">
-    <link href="../css/style-new.css?v=202608172127" rel="stylesheet">
-    <link href="../css/components.css?v=202608172127" rel="stylesheet">
-    <link href="../css/navbar.css?v=202608172127" rel="stylesheet">
-    <link href="../css/mobile-fixes.css?v=202608172127" rel="stylesheet">
+    <link href="../css/variables.css?v=202608202116" rel="stylesheet">
+    <link href="../css/style-new.css?v=202608202116" rel="stylesheet">
+    <link href="../css/components.css?v=202608202116" rel="stylesheet">
+    <link href="../css/navbar.css?v=202608202116" rel="stylesheet">
+    <link href="../css/mobile-fixes.css?v=202608202116" rel="stylesheet">
     <!-- Pattern C Navbar Styles -->
     <style>
         /* ========== Mobile Language Selector ========== */
@@ -329,18 +329,18 @@
     <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/i18n.js?v=202608172127"></script>
-    <script src="../js/navbar.js?v=202608172127"></script>
-    <script src="../js/lang/ja.js?v=202608172127"></script>
-    <script src="../js/lang/en.js?v=202608172127"></script>
-    <script src="../js/lang/zh.js?v=202608172127"></script>
-    <script src="../js/lang/es.js?v=202608172127"></script>
-    <script src="../js/lang/fr.js?v=202608172127"></script>
-    <script src="../js/lang/de.js?v=202608172127"></script>
-    <script src="../js/lang/ko.js?v=202608172127"></script>
-    <script src="../js/lang/ar.js?v=202608172127"></script>
-    <script src="../js/lang/pt.js?v=202608172127"></script>
-    <script src="../js/lang/it.js?v=202608172127"></script>
+    <script src="../js/i18n.js?v=202608202116"></script>
+    <script src="../js/navbar.js?v=202608202116"></script>
+    <script src="../js/lang/ja.js?v=202608202116"></script>
+    <script src="../js/lang/en.js?v=202608202116"></script>
+    <script src="../js/lang/zh.js?v=202608202116"></script>
+    <script src="../js/lang/es.js?v=202608202116"></script>
+    <script src="../js/lang/fr.js?v=202608202116"></script>
+    <script src="../js/lang/de.js?v=202608202116"></script>
+    <script src="../js/lang/ko.js?v=202608202116"></script>
+    <script src="../js/lang/ar.js?v=202608202116"></script>
+    <script src="../js/lang/pt.js?v=202608202116"></script>
+    <script src="../js/lang/it.js?v=202608202116"></script>
     
     <!-- Pattern C Navbar Script -->
     <script>
@@ -444,6 +444,7 @@
                         cover: w.cover_image || w.cover_image_url || null,
                         aiText: w.ai_text_usage || 'none',
                         aiCover: w.ai_cover_usage || 'none',
+                        aiTranslation: w.ai_translation_usage || 'na',
                         tags: Array.isArray(w.tags) ? w.tags : [],
                         description: w.description || ''
                     };
@@ -481,10 +482,7 @@ function updateAllText() {
                         ${work.cover
                             ? '<img src="' + work.cover + '" alt="" style="width:100%;height:100%;object-fit:cover;">'
                             : '<i class="fas fa-book"></i>'}
-                        ${(function() {
-                            var l = getAiBadgeLabel(work.aiText, work.aiCover);
-                            return l ? '<span style="position:absolute; bottom:6px; left:6px; right:6px; text-align:center; padding:0.2rem 0.4rem; border-radius:6px; font-size:0.7rem; font-weight:600; background:rgba(40,50,80,0.85); color:#fff;"><i class=\'fas fa-robot me-1\'></i>' + l + '</span>' : '';
-                        })()}
+                        ${aiBadgesHtml(work.aiText, work.aiCover, work.aiTranslation)}
                     </div>
                     <div class="work-info">
                         <div class="work-title" dir="auto">${escapeHtml(work.title)}</div>

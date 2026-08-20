@@ -229,6 +229,83 @@ function formatWorkPrice(price, currency) {
 // ========== AI disclosure badge (multi-language, shared) ==========
 // 本文と表紙のAI利用をそれぞれ表示（例: 本文: 部分的AI / 表紙: AI生成）
 
+// ===== AI利用の開示バッジ =====
+// 1本の帯に「本文: AI生成 / 表紙: 部分的AI」と書くと横に長く、表紙の絵を隠す。
+// 用途ごとに色を分けた小さな札にすれば、細くしても何のことか見て分かる。
+// 色だけに意味を持たせず、札に必ず語（本文/表紙/翻訳）を入れる
+// （色が見分けにくい人にも伝わるようにするため）。
+var AI_BADGE_COLORS = {
+    text: '#C0392B',        // 本文 — 赤
+    cover: '#2C5F8A',       // 表紙 — 青
+    translation: '#8A6D00'  // 翻訳 — 黄（白文字が読める濃さにしてある）
+};
+
+var AI_BADGE_AREAS = {
+    text: { en: 'Text', ja: '本文', zh: '正文', es: 'Texto', fr: 'Texte', de: 'Text', ko: '본문', ar: 'النص', pt: 'Texto', it: 'Testo' },
+    cover: { en: 'Cover', ja: '表紙', zh: '封面', es: 'Portada', fr: 'Couverture', de: 'Cover', ko: '표지', ar: 'الغلاف', pt: 'Capa', it: 'Copertina' },
+    translation: { en: 'Translation', ja: '翻訳', zh: '翻译', es: 'Traducción', fr: 'Traduction', de: 'Übersetzung', ko: '번역', ar: 'الترجمة', pt: 'Tradução', it: 'Traduzione' }
+};
+
+var AI_BADGE_LEVELS = {
+    full: {
+        short: { en: 'AI', ja: 'AI', zh: 'AI', es: 'IA', fr: 'IA', de: 'KI', ko: 'AI', ar: 'ذكاء', pt: 'IA', it: 'IA' },
+        long: { en: 'AI-generated', ja: 'AI生成', zh: 'AI生成', es: 'generado por IA', fr: 'généré par IA', de: 'KI-generiert', ko: 'AI 생성', ar: 'مولد بالذكاء الاصطناعي', pt: 'gerado por IA', it: 'generato da IA' }
+    },
+    part: {
+        short: { en: 'part-AI', ja: '一部AI', zh: '部分AI', es: 'IA parcial', fr: 'IA partielle', de: 'teils KI', ko: '일부 AI', ar: 'جزئي', pt: 'IA parcial', it: 'IA parziale' },
+        long: { en: 'partly AI', ja: '部分的AI', zh: '部分AI', es: 'parcialmente IA', fr: 'partiellement IA', de: 'teilweise KI', ko: '부분적 AI', ar: 'ذكاء اصطناعي جزئي', pt: 'parcialmente IA', it: 'parzialmente IA' }
+    }
+};
+
+/** 用途ごとの札を作る。AIを使っていない用途は札を出さない */
+function getAiBadges(textUsage, coverUsage, translationUsage) {
+    var level = function (u) {
+        if (u === 'generated' || u === 'full_ai') return 'full';
+        if (u === 'assisted') return 'part';
+        return null;   // 'none' / 'na' / 未設定 は表示しない
+    };
+    var badges = [];
+    [['text', textUsage], ['cover', coverUsage], ['translation', translationUsage]].forEach(function (pair) {
+        var key = pair[0];
+        var lv = level(pair[1]);
+        if (!lv) return;
+        var area = getL(AI_BADGE_AREAS[key]);
+        badges.push({
+            key: key,
+            color: AI_BADGE_COLORS[key],
+            short: area + ' ' + getL(AI_BADGE_LEVELS[lv].short),
+            full: area + ': ' + getL(AI_BADGE_LEVELS[lv].long)
+        });
+    });
+    return badges;
+}
+
+function _escAttr(s) {
+    return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+/**
+ * 表紙の下に重ねる開示バッジのHTML。該当が無ければ空文字。
+ * 呼び出し側の表紙要素は position:relative であること。
+ */
+function aiBadgesHtml(textUsage, coverUsage, translationUsage) {
+    var badges = getAiBadges(textUsage, coverUsage, translationUsage);
+    if (!badges.length) return '';
+    var chips = badges.map(function (b) {
+        return '<span title="' + _escAttr(b.full) + '" style="padding:1px 6px; border-radius:4px;'
+            + ' font-size:0.65rem; font-weight:700; line-height:1.6; white-space:nowrap;'
+            + ' background:' + b.color + '; color:#fff; box-shadow:0 1px 2px rgba(0,0,0,0.3);">'
+            + _escAttr(b.short) + '</span>';
+    }).join('');
+    return '<div style="position:absolute; bottom:6px; left:4px; right:4px; display:flex;'
+        + ' gap:3px; justify-content:center; flex-wrap:wrap; pointer-events:none;">' + chips + '</div>';
+}
+
+window.getAiBadges = getAiBadges;
+window.aiBadgesHtml = aiBadgesHtml;
+
 function getAiBadgeLabel(textUsage, coverUsage) {
     var levelLabel = function(u) {
         if (u === 'generated' || u === 'full_ai') {
