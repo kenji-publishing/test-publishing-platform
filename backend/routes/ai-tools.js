@@ -34,7 +34,7 @@ const { isEuSaleBlocked } = require('../config/vatRates');
 // 30万字 = 長編小説1冊分をカバー（test4は約24万字）。チャンク処理なので長さ自体は問題なく、
 // 上限はジョブ時間の暴走防止のため。それ以上は分割利用を案内する。
 const MAX_CHARS = 300000;
-const SUPPORTED_LANGS = ['en', 'ja', 'zh', 'es', 'fr', 'de', 'ko', 'ar', 'pt', 'it'];
+const SUPPORTED_LANGS = ['en', 'ja', 'zh', 'zh-TW', 'es', 'fr', 'de', 'ko', 'ar', 'pt', 'it'];
 
 // 不正なUUIDのパスは即404にする（DBの22P02エラー→500を防ぐ）
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

@@ -23,7 +23,7 @@ const MODEL_TIERS = {
 
 const LANG_NAMES = {
     en: 'English', ja: 'Japanese', zh: 'Chinese', es: 'Spanish', fr: 'French',
-    de: 'German', ko: 'Korean', ar: 'Arabic', pt: 'Portuguese', it: 'Italian'
+    de: 'German', ko: 'Korean', ar: 'Arabic', pt: 'Portuguese', it: 'Italian', 'zh-TW': 'Traditional Chinese (Taiwan)'
 };
 
 const TIER_INSTRUCTIONS = {

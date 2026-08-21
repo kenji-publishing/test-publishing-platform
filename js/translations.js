@@ -294,7 +294,8 @@ const availableLanguages = {
     ko: { name: 'Korean', nativeName: '한국어', flag: '🇰🇷', rtl: false },
     ar: { name: 'Arabic', nativeName: 'العربية', flag: '🇸🇦', rtl: true },
     pt: { name: 'Portuguese', nativeName: 'Português', flag: '🇧🇷', rtl: false },
-    it: { name: 'Italian', nativeName: 'Italiano', flag: '🇮🇹', rtl: false }
+    it: { name: 'Italian', nativeName: 'Italiano', flag: '🇮🇹', rtl: false },
+    'zh-TW': { name: 'Traditional Chinese', nativeName: '繁體中文', flag: '🇹🇼', rtl: false }
 };
 
 function t(key, lang = null) {

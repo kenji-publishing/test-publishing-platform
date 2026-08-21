@@ -24,7 +24,7 @@ const SAMPLE_MAX_CHARS = 600;
 const SAMPLE_DAILY_LIMIT = 30;
 const sampleUsage = new Map(); // userId -> { day, count }
 
-const SUPPORTED_LANGS = ['en', 'ja', 'zh', 'es', 'fr', 'de', 'ko', 'ar', 'pt', 'it'];
+const SUPPORTED_LANGS = ['en', 'ja', 'zh', 'zh-TW', 'es', 'fr', 'de', 'ko', 'ar', 'pt', 'it'];
 
 /**
  * POST /api/ai-translation/sample
@@ -337,7 +337,8 @@ async function simulateClaudeTranslation(title, description, sourceLang, targetL
       'ko': 'Korean',
       'ar': 'Arabic',
       'pt': 'Portuguese',
-      'it': 'Italian'
+      'it': 'Italian',
+      'zh-TW': 'Traditional Chinese (Taiwan)'
     };
 
     const sourceLangName = langNames[sourceLang] || sourceLang;

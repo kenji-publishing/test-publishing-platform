@@ -188,7 +188,8 @@ var navText = {
 var _langOptions = [
     { value: 'en', label: '\ud83c\uddec\ud83c\udde7 EN' },
     { value: 'ja', label: '\ud83c\uddef\ud83c\uddf5 \u65e5\u672c\u8a9e' },
-    { value: 'zh', label: '\ud83c\udde8\ud83c\uddf3 \u4e2d\u6587' },
+    { value: 'zh', label: '\ud83c\udde8\ud83c\uddf3 \u7b80\u4f53\u4e2d\u6587' },
+    { value: 'zh-TW', label: '\ud83c\uddf9\ud83c\uddfc \u7e41\u9ad4\u4e2d\u6587' },
     { value: 'es', label: '\ud83c\uddea\ud83c\uddf8 ES' },
     { value: 'fr', label: '\ud83c\uddeb\ud83c\uddf7 FR' },
     { value: 'de', label: '\ud83c\udde9\ud83c\uddea DE' },
@@ -212,7 +213,11 @@ var getCurrentLang = getCurrentLanguage;
 function getL(obj) {
     if (!obj) return '';
     var lang = getCurrentLanguage();
-    return obj[lang] || obj.en || '';
+    if (obj[lang]) return obj[lang];
+    // 各ページに直接書かれた文言（uiText）には 'zh-TW' の項が無いものが多い。
+    // 英語に落ちる前に簡体字を試す。字体は違っても中国語の読者には通じる
+    if (lang === 'zh-TW' && obj.zh) return obj.zh;
+    return obj.en || '';
 }
 
 // ========== Work price formatting (multi-currency) ==========

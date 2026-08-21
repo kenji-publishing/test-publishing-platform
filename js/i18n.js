@@ -27,7 +27,8 @@
     var SUPPORTED_LANGUAGES = {
         en: { name: 'English', flag: '🇬🇧', rtl: false },
         ja: { name: '日本語', flag: '🇯🇵', rtl: false },
-        zh: { name: '中文', flag: '🇨🇳', rtl: false },
+        zh: { name: '简体中文', flag: '🇨🇳', rtl: false },
+        'zh-TW': { name: '繁體中文', flag: '🇹🇼', rtl: false },
         es: { name: 'Español', flag: '🇪🇸', rtl: false },
         fr: { name: 'Français', flag: '🇫🇷', rtl: false },
         de: { name: 'Deutsch', flag: '🇩🇪', rtl: false },
@@ -316,6 +317,22 @@
 
     // ========== 初期化 ==========
 
+    /**
+     * ブラウザの言語設定（'ja-JP' や 'zh-TW'）を、対応言語のコードに直す。
+     * 対応が無ければ null（＝既定の英語のまま）。
+     *
+     * 中国語だけは地域を見る。'zh' で切り捨てると、台湾・香港の読者に
+     * 簡体字が出てしまうため。
+     */
+    function _normalizeLocale(raw) {
+        var l = String(raw || '').toLowerCase();
+        if (l.indexOf('zh') === 0) {
+            return /hant|tw|hk|mo/.test(l) ? 'zh-TW' : 'zh';
+        }
+        var base = l.split('-')[0];
+        return SUPPORTED_LANGUAGES[base] ? base : null;
+    }
+
     function _init() {
         _basePath = _detectBasePath();
 
@@ -325,10 +342,8 @@
             _currentLang = saved;
         } else {
             // Detect from browser
-            var browserLang = (navigator.language || navigator.userLanguage || 'en').split('-')[0];
-            if (SUPPORTED_LANGUAGES[browserLang]) {
-                _currentLang = browserLang;
-            }
+            var detected = _normalizeLocale(navigator.language || navigator.userLanguage || 'en');
+            if (detected) _currentLang = detected;
         }
 
         // Set RTL/lang attribute
