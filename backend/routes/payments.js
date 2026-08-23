@@ -467,6 +467,56 @@ async function applyGiftPayment(session) {
  * POST /api/payments/create-checkout-session
  * Create a Stripe checkout session for purchasing a work
  */
+/**
+ * POST /api/payments/free/:workId
+ * 無料作品を自分のライブラリに入れる。
+ *
+ * これまで無料作品の取得はブラウザのlocalStorageに書くだけで、サーバーには
+ * 何も残らなかった。そのため
+ *   ・ログインしていなくても「ライブラリに追加されました」と出る（実際は何も起きない）
+ *   ・別の端末やブラウザでは消えている
+ *   ・購入記録が無いため、ライブラリの掃除処理が翌日に消してしまう
+ * という状態だった。有料と同じく purchases に記録する（金額0）。
+ */
+router.post('/free/:workId', authenticate, async (req, res) => {
+  try {
+    const { workId } = req.params;
+    const result = await db.query(
+      `SELECT work_id, author_id, is_free, price, currency, status FROM works WHERE work_id = $1`,
+      [workId]
+    );
+    const work = result.rows[0];
+    if (!work || work.status !== 'published') {
+      return res.status(404).json({ error: 'Work not found' });
+    }
+    // 無料かどうかはサーバーが判断する（画面の表示は信用しない）
+    const isFree = work.is_free || Number(work.price) === 0;
+    if (!isFree) {
+      return res.status(400).json({ error: 'This work is not free', code: 'NOT_FREE' });
+    }
+    if (String(work.author_id) === String(req.user.userId)) {
+      return res.json({ success: true, alreadyOwned: true, message: 'This is your own work' });
+    }
+
+    // 二重に押しても増えない。返金済みの行が残っていれば復活させる
+    await db.query(
+      `INSERT INTO purchases (user_id, work_id, amount, currency, payment_method, payment_status, transaction_id)
+       VALUES ($1, $2, 0, $3, 'free', 'completed', $4)
+       ON CONFLICT (user_id, work_id) DO UPDATE
+         SET payment_status = 'completed',
+             payment_method = 'free',
+             amount = 0
+         WHERE purchases.payment_status <> 'completed'`,
+      [req.user.userId, workId, work.currency || 'USD', 'free_' + workId + '_' + req.user.userId]
+    );
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Free acquisition error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.post('/create-checkout-session', authenticate, async (req, res) => {
   try {
     // EU圏の消費者への販売は、1件目からVATの申告義務が生じる（免税枠なし）。

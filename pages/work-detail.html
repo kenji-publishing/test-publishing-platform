@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608211704">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608232027">
     <title>Work Detail - AuctLect</title>
-    <script src="../js/config.js?v=202608211704"></script>
+    <script src="../js/config.js?v=202608232027"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="../css/variables.css?v=202608211704" rel="stylesheet">
-    <link href="../css/style-new.css?v=202608211704" rel="stylesheet">
-    <link href="../css/components.css?v=202608211704" rel="stylesheet">
-    <link href="../css/mobile-fixes.css?v=202608211704" rel="stylesheet">
-    <link href="../css/navbar.css?v=202608211704" rel="stylesheet">
+    <link href="../css/variables.css?v=202608232027" rel="stylesheet">
+    <link href="../css/style-new.css?v=202608232027" rel="stylesheet">
+    <link href="../css/components.css?v=202608232027" rel="stylesheet">
+    <link href="../css/mobile-fixes.css?v=202608232027" rel="stylesheet">
+    <link href="../css/navbar.css?v=202608232027" rel="stylesheet">
 <!-- Work Detail Page Styles -->
     <style>
         .work-detail-container { padding: var(--spacing-xl) 0; }
@@ -623,19 +623,19 @@
     <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/lang/ja.js?v=202608211704"></script>
-    <script src="../js/lang/en.js?v=202608211704"></script>
-    <script src="../js/lang/zh.js?v=202608211704"></script>
-    <script src="../js/lang/zh-TW.js?v=202608211704"></script>
-    <script src="../js/lang/es.js?v=202608211704"></script>
-    <script src="../js/lang/fr.js?v=202608211704"></script>
-    <script src="../js/lang/de.js?v=202608211704"></script>
-    <script src="../js/lang/ko.js?v=202608211704"></script>
-    <script src="../js/lang/ar.js?v=202608211704"></script>
-    <script src="../js/lang/pt.js?v=202608211704"></script>
-    <script src="../js/lang/it.js?v=202608211704"></script>
-    <script src="../js/i18n.js?v=202608211704"></script>
-    <script src="../js/navbar.js?v=202608211704"></script>
+    <script src="../js/lang/ja.js?v=202608232027"></script>
+    <script src="../js/lang/en.js?v=202608232027"></script>
+    <script src="../js/lang/zh.js?v=202608232027"></script>
+    <script src="../js/lang/zh-TW.js?v=202608232027"></script>
+    <script src="../js/lang/es.js?v=202608232027"></script>
+    <script src="../js/lang/fr.js?v=202608232027"></script>
+    <script src="../js/lang/de.js?v=202608232027"></script>
+    <script src="../js/lang/ko.js?v=202608232027"></script>
+    <script src="../js/lang/ar.js?v=202608232027"></script>
+    <script src="../js/lang/pt.js?v=202608232027"></script>
+    <script src="../js/lang/it.js?v=202608232027"></script>
+    <script src="../js/i18n.js?v=202608232027"></script>
+    <script src="../js/navbar.js?v=202608232027"></script>
 
 <!-- Work Detail Page Script -->
     <script>
@@ -1381,9 +1381,47 @@ function escapeHtml(text) {
             });
         });
 
-        function getFreeWork() {
+        async function getFreeWork() {
             const id = getWorkIdFromUrl();
-            addToLibrary(id);
+            const token = localStorage.getItem('token');
+
+            // ログインしていなければ何も起きない。以前はこの確認が無く、
+            // ブラウザに書き込んで「追加されました」とだけ表示していた
+            if (!token) {
+                alert(getL({
+                    en: 'Please log in to add this work to your library.',
+                    ja: 'ライブラリに追加するにはログインが必要です。',
+                    zh: '将本作品加入书库需要登录。', 'zh-TW': '將本作品加入書庫需要登入。',
+                    es: 'Inicia sesión para añadir esta obra a tu biblioteca.',
+                    fr: 'Connectez-vous pour ajouter cette œuvre à votre bibliothèque.',
+                    de: 'Bitte melden Sie sich an, um dieses Werk zu Ihrer Bibliothek hinzuzufügen.',
+                    ko: '내 서재에 추가하려면 로그인이 필요합니다.',
+                    ar: 'سجّل الدخول لإضافة هذا العمل إلى مكتبتك.',
+                    pt: 'Faça login para adicionar esta obra à sua biblioteca.',
+                    it: 'Accedi per aggiungere quest\'opera alla tua biblioteca.'
+                }));
+                try { localStorage.setItem('returnAfterLogin', window.location.href); } catch (e) {}
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const resp = await fetch((window.API_ORIGIN || '') + '/api/payments/free/' + encodeURIComponent(id), {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await resp.json();
+                if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
+            } catch (err) {
+                console.error('Free acquisition failed:', err);
+                alert(getL({
+                    en: 'Could not add this work to your library: ',
+                    ja: 'ライブラリに追加できませんでした: '
+                }) + err.message);
+                return;
+            }
+
+            addToLibrary(id);   // 画面にすぐ出すための控え（正はサーバーの記録）
             alert(getL(uiText.addedToLibrary));
             loadWork();
         }

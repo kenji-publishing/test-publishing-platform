@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608211704">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608232027">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608211704">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608232027">
     <title>Reader - AuctLect</title>
     
     <!-- Google Fonts -->
@@ -15,9 +15,9 @@
     <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="../css/variables.css?v=202608211704" rel="stylesheet"><!-- navbar.cssが使う--color-*変数の定義（無いとドロップダウンが透明になる） -->
-    <link href="../css/navbar.css?v=202608211704" rel="stylesheet">
-    <link href="../css/mobile-fixes.css?v=202608211704" rel="stylesheet">
+    <link href="../css/variables.css?v=202608232027" rel="stylesheet"><!-- navbar.cssが使う--color-*変数の定義（無いとドロップダウンが透明になる） -->
+    <link href="../css/navbar.css?v=202608232027" rel="stylesheet">
+    <link href="../css/mobile-fixes.css?v=202608232027" rel="stylesheet">
 
     <style>
         :root {
@@ -823,12 +823,12 @@
     <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/config.js?v=202608211704"></script>
-    <script src="../js/i18n.js?v=202608211704"></script>
-    <script src="../js/lang/it.js?v=202608211704"></script>
-    <script src="../js/navbar.js?v=202608211704"></script>
-    <script src="../js/translations.js?v=202608211704"></script>
-    <script src="../js/lazy-loader.js?v=202608211704"></script>
+    <script src="../js/config.js?v=202608232027"></script>
+    <script src="../js/i18n.js?v=202608232027"></script>
+    <script src="../js/lang/it.js?v=202608232027"></script>
+    <script src="../js/navbar.js?v=202608232027"></script>
+    <script src="../js/translations.js?v=202608232027"></script>
+    <script src="../js/lazy-loader.js?v=202608232027"></script>
     <script>
         // ===== Mode Detection =====
         const isManga = new URLSearchParams(window.location.search).get('type') === 'manga';
@@ -1005,6 +1005,7 @@ function getL(obj, replacements = {}) {
             initTouchEvents();
             initClickZones();
             initMouseDrag();
+            initVerticalPan();
             showTouchHint();
             if (!isManga && apiWorkId) loadWorkFromApi();
         });
@@ -1053,6 +1054,7 @@ function getL(obj, replacements = {}) {
                     var rc = document.getElementById('readerContent');
                     rc.classList.remove('writing-horizontal', 'writing-vertical');
                     rc.classList.add('writing-rtl');
+                    updateVerticalCursor();
                 }
 
                 // 前回の続きから再開
@@ -1506,6 +1508,7 @@ function getL(obj, replacements = {}) {
             const content = document.getElementById('readerContent');
             content.classList.remove('writing-horizontal', 'writing-vertical', 'writing-rtl');
             content.classList.add('writing-' + mode);
+            updateVerticalCursor();
             document.querySelectorAll('.settings-section:nth-child(3) .settings-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
         }
@@ -1655,20 +1658,79 @@ function getL(obj, replacements = {}) {
             return document.getElementById('readerContent').classList.contains('writing-vertical');
         }
 
+        /**
+         * ページが左へ進む本かどうか。
+         *
+         * 縦書きの日本語（および中国語）の本は右から左へ読み進むので、
+         * 「次のページ」は左側にある。アラビア語も同じ向き。
+         * 横書きは英語と同じで右へ進む。
+         */
+        function isRightToLeftBook() {
+            return isRtlMode() || isVerticalMode();
+        }
+
         // Click Zone Navigation
         function initClickZones() {
             var leftZone = document.getElementById('clickZoneLeft');
             var rightZone = document.getElementById('clickZoneRight');
             if (leftZone) {
                 leftZone.addEventListener('click', function() {
-                    if (!hasDragged) { isRtlMode() ? nextPage() : prevPage(); }
+                    if (!hasDragged) { isRightToLeftBook() ? nextPage() : prevPage(); }
                 });
             }
             if (rightZone) {
                 rightZone.addEventListener('click', function() {
-                    if (!hasDragged) { isRtlMode() ? prevPage() : nextPage(); }
+                    if (!hasDragged) { isRightToLeftBook() ? prevPage() : nextPage(); }
                 });
             }
+        }
+
+        // ===== 縦書きのときの「掴んで動かす」 =====
+        // 縦書きは文字が右から左へ流れるため、画面は横方向にスクロールする。
+        // マウスの縦回転や下のバーだけでは動かしづらいので、本文を直接掴めるようにする。
+        var vPan = null;
+
+        function startVerticalPan(e) {
+            var rc = document.getElementById('readerContent');
+            if (!rc) return;
+            vPan = { startX: e.clientX, startScroll: rc.scrollLeft, moved: false };
+            rc.style.cursor = 'grabbing';
+            e.preventDefault();   // 掴んでいる間に文字が選択されるのを防ぐ
+        }
+
+        function initVerticalPan() {
+            var rc = document.getElementById('readerContent');
+            if (!rc) return;
+
+            document.addEventListener('mousemove', function (e) {
+                if (!vPan) return;
+                var dx = e.clientX - vPan.startX;
+                if (Math.abs(dx) > 3) vPan.moved = true;
+                // 掴んだ場所が指についてくるように、動かした分だけ逆にスクロールする
+                rc.scrollLeft = vPan.startScroll - dx;
+            });
+
+            ['mouseup', 'mouseleave'].forEach(function (ev) {
+                document.addEventListener(ev, function () {
+                    if (!vPan) return;
+                    vPan = null;
+                    rc.style.cursor = isVerticalMode() ? 'grab' : '';
+                });
+            });
+
+            // 縦書きのときはマウスホイールの上下を横移動に読み替える
+            rc.addEventListener('wheel', function (e) {
+                if (!isVerticalMode()) return;
+                if (e.deltaY === 0) return;
+                rc.scrollLeft -= e.deltaY;   // 手前に回すと読み進む向き（左）へ
+                e.preventDefault();
+            }, { passive: false });
+        }
+
+        // 表示モードを変えたら、掴めることが分かるようにカーソルを変える
+        function updateVerticalCursor() {
+            var rc = document.getElementById('readerContent');
+            if (rc) rc.style.cursor = isVerticalMode() ? 'grab' : '';
         }
 
         // Mouse Drag Navigation
@@ -1679,7 +1741,9 @@ function getL(obj, replacements = {}) {
             main.addEventListener('mousedown', function(e) {
                 if (e.target.closest('.reader-toolbar, .notes-section, .settings-panel, .bookmarks-panel, .search-panel, .highlight-toolbar, .click-zone, button, a, input, textarea, select')) return;
                 if (e.detail >= 2) return; // Allow double-click text selection
-                if (isVerticalMode()) return; // Conflicts with horizontal scroll
+                // 縦書きは横スクロールで読む。ページ送りではなく、掴んで動かす操作にする
+                // （以前はここで何もせず、画面下のバーでしか移動できなかった）
+                if (isVerticalMode()) { startVerticalPan(e); return; }
                 isDragging = true;
                 hasDragged = false;
                 dragStartX = e.clientX;
@@ -1719,7 +1783,7 @@ function getL(obj, replacements = {}) {
                 if (hasDragged) {
                     var diffX = e.clientX - dragStartX;
                     if (Math.abs(diffX) > DRAG_THRESHOLD) {
-                        var rtl = isRtlMode();
+                        var rtl = isRightToLeftBook();
                         if (diffX > 0) { rtl ? nextPage() : prevPage(); }
                         else { rtl ? prevPage() : nextPage(); }
                     }
