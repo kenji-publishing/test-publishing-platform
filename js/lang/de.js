@@ -766,7 +766,7 @@ window.translations.de = {
             page: 'Seite',
             exported: 'Exportiert'
         },
-        touchHint: 'Wischen Sie links/rechts, um Seiten zu wechseln',
+        touchHint: "Wischen zum Blättern; Wort doppelt tippen zum Markieren",
         cannotHighlight: 'Kann nicht über Elemente hinweg markieren',
         backToDashboard: 'Dashboard',
         backToLibrary: 'Bibliothek',

@@ -766,7 +766,7 @@ window.translations.zh = {
             page: '页',
             exported: '已导出'
         },
-        touchHint: '左右滑动翻页',
+        touchHint: "左右滑动翻页・双击单词高亮",
         cannotHighlight: '无法跨元素高亮',
         backToDashboard: '仪表板',
         backToLibrary: '书库',

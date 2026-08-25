@@ -766,7 +766,7 @@ window.translations.en = {
             page: 'Page',
             exported: 'Exported'
         },
-        touchHint: 'Swipe left/right to turn pages',
+        touchHint: "Swipe to turn pages - double-tap a word to highlight",
         cannotHighlight: 'Cannot highlight across elements',
         backToDashboard: 'Dashboard',
         backToLibrary: 'Library',

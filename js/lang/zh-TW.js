@@ -721,7 +721,7 @@ window.translations['zh-TW'] = {
             "page": "頁",
             "exported": "已匯出"
         },
-        "touchHint": "左右滑動翻頁",
+        "touchHint": "左右滑動翻頁・輕點兩下單字標示",
         "cannotHighlight": "無法跨元素高亮",
         "backToDashboard": "儀表板",
         "backToLibrary": "書庫",

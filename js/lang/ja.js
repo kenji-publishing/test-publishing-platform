@@ -766,7 +766,7 @@ window.translations.ja = {
             page: 'ページ',
             exported: 'エクスポート'
         },
-        touchHint: '左右スワイプでページ移動',
+        touchHint: "左右スワイプでページ移動・単語をダブルタップでハイライト",
         cannotHighlight: '要素をまたいでハイライトできません',
         backToDashboard: 'ダッシュボード',
         backToLibrary: 'ライブラリ',

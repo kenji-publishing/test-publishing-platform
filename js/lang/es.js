@@ -766,7 +766,7 @@ window.translations.es = {
             page: 'Página',
             exported: 'Exportado'
         },
-        touchHint: 'Desliza izquierda/derecha para cambiar páginas',
+        touchHint: "Desliza para cambiar de página; toca dos veces una palabra para resaltarla",
         cannotHighlight: 'No se puede resaltar entre elementos',
         backToDashboard: 'Panel',
         backToLibrary: 'Biblioteca',

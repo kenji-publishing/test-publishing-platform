@@ -766,7 +766,7 @@ window.translations.it = {
             page: 'Pagina',
             exported: 'Esportato'
         },
-        touchHint: 'Scorri a sinistra/destra per girare le pagine',
+        touchHint: "Scorri per sfogliare le pagine; tocca due volte una parola per evidenziarla",
         cannotHighlight: 'Impossibile evidenziare tra elementi diversi',
         backToDashboard: 'Dashboard',
         backToLibrary: 'Biblioteca',

@@ -766,7 +766,7 @@ window.translations.ar = {
             page: 'صفحة',
             exported: 'تم التصدير'
         },
-        touchHint: 'اسحب يساراً/يميناً لتغيير الصفحات',
+        touchHint: "اسحب لتغيير الصفحة · انقر نقرًا مزدوجًا على كلمة لتمييزها",
         cannotHighlight: 'لا يمكن التمييز عبر العناصر',
         backToDashboard: 'لوحة التحكم',
         backToLibrary: 'المكتبة',

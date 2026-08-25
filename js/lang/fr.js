@@ -766,7 +766,7 @@ window.translations.fr = {
             page: 'Page',
             exported: 'Exporté'
         },
-        touchHint: 'Glissez gauche/droite pour changer de page',
+        touchHint: "Glissez pour tourner les pages ; touchez deux fois un mot pour le surligner",
         cannotHighlight: 'Impossible de surligner entre les éléments',
         backToDashboard: 'Tableau de bord',
         backToLibrary: 'Bibliothèque',
