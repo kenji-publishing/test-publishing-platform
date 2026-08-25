@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608232027">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608251547">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608232027">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608251547">
     <title>Reader - AuctLect</title>
     
     <!-- Google Fonts -->
@@ -15,9 +15,9 @@
     <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="../css/variables.css?v=202608232027" rel="stylesheet"><!-- navbar.cssが使う--color-*変数の定義（無いとドロップダウンが透明になる） -->
-    <link href="../css/navbar.css?v=202608232027" rel="stylesheet">
-    <link href="../css/mobile-fixes.css?v=202608232027" rel="stylesheet">
+    <link href="../css/variables.css?v=202608251547" rel="stylesheet"><!-- navbar.cssが使う--color-*変数の定義（無いとドロップダウンが透明になる） -->
+    <link href="../css/navbar.css?v=202608251547" rel="stylesheet">
+    <link href="../css/mobile-fixes.css?v=202608251547" rel="stylesheet">
 
     <style>
         :root {
@@ -171,7 +171,16 @@
         }
 
         .writing-horizontal { writing-mode: horizontal-tb; direction: ltr; }
-        .writing-vertical { writing-mode: vertical-rl; direction: ltr; height: calc(100vh - 240px); overflow-x: auto; padding: 1.5rem; }
+        /* 縦書きの高さは画面から実測した値（--reader-vh）を使う。
+           240px固定だと、ツールバーの高さが変わる携帯では下がはみ出して読めなくなる */
+        .writing-vertical {
+            writing-mode: vertical-rl; direction: ltr;
+            height: var(--reader-vh, calc(100vh - 240px));
+            overflow-x: auto; padding: 1.5rem;
+        }
+        /* 横に引く操作をブラウザの「戻る」に取られないようにする。
+           これが無いと、前のページに戻そうとしてマイライブラリまで戻ってしまう */
+        body, .reader-main, .reader-content { overscroll-behavior-x: contain; }
         .writing-rtl { writing-mode: horizontal-tb; direction: rtl; font-family: 'Noto Naskh Arabic', 'Noto Sans Arabic', serif; }
 
         .text-small { --font-size: 14px; --line-height: 1.7; }
@@ -823,12 +832,12 @@
     <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/config.js?v=202608232027"></script>
-    <script src="../js/i18n.js?v=202608232027"></script>
-    <script src="../js/lang/it.js?v=202608232027"></script>
-    <script src="../js/navbar.js?v=202608232027"></script>
-    <script src="../js/translations.js?v=202608232027"></script>
-    <script src="../js/lazy-loader.js?v=202608232027"></script>
+    <script src="../js/config.js?v=202608251547"></script>
+    <script src="../js/i18n.js?v=202608251547"></script>
+    <script src="../js/lang/it.js?v=202608251547"></script>
+    <script src="../js/navbar.js?v=202608251547"></script>
+    <script src="../js/translations.js?v=202608251547"></script>
+    <script src="../js/lazy-loader.js?v=202608251547"></script>
     <script>
         // ===== Mode Detection =====
         const isManga = new URLSearchParams(window.location.search).get('type') === 'manga';
@@ -1006,6 +1015,7 @@ function getL(obj, replacements = {}) {
             initClickZones();
             initMouseDrag();
             initVerticalPan();
+            updateReaderHeight();
             showTouchHint();
             if (!isManga && apiWorkId) loadWorkFromApi();
         });
@@ -1076,12 +1086,17 @@ function getL(obj, replacements = {}) {
         }
 
         // 'strong': 第○章などの定型見出し / 'weak': 句読点のない短い行 / null: 本文
-        function detectHeading(s) {
+        //
+        // isolated = 前後が空行（または本文の先頭・末尾）であること。
+        // 詩や歌詞は「短くて句読点の無い行」が続くため、これを見ないと
+        // 一行ごとに大きな見出しになり、そこで改ページまで起きてしまう。
+        // 本物の見出しは前後を空けて置かれるので、その一点で見分ける。
+        function detectHeading(s, isolated) {
             if (s.length > 35) return null;
             if (/^[「『（("'“‘・…―—]/.test(s)) return null;
             if (isSymbolOnlyLine(s)) return null;
             if (/^(第\s*[0-9０-９一二三四五六七八九十百千]+\s*(章|話|部|幕|節|編)|chapter\s+[0-9ivxlc]+|prologue|epilogue|プロローグ|エピローグ|序章|終章|序幕|終幕|まえがき|あとがき)/i.test(s)) return 'strong';
-            if (s.length <= 25 && !/[。、．，！？!?.,:;：；]/.test(s)) return 'weak';
+            if (isolated && s.length <= 25 && !/[。、．，！？!?.,:;：；]/.test(s)) return 'weak';
             return null;
         }
 
@@ -1091,7 +1106,18 @@ function getL(obj, replacements = {}) {
         // 原稿を行ブロックに分解し見出しを判定する。
         // Word原稿由来の挿絵([[img ...]])・表([[table]]〜[[/table]])マーカーも解釈する
         function parseBlocks(text) {
-            var lines = String(text).split(/\r?\n/).map(function(s) { return s.trim(); }).filter(Boolean);
+            // 空行は本文には出さないが、「前後が空いているか」の判定に要るので
+            // 捨てる前に覚えておく（詩の行を見出しと取り違えないため）
+            var rawLines = String(text).split(/\r?\n/).map(function(s) { return s.trim(); });
+            var lines = [], isolatedAt = [];
+            rawLines.forEach(function(s, idx) {
+                if (!s) return;
+                var before = idx === 0 || rawLines[idx - 1] === '';
+                var after = idx === rawLines.length - 1 || rawLines[idx + 1] === '';
+                lines.push(s);
+                isolatedAt.push(before && after);
+            });
+
             var blocks = [];
             var i = 0;
             while (i < lines.length) {
@@ -1116,7 +1142,7 @@ function getL(obj, replacements = {}) {
                     if (rows.length) blocks.push({ type: 'table', rows: rows, heading: null, text: '' });
                     continue;
                 }
-                blocks.push({ heading: detectHeading(s), text: s });
+                blocks.push({ heading: detectHeading(s, isolatedAt[i]), text: s });
                 i++;
             }
             // 短い行が大半を占める作品（詩・歌詞など）では弱い見出し判定を無効化
@@ -1129,8 +1155,20 @@ function getL(obj, replacements = {}) {
         }
 
         // 原稿テキストをページ（段落のかたまり）に分割する。見出しは新しいページの先頭から
+        // 1文字あたりの「読む量」。日本語・中国語・韓国語の1文字は、
+        // 英語の1文字よりずっと多くの内容を運ぶ（同じ小説が日本語2,044字＝英語5,445字）。
+        // 文字数だけで区切ると、日本語は1ページに詰め込みすぎ、英語は薄くなる。
+        var CJK_RE = /[぀-ヿ㐀-䶿一-鿿豈-﫿가-힯]/;
+        var CJK_WEIGHT = 2.6;
+
+        function readingWeight(s) {
+            var w = 0;
+            for (var i = 0; i < s.length; i++) w += CJK_RE.test(s.charAt(i)) ? CJK_WEIGHT : 1;
+            return w;
+        }
+
         function paginateContent(text) {
-            var LIMIT = 2000; // 1ページあたりのおおよその文字数
+            var LIMIT = 2000; // 1ページあたりの「読む量」（英語の文字数に換算した目安）
             var blocks = parseBlocks(text);
             var pages = [];
             var cur = [], curLen = 0;
@@ -1153,9 +1191,11 @@ function getL(obj, replacements = {}) {
                 if (b.heading) flush(); // 章の始まりで改ページ
                 var t = b.text;
                 // 1ページを超える長い段落は文末で区切って分割
-                while (t.length > LIMIT) {
-                    var cut = LIMIT;
-                    for (var i = LIMIT; i > LIMIT - 400 && i > 0; i--) {
+                while (readingWeight(t) > LIMIT) {
+                    // 読む量がLIMITに届く位置を文字数に直してから、近くの文末で切る
+                    var approx = Math.max(1, Math.floor(t.length * LIMIT / readingWeight(t)));
+                    var cut = approx;
+                    for (var i = approx; i > approx - 400 && i > 0; i--) {
                         if ('。．！？!?.'.indexOf(t.charAt(i - 1)) !== -1) { cut = i; break; }
                     }
                     flush();
@@ -1163,9 +1203,10 @@ function getL(obj, replacements = {}) {
                     t = t.slice(cut).trim();
                 }
                 if (!t) return;
-                if (curLen > 0 && curLen + t.length > LIMIT) flush();
+                var tWeight = readingWeight(t);
+                if (curLen > 0 && curLen + tWeight > LIMIT) flush();
                 cur.push({ heading: b.heading, text: t });
-                curLen += t.length;
+                curLen += tWeight;
             });
             flush();
             if (!pages.length) pages.push([{ heading: null, text: '' }]);
@@ -1509,6 +1550,7 @@ function getL(obj, replacements = {}) {
             content.classList.remove('writing-horizontal', 'writing-vertical', 'writing-rtl');
             content.classList.add('writing-' + mode);
             updateVerticalCursor();
+            updateReaderHeight();
             document.querySelectorAll('.settings-section:nth-child(3) .settings-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
         }
@@ -1733,13 +1775,32 @@ function getL(obj, replacements = {}) {
             if (rc) rc.style.cursor = isVerticalMode() ? 'grab' : '';
         }
 
+        /**
+         * 縦書きの高さを実際の画面から測って決める。
+         * ツールバーの高さは画面幅で変わるので、固定値では携帯で本文が切れる。
+         */
+        function updateReaderHeight() {
+            var rc = document.getElementById('readerContent');
+            if (!rc) return;
+            var top = rc.getBoundingClientRect().top;                    // 上のツールバー等の分
+            var footer = document.querySelector('.reader-footer, .notes-section');
+            var bottom = footer ? footer.getBoundingClientRect().height : 0;
+            var h = Math.max(240, window.innerHeight - top - bottom - 16);
+            document.documentElement.style.setProperty('--reader-vh', h + 'px');
+        }
+        window.addEventListener('resize', updateReaderHeight);
+        window.addEventListener('orientationchange', function () { setTimeout(updateReaderHeight, 200); });
+
         // Mouse Drag Navigation
         function initMouseDrag() {
-            var main = document.getElementById('readerMain');
             var DRAG_THRESHOLD = 80;
 
-            main.addEventListener('mousedown', function(e) {
-                if (e.target.closest('.reader-toolbar, .notes-section, .settings-panel, .bookmarks-panel, .search-panel, .highlight-toolbar, .click-zone, button, a, input, textarea, select')) return;
+            // 画面全体で受ける。
+            // ページ送りの当たり判定（左右25%ずつ）は本文の外側に重ねてあるため、
+            // 本文にだけ紐づけていると画面の半分でドラッグが始まらなかった。
+            // 動かさずに離せばクリック扱いのままなので、当たり判定の上でも掴んでよい
+            document.addEventListener('mousedown', function(e) {
+                if (e.target.closest('.reader-toolbar, .notes-section, .settings-panel, .bookmarks-panel, .search-panel, .highlight-toolbar, .navbar, button, a, input, textarea, select')) return;
                 if (e.detail >= 2) return; // Allow double-click text selection
                 // 縦書きは横スクロールで読む。ページ送りではなく、掴んで動かす操作にする
                 // （以前はここで何もせず、画面下のバーでしか移動できなかった）
