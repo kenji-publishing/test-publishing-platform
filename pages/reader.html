@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608251547">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608251610">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608251547">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608251610">
     <title>Reader - AuctLect</title>
     
     <!-- Google Fonts -->
@@ -15,9 +15,9 @@
     <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="../css/variables.css?v=202608251547" rel="stylesheet"><!-- navbar.cssが使う--color-*変数の定義（無いとドロップダウンが透明になる） -->
-    <link href="../css/navbar.css?v=202608251547" rel="stylesheet">
-    <link href="../css/mobile-fixes.css?v=202608251547" rel="stylesheet">
+    <link href="../css/variables.css?v=202608251610" rel="stylesheet"><!-- navbar.cssが使う--color-*変数の定義（無いとドロップダウンが透明になる） -->
+    <link href="../css/navbar.css?v=202608251610" rel="stylesheet">
+    <link href="../css/mobile-fixes.css?v=202608251610" rel="stylesheet">
 
     <style>
         :root {
@@ -832,12 +832,12 @@
     <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/config.js?v=202608251547"></script>
-    <script src="../js/i18n.js?v=202608251547"></script>
-    <script src="../js/lang/it.js?v=202608251547"></script>
-    <script src="../js/navbar.js?v=202608251547"></script>
-    <script src="../js/translations.js?v=202608251547"></script>
-    <script src="../js/lazy-loader.js?v=202608251547"></script>
+    <script src="../js/config.js?v=202608251610"></script>
+    <script src="../js/i18n.js?v=202608251610"></script>
+    <script src="../js/lang/it.js?v=202608251610"></script>
+    <script src="../js/navbar.js?v=202608251610"></script>
+    <script src="../js/translations.js?v=202608251610"></script>
+    <script src="../js/lazy-loader.js?v=202608251610"></script>
     <script>
         // ===== Mode Detection =====
         const isManga = new URLSearchParams(window.location.search).get('type') === 'manga';
@@ -1004,6 +1004,7 @@ function getL(obj, replacements = {}) {
         // Mouse Drag State
         let isDragging = false, hasDragged = false;
         let dragStartX = 0, dragStartY = 0;
+        let dragStartScrollY = 0, dragAxis = null;   // 掴んだ時点の縦位置と、横引き/縦引きのどちらか
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -1700,6 +1701,24 @@ function getL(obj, replacements = {}) {
             return document.getElementById('readerContent').classList.contains('writing-vertical');
         }
 
+        /** 本文が画面に収まりきらず、上下に動かす余地があるか */
+        function pageCanScroll() {
+            return document.documentElement.scrollHeight - window.innerHeight > 4;
+        }
+
+        /**
+         * 掴んで動かしている間の上下移動。
+         * サイト全体は scroll-behavior: smooth なので、そのままだと1回動かすごとに
+         * ゆっくり追いかける動きになって掴んだ感じが出ない。ここでは即座に動かす
+         */
+        function panScrollTo(y) {
+            document.documentElement.style.scrollBehavior = 'auto';
+            window.scrollTo(0, y);
+        }
+        function endPanScroll() {
+            document.documentElement.style.scrollBehavior = '';
+        }
+
         /**
          * ページが左へ進む本かどうか。
          *
@@ -1735,7 +1754,7 @@ function getL(obj, replacements = {}) {
         function startVerticalPan(e) {
             var rc = document.getElementById('readerContent');
             if (!rc) return;
-            vPan = { startX: e.clientX, startScroll: rc.scrollLeft, moved: false };
+            vPan = { startX: e.clientX, startY: e.clientY, startScroll: rc.scrollLeft, startPageY: window.scrollY, moved: false };
             rc.style.cursor = 'grabbing';
             e.preventDefault();   // 掴んでいる間に文字が選択されるのを防ぐ
         }
@@ -1747,15 +1766,19 @@ function getL(obj, replacements = {}) {
             document.addEventListener('mousemove', function (e) {
                 if (!vPan) return;
                 var dx = e.clientX - vPan.startX;
-                if (Math.abs(dx) > 3) vPan.moved = true;
+                var dy = e.clientY - vPan.startY;
+                if (Math.abs(dx) > 3 || Math.abs(dy) > 3) vPan.moved = true;
                 // 掴んだ場所が指についてくるように、動かした分だけ逆にスクロールする
                 rc.scrollLeft = vPan.startScroll - dx;
+                // 縦書きでもページ全体が収まらないことがあるので、上下も同じように動かす
+                if (Math.abs(dy) > 3 && pageCanScroll()) panScrollTo(vPan.startPageY - dy);
             });
 
             ['mouseup', 'mouseleave'].forEach(function (ev) {
                 document.addEventListener(ev, function () {
                     if (!vPan) return;
                     vPan = null;
+                    endPanScroll();
                     rc.style.cursor = isVerticalMode() ? 'grab' : '';
                 });
             });
@@ -1809,17 +1832,34 @@ function getL(obj, replacements = {}) {
                 hasDragged = false;
                 dragStartX = e.clientX;
                 dragStartY = e.clientY;
+                dragStartScrollY = window.scrollY;
+                dragAxis = null;
             });
 
             document.addEventListener('mousemove', function(e) {
                 if (!isDragging) return;
                 var diffX = e.clientX - dragStartX;
-                var diffY = Math.abs(e.clientY - dragStartY);
+                var rawY = e.clientY - dragStartY;
+                var diffY = Math.abs(rawY);
 
-                if (Math.abs(diffX) > 10 && !hasDragged) {
-                    window.getSelection().removeAllRanges();
-                    hasDragged = true;
+                // 先に大きく動いた向きで、横引き（ページ送り）か縦引き（上下移動）かを決める。
+                // 一度決めたら離すまで変えない。途中で切り替わると意図しないページ送りが起きる
+                if (!dragAxis) {
+                    if (Math.abs(diffX) > 10 && Math.abs(diffX) >= diffY) dragAxis = 'x';
+                    else if (diffY > 10 && pageCanScroll()) dragAxis = 'y';
+                    if (dragAxis) {
+                        window.getSelection().removeAllRanges();
+                        hasDragged = true;
+                        if (dragAxis === 'y') document.body.style.cursor = 'grabbing';
+                    }
                 }
+
+                // 本文が画面に収まらないときは、掴んだ場所が指についてくるように上下へ動かす
+                if (dragAxis === 'y') {
+                    panScrollTo(dragStartScrollY - rawY);
+                    return;
+                }
+                if (dragAxis !== 'x') return;
 
                 if (hasDragged && Math.abs(diffX) > 30 && diffY < 100) {
                     if (diffX > 50 && currentPage > 1) {
@@ -1838,8 +1878,18 @@ function getL(obj, replacements = {}) {
             document.addEventListener('mouseup', function(e) {
                 if (!isDragging) return;
                 isDragging = false;
+                document.body.style.cursor = '';
+                endPanScroll();
                 document.getElementById('swipeLeft').classList.remove('show');
                 document.getElementById('swipeRight').classList.remove('show');
+
+                // 上下に動かしただけのときはページを送らない
+                if (dragAxis === 'y') {
+                    dragAxis = null;
+                    setTimeout(function() { hasDragged = false; }, 50);
+                    return;
+                }
+                dragAxis = null;
 
                 if (hasDragged) {
                     var diffX = e.clientX - dragStartX;
