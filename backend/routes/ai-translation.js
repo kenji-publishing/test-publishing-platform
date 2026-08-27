@@ -9,6 +9,7 @@ const { authenticate } = require('../middleware/auth');
 const db = require('../config/database');
 const Anthropic = require('@anthropic-ai/sdk');
 const { translateSample } = require('../services/aiTranslationService');
+const { normalizeStyle, normalizeGenre } = require('../services/workProfile');
 
 // Initialize Anthropic client
 const anthropic = new Anthropic({
@@ -32,7 +33,7 @@ const SUPPORTED_LANGS = ['en', 'ja', 'zh', 'zh-TW', 'es', 'fr', 'de', 'ko', 'ar'
  */
 router.post('/sample', authenticate, async (req, res) => {
   try {
-    const { text, sourceLang, targetLang } = req.body;
+    const { text, sourceLang, targetLang, glossary, style, genre } = req.body;
     if (!text || !String(text).trim()) {
       return res.status(400).json({ error: 'Text is required' });
     }
@@ -55,7 +56,16 @@ router.post('/sample', authenticate, async (req, res) => {
     usage.count++;
 
     const excerpt = String(text).slice(0, SAMPLE_MAX_CHARS);
-    const samples = await translateSample({ text: excerpt, sourceLang, targetLang });
+    // 比較にも本翻訳と同じ用語集・作風を渡す。ここだけ条件が違うと
+    // 「比較では固有名詞が崩れる」ように見えて、品質の判断材料にならない
+    const samples = await translateSample({
+      text: excerpt,
+      sourceLang,
+      targetLang,
+      glossary: Array.isArray(glossary) ? glossary.slice(0, 50) : [],
+      style: normalizeStyle(style),
+      genre: normalizeGenre(genre)
+    });
     res.json({ success: true, samples });
   } catch (error) {
     console.error('AI translation sample error:', error);

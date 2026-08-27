@@ -75,7 +75,15 @@ function buildPrompt({ chunk, sourceLang, targetLang, tier, glossary, style, gen
             .map(g => `- "${g.src}" -> "${g.tgt}"`)
             .join('\n');
         if (pairs) {
-            glossaryNote = `\n\nTerminology to enforce consistently (always translate the left term as the right term):\n${pairs}`;
+            // 対応表を渡すだけでは足りない。英語では文法が冠詞を呼ぶので、
+            // 「駅長 -> Chief」と書いても the Chief になってしまう（実際に起きた）。
+            // 訳語が大文字で始まっていれば固有名詞とみなし、冠詞も語形変化も禁じる。
+            glossaryNote = [
+                '', '',
+                'Terminology to enforce consistently (always translate the left term as the right term):',
+                pairs,
+                'Write each right-hand term exactly as given. When it begins with a capital letter, treat it as a proper name: never place an article (a/an/the) before it, never pluralize or inflect it, and never replace it with a descriptive common-noun phrase.'
+            ].join('\n');
         }
     }
 
@@ -123,12 +131,12 @@ async function translateChunk({ chunk, sourceLang, targetLang, tier, glossary, s
  * Translate a short excerpt with all three tiers in parallel
  * (the wizard's quality-comparison step). Excerpt <= ~600 chars.
  */
-async function translateSample({ text, sourceLang, targetLang }) {
+async function translateSample({ text, sourceLang, targetLang, glossary, style, genre }) {
     const tiers = ['haiku', 'sonnet', 'opus'];
     // 25s per-model cap + single retry: one hung model must not push the
     // whole comparison response past the 60s nginx proxy timeout (504)
     const results = await Promise.allSettled(
-        tiers.map(tier => translateChunk({ chunk: text, sourceLang, targetLang, tier }, { timeout: 25000, maxRetries: 1 }))
+        tiers.map(tier => translateChunk({ chunk: text, sourceLang, targetLang, tier, glossary, style, genre }, { timeout: 25000, maxRetries: 1 }))
     );
     const out = {};
     tiers.forEach((tier, i) => {
@@ -194,7 +202,7 @@ async function translateText({ text, sourceLang, targetLang, tier, glossary, sty
         translated.push(await withChunkRetry(() => {
             streamedChars = 0;
             return translateChunk(
-                { chunk: chunks[i], sourceLang, targetLang, tier, glossary },
+                { chunk: chunks[i], sourceLang, targetLang, tier, glossary, style, genre },
                 undefined,
                 (n) => { streamedChars += n; report(); }
             );

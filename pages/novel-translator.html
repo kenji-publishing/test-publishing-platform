@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608251637">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608271617">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Novel Translator - AuctLect</title>
 
@@ -16,26 +16,26 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <!-- Platform CSS -->
-    <link href="../css/variables.css?v=202608251637" rel="stylesheet">
-    <link rel="stylesheet" href="../css/style-new.css?v=202608251637">
-    <link href="../css/components.css?v=202608251637" rel="stylesheet">
-    <link href="../css/navbar.css?v=202608251637" rel="stylesheet">
-    <link rel="stylesheet" href="../css/mobile-fixes.css?v=202608251637">
+    <link href="../css/variables.css?v=202608271617" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style-new.css?v=202608271617">
+    <link href="../css/components.css?v=202608271617" rel="stylesheet">
+    <link href="../css/navbar.css?v=202608271617" rel="stylesheet">
+    <link rel="stylesheet" href="../css/mobile-fixes.css?v=202608271617">
 
     <!-- 言語ファイル（9言語） -->
-    <script src="../js/config.js?v=202608251637"></script>
-    <script src="../js/lang/ja.js?v=202608251637"></script>
-    <script src="../js/lang/en.js?v=202608251637"></script>
-    <script src="../js/lang/zh.js?v=202608251637"></script>
-    <script src="../js/lang/zh-TW.js?v=202608251637"></script>
-    <script src="../js/lang/es.js?v=202608251637"></script>
-    <script src="../js/lang/fr.js?v=202608251637"></script>
-    <script src="../js/lang/de.js?v=202608251637"></script>
-    <script src="../js/lang/ko.js?v=202608251637"></script>
-    <script src="../js/lang/ar.js?v=202608251637"></script>
-    <script src="../js/lang/pt.js?v=202608251637"></script>
-    <script src="../js/lang/it.js?v=202608251637"></script>
-    <script src="../js/wizard-common.js?v=202608251637"></script>
+    <script src="../js/config.js?v=202608271617"></script>
+    <script src="../js/lang/ja.js?v=202608271617"></script>
+    <script src="../js/lang/en.js?v=202608271617"></script>
+    <script src="../js/lang/zh.js?v=202608271617"></script>
+    <script src="../js/lang/zh-TW.js?v=202608271617"></script>
+    <script src="../js/lang/es.js?v=202608271617"></script>
+    <script src="../js/lang/fr.js?v=202608271617"></script>
+    <script src="../js/lang/de.js?v=202608271617"></script>
+    <script src="../js/lang/ko.js?v=202608271617"></script>
+    <script src="../js/lang/ar.js?v=202608271617"></script>
+    <script src="../js/lang/pt.js?v=202608271617"></script>
+    <script src="../js/lang/it.js?v=202608271617"></script>
+    <script src="../js/wizard-common.js?v=202608271617"></script>
 
     <style>
         :root {
@@ -1359,7 +1359,8 @@
         document.getElementById('previewOriginalText').textContent = excerpt;
 
         // 同じ原稿・言語ペアなら前回の結果をそのまま表示（戻ってきた時に消えない）
-        const cacheKey = srcLang + '-' + tgtLang + '::' + sourceTextContent.slice(0, 500);
+        const profileKey = JSON.stringify(glossary) + '::' + (document.getElementById('tsStyle') || {}).value + '::' + (document.getElementById('tsGenre') || {}).value;
+        const cacheKey = srcLang + '-' + tgtLang + '::' + profileKey + '::' + sourceTextContent.slice(0, 500);
         if (comparisonCache.key === cacheKey && comparisonCache.samples) {
             renderComparisonSamples(comparisonCache.samples);
             return;
@@ -1383,7 +1384,15 @@
             const resp = await fetch((window.API_ORIGIN || '') + '/api/ai-translation/sample', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                body: JSON.stringify({ text: sourceTextContent.slice(0, 500), sourceLang: srcLang, targetLang: tgtLang })
+                body: JSON.stringify({
+                    text: sourceTextContent.slice(0, 500),
+                    sourceLang: srcLang,
+                    targetLang: tgtLang,
+                    // 比較も本番と同じ条件で訳す（用語集が効かないと品質を比べられない）
+                    glossary: glossary,
+                    style: (document.getElementById('tsStyle') || {}).value || '',
+                    genre: (document.getElementById('tsGenre') || {}).value || ''
+                })
             });
             if (resp.status === 401) {
                 alert(L === 'ja' ? 'ログインの有効期限が切れています。もう一度ログインしてください。' : 'Your session has expired. Please log in again.');
@@ -1973,7 +1982,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- JSZip: lets us crack open .docx (which is a ZIP) to read the text inside -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="../js/i18n.js?v=202608251637"></script>
-    <script src="../js/navbar.js?v=202608251637"></script>
+    <script src="../js/i18n.js?v=202608271617"></script>
+    <script src="../js/navbar.js?v=202608271617"></script>
 </body>
 </html>
