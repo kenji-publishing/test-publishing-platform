@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608271617">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608271623">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608271617">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608271623">
     <title>Reader - AuctLect</title>
     
     <!-- Google Fonts -->
@@ -15,9 +15,9 @@
     <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="../css/variables.css?v=202608271617" rel="stylesheet"><!-- navbar.cssが使う--color-*変数の定義（無いとドロップダウンが透明になる） -->
-    <link href="../css/navbar.css?v=202608271617" rel="stylesheet">
-    <link href="../css/mobile-fixes.css?v=202608271617" rel="stylesheet">
+    <link href="../css/variables.css?v=202608271623" rel="stylesheet"><!-- navbar.cssが使う--color-*変数の定義（無いとドロップダウンが透明になる） -->
+    <link href="../css/navbar.css?v=202608271623" rel="stylesheet">
+    <link href="../css/mobile-fixes.css?v=202608271623" rel="stylesheet">
 
     <style>
         :root {
@@ -189,6 +189,13 @@
         .text-xlarge { --font-size: 26px; --line-height: 2.0; }
 
         .reader-content p { margin-bottom: 1.5em; text-align: justify; }
+        /* 段落の見せ方は読者が選ぶ。紙の本は字下げ、ウェブ記事は行あけ、と慣習が違う */
+        .para-indent .reader-content p { margin-bottom: 0; text-indent: 1em; }
+        .para-spaced .reader-content p { margin-bottom: 1.5em; text-indent: 0; }
+        .para-both .reader-content p { margin-bottom: 0.75em; text-indent: 1em; }
+        /* 章の書き出しは下げない（本の組版の慣習）。見出しの直後がそれにあたる */
+        .para-indent .reader-content :is(h1, h2, h3) + p,
+        .para-both .reader-content :is(h1, h2, h3) + p { text-indent: 0; }
         .reader-content h1, .reader-content h2, .reader-content h3 { margin-top: 1.5em; margin-bottom: 0.75em; }
 
         .highlight-yellow { background: var(--reader-highlight-yellow); }
@@ -588,7 +595,7 @@
     }
     </style>
 </head>
-<body class="theme-light text-medium">
+<body class="theme-light text-medium para-indent">
 
     <!-- ========== PATTERN C NAVBAR START ========== -->
     <div id="navbar-container"></div>
@@ -684,6 +691,14 @@
                 <button class="settings-btn active" onclick="setWritingMode('horizontal')" id="dirHorizontal" data-i18n="reader.horizontal">Horizontal</button>
                 <button class="settings-btn" onclick="setWritingMode('vertical')" id="dirVertical" data-i18n="reader.vertical">Vertical</button>
                 <button class="settings-btn" onclick="setWritingMode('rtl')" id="dirRtl" data-i18n="reader.rtl">RTL</button>
+            </div>
+        </div>
+        <div class="settings-section">
+            <div class="settings-label"><i class="fas fa-paragraph me-1"></i> <span id="labelParagraph" data-i18n="reader.paragraphStyle">Paragraphs</span></div>
+            <div class="settings-row" id="paragraphStyleRow">
+                <button class="settings-btn active" onclick="setParagraphStyle('indent')" id="paraIndent" data-i18n="reader.paragraphIndent">Indent</button>
+                <button class="settings-btn" onclick="setParagraphStyle('spaced')" id="paraSpaced" data-i18n="reader.paragraphSpaced">Spaced</button>
+                <button class="settings-btn" onclick="setParagraphStyle('both')" id="paraBoth" data-i18n="reader.paragraphBoth">Both</button>
             </div>
         </div>
     </div>
@@ -846,12 +861,12 @@
     <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/config.js?v=202608271617"></script>
-    <script src="../js/i18n.js?v=202608271617"></script>
-    <script src="../js/lang/it.js?v=202608271617"></script>
-    <script src="../js/navbar.js?v=202608271617"></script>
-    <script src="../js/translations.js?v=202608271617"></script>
-    <script src="../js/lazy-loader.js?v=202608271617"></script>
+    <script src="../js/config.js?v=202608271623"></script>
+    <script src="../js/i18n.js?v=202608271623"></script>
+    <script src="../js/lang/it.js?v=202608271623"></script>
+    <script src="../js/navbar.js?v=202608271623"></script>
+    <script src="../js/translations.js?v=202608271623"></script>
+    <script src="../js/lazy-loader.js?v=202608271623"></script>
     <script>
         // ===== Mode Detection =====
         const isManga = new URLSearchParams(window.location.search).get('type') === 'manga';
@@ -1033,6 +1048,7 @@ function getL(obj, replacements = {}) {
             initSelHandles();
             updateReaderHeight();
             showTouchHint();
+            restoreParagraphStyle();
             if (!isManga && apiWorkId) loadWorkFromApi();
         });
 
@@ -1862,6 +1878,28 @@ function getL(obj, replacements = {}) {
             updateReaderHeight();
             document.querySelectorAll('.settings-section:nth-child(3) .settings-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
+        }
+
+        // 段落の見せ方。作品ごとではなく読者の好みなので、端末に1つだけ覚える
+        // （storageKey は作品ごとに分かれるため、ここではあえて使わない）
+        const PARAGRAPH_STYLES = ["indent", "spaced", "both"];
+        const PARAGRAPH_STYLE_KEY = "reader_paragraph_style";
+
+        function setParagraphStyle(style, save) {
+            if (PARAGRAPH_STYLES.indexOf(style) === -1) style = "indent";
+            document.body.classList.remove("para-indent", "para-spaced", "para-both");
+            document.body.classList.add("para-" + style);
+            document.querySelectorAll("#paragraphStyleRow .settings-btn").forEach(function(btn) { btn.classList.remove("active"); });
+            var btn = document.getElementById("para" + style.charAt(0).toUpperCase() + style.slice(1));
+            if (btn) btn.classList.add("active");
+            // プライベートブラウズでは localStorage が例外を投げる。読書自体は止めない
+            if (save !== false) { try { localStorage.setItem(PARAGRAPH_STYLE_KEY, style); } catch (err) {} }
+        }
+
+        function restoreParagraphStyle() {
+            var saved = null;
+            try { saved = localStorage.getItem(PARAGRAPH_STYLE_KEY); } catch (err) {}
+            setParagraphStyle(saved || "indent", false);
         }
 
         function updatePageInfo() {
