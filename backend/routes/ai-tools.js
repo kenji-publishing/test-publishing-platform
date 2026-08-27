@@ -132,7 +132,7 @@ const MANGA_SAMPLE_DAILY_LIMIT = 10;
 const mangaSampleUsage = new Map(); // userId -> { day, count }
 router.post('/manga/sample', authenticate, async (req, res) => {
     try {
-        const { stagedId, sourceLang, targetLang } = req.body;
+        const { stagedId, sourceLang, targetLang, glossary, style, genre } = req.body;
         if (!SUPPORTED_LANGS.includes(targetLang)) return res.status(400).json({ error: 'Unsupported target language' });
         const imagePath = resolveStagedFile(req.user.userId, stagedId);
         if (!imagePath) return res.status(400).json({ error: 'Staged page not found. Please upload pages first.' });
@@ -145,7 +145,16 @@ router.post('/manga/sample', authenticate, async (req, res) => {
         }
         usage.count++;
 
-        const samples = await sampleManga({ imagePath, sourceLang, targetLang });
+        // 比較にも本翻訳と同じ用語集・作風を渡す。ここだけ条件が違うと
+        // 「比較では固有名詞が崩れる」ように見えて、品質の判断材料にならない
+        const samples = await sampleManga({
+            imagePath,
+            sourceLang,
+            targetLang,
+            glossary: Array.isArray(glossary) ? glossary.slice(0, 50) : [],
+            style: normalizeStyle(style),
+            genre: normalizeGenre(genre)
+        });
         res.json({ success: true, samples });
     } catch (error) {
         console.error('Manga sample error:', error);
