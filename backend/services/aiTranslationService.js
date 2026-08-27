@@ -64,6 +64,56 @@ function chunkText(text, limit = MAX_CHUNK_CHARS) {
     return chunks.length ? chunks : [''];
 }
 
+/**
+ * 用語集の固有名詞に付いた冠詞を落とす。
+ *
+ * 指示文を強めても、英語の文法が強く冠詞を求める位置（"Poet is a Liar" の
+ * ような述語）では取りこぼしが残る。どのモデルがどこで滑るかは実行ごとに
+ * 変わるので、最後に機械的にそろえる。
+ *
+ * 触るのは「訳語が大文字で始まっていて、その語がそのまま現れている」時だけ。
+ * 小文字の一般名詞（a shadow）は作者が普通名詞として使った箇所なので残す。
+ * 英語向けの訳文にだけ適用する。スペイン語などの a は前置詞で、消すと壊れる。
+ */
+function stripArticlesBeforeNames(text, glossary, targetLang) {
+    if (targetLang !== 'en') return text;   // 冠詞の規則は英語だけのもの
+    if (!Array.isArray(glossary) || glossary.length === 0) return text;
+    let out = String(text);
+    glossary
+        .map(g => g && typeof g.tgt === 'string' ? g.tgt.trim() : '')
+        .filter(t => /^[A-Z]/.test(t))
+        .forEach(term => {
+            const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            // 冠詞だけ大文字小文字を問わない。用語そのものは大文字始まりに限定する
+            out = out.replace(new RegExp('\\b(?:[Tt]he|[Aa]n?)\\s+(' + escaped + ')\\b', 'g'), '$1');
+        });
+    return out;
+}
+
+/**
+ * 訳文の行構造を原稿に合わせ直す。
+ *
+ * 「行を増やすな」と指示しても、モデルは段落の間に空行を入れることがある。
+ * どのモデルが入れるかは実行ごとに変わる（同じ原稿で opus が入れた回と
+ * sonnet が入れた回がある）ため、指示だけに頼らずここで直す。
+ *
+ * 触るのは「空行が増えただけ」と確認できた時だけ。中身のある行の数が原稿と
+ * 一致しない場合は、段落を分けた・まとめた等の別の変化なので、そのまま返す。
+ */
+function matchLineStructure(source, translated) {
+    const src = String(source).split('\n');
+    const out = String(translated).split('\n');
+    if (out.length === src.length) return translated;
+
+    const outContent = out.filter(l => l.trim() !== '');
+    const srcContentCount = src.filter(l => l.trim() !== '').length;
+    if (outContent.length !== srcContentCount) return translated;
+
+    // 原稿の空行の位置をそのまま再現する
+    let i = 0;
+    return src.map(s => (s.trim() === '' ? '' : outContent[i++])).join('\n');
+}
+
 function buildPrompt({ chunk, sourceLang, targetLang, tier, glossary, style, genre }) {
     const srcName = LANG_NAMES[sourceLang] || sourceLang || 'the source language';
     const tgtName = LANG_NAMES[targetLang] || targetLang || 'the target language';
@@ -75,21 +125,34 @@ function buildPrompt({ chunk, sourceLang, targetLang, tier, glossary, style, gen
             .map(g => `- "${g.src}" -> "${g.tgt}"`)
             .join('\n');
         if (pairs) {
-            // 対応表を渡すだけでは足りない。英語では文法が冠詞を呼ぶので、
-            // 「駅長 -> Chief」と書いても the Chief になってしまう（実際に起きた）。
-            // 訳語が大文字で始まっていれば固有名詞とみなし、冠詞も語形変化も禁じる。
+            // 対応表を渡すだけでは足りない。英語の文法が冠詞を呼ぶので、
+            // 「駅長 -> Chief」と書いても the Chief / a Liar になってしまう。
+            // 効かなかったのは、上の品質指示（自然な英語にせよ・文学的に訳せ）と
+            // 真正面からぶつかるため。どちらが優先かを書かないと、賢いモデルほど
+            // 「自然さ」を選ぶ。実測でも opus だけが the Chief を出し続けた。
+            // そこで (1) どちらが勝つかを明記し (2) 用語集自身の語で実例を示し
+            // (3) 本文の直前（最後に読む位置）に置く、の3つで守らせる。
+            const sample = glossary
+                .map(g => g && g.tgt)
+                .find(t => typeof t === 'string' && /^[A-Z]/.test(t.trim()));
+            const example = sample
+                ? ` For example write "${sample} said" and "he is ${sample}", never "the ${sample} said" or "he is a ${sample}".`
+                : '';
             glossaryNote = [
-                '', '',
-                'Terminology to enforce consistently (always translate the left term as the right term):',
+                'Terminology — fixed renderings, not suggestions:',
                 pairs,
-                'Write each right-hand term exactly as given. When it begins with a capital letter, treat it as a proper name: never place an article (a/an/the) before it, never pluralize or inflect it, and never replace it with a descriptive common-noun phrase.'
+                'Every right-hand term above that begins with a capital letter is a PROPER NAME in this work, even when it looks like a common noun or a job title.'
+                    + ' Write it bare and exactly as given: no article (a/an/the) in front of it, no plural or other inflection, never lowercased, and never swapped for a descriptive phrase.'
+                    + example
+                    + ' This outranks natural phrasing: where a sentence would read more smoothly with an article, leave the article out anyway.',
+                '', ''
             ].join('\n');
         }
     }
 
-    return `You are a professional literary translator translating a novel or long-form text from ${srcName} to ${tgtName}.
+    const system = `You are a professional literary translator translating a novel or long-form text from ${srcName} to ${tgtName}.
 
-${TIER_INSTRUCTIONS[tier]}${styleNote({ style, genre })}${glossaryNote}
+${TIER_INSTRUCTIONS[tier]}${styleNote({ style, genre })}
 
 Rules:
 - The text is one part of a longer manuscript; it may start or end mid-scene. Translate it as-is without adding introductions or conclusions.
@@ -98,8 +161,17 @@ Rules:
 - Lines that are markup markers — like [[img src="..." w="..." align="..."]], [[table]] or [[/table]] — must be copied to the output EXACTLY as-is, unchanged and in the same position. Inside a [[table]] block, translate the cell text but keep the " | " separators and the line structure.
 - Respond with ONLY the ${tgtName} translation — no preamble, no explanations, no markdown fences.
 
-Text to translate:
-${chunk}`;
+${glossaryNote}`;
+
+    // 原稿だけを user 側に置く。指示と本文が同じ発話に混ざっていると、
+    // 本文の文体（自然な英語）に引きずられて規則の方が薄まる
+    const lineCount = String(chunk).split('\n').length;
+    return {
+        system,
+        user: `Text to translate — ${lineCount} lines. Your output must have exactly ${lineCount} lines: do not add blank lines between paragraphs, and do not merge or split lines.
+
+${chunk}`
+    };
 }
 
 /**
@@ -108,10 +180,12 @@ ${chunk}`;
  */
 async function translateChunk({ chunk, sourceLang, targetLang, tier, glossary, style, genre }, requestOptions, onText) {
     if (!chunk.trim()) return chunk;
+    const prompt = buildPrompt({ chunk, sourceLang, targetLang, tier, glossary, style, genre });
     const stream = anthropic.messages.stream({
         model: MODEL_TIERS[tier],
         max_tokens: 16000,
-        messages: [{ role: 'user', content: buildPrompt({ chunk, sourceLang, targetLang, tier, glossary, style, genre }) }]
+        system: prompt.system,
+        messages: [{ role: 'user', content: prompt.user }]
     }, requestOptions);
     if (onText) stream.on('text', (t) => onText(t.length));
     const message = await stream.finalMessage();
@@ -124,7 +198,7 @@ async function translateChunk({ chunk, sourceLang, targetLang, tier, glossary, s
         .map(b => b.text)
         .join('');
     if (!text.trim()) throw new Error('Empty translation result');
-    return text;
+    return matchLineStructure(chunk, stripArticlesBeforeNames(text, glossary, targetLang));
 }
 
 /**
