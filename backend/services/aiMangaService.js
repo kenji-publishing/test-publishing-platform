@@ -12,7 +12,7 @@
 const fs = require('fs');
 const path = require('path');
 const Anthropic = require('@anthropic-ai/sdk');
-const { styleNote } = require('./workProfile');
+const { styleNote, contextNoteBlock } = require('./workProfile');
 
 const anthropic = new Anthropic({ apiKey: process.env.CLAUDE_API_KEY });
 
@@ -62,7 +62,7 @@ async function withRetry(fn, attempts = 5, onWait) {
     throw lastErr;
 }
 
-function buildPrompt({ sourceLang, targetLang, tier, glossary, style, genre }) {
+function buildPrompt({ sourceLang, targetLang, tier, glossary, style, genre, contextNote }) {
     const srcName = LANG_NAMES[sourceLang] || sourceLang || 'the source language';
     const tgtName = LANG_NAMES[targetLang] || targetLang || 'the target language';
     let glossaryNote = '';
@@ -91,6 +91,14 @@ Extract EVERY piece of text on the page and translate it into ${tgtName}:
 
 ${TIER_INSTRUCTIONS[tier]}${styleNote({ style, genre })}${glossaryNote}
 
+When these pull in different directions, follow them in this order, highest first:
+1. The JSON output format below.
+2. The terminology list above.
+3. The author's background note below, when one is supplied.
+4. The genre and register guidance above.
+5. Natural phrasing.
+
+${contextNoteBlock(contextNote)}
 Respond with ONLY this JSON (no markdown fences, no commentary):
 {"bubbles":[{"type":"speech|thought|narration|sfx|sign","location":"short position hint in English (e.g. top-right panel)","bbox":{"x":0,"y":0,"w":0,"h":0},"original":"text as written","translation":"${tgtName} translation"}]}
 If the page has no text at all, respond {"bubbles":[]}.`;
@@ -109,7 +117,7 @@ function normalizeBbox(bb) {
 }
 
 /** 1ページを翻訳（画像ファイル→吹き出しリスト） */
-async function translatePage({ imagePath, sourceLang, targetLang, tier, glossary, style, genre }, requestOptions) {
+async function translatePage({ imagePath, sourceLang, targetLang, tier, glossary, style, genre, contextNote }, requestOptions) {
     const ext = path.extname(imagePath).toLowerCase();
     const mediaType = MEDIA_TYPES[ext] || 'image/jpeg';
     const data = fs.readFileSync(imagePath).toString('base64');
@@ -121,7 +129,7 @@ async function translatePage({ imagePath, sourceLang, targetLang, tier, glossary
             role: 'user',
             content: [
                 { type: 'image', source: { type: 'base64', media_type: mediaType, data } },
-                { type: 'text', text: buildPrompt({ sourceLang, targetLang, tier, glossary, style, genre }) }
+                { type: 'text', text: buildPrompt({ sourceLang, targetLang, tier, glossary, style, genre, contextNote }) }
             ]
         }]
     }, requestOptions);
@@ -152,7 +160,7 @@ async function translatePage({ imagePath, sourceLang, targetLang, tier, glossary
  * 全ページを翻訳。ページ=チャンクで逐次処理・途中再開対応。
  * 戻り値: JSON文字列 {pages:[{page:1, bubbles:[...]}]}（result_textにそのまま保存できる形）
  */
-async function translateManga({ pagePaths, sourceLang, targetLang, tier, glossary, style, genre, onProgress, onStatus, completedChunks = [], onChunkDone }) {
+async function translateManga({ pagePaths, sourceLang, targetLang, tier, glossary, style, genre, contextNote, onProgress, onStatus, completedChunks = [], onChunkDone }) {
     const results = [];
     for (let i = 0; i < pagePaths.length; i++) {
         // 前回完了済みページは再翻訳しない
@@ -163,7 +171,7 @@ async function translateManga({ pagePaths, sourceLang, targetLang, tier, glossar
         }
         if (onStatus) onStatus({ page: i + 1, total: pagePaths.length, retrying: false });
         const bubbles = await withRetry(
-            () => translatePage({ imagePath: pagePaths[i], sourceLang, targetLang, tier, glossary, style, genre }),
+            () => translatePage({ imagePath: pagePaths[i], sourceLang, targetLang, tier, glossary, style, genre, contextNote }),
             5,
             (attempt, attempts, overloaded) => {
                 if (onStatus) onStatus({ page: i + 1, total: pagePaths.length, retrying: true, attempt, attempts, overloaded });
@@ -179,7 +187,7 @@ async function translateManga({ pagePaths, sourceLang, targetLang, tier, glossar
 }
 
 /** お試し比較: 1ページを3品質で並列翻訳（各30s上限。混雑時は1回だけ短い間隔で再試行） */
-async function sampleManga({ imagePath, sourceLang, targetLang, glossary, style, genre }) {
+async function sampleManga({ imagePath, sourceLang, targetLang, glossary, style, genre, contextNote }) {
     const tiers = ['haiku', 'sonnet', 'opus'];
     const runTier = async (tier) => {
         // セリフが多い・レイアウトが特殊なページは1回の読み取りに1分近くかかることがある。
@@ -187,13 +195,13 @@ async function sampleManga({ imagePath, sourceLang, targetLang, glossary, style,
         // （旧設定の30s×SDK再試行×手動再試行は最悪124sでnginx/CFに切られていた）
         const started = Date.now();
         try {
-            return await translatePage({ imagePath, sourceLang, targetLang, tier, glossary, style, genre }, { timeout: 75000, maxRetries: 0 });
+            return await translatePage({ imagePath, sourceLang, targetLang, tier, glossary, style, genre, contextNote }, { timeout: 75000, maxRetries: 0 });
         } catch (e) {
             if (isNonRetryable(e) || !isOverloaded(e)) throw e;
             await new Promise(r => setTimeout(r, 4000)); // 混雑は少し待つと通ることが多い
             // 再試行は全体90s以内に収まる残り時間だけ使う（混雑エラーは通常数秒で返るため実際はほぼ75s）
             const remaining = Math.max(90000 - (Date.now() - started), 15000);
-            return await translatePage({ imagePath, sourceLang, targetLang, tier, glossary, style, genre }, { timeout: Math.min(remaining, 75000), maxRetries: 0 });
+            return await translatePage({ imagePath, sourceLang, targetLang, tier, glossary, style, genre, contextNote }, { timeout: Math.min(remaining, 75000), maxRetries: 0 });
         }
     };
     const results = await Promise.allSettled(tiers.map(runTier));

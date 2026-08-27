@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608271638">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608271954">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608271638">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608271954">
     <title data-i18n="mangaTranslator.pageTitle">Manga Translator - AuctLect</title>
     
     <!-- Google Fonts -->
@@ -17,26 +17,26 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <!-- Platform CSS -->
-    <link href="../css/variables.css?v=202608271638" rel="stylesheet">
-    <link rel="stylesheet" href="../css/style-new.css?v=202608271638">
-    <link href="../css/components.css?v=202608271638" rel="stylesheet">
-    <link href="../css/navbar.css?v=202608271638" rel="stylesheet">
-    <link rel="stylesheet" href="../css/mobile-fixes.css?v=202608271638">
+    <link href="../css/variables.css?v=202608271954" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style-new.css?v=202608271954">
+    <link href="../css/components.css?v=202608271954" rel="stylesheet">
+    <link href="../css/navbar.css?v=202608271954" rel="stylesheet">
+    <link rel="stylesheet" href="../css/mobile-fixes.css?v=202608271954">
     
     <!-- 言語ファイル（9言語） -->
-    <script src="../js/lang/ja.js?v=202608271638"></script>
-    <script src="../js/lang/en.js?v=202608271638"></script>
-    <script src="../js/lang/zh.js?v=202608271638"></script>
-    <script src="../js/lang/zh-TW.js?v=202608271638"></script>
-    <script src="../js/lang/es.js?v=202608271638"></script>
-    <script src="../js/lang/fr.js?v=202608271638"></script>
-    <script src="../js/lang/de.js?v=202608271638"></script>
-    <script src="../js/lang/ko.js?v=202608271638"></script>
-    <script src="../js/lang/ar.js?v=202608271638"></script>
-    <script src="../js/lang/pt.js?v=202608271638"></script>
-    <script src="../js/lang/it.js?v=202608271638"></script>
-    <script src="../js/config.js?v=202608271638"></script>
-    <script src="../js/wizard-common.js?v=202608271638"></script>
+    <script src="../js/lang/ja.js?v=202608271954"></script>
+    <script src="../js/lang/en.js?v=202608271954"></script>
+    <script src="../js/lang/zh.js?v=202608271954"></script>
+    <script src="../js/lang/zh-TW.js?v=202608271954"></script>
+    <script src="../js/lang/es.js?v=202608271954"></script>
+    <script src="../js/lang/fr.js?v=202608271954"></script>
+    <script src="../js/lang/de.js?v=202608271954"></script>
+    <script src="../js/lang/ko.js?v=202608271954"></script>
+    <script src="../js/lang/ar.js?v=202608271954"></script>
+    <script src="../js/lang/pt.js?v=202608271954"></script>
+    <script src="../js/lang/it.js?v=202608271954"></script>
+    <script src="../js/config.js?v=202608271954"></script>
+    <script src="../js/wizard-common.js?v=202608271954"></script>
     <!-- 翻訳ベース（共通関数） -->
     
 
@@ -489,6 +489,9 @@
         .ts-settings-body { padding: 0.75rem; display: none; border-top: 1px solid var(--color-border); background: #fff; }
         .ts-settings-body.open { display: block; }
         .ts-badge { font-size: 0.65rem; background: var(--color-accent); color: #fff; border-radius: 8px; padding: 1px 6px; margin-left: 4px; }
+
+        /* コンテキスト欄の説明。何を書けばよいか分からない欄になりがちなので例を添える */
+        .context-hint { display: block; margin-top: 0.3rem; font-size: 0.75rem; color: var(--color-text-secondary); line-height: 1.5; }
 
         /* Glossary */
         .glossary-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; margin-bottom: 0.5rem; }
@@ -1045,7 +1048,8 @@
 
                     <div class="setting-group full-width">
                         <label id="s3LabelContext"><i class="fas fa-info-circle me-1"></i> Context Note (optional)</label>
-                        <textarea class="form-textarea-custom" id="tsContext" rows="2" placeholder="e.g. A shonen battle manga with many sound effects"></textarea>
+                        <textarea class="form-textarea-custom" id="tsContext" rows="3" placeholder="e.g. A shonen battle manga set in a near-future city. &quot;Kage&quot; is a character's name, not the word for a shadow."></textarea>
+                        <small class="context-hint" id="s3ContextHint">Write facts about the story — setting, era, and which words are characters rather than ordinary nouns. Style and tone belong in the boxes above.</small>
                     </div>
 
                     <div class="setting-group full-width">
@@ -1481,7 +1485,7 @@
         const sampleEl = document.getElementById('compareSample');
         if (sampleEl) sampleEl.textContent = (L === 'ja' ? '1ページ目でお試し翻訳します（P1）' : 'Comparing quality using page 1');
 
-        const profileKey = JSON.stringify(glossary) + '::' + (document.getElementById('tsStyle') || {}).value + '::' + (document.getElementById('tsGenre') || {}).value;
+        const profileKey = JSON.stringify(glossary) + '::' + (document.getElementById('tsStyle') || {}).value + '::' + (document.getElementById('tsGenre') || {}).value + '::' + (document.getElementById('tsContext') || {}).value;
         const cacheKey = srcLang + '-' + tgtLang + '::' + profileKey + '::' + uploadedPages[0].name + ':' + uploadedPages[0].size;
         if (comparisonCache.key === cacheKey && comparisonCache.samples) {
             ['haiku', 'sonnet', 'opus'].forEach(m => {
@@ -1514,7 +1518,8 @@
                     // 比較も本番と同じ条件で訳す（用語集が効かないと品質を比べられない）
                     glossary: glossary,
                     style: (document.getElementById('tsStyle') || {}).value || '',
-                    genre: (document.getElementById('tsGenre') || {}).value || ''
+                    genre: (document.getElementById('tsGenre') || {}).value || '',
+                    context: (document.getElementById('tsContext') || {}).value || ''
                 })
             });
             if (resp.status === 401) {
@@ -1656,6 +1661,7 @@
                     // 作品の性格。指示文に反映される（未選択なら空文字＝従来どおり）
                     style: (document.getElementById('tsStyle') || {}).value || '',
                     genre: (document.getElementById('tsGenre') || {}).value || '',
+                    context: (document.getElementById('tsContext') || {}).value || ''
                     currency: selectedCurrency
                 })
             });
@@ -1898,6 +1904,8 @@
         URL.revokeObjectURL(url);
     }
     function startNewTranslation() {
+        const ctxEl = document.getElementById('tsContext');
+        if (ctxEl) ctxEl.value = '';
         clearPages(); glossary=[]; renderGlossary(); selectedModel='sonnet';
         stagedIds.clear(); mangaResult = null; currentOrderId = null;
         comparisonCache = { key: null, samples: null };
@@ -2067,7 +2075,8 @@
             s3Drama: { en:'Drama', ja:'\u30c9\u30e9\u30de', zh:'\u5287\u60c5', es:'Drama', fr:'Drame', de:'Drama', ko:'\ub4dc\ub77c\ub9c8', ar:'\u062f\u0631\u0627\u0645\u0627', pt:'Drama', it:'Dramma' },
             s3Isekai: { en:'Isekai', ja:'\u7570\u4e16\u754c', zh:'\u7570\u4e16\u754c', es:'Isekai', fr:'Isekai', de:'Isekai', ko:'\uc774\uc138\uacc4', ar:'Isekai', pt:'Isekai', it:'Isekai' },
             s3SliceOfLife: { en:'Slice of Life', ja:'\u65e5\u5e38\u7cfb', zh:'\u65e5\u5e38\u7cfb', es:'Vida cotidiana', fr:'Tranche de vie', de:'Slice of Life', ko:'\uc77c\uc0c1', ar:'\u0634\u0631\u064a\u062d\u0629 \u0645\u0646 \u0627\u0644\u062d\u064a\u0627\u0629', pt:'Cotidiano', it:'Slice of Life' },
-            s3ContextPh: { en:'e.g. A shonen battle manga with many sound effects', ja:'\u4f8b\uff1a\u52b9\u679c\u97f3\u306e\u591a\u3044\u5c11\u5e74\u30d0\u30c8\u30eb\u30de\u30f3\u30ac', zh:'\u4f8b\uff1a\u97f3\u6548\u5f88\u591a\u7684\u5c11\u5e74\u6230\u9b25\u6f2b\u756b', es:'Ej. Un manga shonen de batalla con muchos efectos', fr:'Ex. Un manga shonen de combat avec beaucoup d\'effets', de:'Z.B. Ein Shonen-Battle-Manga mit vielen Soundeffekten', ko:'\uc608: \ud6a8\uacfc\uc74c\uc774 \ub9ce\uc740 \uc18c\ub144 \ubc30\ud2c0 \ub9cc\ud654', ar:'\u0645\u062b\u0627\u0644: \u0645\u0627\u0646\u063a\u0627 \u0642\u062a\u0627\u0644 \u0634\u0648\u0646\u064a\u0646 \u0645\u0639 \u0645\u0624\u062b\u0631\u0627\u062a \u0635\u0648\u062a\u064a\u0629', pt:'Ex. Um mang\u00e1 shonen de batalha com muitos efeitos sonoros', it:'Es. Un manga shonen di battaglia con molti effetti sonori' },
+            s3ContextPh: {"en":"e.g. A shonen battle manga set in a near-future city. \"Kage\" is a character's name, not the word for a shadow.","ja":"例：近未来の都市を舞台にした少年向けバトル漫画。「カゲ」は登場人物の名前で、影のことではありません。","zh":"例：以近未来城市为舞台的少年战斗漫画。「カゲ」是角色名，不是影子的意思。","zh-TW":"例：以近未來城市為舞台的少年戰鬥漫畫。「カゲ」是角色名，不是影子的意思。","es":"Ej. Un manga shonen de batallas en una ciudad del futuro cercano. \"Kage\" es el nombre de un personaje, no la palabra para sombra.","fr":"Ex. Un manga shonen de combat dans une ville du futur proche. « Kage » est le nom d'un personnage, pas le mot pour ombre.","de":"Z. B. Ein Shonen-Kampfmanga in einer Stadt der nahen Zukunft. „Kage\" ist ein Figurenname, nicht das Wort für Schatten.","ko":"예: 근미래 도시를 무대로 한 소년 배틀 만화. \"카게\"는 등장인물의 이름이며 그림자라는 뜻이 아닙니다.","ar":"مثال: مانغا قتال شونين في مدينة مستقبلية قريبة. \"Kage\" اسم شخصية وليس كلمة الظل.","pt":"Ex. Um mangá shonen de batalhas numa cidade do futuro próximo. \"Kage\" é o nome de uma personagem, não a palavra para sombra.","it":"Es. Un manga shonen di battaglie in una città del futuro prossimo. \"Kage\" è il nome di un personaggio, non la parola per ombra."},
+            s3ContextHint: {"en":"Write facts about the story — setting, era, and which words are characters rather than ordinary nouns. Style and tone belong in the boxes above.","ja":"作品の事実を書いてください。舞台・時代のほか、どの語が登場人物でどの語が普通名詞かを書くと訳し分けられます。文体の指定は上の欄で行います。","zh":"请填写作品的事实：背景、年代，以及哪些词是角色名而非普通名词。文体请在上方选择。","zh-TW":"請填寫作品的事實：背景、年代，以及哪些詞是角色名而非普通名詞。文體請在上方選擇。","es":"Escriba hechos sobre la obra: ambientación, época y qué palabras son personajes y no nombres comunes. El estilo se elige arriba.","fr":"Indiquez des faits sur l'œuvre : cadre, époque, et quels mots sont des personnages plutôt que des noms communs. Le style se choisit ci-dessus.","de":"Schreiben Sie Fakten zum Werk: Schauplatz, Epoche und welche Wörter Figuren sind statt gewöhnliche Substantive. Den Stil wählen Sie oben.","ko":"작품의 사실을 적어 주세요. 배경·시대와, 어떤 단어가 등장인물이고 어떤 단어가 보통명사인지. 문체는 위에서 선택합니다.","ar":"اكتب حقائق عن العمل: المكان والزمان، وأي الكلمات أسماء شخصيات لا أسماء عامة. الأسلوب يُختار أعلاه.","pt":"Escreva fatos sobre a obra: cenário, época e quais palavras são personagens e não substantivos comuns. O estilo se escolhe acima.","it":"Scrivi fatti sull'opera: ambientazione, epoca e quali parole sono personaggi e non nomi comuni. Lo stile si sceglie sopra."},
             s3SrcTermPh: { en:'Source term', ja:'\u539f\u8a9e', zh:'\u539f\u6587\u8a5e\u5f59', es:'T\u00e9rmino original', fr:'Terme source', de:'Quellbegriff', ko:'\uc6d0\uc5b4', ar:'\u0627\u0644\u0645\u0635\u0637\u0644\u062d', pt:'Termo original', it:'Termine di origine' },
             s3TgtTermPh: { en:'Translation', ja:'\u8a33\u8a9e', zh:'\u8b6f\u6587', es:'Traducci\u00f3n', fr:'Traduction', de:'\u00dcbersetzung', ko:'\ubc88\uc5ed\uc5b4', ar:'\u0627\u0644\u062a\u0631\u062c\u0645\u0629', pt:'Tradu\u00e7\u00e3o', it:'Traduzione' },
             s4Title: { en:'Compare Translation Quality', ja:'\u7ffb\u8a33\u54c1\u8cea\u3092\u6bd4\u8f03', zh:'\u6bd4\u8f03\u7ffb\u8b6f\u54c1\u8cea', es:'Comparar calidad de traducci\u00f3n', fr:'Comparer la qualit\u00e9', de:'\u00dcbersetzungsqualit\u00e4t vergleichen', ko:'\ubc88\uc5ed \ud488\uc9c8 \ube44\uad50', ar:'\u0645\u0642\u0627\u0631\u0646\u0629 \u062c\u0648\u062f\u0629 \u0627\u0644\u062a\u0631\u062c\u0645\u0629', pt:'Comparar qualidade da tradu\u00e7\u00e3o', it:'Confronta la qualit\u00e0 della traduzione' },
@@ -2123,7 +2132,7 @@
         setOpts('tsStyle', { plain: T.s3Plain, formal: T.s3Formal, casual: T.s3Informal, literary: T.s3Literary, lightnovel: T.s3LightNovel, dramatic: T.s3Dramatic, warm: T.s3Warm, humorous: T.s3Humorous });
         setOpts('tsSfx', { translate:T.s3SfxTranslate, keep:T.s3SfxKeep, annotate:T.s3SfxAnnotate, remove:T.s3SfxRemove });
         setOpts('tsGenre', { action:T.s3Action, romance:T.s3Romance, fantasy:T.s3Fantasy, scifi:T.s3SciFi, horror:T.s3Horror, comedy:T.s3Comedy, drama:T.s3Drama, isekai:T.s3Isekai, slice:T.s3SliceOfLife });
-        setPh('tsContext', T.s3ContextPh); setPh('glossarySrc', T.s3SrcTermPh); setPh('glossaryTgt', T.s3TgtTermPh);
+        setPh('tsContext', T.s3ContextPh); setText('s3ContextHint', T.s3ContextHint); setPh('glossarySrc', T.s3SrcTermPh); setPh('glossaryTgt', T.s3TgtTermPh);
         setText('s4Title', T.s4Title); setText('s4Desc', T.s4Desc); setText('s4OrigLabel', T.s4OrigLabel);
         setText('s4BtnHaiku', T.s4BtnHaiku); setText('s4BtnSonnet', T.s4BtnHaiku); setText('s4BtnOpus', T.s4BtnHaiku);
         setText('s4BtnText', T.s4BtnHaiku);
@@ -2182,8 +2191,8 @@
     </script>
     <!-- Bootstrap JS (Pattern C navbar requires) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/i18n.js?v=202608271638"></script>
-    <script src="../js/navbar.js?v=202608271638"></script>
+    <script src="../js/i18n.js?v=202608271954"></script>
+    <script src="../js/navbar.js?v=202608271954"></script>
     <!-- Language Switcher -->
     <!-- Notification Badge -->
 </body>

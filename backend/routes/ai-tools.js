@@ -24,7 +24,7 @@ const crypto = require('crypto');
 const multer = require('multer');
 const { authenticate } = require('../middleware/auth');
 const db = require('../config/database');
-const { normalizeStyle, normalizeGenre } = require('../services/workProfile');
+const { normalizeStyle, normalizeGenre, normalizeContextNote } = require('../services/workProfile');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { editText } = require('../services/aiEditorService');
 const { translateText } = require('../services/aiTranslationService');
@@ -132,7 +132,7 @@ const MANGA_SAMPLE_DAILY_LIMIT = 10;
 const mangaSampleUsage = new Map(); // userId -> { day, count }
 router.post('/manga/sample', authenticate, async (req, res) => {
     try {
-        const { stagedId, sourceLang, targetLang, glossary, style, genre } = req.body;
+        const { stagedId, sourceLang, targetLang, glossary, style, genre, context } = req.body;
         if (!SUPPORTED_LANGS.includes(targetLang)) return res.status(400).json({ error: 'Unsupported target language' });
         const imagePath = resolveStagedFile(req.user.userId, stagedId);
         if (!imagePath) return res.status(400).json({ error: 'Staged page not found. Please upload pages first.' });
@@ -153,7 +153,8 @@ router.post('/manga/sample', authenticate, async (req, res) => {
             targetLang,
             glossary: Array.isArray(glossary) ? glossary.slice(0, 50) : [],
             style: normalizeStyle(style),
-            genre: normalizeGenre(genre)
+            genre: normalizeGenre(genre),
+            contextNote: normalizeContextNote(context)
         });
         res.json({ success: true, samples });
     } catch (error) {
@@ -168,7 +169,7 @@ router.post('/manga/sample', authenticate, async (req, res) => {
  */
 router.post('/manga/checkout', authenticate, async (req, res) => {
     try {
-        const { stagedIds, model, sourceLang, targetLang, glossary, currency } = req.body;
+        const { stagedIds, model, sourceLang, targetLang, glossary, currency, style, genre, context } = req.body;
         if (!MANGA_PRICING_JPY[model]) return res.status(400).json({ error: 'Invalid model' });
         if (!CURRENCIES[currency]) return res.status(400).json({ error: 'Unsupported currency' });
         if (!SUPPORTED_LANGS.includes(targetLang)) return res.status(400).json({ error: 'Unsupported target language' });
@@ -191,12 +192,13 @@ router.post('/manga/checkout', authenticate, async (req, res) => {
         const amount = Math.max(Number((rawJpy * cur.rate).toFixed(cur.decimals)), STRIPE_MINIMUMS[currency]);
 
         const orderResult = await db.query(
-            `INSERT INTO ai_tool_orders (user_id, tool, model, source_lang, target_lang, glossary, text_content, char_count, currency, amount, pages)
-             VALUES ($1, 'manga', $2, $3, $4, $5, NULL, $6, $7, $8, $9)
+            `INSERT INTO ai_tool_orders (user_id, tool, model, source_lang, target_lang, glossary, text_content, char_count, currency, amount, pages, style, genre, context_note)
+             VALUES ($1, 'manga', $2, $3, $4, $5, NULL, $6, $7, $8, $9, $10, $11, $12)
              RETURNING order_id`,
             [req.user.userId, model, sourceLang || null, targetLang,
              JSON.stringify(Array.isArray(glossary) ? glossary.slice(0, 50) : []),
-             pages, currency, amount, JSON.stringify([])]
+             pages, currency, amount, JSON.stringify([]),
+             normalizeStyle(style), normalizeGenre(genre), normalizeContextNote(context)]
         );
         const orderId = orderResult.rows[0].order_id;
 
@@ -262,7 +264,7 @@ router.post('/manga/checkout', authenticate, async (req, res) => {
  */
 router.post('/checkout', authenticate, async (req, res) => {
     try {
-        const { tool, model, text, sourceLang, targetLang, glossary, currency, style, genre } = req.body;
+        const { tool, model, text, sourceLang, targetLang, glossary, currency, style, genre, context } = req.body;
         if (!TOOL_PAGES[tool]) return res.status(400).json({ error: 'Invalid tool' });
         if (!PRICING_JPY[model]) return res.status(400).json({ error: 'Invalid model' });
         if (!text || !String(text).trim()) return res.status(400).json({ error: 'Text is required' });
@@ -278,12 +280,12 @@ router.post('/checkout', authenticate, async (req, res) => {
         const amount = computeAmount({ chars, model, currency });
 
         const orderResult = await db.query(
-            `INSERT INTO ai_tool_orders (user_id, tool, model, source_lang, target_lang, glossary, text_content, char_count, currency, amount, style, genre)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+            `INSERT INTO ai_tool_orders (user_id, tool, model, source_lang, target_lang, glossary, text_content, char_count, currency, amount, style, genre, context_note)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
              RETURNING order_id`,
             [req.user.userId, tool, model, sourceLang || null, tool === 'translator' ? targetLang : null,
              JSON.stringify(Array.isArray(glossary) ? glossary.slice(0, 50) : []), String(text), chars, currency, amount,
-             normalizeStyle(style), normalizeGenre(genre)]
+             normalizeStyle(style), normalizeGenre(genre), normalizeContextNote(context)]
         );
         const orderId = orderResult.rows[0].order_id;
 
@@ -515,6 +517,7 @@ router.post('/orders/:orderId/run', authenticate, async (req, res) => {
             glossary: order.glossary || [],
             style: order.style || null,
             genre: order.genre || null,
+            contextNote: order.context_note || null,
             onProgress: (pct) => { job.progress = pct; },
             // 前回失敗時の完了済みチャンクから再開（API費の二重払い・再待機を防ぐ）
             completedChunks: Array.isArray(order.partial_chunks) ? order.partial_chunks : [],

@@ -10,7 +10,7 @@
  */
 
 const Anthropic = require('@anthropic-ai/sdk');
-const { styleNote } = require('./workProfile');
+const { styleNote, contextNoteBlock } = require('./workProfile');
 
 const anthropic = new Anthropic({ apiKey: process.env.CLAUDE_API_KEY });
 
@@ -114,7 +114,7 @@ function matchLineStructure(source, translated) {
     return src.map(s => (s.trim() === '' ? '' : outContent[i++])).join('\n');
 }
 
-function buildPrompt({ chunk, sourceLang, targetLang, tier, glossary, style, genre }) {
+function buildPrompt({ chunk, sourceLang, targetLang, tier, glossary, style, genre, contextNote }) {
     const srcName = LANG_NAMES[sourceLang] || sourceLang || 'the source language';
     const tgtName = LANG_NAMES[targetLang] || targetLang || 'the target language';
     let glossaryNote = '';
@@ -154,6 +154,13 @@ function buildPrompt({ chunk, sourceLang, targetLang, tier, glossary, style, gen
 
 ${TIER_INSTRUCTIONS[tier]}${styleNote({ style, genre })}
 
+When these pull in different directions, follow them in this order, highest first:
+1. The output rules below — line count, markup markers, no preamble.
+2. The terminology list below.
+3. The author's background note, when one is supplied with the text.
+4. The genre and register guidance above.
+5. Natural, literary phrasing.
+
 Rules:
 - The text is one part of a longer manuscript; it may start or end mid-scene. Translate it as-is without adding introductions or conclusions.
 - Keep the original paragraph breaks and blank lines. Output exactly as many lines as the input has: do not merge or split paragraphs, and do not add or remove blank lines.
@@ -168,7 +175,7 @@ ${glossaryNote}`;
     const lineCount = String(chunk).split('\n').length;
     return {
         system,
-        user: `Text to translate — ${lineCount} lines. Your output must have exactly ${lineCount} lines: do not add blank lines between paragraphs, and do not merge or split lines.
+        user: contextNoteBlock(contextNote) + `Text to translate — ${lineCount} lines. Your output must have exactly ${lineCount} lines: do not add blank lines between paragraphs, and do not merge or split lines.
 
 ${chunk}`
     };
@@ -178,9 +185,9 @@ ${chunk}`
  * Translate one chunk (streaming to avoid HTTP timeouts on long outputs).
  * onText(charCount) fires per streamed delta for smooth real progress.
  */
-async function translateChunk({ chunk, sourceLang, targetLang, tier, glossary, style, genre }, requestOptions, onText) {
+async function translateChunk({ chunk, sourceLang, targetLang, tier, glossary, style, genre, contextNote }, requestOptions, onText) {
     if (!chunk.trim()) return chunk;
-    const prompt = buildPrompt({ chunk, sourceLang, targetLang, tier, glossary, style, genre });
+    const prompt = buildPrompt({ chunk, sourceLang, targetLang, tier, glossary, style, genre, contextNote });
     const stream = anthropic.messages.stream({
         model: MODEL_TIERS[tier],
         max_tokens: 16000,
@@ -205,12 +212,12 @@ async function translateChunk({ chunk, sourceLang, targetLang, tier, glossary, s
  * Translate a short excerpt with all three tiers in parallel
  * (the wizard's quality-comparison step). Excerpt <= ~600 chars.
  */
-async function translateSample({ text, sourceLang, targetLang, glossary, style, genre }) {
+async function translateSample({ text, sourceLang, targetLang, glossary, style, genre, contextNote }) {
     const tiers = ['haiku', 'sonnet', 'opus'];
     // 25s per-model cap + single retry: one hung model must not push the
     // whole comparison response past the 60s nginx proxy timeout (504)
     const results = await Promise.allSettled(
-        tiers.map(tier => translateChunk({ chunk: text, sourceLang, targetLang, tier, glossary, style, genre }, { timeout: 25000, maxRetries: 1 }))
+        tiers.map(tier => translateChunk({ chunk: text, sourceLang, targetLang, tier, glossary, style, genre, contextNote }, { timeout: 25000, maxRetries: 1 }))
     );
     const out = {};
     tiers.forEach((tier, i) => {
@@ -250,7 +257,7 @@ async function withChunkRetry(fn, attempts = 5) {
  * onChunkDone(index, allChunksSoFar) fires after each chunk so the caller
  * can persist progress.
  */
-async function translateText({ text, sourceLang, targetLang, tier, glossary, style, genre, onProgress, completedChunks = [], onChunkDone }) {
+async function translateText({ text, sourceLang, targetLang, tier, glossary, style, genre, contextNote, onProgress, completedChunks = [], onChunkDone }) {
     const chunks = chunkText(text);
     const totalChars = chunks.reduce((sum, c) => sum + c.length, 0) || 1;
     let doneChars = 0;
@@ -276,7 +283,7 @@ async function translateText({ text, sourceLang, targetLang, tier, glossary, sty
         translated.push(await withChunkRetry(() => {
             streamedChars = 0;
             return translateChunk(
-                { chunk: chunks[i], sourceLang, targetLang, tier, glossary, style, genre },
+                { chunk: chunks[i], sourceLang, targetLang, tier, glossary, style, genre, contextNote },
                 undefined,
                 (n) => { streamedChars += n; report(); }
             );
