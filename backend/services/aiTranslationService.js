@@ -91,6 +91,43 @@ function stripArticlesBeforeNames(text, glossary, targetLang) {
 }
 
 /**
+ * 原稿の各行に番号を振る。
+ *
+ * 「N行で返せ」と言葉で頼むだけでは、haiku は段落を割ったりまとめたりして
+ * 数が合わなくなった（52行が101行に、47行が45行に）。番号を振って同じ番号で
+ * 返させると、対応が言葉ではなく形で決まるので崩れない。実測で4件とも一致した。
+ */
+function numberLines(chunk) {
+    return String(chunk).split('\n').map((l, i) => (i + 1) + '|' + l).join('\n');
+}
+
+/**
+ * 番号つきの訳文を番号どおりに組み直す。1つでも欠けていたら null を返す。
+ * 欠番を空行で埋めると本文が黙って消えるので、その時は組み直さない。
+ */
+function rebuildNumbered(translated, expectedCount) {
+    const got = new Map();
+    for (const line of String(translated).split('\n')) {
+        const m = /^\s*(\d+)\s*\|(.*)$/.exec(line);
+        if (m) {
+            const k = Number(m[1]);
+            if (!got.has(k)) got.set(k, m[2].replace(/^[ \t]+/, ''));
+        }
+    }
+    const out = [];
+    for (let i = 1; i <= expectedCount; i++) {
+        if (!got.has(i)) return null;
+        out.push(got.get(i));
+    }
+    return out.join('\n');
+}
+
+/** 番号で組み直せなかった時に、行頭の番号だけ落として素の訳文に戻す */
+function stripLineNumbers(text) {
+    return String(text).split('\n').map(l => l.replace(/^\s*\d+\s*\|/, '')).join('\n');
+}
+
+/**
  * 訳文の行構造を原稿に合わせ直す。
  *
  * 「行を増やすな」と指示しても、モデルは段落の間に空行を入れることがある。
@@ -163,7 +200,7 @@ When these pull in different directions, follow them in this order, highest firs
 
 Rules:
 - The text is one part of a longer manuscript; it may start or end mid-scene. Translate it as-is without adding introductions or conclusions.
-- Keep the original paragraph breaks and blank lines. Output exactly as many lines as the input has: do not merge or split paragraphs, and do not add or remove blank lines.
+- Keep the original paragraph breaks. The input is numbered line by line; answer with the same numbers, one line each, so the paragraphs stay where the author put them.
 - Keep proper nouns consistent throughout.
 - Lines that are markup markers — like [[img src="..." w="..." align="..."]], [[table]] or [[/table]] — must be copied to the output EXACTLY as-is, unchanged and in the same position. Inside a [[table]] block, translate the cell text but keep the " | " separators and the line structure.
 - Respond with ONLY the ${tgtName} translation — no preamble, no explanations, no markdown fences.
@@ -175,9 +212,17 @@ ${glossaryNote}`;
     const lineCount = String(chunk).split('\n').length;
     return {
         system,
-        user: contextNoteBlock(contextNote) + `Text to translate — ${lineCount} lines. Your output must have exactly ${lineCount} lines: do not add blank lines between paragraphs, and do not merge or split lines.
+        // 最初に来る文が「その発話の用件」として読まれる。行数の話を先に置いたら
+        // haiku が「N行出すこと」を仕事だと解釈し、原稿をそのまま返した
+        // （用語集の語だけ置き換えた日本語が52行）。まず訳せと言い、最後にもう一度念を押す。
+        user: contextNoteBlock(contextNote)
+            + `Translate the ${srcName} text below into ${tgtName}. Write out the translation in full — every sentence, not a summary and not the original text.
 
-${chunk}`
+Each line is numbered. Return exactly ${lineCount} lines, each beginning with the same number and a vertical bar, in the same order. Never merge, split, drop or add a line; a line that is empty stays empty.
+
+${numberLines(chunk)}
+
+(Remember: output lines 1| to ${lineCount}| in ${tgtName}, nothing else.)`
     };
 }
 
@@ -205,7 +250,11 @@ async function translateChunk({ chunk, sourceLang, targetLang, tier, glossary, s
         .map(b => b.text)
         .join('');
     if (!text.trim()) throw new Error('Empty translation result');
-    return matchLineStructure(chunk, stripArticlesBeforeNames(text, glossary, targetLang));
+    // 番号で組み直せれば段落の対応は確実。組み直せなかった時だけ従来の直しに落とす
+    const expected = String(chunk).split('\n').length;
+    const rebuilt = rebuildNumbered(text, expected);
+    const body = rebuilt !== null ? rebuilt : matchLineStructure(chunk, stripLineNumbers(text));
+    return stripArticlesBeforeNames(body, glossary, targetLang);
 }
 
 /**
