@@ -90,6 +90,44 @@ function stripArticlesBeforeNames(text, glossary, targetLang) {
     return out;
 }
 
+// 文字体系。訳し終えていない出力を見つけるのに使う
+const SCRIPTS = {
+    cjk: ["ja", "zh", "zh-TW", "ko"],
+    arabic: ["ar"],
+    latin: ["en", "es", "fr", "de", "pt", "it"]
+};
+const SCRIPT_RE = {
+    cjk: /[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/g,
+    arabic: /[\u0600-\u06ff]/g,
+    latin: /[A-Za-z]/g
+};
+function scriptOf(lang) {
+    for (const name of Object.keys(SCRIPTS)) if (SCRIPTS[name].indexOf(lang) !== -1) return name;
+    return null;
+}
+
+/**
+ * 訳されずに返ってきた出力を見つける。
+ *
+ * haiku が原稿をそのまま（用語集の語だけ置き換えて）返したことが実際にあり、
+ * 気づいたのは出来上がった .docx を開いた人間だった。システムは何も言わなかった。
+ * 原稿が長いほどチャンク数が増え、一度も起きない確率は下がっていく。
+ * 「たまたま起きない」ではなく「起きたら必ず分かる」形にしておく。
+ *
+ * 判定は文字体系で行う。日本語→英語の訳文に日本語の文字が大量に混じっていれば、
+ * それは訳し終えていない。閾値は25%と高めにして、固有名詞をそのまま残した
+ * 正しい訳文を誤って弾かないようにしている。
+ */
+function looksUntranslated(translated, sourceLang, targetLang) {
+    if (!sourceLang || !targetLang || sourceLang === targetLang) return false;
+    const src = scriptOf(sourceLang), tgt = scriptOf(targetLang);
+    if (!src || !tgt || src === tgt) return false;   // 同じ文字体系では判定しない
+    const out = String(translated);
+    if (out.trim().length < 40) return false;        // 短すぎて判定できない
+    const hits = (out.match(SCRIPT_RE[src]) || []).length;
+    return hits / out.length > 0.25;
+}
+
 /**
  * 原稿の各行に番号を振る。
  *
@@ -105,13 +143,15 @@ function numberLines(chunk) {
  * 番号つきの訳文を番号どおりに組み直す。1つでも欠けていたら null を返す。
  * 欠番を空行で埋めると本文が黙って消えるので、その時は組み直さない。
  */
-function rebuildNumbered(translated, expectedCount) {
+function rebuildNumbered(translated, expectedCount, targetLang) {
     const got = new Map();
     for (const line of String(translated).split('\n')) {
         const m = /^\s*(\d+)\s*\|(.*)$/.exec(line);
         if (m) {
             const k = Number(m[1]);
-            if (!got.has(k)) got.set(k, m[2].replace(/^[ \t]+/, ''));
+            // 行頭の全角スペースは日本語の字下げ。英語などの訳文に付くと1字ずれる
+            const lead = scriptOf(targetLang) === 'cjk' ? /^[ \t]+/ : /^[ \t\u3000]+/;
+            if (!got.has(k)) got.set(k, m[2].replace(lead, ''));
         }
     }
     const out = [];
@@ -252,9 +292,13 @@ async function translateChunk({ chunk, sourceLang, targetLang, tier, glossary, s
     if (!text.trim()) throw new Error('Empty translation result');
     // 番号で組み直せれば段落の対応は確実。組み直せなかった時だけ従来の直しに落とす
     const expected = String(chunk).split('\n').length;
-    const rebuilt = rebuildNumbered(text, expected);
+    const rebuilt = rebuildNumbered(text, expected, targetLang);
     const body = rebuilt !== null ? rebuilt : matchLineStructure(chunk, stripLineNumbers(text));
-    return stripArticlesBeforeNames(body, glossary, targetLang);
+    const result = stripArticlesBeforeNames(body, glossary, targetLang);
+    if (looksUntranslated(result, sourceLang, targetLang)) {
+        throw new Error(UNTRANSLATED_MESSAGE);
+    }
+    return result;
 }
 
 /**
@@ -277,6 +321,12 @@ async function translateSample({ text, sourceLang, targetLang, glossary, style, 
     return out;
 }
 
+// 訳し終えていない出力。混雑とは違い待っても意味がないので、すぐ引き直す
+const UNTRANSLATED_MESSAGE = 'The model returned the source text instead of a translation';
+function isUntranslated(error) {
+    return String((error && error.message) || '').includes(UNTRANSLATED_MESSAGE);
+}
+
 // 再試行しても解決しないエラー（安全システム拒否・クレジット切れ）は即座に失敗させる
 function isNonRetryable(error) {
     const msg = String((error && error.message) || '');
@@ -290,7 +340,10 @@ async function withChunkRetry(fn, attempts = 5) {
         try { return await fn(); } catch (e) {
             lastErr = e;
             if (isNonRetryable(e)) throw e;
-            if (i < attempts - 1) await new Promise(r => setTimeout(r, 10000 * Math.pow(2, Math.min(i, 3))));
+            if (i < attempts - 1) {
+                const wait = isUntranslated(e) ? 1000 : 10000 * Math.pow(2, Math.min(i, 3));
+                await new Promise(r => setTimeout(r, wait));
+            }
         }
     }
     throw lastErr;
