@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608282148">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608282155">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Novel Translator - AuctLect</title>
 
@@ -16,26 +16,26 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <!-- Platform CSS -->
-    <link href="../css/variables.css?v=202608282148" rel="stylesheet">
-    <link rel="stylesheet" href="../css/style-new.css?v=202608282148">
-    <link href="../css/components.css?v=202608282148" rel="stylesheet">
-    <link href="../css/navbar.css?v=202608282148" rel="stylesheet">
-    <link rel="stylesheet" href="../css/mobile-fixes.css?v=202608282148">
+    <link href="../css/variables.css?v=202608282155" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style-new.css?v=202608282155">
+    <link href="../css/components.css?v=202608282155" rel="stylesheet">
+    <link href="../css/navbar.css?v=202608282155" rel="stylesheet">
+    <link rel="stylesheet" href="../css/mobile-fixes.css?v=202608282155">
 
     <!-- 言語ファイル（9言語） -->
-    <script src="../js/config.js?v=202608282148"></script>
-    <script src="../js/lang/ja.js?v=202608282148"></script>
-    <script src="../js/lang/en.js?v=202608282148"></script>
-    <script src="../js/lang/zh.js?v=202608282148"></script>
-    <script src="../js/lang/zh-TW.js?v=202608282148"></script>
-    <script src="../js/lang/es.js?v=202608282148"></script>
-    <script src="../js/lang/fr.js?v=202608282148"></script>
-    <script src="../js/lang/de.js?v=202608282148"></script>
-    <script src="../js/lang/ko.js?v=202608282148"></script>
-    <script src="../js/lang/ar.js?v=202608282148"></script>
-    <script src="../js/lang/pt.js?v=202608282148"></script>
-    <script src="../js/lang/it.js?v=202608282148"></script>
-    <script src="../js/wizard-common.js?v=202608282148"></script>
+    <script src="../js/config.js?v=202608282155"></script>
+    <script src="../js/lang/ja.js?v=202608282155"></script>
+    <script src="../js/lang/en.js?v=202608282155"></script>
+    <script src="../js/lang/zh.js?v=202608282155"></script>
+    <script src="../js/lang/zh-TW.js?v=202608282155"></script>
+    <script src="../js/lang/es.js?v=202608282155"></script>
+    <script src="../js/lang/fr.js?v=202608282155"></script>
+    <script src="../js/lang/de.js?v=202608282155"></script>
+    <script src="../js/lang/ko.js?v=202608282155"></script>
+    <script src="../js/lang/ar.js?v=202608282155"></script>
+    <script src="../js/lang/pt.js?v=202608282155"></script>
+    <script src="../js/lang/it.js?v=202608282155"></script>
+    <script src="../js/wizard-common.js?v=202608282155"></script>
 
     <style>
         :root {
@@ -508,6 +508,23 @@
             font-size: 0.85rem; line-height: 1.7; color: var(--color-text-secondary);
         }
         .choose-advice i { color: var(--color-accent); margin-top: 0.25rem; }
+
+        /* 読めない言語に訳したとき、人の目を一度入れてもらうための案内 */
+        .check-advice {
+            display: flex; gap: 0.85rem; align-items: flex-start; text-align: left;
+            max-width: 560px; margin: 1.75rem auto 0; padding: 1rem 1.15rem;
+            background: var(--color-accent-bg); border-radius: 10px;
+            font-size: 0.87rem; line-height: 1.75; color: var(--color-text-secondary);
+        }
+        .check-advice > i { color: var(--color-accent); margin-top: 0.3rem; }
+        .check-advice p { margin: 0 0 0.7rem; }
+        .btn-find-editor {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            padding: 0.35rem 0.9rem; border: 1px solid var(--color-accent);
+            border-radius: 6px; color: var(--color-accent); text-decoration: none;
+            font-size: 0.82rem; font-weight: 500; white-space: nowrap;
+        }
+        .btn-find-editor:hover { background: var(--color-accent); color: #fff; }
 
         /* Glossary */
         .glossary-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; margin-bottom: 0.5rem; }
@@ -1104,6 +1121,14 @@
                         </button>
                     </div>
 
+                    <div class="check-advice">
+                        <i class="fas fa-user-check"></i>
+                        <div>
+                            <p id="s9CheckText">If you cannot read the language you translated into, have someone who can look it over before you publish. Even Opus can slip in a phrase the original never had, or waver over how a name is handled — and there is no one else between the translation and your readers.</p>
+                            <a class="btn-find-editor" id="s9CheckLink" href="editors/index.html"><i class="fas fa-search"></i> <span id="s9CheckLinkLabel">Find an editor for this language</span></a>
+                        </div>
+                    </div>
+
                     <div class="step-actions" style="margin-top:2rem;">
                         <button class="btn-wizard-secondary" onclick="goStep(8)"><i class="fas fa-arrow-left me-1"></i> <span id="s9BtnReview">Review again</span></button>
                         <button class="btn-wizard-primary" onclick="startNewTranslation()"><i class="fas fa-plus me-1"></i> <span id="s9BtnNew">New Translation</span></button>
@@ -1213,6 +1238,7 @@
         if (n === 4) { setTimeout(runComparison, 100); updateCompareTotals(); }
         if (n === 5) updateQuote();
         if (n === 6) updatePaymentAmount();
+        if (n === 9) updateCheckLink();
         if (n === 8) {
             document.getElementById('reviewOriginal').textContent = sourceTextContent;
             document.getElementById('reviewTranslation').value = translatedText;
@@ -1816,6 +1842,19 @@
     document.addEventListener('DOMContentLoaded', updateTranslatorExtraText);
     document.addEventListener('languageChanged', updateTranslatorExtraText);
 
+    // 訳し終えた言語の組み合わせを、編集者探しに引き継ぐ
+    // （読めない言語ほど、自分で条件を選び直すのが難しい）
+    function updateCheckLink() {
+        const link = document.getElementById('s9CheckLink');
+        if (!link) return;
+        const src = (document.getElementById('sourceLang') || {}).value || '';
+        const tgt = (document.getElementById('targetLang') || {}).value || '';
+        const q = [];
+        if (src) q.push('source_language=' + encodeURIComponent(src));
+        if (tgt) q.push('target_language=' + encodeURIComponent(tgt));
+        link.href = 'editors/index.html' + (q.length ? '?' + q.join('&') : '');
+    }
+
     function startNewTranslation() {
         const ctxEl = document.getElementById('tsContext');
         if (ctxEl) ctxEl.value = '';
@@ -1936,6 +1975,8 @@
             s9Title: { en: 'Translation Complete!', ja: '\u7ffb\u8a33\u5b8c\u4e86\uff01', zh: '\u7ffb\u8b6f\u5b8c\u6210\uff01', es: '\u00a1Traducci\u00f3n completada!', fr: 'Traduction termin\u00e9e !', de: '\u00dcbersetzung abgeschlossen!', ko: '\ubc88\uc5ed \uc644\ub8cc!', ar: '\u0627\u0643\u062a\u0645\u0644\u062a \u0627\u0644\u062a\u0631\u062c\u0645\u0629!', pt: 'Tradu\u00e7\u00e3o conclu\u00edda!', it: 'Traduzione completata!' },
             s9Desc: { en: 'Your translation is ready. Download your file below.', ja: '\u7ffb\u8a33\u304c\u5b8c\u6210\u3057\u307e\u3057\u305f\u3002\u4e0b\u304b\u3089\u30c0\u30a6\u30f3\u30ed\u30fc\u30c9\u3057\u3066\u304f\u3060\u3055\u3044\u3002', zh: '\u7ffb\u8b6f\u5df2\u5b8c\u6210\u3002\u8acb\u5f9e\u4e0b\u65b9\u4e0b\u8f09\u3002', es: 'Su traducci\u00f3n est\u00e1 lista. Descargue su archivo.', fr: 'Votre traduction est pr\u00eate. T\u00e9l\u00e9chargez ci-dessous.', de: 'Ihre \u00dcbersetzung ist fertig. Laden Sie Ihre Datei herunter.', ko: '\ubc88\uc5ed\uc774 \uc644\ub8cc\ub418\uc5c8\uc2b5\ub2c8\ub2e4. \uc544\ub798\uc5d0\uc11c \ub2e4\uc6b4\ub85c\ub4dc\ud558\uc138\uc694.', ar: '\u062a\u0631\u062c\u0645\u062a\u0643 \u062c\u0627\u0647\u0632\u0629. \u0642\u0645 \u0628\u062a\u0646\u0632\u064a\u0644 \u0645\u0644\u0641\u0643.', pt: 'Sua tradu\u00e7\u00e3o est\u00e1 pronta. Baixe seu arquivo abaixo.', it: 'La tua traduzione \u00e8 pronta. Scarica il tuo file qui sotto.' },
             s9BtnReview: { en: 'Review again', ja: '\u3082\u3046\u4e00\u5ea6\u78ba\u8a8d', zh: '\u518d\u6b21\u5be9\u67e5', es: 'Revisar de nuevo', fr: 'Revoir', de: 'Erneut pr\u00fcfen', ko: '\ub2e4\uc2dc \uac80\ud1a0', ar: '\u0645\u0631\u0627\u062c\u0639\u0629 \u0645\u0631\u0629 \u0623\u062e\u0631\u0649', pt: 'Revisar novamente', it: 'Rivedi di nuovo' },
+            s9CheckText: {"en":"If you cannot read the language you translated into, have someone who can look it over before you publish. Even Opus can slip in a phrase the original never had, or waver over how a name is handled — and there is no one else between the translation and your readers.","ja":"訳した言語をご自身で読めない場合は、公開の前にその言語が分かる人に目を通してもらうことをおすすめします。Opus でも、原文にない一言が入ることや、固有名詞の扱いが揺れることがあります。訳文と読者のあいだに、ほかに誰もいません。","zh":"如果您读不懂译入的语言，建议在公开前请懂这门语言的人过目。即使是 Opus，也可能加入原文没有的措辞，或在专有名词的处理上出现摇摆。译文与读者之间，再没有别人。","zh-TW":"如果您讀不懂譯入的語言，建議在公開前請懂這門語言的人過目。即使是 Opus，也可能加入原文沒有的措辭，或在專有名詞的處理上出現搖擺。譯文與讀者之間，再沒有別人。","es":"Si no lee el idioma al que ha traducido, pida a alguien que sí lo lea que revise el texto antes de publicarlo. Incluso Opus puede añadir una frase que el original no tenía, o vacilar con un nombre propio: entre la traducción y sus lectores no hay nadie más.","fr":"Si vous ne lisez pas la langue vers laquelle vous avez traduit, faites relire le texte par quelqu’un qui la lit avant de publier. Même Opus peut glisser une phrase absente de l’original ou hésiter sur un nom propre — entre la traduction et vos lecteurs, il n’y a personne d’autre.","de":"Wenn Sie die Zielsprache nicht lesen, lassen Sie den Text vor der Veröffentlichung von jemandem prüfen, der sie liest. Auch Opus kann einen Satz einfügen, den das Original nicht hatte, oder bei einem Eigennamen schwanken — zwischen der Übersetzung und Ihren Lesern steht sonst niemand.","ko":"번역한 언어를 직접 읽지 못하신다면, 공개하기 전에 그 언어를 아는 사람에게 확인을 받으시길 권합니다. Opus도 원문에 없던 표현을 넣거나 고유명사 처리가 흔들릴 때가 있습니다. 번역문과 독자 사이에는 다른 누구도 없습니다.","ar":"إذا كنت لا تقرأ اللغة التي ترجمت إليها، فاطلب من شخص يقرؤها مراجعة النص قبل النشر. حتى Opus قد يضيف عبارة لم تكن في الأصل أو يتذبذب في معالجة اسم علم — ولا أحد آخر بين الترجمة وقرائك.","pt":"Se não lê o idioma para o qual traduziu, peça a alguém que o leia para revisar antes de publicar. Mesmo o Opus pode inserir uma frase que o original não tinha, ou vacilar com um nome próprio — entre a tradução e os seus leitores não há mais ninguém.","it":"Se non legge la lingua in cui ha tradotto, faccia rileggere il testo da qualcuno che la legge prima di pubblicare. Anche Opus può inserire una frase che l’originale non aveva, o esitare su un nome proprio: fra la traduzione e i suoi lettori non c’è nessun altro."},
+            s9CheckLinkLabel: {"en":"Find an editor for this language","ja":"この言語の編集者を探す","zh":"寻找这门语言的编辑","zh-TW":"尋找這門語言的編輯","es":"Buscar un editor para este idioma","fr":"Trouver un relecteur pour cette langue","de":"Lektor für diese Sprache finden","ko":"이 언어의 편집자 찾기","ar":"ابحث عن محرر لهذه اللغة","pt":"Encontrar um editor para este idioma","it":"Trova un revisore per questa lingua"},
             s9BtnNew: { en: 'New Translation', ja: '\u65b0\u3057\u3044\u7ffb\u8a33', zh: '\u65b0\u7ffb\u8b6f', es: 'Nueva traducci\u00f3n', fr: 'Nouvelle traduction', de: 'Neue \u00dcbersetzung', ko: '\uc0c8 \ubc88\uc5ed', ar: '\u062a\u0631\u062c\u0645\u0629 \u062c\u062f\u064a\u062f\u0629', pt: 'Nova tradu\u00e7\u00e3o', it: 'Nuova traduzione' }
         };
 
@@ -1976,7 +2017,7 @@
         setText('s7Title', T.s7Title); setText('s7Note', T.s7Note);
         setText('s8Title', T.s8Title); setText('s8Desc', T.s8Desc); setText('s8OrigHeader', T.s8OrigHeader);
         setText('s8EditHint', T.s8EditHint); setText('s8BtnRetranslate', T.s8BtnRetranslate); setText('s8BtnText', T.s8BtnText);
-        setText('s9Title', T.s9Title); setText('s9Desc', T.s9Desc); setText('s9BtnReview', T.s9BtnReview); setText('s9BtnNew', T.s9BtnNew);
+        setText('s9Title', T.s9Title); setText('s9Desc', T.s9Desc); setText('s9BtnReview', T.s9BtnReview); setText('s9BtnNew', T.s9BtnNew); setText('s9CheckText', T.s9CheckText); setText('s9CheckLinkLabel', T.s9CheckLinkLabel);
         document.querySelectorAll('.back-label').forEach(el => el.textContent = t(T.btnBack));
         document.querySelectorAll('.next-label').forEach(el => el.textContent = t(T.btnNext));
         document.title = t(T.pageTitle) + ' - AuctLect';
@@ -2054,7 +2095,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- JSZip: lets us crack open .docx (which is a ZIP) to read the text inside -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="../js/i18n.js?v=202608282148"></script>
-    <script src="../js/navbar.js?v=202608282148"></script>
+    <script src="../js/i18n.js?v=202608282155"></script>
+    <script src="../js/navbar.js?v=202608282155"></script>
 </body>
 </html>
