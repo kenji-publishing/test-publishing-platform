@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608282155">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608291436">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Novel Translator - AuctLect</title>
 
@@ -16,26 +16,26 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <!-- Platform CSS -->
-    <link href="../css/variables.css?v=202608282155" rel="stylesheet">
-    <link rel="stylesheet" href="../css/style-new.css?v=202608282155">
-    <link href="../css/components.css?v=202608282155" rel="stylesheet">
-    <link href="../css/navbar.css?v=202608282155" rel="stylesheet">
-    <link rel="stylesheet" href="../css/mobile-fixes.css?v=202608282155">
+    <link href="../css/variables.css?v=202608291436" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style-new.css?v=202608291436">
+    <link href="../css/components.css?v=202608291436" rel="stylesheet">
+    <link href="../css/navbar.css?v=202608291436" rel="stylesheet">
+    <link rel="stylesheet" href="../css/mobile-fixes.css?v=202608291436">
 
     <!-- 言語ファイル（9言語） -->
-    <script src="../js/config.js?v=202608282155"></script>
-    <script src="../js/lang/ja.js?v=202608282155"></script>
-    <script src="../js/lang/en.js?v=202608282155"></script>
-    <script src="../js/lang/zh.js?v=202608282155"></script>
-    <script src="../js/lang/zh-TW.js?v=202608282155"></script>
-    <script src="../js/lang/es.js?v=202608282155"></script>
-    <script src="../js/lang/fr.js?v=202608282155"></script>
-    <script src="../js/lang/de.js?v=202608282155"></script>
-    <script src="../js/lang/ko.js?v=202608282155"></script>
-    <script src="../js/lang/ar.js?v=202608282155"></script>
-    <script src="../js/lang/pt.js?v=202608282155"></script>
-    <script src="../js/lang/it.js?v=202608282155"></script>
-    <script src="../js/wizard-common.js?v=202608282155"></script>
+    <script src="../js/config.js?v=202608291436"></script>
+    <script src="../js/lang/ja.js?v=202608291436"></script>
+    <script src="../js/lang/en.js?v=202608291436"></script>
+    <script src="../js/lang/zh.js?v=202608291436"></script>
+    <script src="../js/lang/zh-TW.js?v=202608291436"></script>
+    <script src="../js/lang/es.js?v=202608291436"></script>
+    <script src="../js/lang/fr.js?v=202608291436"></script>
+    <script src="../js/lang/de.js?v=202608291436"></script>
+    <script src="../js/lang/ko.js?v=202608291436"></script>
+    <script src="../js/lang/ar.js?v=202608291436"></script>
+    <script src="../js/lang/pt.js?v=202608291436"></script>
+    <script src="../js/lang/it.js?v=202608291436"></script>
+    <script src="../js/wizard-common.js?v=202608291436"></script>
 
     <style>
         :root {
@@ -525,6 +525,17 @@
             font-size: 0.82rem; font-weight: 500; white-space: nowrap;
         }
         .btn-find-editor:hover { background: var(--color-accent); color: #fff; }
+
+        /* 用語集の点検。訳文は書き換えず、気になる箇所を並べるだけ */
+        .gloss-check { max-width: 560px; margin: 1.5rem auto 0; text-align: left; }
+        .gloss-check h4 { font-size: 0.9rem; margin: 0 0 0.5rem; display: flex; align-items: center; gap: 0.4rem; }
+        .gloss-check table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+        .gloss-check th, .gloss-check td { padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--color-border); text-align: left; vertical-align: top; }
+        .gloss-check th { color: var(--color-text-secondary); font-weight: 600; background: var(--color-bg-hover); }
+        .gloss-check td:nth-child(2) { text-align: right; font-variant-numeric: tabular-nums; }
+        .gloss-check .ok { color: var(--color-success); font-size: 0.85rem; margin: 0; }
+        .gloss-check .caveat { font-size: 0.78rem; color: var(--color-text-light); margin: 0.6rem 0 0; line-height: 1.6; }
+
 
         /* Glossary */
         .glossary-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; margin-bottom: 0.5rem; }
@@ -1121,6 +1132,13 @@
                         </button>
                     </div>
 
+                    <div class="gloss-check" id="glossCheck" style="display:none;">
+                        <h4><i class="fas fa-book"></i> <span id="s9GlossTitle">Glossary check</span></h4>
+                        <div id="glossCheckBody"></div>
+                        <p class="caveat" id="s9GlossCaveat"></p>
+                    </div>
+
+
                     <div class="check-advice">
                         <i class="fas fa-user-check"></i>
                         <div>
@@ -1238,7 +1256,7 @@
         if (n === 4) { setTimeout(runComparison, 100); updateCompareTotals(); }
         if (n === 5) updateQuote();
         if (n === 6) updatePaymentAmount();
-        if (n === 9) updateCheckLink();
+        if (n === 9) { updateCheckLink(); renderGlossaryCheck(); }
         if (n === 8) {
             document.getElementById('reviewOriginal').textContent = sourceTextContent;
             document.getElementById('reviewTranslation').value = translatedText;
@@ -1855,7 +1873,97 @@
         link.href = 'editors/index.html' + (q.length ? '?' + q.join('&') : '');
     }
 
+    const GLOSS_CHECK_TEXT = {"title":{"en":"Glossary check","ja":"用語集の確認","zh":"术语表检查","zh-TW":"術語表檢查","es":"Revisión del glosario","fr":"Vérification du glossaire","de":"Glossar-Prüfung","ko":"용어집 확인","ar":"فحص قائمة المصطلحات","pt":"Verificação do glossário","it":"Controllo del glossario"},"allGood":{"en":"Every glossary term was used as registered.","ja":"用語集の訳語は、登録どおりに使われています。","zh":"术语表中的译词均按登记使用。","zh-TW":"術語表中的譯詞均按登記使用。","es":"Todos los términos del glosario se usaron tal como se registraron.","fr":"Tous les termes du glossaire ont été employés tels qu’enregistrés.","de":"Alle Glossarbegriffe wurden wie eingetragen verwendet.","ko":"용어집의 번역어가 등록된 대로 사용되었습니다.","ar":"استُخدمت جميع مصطلحات القائمة كما سُجّلت.","pt":"Todos os termos do glossário foram usados como registados.","it":"Tutti i termini del glossario sono stati usati come registrati."},"colTerm":{"en":"Term","ja":"訳語","zh":"译词","zh-TW":"譯詞","es":"Término","fr":"Terme","de":"Begriff","ko":"번역어","ar":"المصطلح","pt":"Termo","it":"Termine"},"colUsed":{"en":"Used","ja":"回数","zh":"次数","zh-TW":"次數","es":"Usos","fr":"Emplois","de":"Anzahl","ko":"횟수","ar":"المرات","pt":"Usos","it":"Usi"},"colNote":{"en":"What to look at","ja":"確認したいこと","zh":"需确认之处","zh-TW":"需確認之處","es":"Qué revisar","fr":"À vérifier","de":"Zu prüfen","ko":"확인할 점","ar":"ما يجب مراجعته","pt":"O que verificar","it":"Da controllare"},"unused":{"en":"never appears in the translation","ja":"訳文に一度も出てきません","zh":"译文中一次也未出现","zh-TW":"譯文中一次也未出現","es":"no aparece nunca en la traducción","fr":"n’apparaît jamais dans la traduction","de":"kommt in der Übersetzung nicht vor","ko":"번역문에 한 번도 나오지 않습니다","ar":"لا يظهر في الترجمة إطلاقًا","pt":"não aparece na tradução","it":"non compare mai nella traduzione"},"lower":{"en":"also written “{w}” {n} times (lower case)","ja":"小文字の「{w}」も{n}回あります","zh":"另有小写「{w}」{n}次","zh-TW":"另有小寫「{w}」{n}次","es":"también escrito «{w}» {n} veces (minúscula)","fr":"également écrit « {w} » {n} fois (minuscule)","de":"außerdem {n}-mal „{w}“ (klein)","ko":"소문자 「{w}」도 {n}회 있습니다","ar":"ويُكتب أيضًا «{w}» {n} مرة (بحرف صغير)","pt":"também escrito «{w}» {n} vezes (minúscula)","it":"scritto anche «{w}» {n} volte (minuscolo)"},"variant":{"en":"a near-identical spelling “{w}” appears {n} times","ja":"1文字違いの「{w}」が{n}回あります","zh":"出现仅差一个字母的「{w}」{n}次","zh-TW":"出現僅差一個字母的「{w}」{n}次","es":"aparece «{w}», casi idéntico, {n} veces","fr":"« {w} », presque identique, apparaît {n} fois","de":"die fast gleiche Schreibweise „{w}“ kommt {n}-mal vor","ko":"한 글자 다른 「{w}」가 {n}회 있습니다","ar":"يظهر «{w}» المشابه تمامًا {n} مرة","pt":"aparece «{w}», quase idêntico, {n} vezes","it":"compare «{w}», quasi identico, {n} volte"},"caveat":{"en":"This list only counts words; the translation itself was not changed. Some entries are correct — a name may be an ordinary word elsewhere, and two characters can have names one letter apart. Decide by reading the passage.","ja":"これは語を数えただけの一覧で、訳文には手を加えていません。正しい場合もあります（名前が別の場所では普通名詞のことも、1文字違いの名前が二人いることもあります）。本文を読んでご判断ください。","zh":"此表仅为词频统计，译文未作任何改动。有些情况是正确的——名字在别处可能是普通名词，也可能存在仅差一字的两个角色名。请阅读正文后判断。","zh-TW":"此表僅為詞頻統計，譯文未作任何改動。有些情況是正確的——名字在別處可能是普通名詞，也可能存在僅差一字的兩個角色名。請閱讀正文後判斷。","es":"Esta lista solo cuenta palabras; la traducción no se modificó. Algunas entradas son correctas: un nombre puede ser un sustantivo común en otro lugar, y dos personajes pueden tener nombres que difieren en una letra. Decida leyendo el pasaje.","fr":"Cette liste ne fait que compter des mots ; la traduction n’a pas été modifiée. Certaines entrées sont correctes : un nom peut être un mot courant ailleurs, et deux personnages peuvent porter des noms séparés d’une lettre. Décidez en lisant le passage.","de":"Diese Liste zählt nur Wörter; die Übersetzung wurde nicht verändert. Manche Einträge sind korrekt – ein Name kann an anderer Stelle ein gewöhnliches Wort sein, und zwei Figuren können Namen tragen, die sich um einen Buchstaben unterscheiden. Entscheiden Sie beim Lesen der Stelle.","ko":"이 목록은 단어를 세었을 뿐이며 번역문은 수정하지 않았습니다. 맞는 경우도 있습니다(이름이 다른 곳에서는 보통명사일 수 있고, 한 글자 다른 이름의 인물이 둘일 수도 있습니다). 본문을 읽고 판단해 주세요.","ar":"هذه القائمة تعدّ الكلمات فقط، ولم تُعدَّل الترجمة. بعض المدخلات صحيحة: قد يكون الاسم كلمة عادية في موضع آخر، وقد يحمل شخصيتان اسمين يفترقان بحرف واحد. احكم بقراءة المقطع.","pt":"Esta lista apenas conta palavras; a tradução não foi alterada. Algumas entradas estão corretas — um nome pode ser um substantivo comum noutro sítio, e duas personagens podem ter nomes que diferem numa letra. Decida lendo a passagem.","it":"Questo elenco conta soltanto le parole; la traduzione non è stata modificata. Alcune voci sono corrette: un nome può essere una parola comune altrove, e due personaggi possono avere nomi che differiscono di una lettera. Decida leggendo il passo."}};
+
+    // ===== 用語集の点検 =====
+    // 出来上がった訳文の中で、用語集の訳語がどう扱われたかを数えるだけ。
+    // 訳文は絶対に書き換えない。1文字違いを機械的に直す作りにすると、
+    // この作品に実在する Bard（詩人）と Card（カルタ）のような名前どうしを
+    // 取り違えて、登場人物を消してしまう（hard・bird・bad も1文字違いに入る）。
+    // 直すかどうかは、原文を知っている作者にしか決められない。
+    function editDistance(a, b) {
+        const m = a.length, n = b.length;
+        let prev = Array.from({ length: n + 1 }, (_, j) => j);
+        for (let i = 1; i <= m; i++) {
+            const cur = [i];
+            for (let j = 1; j <= n; j++) {
+                cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+            }
+            prev = cur;
+        }
+        return prev[n];
+    }
+
+    function buildGlossaryReport(text, terms) {
+        const tokens = String(text).match(/[A-Za-z']+/g) || [];
+        const tally = {};
+        for (const tk of tokens) tally[tk] = (tally[tk] || 0) + 1;
+        const targets = terms.map(g => String((g && g.tgt) || '').trim()).filter(Boolean);
+        const known = new Set(targets.map(s => s.toLowerCase()));
+        const rows = [];
+        for (const term of targets) {
+            if (!/^[A-Za-z][A-Za-z']*$/.test(term)) continue;   // 英語の1語だけを見る
+            const used = tally[term] || 0;
+            const lowerForm = term.toLowerCase();
+            const lower = lowerForm === term ? 0 : (tally[lowerForm] || 0);
+            const notes = [];
+            if (used === 0) notes.push({ k: 'unused' });
+            if (lower > 0) notes.push({ k: 'lower', w: lowerForm, n: lower });
+            // 綴りの化け。短い語は普通の英単語と衝突しやすいので5文字以上に限る
+            if (term.length >= 5) {
+                for (const w of Object.keys(tally)) {
+                    if (w === term || known.has(w.toLowerCase())) continue;
+                    if (tally[w] < 2) continue;
+                    if (Math.abs(w.length - term.length) > 1) continue;
+                    const a = w.toLowerCase();
+                    // 語尾だけの違いは普通の英語の活用（shadow/shadows, cleaner/cleaned）。
+                    // 綴りの化けは語の途中で起きる（cleaner → clearner）ので、そこだけ見る
+                    const tailOnly = a.slice(0, -1) === lowerForm.slice(0, -1)
+                        || a === lowerForm.slice(0, -1) || lowerForm === a.slice(0, -1);
+                    if (tailOnly) continue;
+                    if (editDistance(a, lowerForm) === 1) notes.push({ k: 'variant', w: w, n: tally[w] });
+                }
+            }
+            if (notes.length) rows.push({ term: term, used: used, notes: notes });
+        }
+        return rows;
+    }
+
+    function renderGlossaryCheck() {
+        const box = document.getElementById('glossCheck');
+        if (!box) return;
+        if (!glossary.length || !translatedText) { box.style.display = 'none'; return; }
+        const L = getLang();
+        const T = GLOSS_CHECK_TEXT;
+        const t = (o) => o[L] || o.en;
+        const rows = buildGlossaryReport(translatedText, glossary);
+        const head = document.getElementById('s9GlossTitle');
+        if (head) head.textContent = t(T.title);
+        const caveat = document.getElementById('s9GlossCaveat');
+        const body = document.getElementById('glossCheckBody');
+        if (!rows.length) {
+            body.innerHTML = '<p class="ok"><i class="fas fa-check"></i> ' + escH(t(T.allGood)) + '</p>';
+            if (caveat) caveat.textContent = '';
+        } else {
+            const cells = rows.map(function (r) {
+                const msg = r.notes.map(function (n) {
+                    if (n.k === 'unused') return t(T.unused);
+                    if (n.k === 'lower') return t(T.lower).replace('{w}', n.w).replace('{n}', n.n);
+                    return t(T.variant).replace('{w}', n.w).replace('{n}', n.n);
+                }).join(' / ');
+                return '<tr><td>' + escH(r.term) + '</td><td>' + r.used + '</td><td>' + escH(msg) + '</td></tr>';
+            }).join('');
+            body.innerHTML = '<table><tr><th>' + escH(t(T.colTerm)) + '</th><th>' + escH(t(T.colUsed))
+                + '</th><th>' + escH(t(T.colNote)) + '</th></tr>' + cells + '</table>';
+            if (caveat) caveat.textContent = t(T.caveat);
+        }
+        box.style.display = 'block';
+    }
+
+
     function startNewTranslation() {
+        const gc = document.getElementById('glossCheck');
+        if (gc) gc.style.display = 'none';
         const ctxEl = document.getElementById('tsContext');
         if (ctxEl) ctxEl.value = '';
         document.getElementById('sourceText').value = '';
@@ -2095,7 +2203,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- JSZip: lets us crack open .docx (which is a ZIP) to read the text inside -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="../js/i18n.js?v=202608282155"></script>
-    <script src="../js/navbar.js?v=202608282155"></script>
+    <script src="../js/i18n.js?v=202608291436"></script>
+    <script src="../js/navbar.js?v=202608291436"></script>
 </body>
 </html>
