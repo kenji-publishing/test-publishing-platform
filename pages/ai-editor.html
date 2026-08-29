@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608291606">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608291748">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Editor - AuctLect</title>
 
@@ -16,25 +16,25 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <!-- Platform CSS -->
-    <link href="../css/variables.css?v=202608291606" rel="stylesheet">
-    <link rel="stylesheet" href="../css/style-new.css?v=202608291606">
-    <link href="../css/components.css?v=202608291606" rel="stylesheet">
-    <link href="../css/navbar.css?v=202608291606" rel="stylesheet">
-    <link rel="stylesheet" href="../css/mobile-fixes.css?v=202608291606">
+    <link href="../css/variables.css?v=202608291748" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style-new.css?v=202608291748">
+    <link href="../css/components.css?v=202608291748" rel="stylesheet">
+    <link href="../css/navbar.css?v=202608291748" rel="stylesheet">
+    <link rel="stylesheet" href="../css/mobile-fixes.css?v=202608291748">
 
     <!-- 言語ファイル（9言語） -->
-    <script src="../js/lang/ja.js?v=202608291606"></script>
-    <script src="../js/lang/en.js?v=202608291606"></script>
-    <script src="../js/lang/zh.js?v=202608291606"></script>
-    <script src="../js/lang/zh-TW.js?v=202608291606"></script>
-    <script src="../js/lang/es.js?v=202608291606"></script>
-    <script src="../js/lang/fr.js?v=202608291606"></script>
-    <script src="../js/lang/de.js?v=202608291606"></script>
-    <script src="../js/lang/ko.js?v=202608291606"></script>
-    <script src="../js/lang/ar.js?v=202608291606"></script>
-    <script src="../js/lang/pt.js?v=202608291606"></script>
-    <script src="../js/lang/it.js?v=202608291606"></script>
-    <script src="../js/wizard-common.js?v=202608291606"></script>
+    <script src="../js/lang/ja.js?v=202608291748"></script>
+    <script src="../js/lang/en.js?v=202608291748"></script>
+    <script src="../js/lang/zh.js?v=202608291748"></script>
+    <script src="../js/lang/zh-TW.js?v=202608291748"></script>
+    <script src="../js/lang/es.js?v=202608291748"></script>
+    <script src="../js/lang/fr.js?v=202608291748"></script>
+    <script src="../js/lang/de.js?v=202608291748"></script>
+    <script src="../js/lang/ko.js?v=202608291748"></script>
+    <script src="../js/lang/ar.js?v=202608291748"></script>
+    <script src="../js/lang/pt.js?v=202608291748"></script>
+    <script src="../js/lang/it.js?v=202608291748"></script>
+    <script src="../js/wizard-common.js?v=202608291748"></script>
 
     <style>
         :root {
@@ -680,6 +680,26 @@
             .lang-bar { flex-direction: column; align-items: stretch; }
             .lang-swap { align-self: center; transform: rotate(90deg); }
         }
+
+        /* ===== 用語集の入力欄 =====
+           先に別の定義があるので、後ろに置いて効かせる。
+           入力欄は表の上に固定し、表は自前の高さの中だけでスクロールさせる。 */
+        .glossary-add-row {
+            position: sticky;
+            top: calc(var(--gloss-sticky-top, 60px) + 6px);
+            z-index: 3;
+            margin-top: 0;
+            padding: 0.5rem 0;
+            background: var(--color-bg-card);
+        }
+        .glossary-area {
+            max-height: 240px;
+            overflow-y: auto;
+            margin-top: 0.5rem;
+            border: 1px solid var(--color-border-light);
+            border-radius: 6px;
+        }
+        .glossary-table thead th { position: sticky; top: 0; z-index: 1; }
     </style>
 </head>
 <body>
@@ -861,6 +881,11 @@
                     <!-- Terminology (for consistency checks) -->
                     <div class="setting-group full-width">
                         <label id="s3LabelGlossary"><i class="fas fa-book me-1"></i> Terminology (character names, recurring terms)</label>
+                        <div class="glossary-add-row">
+                            <input type="text" id="glossarySrc" placeholder="Term (e.g. character name)">
+                            <input type="text" id="glossaryTgt" placeholder="Preferred form / note">
+                            <button class="glossary-add-btn" onclick="addGlossaryEntry()"><i class="fas fa-plus"></i></button>
+                        </div>
                         <div class="glossary-area">
                             <table class="glossary-table" id="glossaryTable">
                                 <thead>
@@ -868,11 +893,6 @@
                                 </thead>
                                 <tbody id="glossaryBody"></tbody>
                             </table>
-                            <div class="glossary-add-row">
-                                <input type="text" id="glossarySrc" placeholder="Term (e.g. character name)">
-                                <input type="text" id="glossaryTgt" placeholder="Preferred form / note">
-                                <button class="glossary-add-btn" onclick="addGlossaryEntry()"><i class="fas fa-plus"></i></button>
-                            </div>
                         </div>
                     </div>
 
@@ -1145,6 +1165,33 @@
         updateQuote();
     }
 
+    // 入力欄を貼りつける高さ。ナビバーは幅で高さが変わるので実測する
+    function updateGlossStickyTop() {
+        const nav = document.querySelector('nav.navbar');
+        const h = nav ? Math.round(nav.getBoundingClientRect().height) : 60;
+        document.documentElement.style.setProperty('--gloss-sticky-top', h + 'px');
+    }
+    // 用語を続けて入れるとき、キーボードから手を離さずに済むようにする
+    document.addEventListener('DOMContentLoaded', function () {
+        updateGlossStickyTop();
+        setTimeout(updateGlossStickyTop, 300);
+        window.addEventListener('resize', updateGlossStickyTop);
+        ['glossarySrc', 'glossaryTgt'].forEach(function (id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('keydown', function (ev) {
+                if (ev.key !== 'Enter') return;
+                ev.preventDefault();
+                if (id === 'glossarySrc' && !document.getElementById('glossaryTgt').value.trim()) {
+                    document.getElementById('glossaryTgt').focus();
+                    return;
+                }
+                addGlossaryEntry();
+                document.getElementById('glossarySrc').focus();
+            });
+        });
+    });
+
     document.addEventListener('DOMContentLoaded', function() {
         const main = document.getElementById('currencySelect');
         const sel5 = document.getElementById('currencySelect5');
@@ -1390,7 +1437,7 @@
         const src = document.getElementById('glossarySrc').value.trim();
         const tgt = document.getElementById('glossaryTgt').value.trim();
         if (!src || !tgt) return;
-        glossary.push({ src, tgt });
+        glossary.unshift({ src, tgt });
         document.getElementById('glossarySrc').value = '';
         document.getElementById('glossaryTgt').value = '';
         renderGlossary();
@@ -2219,8 +2266,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- JSZip: lets us crack open .docx (which is a ZIP) to read the text inside -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="../js/config.js?v=202608291606"></script>
-    <script src="../js/i18n.js?v=202608291606"></script>
-    <script src="../js/navbar.js?v=202608291606"></script>
+    <script src="../js/config.js?v=202608291748"></script>
+    <script src="../js/i18n.js?v=202608291748"></script>
+    <script src="../js/navbar.js?v=202608291748"></script>
 </body>
 </html>
