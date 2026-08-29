@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608291436">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608291606">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608291436">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608291606">
     <title data-i18n="mangaTranslator.pageTitle">Manga Translator - AuctLect</title>
     
     <!-- Google Fonts -->
@@ -17,26 +17,26 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <!-- Platform CSS -->
-    <link href="../css/variables.css?v=202608291436" rel="stylesheet">
-    <link rel="stylesheet" href="../css/style-new.css?v=202608291436">
-    <link href="../css/components.css?v=202608291436" rel="stylesheet">
-    <link href="../css/navbar.css?v=202608291436" rel="stylesheet">
-    <link rel="stylesheet" href="../css/mobile-fixes.css?v=202608291436">
+    <link href="../css/variables.css?v=202608291606" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style-new.css?v=202608291606">
+    <link href="../css/components.css?v=202608291606" rel="stylesheet">
+    <link href="../css/navbar.css?v=202608291606" rel="stylesheet">
+    <link rel="stylesheet" href="../css/mobile-fixes.css?v=202608291606">
     
     <!-- 言語ファイル（9言語） -->
-    <script src="../js/lang/ja.js?v=202608291436"></script>
-    <script src="../js/lang/en.js?v=202608291436"></script>
-    <script src="../js/lang/zh.js?v=202608291436"></script>
-    <script src="../js/lang/zh-TW.js?v=202608291436"></script>
-    <script src="../js/lang/es.js?v=202608291436"></script>
-    <script src="../js/lang/fr.js?v=202608291436"></script>
-    <script src="../js/lang/de.js?v=202608291436"></script>
-    <script src="../js/lang/ko.js?v=202608291436"></script>
-    <script src="../js/lang/ar.js?v=202608291436"></script>
-    <script src="../js/lang/pt.js?v=202608291436"></script>
-    <script src="../js/lang/it.js?v=202608291436"></script>
-    <script src="../js/config.js?v=202608291436"></script>
-    <script src="../js/wizard-common.js?v=202608291436"></script>
+    <script src="../js/lang/ja.js?v=202608291606"></script>
+    <script src="../js/lang/en.js?v=202608291606"></script>
+    <script src="../js/lang/zh.js?v=202608291606"></script>
+    <script src="../js/lang/zh-TW.js?v=202608291606"></script>
+    <script src="../js/lang/es.js?v=202608291606"></script>
+    <script src="../js/lang/fr.js?v=202608291606"></script>
+    <script src="../js/lang/de.js?v=202608291606"></script>
+    <script src="../js/lang/ko.js?v=202608291606"></script>
+    <script src="../js/lang/ar.js?v=202608291606"></script>
+    <script src="../js/lang/pt.js?v=202608291606"></script>
+    <script src="../js/lang/it.js?v=202608291606"></script>
+    <script src="../js/config.js?v=202608291606"></script>
+    <script src="../js/wizard-common.js?v=202608291606"></script>
     <!-- 翻訳ベース（共通関数） -->
     
 
@@ -519,6 +519,30 @@
             font-size: 0.82rem; font-weight: 500; white-space: nowrap;
         }
         .btn-find-editor:hover { background: var(--color-accent); color: #fff; }
+
+        /* 用語集: 入力欄を表の上に固定する。表の下に置くと、語が増えるたびに
+           入力欄が下へ逃げて、追加のたびに画面を動かすことになる */
+        .glossary-area { max-height: 220px; overflow-y: auto; margin-top: 0.5rem; border: 1px solid var(--color-border-light); border-radius: 6px; }
+        .glossary-area:empty { display: none; }
+        .glossary-table thead th { position: sticky; top: 0; z-index: 1; }
+        .glossary-add-row { margin-top: 0; }
+        /* 前回の用語集の引き継ぎ */
+        .glossary-carry {
+            display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; justify-content: space-between;
+            padding: 0.6rem 0.75rem; margin-bottom: 0.5rem;
+            background: var(--color-accent-bg); border-radius: 8px; font-size: 0.8rem; line-height: 1.6;
+        }
+        .glossary-carry .carry-text { flex: 1 1 16rem; color: var(--color-text-secondary); }
+        .glossary-carry .carry-terms { display: block; color: var(--color-text-light); font-size: 0.75rem; overflow-wrap: anywhere; }
+        .glossary-carry .carry-actions { display: flex; gap: 0.4rem; flex-shrink: 0; }
+        .carry-btn {
+            padding: 0.25rem 0.75rem; border-radius: 6px; font-size: 0.78rem; cursor: pointer;
+            border: 1px solid var(--color-border); background: transparent; color: var(--color-text-secondary); white-space: nowrap;
+        }
+        .carry-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
+        .carry-btn.carry-yes { border-color: var(--color-accent); background: var(--color-accent); color: #fff; }
+        .carry-btn.carry-yes:hover { opacity: 0.88; color: #fff; }
+
 
         /* Glossary */
         .glossary-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; margin-bottom: 0.5rem; }
@@ -1081,6 +1105,21 @@
 
                     <div class="setting-group full-width">
                         <label id="s3LabelGlossary"><i class="fas fa-book me-1"></i> Glossary (character names, terms)</label>
+                        <div class="glossary-carry" id="glossaryCarry" style="display:none;">
+                            <div class="carry-text">
+                                <span id="carryLead"></span>
+                                <span class="carry-terms" id="carryTerms"></span>
+                            </div>
+                            <div class="carry-actions">
+                                <button type="button" class="carry-btn carry-yes" onclick="loadCarriedGlossary()" id="carryYes">Load</button>
+                                <button type="button" class="carry-btn" onclick="dismissCarriedGlossary()" id="carryNo">Not now</button>
+                            </div>
+                        </div>
+                        <div class="glossary-add-row">
+                            <input type="text" id="glossarySrc" placeholder="Source term">
+                            <input type="text" id="glossaryTgt" placeholder="Translation">
+                            <button class="glossary-add-btn" onclick="addGlossaryEntry()"><i class="fas fa-plus"></i></button>
+                        </div>
                         <div class="glossary-area">
                             <table class="glossary-table" id="glossaryTable">
                                 <thead>
@@ -1088,11 +1127,6 @@
                                 </thead>
                                 <tbody id="glossaryBody"></tbody>
                             </table>
-                            <div class="glossary-add-row">
-                                <input type="text" id="glossarySrc" placeholder="Source term">
-                                <input type="text" id="glossaryTgt" placeholder="Translation">
-                                <button class="glossary-add-btn" onclick="addGlossaryEntry()"><i class="fas fa-plus"></i></button>
-                            </div>
                         </div>
                     </div>
 
@@ -1356,6 +1390,9 @@
         if (n === 4) { setTimeout(runComparison, 100); updateCompareTotals(); }
         if (n === 5) updateQuote();
         if (n === 6) updatePaymentAmount();
+        if (n === 3) showCarryOffer();
+        // 用語集を入れ終えて先へ進む時点で覚える（次の章で聞くため）
+        if (n === 4) saveCarriedGlossary();
         if (n === 9) updateCheckLink();
         if (n === 8) { renderReviewPages(); }
         if (n === 9 && currentOrderId) {
@@ -1438,9 +1475,90 @@
     }
     function swapLanguages() { const s=document.getElementById('sourceLang'),t=document.getElementById('targetLang'),v=s.value; s.value=t.value; t.value=v; }
 
+    const CARRY_TEXT = {"lead":{"en":"You have a glossary from last time ({n} terms, {src} → {tgt}).","ja":"前回の用語集があります（{n}語・{src} → {tgt}）。","zh":"有上次使用的术语表（{n}个词・{src} → {tgt}）。","zh-TW":"有上次使用的術語表（{n}個詞・{src} → {tgt}）。","es":"Tiene un glosario de la vez anterior ({n} términos, {src} → {tgt}).","fr":"Vous avez un glossaire de la fois précédente ({n} termes, {src} → {tgt}).","de":"Sie haben ein Glossar vom letzten Mal ({n} Begriffe, {src} → {tgt}).","ko":"지난번 용어집이 있습니다({n}개・{src} → {tgt}).","ar":"لديك قائمة مصطلحات من المرة السابقة ({n} مصطلحًا، {src} ← {tgt}).","pt":"Tem um glossário da vez anterior ({n} termos, {src} → {tgt}).","it":"Hai un glossario della volta precedente ({n} termini, {src} → {tgt})."},"load":{"en":"Load","ja":"読み込む","zh":"载入","zh-TW":"載入","es":"Cargar","fr":"Charger","de":"Laden","ko":"불러오기","ar":"تحميل","pt":"Carregar","it":"Carica"},"skip":{"en":"Not now","ja":"使わない","zh":"不使用","zh-TW":"不使用","es":"Ahora no","fr":"Pas maintenant","de":"Jetzt nicht","ko":"사용 안 함","ar":"ليس الآن","pt":"Agora não","it":"Non ora"}};
+
+    // ===== 前回の用語集の引き継ぎ =====
+    // 同じ作品の次の章を訳すとき、同じ用語集を入れ直すのは手間なうえ、
+    // 入れ忘れると章ごとに登場人物の名前が変わる（第4章で実際に起きた）。
+    // ただし黙って入れると別の作品に前の作品の名前が紛れ込むので、
+    // 中身を見せて「読み込む／使わない」を選んでもらう。
+    const CARRY_KEY = 'mangaTranslatorGlossary';
+    let carriedGlossary = null;
+
+    function readCarried() {
+        try {
+            const raw = localStorage.getItem(CARRY_KEY);
+            if (!raw) return null;
+            const data = JSON.parse(raw);
+            if (!data || !Array.isArray(data.terms) || !data.terms.length) return null;
+            return data;
+        } catch (err) { return null; }
+    }
+
+    function saveCarriedGlossary() {
+        if (!glossary.length) return;
+        const payload = {
+            src: (document.getElementById('sourceLang') || {}).value || '',
+            tgt: (document.getElementById('targetLang') || {}).value || '',
+            terms: glossary.slice(0, 50)
+        };
+        try { localStorage.setItem(CARRY_KEY, JSON.stringify(payload)); } catch (err) {}
+    }
+
+    function langLabel(selectId, code) {
+        const sel = document.getElementById(selectId);
+        if (!sel) return code;
+        const opt = Array.prototype.find.call(sel.options, function (o) { return o.value === code; });
+        return opt ? opt.textContent : code;
+    }
+
+    function showCarryOffer() {
+        const box = document.getElementById('glossaryCarry');
+        if (!box) return;
+        const data = readCarried();
+        const src = (document.getElementById('sourceLang') || {}).value || '';
+        const tgt = (document.getElementById('targetLang') || {}).value || '';
+        // すでに入力がある / 言語の組み合わせが違う場合は出さない
+        if (!data || glossary.length || data.src !== src || data.tgt !== tgt) { box.style.display = 'none'; return; }
+        carriedGlossary = data;
+        const L = getLang();
+        const T = CARRY_TEXT;
+        const t = (o) => o[L] || o.en;
+        const lead = document.getElementById('carryLead');
+        if (lead) {
+            lead.textContent = t(T.lead)
+                .replace('{n}', data.terms.length)
+                .replace('{src}', langLabel('sourceLang', data.src))
+                .replace('{tgt}', langLabel('targetLang', data.tgt));
+        }
+        const terms = document.getElementById('carryTerms');
+        if (terms) {
+            const names = data.terms.slice(0, 6).map(function (g) { return g.tgt; }).join(' / ');
+            terms.textContent = names + (data.terms.length > 6 ? ' …' : '');
+        }
+        const yes = document.getElementById('carryYes');
+        if (yes) yes.textContent = t(T.load);
+        const no = document.getElementById('carryNo');
+        if (no) no.textContent = t(T.skip);
+        box.style.display = 'flex';
+    }
+
+    function loadCarriedGlossary() {
+        if (!carriedGlossary) return;
+        glossary = carriedGlossary.terms.slice();
+        renderGlossary();
+        dismissCarriedGlossary();
+    }
+
+    function dismissCarriedGlossary() {
+        const box = document.getElementById('glossaryCarry');
+        if (box) box.style.display = 'none';
+    }
+
+
     function addGlossaryEntry() {
         const s=document.getElementById('glossarySrc').value.trim(), t=document.getElementById('glossaryTgt').value.trim();
-        if(!s||!t) return; glossary.push({src:s,tgt:t}); document.getElementById('glossarySrc').value=''; document.getElementById('glossaryTgt').value=''; renderGlossary();
+        if(!s||!t) return; glossary.unshift({src:s,tgt:t}); document.getElementById('glossarySrc').value=''; document.getElementById('glossaryTgt').value=''; renderGlossary();
     }
     function removeGlossaryEntry(i) { glossary.splice(i,1); renderGlossary(); }
     function renderGlossary() {
@@ -1844,6 +1962,24 @@
     }
 
     // ===== 決済からの戻り処理（?order=...&paid=1 / canceled=1） =====
+    // 用語を続けて入れるとき、キーボードから手を離さずに済むようにする
+    document.addEventListener('DOMContentLoaded', function () {
+        ['glossarySrc', 'glossaryTgt'].forEach(function (id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('keydown', function (e) {
+                if (e.key !== 'Enter') return;
+                e.preventDefault();
+                if (id === 'glossarySrc' && !document.getElementById('glossaryTgt').value.trim()) {
+                    document.getElementById('glossaryTgt').focus();
+                    return;
+                }
+                addGlossaryEntry();
+                document.getElementById('glossarySrc').focus();
+            });
+        });
+    });
+
     document.addEventListener('DOMContentLoaded', async function () {
         const params = new URLSearchParams(window.location.search);
         const orderId = params.get('order');
@@ -2248,8 +2384,8 @@
     </script>
     <!-- Bootstrap JS (Pattern C navbar requires) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/i18n.js?v=202608291436"></script>
-    <script src="../js/navbar.js?v=202608291436"></script>
+    <script src="../js/i18n.js?v=202608291606"></script>
+    <script src="../js/navbar.js?v=202608291606"></script>
     <!-- Language Switcher -->
     <!-- Notification Badge -->
 </body>
