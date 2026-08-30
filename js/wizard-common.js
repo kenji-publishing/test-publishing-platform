@@ -415,6 +415,43 @@
         setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
     }
 
+    /**
+     * ファイル名を人の感覚どおりに並べる。
+     * 文字列の比較だけだと「10章」が「2章」より前に来てしまうので、
+     * 数字の並びは数として比べる（01/02/10 でも 1/2/10 でも正しい順になる）
+     */
+    function naturalCompare(a, b) {
+        var re = /(\d+)|(\D+)/g;
+        var ax = String(a).toLowerCase().match(re) || [];
+        var bx = String(b).toLowerCase().match(re) || [];
+        for (var i = 0; i < Math.min(ax.length, bx.length); i++) {
+            var an = parseInt(ax[i], 10), bn = parseInt(bx[i], 10);
+            if (!isNaN(an) && !isNaN(bn)) {
+                if (an !== bn) return an - bn;
+            } else if (ax[i] !== bx[i]) {
+                return ax[i] < bx[i] ? -1 : 1;
+            }
+        }
+        return ax.length - bx.length;
+    }
+
+    /** 複数のファイルを1つのZIPにまとめる（章ごとの仕上がりをまとめて渡すため） */
+    function zipFiles(files) {
+        if (typeof global.JSZip === 'undefined') {
+            return Promise.reject(new Error('JSZip is not loaded'));
+        }
+        var zip = new global.JSZip();
+        var used = {};
+        files.forEach(function (f) {
+            // 同じ名前が2つ入るとZIPの中で1つになってしまうので、後の方に番号を付ける
+            var name = f.name;
+            if (used[name]) { name = name.replace(/(\.[^.]+)?$/, ' (' + (++used[f.name]) + ')$1'); }
+            else { used[f.name] = 1; }
+            zip.file(name, f.blob || f.text || '');
+        });
+        return zip.generateAsync({ type: 'blob' });
+    }
+
     global.WizardCommon = {
         CURRENCIES: CURRENCIES,
         PAY_MINIMUMS: PAY_MINIMUMS,
@@ -428,6 +465,8 @@
         saveBlob: saveBlob,
         formatRemaining: formatRemaining,
         workFileBaseName: workFileBaseName,
-        trackedChangesDocxBlob: trackedChangesDocxBlob
+        trackedChangesDocxBlob: trackedChangesDocxBlob,
+        naturalCompare: naturalCompare,
+        zipFiles: zipFiles
     };
 })(window);

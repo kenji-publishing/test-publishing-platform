@@ -68,6 +68,42 @@ function computeAmount({ chars, model, currency }) {
     return Math.max(converted, STRIPE_MINIMUMS[currency]);
 }
 
+// 1注文に入れられる章の数。多すぎる注文は1本のジョブが何時間も走ることになる
+const MAX_PARTS = 60;
+
+/**
+ * 章ごとのファイルを「連結した本文」と「切れ目の一覧」に組み直す。
+ *
+ * 本文をそのままつなげ、どこからどこまでが何というファイルだったかを別に持つ。
+ * こうしておくと、AIには章ごとに渡しつつ（区切り記号を本文に混ぜずに済む）、
+ * 文字数・金額・上限の判定は今までどおり本文1本で行える。
+ */
+function buildParts(rawParts) {
+    if (rawParts.length > MAX_PARTS) {
+        return { error: `Too many files (max ${MAX_PARTS} per order)` };
+    }
+    const SEP = '\n\n';
+    const parts = [];
+    let text = '';
+    for (let i = 0; i < rawParts.length; i++) {
+        const body = String((rawParts[i] && rawParts[i].text) || '');
+        if (!body.trim()) return { error: `File ${i + 1} is empty` };
+        if (text) text += SEP;
+        parts.push({
+            name: String((rawParts[i] && rawParts[i].name) || `part${i + 1}`).slice(0, 200),
+            start: text.length,
+            len: body.length
+        });
+        text += body;
+    }
+    return { text, parts };
+}
+
+/** 注文の parts を安全に取り出す（1ファイルの注文では null） */
+function orderParts(order) {
+    return Array.isArray(order.parts) && order.parts.length ? order.parts : null;
+}
+
 // In-memory progress per order (the durable result lives in ai_tool_orders.result_text)
 const jobs = new Map(); // orderId -> { status, progress }
 
@@ -264,9 +300,21 @@ router.post('/manga/checkout', authenticate, async (req, res) => {
  */
 router.post('/checkout', authenticate, async (req, res) => {
     try {
-        const { tool, model, text, sourceLang, targetLang, glossary, currency, style, genre, context } = req.body;
+        const { tool, model, sourceLang, targetLang, glossary, currency, style, genre, context } = req.body;
         if (!TOOL_PAGES[tool]) return res.status(400).json({ error: 'Invalid tool' });
         if (!PRICING_JPY[model]) return res.status(400).json({ error: 'Invalid model' });
+
+        // 章ごとのファイルが送られてきたら、連結した本文と切れ目の一覧に組み直す。
+        // 送られてこなければ今までどおりの1本の原稿（parts は null のまま）
+        let text = req.body.text;
+        let parts = null;
+        if (Array.isArray(req.body.parts) && req.body.parts.length) {
+            const built = buildParts(req.body.parts);
+            if (built.error) return res.status(400).json({ error: built.error });
+            text = built.text;
+            parts = built.parts;
+        }
+
         if (!text || !String(text).trim()) return res.status(400).json({ error: 'Text is required' });
         if (String(text).length > MAX_CHARS) {
             return res.status(400).json({ error: `Text is too long (max ${MAX_CHARS.toLocaleString()} characters)` });
@@ -280,12 +328,13 @@ router.post('/checkout', authenticate, async (req, res) => {
         const amount = computeAmount({ chars, model, currency });
 
         const orderResult = await db.query(
-            `INSERT INTO ai_tool_orders (user_id, tool, model, source_lang, target_lang, glossary, text_content, char_count, currency, amount, style, genre, context_note)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+            `INSERT INTO ai_tool_orders (user_id, tool, model, source_lang, target_lang, glossary, text_content, char_count, currency, amount, style, genre, context_note, parts)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
              RETURNING order_id`,
             [req.user.userId, tool, model, sourceLang || null, tool === 'translator' ? targetLang : null,
              JSON.stringify(Array.isArray(glossary) ? glossary.slice(0, 50) : []), String(text), chars, currency, amount,
-             normalizeStyle(style), normalizeGenre(genre), normalizeContextNote(context)]
+             normalizeStyle(style), normalizeGenre(genre), normalizeContextNote(context),
+             parts ? JSON.stringify(parts) : null]
         );
         const orderId = orderResult.rows[0].order_id;
 
@@ -371,7 +420,13 @@ router.get('/orders/:orderId', authenticate, async (req, res) => {
                 currency: order.currency,
                 amount: parseFloat(order.amount),
                 status: order.status,
-                result: order.status === 'completed' ? order.result_text : null
+                result: order.status === 'completed' ? order.result_text : null,
+                // 章ごとの注文なら、章の名前と仕上がりも返す（ページを開き直しても
+                // 章ごとにダウンロードできるように）
+                // 切れ目もそのまま返す。ウィザードはこれで章ごとの元原稿を切り出す
+                parts: orderParts(order),
+                partNames: orderParts(order) ? orderParts(order).map(p => p.name) : null,
+                resultParts: order.status === 'completed' && Array.isArray(order.result_parts) ? order.result_parts : null
             }
         });
     } catch (error) {
@@ -529,6 +584,16 @@ router.post('/orders/:orderId/run', authenticate, async (req, res) => {
                 ).catch((e) => console.error(`Partial save failed for ${order.order_id}:`, e.message));
             }
         };
+        // 章ごとのファイルは1つずつAIに渡す。連結した本文をそのまま渡すと
+        // 章の切れ目が本文に埋もれ、仕上がりを章ごとに返せなくなる
+        const parts = order.tool === 'manga' ? null : orderParts(order);
+        const runOne = (text, hooks) => {
+            const p = Object.assign({}, params, { text: text }, hooks || {});
+            return order.tool === 'translator'
+                ? translateText(Object.assign({}, p, { sourceLang: order.source_lang, targetLang: order.target_lang }))
+                : editText(Object.assign({}, p, { language: order.source_lang }));
+        };
+
         let runPromise;
         if (order.tool === 'manga') {
             const orderDir = path.join(MANGA_ORDERS_DIR, order.order_id);
@@ -540,10 +605,45 @@ router.post('/orders/:orderId/run', authenticate, async (req, res) => {
                     : `ページ ${s.page}/${s.total} を翻訳中 / Translating page ${s.page}/${s.total}`;
             };
             runPromise = translateManga({ ...params, pagePaths, sourceLang: order.source_lang, targetLang: order.target_lang });
-        } else if (order.tool === 'translator') {
-            runPromise = translateText({ ...params, sourceLang: order.source_lang, targetLang: order.target_lang });
+        } else if (!parts) {
+            runPromise = runOne(order.text_content, null);
         } else {
-            runPromise = editText({ ...params, language: order.source_lang });
+            runPromise = (async () => {
+                // 終わった章は result_parts に残っている。失敗して再実行したときは
+                // その続きから始める（AI費用の二重払いと、同じ待ち時間の繰り返しを防ぐ）
+                const done = Array.isArray(order.result_parts) ? order.result_parts.slice(0, parts.length) : [];
+                const resumeAt = done.length;
+                const total = parts.reduce((n, p) => n + (p.len || 0), 0) || 1;
+                let base = parts.slice(0, resumeAt).reduce((n, p) => n + (p.len || 0), 0);
+
+                for (let i = resumeAt; i < parts.length; i++) {
+                    const part = parts[i];
+                    const body = String(order.text_content).substr(part.start, part.len);
+                    // 言葉は画面側で組み立てる。ここは「何ファイル目か」だけを渡す
+                    job.part = { index: i + 1, total: parts.length, name: part.name };
+                    const out = await runOne(body, {
+                        // 進捗は注文全体に対する割合。章ごとに0%へ戻ると止まって見える
+                        onProgress: (pct) => {
+                            job.progress = Math.min(99, Math.round((base + part.len * pct / 100) / total * 100));
+                        },
+                        // 途中経過は「今処理している章」のもの。次の章に持ち越さない
+                        completedChunks: (i === resumeAt && Array.isArray(order.partial_chunks)) ? order.partial_chunks : [],
+                        onChunkDone: async (idx, chunksSoFar) => {
+                            await db.query(
+                                `UPDATE ai_tool_orders SET partial_chunks = $2, updated_at = CURRENT_TIMESTAMP WHERE order_id = $1`,
+                                [order.order_id, JSON.stringify(chunksSoFar)]
+                            ).catch((e) => console.error(`Partial save failed for ${order.order_id}:`, e.message));
+                        }
+                    });
+                    done.push(out);
+                    base += part.len;
+                    await db.query(
+                        `UPDATE ai_tool_orders SET result_parts = $2, partial_chunks = NULL, updated_at = CURRENT_TIMESTAMP WHERE order_id = $1`,
+                        [order.order_id, JSON.stringify(done)]
+                    );
+                }
+                return done.join('\n\n');
+            })();
         }
 
         runPromise.then(async (resultText) => {
@@ -581,7 +681,11 @@ router.get('/orders/:orderId/job', authenticate, async (req, res) => {
         if (!order) return;
 
         if (order.status === 'completed') {
-            return res.json({ success: true, status: 'completed', progress: 100, result: order.result_text });
+            return res.json({
+                success: true, status: 'completed', progress: 100, result: order.result_text,
+                partNames: orderParts(order) ? orderParts(order).map(p => p.name) : null,
+                resultParts: Array.isArray(order.result_parts) ? order.result_parts : null
+            });
         }
         const job = jobs.get(order.order_id);
         if (job) {
@@ -590,6 +694,7 @@ router.get('/orders/:orderId/job', authenticate, async (req, res) => {
                 status: job.status,
                 progress: job.progress,
                 detail: job.detail || null,
+                part: job.part || null,
                 result: null,
                 error: job.error || order.error || null
             });

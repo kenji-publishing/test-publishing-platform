@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608302024">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608302135">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Novel Translator - AuctLect</title>
 
@@ -16,26 +16,26 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <!-- Platform CSS -->
-    <link href="../css/variables.css?v=202608302024" rel="stylesheet">
-    <link rel="stylesheet" href="../css/style-new.css?v=202608302024">
-    <link href="../css/components.css?v=202608302024" rel="stylesheet">
-    <link href="../css/navbar.css?v=202608302024" rel="stylesheet">
-    <link rel="stylesheet" href="../css/mobile-fixes.css?v=202608302024">
+    <link href="../css/variables.css?v=202608302135" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style-new.css?v=202608302135">
+    <link href="../css/components.css?v=202608302135" rel="stylesheet">
+    <link href="../css/navbar.css?v=202608302135" rel="stylesheet">
+    <link rel="stylesheet" href="../css/mobile-fixes.css?v=202608302135">
 
     <!-- 言語ファイル（9言語） -->
-    <script src="../js/config.js?v=202608302024"></script>
-    <script src="../js/lang/ja.js?v=202608302024"></script>
-    <script src="../js/lang/en.js?v=202608302024"></script>
-    <script src="../js/lang/zh.js?v=202608302024"></script>
-    <script src="../js/lang/zh-TW.js?v=202608302024"></script>
-    <script src="../js/lang/es.js?v=202608302024"></script>
-    <script src="../js/lang/fr.js?v=202608302024"></script>
-    <script src="../js/lang/de.js?v=202608302024"></script>
-    <script src="../js/lang/ko.js?v=202608302024"></script>
-    <script src="../js/lang/ar.js?v=202608302024"></script>
-    <script src="../js/lang/pt.js?v=202608302024"></script>
-    <script src="../js/lang/it.js?v=202608302024"></script>
-    <script src="../js/wizard-common.js?v=202608302024"></script>
+    <script src="../js/config.js?v=202608302135"></script>
+    <script src="../js/lang/ja.js?v=202608302135"></script>
+    <script src="../js/lang/en.js?v=202608302135"></script>
+    <script src="../js/lang/zh.js?v=202608302135"></script>
+    <script src="../js/lang/zh-TW.js?v=202608302135"></script>
+    <script src="../js/lang/es.js?v=202608302135"></script>
+    <script src="../js/lang/fr.js?v=202608302135"></script>
+    <script src="../js/lang/de.js?v=202608302135"></script>
+    <script src="../js/lang/ko.js?v=202608302135"></script>
+    <script src="../js/lang/ar.js?v=202608302135"></script>
+    <script src="../js/lang/pt.js?v=202608302135"></script>
+    <script src="../js/lang/it.js?v=202608302135"></script>
+    <script src="../js/wizard-common.js?v=202608302135"></script>
 
     <style>
         :root {
@@ -903,10 +903,7 @@
 
                     <!-- 読み込んだ原稿。全文タブに切り替わっても見えるようタブの外に置く -->
                     <div id="fileInfo" style="display:none;">
-                        <div class="file-info-bar">
-                            <span><i class="fas fa-check-circle" style="color:var(--color-success)"></i> <span id="fileInfoName"></span></span>
-                            <button class="btn-clear-file" onclick="clearSourceFile()"><i class="fas fa-trash-alt me-1"></i> <span id="clearFileLabel">Remove</span></button>
-                        </div>
+                        <!-- 中身は renderSourceFiles() が入れる（ファイル1つでも複数でも同じ形） -->
                     </div>
 
                     <!-- Full Text Input -->
@@ -925,7 +922,7 @@
                         <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
                             <i class="fas fa-cloud-upload-alt"></i>
                             <p id="uploadText">Click or drag a file here (.txt, .docx)</p>
-                            <input type="file" id="fileInput" accept=".txt,.docx" style="display:none;" onchange="handleFileUpload(this)">
+                            <input type="file" id="fileInput" accept=".txt,.docx" multiple style="display:none;" onchange="handleFileUpload(this)">
                         </div>
                     </div>
 
@@ -1159,6 +1156,12 @@
                     <h2 id="s8Title">Review Translation</h2>
                     <p class="step-desc" id="s8Desc">Review and edit the translation below. You can make corrections before finalizing.</p>
 
+                    <!-- 章ごとの注文では1ファイルずつ表示する。10章を1つの枠に入れても読めない -->
+                    <div id="reviewPartBar" style="display:none; margin-bottom:0.75rem; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                        <span id="reviewPartLabel" style="font-size:0.85rem; color:var(--color-text-secondary);">Showing file</span>
+                        <select id="reviewPartSelect" onchange="onReviewPartChange(this)" style="flex:1; min-width:220px; max-width:520px; padding:0.4rem 0.6rem; border:1px solid var(--color-border,#e5ddd3); border-radius:8px;"></select>
+                    </div>
+
                     <div class="review-layout">
                         <div class="review-panel">
                             <div class="review-panel-header" id="s8OrigHeader">Original</div>
@@ -1183,6 +1186,9 @@
                     <div class="complete-icon"><i class="fas fa-check-circle"></i></div>
                     <h2 id="s9Title">Translation Complete!</h2>
                     <p id="s9Desc">Your translation is ready. Download your file below.</p>
+
+                    <!-- 章ごとの注文のときだけ出る。1ファイルの注文では今までどおり -->
+                    <div id="partDownloads" style="display:none;"></div>
 
                     <div class="download-options">
                         <button class="download-btn" onclick="downloadResult('txt')">
@@ -1328,9 +1334,13 @@
         if (n === 4) saveCarriedGlossary();
         if (n === 9) { updateCheckLink(); renderGlossaryCheck(); }
         if (n === 8) {
-            document.getElementById('reviewOriginal').textContent = sourceTextContent;
-            document.getElementById('reviewTranslation').value = translatedText;
+            // 章ごとの注文なら1ファイルずつ表示する（setupReviewPartsが中身も入れる）
+            if (!setupReviewParts()) {
+                document.getElementById('reviewOriginal').textContent = sourceTextContent;
+                document.getElementById('reviewTranslation').value = translatedText;
+            }
         }
+        if (n === 9) renderPartDownloads();
 
         for (let i = 1; i <= 9; i++) {
             const el = document.getElementById('step' + i);
@@ -1375,74 +1385,308 @@
         const tmp = src.value; src.value = tgt.value; tgt.value = tmp;
     }
 
-    // Accepts either a file <input> element (from change event) or a File directly (from drop)
-    function handleFileUpload(inputOrFile) {
-        const file = (inputOrFile && inputOrFile.files) ? inputOrFile.files[0] : inputOrFile;
-        if (!file) return;
-        sourceFileName = file.name;
-        // Sniff the first 8 bytes to identify the format. Extensions can lie,
-        // so magic bytes are the reliable signal.
-        const headerReader = new FileReader();
-        headerReader.onload = function(e) {
-            const bytes = new Uint8Array(e.target.result);
-            const isZip = bytes.length >= 4 && bytes[0] === 0x50 && bytes[1] === 0x4B && bytes[2] === 0x03 && bytes[3] === 0x04;
-            const isOle = bytes.length >= 8 && bytes[0] === 0xD0 && bytes[1] === 0xCF && bytes[2] === 0x11 && bytes[3] === 0xE0;
+    // ===== 章ごとの複数ファイル =====
+    // 長編を章ごとに校正・翻訳したい人のための仕組み。
+    // ファイルは名前順に並べ、1回の支払いでまとめて処理し、仕上がりは章ごとに受け取る。
+    // 本文はサーバー側でも同じ区切りで連結する。ここを変えると金額と文字数がずれる
+    const PART_SEP = '\n\n';
+    const MAX_FILES = 60;      // サーバー側の上限と同じ
+    let sourceFiles = [];      // [{name, size, text}] ファイル名の順
+    let resultParts = null;    // 章ごとの仕上がり（1ファイルの注文ではnull）
+    let partNames = null;
+    let reviewPart = 0;
 
-            if (isOle) {
-                alert(getLang() === 'ja'
-                    ? '古い「.doc」形式には対応していません。Wordで「名前を付けて保存」→「Word文書(.docx)」または「.txt(UTF-8)」で保存し直してください。'
-                    : 'The legacy .doc format is not supported. Please re-save the file as .docx or .txt (UTF-8) in Word.');
-                return;
-            }
-            if (isZip) {
-                readDocxText(file).then(function(text) {
-                    applyLoadedText(text, file);
-                }).catch(function(err) {
-                    console.error('docx read failed:', err);
-                    alert(getLang() === 'ja'
-                        ? 'このファイルは.docxとして読み込めませんでした。.txt(UTF-8)形式で保存し直してください。'
-                        : 'Could not read this file as .docx. Please save it as .txt (UTF-8) instead.');
-                });
-                return;
-            }
-            const textReader = new FileReader();
-            textReader.onload = function(ev) {
-                const text = decodeTextWithFallback(ev.target.result);
-                applyLoadedText(text, file);
-            };
-            textReader.readAsArrayBuffer(file);
-        };
-        headerReader.readAsArrayBuffer(file.slice(0, 8));
+    const MF_TEXT = {
+        remove:    { en: 'Remove', ja: '削除', zh: '删除', 'zh-TW': '刪除', es: 'Eliminar', fr: 'Supprimer', de: 'Entfernen', ko: '삭제', ar: 'إزالة', pt: 'Remover', it: 'Rimuovi' },
+        removeAll: { en: 'Remove all', ja: 'すべて削除', zh: '全部删除', 'zh-TW': '全部刪除', es: 'Eliminar todo', fr: 'Tout supprimer', de: 'Alle entfernen', ko: '전체 삭제', ar: 'إزالة الكل', pt: 'Remover tudo', it: 'Rimuovi tutto' },
+        up:        { en: 'Move up', ja: '上へ', zh: '上移', 'zh-TW': '上移', es: 'Subir', fr: 'Monter', de: 'Nach oben', ko: '위로', ar: 'لأعلى', pt: 'Subir', it: 'Su' },
+        down:      { en: 'Move down', ja: '下へ', zh: '下移', 'zh-TW': '下移', es: 'Bajar', fr: 'Descendre', de: 'Nach unten', ko: '아래로', ar: 'لأسفل', pt: 'Descer', it: 'Giù' },
+        order:     { en: 'Files are processed in this order, sorted by file name. Number your files (01, 02, …) to keep chapters in order, or use the arrows.', ja: 'この順番で処理します。ファイル名の順に並べています。章の順にするには、ファイル名に番号（01、02…）を付けるか、矢印で入れ替えてください。', zh: '按此顺序处理，已按文件名排序。请为文件编号（01、02…）或用箭头调整顺序。', 'zh-TW': '依此順序處理，已按檔名排序。請為檔案編號（01、02…）或用箭頭調整順序。', es: 'Se procesan en este orden, ordenados por nombre de archivo. Numera los archivos (01, 02, …) o usa las flechas.', fr: 'Traités dans cet ordre, triés par nom de fichier. Numérotez vos fichiers (01, 02, …) ou utilisez les flèches.', de: 'Wird in dieser Reihenfolge verarbeitet, sortiert nach Dateiname. Nummerieren Sie die Dateien (01, 02, …) oder nutzen Sie die Pfeile.', ko: '이 순서대로 처리합니다. 파일 이름순으로 정렬되어 있습니다. 파일에 번호(01, 02…)를 붙이거나 화살표로 바꾸세요.', ar: 'تُعالَج بهذا الترتيب، مرتبةً حسب اسم الملف. رقّم الملفات (01، 02، …) أو استخدم الأسهم.', pt: 'Processados nesta ordem, ordenados pelo nome do ficheiro. Numere os ficheiros (01, 02, …) ou use as setas.', it: 'Elaborati in questo ordine, ordinati per nome file. Numera i file (01, 02, …) o usa le frecce.' },
+        readOnly:  { en: 'Several files are loaded, so the combined text is shown read-only. Remove the files to type here.', ja: '複数のファイルを読み込んでいるため、まとめた本文は編集できません。ここに直接書く場合はファイルを削除してください。', zh: '已载入多个文件，合并文本为只读。若要直接输入，请先删除文件。', 'zh-TW': '已載入多個檔案，合併文字為唯讀。若要直接輸入，請先刪除檔案。', es: 'Hay varios archivos cargados, así que el texto combinado es de solo lectura. Elimina los archivos para escribir aquí.', fr: 'Plusieurs fichiers sont chargés : le texte combiné est en lecture seule. Supprimez-les pour écrire ici.', de: 'Mehrere Dateien sind geladen, der zusammengefügte Text ist schreibgeschützt. Entfernen Sie die Dateien, um hier zu schreiben.', ko: '여러 파일을 불러왔기 때문에 합쳐진 본문은 편집할 수 없습니다. 여기에 직접 쓰려면 파일을 삭제하세요.', ar: 'تم تحميل عدة ملفات، لذا النص المدمج للقراءة فقط. احذف الملفات للكتابة هنا.', pt: 'Vários ficheiros carregados, por isso o texto combinado é só de leitura. Remova-os para escrever aqui.', it: 'Sono caricati più file, quindi il testo unito è di sola lettura. Rimuovi i file per scrivere qui.' },
+        perFile:   { en: 'Download by file', ja: 'ファイルごとにダウンロード', zh: '按文件下载', 'zh-TW': '依檔案下載', es: 'Descargar por archivo', fr: 'Télécharger par fichier', de: 'Nach Datei herunterladen', ko: '파일별로 내려받기', ar: 'تنزيل حسب الملف', pt: 'Descarregar por ficheiro', it: 'Scarica per file' },
+        allZip:    { en: 'All files (.zip)', ja: '全ファイルをZIPで', zh: '全部文件（.zip）', 'zh-TW': '全部檔案（.zip）', es: 'Todos los archivos (.zip)', fr: 'Tous les fichiers (.zip)', de: 'Alle Dateien (.zip)', ko: '전체 파일 (.zip)', ar: 'كل الملفات (.zip)', pt: 'Todos os ficheiros (.zip)', it: 'Tutti i file (.zip)' },
+        joined:    { en: 'The buttons below give you everything joined into one file.', ja: '下のボタンは、全ファイルを1つにまとめたものです。', zh: '下方按钮为全部合并成一个文件。', 'zh-TW': '下方按鈕為全部合併成一個檔案。', es: 'Los botones de abajo dan todo unido en un solo archivo.', fr: 'Les boutons ci-dessous donnent tout réuni en un seul fichier.', de: 'Die Schaltflächen unten liefern alles in einer Datei zusammengefügt.', ko: '아래 버튼은 전체를 하나로 합친 파일입니다.', ar: 'الأزرار أدناه تعطيك كل شيء مدمجًا في ملف واحد.', pt: 'Os botões abaixo dão tudo junto num único ficheiro.', it: 'I pulsanti sotto danno tutto unito in un unico file.' },
+        showing:   { en: 'Showing file', ja: '表示中のファイル', zh: '当前文件', 'zh-TW': '目前檔案', es: 'Archivo mostrado', fr: 'Fichier affiché', de: 'Angezeigte Datei', ko: '표시 중인 파일', ar: 'الملف المعروض', pt: 'Ficheiro apresentado', it: 'File mostrato' },
+        zipFail:   { en: 'Could not build the ZIP file. Please download the files one by one.', ja: 'ZIPファイルを作成できませんでした。1つずつダウンロードしてください。', zh: '无法创建ZIP文件，请逐个下载。', 'zh-TW': '無法建立ZIP檔案，請逐一下載。', es: 'No se pudo crear el ZIP. Descarga los archivos uno a uno.', fr: 'Impossible de créer le ZIP. Téléchargez les fichiers un par un.', de: 'ZIP-Datei konnte nicht erstellt werden. Bitte laden Sie die Dateien einzeln herunter.', ko: 'ZIP 파일을 만들지 못했습니다. 하나씩 내려받아 주세요.', ar: 'تعذّر إنشاء ملف ZIP. نزّل الملفات واحدًا تلو الآخر.', pt: 'Não foi possível criar o ZIP. Descarregue os ficheiros um a um.', it: 'Impossibile creare il file ZIP. Scarica i file uno alla volta.' }
+    };
+    function mfL(key) { const d = MF_TEXT[key]; return d[getLang()] || d.en; }
+
+    /** 表示中の章の名前と数（章ごとの注文でなければ null） */
+    function partNameList() {
+        if (partNames && partNames.length) return partNames;
+        if (sourceFiles.length > 1) return sourceFiles.map(function (f) { return f.name; });
+        return null;
     }
 
-    function applyLoadedText(text, file) {
-        document.getElementById('sourceText').value = text;
+    // ファイルは1つでも複数でも同じ道を通す（分岐を増やすと片方だけ壊れる）
+    function handleFileUpload(inputOrFile) {
+        const list = (inputOrFile && inputOrFile.files)
+            ? Array.prototype.slice.call(inputOrFile.files)
+            : (inputOrFile ? [inputOrFile] : []);
+        if (!list.length) return;
+        const fi = document.getElementById('fileInput');
+        if (fi) fi.value = '';   // 同じファイルを選び直せるようにしておく
+        Promise.all(list.map(readSourceFile)).then(function (loaded) {
+            loaded.filter(Boolean).forEach(function (f) { sourceFiles.push(f); });
+            // 1回の注文に入れられる数（サーバー側と同じ60）。
+            // 決済まで進んでから断られると原稿を選び直すことになるので、ここで止める
+            if (sourceFiles.length > MAX_FILES) {
+                sourceFiles = sourceFiles.slice(0, MAX_FILES);
+                alert(getLang() === 'ja'
+                    ? '1回に処理できるファイルは' + MAX_FILES + '個までです。' + MAX_FILES + '個目までを読み込みました。'
+                    : 'Up to ' + MAX_FILES + ' files can be processed in one order. The first ' + MAX_FILES + ' were loaded.');
+            }
+            // 章の順番はファイル名で決まる。「10章」が「2章」より前に来ないよう数字は数として比べる
+            sourceFiles.sort(function (a, b) { return WizardCommon.naturalCompare(a.name, b.name); });
+            applySourceFiles();
+        });
+    }
+
+    // 1ファイルを読んで {name,size,text} にする。
+    // 拡張子は嘘をつくので、先頭8バイトの中身で形式を見分ける
+    function readSourceFile(file) {
+        const L = getLang();
+        return new Promise(function (resolve) {
+            const headerReader = new FileReader();
+            headerReader.onload = function (e) {
+                const bytes = new Uint8Array(e.target.result);
+                const isZip = bytes.length >= 4 && bytes[0] === 0x50 && bytes[1] === 0x4B && bytes[2] === 0x03 && bytes[3] === 0x04;
+                const isOle = bytes.length >= 8 && bytes[0] === 0xD0 && bytes[1] === 0xCF && bytes[2] === 0x11 && bytes[3] === 0xE0;
+
+                if (isOle) {
+                    alert(file.name + ': ' + (L === 'ja'
+                        ? '古い「.doc」形式には対応していません。Wordで「名前を付けて保存」→「Word文書(.docx)」または「.txt(UTF-8)」で保存し直してください。'
+                        : 'The legacy .doc format is not supported. Please re-save the file as .docx or .txt (UTF-8) in Word.'));
+                    return resolve(null);
+                }
+                if (isZip) {
+                    readDocxText(file).then(function (text) {
+                        resolve({ name: file.name, size: file.size, text: text });
+                    }).catch(function (err) {
+                        console.error('docx read failed:', err);
+                        alert(file.name + ': ' + (L === 'ja'
+                            ? 'このファイルは.docxとして読み込めませんでした。.txt(UTF-8)形式で保存し直してください。'
+                            : 'Could not read this file as .docx. Please save it as .txt (UTF-8) instead.'));
+                        resolve(null);
+                    });
+                    return;
+                }
+                const textReader = new FileReader();
+                textReader.onload = function (ev) {
+                    resolve({ name: file.name, size: file.size, text: decodeTextWithFallback(ev.target.result) });
+                };
+                textReader.readAsArrayBuffer(file);
+            };
+            headerReader.readAsArrayBuffer(file.slice(0, 8));
+        });
+    }
+
+    function applySourceFiles() {
+        const ta = document.getElementById('sourceText');
+        if (sourceFiles.length) {
+            ta.value = sourceFiles.map(function (f) { return f.text; }).join(PART_SEP);
+            // まとめた本文をここで書き換えられると、どこが何章か分からなくなる
+            ta.readOnly = sourceFiles.length > 1;
+        } else {
+            ta.value = '';
+            ta.readOnly = false;
+        }
+        sourceFileName = sourceFiles.length === 1 ? sourceFiles[0].name : '';
         updateCharCount();
-        document.getElementById('fileInfo').style.display = 'block';
-        document.getElementById('fileInfoName').textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + 'KB)';
+        renderSourceFiles();
         setInputMode('full');
     }
 
-    // 読み込んだ原稿を取り消す。ファイル名の表示だけ消すと本文が残って
-    // 「消したのに文字数が減らない」ことになるので、両方まとめて消す
-    function clearSourceFile() {
-        const textarea = document.getElementById('sourceText');
-        const L = getLang();
-        if (textarea.value.trim() && !confirm(L === 'ja'
-                ? '読み込んだ原稿を削除します。よろしいですか？'
-                : 'This will remove the loaded manuscript. Continue?')) return;
-        textarea.value = '';
-        sourceFileName = '';
-        sourceTextContent = '';
-        // 同じファイルを選び直せるように値を空にしておく。値が変わらないと
-        // ブラウザは change を出さないので、選び直しても何も起きなくなる
-        const input = document.getElementById('fileInput');
-        if (input) input.value = '';
-        document.getElementById('fileInfoName').textContent = '';
-        document.getElementById('fileInfo').style.display = 'none';
-        comparisonCache = { key: null, samples: null };
-        updateCharCount();
+    function renderSourceFiles() {
+        const info = document.getElementById('fileInfo');
+        if (!info) return;
+        if (!sourceFiles.length) {
+            info.style.display = 'none';
+            info.innerHTML = '';
+            return;
+        }
+        const multi = sourceFiles.length > 1;
+        const box = 'border:1px solid var(--color-border,#e5ddd3); background:transparent; border-radius:6px; cursor:pointer;';
+        let html = '';
+        if (multi) {
+            html += '<div style="font-size:0.82rem; color:var(--color-text-secondary); margin-bottom:0.5rem;">'
+                 + '<i class="fas fa-list-ol me-1"></i>' + escH(mfL('order')) + '</div>';
+        }
+        sourceFiles.forEach(function (f, i) {
+            html += '<div style="display:flex; align-items:center; gap:0.5rem; padding:0.35rem 0.5rem; border:1px solid var(--color-border,#e5ddd3); border-radius:8px; margin-bottom:0.35rem;">'
+                + (multi
+                    ? '<span style="min-width:1.7rem; text-align:center; font-weight:700; color:var(--color-accent,#8B7355);">' + (i + 1) + '</span>'
+                    : '<i class="fas fa-check-circle" style="color:var(--color-success,#2e7d32)"></i>')
+                + '<span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" dir="auto">' + escH(f.name) + '</span>'
+                + '<span style="font-size:0.8rem; color:var(--color-text-secondary); white-space:nowrap;">' + (f.size / 1024).toFixed(1) + 'KB</span>';
+            if (multi) {
+                html += '<button type="button" title="' + escH(mfL('up')) + '" onclick="moveSourceFile(' + i + ',-1)"' + (i === 0 ? ' disabled' : '')
+                     + ' style="' + box + ' padding:0.1rem 0.45rem;"><i class="fas fa-arrow-up"></i></button>'
+                     + '<button type="button" title="' + escH(mfL('down')) + '" onclick="moveSourceFile(' + i + ',1)"' + (i === sourceFiles.length - 1 ? ' disabled' : '')
+                     + ' style="' + box + ' padding:0.1rem 0.45rem;"><i class="fas fa-arrow-down"></i></button>';
+            }
+            html += '<button type="button" title="' + escH(mfL('remove')) + '" onclick="removeSourceFile(' + i + ')"'
+                + ' style="border:1px solid #dc3545; background:transparent; color:#dc3545; border-radius:6px; padding:0.1rem 0.5rem; cursor:pointer;"><i class="fas fa-times"></i></button>'
+                + '</div>';
+        });
+        if (multi) {
+            html += '<div style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem; margin-top:0.25rem;">'
+                + '<span style="font-size:0.8rem; color:var(--color-text-secondary);">' + escH(mfL('readOnly')) + '</span>'
+                + '<button type="button" onclick="clearUploadedFile()" style="white-space:nowrap; border:1px solid #dc3545; background:transparent; color:#dc3545; border-radius:6px; padding:0.15rem 0.6rem; cursor:pointer; font-size:0.85rem;">'
+                + '<i class="fas fa-trash me-1"></i>' + escH(mfL('removeAll')) + '</button></div>';
+        }
+        info.innerHTML = html;
+        info.style.display = 'block';
     }
+
+    // ×は「消える」と読める。実際に消して、本文と文字数も一緒に減らす
+    function removeSourceFile(i) {
+        sourceFiles.splice(i, 1);
+        applySourceFiles();
+    }
+
+    function moveSourceFile(i, dir) {
+        const j = i + dir;
+        if (j < 0 || j >= sourceFiles.length) return;
+        const tmp = sourceFiles[i];
+        sourceFiles[i] = sourceFiles[j];
+        sourceFiles[j] = tmp;
+        applySourceFiles();
+    }
+
+    // 読み込んだ原稿をすべて取り消す
+    function clearUploadedFile() {
+        sourceFiles = [];
+        sourceTextContent = '';
+        applySourceFiles();
+    }
+
+    // ===== レビュー画面：章ごとに見る =====
+    // 10章ぶんを1つの枠に入れても読めないので、1ファイルずつ表示して直せるようにする
+    function reviewSourceText() {
+        if (resultParts && sourceFiles[reviewPart]) return sourceFiles[reviewPart].text;
+        return sourceTextContent;
+    }
+
+    function setupReviewParts() {
+        const bar = document.getElementById('reviewPartBar');
+        const sel = document.getElementById('reviewPartSelect');
+        if (!bar || !sel) return false;
+        const names = partNameList();
+        if (!resultParts || !names || names.length < 2) {
+            bar.style.display = 'none';
+            return false;
+        }
+        bar.style.display = 'flex';
+        document.getElementById('reviewPartLabel').textContent = mfL('showing');
+        sel.innerHTML = names.map(function (n, i) {
+            return '<option value="' + i + '">' + (i + 1) + '. ' + escH(n) + '</option>';
+        }).join('');
+        if (reviewPart >= names.length) reviewPart = 0;
+        sel.value = String(reviewPart);
+        loadReviewPart(reviewPart);
+        return true;
+    }
+
+    function loadReviewPart(i) {
+        reviewPart = i;
+        document.getElementById('reviewOriginal').textContent = reviewSourceText();
+        document.getElementById('reviewTranslation').value = (resultParts && resultParts[i]) || '';
+        if (typeof diffVisible !== 'undefined' && diffVisible) toggleDiffView();
+    }
+
+    function onReviewPartChange(sel) {
+        saveReviewPart();                       // 手で直した分をその章へ書き戻してから切り替える
+        loadReviewPart(parseInt(sel.value, 10) || 0);
+    }
+
+    function saveReviewPart() {
+        if (!resultParts) return;
+        const ta = document.getElementById('reviewTranslation');
+        if (!ta) return;
+        resultParts[reviewPart] = ta.value;
+        translatedText = resultParts.join(PART_SEP);
+    }
+
+    // ===== ダウンロード：章ごと / まとめて =====
+    function renderPartDownloads() {
+        const box = document.getElementById('partDownloads');
+        if (!box) return;
+        const names = partNameList();
+        if (!resultParts || !names || names.length < 2) {
+            box.style.display = 'none';
+            box.innerHTML = '';
+            return;
+        }
+        saveReviewPart();
+        const btn = 'border:1px solid var(--color-border,#e5ddd3); background:transparent; border-radius:6px; padding:0.15rem 0.6rem; cursor:pointer; font-size:0.85rem;';
+        let html = '<div style="text-align:left; max-width:560px; margin:0 auto 1.5rem;">'
+            + '<div style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">'
+            + '<strong>' + escH(mfL('perFile')) + '</strong>'
+            + '<button type="button" onclick="downloadAllParts()" style="' + btn + ' white-space:nowrap;"><i class="fas fa-file-archive me-1"></i>' + escH(mfL('allZip')) + '</button>'
+            + '</div>';
+        names.forEach(function (n, i) {
+            html += '<div style="display:flex; align-items:center; gap:0.5rem; padding:0.35rem 0.5rem; border:1px solid var(--color-border,#e5ddd3); border-radius:8px; margin-bottom:0.35rem;">'
+                + '<span style="min-width:1.7rem; text-align:center; font-weight:700; color:var(--color-accent,#8B7355);">' + (i + 1) + '</span>'
+                + '<span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" dir="auto">' + escH(n) + '</span>'
+                + '<button type="button" onclick="downloadPart(' + i + ', \'txt\')" style="' + btn + '">.txt</button>'
+                + '<button type="button" onclick="downloadPart(' + i + ', \'docx\')" style="' + btn + '">.docx</button>'
+                + '</div>';
+        });
+        html += '<div style="font-size:0.82rem; color:var(--color-text-secondary); margin-top:0.5rem;">' + escH(mfL('joined')) + '</div></div>';
+        box.innerHTML = html;
+        box.style.display = 'block';
+    }
+
+    /** 章ごとのファイル名。元のファイル名を引き継ぐので、どれがどの章か分かる */
+    function partFileName(i) {
+        const names = partNameList() || [];
+        return WizardCommon.workFileBaseName(names[i] || '', '', 'part' + (i + 1)) + partSuffix();
+    }
+
+    function downloadPart(i, format) {
+        const L = getLang();
+        saveReviewPart();
+        const text = (resultParts && resultParts[i]) || '';
+        const base = partFileName(i);
+        if (format === 'docx') {
+            WizardCommon.textToDocxBlob(text).then(function (blob) {
+                WizardCommon.saveBlob(blob, base + '.docx');
+            }).catch(function (err) {
+                console.error('docx build failed:', err);
+                alert(L === 'ja'
+                    ? 'Wordファイルの作成に失敗しました。通信環境を確認してもう一度お試しください（.txtでのダウンロードは可能です）。'
+                    : 'Could not create the Word file. Please check your connection and try again (.txt download still works).');
+            });
+            return;
+        }
+        WizardCommon.saveBlob(new Blob([text], { type: 'text/plain;charset=utf-8' }), base + '.txt');
+    }
+
+    // 章が多いときに1つずつ押させない。ZIP1つにまとめて渡す
+    function downloadAllParts() {
+        const L = getLang();
+        saveReviewPart();
+        const files = (resultParts || []).map(function (t, i) {
+            return { name: partFileName(i) + '.txt', text: t || '' };
+        });
+        WizardCommon.zipFiles(files).then(function (blob) {
+            WizardCommon.saveBlob(blob, mergedBaseName() + partSuffix() + '.zip');
+        }).catch(function (err) {
+            console.error('zip failed:', err);
+            alert(mfL('zipFail'));
+        });
+    }
+
+    /** ダウンロード名の接尾辞。翻訳先の言語名を付け、章を取り違えないようにする */
+    function partSuffix() {
+        const sel = document.getElementById('targetLang');
+        const name = (sel && sel.options[sel.selectedIndex]) ? sel.options[sel.selectedIndex].textContent.trim() : '';
+        return name ? ' - ' + name : '';
+    }
+
+    // 画面のボタンは以前からの名前で呼んでいる
+    function clearSourceFile() { clearUploadedFile(); }
 
     // Try UTF-8 first (modern default), then Shift-JIS / EUC-JP for legacy Japanese files.
     // `fatal: true` makes TextDecoder throw on invalid sequences instead of silently
@@ -1885,6 +2129,11 @@
                     tool: 'translator',
                     model: selectedModel,
                     text: sourceTextContent,
+                    // 章ごとのファイルを送ると、サーバーは1つずつAIに渡して
+                    // 仕上がりも章ごとに返す（支払いは1回のまま）
+                    parts: sourceFiles.length > 1
+                        ? sourceFiles.map(function (f) { return { name: f.name, text: f.text }; })
+                        : undefined,
                     sourceLang: document.getElementById('sourceLang').value,
                     targetLang: document.getElementById('targetLang').value,
                     glossary: glossary,
@@ -1954,14 +2203,26 @@
                 fill.style.width = pct + '%';
                 pctEl.textContent = pct + '%';
 
+                // 章ごとの注文は何時間もかかる。今どのファイルを処理中かを出す
+                const partLine = job.part
+                    ? (L === 'ja'
+                        ? 'ファイル ' + job.part.index + '/' + job.part.total + '：' + job.part.name
+                        : 'File ' + job.part.index + '/' + job.part.total + ': ' + job.part.name)
+                    : '';
+
                 if (job.status !== 'completed' && pct >= 5) {
                     const elapsedSec = (Date.now() - startedAt) / 1000;
                     const remainSec = Math.max(1, Math.round(elapsedSec * (100 - pct) / pct));
-                    etaEl.textContent = WizardCommon.formatRemaining(remainSec, L);
+                    etaEl.textContent = (partLine ? partLine + ' — ' : '') + WizardCommon.formatRemaining(remainSec, L);
+                } else if (job.status !== 'completed' && partLine) {
+                    etaEl.textContent = partLine;
                 }
 
                 if (job.status === 'completed') {
                     translatedText = job.result || '';
+                    resultParts = Array.isArray(job.resultParts) && job.resultParts.length > 1 ? job.resultParts : null;
+                    partNames = Array.isArray(job.partNames) ? job.partNames : null;
+                    reviewPart = 0;
                     setTimeout(() => goStep(8), 400);
                     return;
                 }
@@ -2013,6 +2274,16 @@
 
             // \u6ce8\u6587\u5185\u5bb9\u304b\u3089\u30a6\u30a3\u30b6\u30fc\u30c9\u306e\u72b6\u614b\u3092\u5fa9\u5143\uff08\u539f\u7a3f\u306f\u30b5\u30fc\u30d0\u30fc\u4fdd\u5b58\u5206\u304c\u6b63\uff09
             sourceTextContent = order.text || '';
+            // 章ごとの注文なら、どこからどこまでが何章かも戻す。
+            // これが無いと、開き直したときにレビュー画面の左側（元の原稿）が
+            // 全章まとめて表示され、章ごとの見比べができなくなる
+            if (Array.isArray(order.parts) && order.parts.length > 1) {
+                sourceFiles = order.parts.map(function (p) {
+                    return { name: p.name, size: p.len, text: sourceTextContent.substr(p.start, p.len) };
+                });
+                partNames = sourceFiles.map(function (f) { return f.name; });
+                applySourceFiles();
+            }
             const ta = document.getElementById('sourceText');
             if (ta) { ta.value = sourceTextContent; updateCharCount(); }
             selectedModel = order.model || 'sonnet';
@@ -2033,6 +2304,8 @@
             }
 
             if (order.status === 'completed' && order.result) {
+                resultParts = Array.isArray(order.resultParts) && order.resultParts.length > 1 ? order.resultParts : null;
+                reviewPart = 0;
                 translatedText = order.result; // \u518d\u8aad\u307f\u8fbc\u307f\u3057\u3066\u3082\u7d50\u679c\u306f\u6d88\u3048\u306a\u3044
                 goStep(8);
                 return;
@@ -2061,12 +2334,29 @@
     });
 
     // ===== Step 9: Download =====
+
+    /** まとめて1つにするときの名前。章ごとの注文では先頭のファイル名を基準にする */
+    function mergedBaseName() {
+        const L = getLang();
+        const names = partNameList();
+        if (names && names.length > 1) {
+            return WizardCommon.workFileBaseName(names[0], '', L === 'ja' ? '原稿' : 'manuscript')
+                + (L === 'ja' ? ' ほか' + (names.length - 1) + 'ファイル' : ' +' + (names.length - 1) + ' more');
+        }
+        return WizardCommon.workFileBaseName(sourceFileName, sourceTextContent, L === 'ja' ? '原稿' : 'manuscript');
+    }
+
+    /** まとめて1つにするときの本文。章ごとの注文では全章をつなげる */
+    function reviewFullText() {
+        if (resultParts) { saveReviewPart(); return resultParts.join(PART_SEP); }
+        return document.getElementById('reviewTranslation').value;
+    }
+
     function downloadResult(format) {
         const L = getLang();
-        const text = document.getElementById('reviewTranslation').value;
-        // 原稿の名前 + 翻訳先の言語名。章ごとに翻訳しても取り違えない
-        const title = WizardCommon.workFileBaseName(sourceFileName, sourceTextContent,
-            L === 'ja' ? '原稿' : 'manuscript');
+        // 章ごとの注文では画面に出ているのは1章分だけ。ここは全部つなげたものを渡す
+        const text = reviewFullText();
+        const title = mergedBaseName();
         const langSel = document.getElementById('targetLang');
         const langName = (langSel && langSel.options[langSel.selectedIndex])
             ? langSel.options[langSel.selectedIndex].textContent.trim() : '';
@@ -2233,15 +2523,16 @@
         if (gc) gc.style.display = 'none';
         const ctxEl = document.getElementById('tsContext');
         if (ctxEl) ctxEl.value = '';
-        document.getElementById('sourceText').value = '';
-        updateCharCount();
+        sourceFiles = [];
+        resultParts = null;
+        partNames = null;
+        reviewPart = 0;
+        applySourceFiles();
         glossary = [];
         renderGlossary();
         translatedText = '';
         sourceTextContent = '';
         sourceFileName = '';
-        document.getElementById('fileInfoName').textContent = '';
-        document.getElementById('fileInfo').style.display = 'none';
         const fileInputEl = document.getElementById('fileInput');
         if (fileInputEl) fileInputEl.value = '';
         selectedModel = 'sonnet';
@@ -2285,7 +2576,7 @@
             tabFileLabel: { en: 'Upload File', ja: '\u30d5\u30a1\u30a4\u30eb\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9', zh: '\u4e0a\u50b3\u6a94\u6848', es: 'Subir archivo', fr: 'T\u00e9l\u00e9verser', de: 'Datei hochladen', ko: '\ud30c\uc77c \uc5c5\ub85c\ub4dc', ar: '\u0631\u0641\u0639 \u0645\u0644\u0641', pt: 'Enviar arquivo', it: 'Carica file' },
             charLabel: { en: 'characters', ja: '\u6587\u5b57', zh: '\u5b57\u5143', es: 'caracteres', fr: 'caract\u00e8res', de: 'Zeichen', ko: '\uae00\uc790', ar: '\u062d\u0631\u0641', pt: 'caracteres', it: 'caratteri' },
             s2LengthHint: {"en":"One run takes up to 300,000 characters. Translating a chapter at a time is easier to check and to correct.","ja":"1回の上限は30万字です。章ごとに分けて訳すと、確認と手直しがしやすくなります。","zh":"单次上限为30万字。按章翻译更便于检查和修改。","zh-TW":"單次上限為30萬字。按章翻譯更便於檢查和修改。","es":"Cada ejecución admite hasta 300.000 caracteres. Traducir capítulo por capítulo facilita revisar y corregir.","fr":"Une exécution accepte jusqu'à 300 000 caractères. Traduire chapitre par chapitre facilite la relecture et les corrections.","de":"Ein Durchlauf verarbeitet bis zu 300.000 Zeichen. Kapitelweise zu übersetzen erleichtert Prüfung und Korrektur.","ko":"1회 상한은 30만 자입니다. 장별로 나누어 번역하면 확인과 수정이 쉬워집니다.","ar":"يستوعب التشغيل الواحد حتى 300000 حرف. الترجمة فصلًا بفصل تسهّل المراجعة والتصحيح.","pt":"Cada execução aceita até 300.000 caracteres. Traduzir capítulo a capítulo facilita revisar e corrigir.","it":"Ogni esecuzione accetta fino a 300.000 caratteri. Tradurre un capitolo alla volta rende più facile controllare e correggere."},
-            uploadText: { en: 'Click or drag a file here (.txt, .docx)', ja: '\u30af\u30ea\u30c3\u30af\u307e\u305f\u306f\u30d5\u30a1\u30a4\u30eb\u3092\u30c9\u30e9\u30c3\u30b0 (.txt, .docx)', zh: '\u9ede\u64ca\u6216\u62d6\u66f3\u6a94\u6848 (.txt, .docx)', 'zh-TW': '\u9ede\u9078\u6216\u62d6\u66f3\u6a94\u6848 (.txt, .docx)', es: 'Haga clic o arrastre un archivo (.txt, .docx)', fr: 'Cliquez ou glissez un fichier (.txt, .docx)', de: 'Klicken oder Datei hierher ziehen (.txt, .docx)', ko: '\ud074\ub9ad \ub610\ub294 \ud30c\uc77c\uc744 \ub4dc\ub798\uadf8 (.txt, .docx)', ar: '\u0627\u0646\u0642\u0631 \u0623\u0648 \u0627\u0633\u062d\u0628 \u0645\u0644\u0641\u064b\u0627 (.txt, .docx)', pt: 'Clique ou arraste um arquivo (.txt, .docx)', it: 'Clicca o trascina un file qui (.txt, .docx)' },
+            uploadText: { en: "Click or drag files here (.txt, .docx) — several at once is fine", ja: "クリックまたはファイルをドラッグ (.txt, .docx) — 複数まとめて選べます", zh: "点击或拖拽文件 (.txt, .docx) — 可一次选择多个", 'zh-TW': "點選或拖曳檔案 (.txt, .docx) — 可一次選擇多個", es: "Haz clic o arrastra archivos (.txt, .docx) — puedes elegir varios a la vez", fr: "Cliquez ou déposez des fichiers (.txt, .docx) — plusieurs à la fois", de: "Klicken oder Dateien hierher ziehen (.txt, .docx) — mehrere auf einmal möglich", ko: "클릭하거나 파일을 끌어다 놓으세요 (.txt, .docx) — 여러 개를 한 번에 선택할 수 있습니다", ar: "انقر أو اسحب الملفات هنا (.txt، .docx) — يمكن اختيار عدة ملفات دفعة واحدة", pt: "Clique ou arraste ficheiros (.txt, .docx) — vários de uma vez", it: "Clicca o trascina i file (.txt, .docx) — anche più file insieme" },
             s2Placeholder: { en: 'Paste your novel text here...', ja: '\u5c0f\u8aac\u306e\u30c6\u30ad\u30b9\u30c8\u3092\u3053\u3053\u306b\u8cbc\u308a\u4ed8\u3051...', zh: '\u5728\u6b64\u8cbc\u4e0a\u5c0f\u8aaa\u6587\u672c...', es: 'Pegue el texto de su novela aqu\u00ed...', fr: 'Collez votre texte de roman ici...', de: 'F\u00fcgen Sie Ihren Romantext hier ein...', ko: '\uc18c\uc124 \ud14d\uc2a4\ud2b8\ub97c \uc5ec\uae30\uc5d0 \ubd99\uc5ec\ub123\uc73c\uc138\uc694...', ar: '\u0627\u0644\u0635\u0642 \u0646\u0635 \u0631\u0648\u0627\u064a\u062a\u0643 \u0647\u0646\u0627...', pt: 'Cole o texto do seu romance aqui...', it: 'Incolla qui il testo del tuo romanzo...' },
             s6CardLabel: { en: 'Credit / Debit Card', ja: '\u30af\u30ec\u30b8\u30c3\u30c8/\u30c7\u30d3\u30c3\u30c8\u30ab\u30fc\u30c9', zh: '\u4fe1\u7528\u5361/\u7c3d\u5e33\u5361', es: 'Tarjeta de cr\u00e9dito/d\u00e9bito', fr: 'Carte de cr\u00e9dit/d\u00e9bit', de: 'Kredit-/Debitkarte', ko: '\uc2e0\uc6a9/\uccb4\ud06c\uce74\ub4dc', ar: '\u0628\u0637\u0627\u0642\u0629 \u0627\u0626\u062a\u0645\u0627\u0646/\u062e\u0635\u0645', pt: 'Cart\u00e3o de cr\u00e9dito/d\u00e9bito', it: 'Carta di credito/debito' },
             s6MethodsNote: { en:'Available payment methods are shown on the payment page based on your currency and region.', ja:'ご利用可能な決済方法は、通貨・地域に応じて決済ページに表示されます。', zh:'可用的付款方式將依貨幣與地區顯示於付款頁面。', es:'Los métodos de pago disponibles se muestran en la página de pago según su moneda y región.', fr:"Les moyens de paiement disponibles s'affichent sur la page de paiement selon votre devise et votre région.", de:'Die verfügbaren Zahlungsmethoden werden auf der Zahlungsseite je nach Währung und Region angezeigt.', ko:'이용 가능한 결제 수단은 통화 및 지역에 따라 결제 페이지에 표시됩니다.', ar:'تُعرض طرق الدفع المتاحة في صفحة الدفع حسب العملة والمنطقة.', pt:'Os métodos de pagamento disponíveis são mostrados na página de pagamento conforme sua moeda e região.', it:'I metodi di pagamento disponibili vengono mostrati nella pagina di pagamento in base a valuta e regione.' },
@@ -2449,7 +2740,7 @@
                 this.style.borderColor = '';
                 this.style.background = '';
                 const files = e.dataTransfer && e.dataTransfer.files;
-                if (files && files.length > 0) handleFileUpload(files[0]);
+                if (files && files.length > 0) handleFileUpload({ files: files });
             });
         }
         // Block accidental drops outside the upload zone too.
@@ -2470,7 +2761,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- JSZip: lets us crack open .docx (which is a ZIP) to read the text inside -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="../js/i18n.js?v=202608302024"></script>
-    <script src="../js/navbar.js?v=202608302024"></script>
+    <script src="../js/i18n.js?v=202608302135"></script>
+    <script src="../js/navbar.js?v=202608302135"></script>
 </body>
 </html>
