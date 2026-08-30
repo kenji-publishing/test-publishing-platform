@@ -458,10 +458,10 @@ function renderNavbar(options) {
     var html = '';
 
     // Overlay
-    html += '<div class="navbar-overlay d-lg-none" id="navbarOverlay"></div>';
+    html += '<div class="navbar-overlay d-xl-none" id="navbarOverlay"></div>';
 
     // Nav start
-    html += '<nav class="navbar navbar-expand-lg navbar-custom sticky-top">';
+    html += '<nav class="navbar navbar-expand-xl navbar-custom sticky-top">';
     html += '<div class="container">';
 
     // Brand
@@ -470,7 +470,7 @@ function renderNavbar(options) {
     html += '</a>';
 
     // Mobile language selector
-    html += '<div class="navbar-lang-selector d-lg-none">';
+    html += '<div class="navbar-lang-selector d-xl-none">';
     html += '<select class="language-selector" id="languageSelectorMobile">';
     html += langOpts;
     html += '</select>';
@@ -480,8 +480,8 @@ function renderNavbar(options) {
     html += '<div class="user-dropdown auth-only" id="userDropdown">';
     html += '<button type="button" class="user-dropdown-toggle" id="userDropdownBtn" onclick="toggleUserDropdown(event)">';
     html += '<i class="fas fa-user-circle"></i>';
-    html += '<span class="user-name d-none d-lg-inline" id="userName">User</span>';
-    html += '<i class="fas fa-chevron-down user-chevron d-none d-lg-inline"></i>';
+    html += '<span class="user-name d-none d-xl-inline" id="userName">User</span>';
+    html += '<i class="fas fa-chevron-down user-chevron d-none d-xl-inline"></i>';
     html += '</button>';
     html += '<div class="user-menu" id="userMenu">';
     html += '<div class="user-menu-header">';
@@ -523,7 +523,7 @@ function renderNavbar(options) {
     html += '<div class="collapse navbar-collapse" id="navbarNav">';
 
     // ===== PC Navigation =====
-    html += '<ul class="navbar-nav me-auto d-none d-lg-flex">';
+    html += '<ul class="navbar-nav me-auto d-none d-xl-flex">';
 
     // Browse
     html += '<li class="nav-item">';
@@ -580,7 +580,7 @@ function renderNavbar(options) {
     html += '</ul>';
 
     // ===== Mobile Navigation =====
-    html += '<ul class="navbar-nav d-lg-none">';
+    html += '<ul class="navbar-nav d-xl-none">';
 
     // Browse
     html += '<li class="nav-item">';
@@ -652,7 +652,7 @@ function renderNavbar(options) {
     html += '</ul>';
 
     // ===== Right side (PC) =====
-    html += '<div class="d-none d-lg-flex align-items-center gap-3">';
+    html += '<div class="d-none d-xl-flex align-items-center gap-3">';
 
     // Language selector PC
     html += '<select class="language-selector" id="languageSelector">';
@@ -660,7 +660,7 @@ function renderNavbar(options) {
     html += '</select>';
 
     // Guest buttons (PC)
-    html += '<div class="navbar-buttons-guest guest-only d-none d-lg-flex">';
+    html += '<div class="navbar-buttons-guest guest-only d-none d-xl-flex">';
     html += '<a href="' + p('login.html') + '" class="btn btn-soft-custom">';
     html += '<span id="navSignInPC">' + getL(navText.signIn) + '</span></a>';
     html += '<a href="' + p('register.html') + '" class="btn btn-primary-custom">';

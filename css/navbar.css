@@ -13,7 +13,7 @@
     margin-right: 0.5rem;
 }
 
-@media (max-width: 991.98px) {
+@media (max-width: 1199.98px) {
     .navbar-lang-selector {
         order: 1;
     }
@@ -23,9 +23,21 @@
 }
 
 /* ========== PC Navbar - 横並び維持 ========== */
-@media (min-width: 992px) {
+@media (min-width: 1200px) {
+    /* ナビバーの容器だけ広げる。
+       Bootstrapの .container は最大1140pxで頭打ちになるが、ドイツ語などは
+       ナビ項目だけで約1276px必要で、容器に収まらない。
+       以前はそれが容器の外へはみ出し、狭い画面では画面外で切り取られて
+       言語セレクタに触れなくなっていた（2026-08-27の不具合）。
+       容器を広げて、広い画面では1行に収まるようにする。 */
+    .navbar > .container {
+        max-width: min(1600px, calc(100% - 2rem));
+    }
+
     .navbar-nav {
-        flex-wrap: nowrap !important;
+        /* 入りきらないときは折り返す。nowrapだと画面外に切り取られ、
+           言語セレクタに触れなくなる（2026-08-27の不具合） */
+        flex-wrap: wrap !important;
         flex-direction: row !important;
     }
     .navbar-nav .nav-item {
@@ -72,7 +84,7 @@ body.logged-in .auth-only.dropdown {
 body.logged-in .guest-only {
     display: none !important;
 }
-@media (min-width: 992px) {
+@media (min-width: 1200px) {
     body.logged-in .navbar-buttons-guest {
         display: none !important;
     }
@@ -238,7 +250,7 @@ body.logged-in .guest-only {
 }
 
 /* ========== Mobile Adjustments ========== */
-@media (max-width: 991.98px) {
+@media (max-width: 1199.98px) {
     .user-dropdown {
         order: 3;
         margin-left: 0.5rem;
@@ -299,7 +311,7 @@ body.logged-in .guest-only {
 
 /* ===== Mobile: always-visible Messages icon (hamburger横、ログイン時のみ) ===== */
 .msg-icon-mobile { display: none !important; }
-@media (max-width: 991.98px) {
+@media (max-width: 1199.98px) {
     body.logged-in .msg-icon-mobile { display: inline-block !important; }
 }
 .msg-icon-mobile .msg-badge {
