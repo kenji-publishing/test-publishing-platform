@@ -242,6 +242,7 @@ Rules:
 - The text is one part of a longer manuscript; it may start or end mid-scene. Translate it as-is without adding introductions or conclusions.
 - Keep the original paragraph breaks. The input is numbered line by line; answer with the same numbers, one line each, so the paragraphs stay where the author put them.
 - Keep proper nouns consistent throughout.
+- Punctuate the way ${tgtName} punctuates, and keep it the same from the first line to the last. Quotation marks especially: carry the meaning of the source's marks across, not the marks themselves — Japanese 「」 and 『』 become whatever ${tgtName} uses for speech and for a quote inside a quote.
 - Lines that are markup markers — like [[img src="..." w="..." align="..."]], [[table]] or [[/table]] — must be copied to the output EXACTLY as-is, unchanged and in the same position. Inside a [[table]] block, translate the cell text but keep the " | " separators and the line structure.
 - Respond with ONLY the ${tgtName} translation — no preamble, no explanations, no markdown fences.
 
