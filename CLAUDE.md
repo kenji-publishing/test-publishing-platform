@@ -196,6 +196,13 @@ node tools/bump-assets.js --check  # 付け忘れがないか確認（変更し�
 
 ## Common Pitfalls
 - ナビバーの変更は navbar.js の1箇所のみ。各ページのHTMLを直接編集しないこと
+- **ナビバーの折りたたみは `xl`（1200px）**。`lg`(992px) ではない（2026-08-27に変更）。
+  ログイン時は項目が7つあり、1行に必要な幅は 英語1190 / 仏語1244 / **独語1276px**。
+  Bootstrapの `.container` は1140pxで頭打ちなので、`.navbar > .container` だけ広げてある。
+  **ブレークポイントは navbar.js・navbar.css・mobile-fixes.css・各ページのインライン
+  「Pattern C」CSS（31ファイル）の4か所に散っている。変えるときは全部揃えること**
+- **ナビの `flex-wrap` を `nowrap` に戻さないこと。** 入りきらない分が画面外で切り取られ、
+  言語セレクタに触れなくなる（実際に起きた）。折り返して2行になる方が、消えるよりよい
 - 新言語追加時、Privacy/Terms等のlang-contentページは手動でコンテンツブロック追加が必要
 - i18n.js の languageChanged イベントの detail は `{ language: 'ja' }` 形式
 - ページ固有の getL() が残っているページ（library, reader, my-works等）は削除しないこと
