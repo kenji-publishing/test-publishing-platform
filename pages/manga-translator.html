@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608301249">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608302024">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608301249">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608302024">
     <title data-i18n="mangaTranslator.pageTitle">Manga Translator - AuctLect</title>
     
     <!-- Google Fonts -->
@@ -17,26 +17,26 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <!-- Platform CSS -->
-    <link href="../css/variables.css?v=202608301249" rel="stylesheet">
-    <link rel="stylesheet" href="../css/style-new.css?v=202608301249">
-    <link href="../css/components.css?v=202608301249" rel="stylesheet">
-    <link href="../css/navbar.css?v=202608301249" rel="stylesheet">
-    <link rel="stylesheet" href="../css/mobile-fixes.css?v=202608301249">
+    <link href="../css/variables.css?v=202608302024" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style-new.css?v=202608302024">
+    <link href="../css/components.css?v=202608302024" rel="stylesheet">
+    <link href="../css/navbar.css?v=202608302024" rel="stylesheet">
+    <link rel="stylesheet" href="../css/mobile-fixes.css?v=202608302024">
     
     <!-- 言語ファイル（9言語） -->
-    <script src="../js/lang/ja.js?v=202608301249"></script>
-    <script src="../js/lang/en.js?v=202608301249"></script>
-    <script src="../js/lang/zh.js?v=202608301249"></script>
-    <script src="../js/lang/zh-TW.js?v=202608301249"></script>
-    <script src="../js/lang/es.js?v=202608301249"></script>
-    <script src="../js/lang/fr.js?v=202608301249"></script>
-    <script src="../js/lang/de.js?v=202608301249"></script>
-    <script src="../js/lang/ko.js?v=202608301249"></script>
-    <script src="../js/lang/ar.js?v=202608301249"></script>
-    <script src="../js/lang/pt.js?v=202608301249"></script>
-    <script src="../js/lang/it.js?v=202608301249"></script>
-    <script src="../js/config.js?v=202608301249"></script>
-    <script src="../js/wizard-common.js?v=202608301249"></script>
+    <script src="../js/lang/ja.js?v=202608302024"></script>
+    <script src="../js/lang/en.js?v=202608302024"></script>
+    <script src="../js/lang/zh.js?v=202608302024"></script>
+    <script src="../js/lang/zh-TW.js?v=202608302024"></script>
+    <script src="../js/lang/es.js?v=202608302024"></script>
+    <script src="../js/lang/fr.js?v=202608302024"></script>
+    <script src="../js/lang/de.js?v=202608302024"></script>
+    <script src="../js/lang/ko.js?v=202608302024"></script>
+    <script src="../js/lang/ar.js?v=202608302024"></script>
+    <script src="../js/lang/pt.js?v=202608302024"></script>
+    <script src="../js/lang/it.js?v=202608302024"></script>
+    <script src="../js/config.js?v=202608302024"></script>
+    <script src="../js/wizard-common.js?v=202608302024"></script>
     <!-- 翻訳ベース（共通関数） -->
     
 
@@ -910,6 +910,9 @@
             padding: 0.5rem 0;
             background: var(--color-bg-card);
         }
+        .glyph-warn { background: var(--color-warning-bg); }
+        .glyph-warn .carry-text { color: var(--color-text-primary); }
+        .glyph-warn i { color: var(--color-warning); }
         /* 前回の用語集の引き継ぎ */
         .glossary-carry {
             display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; justify-content: space-between;
@@ -1127,6 +1130,13 @@
 
                     <div class="setting-group full-width">
                         <label id="s3LabelGlossary"><i class="fas fa-book me-1"></i> Glossary (character names, terms)</label>
+                        <div class="glossary-carry glyph-warn" id="glyphWarn" style="display:none;">
+                            <div class="carry-text"><i class="fas fa-exclamation-circle me-1"></i> <span id="glyphWarnText"></span></div>
+                            <div class="carry-actions">
+                                <button type="button" class="carry-btn carry-yes" onclick="applyGlyphFix()" id="glyphFixBtn">Fix</button>
+                                <button type="button" class="carry-btn" onclick="dismissGlyphWarning()" id="glyphKeepBtn">Keep</button>
+                            </div>
+                        </div>
                         <div class="glossary-carry" id="glossaryCarry" style="display:none;">
                             <div class="carry-text">
                                 <span id="carryLead"></span>
@@ -1592,9 +1602,81 @@
     }
 
 
+    const GLYPH_TEXT = {"body":{"en":"The translation contains characters that Simplified Chinese does not use ({chars}). Suggested: {fixed}","ja":"訳語に、簡体字では使わない字が入っています（{chars}）。簡体字にすると {fixed} です。","zh":"译词中含有简体中文不使用的字（{chars}）。建议改为：{fixed}","zh-TW":"譯詞中含有簡體中文不使用的字（{chars}）。建議改為：{fixed}","es":"El término contiene caracteres que el chino simplificado no usa ({chars}). Sugerencia: {fixed}","fr":"Le terme contient des caractères que le chinois simplifié n’emploie pas ({chars}). Suggestion : {fixed}","de":"Der Begriff enthält Zeichen, die das vereinfachte Chinesisch nicht verwendet ({chars}). Vorschlag: {fixed}","ko":"번역어에 간체자에서 쓰지 않는 글자가 있습니다({chars}). 제안: {fixed}","ar":"يحتوي المصطلح على حروف لا تستخدمها الصينية المبسطة ({chars}). الاقتراح: {fixed}","pt":"O termo contém caracteres que o chinês simplificado não usa ({chars}). Sugestão: {fixed}","it":"Il termine contiene caratteri che il cinese semplificato non usa ({chars}). Suggerimento: {fixed}"},"fix":{"en":"Use {fixed}","ja":"{fixed} に直す","zh":"改为 {fixed}","zh-TW":"改為 {fixed}","es":"Usar {fixed}","fr":"Utiliser {fixed}","de":"{fixed} verwenden","ko":"{fixed}(으)로 변경","ar":"استخدم {fixed}","pt":"Usar {fixed}","it":"Usa {fixed}"},"keep":{"en":"Keep as is","ja":"このままにする","zh":"保持原样","zh-TW":"保持原樣","es":"Dejar así","fr":"Laisser tel quel","de":"So belassen","ko":"그대로 두기","ar":"اتركه كما هو","pt":"Manter assim","it":"Lascia così"}};
+
+    // ===== 訳語の字体の点検 =====
+    // 日本語の原稿から用語集を作ると、訳語にも日本語の字体が入りやすい。
+    // 実際に「詩人 → 騒人」と登録され、簡体字の中文に日本語の 騒 が79回入った。
+    // しかも各チャンクが独立に判断するので、6回は骚人に直され3回はそのまま残り、
+    // 同じ人物が章の途中で表記の変わる状態になった。入れる時点で気づけば防げる。
+    //
+    // 対応表は「日本語・繁体でしか使わない字 → 簡体字」。よく出るものだけを持つ。
+    const GLYPH_MAP = {
+        zh: {
+            '騒': '骚', '掃': '扫', '帰': '归', '気': '气', '実': '实', '売': '卖', '読': '读',
+            '広': '广', '対': '对', '経': '经', '検': '检', '単': '单', '価': '价', '伝': '传',
+            '関': '关', '変': '变', '発': '发', '戦': '战', '様': '样', '齢': '龄', '歳': '岁',
+            '窓': '窗', '専': '专', '転': '转', '児': '儿', '薬': '药', '団': '团', '県': '县',
+            '沢': '泽', '浜': '滨', '蔵': '藏', '鉄': '铁', '駅': '驿', '営': '营', '総': '总',
+            '済': '济', '険': '险', '験': '验', '労': '劳', '帯': '带', '応': '应', '権': '权',
+            '観': '观', '覚': '觉', '楽': '乐', '続': '续', '絵': '绘', '聴': '听', '証': '证',
+            '雑': '杂', '顔': '颜', '髪': '发', '鳥': '鸟', '仮': '假', '両': '两', '満': '满',
+            '焼': '烧', '熱': '热', '産': '产', '絡': '络', '縁': '缘', '職': '职', '聞': '闻',
+            '芸': '艺', '蘭': '兰', '諸': '诸', '豊': '丰', '辺': '边', '郷': '乡', '釈': '释',
+            '隣': '邻', '霊': '灵', '響': '响', '頼': '赖', '駆': '驱', '鶏': '鸡', '麗': '丽',
+            '黙': '默', '龍': '龙', '髄': '髓', '醸': '酿', '繊': '纤', '粛': '肃', '穂': '穗'
+        }
+    };
+
+    // 訳語に、その言語では使わない字体が混じっていないか調べる
+    function checkTargetGlyphs(term, targetLang) {
+        const map = GLYPH_MAP[targetLang];
+        if (!map) return null;
+        const bad = [];
+        for (const ch of String(term)) if (map[ch] && !bad.some(b => b.from === ch)) bad.push({ from: ch, to: map[ch] });
+        if (!bad.length) return null;
+        let fixed = String(term);
+        bad.forEach(b => { fixed = fixed.split(b.from).join(b.to); });
+        return { bad: bad, fixed: fixed };
+    }
+
+    // 入力された訳語の字体がおかしければ、直した形を添えて知らせる
+    function noteGlyphWarning(term) {
+        const box = document.getElementById('glyphWarn');
+        if (!box) return;
+        const tgt = (document.getElementById('targetLang') || {}).value || '';
+        const r = checkTargetGlyphs(term, tgt);
+        if (!r) { box.style.display = 'none'; return; }
+        const L = getLang();
+        const T = GLYPH_TEXT;
+        const t = (o) => o[L] || o.en;
+        pendingGlyphFix = { from: term, to: r.fixed };
+        document.getElementById('glyphWarnText').textContent = t(T.body)
+            .replace('{chars}', r.bad.map(b => b.from + ' → ' + b.to).join('、'))
+            .replace('{fixed}', r.fixed);
+        document.getElementById('glyphFixBtn').textContent = t(T.fix).replace('{fixed}', r.fixed);
+        document.getElementById('glyphKeepBtn').textContent = t(T.keep);
+        box.style.display = 'flex';
+    }
+
+    let pendingGlyphFix = null;
+
+    function applyGlyphFix() {
+        if (!pendingGlyphFix) return;
+        const i = glossary.findIndex(g => g.tgt === pendingGlyphFix.from);
+        if (i >= 0) { glossary[i] = { src: glossary[i].src, tgt: pendingGlyphFix.to }; renderGlossary(); }
+        dismissGlyphWarning();
+    }
+
+    function dismissGlyphWarning() {
+        pendingGlyphFix = null;
+        const box = document.getElementById('glyphWarn');
+        if (box) box.style.display = 'none';
+    }
+
     function addGlossaryEntry() {
         const s=document.getElementById('glossarySrc').value.trim(), t=document.getElementById('glossaryTgt').value.trim();
-        if(!s||!t) return; glossary.unshift({src:s,tgt:t}); document.getElementById('glossarySrc').value=''; document.getElementById('glossaryTgt').value=''; renderGlossary();
+        if(!s||!t) return; glossary.unshift({src:s,tgt:t}); document.getElementById('glossarySrc').value=''; document.getElementById('glossaryTgt').value=''; renderGlossary(); noteGlyphWarning(t);
     }
     function removeGlossaryEntry(i) { glossary.splice(i,1); renderGlossary(); }
     function renderGlossary() {
@@ -2420,8 +2502,8 @@
     </script>
     <!-- Bootstrap JS (Pattern C navbar requires) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/i18n.js?v=202608301249"></script>
-    <script src="../js/navbar.js?v=202608301249"></script>
+    <script src="../js/i18n.js?v=202608302024"></script>
+    <script src="../js/navbar.js?v=202608302024"></script>
     <!-- Language Switcher -->
     <!-- Notification Badge -->
 </body>
