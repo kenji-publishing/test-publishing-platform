@@ -253,7 +253,7 @@ router.get('/my', authenticate, async (req, res) => {
             `SELECT work_id, title, status, cover_image, cover_image_url,
                     view_count, like_count, comment_count, page_count,
                     price, currency, is_free, language, original_language,
-                    content_type, genre, ai_text_usage, ai_cover_usage, ai_translation_usage,
+                    content_type, genre, ai_text_usage, ai_cover_usage, ai_translation_usage, needs_translation_review,
                     original_work_id, created_at, updated_at, published_at
              FROM works
              WHERE author_id = $1 AND status != 'deleted'
@@ -372,7 +372,7 @@ router.get('/', async (req, res) => {
                    w.rating_average, w.rating_count, w.published_at,
                    w.is_adult, w.age_rating, w.content_warnings,
                    w.is_ai_generated, w.ai_tools_used,
-                   w.ai_text_usage, w.ai_cover_usage, w.ai_translation_usage,
+                   w.ai_text_usage, w.ai_cover_usage, w.ai_translation_usage, w.needs_translation_review,
                    u.user_id as author_id,
                    -- ペンネームが無いときの本名への切り替えはここで済ませる。
                    -- 本名をそのまま返して画面側で選ばせると、ペンネームを設定した
@@ -1182,6 +1182,7 @@ router.post('/', authenticate, async (req, res) => {
             aiTextUsage,
             aiCoverUsage,
             aiTranslationUsage,
+            needsTranslationReview,
             ageRating,
             contentWarnings,
             originalWorkId
@@ -1240,8 +1241,8 @@ router.post('/', authenticate, async (req, res) => {
                     is_ai_generated, ai_tools_used, preview_percent,
                     word_count, page_count, currency, status,
                     ai_text_usage, ai_cover_usage, ai_translation_usage,
-                    age_rating, content_warnings, author_name, original_work_id
-                 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28)
+                    age_rating, content_warnings, author_name, original_work_id, needs_translation_review
+                 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29)
                  RETURNING *`,
                 [
                     req.user.userId,
@@ -1271,7 +1272,8 @@ router.post('/', authenticate, async (req, res) => {
                     rating,
                     JSON.stringify(warnings),
                     workAuthorName,
-                    originalId
+                    originalId,
+                    needsTranslationReview === true
                 ]
             );
             work = result.rows[0];
@@ -1321,6 +1323,7 @@ router.put('/:workId', authenticate, async (req, res) => {
             price, status, isFree, coverImage, isAdult,
             isAiGenerated, aiToolsUsed, previewPercent, currency,
             aiTextUsage, aiCoverUsage, aiTranslationUsage,
+            needsTranslationReview,
             ageRating, contentWarnings, originalWorkId
         } = req.body;
 
@@ -1376,6 +1379,7 @@ router.put('/:workId', authenticate, async (req, res) => {
                  age_rating = COALESCE($22, age_rating),
                  content_warnings = COALESCE($23::jsonb, content_warnings),
                  author_name = COALESCE($24, author_name),
+                 needs_translation_review = COALESCE($27::boolean, needs_translation_review),
                  -- 紐づけは「外す」操作もあるためCOALESCEでは扱えない。
                  -- $25 が真のときだけ $26 の値（NULL可）で置き換える
                  original_work_id = CASE WHEN $25::boolean THEN $26::uuid ELSE original_work_id END,
@@ -1393,7 +1397,8 @@ router.put('/:workId', authenticate, async (req, res) => {
                 isAiGenerated, aiToolsUsed, previewPercent,
                 wordCount, pageCount, req.params.workId, workCurrency,
                 aiText, aiCover, aiTranslation, rating, warnings, workAuthorName,
-                originalId !== undefined, originalId === undefined ? null : originalId
+                originalId !== undefined, originalId === undefined ? null : originalId,
+                needsTranslationReview === undefined ? null : (needsTranslationReview === true)
             ]
         );
 
