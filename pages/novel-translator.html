@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608311419">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608311426">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Novel Translator - AuctLect</title>
 
@@ -16,26 +16,26 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <!-- Platform CSS -->
-    <link href="../css/variables.css?v=202608311419" rel="stylesheet">
-    <link rel="stylesheet" href="../css/style-new.css?v=202608311419">
-    <link href="../css/components.css?v=202608311419" rel="stylesheet">
-    <link href="../css/navbar.css?v=202608311419" rel="stylesheet">
-    <link rel="stylesheet" href="../css/mobile-fixes.css?v=202608311419">
+    <link href="../css/variables.css?v=202608311426" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style-new.css?v=202608311426">
+    <link href="../css/components.css?v=202608311426" rel="stylesheet">
+    <link href="../css/navbar.css?v=202608311426" rel="stylesheet">
+    <link rel="stylesheet" href="../css/mobile-fixes.css?v=202608311426">
 
     <!-- 言語ファイル（9言語） -->
-    <script src="../js/config.js?v=202608311419"></script>
-    <script src="../js/lang/ja.js?v=202608311419"></script>
-    <script src="../js/lang/en.js?v=202608311419"></script>
-    <script src="../js/lang/zh.js?v=202608311419"></script>
-    <script src="../js/lang/zh-TW.js?v=202608311419"></script>
-    <script src="../js/lang/es.js?v=202608311419"></script>
-    <script src="../js/lang/fr.js?v=202608311419"></script>
-    <script src="../js/lang/de.js?v=202608311419"></script>
-    <script src="../js/lang/ko.js?v=202608311419"></script>
-    <script src="../js/lang/ar.js?v=202608311419"></script>
-    <script src="../js/lang/pt.js?v=202608311419"></script>
-    <script src="../js/lang/it.js?v=202608311419"></script>
-    <script src="../js/wizard-common.js?v=202608311419"></script>
+    <script src="../js/config.js?v=202608311426"></script>
+    <script src="../js/lang/ja.js?v=202608311426"></script>
+    <script src="../js/lang/en.js?v=202608311426"></script>
+    <script src="../js/lang/zh.js?v=202608311426"></script>
+    <script src="../js/lang/zh-TW.js?v=202608311426"></script>
+    <script src="../js/lang/es.js?v=202608311426"></script>
+    <script src="../js/lang/fr.js?v=202608311426"></script>
+    <script src="../js/lang/de.js?v=202608311426"></script>
+    <script src="../js/lang/ko.js?v=202608311426"></script>
+    <script src="../js/lang/ar.js?v=202608311426"></script>
+    <script src="../js/lang/pt.js?v=202608311426"></script>
+    <script src="../js/lang/it.js?v=202608311426"></script>
+    <script src="../js/wizard-common.js?v=202608311426"></script>
 
     <style>
         :root {
@@ -1315,6 +1315,8 @@
     // ===== Step Navigation =====
     function goStep(n) {
         // Validate before advancing
+        // 用語集の字体は、追加した瞬間だけでなく先へ進む時にも見る
+        if (n === 4 && currentStep === 3 && !confirmGlyphsBeforeLeaving()) return;
         if (n === 3 && currentStep === 2) {
             const text = document.getElementById('sourceText').value.trim();
             if (!text) { alert(getLang() === 'ja' ? 'テキストを入力してください' : 'Please enter text to translate'); return; }
@@ -1837,7 +1839,7 @@
 
 
     const GLYPH_LANG_NAME = {"zh":{"en":"Simplified Chinese","ja":"簡体字","zh":"简体中文","zh-TW":"簡體中文","es":"el chino simplificado","fr":"le chinois simplifié","de":"das vereinfachte Chinesisch","ko":"간체자","ar":"الصينية المبسطة","pt":"o chinês simplificado","it":"il cinese semplificato"},"zh-TW":{"en":"Traditional Chinese","ja":"台湾の繁体字","zh":"繁体中文","zh-TW":"繁體中文","es":"el chino tradicional","fr":"le chinois traditionnel","de":"das traditionelle Chinesisch","ko":"번체자","ar":"الصينية التقليدية","pt":"o chinês tradicional","it":"il cinese tradizionale"}};
-    const GLYPH_TEXT = {"body":{"en":"The translation contains characters that {lang} does not use ({chars}). Suggested: {fixed}","ja":"訳語に、{lang}では使わない字が入っています（{chars}）。{lang}にすると {fixed} です。","zh":"译词中含有{lang}不使用的字（{chars}）。建议改为：{fixed}","zh-TW":"譯詞中含有{lang}不使用的字（{chars}）。建議改為：{fixed}","es":"El término contiene caracteres que {lang} no usa ({chars}). Sugerencia: {fixed}","fr":"Le terme contient des caractères que {lang} n’emploie pas ({chars}). Suggestion : {fixed}","de":"Der Begriff enthält Zeichen, die {lang} nicht verwendet ({chars}). Vorschlag: {fixed}","ko":"번역어에 {lang}에서 쓰지 않는 글자가 있습니다({chars}). 제안: {fixed}","ar":"يحتوي المصطلح على حروف لا يستخدمها {lang} ({chars}). الاقتراح: {fixed}","pt":"O termo contém caracteres que {lang} não usa ({chars}). Sugestão: {fixed}","it":"Il termine contiene caratteri che {lang} non usa ({chars}). Suggerimento: {fixed}"},"fix":{"en":"Use {fixed}","ja":"{fixed} に直す","zh":"改为 {fixed}","zh-TW":"改為 {fixed}","es":"Usar {fixed}","fr":"Utiliser {fixed}","de":"{fixed} verwenden","ko":"{fixed}(으)로 변경","ar":"استخدم {fixed}","pt":"Usar {fixed}","it":"Usa {fixed}"},"keep":{"en":"Keep as is","ja":"このままにする","zh":"保持原样","zh-TW":"保持原樣","es":"Dejar así","fr":"Laisser tel quel","de":"So belassen","ko":"그대로 두기","ar":"اتركه كما هو","pt":"Manter assim","it":"Lascia così"}};
+    const GLYPH_TEXT = {"body":{"en":"The translation contains characters that {lang} does not use ({chars}). Suggested: {fixed}","ja":"訳語に、{lang}では使わない字が入っています（{chars}）。{lang}にすると {fixed} です。","zh":"译词中含有{lang}不使用的字（{chars}）。建议改为：{fixed}","zh-TW":"譯詞中含有{lang}不使用的字（{chars}）。建議改為：{fixed}","es":"El término contiene caracteres que {lang} no usa ({chars}). Sugerencia: {fixed}","fr":"Le terme contient des caractères que {lang} n’emploie pas ({chars}). Suggestion : {fixed}","de":"Der Begriff enthält Zeichen, die {lang} nicht verwendet ({chars}). Vorschlag: {fixed}","ko":"번역어에 {lang}에서 쓰지 않는 글자가 있습니다({chars}). 제안: {fixed}","ar":"يحتوي المصطلح على حروف لا يستخدمها {lang} ({chars}). الاقتراح: {fixed}","pt":"O termo contém caracteres que {lang} não usa ({chars}). Sugestão: {fixed}","it":"Il termine contiene caratteri che {lang} non usa ({chars}). Suggerimento: {fixed}"},"fix":{"en":"Use {fixed}","ja":"{fixed} に直す","zh":"改为 {fixed}","zh-TW":"改為 {fixed}","es":"Usar {fixed}","fr":"Utiliser {fixed}","de":"{fixed} verwenden","ko":"{fixed}(으)로 변경","ar":"استخدم {fixed}","pt":"Usar {fixed}","it":"Usa {fixed}"},"keep":{"en":"Keep as is","ja":"このままにする","zh":"保持原样","zh-TW":"保持原樣","es":"Dejar así","fr":"Laisser tel quel","de":"So belassen","ko":"그대로 두기","ar":"اتركه كما هو","pt":"Manter assim","it":"Lascia così"}, fixAll: {"en":"Fix all {n}","ja":"{n}件すべて直す","zh":"全部修正（{n}处）","zh-TW":"全部修正（{n}處）","es":"Corregir los {n}","fr":"Tout corriger ({n})","de":"Alle {n} korrigieren","ko":"{n}건 모두 수정","ar":"تصحيح الكل ({n})","pt":"Corrigir todos ({n})","it":"Correggi tutti ({n})"} };
 
     // ===== 訳語の字体の点検 =====
     // 日本語の原稿から用語集を作ると、訳語にも日本語の字体が入りやすい。
@@ -1942,14 +1944,63 @@
 
     let pendingGlyphFix = null;
 
+    // 「次へ」を押した時点でも用語集全体を見る。
+    // 追加ボタンを押した瞬間にしか点検していなかったため、
+    // その場の警告を見落としたまま先へ進めてしまった。
+    let glyphAcknowledged = false;
+
+    // 入力欄に打ちかけたまま「次へ」を押されたら、取りこぼさずに足す
+    function flushPendingGlossaryInput() {
+        const s = (document.getElementById('glossarySrc') || {}).value;
+        const t = (document.getElementById('glossaryTgt') || {}).value;
+        if (s && t && s.trim() && t.trim()) addGlossaryEntry();
+    }
+
+    // 用語集ぜんぶを見て、直すべき訳語があれば知らせる。
+    // 先へ進んでよければ true を返す
+    function confirmGlyphsBeforeLeaving() {
+        flushPendingGlossaryInput();
+        if (glyphAcknowledged) return true;
+        const tgt = (document.getElementById('targetLang') || {}).value || '';
+        const bad = [];
+        glossary.forEach((g, i) => {
+            const r = checkTargetGlyphs(g.tgt, tgt);
+            if (r) bad.push({ i: i, from: g.tgt, to: r.fixed, chars: r.bad });
+        });
+        if (!bad.length) return true;
+        const L = getLang();
+        const T = GLYPH_TEXT;
+        const t = (o) => o[L] || o.en;
+        pendingGlyphFix = { all: bad };
+        const langName = t(GLYPH_LANG_NAME[tgt] || GLYPH_LANG_NAME.zh);
+        const chars = bad.reduce((a, b) => a.concat(b.chars.map(x => x.from + ' → ' + x.to)), []);
+        const uniq = chars.filter((v, i2) => chars.indexOf(v) === i2);
+        document.getElementById('glyphWarnText').textContent = t(T.body)
+            .split('{lang}').join(langName)
+            .replace('{chars}', uniq.join('、'))
+            .replace('{fixed}', bad.map(b => b.to).join('、'));
+        document.getElementById('glyphFixBtn').textContent = t(T.fixAll).replace('{n}', bad.length);
+        document.getElementById('glyphKeepBtn').textContent = t(T.keep);
+        document.getElementById('glyphWarn').style.display = 'flex';
+        document.getElementById('glyphWarn').scrollIntoView({ block: 'center' });
+        return false;
+    }
+
     function applyGlyphFix() {
         if (!pendingGlyphFix) return;
-        const i = glossary.findIndex(g => g.tgt === pendingGlyphFix.from);
-        if (i >= 0) { glossary[i] = { src: glossary[i].src, tgt: pendingGlyphFix.to }; renderGlossary(); }
+        if (pendingGlyphFix.all) {
+            pendingGlyphFix.all.forEach(function (b) { if (glossary[b.i]) glossary[b.i] = { src: glossary[b.i].src, tgt: b.to }; });
+        } else {
+            const i = glossary.findIndex(function (g) { return g.tgt === pendingGlyphFix.from; });
+            if (i >= 0) glossary[i] = { src: glossary[i].src, tgt: pendingGlyphFix.to };
+        }
+        renderGlossary();
+        glyphAcknowledged = true;
         dismissGlyphWarning();
     }
 
     function dismissGlyphWarning() {
+        if (pendingGlyphFix && pendingGlyphFix.all) glyphAcknowledged = true;
         pendingGlyphFix = null;
         const box = document.getElementById('glyphWarn');
         if (box) box.style.display = 'none';
@@ -1967,6 +2018,7 @@
     }
     function removeGlossaryEntry(i) { glossary.splice(i, 1); renderGlossary(); }
     function renderGlossary() {
+        glyphAcknowledged = false;
         document.getElementById('glossaryBody').innerHTML = glossary.map((g, i) =>
             '<tr><td>' + escH(g.src) + '</td><td>' + escH(g.tgt) + '</td><td><button class="glossary-del-btn" onclick="removeGlossaryEntry(' + i + ')"><i class="fas fa-times"></i></button></td></tr>'
         ).join('');
@@ -2808,7 +2860,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- JSZip: lets us crack open .docx (which is a ZIP) to read the text inside -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="../js/i18n.js?v=202608311419"></script>
-    <script src="../js/navbar.js?v=202608311419"></script>
+    <script src="../js/i18n.js?v=202608311426"></script>
+    <script src="../js/navbar.js?v=202608311426"></script>
 </body>
 </html>
