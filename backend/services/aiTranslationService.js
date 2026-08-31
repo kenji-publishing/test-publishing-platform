@@ -34,12 +34,15 @@ const LANG_NAMES = {
 const QUOTE_STYLE = {
     ar: 'Use « » for speech, and " " for a quotation inside speech. Do not use " " for speech itself.',
     fr: 'Use « » for speech, and " " for a quotation inside speech.',
-    es: 'Use « » for speech, and " " for a quotation inside speech.',
+    // スペイン語・ポルトガル語の小説の会話はダッシュで始める。«» や "" は引用や心内語のほう。
+    // 記号の作法だけでなく前後の空白の入れ方まで違うので、例文ごと渡す
+    es: 'Mark speech with the raya (—), not with quotation marks: a line of dialogue opens with — and no space after it, and a narrative tag is set off by another —, as in: —Buenos días —dijo el poeta—. ¿Cómo está? Use « » only for a quotation or a thought inside the narration.',
     it: 'Use « » for speech, and " " for a quotation inside speech.',
     de: 'Use „ “ for speech, and ‚ ‘ for a quotation inside speech.',
     en: 'Use " " for speech, and \' \' for a quotation inside speech.',
     ja: 'Use 「 」 for speech, and 『 』 for a quotation inside speech.',
     ko: 'Use " " for speech, and \' \' for a quotation inside speech.',
+    pt: 'Mark speech with the travessão (—), not with quotation marks: a line of dialogue opens with — followed by a space, and a narrative tag is set off by another —, as in: — Bom dia — disse o poeta. Use " " only for a quotation or a thought inside the narration.',
     zh: 'Use “ ” for speech, and ‘ ’ for a quotation inside speech.',
     'zh-TW': 'Use 「 」 for speech, and 『 』 for a quotation inside speech.'
 };
