@@ -30,7 +30,8 @@ router.use((req, res, next) => {
 const LANG_NAMES = {
     'ja': '日本語', 'en': 'English', 'zh': '中文',
     'es': 'Español', 'fr': 'Français', 'de': 'Deutsch',
-    'ko': '한국어', 'ar': 'العربية'
+    'ko': '한국어', 'ar': 'العربية',
+    'zh-TW': '繁體中文', 'pt': 'Português', 'it': 'Italiano'
 };
 
 // Category names
