@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608311426">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202608311638">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Novel Translator - AuctLect</title>
 
@@ -16,26 +16,26 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <!-- Platform CSS -->
-    <link href="../css/variables.css?v=202608311426" rel="stylesheet">
-    <link rel="stylesheet" href="../css/style-new.css?v=202608311426">
-    <link href="../css/components.css?v=202608311426" rel="stylesheet">
-    <link href="../css/navbar.css?v=202608311426" rel="stylesheet">
-    <link rel="stylesheet" href="../css/mobile-fixes.css?v=202608311426">
+    <link href="../css/variables.css?v=202608311638" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style-new.css?v=202608311638">
+    <link href="../css/components.css?v=202608311638" rel="stylesheet">
+    <link href="../css/navbar.css?v=202608311638" rel="stylesheet">
+    <link rel="stylesheet" href="../css/mobile-fixes.css?v=202608311638">
 
     <!-- 言語ファイル（9言語） -->
-    <script src="../js/config.js?v=202608311426"></script>
-    <script src="../js/lang/ja.js?v=202608311426"></script>
-    <script src="../js/lang/en.js?v=202608311426"></script>
-    <script src="../js/lang/zh.js?v=202608311426"></script>
-    <script src="../js/lang/zh-TW.js?v=202608311426"></script>
-    <script src="../js/lang/es.js?v=202608311426"></script>
-    <script src="../js/lang/fr.js?v=202608311426"></script>
-    <script src="../js/lang/de.js?v=202608311426"></script>
-    <script src="../js/lang/ko.js?v=202608311426"></script>
-    <script src="../js/lang/ar.js?v=202608311426"></script>
-    <script src="../js/lang/pt.js?v=202608311426"></script>
-    <script src="../js/lang/it.js?v=202608311426"></script>
-    <script src="../js/wizard-common.js?v=202608311426"></script>
+    <script src="../js/config.js?v=202608311638"></script>
+    <script src="../js/lang/ja.js?v=202608311638"></script>
+    <script src="../js/lang/en.js?v=202608311638"></script>
+    <script src="../js/lang/zh.js?v=202608311638"></script>
+    <script src="../js/lang/zh-TW.js?v=202608311638"></script>
+    <script src="../js/lang/es.js?v=202608311638"></script>
+    <script src="../js/lang/fr.js?v=202608311638"></script>
+    <script src="../js/lang/de.js?v=202608311638"></script>
+    <script src="../js/lang/ko.js?v=202608311638"></script>
+    <script src="../js/lang/ar.js?v=202608311638"></script>
+    <script src="../js/lang/pt.js?v=202608311638"></script>
+    <script src="../js/lang/it.js?v=202608311638"></script>
+    <script src="../js/wizard-common.js?v=202608311638"></script>
 
     <style>
         :root {
@@ -2539,47 +2539,101 @@
         return prev[n];
     }
 
-    // その語が出ている短い一節を拾う。どこを直せばよいかが一目で分かるように
-    function findExamples(text, word) {
-        const re = new RegExp('[^.!?"\n]{0,40}(?<![A-Za-z])' + word + '(?![A-Za-z])[^.!?"\n]{0,40}', 'g');
-        const hits = String(text).match(re) || [];
-        return hits.slice(0, 3).map(function (s) { return s.trim(); });
+    // 訳語が出ている短い一節を拾う。どこを直せばよいかが一目で分かるように
+    // アルファベットは前後が字でないことを確かめる。漢字・かな・アラビア文字は
+    // 語の切れ目が無いので、そのまま含まれているかだけを見る
+    function findExamples(text, word, latin) {
+        const s = String(text);
+        const out = [];
+        if (latin) {
+            const re = new RegExp('[^.!?"\n]{0,40}(?<![A-Za-z])' + word + '(?![A-Za-z])[^.!?"\n]{0,40}', 'g');
+            (s.match(re) || []).slice(0, 3).forEach(function (m) { out.push(m.trim()); });
+            return out;
+        }
+        let at = -1;
+        while (out.length < 3 && (at = s.indexOf(word, at + 1)) >= 0) {
+            out.push(s.slice(Math.max(0, at - 20), at + word.length + 20).replace(/\n/g, ' ').trim());
+        }
+        return out;
+    }
+
+    // 語の切れ目が無い文字（漢字など）で「1文字違い」を総当たりすると、
+    // 老人院 に対する 老人也・老人的 のような無関係な語まで拾ってしまう。
+    // 探したいのは字体の取り違えだけなので、字体の対応表から
+    // 「あり得る別表記」を作って、それだけを数える。
+    // （骚人 に対する 騒人 と 騷人、扫帚 に対する 掃帚 など）
+    function glyphVariantsOf(term) {
+        const alt = {};
+        for (const lang of Object.keys(GLYPH_MAP)) {
+            const m = GLYPH_MAP[lang];
+            for (const from of Object.keys(m)) {
+                const to = m[from];
+                (alt[from] = alt[from] || new Set()).add(to);
+                (alt[to] = alt[to] || new Set()).add(from);
+            }
+        }
+        const out = new Set();
+        for (let i = 0; i < term.length; i++) {
+            const set = alt[term[i]];
+            if (!set) continue;
+            set.forEach(function (ch) {
+                if (ch === term[i]) return;
+                out.add(term.slice(0, i) + ch + term.slice(i + 1));
+            });
+        }
+        out.delete(term);
+        return Array.from(out);
     }
 
     function buildGlossaryReport(text, terms) {
-        const tokens = String(text).match(/[A-Za-z']+/g) || [];
+        const s = String(text);
+        const tokens = s.match(/[A-Za-z']+/g) || [];
         const tally = {};
         for (const tk of tokens) tally[tk] = (tally[tk] || 0) + 1;
         const targets = terms.map(g => String((g && g.tgt) || '').trim()).filter(Boolean);
-        const known = new Set(targets.map(s => s.toLowerCase()));
+        const known = new Set(targets.map(x => x.toLowerCase()));
         const rows = [];
         for (const term of targets) {
-            if (!/^[A-Za-z][A-Za-z']*$/.test(term)) continue;   // 英語の1語だけを見る
-            const used = tally[term] || 0;
-            const lowerForm = term.toLowerCase();
-            const lower = lowerForm === term ? 0 : (tally[lowerForm] || 0);
+            const latin = /^[A-Za-z][A-Za-z']*$/.test(term);
             const notes = [];
-            if (used === 0) notes.push({ k: 'unused' });
-            if (lower > 0) notes.push({ k: 'lower', w: lowerForm, n: lower, eg: findExamples(text, lowerForm) });
-            // 綴りの化け。短い語は普通の英単語と衝突しやすいので5文字以上に限る
-            if (term.length >= 5) {
-                for (const w of Object.keys(tally)) {
-                    if (w === term || known.has(w.toLowerCase())) continue;
-                    if (tally[w] < 2) continue;
-                    if (Math.abs(w.length - term.length) > 1) continue;
-                    const a = w.toLowerCase();
-                    // 語尾だけの違いは普通の英語の活用（shadow/shadows, cleaner/cleaned）。
-                    // 綴りの化けは語の途中で起きる（cleaner → clearner）ので、そこだけ見る
-                    const tailOnly = a.slice(0, -1) === lowerForm.slice(0, -1)
-                        || a === lowerForm.slice(0, -1) || lowerForm === a.slice(0, -1);
-                    if (tailOnly) continue;
-                    if (editDistance(a, lowerForm) === 1) notes.push({ k: 'variant', w: w, n: tally[w], eg: findExamples(text, w) });
+            let used;
+
+            if (latin) {
+                used = tally[term] || 0;
+                const lowerForm = term.toLowerCase();
+                const lower = lowerForm === term ? 0 : (tally[lowerForm] || 0);
+                if (used === 0) notes.push({ k: 'unused' });
+                if (lower > 0) notes.push({ k: 'lower', w: lowerForm, n: lower, eg: findExamples(s, lowerForm, true) });
+                // 綴りの化け。短い語は普通の英単語と衝突しやすいので5文字以上に限る
+                if (term.length >= 5) {
+                    for (const w of Object.keys(tally)) {
+                        if (w === term || known.has(w.toLowerCase())) continue;
+                        if (tally[w] < 2) continue;
+                        if (Math.abs(w.length - term.length) > 1) continue;
+                        const a = w.toLowerCase();
+                        // 語尾だけの違いは普通の活用（shadow/shadows, cleaner/cleaned）。
+                        // 綴りの化けは語の途中で起きる（cleaner → clearner）ので、そこだけ見る
+                        const tailOnly = a.slice(0, -1) === lowerForm.slice(0, -1)
+                            || a === lowerForm.slice(0, -1) || lowerForm === a.slice(0, -1);
+                        if (tailOnly) continue;
+                        if (editDistance(a, lowerForm) === 1) notes.push({ k: 'variant', w: w, n: tally[w], eg: findExamples(s, w, true) });
+                    }
                 }
+            } else {
+                // 漢字・ハングル・アラビア文字などは、そのまま含まれている数を数える
+                used = s.split(term).length - 1;
+                if (used === 0) notes.push({ k: 'unused' });
+                glyphVariantsOf(term).forEach(function (w) {
+                    const n = s.split(w).length - 1;
+                    if (n > 0) notes.push({ k: 'variant', w: w, n: n, eg: findExamples(s, w, false) });
+                });
             }
+
             if (notes.length) rows.push({ term: term, used: used, notes: notes });
         }
         return rows;
     }
+
 
     function renderGlossaryCheck() {
         const box = document.getElementById('glossCheck');
@@ -2860,7 +2914,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- JSZip: lets us crack open .docx (which is a ZIP) to read the text inside -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="../js/i18n.js?v=202608311426"></script>
-    <script src="../js/navbar.js?v=202608311426"></script>
+    <script src="../js/i18n.js?v=202608311638"></script>
+    <script src="../js/navbar.js?v=202608311638"></script>
 </body>
 </html>
