@@ -27,6 +27,23 @@ const LANG_NAMES = {
     de: 'German', ko: 'Korean', ar: 'Arabic', pt: 'Portuguese', it: 'Italian', 'zh-TW': 'Traditional Chinese (Taiwan)'
 };
 
+// 会話に使う引用符。言語によっては複数の流儀が並び立っていて、
+// 「その言語の作法に従え」とだけ言うと、チャンクごとに違う方を選ぶ。
+// アラビア語で実際に起きた（«» と "" が章の中で混ざった）ので、
+// 揺れる言語は一方に決めておく。表に無い言語は今までどおり任せる。
+const QUOTE_STYLE = {
+    ar: 'Use « » for speech, and " " for a quotation inside speech. Do not use " " for speech itself.',
+    fr: 'Use « » for speech, and " " for a quotation inside speech.',
+    es: 'Use « » for speech, and " " for a quotation inside speech.',
+    it: 'Use « » for speech, and " " for a quotation inside speech.',
+    de: 'Use „ “ for speech, and ‚ ‘ for a quotation inside speech.',
+    en: 'Use " " for speech, and \' \' for a quotation inside speech.',
+    ja: 'Use 「 」 for speech, and 『 』 for a quotation inside speech.',
+    ko: 'Use " " for speech, and \' \' for a quotation inside speech.',
+    zh: 'Use “ ” for speech, and ‘ ’ for a quotation inside speech.',
+    'zh-TW': 'Use 「 」 for speech, and 『 』 for a quotation inside speech.'
+};
+
 const TIER_INSTRUCTIONS = {
     haiku: 'Produce an accurate, faithful translation. Stay close to the original sentence structure where the target language allows; prioritize precision of meaning over stylistic polish.',
     sonnet: 'Produce a natural, fluent translation that reads as if originally written in the target language. Adapt sentence structure and idioms where needed, while preserving the meaning, tone, and register of the original.',
@@ -242,7 +259,7 @@ Rules:
 - The text is one part of a longer manuscript; it may start or end mid-scene. Translate it as-is without adding introductions or conclusions.
 - Keep the original paragraph breaks. The input is numbered line by line; answer with the same numbers, one line each, so the paragraphs stay where the author put them.
 - Keep proper nouns consistent throughout.
-- Punctuate the way ${tgtName} punctuates, and keep it the same from the first line to the last. Quotation marks especially: carry the meaning of the source's marks across, not the marks themselves — Japanese 「」 and 『』 become whatever ${tgtName} uses for speech and for a quote inside a quote.
+- Punctuate the way ${tgtName} punctuates, and keep it the same from the first line to the last. Quotation marks especially: carry the meaning of the source's marks across, not the marks themselves — Japanese 「」 and 『』 become whatever ${tgtName} uses for speech and for a quote inside a quote.${QUOTE_STYLE[targetLang] ? ' ' + QUOTE_STYLE[targetLang] : ''}
 - Lines that are markup markers — like [[img src="..." w="..." align="..."]], [[table]] or [[/table]] — must be copied to the output EXACTLY as-is, unchanged and in the same position. Inside a [[table]] block, translate the cell text but keep the " | " separators and the line structure.
 - Respond with ONLY the ${tgtName} translation — no preamble, no explanations, no markdown fences.
 
