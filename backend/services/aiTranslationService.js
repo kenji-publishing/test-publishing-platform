@@ -47,6 +47,21 @@ const QUOTE_STYLE = {
     'zh-TW': 'Use 「 」 for speech, and 『 』 for a quotation inside speech.'
 };
 
+// 渾名を名前として使うとき、冠詞の扱いは言語によって正反対になる。
+// 英語は裸で置くのが名前らしい形（the Chief は誤り）。スペイン語やイタリア語は
+// 逆で、冠詞を付けた el Jefe / il Poeta が名前としての自然な形になり、外すと不自然。
+// 以前は全言語に「冠詞を外せ」と書いていたので、英語以外には誤った指示を送っていた。
+// アラビア語は冠詞が語に溶けている（الرئيس）ので、指示は要らない。
+// 中国語・日本語・韓国語には冠詞が無いので、こちらも触れない。
+const NAME_ARTICLE_RULE = {
+    en: 'Write it bare: no article (a/an/the) in front of it.',
+    es: 'Keep the definite article that grammar calls for (el/la) in front of it, the way Spanish treats a nickname used as a name, and capitalize the term itself.',
+    pt: 'Keep the definite article that grammar calls for (o/a) in front of it, the way Portuguese treats a nickname used as a name, and capitalize the term itself.',
+    it: 'Keep the definite article that grammar calls for (il/lo/la) in front of it, the way Italian treats a nickname used as a name, and capitalize the term itself.',
+    fr: 'Keep the definite article that grammar calls for (le/la) in front of it, the way French treats a nickname used as a name, and capitalize the term itself.',
+    de: 'Keep the definite article that grammar calls for (der/die/das) in front of it and decline the article as the case requires; the term itself is always capitalized.'
+};
+
 const TIER_INSTRUCTIONS = {
     haiku: 'Produce an accurate, faithful translation. Stay close to the original sentence structure where the target language allows; prioritize precision of meaning over stylistic polish.',
     sonnet: 'Produce a natural, fluent translation that reads as if originally written in the target language. Adapt sentence structure and idioms where needed, while preserving the meaning, tone, and register of the original.',
@@ -232,16 +247,21 @@ function buildPrompt({ chunk, sourceLang, targetLang, tier, glossary, style, gen
             const sample = glossary
                 .map(g => g && g.tgt)
                 .find(t => typeof t === 'string' && /^[A-Z]/.test(t.trim()));
-            const example = sample
+            const example = (targetLang === 'en' && sample)
                 ? ` For example write "${sample} said" and "he is ${sample}", never "the ${sample} said" or "he is a ${sample}".`
                 : '';
+            const articleRule = NAME_ARTICLE_RULE[targetLang] || '';
+            const closing = targetLang === 'en'
+                ? ' This outranks natural phrasing: where a sentence would read more smoothly with an article, leave the article out anyway.'
+                : ' This outranks natural phrasing: keep the term as given even where a smoother wording suggests itself.';
             glossaryNote = [
                 'Terminology — fixed renderings, not suggestions:',
                 pairs,
                 'Every right-hand term above that begins with a capital letter is a PROPER NAME in this work, even when it looks like a common noun or a job title.'
-                    + ' Write it bare and exactly as given: no article (a/an/the) in front of it, no plural or other inflection, never lowercased, and never swapped for a descriptive phrase.'
+                    + ' Use it exactly as given: no plural or other inflection, never lowercased, and never swapped for a descriptive phrase.'
+                    + (articleRule ? ' ' + articleRule : '')
                     + example
-                    + ' This outranks natural phrasing: where a sentence would read more smoothly with an article, leave the article out anyway.',
+                    + closing,
                 '', ''
             ].join('\n');
         }
