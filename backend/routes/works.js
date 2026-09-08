@@ -1154,7 +1154,16 @@ async function resolveOriginalWork(originalWorkId, userId, selfWorkId) {
         err.status = 400;
         throw err;
     }
-    return row.original_work_id ? String(row.original_work_id) : String(row.work_id);
+    // 版を1つ選んでも、行き着く先はその本の原作。翻訳を選んでも同じ組にまとまる
+    const rootId = row.original_work_id ? String(row.original_work_id) : String(row.work_id);
+    // 自分の翻訳版を選ぶと、たどった先が自分自身になる。
+    // そのまま通すと「自分の翻訳版」になり、版の一覧から本人が消える
+    if (selfWorkId && rootId === String(selfWorkId)) {
+        const err = new Error('A work cannot be a translation of itself');
+        err.status = 400;
+        throw err;
+    }
+    return rootId;
 }
 
 router.post('/', authenticate, async (req, res) => {
