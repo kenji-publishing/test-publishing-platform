@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609091931">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609092036">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609091931">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609092036">
     <title>Reader - AuctLect</title>
     
     <!-- Google Fonts -->
@@ -15,9 +15,9 @@
     <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="../css/variables.css?v=202609091931" rel="stylesheet"><!-- navbar.cssが使う--color-*変数の定義（無いとドロップダウンが透明になる） -->
-    <link href="../css/navbar.css?v=202609091931" rel="stylesheet">
-    <link href="../css/mobile-fixes.css?v=202609091931" rel="stylesheet">
+    <link href="../css/variables.css?v=202609092036" rel="stylesheet"><!-- navbar.cssが使う--color-*変数の定義（無いとドロップダウンが透明になる） -->
+    <link href="../css/navbar.css?v=202609092036" rel="stylesheet">
+    <link href="../css/mobile-fixes.css?v=202609092036" rel="stylesheet">
 
     <style>
         :root {
@@ -162,7 +162,17 @@
         .theme-preview.dark { background: #1A1A1A; }
         .theme-preview.sepia { background: #F4ECD8; }
 
-        .reader-main { padding-top: calc(var(--nav-h, 80px) + var(--toolbar-h, 50px) + 10px); padding-bottom: 180px; min-height: 100vh; touch-action: pan-y; }
+        /* 画面そのものは動かさない。動くのはページの中身だけ（KindleやGoogle Booksと同じ）。
+           上下に払っても画面がついてこないので、ページ送りと取り違えることがなくなる */
+        html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+        .reader-main {
+            padding-top: calc(var(--nav-h, 80px) + var(--toolbar-h, 50px) + 10px);
+            padding-bottom: 0;
+            padding-left: 24px; padding-right: 24px;
+            height: 100%;
+            overflow: hidden;
+            touch-action: none;   /* 画面を引きずって動かせないようにする */
+        }
 
         /* 本文の表示領域。ここに入るぶんが1ページで、ページの中は動かさない。
            収まらないぶんは横（次のページ）へ送られ、はみ出した先は隠れている */
@@ -174,7 +184,9 @@
             width: 100%; max-width: 900px; margin: 0 auto;
             height: var(--reader-vh, calc(100vh - 300px));
             overflow: hidden;
-            padding: 0 24px;
+            /* 左右の余白は外側（reader-main）で取る。
+               枠の内側に余白を置くと、最後のページまで送りきれない */
+            padding: 0;
             font-size: var(--font-size); line-height: var(--line-height);
             -webkit-user-select: text; user-select: text;
             /* 横方向は自分で扱う。ブラウザの「戻る」に取られないようにもする */
@@ -182,6 +194,11 @@
             overscroll-behavior-x: contain;
         }
         .reader-flow { height: 100%; }
+        /* ページに入りきらなかった行を隠す。地の色で塗るので余白に見える */
+        .reader-edge-mask {
+            position: absolute; top: 0; bottom: 0; width: 0;
+            background: var(--reader-bg); z-index: 2; pointer-events: none;
+        }
 
         /* 横書き・アラビア語: 1段＝1画面。段の幅と間隔はJSが画面から決める */
         .writing-horizontal .reader-flow,
@@ -202,6 +219,24 @@
         .writing-horizontal .reader-flow p,
         .writing-rtl .reader-flow p { max-width: 34em; }
         .writing-vertical .reader-flow p { max-height: 34em; }
+        /* 縦書きは行の並びを崩さないことが最優先。段落・見出しの間隔を
+           行の整数本ぶんに揃えると、ページの切れ目が必ず行と行の間に来る */
+        /* margin-block-* は縦書きでは「行の流れる向き」の余白＝行と行の間隔になる。
+           ブラウザの既定（1em）が残っていると、段落の変わり目だけ行の間隔が広がり、
+           行の並びがずれてページの切れ目が行の途中に来る */
+        /* 大きい文字（見出し）は行の枠から数pxはみ出す。
+           読み始めの端で切れないよう、わずかに余裕を持たせる */
+        .writing-vertical .reader-flow { padding-block-start: 6px; }
+        .writing-vertical .reader-flow p {
+            margin-block-start: 0;
+            margin-block-end: var(--v-para-gap, 0px);
+        }
+        .writing-vertical .reader-flow h1,
+        .writing-vertical .reader-flow h2,
+        .writing-vertical .reader-flow h3 {
+            margin-block-start: 0;
+            margin-block-end: var(--v-line, 0px);
+        }
 
         /* 本だけを見たいときのために、上のバーを隠せるようにする（中央をタップ）。
            下のメモ欄は残す */
@@ -398,7 +433,8 @@
         }
 
         @media (max-width: 768px) {
-            .reader-content { padding: 1rem; }
+            .reader-content { padding: 0; }
+            .reader-main { padding-left: 16px; padding-right: 16px; }
             .work-title { display: none; }
             .toolbar-left .back-link:first-child .work-title { display: none; } /* Hide AuctLect text on mobile */
             #backLinkText { display: none; } /* Hide Library text on mobile */
@@ -895,12 +931,12 @@
     <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/config.js?v=202609091931"></script>
-    <script src="../js/i18n.js?v=202609091931"></script>
-    <script src="../js/lang/it.js?v=202609091931"></script>
-    <script src="../js/navbar.js?v=202609091931"></script>
-    <script src="../js/translations.js?v=202609091931"></script>
-    <script src="../js/lazy-loader.js?v=202609091931"></script>
+    <script src="../js/config.js?v=202609092036"></script>
+    <script src="../js/i18n.js?v=202609092036"></script>
+    <script src="../js/lang/it.js?v=202609092036"></script>
+    <script src="../js/navbar.js?v=202609092036"></script>
+    <script src="../js/translations.js?v=202609092036"></script>
+    <script src="../js/lazy-loader.js?v=202609092036"></script>
     <script>
         // ===== Mode Detection =====
         const isManga = new URLSearchParams(window.location.search).get('type') === 'manga';
@@ -1283,8 +1319,18 @@ function getL(obj, replacements = {}) {
         // 縦書きは writing-mode 自体が同じ形の段を作るので、そのまま送る。
         // 文字を大きくすれば1ページに入る量が自動的に減る。
 
-        var PAGE_MARGIN = 24;   // 本文の左右の余白（px）。段の間はこの2つぶん
-        var pageStep = 0;       // 1ページぶんの移動量
+        var pageStep = 0;       // 1ページぶんの移動量（＝段の並ぶ間隔）
+        var verticalLine = 0;   // 縦書きの1行ぶんの幅（行の途中でページを切らないため）
+        var pageOffsets = null; // 縦書きで実測したページの切れ目（読み始めからの距離）
+
+        /** n ページ目の位置（読み始めからの距離） */
+        function pageOffset(n) {
+            if (pageOffsets && pageOffsets.length) {
+                return pageOffsets[Math.min(Math.max(n, 1), pageOffsets.length) - 1];
+            }
+            return (n - 1) * pageStep;
+        }
+        var pendingLayout = null;   // まだ幅が測れず、組み直しを持ち越したときの目印
         var scrollSign = 1;     // 読み進む向き。縦書きとアラビア語は逆になる
 
         function readerViewport() { return document.getElementById('readerContent'); }
@@ -1298,10 +1344,13 @@ function getL(obj, replacements = {}) {
         function measureScrollSign(el) {
             if (el.scrollWidth <= el.clientWidth + 1) return 1;
             var prev = el.scrollLeft;
-            el.scrollLeft = 1;
-            var sign = el.scrollLeft > 0 ? 1 : -1;
+            // 両側へ目一杯動かしてみて、余地の大きい方が読み進む向き。
+            // 1pxだけ動かして判断すると、端数で1pxぶんの余地がある縦書きを
+            // 「右へ進む」と誤判定する（実際に起きた）
+            el.scrollLeft = 999999;  var pos = el.scrollLeft;
+            el.scrollLeft = -999999; var neg = el.scrollLeft;
             el.scrollLeft = prev;
-            return sign;
+            return Math.abs(neg) > Math.abs(pos) ? -1 : 1;
         }
 
         /** 要素が何ページ目にあるか（1始まり） */
@@ -1309,8 +1358,18 @@ function getL(obj, replacements = {}) {
             var vp = readerViewport();
             if (!vp || !pageStep || !el) return 1;
             // 「ずらしていない状態での位置」を出す。scrollLeft は正でも負でも同じ式でよい
-            var rel = el.getBoundingClientRect().left - vp.getBoundingClientRect().left + vp.scrollLeft;
-            return Math.min(Math.max(Math.floor((Math.abs(rel) + 2) / pageStep) + 1, 1), totalPages || 1);
+            var rel = Math.abs(el.getBoundingClientRect().left - vp.getBoundingClientRect().left + vp.scrollLeft);
+            var page;
+            if (pageOffsets && pageOffsets.length) {
+                // 切れ目の一覧から、その位置を含むページを探す
+                page = 1;
+                for (var i = pageOffsets.length - 1; i >= 0; i--) {
+                    if (rel + 2 >= pageOffsets[i]) { page = i + 1; break; }
+                }
+            } else {
+                page = Math.floor((rel + 2) / pageStep) + 1;
+            }
+            return Math.min(Math.max(page, 1), totalPages || 1);
         }
 
         /**
@@ -1334,6 +1393,55 @@ function getL(obj, replacements = {}) {
         }
 
         /**
+         * 縦書きのページの切れ目を、実際の行の位置から決める。
+         *
+         * 行の間隔は段落の変わり目や見出しで動くので、決まった幅で切ると
+         * 行の途中に切れ目が来て、次のページの1行目が端からのぞく。
+         * 行を1本ずつ見て、収まらなくなったところを次のページの頭にする
+         */
+        function measureVerticalPages(vp, flow) {
+            var vpRight = vp.getBoundingClientRect().right;
+            var scroll = vp.scrollLeft;
+            var W = vp.clientWidth;
+            var lines = [];
+            var walker = document.createTreeWalker(flow, NodeFilter.SHOW_TEXT);
+            var n;
+            while ((n = walker.nextNode())) {
+                if (!n.nodeValue.trim()) continue;
+                var parent = n.parentElement;
+                var isHead = parent && /^H[1-3]$/.test(parent.tagName);
+                var rg = document.createRange();
+                rg.selectNodeContents(n);
+                var rs = rg.getClientRects();
+                for (var i = 0; i < rs.length; i++) {
+                    // 読み始め（右端）からの距離。縦書きは左へ進むので符号を反転する
+                    // 3つ目は「ここでページを切る」印（章の始まり）
+                    lines.push([vpRight - rs[i].right - scroll, vpRight - rs[i].left - scroll,
+                                isHead && i === 0]);
+                }
+            }
+            // 挿絵や表も1つの塊として扱う
+            Array.prototype.forEach.call(flow.querySelectorAll('img, table'), function (el) {
+                var b = el.getBoundingClientRect();
+                lines.push([vpRight - b.right - scroll, vpRight - b.left - scroll]);
+            });
+            lines.sort(function (a, b) { return a[0] - b[0]; });
+
+            var offsets = [0], limit = W;
+            for (var k = 0; k < lines.length; k++) {
+                var start = Math.max(0, lines[k][0]);
+                // 章の始まりは必ずページの頭から。入りきらない行も次のページへ送る
+                if ((lines[k][2] && start > 1) || lines[k][1] > limit + 0.5) {
+                    if (start >= offsets[offsets.length - 1] + 1) {
+                        offsets.push(start);
+                        limit = start + W;
+                    }
+                }
+            }
+            return offsets;
+        }
+
+        /**
          * 縦書きでは、章の始まりを次のページの頭へ送る。
          * 横書きは段組みの break-before が同じことをしてくれるが、
          * 縦書きは段組みを使わないので、余白を足して押し出す
@@ -1351,7 +1459,13 @@ function getL(obj, replacements = {}) {
                 var rel = Math.abs(heads[j].getBoundingClientRect().left - vpLeft + scroll);
                 var into = rel % pageStep;
                 // ページの頭から2px以内なら、すでに頭にある
-                if (into > 2) heads[j].style.marginBlockStart = (pageStep - into) + 'px';
+                if (into > 2) {
+                    var need = pageStep - into;
+                    // 行の整数本ぶんに切り上げる。半端な量を足すと、そこから先の
+                    // 行の並びがずれ、ページの切れ目が行の途中に来るようになる
+                    if (verticalLine > 0) need = Math.ceil(need / verticalLine) * verticalLine;
+                    heads[j].style.marginBlockStart = need + 'px';
+                }
             }
         }
 
@@ -1366,22 +1480,65 @@ function getL(obj, replacements = {}) {
             updateReaderHeight();
 
             var width = vp.clientWidth;
+            // まだ画面に出ていない（幅が取れない）ときは組まない。
+            // ここで測ると段が極端に細くなり、1画面に2段入ってしまう
+            if (width < 40) { pendingLayout = anchorIndex; return; }
+            pendingLayout = null;
+
+            // 段の幅は枠の幅そのもの。段と段の間（画面には出ない隙間）を足したものが
+            // ページの送り幅になる。枠の内側に余白を持たせないので、
+            // 「段の並ぶ間隔」と「送り幅」が必ず一致し、ページがずれていかない
+            var colW = Math.max(80, width);
+            var colGap = 32;
+
             if (isVerticalMode()) {
-                // 縦書きは writing-mode が段を作るので、段組みは指定しない
+                // 縦書きは段組みが使えない（行がただ続く）ので、
+                // ページの切れ目が行の途中に来ないよう、送り幅を行の整数本ぶんにする。
+                // 行の並びを崩さないため、段落と見出しの間隔も行の整数倍に揃える
                 flow.style.columnWidth = '';
                 flow.style.columnGap = '';
+                flow.style.width = '';
+                var lineH = parseFloat(getComputedStyle(flow).lineHeight) || 0;
+                if (!lineH) lineH = (parseFloat(getComputedStyle(flow).fontSize) || 18) * 1.8;
+                var spaced = document.body.classList.contains('para-spaced')
+                          || document.body.classList.contains('para-both');
+                flow.style.setProperty('--v-line', lineH + 'px');
+                flow.style.setProperty('--v-para-gap', (spaced ? lineH : 0) + 'px');
+                verticalLine = lineH;
             } else {
-                // 1段＝1画面。段の間を余白2つぶんにすると、どのページも左右が同じ余白になる
-                flow.style.columnWidth = Math.max(120, width - PAGE_MARGIN * 2) + 'px';
-                flow.style.columnGap = (PAGE_MARGIN * 2) + 'px';
+                // 幅は「中身の幅」として扱う。border-box のままだと、この後で足す
+                // 端の空きぶんだけ段が細くなり、ページの送り幅と合わなくなる
+                flow.style.boxSizing = 'content-box';
+                flow.style.width = colW + 'px';
+                flow.style.columnWidth = colW + 'px';
+                flow.style.columnGap = colGap + 'px';
             }
-            pageStep = width || 1;
+            // 段の並ぶ間隔（＝1ページぶんの送り幅）。
+            // 縦書きは行の整数本ぶんに切り下げる（行を分断しないため）
+            pageStep = isVerticalMode()
+                ? Math.max(verticalLine || 1, Math.floor((width || 1) / (verticalLine || 1)) * (verticalLine || 1))
+                : (colW + colGap);
 
-            if (isVerticalMode()) alignHeadingsToPages();
+            if (isVerticalMode()) {
+                // 見えている幅も行の整数本ぶんに合わせる。
+                // 合わせないと、次のページの1行目が端から少しだけのぞく
+                vp.style.width = pageStep + 'px';
+            } else {
+                vp.style.width = '';
+            }
+            flow.style.paddingInlineEnd = '';
+            flow.style.paddingBlockEnd = '';
 
             scrollSign = measureScrollSign(vp);
-            var span = Math.max(vp.scrollWidth - vp.clientWidth, 0);
-            totalPages = Math.max(1, Math.round(span / pageStep) + 1);
+
+            if (isVerticalMode()) {
+                pageOffsets = measureVerticalPages(vp, flow);
+                totalPages = Math.max(1, pageOffsets.length);
+            } else {
+                pageOffsets = null;
+                var span = Math.max(vp.scrollWidth - vp.clientWidth, 0);
+                totalPages = Math.max(1, Math.round(span / pageStep) + 1);
+            }
 
             var target = currentPage;
             if (typeof anchorIndex === 'number' && anchorIndex >= 0) {
@@ -1413,6 +1570,12 @@ function getL(obj, replacements = {}) {
             var flow = document.createElement('div');
             flow.className = 'reader-flow';
             flow.id = 'readerFlow';
+
+            // ページに入りきらなかった行を隠す覆い（縦書きで使う）
+            var mask = document.createElement('div');
+            mask.className = 'reader-edge-mask';
+            mask.id = 'readerEdgeMask';
+            container.appendChild(mask);
 
             var blockNo = 0;
             function mark(el) {
@@ -2134,10 +2297,34 @@ function getL(obj, replacements = {}) {
             document.getElementById('pageInfo').textContent = `${currentPage} / ${totalPages}`;
             // ページの中は動かさず、ページごと横に送る
             var vp = readerViewport();
-            if (vp && pageStep) vp.scrollLeft = scrollSign * (currentPage - 1) * pageStep;
+            if (vp && pageStep) {
+                vp.scrollLeft = scrollSign * pageOffset(currentPage);
+                updateEdgeMask(vp);
+            }
             updateReadingProgress();
             // 次回同じページから再開できるよう現在ページを保存
             localStorage.setItem(storageKey('reader_lastpage'), currentPage);
+        }
+
+        /**
+         * ページの終わりに入りきらなかった行が、ふちから少しのぞくのを隠す。
+         *
+         * 窓の幅は一定なのに、ページの切れ目は行の位置で決まるので、
+         * どうしても数十pxの余りが出る。そこを地の色で覆う（紙の余白と同じ見え方）
+         */
+        function updateEdgeMask(vp) {
+            var mask = document.getElementById('readerEdgeMask');
+            if (!mask) return;
+            if (!pageOffsets || !pageOffsets.length) { mask.style.width = '0px'; return; }
+            var start = pageOffset(currentPage);
+            var next = currentPage < pageOffsets.length ? pageOffsets[currentPage] : null;
+            // 最後のページは、残り全部が入っているので覆わない
+            var used = next === null ? vp.clientWidth : (next - start);
+            var leftover = Math.max(0, vp.clientWidth - used);
+            mask.style.width = leftover + 'px';
+            // 縦書きは左へ進むので、余りは左端に出る
+            mask.style.left = scrollSign < 0 ? '0' : 'auto';
+            mask.style.right = scrollSign < 0 ? 'auto' : '0';
         }
 
         function updateReadingProgress() {
@@ -2397,6 +2584,19 @@ function getL(obj, replacements = {}) {
             resizeTimer = setTimeout(function() { resizeTimer = null; layoutPages(anchor); }, 150);
         }
         window.addEventListener('resize', relayoutSoon);
+        // 画面の幅が変わったことを確実に捕まえる。resize が来ない場面（DevToolsの
+        // 端末表示の切替など）でも、本文の枠そのものの変化なら拾える
+        if (window.ResizeObserver) {
+            var lastW = 0, lastH = 0;
+            new ResizeObserver(function(entries) {
+                var r = entries[0].contentRect;
+                var w = Math.round(r.width), h = Math.round(r.height);
+                if (Math.abs(w - lastW) < 2 && Math.abs(h - lastH) < 2) return;
+                lastW = w; lastH = h;
+                if (pendingLayout !== null) { var a = pendingLayout; pendingLayout = null; layoutPages(a); }
+                else relayoutSoon();
+            }).observe(document.getElementById('readerContent'));
+        }
         window.addEventListener('orientationchange', function () { setTimeout(relayoutSoon, 250); });
 
         // ===== マウスの操作 =====
