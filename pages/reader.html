@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609092111">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609092124">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609092111">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609092124">
     <title>Reader - AuctLect</title>
     
     <!-- Google Fonts -->
@@ -15,9 +15,9 @@
     <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="../css/variables.css?v=202609092111" rel="stylesheet"><!-- navbar.cssが使う--color-*変数の定義（無いとドロップダウンが透明になる） -->
-    <link href="../css/navbar.css?v=202609092111" rel="stylesheet">
-    <link href="../css/mobile-fixes.css?v=202609092111" rel="stylesheet">
+    <link href="../css/variables.css?v=202609092124" rel="stylesheet"><!-- navbar.cssが使う--color-*変数の定義（無いとドロップダウンが透明になる） -->
+    <link href="../css/navbar.css?v=202609092124" rel="stylesheet">
+    <link href="../css/mobile-fixes.css?v=202609092124" rel="stylesheet">
 
     <style>
         :root {
@@ -94,14 +94,19 @@
         /* 表紙は段の境目で割らせない。段組みは中身を分割してよい決まりなので、
            指定しないと絵が上下（縦書きでは左右）に割れる */
         .reader-cover {
-            text-align: center; padding: 1rem 0;
+            /* 段の高さちょうどに収める。1pxでもはみ出すと、
+               「割らない」指定より「入りきらない」が優先されて2ページに割れる */
+            height: 100%; box-sizing: border-box;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            text-align: center; padding: 0.5rem 0;
             break-inside: avoid; -webkit-column-break-inside: avoid;
             break-after: column; -webkit-column-break-after: always;
         }
         .reader-cover img {
             max-width: 100%;
-            /* 枠に収まる大きさに抑える。はみ出すと割れる原因になる */
-            max-height: calc(var(--reader-vh, 60vh) - 6rem);
+            /* 題名と余白のぶんを残して収める */
+            max-height: 78%;
             border-radius: 8px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
@@ -247,6 +252,9 @@
         .writing-vertical .reader-flow h3 {
             margin-block-start: 0;
             margin-block-end: var(--v-line, 0px);
+            /* 大きい文字は枠より数px手前へはみ出す。内側に寄せておかないと、
+               章の頭でページを切ったとき、見出しの端が前のページに残る */
+            padding-block-start: 6px;
         }
 
         /* 本だけを見たいときのために、上のバーを隠せるようにする（中央をタップ）。
@@ -944,12 +952,12 @@
     <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/config.js?v=202609092111"></script>
-    <script src="../js/i18n.js?v=202609092111"></script>
-    <script src="../js/lang/it.js?v=202609092111"></script>
-    <script src="../js/navbar.js?v=202609092111"></script>
-    <script src="../js/translations.js?v=202609092111"></script>
-    <script src="../js/lazy-loader.js?v=202609092111"></script>
+    <script src="../js/config.js?v=202609092124"></script>
+    <script src="../js/i18n.js?v=202609092124"></script>
+    <script src="../js/lang/it.js?v=202609092124"></script>
+    <script src="../js/navbar.js?v=202609092124"></script>
+    <script src="../js/translations.js?v=202609092124"></script>
+    <script src="../js/lazy-loader.js?v=202609092124"></script>
     <script>
         // ===== Mode Detection =====
         const isManga = new URLSearchParams(window.location.search).get('type') === 'manga';
@@ -1417,40 +1425,66 @@ function getL(obj, replacements = {}) {
             var scroll = vp.scrollLeft;
             var W = vp.clientWidth;
             var lines = [];
+
+            // 表紙は「絵＋題名」でひとつの塊。中の題名を見出しとして扱うと、
+            // そこでページが切れて表紙が2枚3枚に割れる（実際に起きた）
+            var cover = flow.querySelector('.reader-cover');
+            if (cover) {
+                var cb = cover.getBoundingClientRect();
+                lines.push([vpRight - cb.right - scroll, vpRight - cb.left - scroll, false]);
+            }
+            function insideCover(el) { return !!(cover && el && cover.contains(el)); }
+
             var walker = document.createTreeWalker(flow, NodeFilter.SHOW_TEXT);
             var n;
             while ((n = walker.nextNode())) {
                 if (!n.nodeValue.trim()) continue;
                 var parent = n.parentElement;
+                if (insideCover(parent)) continue;   // 表紙の中身は上でまとめて数えた
                 var isHead = parent && /^H[1-3]$/.test(parent.tagName);
                 var rg = document.createRange();
                 rg.selectNodeContents(n);
                 var rs = rg.getClientRects();
                 for (var i = 0; i < rs.length; i++) {
                     // 読み始め（右端）からの距離。縦書きは左へ進むので符号を反転する
+                    var from = vpRight - rs[i].right - scroll;
+                    // 章の頭で切るときは、文字の位置ではなく見出しの枠の位置を使う。
+                    // 文字は枠の中で少し内側に置かれるので、文字の位置で切ると
+                    // 前のページ（表紙など）の端が数pxだけのぞく
+                    if (isHead && i === 0) {
+                        from = vpRight - parent.getBoundingClientRect().right - scroll;
+                    }
                     // 3つ目は「ここでページを切る」印（章の始まり）
-                    lines.push([vpRight - rs[i].right - scroll, vpRight - rs[i].left - scroll,
-                                isHead && i === 0]);
+                    lines.push([from, vpRight - rs[i].left - scroll, isHead && i === 0]);
                 }
             }
             // 挿絵や表も1つの塊として扱う
             Array.prototype.forEach.call(flow.querySelectorAll('img, table'), function (el) {
+                if (insideCover(el)) return;         // 表紙の絵も上でまとめて数えた
                 var b = el.getBoundingClientRect();
-                lines.push([vpRight - b.right - scroll, vpRight - b.left - scroll]);
+                lines.push([vpRight - b.right - scroll, vpRight - b.left - scroll, false]);
             });
             lines.sort(function (a, b) { return a[0] - b[0]; });
 
-            var offsets = [0], limit = W;
+            var offsets = [], limit = 0;
             for (var k = 0; k < lines.length; k++) {
                 var start = Math.max(0, lines[k][0]);
+                if (!offsets.length) {
+                    // 1ページ目は本文の始まりから。0から数え始めると、
+                    // 上端の余白のぶんだけ空のページが1枚できてしまう
+                    offsets.push(start);
+                    limit = start + W;
+                    continue;
+                }
                 // 章の始まりは必ずページの頭から。入りきらない行も次のページへ送る
-                if ((lines[k][2] && start > 1) || lines[k][1] > limit + 0.5) {
+                if ((lines[k][2] && start > offsets[offsets.length - 1] + 1) || lines[k][1] > limit + 0.5) {
                     if (start >= offsets[offsets.length - 1] + 1) {
                         offsets.push(start);
                         limit = start + W;
                     }
                 }
             }
+            if (!offsets.length) offsets.push(0);
             return offsets;
         }
 
