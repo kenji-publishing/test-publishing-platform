@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609092036">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609092111">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609092036">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609092111">
     <title>Reader - AuctLect</title>
     
     <!-- Google Fonts -->
@@ -15,9 +15,9 @@
     <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="../css/variables.css?v=202609092036" rel="stylesheet"><!-- navbar.cssが使う--color-*変数の定義（無いとドロップダウンが透明になる） -->
-    <link href="../css/navbar.css?v=202609092036" rel="stylesheet">
-    <link href="../css/mobile-fixes.css?v=202609092036" rel="stylesheet">
+    <link href="../css/variables.css?v=202609092111" rel="stylesheet"><!-- navbar.cssが使う--color-*変数の定義（無いとドロップダウンが透明になる） -->
+    <link href="../css/navbar.css?v=202609092111" rel="stylesheet">
+    <link href="../css/mobile-fixes.css?v=202609092111" rel="stylesheet">
 
     <style>
         :root {
@@ -91,10 +91,17 @@
             white-space: nowrap;
         }
 
-        .reader-cover { text-align: center; padding: 2rem 0; }
+        /* 表紙は段の境目で割らせない。段組みは中身を分割してよい決まりなので、
+           指定しないと絵が上下（縦書きでは左右）に割れる */
+        .reader-cover {
+            text-align: center; padding: 1rem 0;
+            break-inside: avoid; -webkit-column-break-inside: avoid;
+            break-after: column; -webkit-column-break-after: always;
+        }
         .reader-cover img {
             max-width: 100%;
-            max-height: 65vh;
+            /* 枠に収まる大きさに抑える。はみ出すと割れる原因になる */
+            max-height: calc(var(--reader-vh, 60vh) - 6rem);
             border-radius: 8px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
@@ -166,7 +173,9 @@
            上下に払っても画面がついてこないので、ページ送りと取り違えることがなくなる */
         html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
         .reader-main {
-            padding-top: calc(var(--nav-h, 80px) + var(--toolbar-h, 50px) + 10px);
+            /* ナビバーは sticky（場所を取る）ので、ここで高さを足すと二重に数えることになり、
+               本文の上に2行ぶんほどの空きができる。足すのは固定表示のツールバーの分だけ */
+            padding-top: calc(var(--toolbar-h, 50px) + 12px);
             padding-bottom: 0;
             padding-left: 24px; padding-right: 24px;
             height: 100%;
@@ -213,6 +222,8 @@
         .writing-vertical { writing-mode: vertical-rl; direction: ltr; }
         .writing-rtl { writing-mode: horizontal-tb; direction: rtl; font-family: 'Noto Naskh Arabic', 'Noto Sans Arabic', serif; }
         body, .reader-main { overscroll-behavior-x: contain; }
+        /* サイト共通のフッターは本を読む画面には出さない（本文の下に重なって見える） */
+        #footer-container { display: none; }
 
         /* 画面を広げても1行が長くなりすぎないようにする。
            長い行は目が戻る位置を見失うので、読みにくくなる（Google Booksで起きる） */
@@ -243,7 +254,9 @@
         body.reader-immersive #navbar-container,
         body.reader-immersive .navbar-custom,
         body.reader-immersive .reader-toolbar { display: none; }
-        body.reader-immersive .reader-main { padding-top: 12px; }
+        /* 全画面のときはバーが無いぶん、1行ぶんの余裕を上に取る。
+           上端に貼りついていると1行目が読みにくい */
+        body.reader-immersive .reader-main { padding-top: calc(var(--font-size, 18px) * 1.8); }
         .immersive-hint {
             position: fixed; top: 8px; left: 50%; transform: translateX(-50%);
             background: rgba(0,0,0,0.6); color: #fff; padding: 0.3rem 0.8rem;
@@ -931,12 +944,12 @@
     <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/config.js?v=202609092036"></script>
-    <script src="../js/i18n.js?v=202609092036"></script>
-    <script src="../js/lang/it.js?v=202609092036"></script>
-    <script src="../js/navbar.js?v=202609092036"></script>
-    <script src="../js/translations.js?v=202609092036"></script>
-    <script src="../js/lazy-loader.js?v=202609092036"></script>
+    <script src="../js/config.js?v=202609092111"></script>
+    <script src="../js/i18n.js?v=202609092111"></script>
+    <script src="../js/lang/it.js?v=202609092111"></script>
+    <script src="../js/navbar.js?v=202609092111"></script>
+    <script src="../js/translations.js?v=202609092111"></script>
+    <script src="../js/lazy-loader.js?v=202609092111"></script>
     <script>
         // ===== Mode Detection =====
         const isManga = new URLSearchParams(window.location.search).get('type') === 'manga';
@@ -1525,6 +1538,21 @@ function getL(obj, replacements = {}) {
                 vp.style.width = pageStep + 'px';
             } else {
                 vp.style.width = '';
+            }
+
+            // 表紙は1ページを丸ごと使う。
+            // 縦書きのままだと、絵と題名が横に並んで2ページぶんの幅になり、割れて見える
+            var cover = flow.querySelector('.reader-cover');
+            if (cover) {
+                if (isVerticalMode()) {
+                    cover.style.writingMode = 'horizontal-tb';
+                    cover.style.width = pageStep + 'px';
+                    cover.style.height = vp.clientHeight + 'px';
+                } else {
+                    cover.style.writingMode = '';
+                    cover.style.width = '';
+                    cover.style.height = '';
+                }
             }
             flow.style.paddingInlineEnd = '';
             flow.style.paddingBlockEnd = '';
