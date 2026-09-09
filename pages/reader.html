@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609091443">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609091641">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609091443">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609091641">
     <title>Reader - AuctLect</title>
     
     <!-- Google Fonts -->
@@ -15,9 +15,9 @@
     <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="../css/variables.css?v=202609091443" rel="stylesheet"><!-- navbar.cssが使う--color-*変数の定義（無いとドロップダウンが透明になる） -->
-    <link href="../css/navbar.css?v=202609091443" rel="stylesheet">
-    <link href="../css/mobile-fixes.css?v=202609091443" rel="stylesheet">
+    <link href="../css/variables.css?v=202609091641" rel="stylesheet"><!-- navbar.cssが使う--color-*変数の定義（無いとドロップダウンが透明になる） -->
+    <link href="../css/navbar.css?v=202609091641" rel="stylesheet">
+    <link href="../css/mobile-fixes.css?v=202609091641" rel="stylesheet">
 
     <style>
         :root {
@@ -861,12 +861,12 @@
     <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/config.js?v=202609091443"></script>
-    <script src="../js/i18n.js?v=202609091443"></script>
-    <script src="../js/lang/it.js?v=202609091443"></script>
-    <script src="../js/navbar.js?v=202609091443"></script>
-    <script src="../js/translations.js?v=202609091443"></script>
-    <script src="../js/lazy-loader.js?v=202609091443"></script>
+    <script src="../js/config.js?v=202609091641"></script>
+    <script src="../js/i18n.js?v=202609091641"></script>
+    <script src="../js/lang/it.js?v=202609091641"></script>
+    <script src="../js/navbar.js?v=202609091641"></script>
+    <script src="../js/translations.js?v=202609091641"></script>
+    <script src="../js/lazy-loader.js?v=202609091641"></script>
     <script>
         // ===== Mode Detection =====
         const isManga = new URLSearchParams(window.location.search).get('type') === 'manga';
@@ -1112,31 +1112,63 @@ function getL(obj, replacements = {}) {
         // ===== 見出し検出 =====
 
         // 記号だけの行（場面転換の「＊＊＊」等）は見出しにしない
+        // ===== 見出しの判定に使う記号 =====
+        // 言語ごとに記号を並べていくと、次の言語でまた同じ間違いが起きる
+        // （ドイツ語の „ とアラビア語の ؟ で実際に起きた）。
+        // 文字を並べるのをやめ、Unicodeが各文字に付けている分類で見る。
+        //   Ps=開き括弧「『（(  Pi=開き引用符 „«‘“‹  Pe=閉じ括弧  Pf=閉じ引用符
+        //   Po=その他の句読点（。、.,!? ؟ ، । ՞ ; など全言語ぶん）  Pd=ダッシュ — – ‐
+        //
+        // 古いブラウザは \p{...} を読めず、書いてあるだけでページの処理全体が止まる。
+        // 作れなかったときは、これまでどおりの文字の一覧に戻す
+        function _re(pattern, flags, fallback) {
+            try { return new RegExp(pattern, flags); } catch (e) { return fallback; }
+        }
+
+        // 会話・引用で始まる行（見出しではない）
+        var QUOTE_OPEN_RE = _re('^[\\p{Pi}\\p{Ps}"\'‘’”〝״»›¿¡・…]', 'u',
+            /^[「『（("'“‘„‚«‹»›¿¡・…]/);
+        // 文の区切りの記号を含む行（見出しではない）
+        var SENTENCE_MARK_RE = _re('[\\p{Po}\\p{Pe}\\p{Pf}]', 'u',
+            /[。、．，！？!?.,:;：；،؛؟۔]/);
+        // ダッシュ類。スペイン語やポルトガル語は会話をダッシュで始める
+        var DASH_START_RE = _re('^\\p{Pd}', 'u', /^[―—–‐-]/);
+        var DASH_END_RE = _re('\\p{Pd}$', 'u', /[―—–‐-]$/);
+
+        // 章の言い方は言語ごとに違う。「Chapitre premier」「Capitolo primo」のように
+        // 数字を使わない書き方もあるので、章を表す語だけで拾う
+        var CHAPTER_RE = _re(
+            '^(第\\s*[0-9０-９一二三四五六七八九十百千]+\\s*(章|話|部|幕|節|編)'
+            + '|(chapter|kapitel|chapitre|cap[ií]tulo|capitolo|hoofdstuk)\\b'
+            // \b は英字にしか効かないので、アラビア語には付けない（付けると一致しない）
+            + '|제\\s*[0-9]+\\s*장|الفصل(\\s|$)'
+            + '|prologue|epilogue|プロローグ|エピローグ|序章|終章|序幕|終幕|まえがき|あとがき)',
+            'ui',
+            /^(第\s*[0-9０-９一二三四五六七八九十百千]+\s*(章|話|部|幕|節|編)|(chapter|kapitel|chapitre|cap[ií]tulo|capitolo)\b|제\s*[0-9]+\s*장|prologue|epilogue|プロローグ|エピローグ|序章|終章|序幕|終幕|まえがき|あとがき)/i
+        );
+
+        // 中黒（・ · ･）は名前の区切りであって文の区切りではない。
+        // 「アンナ・カレーニナ」のような章題を本文に落とさないよう、句読点から外す
+        function hasSentenceMark(s) {
+            return SENTENCE_MARK_RE.test(String(s).replace(/[・·･]/g, ''));
+        }
+
         function isSymbolOnlyLine(s) {
             return /^[\s*＊※◆◇■□▲△●○★☆†‡=＝\-ー―—～〜・．.]+$/.test(s);
         }
 
         // 'strong': 第○章などの定型見出し / 'weak': 句読点のない短い行 / null: 本文
         //
-        // isolated = 前後が空行（または本文の先頭・末尾）であること。
-        // 詩や歌詞は「短くて句読点の無い行」が続くため、これを見ないと
-        // 一行ごとに大きな見出しになり、そこで改ページまで起きてしまう。
-        // 本物の見出しは前後を空けて置かれるので、その一点で見分ける。
+        // 弱い判定は「前後が空いた短い行」。詩や歌詞ではこれが大量に出るので、
+        // 多すぎるときは parseBlocks 側でまとめて取り消す
         function detectHeading(s, isolated) {
             if (s.length > 35) return null;
-            // 会話の行を見出しにしない。かぎ括弧は言語ごとに違う——
-            // ドイツ語は „…“、フランス語・イタリア語・アラビア語は «…»、スペイン語は ¿ ¡ で始まる。
-            // 日本語と英語の括弧しか見ていなかったため、独仏伊のセリフが章題として
-            // 大きな字で表示され、そこでページが変わっていた
-            if (/^[「『（("'“‘„‚«‹»›¿¡・…―—]/.test(s)) return null;
+            if (QUOTE_OPEN_RE.test(s)) return null;
+            // ダッシュで始まる行は会話。ただし「‐漂流‐」のように前後を挟む飾りは見出し
+            if (DASH_START_RE.test(s) && !DASH_END_RE.test(s)) return null;
             if (isSymbolOnlyLine(s)) return null;
-            // 章の言い方は言語ごとに違う。「Chapitre premier」「Capitolo primo」のように
-            // 数字を使わない書き方もあるので、章を表す語だけで拾う
-            if (/^(第\s*[0-9０-９一二三四五六七八九十百千]+\s*(章|話|部|幕|節|編)|(chapter|kapitel|chapitre|cap[ií]tulo|capitolo|hoofdstuk)\b|제\s*[0-9]+\s*장|الفصل\b|prologue|epilogue|プロローグ|エピローグ|序章|終章|序幕|終幕|まえがき|あとがき)/i.test(s)) return 'strong';
-            // 句読点はアラビア語のもの（، ؛ ؟ ۔）も見る。見ていなかったため
-            // アラビア語版では短いセリフが大量に見出し候補になり、
-            // 「多すぎるので全部やめる」という安全装置が働いて章まで消えていた
-            if (isolated && s.length <= 25 && !/[。、．，！？!?.,:;：；،؛؟۔]/.test(s)) return 'weak';
+            if (CHAPTER_RE.test(s)) return 'strong';
+            if (isolated && s.length <= 25 && !hasSentenceMark(s)) return 'weak';
             return null;
         }
 
