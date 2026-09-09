@@ -348,6 +348,96 @@ function formatWorkPrice(price, currency) {
     return sym + (ZERO_DECIMAL.indexOf(cur) !== -1 ? Math.round(n).toLocaleString() : n.toFixed(2));
 }
 
+// ========== 読者の通貨での目安表示 ==========
+// 作品は1つの通貨でしか値段を持てない（$3.00 の英語版など）。
+// 別の通貨圏の読者には「自分だといくら払うのか」が分からないので、
+// 「$3.00（約 £2.30）」と目安を添える。請求はあくまで $3.00 のまま。
+//
+// 訪問者の国はサーバー（Cloudflareのヘッダー）しか知らないので /api/geo に聞く。
+// レートもサーバーから受け取る（画面側に3つ目の為替表を作らないため）
+
+var _geoData = null;
+var _geoPromise = null;
+
+function loadViewerGeo() {
+    if (_geoPromise) return _geoPromise;
+    // 同じ人に何度も聞かない。国が変わるのは移動したときだけなのでタブの間だけ覚える
+    try {
+        var cached = sessionStorage.getItem('viewerGeo');
+        if (cached) { _geoData = JSON.parse(cached); _geoPromise = Promise.resolve(_geoData); return _geoPromise; }
+    } catch (e) { /* プライベートモード等。聞き直すだけなので問題ない */ }
+
+    _geoPromise = fetch((window.API_ORIGIN || '') + '/api/geo')
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+            _geoData = d;
+            try { sessionStorage.setItem('viewerGeo', JSON.stringify(d)); } catch (e) {}
+            return d;
+        })
+        .catch(function () {
+            // 一度の失敗を覚えたままにしない。覚えてしまうと、読み込み中の一瞬の失敗で
+            // そのページを開いている間ずっと目安が出なくなる（値段そのものは出ている）
+            _geoPromise = null;
+            return null;
+        });
+    return _geoPromise;
+}
+
+/**
+ * 作品の値段を読者の通貨に換算した目安。
+ * 同じ通貨のとき・国が分からないとき・レートが無いときは空文字（何も足さない）
+ */
+function approxWorkPrice(price, currency) {
+    var g = _geoData;
+    var n = parseFloat(price) || 0;
+    if (!g || !g.currency || !g.rates || n <= 0) return '';
+    var from = String(currency || 'USD').toUpperCase();
+    var to = String(g.currency).toUpperCase();
+    if (from === to) return '';                       // 同じ通貨なら目安は要らない
+    var f = g.rates[from], t = g.rates[to];
+    if (!f || !t || !f.rate) return '';
+    var converted = n / f.rate * t.rate;              // レートは円建てなので、円を経由して換算する
+    var digits = t.decimals === 0 ? 0 : 2;
+    var shown = digits === 0 ? Math.round(converted).toLocaleString() : converted.toFixed(2);
+    return (t.symbol || (to + ' ')) + shown;
+}
+
+var _approxText = {
+    about: { en: 'about', ja: '約', zh: '约', 'zh-TW': '約', es: 'aprox.', fr: 'env.', de: 'ca.',
+             ko: '약', ar: 'نحو', pt: 'aprox.', it: 'circa' },
+    note: { en: 'Estimate only. You will be charged {c}.', ja: '目安の金額です。実際のお支払いは {c} です。',
+            zh: '仅为估算。实际扣款为 {c}。', 'zh-TW': '僅為估算。實際扣款為 {c}。',
+            es: 'Solo es una estimación. El cobro se hace en {c}.',
+            fr: 'Estimation seulement. Le paiement est effectué en {c}.',
+            de: 'Nur eine Schätzung. Abgerechnet wird in {c}.',
+            ko: '대략적인 금액입니다. 실제 결제는 {c}로 이루어집니다.',
+            ar: 'مبلغ تقريبي. سيتم الخصم بعملة {c}.',
+            pt: 'Apenas uma estimativa. A cobrança é feita em {c}.',
+            it: 'Solo una stima. L\'addebito avviene in {c}.' }
+};
+
+/**
+ * 画面上の目安表示を埋める。
+ * ページ側は値段の隣に <span class="price-approx" data-price="3.00" data-currency="USD"></span>
+ * を置いておくだけでよい（レートが来る前に描画されても、後からここが埋める）
+ */
+function fillApproxPrices(root) {
+    var scope = root || document;
+    loadViewerGeo().then(function () {
+        var spans = scope.querySelectorAll('.price-approx[data-price]');
+        Array.prototype.forEach.call(spans, function (el) {
+            var cur = el.getAttribute('data-currency') || 'USD';
+            var txt = approxWorkPrice(el.getAttribute('data-price'), cur);
+            if (!txt) { el.textContent = ''; el.removeAttribute('title'); return; }
+            el.textContent = '（' + getL(_approxText.about) + ' ' + txt + '）';
+            el.title = getL(_approxText.note).replace('{c}', String(cur).toUpperCase());
+        });
+    });
+}
+
+// 言語を切り替えたら「約」の字も切り替える
+document.addEventListener('languageChanged', function () { fillApproxPrices(); });
+
 // ========== Path prefix auto-detection ==========
 
 function detectPathPrefix() {

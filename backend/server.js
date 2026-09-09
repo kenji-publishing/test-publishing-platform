@@ -23,6 +23,7 @@ if (!process.env.JWT_SECRET) {
 
 // Import database connection
 const db = require('./config/database');
+const { RATES: CURRENCY_RATES, currencyForCountry } = require('./config/currencies');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -122,6 +123,21 @@ app.get('/api/health', (req, res) => {
     // EU圏の購入をこのヘッダーで止めているので、届かなくなったら気づけるようにする。
     // 国名そのものは出さない（訪問者の所在地を返す必要はない）
     geo: req.headers['cf-ipcountry'] ? 'available' : 'unavailable'
+  });
+});
+
+// 訪問者の国と、その国の通貨・為替レート。
+// 作品の値段に「自分の通貨だといくらか」を添えるためだけに使う。
+// 請求は作品に設定された通貨のまま（ここでは金額を決めない）
+app.get('/api/geo', (req, res) => {
+  const country = (req.headers['cf-ipcountry'] || '').toUpperCase();
+  // 国ごとに答えが変わるので、途中の経路に保存させない
+  // （英国の読者向けの答えを米国の読者に返してしまわないように）
+  res.set('Cache-Control', 'private, no-store');
+  res.json({
+    country: country || null,
+    currency: currencyForCountry(country),
+    rates: CURRENCY_RATES
   });
 });
 
