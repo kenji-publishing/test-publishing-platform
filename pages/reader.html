@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609091641">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609091931">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609091641">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609091931">
     <title>Reader - AuctLect</title>
     
     <!-- Google Fonts -->
@@ -15,9 +15,9 @@
     <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="../css/variables.css?v=202609091641" rel="stylesheet"><!-- navbar.cssが使う--color-*変数の定義（無いとドロップダウンが透明になる） -->
-    <link href="../css/navbar.css?v=202609091641" rel="stylesheet">
-    <link href="../css/mobile-fixes.css?v=202609091641" rel="stylesheet">
+    <link href="../css/variables.css?v=202609091931" rel="stylesheet"><!-- navbar.cssが使う--color-*変数の定義（無いとドロップダウンが透明になる） -->
+    <link href="../css/navbar.css?v=202609091931" rel="stylesheet">
+    <link href="../css/mobile-fixes.css?v=202609091931" rel="stylesheet">
 
     <style>
         :root {
@@ -164,24 +164,58 @@
 
         .reader-main { padding-top: calc(var(--nav-h, 80px) + var(--toolbar-h, 50px) + 10px); padding-bottom: 180px; min-height: 100vh; touch-action: pan-y; }
 
+        /* 本文の表示領域。ここに入るぶんが1ページで、ページの中は動かさない。
+           収まらないぶんは横（次のページ）へ送られ、はみ出した先は隠れている */
         .reader-content {
-            max-width: 800px; margin: 0 auto; padding: 1.5rem;
+            position: relative;
+            /* 縦書きでは width が「行の流れる向き」ではなく紙の横幅にあたる。
+               max-width だけだと中身に合わせて画面より広くなり、両端が切れる。
+               100% で画面の幅に固定する */
+            width: 100%; max-width: 900px; margin: 0 auto;
+            height: var(--reader-vh, calc(100vh - 300px));
+            overflow: hidden;
+            padding: 0 24px;
             font-size: var(--font-size); line-height: var(--line-height);
             -webkit-user-select: text; user-select: text;
+            /* 横方向は自分で扱う。ブラウザの「戻る」に取られないようにもする */
+            touch-action: pan-y;
+            overscroll-behavior-x: contain;
         }
+        .reader-flow { height: 100%; }
+
+        /* 横書き・アラビア語: 1段＝1画面。段の幅と間隔はJSが画面から決める */
+        .writing-horizontal .reader-flow,
+        .writing-rtl .reader-flow { column-fill: auto; }
+        /* 章の始まりは次のページの頭から（縦書きは alignHeadingsToPages が行う） */
+        .writing-horizontal .reader-flow h2,
+        .writing-rtl .reader-flow h2 { break-before: column; -webkit-column-break-before: always; }
+        .reader-flow > :first-child { break-before: auto; -webkit-column-break-before: auto; }
+        .reader-flow img, .reader-flow .reader-table-wrap { break-inside: avoid; }
 
         .writing-horizontal { writing-mode: horizontal-tb; direction: ltr; }
-        /* 縦書きの高さは画面から実測した値（--reader-vh）を使う。
-           240px固定だと、ツールバーの高さが変わる携帯では下がはみ出して読めなくなる */
-        .writing-vertical {
-            writing-mode: vertical-rl; direction: ltr;
-            height: var(--reader-vh, calc(100vh - 240px));
-            overflow-x: auto; padding: 1.5rem;
-        }
-        /* 横に引く操作をブラウザの「戻る」に取られないようにする。
-           これが無いと、前のページに戻そうとしてマイライブラリまで戻ってしまう */
-        body, .reader-main, .reader-content { overscroll-behavior-x: contain; }
+        .writing-vertical { writing-mode: vertical-rl; direction: ltr; }
         .writing-rtl { writing-mode: horizontal-tb; direction: rtl; font-family: 'Noto Naskh Arabic', 'Noto Sans Arabic', serif; }
+        body, .reader-main { overscroll-behavior-x: contain; }
+
+        /* 画面を広げても1行が長くなりすぎないようにする。
+           長い行は目が戻る位置を見失うので、読みにくくなる（Google Booksで起きる） */
+        .writing-horizontal .reader-flow p,
+        .writing-rtl .reader-flow p { max-width: 34em; }
+        .writing-vertical .reader-flow p { max-height: 34em; }
+
+        /* 本だけを見たいときのために、上のバーを隠せるようにする（中央をタップ）。
+           下のメモ欄は残す */
+        body.reader-immersive #navbar-container,
+        body.reader-immersive .navbar-custom,
+        body.reader-immersive .reader-toolbar { display: none; }
+        body.reader-immersive .reader-main { padding-top: 12px; }
+        .immersive-hint {
+            position: fixed; top: 8px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.6); color: #fff; padding: 0.3rem 0.8rem;
+            border-radius: 999px; font-size: 0.75rem; z-index: 1200;
+            opacity: 0; transition: opacity 0.3s; pointer-events: none;
+        }
+        .immersive-hint.show { opacity: 1; }
 
         .text-small { --font-size: 14px; --line-height: 1.7; }
         .text-medium { --font-size: 18px; --line-height: 1.8; }
@@ -861,12 +895,12 @@
     <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/config.js?v=202609091641"></script>
-    <script src="../js/i18n.js?v=202609091641"></script>
-    <script src="../js/lang/it.js?v=202609091641"></script>
-    <script src="../js/navbar.js?v=202609091641"></script>
-    <script src="../js/translations.js?v=202609091641"></script>
-    <script src="../js/lazy-loader.js?v=202609091641"></script>
+    <script src="../js/config.js?v=202609091931"></script>
+    <script src="../js/i18n.js?v=202609091931"></script>
+    <script src="../js/lang/it.js?v=202609091931"></script>
+    <script src="../js/navbar.js?v=202609091931"></script>
+    <script src="../js/translations.js?v=202609091931"></script>
+    <script src="../js/lazy-loader.js?v=202609091931"></script>
     <script>
         // ===== Mode Detection =====
         const isManga = new URLSearchParams(window.location.search).get('type') === 'manga';
@@ -1044,7 +1078,6 @@ function getL(obj, replacements = {}) {
             initTouchEvents();
             initClickZones();
             initMouseDrag();
-            initVerticalPan();
             initSelHandles();
             updateReaderHeight();
             showTouchHint();
@@ -1089,7 +1122,7 @@ function getL(obj, replacements = {}) {
 
                 document.getElementById('workTitle').textContent = loadedWork.title || '';
                 document.title = (loadedWork.title || 'Reader') + ' - AuctLect';
-                renderWorkPages(paginateContent(loadedWork.content || ''), loadedWork);
+                renderWorkPages(loadedWork.content || '', loadedWork);
 
                 // アラビア語作品は自動でRTL表示にする。
                 // ただし読者がこの作品の表示方向を自分で選んでいたら、その選択が優先
@@ -1239,69 +1272,158 @@ function getL(obj, replacements = {}) {
             return w;
         }
 
-        function paginateContent(text) {
-            var LIMIT = 2000; // 1ページあたりの「読む量」（英語の文字数に換算した目安）
-            var blocks = parseBlocks(text);
-            var pages = [];
-            var cur = [], curLen = 0;
+        // ===== ページの組み方 =====
+        // 1ページは「画面に入るところまで」。KindleやGoogle Booksと同じ考え方。
+        //
+        // 以前は「読む量2,000文字ぶん」で切っていた。画面の大きさを見ていないので
+        // 中身が画面に収まらず、指で動かす必要があり、その操作がページ送りと
+        // ぶつかっていた（縦書きの両端切れ・横書きで上下に動かすとページが進む）。
+        //
+        // 横書きは CSS の段組みで「1段＝1画面」にし、1段ぶんずつ横へ送る。
+        // 縦書きは writing-mode 自体が同じ形の段を作るので、そのまま送る。
+        // 文字を大きくすれば1ページに入る量が自動的に減る。
 
-            function flush() {
-                if (cur.length) { pages.push(cur); cur = []; curLen = 0; }
-            }
+        var PAGE_MARGIN = 24;   // 本文の左右の余白（px）。段の間はこの2つぶん
+        var pageStep = 0;       // 1ページぶんの移動量
+        var scrollSign = 1;     // 読み進む向き。縦書きとアラビア語は逆になる
 
-            blocks.forEach(function(b) {
-                // 挿絵・表はページをまたがない1ブロックとして扱う（文字数換算のコストで詰める）
-                if (b.type === 'img' || b.type === 'table') {
-                    var cost = b.type === 'img'
-                        ? 600
-                        : Math.min(200 + b.rows.reduce(function(n, r) { return n + r.join('').length; }, 0), LIMIT);
-                    if (curLen > 0 && curLen + cost > LIMIT) flush();
-                    cur.push(b);
-                    curLen += cost;
-                    return;
-                }
-                if (b.heading) flush(); // 章の始まりで改ページ
-                var t = b.text;
-                // 1ページを超える長い段落は文末で区切って分割
-                while (readingWeight(t) > LIMIT) {
-                    // 読む量がLIMITに届く位置を文字数に直してから、近くの文末で切る
-                    var approx = Math.max(1, Math.floor(t.length * LIMIT / readingWeight(t)));
-                    var cut = approx;
-                    for (var i = approx; i > approx - 400 && i > 0; i--) {
-                        if ('。．！？!?.'.indexOf(t.charAt(i - 1)) !== -1) { cut = i; break; }
-                    }
-                    flush();
-                    pages.push([{ heading: null, text: t.slice(0, cut) }]);
-                    t = t.slice(cut).trim();
-                }
-                if (!t) return;
-                var tWeight = readingWeight(t);
-                if (curLen > 0 && curLen + tWeight > LIMIT) flush();
-                cur.push({ heading: b.heading, text: t });
-                curLen += tWeight;
-            });
-            flush();
-            if (!pages.length) pages.push([{ heading: null, text: '' }]);
-            return pages;
+        function readerViewport() { return document.getElementById('readerContent'); }
+        function readerFlow() { return document.getElementById('readerFlow'); }
+
+        /**
+         * 読み進む向きを実測する。
+         * 縦書きやアラビア語では scrollLeft が負の範囲になる（規格どおり）。
+         * 決め打ちにするとブラウザによって逆に動くので、1px動かして確かめる
+         */
+        function measureScrollSign(el) {
+            if (el.scrollWidth <= el.clientWidth + 1) return 1;
+            var prev = el.scrollLeft;
+            el.scrollLeft = 1;
+            var sign = el.scrollLeft > 0 ? 1 : -1;
+            el.scrollLeft = prev;
+            return sign;
         }
 
-        // ===== ページ・表紙・目次の描画 =====
+        /** 要素が何ページ目にあるか（1始まり） */
+        function pageOfElement(el) {
+            var vp = readerViewport();
+            if (!vp || !pageStep || !el) return 1;
+            // 「ずらしていない状態での位置」を出す。scrollLeft は正でも負でも同じ式でよい
+            var rel = el.getBoundingClientRect().left - vp.getBoundingClientRect().left + vp.scrollLeft;
+            return Math.min(Math.max(Math.floor((Math.abs(rel) + 2) / pageStep) + 1, 1), totalPages || 1);
+        }
+
+        /**
+         * 今のページの先頭にある段落の番号。文字サイズを変えても同じ場所へ戻るための目印。
+         *
+         * 段落は並び順に位置が進むので、二分探索で見つける。
+         * 端から順に測ると、長編（段落数千）では設定を変えるたびに固まる
+         */
+        function currentAnchorIndex() {
+            var flow = readerFlow();
+            if (!flow) return -1;
+            var els = flow.querySelectorAll('[data-block]');
+            if (!els.length) return -1;
+            var lo = 0, hi = els.length - 1, best = 0;
+            while (lo <= hi) {
+                var mid = (lo + hi) >> 1;
+                if (pageOfElement(els[mid]) >= currentPage) { best = mid; hi = mid - 1; }
+                else lo = mid + 1;
+            }
+            return parseInt(els[best].getAttribute('data-block'), 10);
+        }
+
+        /**
+         * 縦書きでは、章の始まりを次のページの頭へ送る。
+         * 横書きは段組みの break-before が同じことをしてくれるが、
+         * 縦書きは段組みを使わないので、余白を足して押し出す
+         */
+        function alignHeadingsToPages() {
+            var flow = readerFlow();
+            if (!flow || !pageStep) return;
+            var heads = flow.querySelectorAll('h2');
+            for (var i = 0; i < heads.length; i++) {
+                heads[i].style.marginBlockStart = '';
+            }
+            var vpLeft = readerViewport().getBoundingClientRect().left;
+            var scroll = readerViewport().scrollLeft;
+            for (var j = 0; j < heads.length; j++) {
+                var rel = Math.abs(heads[j].getBoundingClientRect().left - vpLeft + scroll);
+                var into = rel % pageStep;
+                // ページの頭から2px以内なら、すでに頭にある
+                if (into > 2) heads[j].style.marginBlockStart = (pageStep - into) + 'px';
+            }
+        }
+
+        /**
+         * 画面の大きさに合わせて組み直し、ページ数を数える。
+         * 文字サイズ・画面の向き・バーの表示が変わるたびに呼ぶ。
+         * anchorIndex を渡すと、その段落が見えるページを開く（読んでいた場所を保つ）
+         */
+        function layoutPages(anchorIndex) {
+            var vp = readerViewport(), flow = readerFlow();
+            if (!vp || !flow) return;
+            updateReaderHeight();
+
+            var width = vp.clientWidth;
+            if (isVerticalMode()) {
+                // 縦書きは writing-mode が段を作るので、段組みは指定しない
+                flow.style.columnWidth = '';
+                flow.style.columnGap = '';
+            } else {
+                // 1段＝1画面。段の間を余白2つぶんにすると、どのページも左右が同じ余白になる
+                flow.style.columnWidth = Math.max(120, width - PAGE_MARGIN * 2) + 'px';
+                flow.style.columnGap = (PAGE_MARGIN * 2) + 'px';
+            }
+            pageStep = width || 1;
+
+            if (isVerticalMode()) alignHeadingsToPages();
+
+            scrollSign = measureScrollSign(vp);
+            var span = Math.max(vp.scrollWidth - vp.clientWidth, 0);
+            totalPages = Math.max(1, Math.round(span / pageStep) + 1);
+
+            var target = currentPage;
+            if (typeof anchorIndex === 'number' && anchorIndex >= 0) {
+                var el = flow.querySelector('[data-block="' + anchorIndex + '"]');
+                if (el) {
+                    // 数え直した後の位置で計算する
+                    var rel = el.getBoundingClientRect().left - vp.getBoundingClientRect().left + vp.scrollLeft;
+                    target = Math.floor((Math.abs(rel) + 2) / pageStep) + 1;
+                }
+            }
+            currentPage = Math.min(Math.max(target, 1), totalPages);
+            buildToc();
+            updatePageInfo();
+        }
+
+        // ===== 本文の描画 =====
 
         let tocEntries = []; // [{ title, page }]
 
-        // 分割したページをDOMに描画する（textContentでXSS対策）。表紙があれば1ページ目にする
-        function renderWorkPages(pages, work) {
+        /**
+         * 本文をひと続きに流し込む（ページで区切らない）。
+         * どこがページの切れ目になるかは、上の layoutPages が画面から決める
+         */
+        function renderWorkPages(text, work) {
             var container = document.getElementById('readerContent');
             container.innerHTML = '';
             tocEntries = [];
-            var pageNum = 1;
+
+            var flow = document.createElement('div');
+            flow.className = 'reader-flow';
+            flow.id = 'readerFlow';
+
+            var blockNo = 0;
+            function mark(el) {
+                el.setAttribute('data-block', blockNo++);
+                return el;
+            }
 
             var coverUrl = work && (work.cover_image || work.cover_image_url);
             if (coverUrl) {
                 var coverDiv = document.createElement('div');
-                coverDiv.className = 'page reader-cover';
-                coverDiv.dataset.page = pageNum;
-                coverDiv.style.display = 'none';
+                coverDiv.className = 'reader-cover';
                 var img = document.createElement('img');
                 img.src = coverUrl;
                 img.alt = work.title || '';
@@ -1311,69 +1433,82 @@ function getL(obj, replacements = {}) {
                     coverTitle.textContent = work.title;
                     coverDiv.appendChild(coverTitle);
                 }
-                container.appendChild(coverDiv);
-                pageNum++;
+                flow.appendChild(mark(coverDiv));
+            } else if (work && work.title) {
+                var h1 = document.createElement('h1');
+                h1.textContent = work.title;
+                flow.appendChild(mark(h1));
             }
 
-            pages.forEach(function(blocks, idx) {
-                var div = document.createElement('div');
-                div.className = 'page';
-                div.dataset.page = pageNum;
-                div.style.display = 'none';
-                // 表紙が無い場合は本文1ページ目の先頭にタイトルを表示
-                if (!coverUrl && idx === 0 && work && work.title) {
-                    var h1 = document.createElement('h1');
-                    h1.textContent = work.title;
-                    div.appendChild(h1);
+            parseBlocks(text).forEach(function(b) {
+                var el;
+                if (b.type === 'img') {
+                    // 挿絵: DOM生成のみ（innerHTML不使用）。srcは/uploads/配下に限定済み
+                    el = document.createElement('div');
+                    el.className = 'reader-illustration align-' + b.align;
+                    var ilImg = document.createElement('img');
+                    ilImg.src = (window.API_ORIGIN || '') + b.src;
+                    ilImg.style.width = b.w + '%';
+                    ilImg.alt = '';
+                    el.appendChild(ilImg);
+                    flow.appendChild(mark(el));
+                    return;
                 }
-                blocks.forEach(function(b) {
-                    var el;
-                    if (b.type === 'img') {
-                        // 挿絵: DOM生成のみ（innerHTML不使用）。srcは/uploads/配下に限定済み
-                        el = document.createElement('div');
-                        el.className = 'reader-illustration align-' + b.align;
-                        // 挿絵は数枚程度なので全て先読みする（ページをめくった瞬間に表示される）
-                        var ilImg = document.createElement('img');
-                        ilImg.src = (window.API_ORIGIN || '') + b.src;
-                        ilImg.style.width = b.w + '%';
-                        ilImg.alt = '';
-                        el.appendChild(ilImg);
-                        div.appendChild(el);
-                        return;
-                    }
-                    if (b.type === 'table') {
-                        el = document.createElement('div');
-                        el.className = 'reader-table-wrap';
-                        var tb = document.createElement('table');
-                        tb.className = 'reader-table';
-                        b.rows.forEach(function(r, ri) {
-                            var tr = document.createElement('tr');
-                            r.forEach(function(c) {
-                                var td = document.createElement(ri === 0 ? 'th' : 'td');
-                                td.textContent = c;
-                                tr.appendChild(td);
-                            });
-                            tb.appendChild(tr);
+                if (b.type === 'table') {
+                    el = document.createElement('div');
+                    el.className = 'reader-table-wrap';
+                    var tb = document.createElement('table');
+                    tb.className = 'reader-table';
+                    b.rows.forEach(function(r, ri) {
+                        var tr = document.createElement('tr');
+                        r.forEach(function(c) {
+                            var td = document.createElement(ri === 0 ? 'th' : 'td');
+                            td.textContent = c;
+                            tr.appendChild(td);
                         });
-                        el.appendChild(tb);
-                        div.appendChild(el);
-                        return;
-                    }
-                    if (b.heading) {
-                        el = document.createElement('h2');
-                        tocEntries.push({ title: b.text, page: pageNum });
-                    } else {
-                        el = document.createElement('p');
-                    }
-                    el.textContent = b.text;
-                    div.appendChild(el);
-                });
-                container.appendChild(div);
-                pageNum++;
+                        tb.appendChild(tr);
+                    });
+                    el.appendChild(tb);
+                    flow.appendChild(mark(el));
+                    return;
+                }
+                el = document.createElement(b.heading ? 'h2' : 'p');
+                el.textContent = b.text;
+                flow.appendChild(mark(el));
             });
 
-            totalPages = pageNum - 1;
+            container.appendChild(flow);
             currentPage = 1;
+            // 画像の読み込みで高さが変わるため、揃ってからもう一度数え直す
+            layoutPages();
+            waitForImages(flow, function() { layoutPages(currentAnchorIndex()); });
+        }
+
+        /** 画像が読み終わるのを待つ（読み込み前後で1ページの量が変わるため） */
+        function waitForImages(root, done) {
+            var imgs = root.querySelectorAll('img');
+            var left = 0;
+            Array.prototype.forEach.call(imgs, function(im) {
+                if (im.complete) return;
+                left++;
+                var fire = function() { if (--left <= 0) done(); };
+                im.addEventListener('load', fire, { once: true });
+                im.addEventListener('error', fire, { once: true });
+            });
+            if (left === 0) return;
+            // 読み込みが終わらないときも、いつまでも待たない
+            setTimeout(function() { if (left > 0) { left = 0; done(); } }, 4000);
+        }
+
+        /** 見出しの位置から目次を作る（ページ番号は組み直すたびに変わる） */
+        function buildToc() {
+            var flow = readerFlow();
+            tocEntries = [];
+            if (flow) {
+                Array.prototype.forEach.call(flow.querySelectorAll('h2'), function(h) {
+                    tocEntries.push({ title: h.textContent, page: pageOfElement(h), block: h.getAttribute('data-block') });
+                });
+            }
             renderToc();
         }
 
@@ -1484,6 +1619,7 @@ function getL(obj, replacements = {}) {
                 touchStartY = e.changedTouches[0].screenY;
                 isSwiping = false;
                 isLongPress = false;
+                touchMoved = false;
                 longPressTimer = setTimeout(() => {
                     isLongPress = true;
                     if (navigator.vibrate) navigator.vibrate(50);
@@ -1496,7 +1632,9 @@ function getL(obj, replacements = {}) {
                 if (selDrag) return;
                 const diffX = e.changedTouches[0].screenX - touchStartX;
                 const diffY = Math.abs(e.changedTouches[0].screenY - touchStartY);
-                if (Math.abs(diffX) > 30 && diffY < 100) {
+                // 横に払ったときだけページ送り。斜めに動いたものは受け付けない
+                if (Math.abs(diffX) > 12 || diffY > 12) touchMoved = true;
+                if (Math.abs(diffX) > 30 && Math.abs(diffX) > diffY) {
                     isSwiping = true;
                     if (diffX > 50 && currentPage > 1) {
                         document.getElementById('swipeLeft').classList.add('show');
@@ -1525,9 +1663,12 @@ function getL(obj, replacements = {}) {
                     if (diffX > 0) { rtl ? nextPage() : prevPage(); } else { rtl ? prevPage() : nextPage(); }
                 }
                 if (isLongPress) setTimeout(() => handleTextSelection(), 100);
-                const wasSwiping = isSwiping, wasLongPress = isLongPress;
+                const wasSwiping = isSwiping, wasLongPress = isLongPress, wasMoved = touchMoved;
                 isSwiping = false;
-                if (!wasSwiping && !wasLongPress) handleTap(e.changedTouches[0]);
+                touchMoved = false;
+                // 指が動いていたらタップではない。上下に払っただけで
+                // バーが消えたりページが変わったりしないようにする
+                if (!wasSwiping && !wasLongPress && !wasMoved) handleTap(e.changedTouches[0]);
             }, { passive: true });
 
             document.getElementById('readerContent').addEventListener('mouseup', function(e) {
@@ -1539,6 +1680,7 @@ function getL(obj, replacements = {}) {
         // ===== 携帯のタップ =====
         // 1回叩けばページ送り、2回続けて叩けばその単語を選ぶ。
         // どちらか決まるまでの少しの間（300ミリ秒）だけページ送りを待たせる
+        var touchMoved = false;   // 指が動いたか（動いていればタップとして扱わない）
         var lastTap = { at: 0, x: 0, y: 0 };
         var pendingTapTimer = null;
         // 2回目を待つ間と、ページ送りを待たせる間は同じ長さにする。
@@ -1565,14 +1707,15 @@ function getL(obj, replacements = {}) {
                 return;
             }
 
-            var zone = x < window.innerWidth * 0.25 ? 'left' : (x > window.innerWidth * 0.75 ? 'right' : null);
-            if (!zone) return;
+            var zone = tapZone(x);
             if (pendingTapTimer) clearTimeout(pendingTapTimer);
+            // 2回目の叩きを待ってから動く。待たないと、ダブルタップの1回目で
+            // ページが変わってしまう
             pendingTapTimer = setTimeout(function() {
                 pendingTapTimer = null;
-                var rtl = isRightToLeftBook();
-                if (zone === 'left') { rtl ? nextPage() : prevPage(); }
-                else { rtl ? prevPage() : nextPage(); }
+                // 中央は本を大きく見せるための切り替え。左右はページ送り
+                if (zone === 'center') toggleChrome();
+                else turnByZone(zone);
             }, DOUBLE_TAP_MS);
         }
 
@@ -1927,11 +2070,13 @@ function getL(obj, replacements = {}) {
 
         // save に false を渡すのは復元・自動判定のとき（読者が選んでいないので上書きしない）
         function setTextSize(size, save) {
+            keepReadingPlace();   // 組み直す前に、読んでいた場所を控える
             if (TEXT_SIZES.indexOf(size) === -1) size = "medium";
             document.body.classList.remove("text-small", "text-medium", "text-large", "text-xlarge");
             document.body.classList.add("text-" + size);
             markActiveSetting("textSizeRow", size);
             if (save !== false) saveSetting(TEXT_SIZE_KEY, size);
+            relayoutAfterSetting();
         }
 
         function setTheme(theme, save) {
@@ -1943,22 +2088,37 @@ function getL(obj, replacements = {}) {
         }
 
         function setWritingMode(mode, save) {
+            keepReadingPlace();   // 組み直す前に、読んでいた場所を控える
             if (WRITING_MODES.indexOf(mode) === -1) mode = "horizontal";
             const content = document.getElementById("readerContent");
             content.classList.remove("writing-horizontal", "writing-vertical", "writing-rtl");
             content.classList.add("writing-" + mode);
-            updateVerticalCursor();
             updateReaderHeight();
             markActiveSetting("directionRow", mode);
             if (save !== false) saveSetting(storageKey(WRITING_MODE_KEY), mode);
+            relayoutAfterSetting();
         }
 
         function setParagraphStyle(style, save) {
+            keepReadingPlace();   // 組み直す前に、読んでいた場所を控える
             if (PARAGRAPH_STYLES.indexOf(style) === -1) style = "indent";
             document.body.classList.remove("para-indent", "para-spaced", "para-both");
             document.body.classList.add("para-" + style);
             markActiveSetting("paragraphStyleRow", style);
             if (save !== false) saveSetting(PARAGRAPH_STYLE_KEY, style);
+            relayoutAfterSetting();
+        }
+
+        // 設定を変えたら、今読んでいる場所を保ったまま組み直す。
+        // 場所は「変える前」に控えておく——変えた後では、もう組み直された後の
+        // ページ5の先頭を指してしまい、読んでいた場所とずれる
+        var pendingAnchor = -1;
+        function keepReadingPlace() { pendingAnchor = currentAnchorIndex(); }
+        function relayoutAfterSetting() {
+            var anchor = pendingAnchor;
+            pendingAnchor = -1;
+            // クラスの反映（文字サイズ等）が終わってから測る
+            setTimeout(function() { layoutPages(anchor); }, 0);
         }
 
         function restoreReaderSettings() {
@@ -1972,9 +2132,9 @@ function getL(obj, replacements = {}) {
 
         function updatePageInfo() {
             document.getElementById('pageInfo').textContent = `${currentPage} / ${totalPages}`;
-            document.querySelectorAll('.page').forEach(page => {
-                page.style.display = page.dataset.page == currentPage ? 'block' : 'none';
-            });
+            // ページの中は動かさず、ページごと横に送る
+            var vp = readerViewport();
+            if (vp && pageStep) vp.scrollLeft = scrollSign * (currentPage - 1) * pageStep;
             updateReadingProgress();
             // 次回同じページから再開できるよう現在ページを保存
             localStorage.setItem(storageKey('reader_lastpage'), currentPage);
@@ -1985,8 +2145,50 @@ function getL(obj, replacements = {}) {
             if (fill) fill.style.width = (currentPage / totalPages) * 100 + '%';
         }
 
-        function nextPage() { if (currentPage < totalPages) { currentPage++; updatePageInfo(); window.scrollTo(0, 0); } }
-        function prevPage() { if (currentPage > 1) { currentPage--; updatePageInfo(); window.scrollTo(0, 0); } }
+        // ページは画面に収まっているので、めくるときに画面を上へ戻す必要はない
+        function nextPage() { if (currentPage < totalPages) { currentPage++; updatePageInfo(); } }
+        function prevPage() { if (currentPage > 1) { currentPage--; updatePageInfo(); } }
+
+        var immersiveHintText = {
+            en: 'Tap the middle of the screen to bring the bars back',
+            ja: '画面の中央をタップすると、バーが戻ります',
+            zh: '点击屏幕中央可恢复工具栏', 'zh-TW': '點選畫面中央可恢復工具列',
+            es: 'Toca el centro de la pantalla para recuperar las barras',
+            fr: "Touchez le centre de l'écran pour faire revenir les barres",
+            de: 'Tippen Sie in die Bildschirmmitte, um die Leisten zurückzuholen',
+            ko: '화면 가운데를 누르면 막대가 다시 나타납니다',
+            ar: 'انقر وسط الشاشة لإعادة الأشرطة',
+            pt: 'Toque no centro do ecrã para trazer as barras de volta',
+            it: 'Tocca il centro dello schermo per far tornare le barre'
+        };
+
+        function showImmersiveHint() {
+            var el = document.createElement('div');
+            el.className = 'immersive-hint';
+            el.textContent = getL(immersiveHintText);
+            document.body.appendChild(el);
+            requestAnimationFrame(function() { el.classList.add('show'); });
+            setTimeout(function() {
+                el.classList.remove('show');
+                setTimeout(function() { el.remove(); }, 400);
+            }, 2600);
+        }
+
+        // 本だけを見たいときは上のバーを消す（Kindleと同じく画面の中央をタップ）。
+        // 下のメモ欄は残す
+        var immersiveHintShown = false;
+
+        function toggleChrome() {
+            var anchor = currentAnchorIndex();   // 切り替える前に控える
+            document.body.classList.toggle('reader-immersive');
+            // 隠したままだと戻し方が分からないので、最初の1回だけ案内を出す
+            if (document.body.classList.contains('reader-immersive') && !immersiveHintShown) {
+                immersiveHintShown = true;
+                showImmersiveHint();
+            }
+            // バーの分だけ本文の高さが変わるので、組み直して同じ場所を開く
+            setTimeout(function() { layoutPages(anchor); }, 30);
+        }
 
         function toggleBookmarks() {
             const panel = document.getElementById('bookmarksPanel');
@@ -1997,9 +2199,12 @@ function getL(obj, replacements = {}) {
         }
 
         function addBookmark() {
-            const content = document.querySelector(`.page[data-page="${currentPage}"]`);
-            const preview = content ? content.textContent.substring(0, 80).trim() + '...' : '';
-            const bookmark = { id: Date.now(), page: currentPage, title: `${getL(uiText.page)} ${currentPage}`, preview: preview, createdAt: new Date().toISOString() };
+            // ページ番号は文字サイズを変えると変わるので、段落の番号も一緒に覚えておく
+            const anchor = currentAnchorIndex();
+            const flow = readerFlow();
+            const first = flow && anchor >= 0 ? flow.querySelector('[data-block="' + anchor + '"]') : null;
+            const preview = first ? first.textContent.substring(0, 80).trim() + '...' : '';
+            const bookmark = { id: Date.now(), page: currentPage, anchor: anchor, title: `${getL(uiText.page)} ${currentPage}`, preview: preview, createdAt: new Date().toISOString() };
             bookmarks.push(bookmark);
             localStorage.setItem(storageKey('reader_bookmarks'), JSON.stringify(bookmarks));
             renderBookmarks();
@@ -2016,7 +2221,7 @@ function getL(obj, replacements = {}) {
                 return;
             }
             list.innerHTML = bookmarks.map(b => `
-                <div class="bookmark-item" onclick="goToBookmark(${b.page})">
+                <div class="bookmark-item" onclick="goToBookmark(${b.page}, ${typeof b.anchor === 'number' ? b.anchor : -1})">
                     <button class="bookmark-delete" onclick="event.stopPropagation(); deleteBookmark(${b.id})"><i class="fas fa-times"></i></button>
                     <div class="bookmark-title">${b.title}</div>
                     <div class="bookmark-preview">${b.preview}</div>
@@ -2024,7 +2229,15 @@ function getL(obj, replacements = {}) {
             `).join('');
         }
 
-        function goToBookmark(page) { currentPage = page; updatePageInfo(); toggleBookmarks(); }
+        function goToBookmark(page, anchor) {
+            // 段落の番号が残っていればそちらを使う（文字サイズを変えてもずれない）
+            var flow = readerFlow();
+            var el = (typeof anchor === 'number' && anchor >= 0 && flow)
+                ? flow.querySelector('[data-block="' + anchor + '"]') : null;
+            currentPage = el ? pageOfElement(el) : Math.min(Math.max(page, 1), totalPages);
+            updatePageInfo();
+            toggleBookmarks();
+        }
         function deleteBookmark(id) { bookmarks = bookmarks.filter(b => b.id !== id); localStorage.setItem(storageKey('reader_bookmarks'), JSON.stringify(bookmarks)); renderBookmarks(); }
 
         function toggleNotes() {
@@ -2115,24 +2328,6 @@ function getL(obj, replacements = {}) {
             return document.getElementById('readerContent').classList.contains('writing-vertical');
         }
 
-        /** 本文が画面に収まりきらず、上下に動かす余地があるか */
-        function pageCanScroll() {
-            return document.documentElement.scrollHeight - window.innerHeight > 4;
-        }
-
-        /**
-         * 掴んで動かしている間の上下移動。
-         * サイト全体は scroll-behavior: smooth なので、そのままだと1回動かすごとに
-         * ゆっくり追いかける動きになって掴んだ感じが出ない。ここでは即座に動かす
-         */
-        function panScrollTo(y) {
-            document.documentElement.style.scrollBehavior = 'auto';
-            window.scrollTo(0, y);
-        }
-        function endPanScroll() {
-            document.documentElement.style.scrollBehavior = '';
-        }
-
         /**
          * ページが左へ進む本かどうか。
          *
@@ -2144,78 +2339,44 @@ function getL(obj, replacements = {}) {
             return isRtlMode() || isVerticalMode();
         }
 
-        // Click Zone Navigation
+        // ===== 触ったときの割り当て =====
+        // 画面を3つに分ける。左右でページを送り、中央でバーの表示を切り替える（Kindleと同じ）。
+        // 上下の操作には何も割り当てない——1ページが画面に収まっているので動かす必要が無く、
+        // 割り当てるとページ送りと取り違えが起きる（以前はこれで誤爆していた）
+        var ZONE_SIDE = 0.25;   // 左右それぞれ画面の25%。指で狙える広さ（10%では狭すぎる）
+
+        function tapZone(x) {
+            if (x < window.innerWidth * ZONE_SIDE) return 'left';
+            if (x > window.innerWidth * (1 - ZONE_SIDE)) return 'right';
+            return 'center';
+        }
+
+        function turnByZone(zone) {
+            var rtl = isRightToLeftBook();
+            if (zone === 'left') { rtl ? nextPage() : prevPage(); }
+            else if (zone === 'right') { rtl ? prevPage() : nextPage(); }
+        }
+
         function initClickZones() {
             var leftZone = document.getElementById('clickZoneLeft');
             var rightZone = document.getElementById('clickZoneRight');
             // 触ったときは handleTap が受け持つ（1回叩き＝ページ送り、2回＝単語を選ぶ）
             if (leftZone) {
                 leftZone.addEventListener('click', function() {
-                    if (!hasDragged && !isTouchInput()) { isRightToLeftBook() ? nextPage() : prevPage(); }
+                    if (!hasDragged && !isTouchInput()) turnByZone('left');
                 });
             }
             if (rightZone) {
                 rightZone.addEventListener('click', function() {
-                    if (!hasDragged && !isTouchInput()) { isRightToLeftBook() ? prevPage() : nextPage(); }
+                    if (!hasDragged && !isTouchInput()) turnByZone('right');
                 });
             }
         }
 
-        // ===== 縦書きのときの「掴んで動かす」 =====
-        // 縦書きは文字が右から左へ流れるため、画面は横方向にスクロールする。
-        // マウスの縦回転や下のバーだけでは動かしづらいので、本文を直接掴めるようにする。
-        var vPan = null;
-
-        function startVerticalPan(e) {
-            var rc = document.getElementById('readerContent');
-            if (!rc) return;
-            vPan = { startX: e.clientX, startY: e.clientY, startScroll: rc.scrollLeft, startPageY: window.scrollY, moved: false };
-            rc.style.cursor = 'grabbing';
-            e.preventDefault();   // 掴んでいる間に文字が選択されるのを防ぐ
-        }
-
-        function initVerticalPan() {
-            var rc = document.getElementById('readerContent');
-            if (!rc) return;
-
-            document.addEventListener('mousemove', function (e) {
-                if (!vPan) return;
-                var dx = e.clientX - vPan.startX;
-                var dy = e.clientY - vPan.startY;
-                if (Math.abs(dx) > 3 || Math.abs(dy) > 3) vPan.moved = true;
-                // 掴んだ場所が指についてくるように、動かした分だけ逆にスクロールする
-                rc.scrollLeft = vPan.startScroll - dx;
-                // 縦書きでもページ全体が収まらないことがあるので、上下も同じように動かす
-                if (Math.abs(dy) > 3 && pageCanScroll()) panScrollTo(vPan.startPageY - dy);
-            });
-
-            ['mouseup', 'mouseleave'].forEach(function (ev) {
-                document.addEventListener(ev, function () {
-                    if (!vPan) return;
-                    vPan = null;
-                    endPanScroll();
-                    rc.style.cursor = isVerticalMode() ? 'grab' : '';
-                });
-            });
-
-            // 縦書きのときはマウスホイールの上下を横移動に読み替える
-            rc.addEventListener('wheel', function (e) {
-                if (!isVerticalMode()) return;
-                if (e.deltaY === 0) return;
-                rc.scrollLeft -= e.deltaY;   // 手前に回すと読み進む向き（左）へ
-                e.preventDefault();
-            }, { passive: false });
-        }
-
-        // 表示モードを変えたら、掴めることが分かるようにカーソルを変える
-        function updateVerticalCursor() {
-            var rc = document.getElementById('readerContent');
-            if (rc) rc.style.cursor = isVerticalMode() ? 'grab' : '';
-        }
-
         /**
-         * 縦書きの高さを実際の画面から測って決める。
-         * ツールバーの高さは画面幅で変わるので、固定値では携帯で本文が切れる。
+         * 本文の高さを画面から測る。
+         * 1ページはここに収まる量なので、この値が「1ページの大きさ」になる。
+         * バーを隠したときも呼ばれ、そのぶん本文が広がる
          */
         function updateReaderHeight() {
             var rc = document.getElementById('readerContent');
@@ -2226,58 +2387,42 @@ function getL(obj, replacements = {}) {
             var h = Math.max(240, window.innerHeight - top - bottom - 16);
             document.documentElement.style.setProperty('--reader-vh', h + 'px');
         }
-        window.addEventListener('resize', updateReaderHeight);
-        window.addEventListener('orientationchange', function () { setTimeout(updateReaderHeight, 200); });
 
-        // Mouse Drag Navigation
+        // 画面の大きさが変わったら組み直す（読んでいた場所は保つ）
+        var resizeTimer = null;
+        function relayoutSoon() {
+            if (resizeTimer) clearTimeout(resizeTimer);
+            var anchor = pendingAnchor >= 0 ? pendingAnchor : currentAnchorIndex();
+            pendingAnchor = -1;
+            resizeTimer = setTimeout(function() { resizeTimer = null; layoutPages(anchor); }, 150);
+        }
+        window.addEventListener('resize', relayoutSoon);
+        window.addEventListener('orientationchange', function () { setTimeout(relayoutSoon, 250); });
+
+        // ===== マウスの操作 =====
         function initMouseDrag() {
             var DRAG_THRESHOLD = 80;
 
-            // 画面全体で受ける。
-            // ページ送りの当たり判定（左右25%ずつ）は本文の外側に重ねてあるため、
-            // 本文にだけ紐づけていると画面の半分でドラッグが始まらなかった。
-            // 動かさずに離せばクリック扱いのままなので、当たり判定の上でも掴んでよい
             document.addEventListener('mousedown', function(e) {
                 if (isTouchInput()) return;   // 携帯は touchstart 側で受けている
                 if (e.target.closest(CONTROL_SELECTOR)) return;
-                if (e.detail >= 2) return; // Allow double-click text selection
-                // 縦書きは横スクロールで読む。ページ送りではなく、掴んで動かす操作にする
-                // （以前はここで何もせず、画面下のバーでしか移動できなかった）
-                if (isVerticalMode()) { startVerticalPan(e); return; }
+                if (e.detail >= 2) return;    // ダブルクリックの文字選択は邪魔しない
                 isDragging = true;
                 hasDragged = false;
                 dragStartX = e.clientX;
                 dragStartY = e.clientY;
-                dragStartScrollY = window.scrollY;
-                dragAxis = null;
             });
 
             document.addEventListener('mousemove', function(e) {
                 if (!isDragging) return;
                 var diffX = e.clientX - dragStartX;
-                var rawY = e.clientY - dragStartY;
-                var diffY = Math.abs(rawY);
-
-                // 先に大きく動いた向きで、横引き（ページ送り）か縦引き（上下移動）かを決める。
-                // 一度決めたら離すまで変えない。途中で切り替わると意図しないページ送りが起きる
-                if (!dragAxis) {
-                    if (Math.abs(diffX) > 10 && Math.abs(diffX) >= diffY) dragAxis = 'x';
-                    else if (diffY > 10 && pageCanScroll()) dragAxis = 'y';
-                    if (dragAxis) {
-                        window.getSelection().removeAllRanges();
-                        hasDragged = true;
-                        if (dragAxis === 'y') document.body.style.cursor = 'grabbing';
-                    }
+                var diffY = Math.abs(e.clientY - dragStartY);
+                // 横に引いたときだけページ送り。上下に引いても何もしない
+                if (Math.abs(diffX) > 10 && Math.abs(diffX) > diffY && !hasDragged) {
+                    window.getSelection().removeAllRanges();
+                    hasDragged = true;
                 }
-
-                // 本文が画面に収まらないときは、掴んだ場所が指についてくるように上下へ動かす
-                if (dragAxis === 'y') {
-                    panScrollTo(dragStartScrollY - rawY);
-                    return;
-                }
-                if (dragAxis !== 'x') return;
-
-                if (hasDragged && Math.abs(diffX) > 30 && diffY < 100) {
+                if (hasDragged && Math.abs(diffX) > 30) {
                     if (diffX > 50 && currentPage > 1) {
                         document.getElementById('swipeLeft').classList.add('show');
                         document.getElementById('swipeRight').classList.remove('show');
@@ -2294,18 +2439,8 @@ function getL(obj, replacements = {}) {
             document.addEventListener('mouseup', function(e) {
                 if (!isDragging) return;
                 isDragging = false;
-                document.body.style.cursor = '';
-                endPanScroll();
                 document.getElementById('swipeLeft').classList.remove('show');
                 document.getElementById('swipeRight').classList.remove('show');
-
-                // 上下に動かしただけのときはページを送らない
-                if (dragAxis === 'y') {
-                    dragAxis = null;
-                    setTimeout(function() { hasDragged = false; }, 50);
-                    return;
-                }
-                dragAxis = null;
 
                 if (hasDragged) {
                     var diffX = e.clientX - dragStartX;
@@ -2315,8 +2450,29 @@ function getL(obj, replacements = {}) {
                         else { rtl ? prevPage() : nextPage(); }
                     }
                     setTimeout(function() { hasDragged = false; }, 50);
+                    return;
                 }
+
+                // 引かずに離した＝クリック。画面の中央ならバーの表示を切り替える
+                if (isTouchInput()) return;
+                if (e.target.closest(CONTROL_SELECTOR) || e.target.closest('.click-zone')) return;
+                if (String(window.getSelection())) return;   // 文字を選んだだけのときは何もしない
+                // 動かしていたらクリックではない（縦に引いた場合など）
+                if (Math.abs(e.clientX - dragStartX) > 12 || Math.abs(e.clientY - dragStartY) > 12) return;
+                if (tapZone(e.clientX) === 'center') toggleChrome();
             });
+
+            // ページが画面に収まっているので、マウスホイールはページ送りに使う
+            var wheelAt = 0;
+            document.addEventListener('wheel', function(e) {
+                if (e.target.closest(CONTROL_SELECTOR)) return;
+                var now = Date.now();
+                if (now - wheelAt < 250) return;            // 1回転がしで1ページだけ進める
+                var delta = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+                if (Math.abs(delta) < 4) return;
+                wheelAt = now;
+                if (delta > 0) nextPage(); else prevPage();
+            }, { passive: true });
         }
 
         document.addEventListener('keydown', function(e) {
