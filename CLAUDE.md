@@ -147,7 +147,7 @@ test-publishing-platform/
 │   ├── scripts/
 │   │   └── oss-return.js   # EU OSS 四半期申告用データの書き出し
 │   └── config/             # DB, メール, 収益, VAT税率
-│       └── vatRates.js     # VAT税率表。VAT_REGISTERED=false の間は常に0%
+│       └── vatRates.js     # VAT税率表（電子書籍＋標準税率）。成人向けの分岐あり
 ├── deploy/                 # 本番サーバーに置くもの
 │   ├── nginx-auctlect.conf # 本体（certbotが443ブロックを追記済み。cpだけで上書きしない）
 │   ├── nginx-hooks.conf    # hooks.auctlect.com（Cloudflareを通さないwebhook専用）
@@ -167,7 +167,11 @@ test-publishing-platform/
 | メール不達の検知 | 随時 | 管理者＋info@auctlect.com |
 
 - **メールは 受信=Microsoft 365 / 送信=AWS SES**。`mail.auctlect.com` のDNSは送信用で、消すと通知が止まる
-- **VATは現在未登録**。EU圏の購入は `checkEuSaleAllowed()` が機械的にブロック中
+- **EUのVATは登録済み・EU圏へ販売できる**（2026-08-10発効。アイルランドの non-Union OSS、
+  登録番号 EU372102380）。`VAT_REGISTERED = true`、税率は28か国ぶん確定済み。
+  **四半期申告が必要（売上ゼロでも必須）。初回はQ3 2026、期限 2026-10-31**
+- **英国のVATは別で、まだ未登録**（課税売上高が閾値未満）。`UK_VAT_REGISTERED = false` の間、
+  英国内の販売は税率0。**この2つを混同しないこと**
 - 管理者アカウントは2つ（Google と Microsoft）。片方を失っても運営できるようにしてある
 
 ## Key Conventions
