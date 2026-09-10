@@ -1484,4 +1484,58 @@ router.delete('/:workId', authenticate, async (req, res) => {
     }
 });
 
+/**
+ * 読んでいた場所（端末をまたいで引き継ぐ）
+ *
+ * 覚えるのは段落の番号。ページ番号は文字サイズや画面の大きさで変わるので、
+ * 別の端末では別の場所を指してしまう。
+ */
+router.get('/:workId/position', authenticate, async (req, res) => {
+    try {
+        const result = await db.query(
+            `SELECT block_index, page, percent, updated_at
+             FROM reading_positions WHERE user_id = $1 AND work_id = $2`,
+            [req.user.userId, req.params.workId]
+        );
+        const row = result.rows[0];
+        res.json({
+            success: true,
+            position: row ? {
+                blockIndex: row.block_index,
+                page: row.page,
+                percent: row.percent,
+                updatedAt: row.updated_at
+            } : null
+        });
+    } catch (error) {
+        console.error('Get reading position error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.put('/:workId/position', authenticate, async (req, res) => {
+    try {
+        const { blockIndex, page, percent } = req.body;
+        const num = (v, max) => {
+            const n = parseInt(v, 10);
+            return Number.isFinite(n) && n >= 0 && n <= max ? n : null;
+        };
+        await db.query(
+            `INSERT INTO reading_positions (user_id, work_id, block_index, page, percent, updated_at)
+             VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP)
+             ON CONFLICT (user_id, work_id) DO UPDATE
+               SET block_index = EXCLUDED.block_index,
+                   page = EXCLUDED.page,
+                   percent = EXCLUDED.percent,
+                   updated_at = CURRENT_TIMESTAMP`,
+            [req.user.userId, req.params.workId,
+             num(blockIndex, 2000000), num(page, 1000000), num(percent, 100)]
+        );
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Save reading position error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 module.exports = router;

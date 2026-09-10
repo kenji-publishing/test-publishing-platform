@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609092124">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609100950">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609092124">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609100950">
     <title>Reader - AuctLect</title>
     
     <!-- Google Fonts -->
@@ -15,9 +15,9 @@
     <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="../css/variables.css?v=202609092124" rel="stylesheet"><!-- navbar.cssが使う--color-*変数の定義（無いとドロップダウンが透明になる） -->
-    <link href="../css/navbar.css?v=202609092124" rel="stylesheet">
-    <link href="../css/mobile-fixes.css?v=202609092124" rel="stylesheet">
+    <link href="../css/variables.css?v=202609100950" rel="stylesheet"><!-- navbar.cssが使う--color-*変数の定義（無いとドロップダウンが透明になる） -->
+    <link href="../css/navbar.css?v=202609100950" rel="stylesheet">
+    <link href="../css/mobile-fixes.css?v=202609100950" rel="stylesheet">
 
     <style>
         :root {
@@ -208,6 +208,19 @@
             overscroll-behavior-x: contain;
         }
         .reader-flow { height: 100%; }
+
+        /* 連続スクロール表示。ページで区切らず、上下（縦書きは左右）に流す。
+           ページ送りが無いので、めくる操作と取り違えることがない */
+        body.reader-scroll .reader-content { overflow-y: auto; overflow-x: hidden; }
+        body.reader-scroll .writing-vertical { overflow-x: auto; overflow-y: hidden; }
+        body.reader-scroll .reader-flow { height: auto; }
+        body.reader-scroll .writing-vertical .reader-flow { height: 100%; }
+        body.reader-scroll .reader-edge-mask { display: none; }
+        body.reader-scroll .page-nav { display: none; }
+        /* 指で流せるようにする。ページ送りのときは自前で扱うため止めてある */
+        body.reader-scroll .reader-main { touch-action: auto; }
+        body.reader-scroll .reader-content { touch-action: pan-y; }
+        body.reader-scroll .writing-vertical { touch-action: pan-x; }
         /* ページに入りきらなかった行を隠す。地の色で塗るので余白に見える */
         .reader-edge-mask {
             position: absolute; top: 0; bottom: 0; width: 0;
@@ -273,10 +286,25 @@
         }
         .immersive-hint.show { opacity: 1; }
 
-        .text-small { --font-size: 14px; --line-height: 1.7; }
-        .text-medium { --font-size: 18px; --line-height: 1.8; }
-        .text-large { --font-size: 22px; --line-height: 1.9; }
-        .text-xlarge { --font-size: 26px; --line-height: 2.0; }
+        /* 文字の大きさは行間の「基準」まで。実際の行間は基準×倍率（読者が選ぶ） */
+        .text-small { --font-size: 14px; --line-base: 1.7; }
+        .text-medium { --font-size: 18px; --line-base: 1.8; }
+        .text-large { --font-size: 22px; --line-base: 1.9; }
+        .text-xlarge { --font-size: 26px; --line-base: 2.0; }
+        body { --leading: 1; --line-height: calc(var(--line-base, 1.8) * var(--leading, 1)); }
+        .leading-tight { --leading: 0.86; }
+        .leading-normal { --leading: 1; }
+        .leading-loose { --leading: 1.18; }
+
+        /* 左右の余白。狭くすれば1行が長くなり、広くすれば本の余白のように見える */
+        .margin-narrow .reader-main { padding-left: 8px; padding-right: 8px; }
+        .margin-normal .reader-main { padding-left: 24px; padding-right: 24px; }
+        .margin-wide .reader-main { padding-left: 48px; padding-right: 48px; }
+        @media (max-width: 768px) {
+            .margin-narrow .reader-main { padding-left: 4px; padding-right: 4px; }
+            .margin-normal .reader-main { padding-left: 16px; padding-right: 16px; }
+            .margin-wide .reader-main { padding-left: 32px; padding-right: 32px; }
+        }
 
         .reader-content p { margin-bottom: 1.5em; text-align: justify; }
         /* 段落の見せ方は読者が選ぶ。紙の本は字下げ、ウェブ記事は行あけ、と慣習が違う */
@@ -434,17 +462,43 @@
         .click-zone-left { left: 0; width: 25%; }
         .click-zone-right { right: 0; width: 25%; }
 
-        /* Reading Progress Bar */
+        /* 下部のスライダー。今どこを読んでいるかが見え、つまんで移動できる。
+           メモ欄の上に置く（重ねると、めくるつもりでメモ欄を触ってしまう） */
         .reading-progress-bar {
             position: fixed;
-            bottom: 0;
+            bottom: var(--notes-h, 0px);
             left: 0;
             right: 0;
             height: 3px;
             background: rgba(0, 0, 0, 0.1);
             z-index: 1100;
-            pointer-events: none;
+            /* 指で掴める高さを確保する（見た目は3pxのまま） */
+            padding: 12px 0;
+            margin-bottom: -12px;
+            box-sizing: content-box;
+            cursor: pointer;
+            touch-action: none;
         }
+        .reading-progress-bar.dragging .reading-progress-fill { transition: none; }
+        /* つまんでいる位置を示す丸 */
+        .progress-knob {
+            position: absolute; bottom: 12px; width: 14px; height: 14px;
+            margin-left: -7px; margin-bottom: -5px; border-radius: 50%;
+            background: var(--reader-accent); border: 2px solid #fff;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+            opacity: 0; transition: opacity 0.15s;
+        }
+        .reading-progress-bar:hover .progress-knob,
+        .reading-progress-bar.dragging .progress-knob { opacity: 1; }
+        /* つまんでいる間に出すページ番号 */
+        .progress-tip {
+            position: fixed; bottom: calc(var(--notes-h, 0px) + 28px);
+            transform: translateX(-50%);
+            background: var(--reader-text); color: var(--reader-bg);
+            padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.8rem;
+            white-space: nowrap; z-index: 1101; display: none;
+        }
+        .progress-tip.show { display: block; }
         .reading-progress-fill {
             height: 100%;
             background: linear-gradient(90deg, #8B7355, #A89070);
@@ -777,6 +831,29 @@
             </div>
         </div>
         <div class="settings-section">
+            <div class="settings-label"><i class="fas fa-book-open me-1"></i> <span id="labelViewMode">Display</span></div>
+            <div class="settings-row" id="viewModeRow">
+                <button class="settings-btn active" onclick="setViewMode('paged')" id="viewPaged" data-value="paged">Pages</button>
+                <button class="settings-btn" onclick="setViewMode('scroll')" id="viewScroll" data-value="scroll">Scroll</button>
+            </div>
+        </div>
+        <div class="settings-section">
+            <div class="settings-label"><i class="fas fa-bars me-1"></i> <span id="labelLeading">Line spacing</span></div>
+            <div class="settings-row" id="leadingRow">
+                <button class="settings-btn" onclick="setLeading('tight')" id="leadTight" data-value="tight">S</button>
+                <button class="settings-btn active" onclick="setLeading('normal')" id="leadNormal" data-value="normal">M</button>
+                <button class="settings-btn" onclick="setLeading('loose')" id="leadLoose" data-value="loose">L</button>
+            </div>
+        </div>
+        <div class="settings-section">
+            <div class="settings-label"><i class="fas fa-arrows-alt-h me-1"></i> <span id="labelMargin">Margins</span></div>
+            <div class="settings-row" id="marginRow">
+                <button class="settings-btn" onclick="setMargin('narrow')" id="marginNarrow" data-value="narrow">S</button>
+                <button class="settings-btn active" onclick="setMargin('normal')" id="marginNormal" data-value="normal">M</button>
+                <button class="settings-btn" onclick="setMargin('wide')" id="marginWide" data-value="wide">L</button>
+            </div>
+        </div>
+        <div class="settings-section">
             <div class="settings-label"><i class="fas fa-align-left me-1"></i> <span id="labelDirection" data-i18n="reader.direction">Direction</span></div>
             <div class="settings-row" id="directionRow">
                 <button class="settings-btn active" onclick="setWritingMode('horizontal')" id="dirHorizontal" data-value="horizontal" data-i18n="reader.horizontal">Horizontal</button>
@@ -952,12 +1029,12 @@
     <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/config.js?v=202609092124"></script>
-    <script src="../js/i18n.js?v=202609092124"></script>
-    <script src="../js/lang/it.js?v=202609092124"></script>
-    <script src="../js/navbar.js?v=202609092124"></script>
-    <script src="../js/translations.js?v=202609092124"></script>
-    <script src="../js/lazy-loader.js?v=202609092124"></script>
+    <script src="../js/config.js?v=202609100950"></script>
+    <script src="../js/i18n.js?v=202609100950"></script>
+    <script src="../js/lang/it.js?v=202609100950"></script>
+    <script src="../js/navbar.js?v=202609100950"></script>
+    <script src="../js/translations.js?v=202609100950"></script>
+    <script src="../js/lazy-loader.js?v=202609100950"></script>
     <script>
         // ===== Mode Detection =====
         const isManga = new URLSearchParams(window.location.search).get('type') === 'manga';
@@ -1136,6 +1213,7 @@ function getL(obj, replacements = {}) {
             initClickZones();
             initMouseDrag();
             initSelHandles();
+            initProgressBar();
             updateReaderHeight();
             showTouchHint();
             restoreReaderSettings();
@@ -1188,11 +1266,10 @@ function getL(obj, replacements = {}) {
                     setWritingMode("rtl", false);
                 }
 
-                // 前回の続きから再開
-                if (savedLastPage >= 1 && savedLastPage <= totalPages) currentPage = savedLastPage;
-
                 updateAiBadge();
                 updatePageInfo();
+                // 前回の続きから再開（別の端末で読んでいた場所も引き継ぐ）
+                restoreReadingPosition();
             } catch (err) {
                 console.error('Failed to load work:', err);
                 showReaderNotice(getL(uiText.loadFailed), 'javascript:location.reload()', getL(uiText.retry));
@@ -1531,6 +1608,27 @@ function getL(obj, replacements = {}) {
             // ここで測ると段が極端に細くなり、1画面に2段入ってしまう
             if (width < 40) { pendingLayout = anchorIndex; return; }
             pendingLayout = null;
+
+            // 連続スクロール表示はページに区切らない。段組みもページ数も使わない
+            if (isScrollMode()) {
+                flow.style.columnWidth = '';
+                flow.style.columnGap = '';
+                flow.style.width = '';
+                flow.style.boxSizing = '';
+                flow.style.paddingInlineEnd = '';
+                flow.style.paddingBlockEnd = '';
+                vp.style.width = '';
+                pageOffsets = null;
+                pageStep = width || 1;
+                totalPages = 1;
+                currentPage = 1;
+                var keep = (typeof anchorIndex === 'number' && anchorIndex >= 0)
+                    ? flow.querySelector('[data-block="' + anchorIndex + '"]') : null;
+                if (keep) keep.scrollIntoView({ block: 'start', inline: 'start' });
+                buildToc();
+                updatePageInfo();
+                return;
+            }
 
             // 段の幅は枠の幅そのもの。段と段の間（画面には出ない隙間）を足したものが
             // ページの送り幅になる。枠の内側に余白を持たせないので、
@@ -1882,7 +1980,7 @@ function getL(obj, replacements = {}) {
                 if (selDrag || e.target.closest(CONTROL_SELECTOR)) return;
                 touchEndX = e.changedTouches[0].screenX;
                 const diffX = touchEndX - touchStartX;
-                if (isSwiping && Math.abs(diffX) > 80) {
+                if (isSwiping && Math.abs(diffX) > 80 && !isScrollMode()) {
                     // 縦書きの日本語やアラビア語は左へ読み進むので、指の向きも逆になる
                     var rtl = isRightToLeftBook();
                     if (diffX > 0) { rtl ? nextPage() : prevPage(); } else { rtl ? prevPage() : nextPage(); }
@@ -2268,6 +2366,12 @@ function getL(obj, replacements = {}) {
         // 文字サイズ・テーマ・段落は「その人の読み方」なので端末に1つだけ覚える。
         // 表示方向だけは「その本の性質」なので作品ごとに覚える
         // （日本語の本を縦書きで読んだあと、英語の本まで縦書きで開かないように）
+        const VIEW_MODES = ["paged", "scroll"];
+        const VIEW_MODE_KEY = "reader_view_mode";
+        const LEADINGS = ["tight", "normal", "loose"];
+        const MARGIN_SIZES = ["narrow", "normal", "wide"];
+        const LEADING_KEY = "reader_leading";
+        const MARGIN_KEY = "reader_margin";
         const TEXT_SIZES = ["small", "medium", "large", "xlarge"];
         const THEMES = ["light", "dark", "sepia"];
         const WRITING_MODES = ["horizontal", "vertical", "rtl"];
@@ -2346,8 +2450,65 @@ function getL(obj, replacements = {}) {
             setTimeout(function() { layoutPages(anchor); }, 0);
         }
 
+        /** 連続スクロール表示か */
+        function isScrollMode() { return document.body.classList.contains('reader-scroll'); }
+
+        // ページ送りか連続スクロールか。
+        // スクロールにすると、ページ送りの操作そのものが無くなる
+        function setViewMode(mode, save) {
+            keepReadingPlace();
+            if (VIEW_MODES.indexOf(mode) === -1) mode = "paged";
+            document.body.classList.toggle("reader-scroll", mode === "scroll");
+            markActiveSetting("viewModeRow", mode);
+            if (save !== false) saveSetting(VIEW_MODE_KEY, mode);
+            relayoutAfterSetting();
+        }
+
+        // 行間。文字を大きくしなくても、これだけで読みやすさが変わる
+        function setLeading(size, save) {
+            keepReadingPlace();
+            if (LEADINGS.indexOf(size) === -1) size = "normal";
+            document.body.classList.remove("leading-tight", "leading-normal", "leading-loose");
+            document.body.classList.add("leading-" + size);
+            markActiveSetting("leadingRow", size);
+            if (save !== false) saveSetting(LEADING_KEY, size);
+            relayoutAfterSetting();
+        }
+
+        // 左右の余白。狭くすれば1行が長く、広くすれば紙の本の見え方に近づく
+        function setMargin(size, save) {
+            keepReadingPlace();
+            if (MARGIN_SIZES.indexOf(size) === -1) size = "normal";
+            document.body.classList.remove("margin-narrow", "margin-normal", "margin-wide");
+            document.body.classList.add("margin-" + size);
+            markActiveSetting("marginRow", size);
+            if (save !== false) saveSetting(MARGIN_KEY, size);
+            relayoutAfterSetting();
+        }
+
+        function updateReaderSettingLabels() {
+            var view = { en: "Display", ja: "表示", zh: "显示方式", 'zh-TW': "顯示方式", es: "Visualización", fr: "Affichage", de: "Darstellung", ko: "표시 방식", ar: "طريقة العرض", pt: "Apresentação", it: "Visualizzazione" }, paged = { en: "Pages", ja: "ページ送り", zh: "翻页", 'zh-TW': "翻頁", es: "Páginas", fr: "Pages", de: "Seiten", ko: "페이지", ar: "صفحات", pt: "Páginas", it: "Pagine" }, scrolled = { en: "Scroll", ja: "スクロール", zh: "滚动", 'zh-TW': "捲動", es: "Desplazamiento", fr: "Défilement", de: "Scrollen", ko: "스크롤", ar: "تمرير", pt: "Rolagem", it: "Scorrimento" };
+            var v = document.getElementById('labelViewMode');
+            if (v) v.textContent = getL(view);
+            var pb = document.getElementById('viewPaged');
+            if (pb) pb.textContent = getL(paged);
+            var sb = document.getElementById('viewScroll');
+            if (sb) sb.textContent = getL(scrolled);
+            var leading = { en: "Line spacing", ja: "行間", zh: "行距", 'zh-TW': "行距", es: "Interlineado", fr: "Interligne", de: "Zeilenabstand", ko: "줄 간격", ar: "تباعد الأسطر", pt: "Entrelinha", it: "Interlinea" };
+            var margins = { en: "Margins", ja: "余白", zh: "页边距", 'zh-TW': "頁邊距", es: "Márgenes", fr: "Marges", de: "Ränder", ko: "여백", ar: "الهوامش", pt: "Margens", it: "Margini" };
+            var a = document.getElementById('labelLeading');
+            if (a) a.textContent = getL(leading);
+            var b = document.getElementById('labelMargin');
+            if (b) b.textContent = getL(margins);
+        }
+        document.addEventListener('languageChanged', updateReaderSettingLabels);
+
         function restoreReaderSettings() {
             setTextSize(loadSetting(TEXT_SIZE_KEY, TEXT_SIZES) || "medium", false);
+            setViewMode(loadSetting(VIEW_MODE_KEY, VIEW_MODES) || "paged", false);
+            setLeading(loadSetting(LEADING_KEY, LEADINGS) || "normal", false);
+            setMargin(loadSetting(MARGIN_KEY, MARGIN_SIZES) || "normal", false);
+            updateReaderSettingLabels();
             setTheme(loadSetting(THEME_KEY, THEMES) || "light", false);
             setParagraphStyle(loadSetting(PARAGRAPH_STYLE_KEY, PARAGRAPH_STYLES) || "indent", false);
             // 表示方向はこの作品で選ばれていた時だけ。未選択なら作品の言語に任せる
@@ -2355,8 +2516,138 @@ function getL(obj, replacements = {}) {
             if (mode) setWritingMode(mode, false);
         }
 
+
+        // ===== 読んでいた場所（端末をまたいで引き継ぐ） =====
+        // 覚えるのは段落の番号。ページ番号は文字サイズや画面の大きさで変わるので、
+        // 携帯で覚えたページ番号をパソコンで開くと別の場所になってしまう
+
+        var POSITION_KEY = 'reader_position';   // この端末に残す控え
+        var positionSaveTimer = null;
+
+        function localPosition() {
+            try {
+                var raw = localStorage.getItem(storageKey(POSITION_KEY));
+                return raw ? JSON.parse(raw) : null;
+            } catch (e) { return null; }
+        }
+
+        /** 今読んでいる場所を、この端末とサーバーの両方に覚えさせる */
+        function saveReadingPosition() {
+            if (!readerFlow()) return;
+            var pos = {
+                blockIndex: currentAnchorIndex(),
+                page: currentPage,
+                percent: isScrollMode() ? scrollPercent() : Math.round(currentPage / (totalPages || 1) * 100),
+                at: Date.now()
+            };
+            if (pos.blockIndex < 0) return;
+            try { localStorage.setItem(storageKey(POSITION_KEY), JSON.stringify(pos)); } catch (e) {}
+
+            // サーバーへは間を置いて送る（1ページごとに送ると通信が増えるだけ）
+            var token = localStorage.getItem('token');
+            if (!token || !workId) return;
+            if (positionSaveTimer) clearTimeout(positionSaveTimer);
+            positionSaveTimer = setTimeout(function () {
+                positionSaveTimer = null;
+                fetch((window.API_ORIGIN || '') + '/api/works/' + encodeURIComponent(workId) + '/position', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify(pos)
+                }).catch(function () { /* 送れなくてもこの端末には残っている */ });
+            }, 2500);
+        }
+
+        // 画面を閉じる・離れるときは、待たずに送る
+        document.addEventListener('visibilitychange', function () {
+            if (document.visibilityState !== 'hidden') return;
+            if (!positionSaveTimer) return;
+            clearTimeout(positionSaveTimer);
+            positionSaveTimer = null;
+            var token = localStorage.getItem('token');
+            var pos = localPosition();
+            if (!token || !workId || !pos) return;
+            // 閉じる直前でも届く送り方
+            if (navigator.sendBeacon) {
+                // sendBeaconは認証ヘッダーを付けられないので、fetchのkeepaliveを使う
+                fetch((window.API_ORIGIN || '') + '/api/works/' + encodeURIComponent(workId) + '/position', {
+                    method: 'PUT', keepalive: true,
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify(pos)
+                }).catch(function () {});
+            }
+        });
+
+        /**
+         * 読んでいた場所へ戻る。
+         * この端末の控えとサーバーの記録を比べ、新しい方を使う
+         */
+        async function restoreReadingPosition() {
+            var flow = readerFlow();
+            if (!flow) return;
+            var local = localPosition();
+            var remote = null;
+            var token = localStorage.getItem('token');
+            if (token && workId) {
+                try {
+                    var resp = await fetch((window.API_ORIGIN || '') + '/api/works/' + encodeURIComponent(workId) + '/position', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    if (resp.ok) {
+                        var data = await resp.json();
+                        if (data.position && typeof data.position.blockIndex === 'number') {
+                            remote = data.position;
+                            remote.at = new Date(data.position.updatedAt).getTime() || 0;
+                        }
+                    }
+                } catch (e) { /* 取れなければこの端末の控えを使う */ }
+            }
+
+            var use = local;
+            var fromOtherDevice = false;
+            if (remote && (!local || remote.at > (local.at || 0) + 5000)) {
+                use = remote;
+                fromOtherDevice = true;
+            }
+            if (!use || typeof use.blockIndex !== 'number' || use.blockIndex < 0) {
+                // 昔の形（ページ番号だけ）の控えがあれば使う
+                if (savedLastPage >= 1 && savedLastPage <= totalPages) {
+                    currentPage = savedLastPage;
+                    updatePageInfo();
+                }
+                return;
+            }
+
+            var el = flow.querySelector('[data-block="' + use.blockIndex + '"]');
+            if (!el) return;
+            if (isScrollMode()) {
+                el.scrollIntoView({ block: 'start', inline: 'start' });
+                updateReadingProgress();
+            } else {
+                currentPage = pageOfElement(el);
+                updatePageInfo();
+            }
+            if (fromOtherDevice) showResumeNotice();
+        }
+
+        var resumeNoticeText = { en: "Resumed where you left off on another device", ja: "別の端末で読んでいた位置から再開しました", zh: "已从您在其他设备上的阅读位置继续", 'zh-TW': "已從您在其他裝置上的閱讀位置繼續", es: "Continuamos donde lo dejaste en otro dispositivo", fr: "Reprise là où vous vous étiez arrêté sur un autre appareil", de: "Fortgesetzt, wo Sie auf einem anderen Gerät aufgehört haben", ko: "다른 기기에서 읽던 위치부터 이어서 봅니다", ar: "تابعنا من حيث توقفت على جهاز آخر", pt: "Retomámos onde parou noutro dispositivo", it: "Ripreso da dove avevi lasciato su un altro dispositivo" };
+
+        function showResumeNotice() {
+            var el = document.createElement('div');
+            el.className = 'immersive-hint';
+            el.textContent = getL(resumeNoticeText);
+            document.body.appendChild(el);
+            requestAnimationFrame(function () { el.classList.add('show'); });
+            setTimeout(function () {
+                el.classList.remove('show');
+                setTimeout(function () { el.remove(); }, 400);
+            }, 3200);
+        }
+
         function updatePageInfo() {
-            document.getElementById('pageInfo').textContent = `${currentPage} / ${totalPages}`;
+            // スクロール表示ではページ番号の代わりに読んだ割合を出す
+            document.getElementById('pageInfo').textContent = isScrollMode()
+                ? scrollPercent() + '%'
+                : `${currentPage} / ${totalPages}`;
             // ページの中は動かさず、ページごと横に送る
             var vp = readerViewport();
             if (vp && pageStep) {
@@ -2366,6 +2657,7 @@ function getL(obj, replacements = {}) {
             updateReadingProgress();
             // 次回同じページから再開できるよう現在ページを保存
             localStorage.setItem(storageKey('reader_lastpage'), currentPage);
+            saveReadingPosition();
         }
 
         /**
@@ -2389,10 +2681,40 @@ function getL(obj, replacements = {}) {
             mask.style.right = scrollSign < 0 ? 'auto' : '0';
         }
 
+        /** スクロール表示で、どこまで読んだかの割合 */
+        function scrollPercent() {
+            var vp = readerViewport();
+            if (!vp) return 0;
+            var span, pos;
+            if (isVerticalMode()) {
+                span = vp.scrollWidth - vp.clientWidth;
+                pos = Math.abs(vp.scrollLeft);
+            } else {
+                span = vp.scrollHeight - vp.clientHeight;
+                pos = vp.scrollTop;
+            }
+            if (span <= 0) return 100;
+            return Math.min(100, Math.max(0, Math.round(pos / span * 100)));
+        }
+
         function updateReadingProgress() {
             const fill = document.getElementById('readingProgressFill');
-            if (fill) fill.style.width = (currentPage / totalPages) * 100 + '%';
+            var pct = isScrollMode() ? scrollPercent() : (currentPage / (totalPages || 1)) * 100;
+            if (fill) fill.style.width = pct + '%';
+            var knob = document.getElementById('progressKnob');
+            if (knob) knob.style.left = pct + '%';
         }
+
+        // スクロール表示では、流した分だけ進み具合を更新する
+        document.addEventListener('DOMContentLoaded', function () {
+            var vp = document.getElementById('readerContent');
+            if (!vp) return;
+            vp.addEventListener('scroll', function () {
+                if (!isScrollMode()) return;
+                updateReadingProgress();
+                document.getElementById('pageInfo').textContent = scrollPercent() + '%';
+            }, { passive: true });
+        });
 
         // ページは画面に収まっているので、めくるときに画面を上へ戻す必要はない
         function nextPage() { if (currentPage < totalPages) { currentPage++; updatePageInfo(); } }
@@ -2588,6 +2910,67 @@ function getL(obj, replacements = {}) {
             return isRtlMode() || isVerticalMode();
         }
 
+        // ===== 下部のスライダー =====
+        // 本全体のどこにいるかが見え、つまんで移動できる（Kindle・Google Booksと同じ）
+        var progressTipText = { en: "page", ja: "ページ", zh: "页", 'zh-TW': "頁", es: "pág.", fr: "page", de: "Seite", ko: "페이지", ar: "صفحة", pt: "pág.", it: "pag." };
+
+        function initProgressBar() {
+            var bar = document.getElementById('readingProgressBar');
+            var tip = document.getElementById('progressTip');
+            if (!bar) return;
+            var dragging = false;
+
+            function ratioAt(clientX) {
+                var r = bar.getBoundingClientRect();
+                return Math.min(1, Math.max(0, (clientX - r.left) / (r.width || 1)));
+            }
+
+            function apply(clientX, commit) {
+                var ratio = ratioAt(clientX);
+                if (isScrollMode()) {
+                    var vp = readerViewport();
+                    if (!vp) return;
+                    if (isVerticalMode()) {
+                        var span = vp.scrollWidth - vp.clientWidth;
+                        vp.scrollLeft = scrollSign * span * ratio;
+                    } else {
+                        vp.scrollTop = (vp.scrollHeight - vp.clientHeight) * ratio;
+                    }
+                    updateReadingProgress();
+                    if (tip) { tip.textContent = scrollPercent() + '%'; tip.style.left = (ratio * 100) + '%'; }
+                    return;
+                }
+                var page = Math.min(totalPages, Math.max(1, Math.round(ratio * (totalPages - 1)) + 1));
+                if (tip) {
+                    tip.textContent = page + ' / ' + totalPages;
+                    tip.style.left = (ratio * 100) + '%';
+                }
+                // つまんでいる間も動かす（Kindleは離した時だけだが、動く方が分かりやすい）
+                if (page !== currentPage) { currentPage = page; updatePageInfo(); }
+            }
+
+            function start(e) {
+                dragging = true;
+                bar.classList.add('dragging');
+                if (tip) tip.classList.add('show');
+                apply(e.clientX);
+                if (e.pointerId !== undefined && bar.setPointerCapture) bar.setPointerCapture(e.pointerId);
+                e.preventDefault();
+            }
+            function move(e) { if (dragging) { apply(e.clientX); e.preventDefault(); } }
+            function end() {
+                if (!dragging) return;
+                dragging = false;
+                bar.classList.remove('dragging');
+                if (tip) tip.classList.remove('show');
+            }
+
+            bar.addEventListener('pointerdown', start);
+            bar.addEventListener('pointermove', move);
+            bar.addEventListener('pointerup', end);
+            bar.addEventListener('pointercancel', end);
+        }
+
         // ===== 触ったときの割り当て =====
         // 画面を3つに分ける。左右でページを送り、中央でバーの表示を切り替える（Kindleと同じ）。
         // 上下の操作には何も割り当てない——1ページが画面に収まっているので動かす必要が無く、
@@ -2601,6 +2984,7 @@ function getL(obj, replacements = {}) {
         }
 
         function turnByZone(zone) {
+            if (isScrollMode()) return;   // スクロール表示にページ送りは無い
             var rtl = isRightToLeftBook();
             if (zone === 'left') { rtl ? nextPage() : prevPage(); }
             else if (zone === 'right') { rtl ? prevPage() : nextPage(); }
@@ -2635,6 +3019,8 @@ function getL(obj, replacements = {}) {
             var bottom = footer ? footer.getBoundingClientRect().height : 0;
             var h = Math.max(240, window.innerHeight - top - bottom - 16);
             document.documentElement.style.setProperty('--reader-vh', h + 'px');
+            // スライダーをメモ欄の上に置くため、メモ欄の高さも渡す
+            document.documentElement.style.setProperty('--notes-h', Math.round(bottom) + 'px');
         }
 
         // 画面の大きさが変わったら組み直す（読んでいた場所は保つ）
@@ -2706,7 +3092,7 @@ function getL(obj, replacements = {}) {
 
                 if (hasDragged) {
                     var diffX = e.clientX - dragStartX;
-                    if (Math.abs(diffX) > DRAG_THRESHOLD) {
+                    if (Math.abs(diffX) > DRAG_THRESHOLD && !isScrollMode()) {
                         var rtl = isRightToLeftBook();
                         if (diffX > 0) { rtl ? nextPage() : prevPage(); }
                         else { rtl ? prevPage() : nextPage(); }
@@ -2727,6 +3113,7 @@ function getL(obj, replacements = {}) {
             // ページが画面に収まっているので、マウスホイールはページ送りに使う
             var wheelAt = 0;
             document.addEventListener('wheel', function(e) {
+                if (isScrollMode()) return;   // スクロール表示はブラウザに任せる
                 if (e.target.closest(CONTROL_SELECTOR)) return;
                 var now = Date.now();
                 if (now - wheelAt < 250) return;            // 1回転がしで1ページだけ進める
@@ -2830,7 +3217,9 @@ function getL(obj, replacements = {}) {
     <!-- Reading Progress Bar -->
     <div class="reading-progress-bar" id="readingProgressBar">
         <div class="reading-progress-fill" id="readingProgressFill"></div>
+        <div class="progress-knob" id="progressKnob"></div>
     </div>
+    <div class="progress-tip" id="progressTip"></div>
 
     <!-- Notification Badge -->
 
