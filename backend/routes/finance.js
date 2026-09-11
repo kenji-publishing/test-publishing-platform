@@ -28,9 +28,12 @@ router.get('/admin/stats', async (req, res) => {
                     THEN (CASE WHEN transaction_type = 'refund' THEN -amount ELSE amount END) ELSE 0 END), 0) AS month,
                 COALESCE(SUM(CASE WHEN created_at >= DATE_TRUNC('week', CURRENT_DATE)
                     THEN (CASE WHEN transaction_type = 'refund' THEN -amount ELSE amount END) ELSE 0 END), 0) AS week,
-                COUNT(*) FILTER (WHERE transaction_type = 'purchase')::int AS purchases
+                COUNT(*) FILTER (WHERE transaction_type = 'purchase')::int AS purchases,
+                COUNT(*) FILTER (WHERE transaction_type = 'ai_tool')::int AS ai_tool_orders
             FROM transactions
-            WHERE status = 'completed' AND transaction_type IN ('purchase', 'refund')
+            -- 作品の売上とAIツールの売上は別物だが、**収入としてはどちらも計上する**。
+            -- 件数は purchases / ai_tool_orders で分けて返す
+            WHERE status = 'completed' AND transaction_type IN ('purchase', 'refund', 'ai_tool')
             GROUP BY currency
             ORDER BY currency
         `;

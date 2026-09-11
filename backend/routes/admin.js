@@ -40,7 +40,9 @@ router.get('/stats', async (req, res) => {
         FROM transactions
         WHERE created_at >= date_trunc('month', CURRENT_DATE)
           AND status = 'completed'
-          AND transaction_type IN ('purchase', 'refund')
+          -- AIツール（AI翻訳・AI校正）の売上も会社の収入。'ai_tool' を外すと
+          -- 管理画面の収益が実態より少なく出る（2026-09-11にkenjiさんが気づいた）
+          AND transaction_type IN ('purchase', 'refund', 'ai_tool')
         GROUP BY currency
         ORDER BY currency
       `);
