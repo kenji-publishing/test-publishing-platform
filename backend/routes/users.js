@@ -121,6 +121,41 @@ router.get('/payout-details', authenticate, async (req, res) => {
 });
 
 /**
+ * GET /api/users/payout-status
+ * 「受取口座の登録を促すべきか」だけを返す軽い判定。
+ *
+ * 収益が出ているのに口座が未登録だと、支払いは繰り越されるだけで著者には何も伝わらない。
+ * 著者から見ると「売れた通知は来るのに振り込まれない」状態になるので、
+ * ダッシュボードで気づけるようにする。口座の中身は返さない（必要なのは有無だけ）。
+ */
+router.get('/payout-status', authenticate, async (req, res) => {
+  try {
+    const hasDetails = (await db.query(
+      'SELECT 1 FROM user_payout_details WHERE user_id = $1 LIMIT 1',
+      [req.user.userId]
+    )).rows.length > 0;
+
+    // 未払いの取り分があるか（支払い済みのものは payout_run_id が入る）
+    const earned = (await db.query(
+      `SELECT COALESCE(SUM(amount), 0) AS total, COUNT(*) AS rows
+         FROM revenue_splits
+        WHERE recipient_id = $1 AND payout_run_id IS NULL`,
+      [req.user.userId]
+    )).rows[0];
+
+    res.json({
+      hasDetails,
+      hasEarnings: Number(earned.rows) > 0 && Number(earned.total) > 0,
+      needsSetup: !hasDetails && Number(earned.total) > 0
+    });
+  } catch (error) {
+    // 判定できないときは促さない。誤った催促は「登録したのにまた言われる」となり信用を落とす
+    console.error('Get payout status error:', error.message);
+    res.json({ hasDetails: true, hasEarnings: false, needsSetup: false });
+  }
+});
+
+/**
  * PUT /api/users/payout-details
  * 受取口座の登録・更新（upsert）。月次の手動送金（Wise一括）の宛先になる
  */

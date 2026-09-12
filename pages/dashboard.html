@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609112048">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609121601">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609112048">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609121601">
     <title data-i18n="dashboard.title">Dashboard - AuctLect</title>
     
     <!-- Google Fonts -->
@@ -22,12 +22,12 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <!-- Custom Styles -->
-    <link href="../css/variables.css?v=202609112048" rel="stylesheet">
-    <link href="../css/style-new.css?v=202609112048" rel="stylesheet">
-    <link href="../css/components.css?v=202609112048" rel="stylesheet">
-    <link href="../css/navbar.css?v=202609112048" rel="stylesheet">
-    <link href="../css/mobile-fixes.css?v=202609112048" rel="stylesheet">
-    <link href="../css/navbar.css?v=202609112048" rel="stylesheet">
+    <link href="../css/variables.css?v=202609121601" rel="stylesheet">
+    <link href="../css/style-new.css?v=202609121601" rel="stylesheet">
+    <link href="../css/components.css?v=202609121601" rel="stylesheet">
+    <link href="../css/navbar.css?v=202609121601" rel="stylesheet">
+    <link href="../css/mobile-fixes.css?v=202609121601" rel="stylesheet">
+    <link href="../css/navbar.css?v=202609121601" rel="stylesheet">
     
     <style>
         :root {
@@ -403,6 +403,10 @@
                 </div>
             </div>
 
+            <!-- 受取口座の未登録案内。収益があるのに口座が無いときだけ出す。
+                 未登録のままでは支払いが繰り越されるだけで著者には伝わらないため -->
+            <div id="payoutSetupNotice" class="mb-4" style="display:none"></div>
+
             <!-- Dashboard Tabs -->
             <div class="d-flex gap-2 mb-4" id="dashboardTabs">
                 <button class="btn btn-custom btn-sm active" id="tabMyWorks" onclick="switchDashTab('myworks')">
@@ -662,25 +666,25 @@
     <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/config.js?v=202609112048"></script>
-    <script src="../js/i18n.js?v=202609112048"></script>
-    <script src="../js/navbar.js?v=202609112048"></script>
+    <script src="../js/config.js?v=202609121601"></script>
+    <script src="../js/i18n.js?v=202609121601"></script>
+    <script src="../js/navbar.js?v=202609121601"></script>
     <!-- 言語ファイル（9言語） -->
-    <script src="../js/lang/ja.js?v=202609112048"></script>
-    <script src="../js/lang/en.js?v=202609112048"></script>
-    <script src="../js/lang/zh.js?v=202609112048"></script>
-    <script src="../js/lang/zh-TW.js?v=202609112048"></script>
-    <script src="../js/lang/es.js?v=202609112048"></script>
-    <script src="../js/lang/fr.js?v=202609112048"></script>
-    <script src="../js/lang/de.js?v=202609112048"></script>
-    <script src="../js/lang/ko.js?v=202609112048"></script>
-    <script src="../js/lang/ar.js?v=202609112048"></script>
-    <script src="../js/lang/pt.js?v=202609112048"></script>
-    <script src="../js/lang/it.js?v=202609112048"></script>
+    <script src="../js/lang/ja.js?v=202609121601"></script>
+    <script src="../js/lang/en.js?v=202609121601"></script>
+    <script src="../js/lang/zh.js?v=202609121601"></script>
+    <script src="../js/lang/zh-TW.js?v=202609121601"></script>
+    <script src="../js/lang/es.js?v=202609121601"></script>
+    <script src="../js/lang/fr.js?v=202609121601"></script>
+    <script src="../js/lang/de.js?v=202609121601"></script>
+    <script src="../js/lang/ko.js?v=202609121601"></script>
+    <script src="../js/lang/ar.js?v=202609121601"></script>
+    <script src="../js/lang/pt.js?v=202609121601"></script>
+    <script src="../js/lang/it.js?v=202609121601"></script>
     <!-- 翻訳ベース（共通関数） -->
     <!-- 言語切替機能 -->
     
-    <script src="../js/notification-badge.js?v=202609112048"></script>
+    <script src="../js/notification-badge.js?v=202609121601"></script>
     
     <script>
         // 多言語対応テキスト
@@ -794,6 +798,75 @@
         // 作品・閲覧数は /api/works/my、収益は /api/analytics/author/overview が正。
         // （以前はデモ用の固定値か全部ゼロを出していて、実績があっても
         //   「まだ作品がありません」と表示されていた）
+        /**
+         * 収益があるのに受取口座が未登録なら案内を出す。
+         *
+         * 未登録のままだと支払いは翌月に繰り越されるだけで、著者には何も伝わらない。
+         * 「売れた通知は来るのに振り込まれない」という見え方を避けるための案内。
+         * 判定できないときは何も出さない（誤った催促はしない）。
+         */
+        async function checkPayoutSetup() {
+            const box = document.getElementById('payoutSetupNotice');
+            if (!box) return;
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+                const res = await fetch((window.API_ORIGIN || '') + '/api/users/payout-status', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!res.ok) return;
+                const s = await res.json();
+                if (!s.needsSetup) return;
+
+                const t = getL({
+                    en: { h: 'Your payout account is not set up yet',
+                          p: 'You have revenue waiting. We cannot pay it out until you add a bank account — the balance carries over to the next month, so nothing is lost.',
+                          b: 'Add payout account' },
+                    ja: { h: '受取口座が未登録です',
+                          p: 'お支払いできる収益があります。銀行口座をご登録いただくまでお支払いができず、残高は翌月へ繰り越されます（金額が失われることはありません）。',
+                          b: '受取口座を登録する' },
+                    zh: { h: '尚未设置收款账户',
+                          p: '您有待支付的收益。在添加银行账户之前无法支付，余额将结转至下月（金额不会消失）。',
+                          b: '设置收款账户' },
+                    es: { h: 'Aún no ha configurado su cuenta de cobro',
+                          p: 'Tiene ingresos pendientes. No podemos pagarlos hasta que añada una cuenta bancaria; el saldo se traslada al mes siguiente, así que no se pierde nada.',
+                          b: 'Añadir cuenta de cobro' },
+                    fr: { h: 'Votre compte de paiement n’est pas encore renseigné',
+                          p: 'Des revenus sont en attente. Nous ne pouvons pas les verser avant que vous ayez ajouté un compte bancaire ; le solde est reporté au mois suivant, rien n’est perdu.',
+                          b: 'Renseigner mon compte' },
+                    de: { h: 'Ihr Auszahlungskonto ist noch nicht eingerichtet',
+                          p: 'Es warten Einnahmen auf Sie. Wir können sie erst auszahlen, wenn Sie ein Bankkonto hinterlegt haben; das Guthaben wird in den nächsten Monat übertragen und geht nicht verloren.',
+                          b: 'Auszahlungskonto hinterlegen' },
+                    ko: { h: '수령 계좌가 아직 등록되지 않았습니다',
+                          p: '지급 대기 중인 수익이 있습니다. 은행 계좌를 등록하기 전에는 지급할 수 없으며, 잔액은 다음 달로 이월됩니다(금액은 사라지지 않습니다).',
+                          b: '수령 계좌 등록' },
+                    ar: { h: 'لم يتم إعداد حساب التحويل بعد',
+                          p: 'لديك إيرادات في انتظار الدفع. لا يمكننا تحويلها حتى تضيف حساباً بنكياً؛ ويُرحَّل الرصيد إلى الشهر التالي، فلا يضيع شيء.',
+                          b: 'إضافة حساب التحويل' },
+                    pt: { h: 'A sua conta de recebimento ainda não está configurada',
+                          p: 'Tem receitas pendentes. Não podemos pagá-las até adicionar uma conta bancária; o saldo é transferido para o mês seguinte, pelo que nada se perde.',
+                          b: 'Adicionar conta de recebimento' },
+                    it: { h: 'Il tuo conto per gli incassi non è ancora impostato',
+                          p: 'Hai ricavi in attesa. Non possiamo pagarli finché non aggiungi un conto bancario; il saldo passa al mese successivo, quindi nulla va perduto.',
+                          b: 'Aggiungi il conto' }
+                });
+
+                box.innerHTML =
+                    '<div style="padding:16px 18px;background:#fff4e5;border:1px solid #e8a33d;'
+                    + 'border-left-width:5px;border-radius:8px;color:#5c3d00">'
+                    + '<div style="font-weight:600;font-size:1.02rem">'
+                    + '<i class="fas fa-university me-2"></i>' + t.h + '</div>'
+                    + '<div style="margin-top:6px;font-size:.92rem;line-height:1.7">' + t.p + '</div>'
+                    + '<a href="profile.html#payoutCard" class="btn btn-primary-custom btn-sm" '
+                    + 'style="margin-top:12px"><i class="fas fa-arrow-right me-1"></i>' + t.b + '</a>'
+                    + '</div>';
+                box.style.display = '';
+            } catch (e) {
+                // 案内が出せなくてもダッシュボード本体は動かす
+                console.error('payout status check failed:', e);
+            }
+        }
+
         async function loadDashboardData() {
             const token = localStorage.getItem('token');
             if (!token) return;
@@ -1348,6 +1421,9 @@
 
             // コラボタブのバッジ（届いた申請の件数）
             refreshCollabTabBadge();
+
+            // 受取口座の未登録案内
+            checkPayoutSetup();
 
             // Init analytics charts
             const isDemo = new URLSearchParams(window.location.search).has('demo');

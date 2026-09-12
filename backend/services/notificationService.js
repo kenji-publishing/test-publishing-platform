@@ -136,14 +136,58 @@ async function sendNotificationEmail(userId, prefs, { subject, title, lines, act
  * @param {string} workId - 作品ID
  */
 async function notifySale(authorId, workTitle, amount, buyerName = '読者', workId = null) {
+    // 口座が未登録のままだと支払いは繰り越されるだけで、著者には何も伝わらない。
+    // 「売れた通知は来るのに振り込まれない」という最悪の見え方になるので、
+    // 売れたこの瞬間に一緒に伝える。
+    const needsPayout = !(await hasPayoutDetails(authorId));
+
+    let message = `「${workTitle}」が${buyerName}さんに購入されました。収益: ¥${amount.toLocaleString()}`;
+    if (needsPayout) {
+        message += ' ／ ⚠️ 受取口座が未登録です。登録が済むまでお支払いできず、残高は繰り越されます。';
+    }
+
     return createNotification({
         userId: authorId,
         type: NotificationTypes.SALE,
-        title: '作品が購入されました！',
-        message: `「${workTitle}」が${buyerName}さんに購入されました。収益: ¥${amount.toLocaleString()}`,
-        actionUrl: workId ? `/pages/work-detail.html?id=${workId}` : '/pages/dashboard.html',
-        metadata: { workTitle, amount, buyerName, workId }
+        title: needsPayout ? '作品が購入されました（受取口座の登録が必要です）' : '作品が購入されました！',
+        message,
+        // 口座が無いときは、作品ページより先に登録画面へ送る
+        actionUrl: needsPayout
+            ? '/pages/profile.html#payoutCard'
+            : (workId ? `/pages/work-detail.html?id=${workId}` : '/pages/dashboard.html'),
+        metadata: { workTitle, amount, buyerName, workId, payoutDetailsMissing: needsPayout },
+        // 通常の売上通知はアプリ内だけ。**口座未登録のときだけメールも送る**
+        // （気づかないとお金が届かないため、この一件は見逃されると困る）
+        email: needsPayout ? {
+            subject: '【AuctLect】受取口座のご登録をお願いします',
+            lines: [
+                `「${workTitle}」が購入されました。`,
+                'ただ、収益をお支払いする銀行口座がまだご登録されていません。',
+                'ご登録が済むまでお支払いができず、残高は翌月へ繰り越されます（金額が失われることはありません）。',
+                '下のボタンからご登録いただけます。数分で完了します。'
+            ],
+            actionLabel: '受取口座を登録する'
+        } : null
     });
+}
+
+/**
+ * 収益の受取口座が登録されているか。
+ *
+ * 判定できないときは **「登録済み」として扱う**。
+ * 登録済みの人に催促を送るのは「直したのにまた言われる」という体験になり、
+ * 見逃しよりも信用を損なう。見逃した場合はダッシュボードの案内で拾える。
+ */
+async function hasPayoutDetails(userId) {
+    try {
+        const r = await pool.query(
+            'SELECT 1 FROM user_payout_details WHERE user_id = $1 LIMIT 1', [userId]
+        );
+        return r.rows.length > 0;
+    } catch (e) {
+        console.error('[NotificationService] payout details check failed:', e.message);
+        return true;
+    }
 }
 
 /**
