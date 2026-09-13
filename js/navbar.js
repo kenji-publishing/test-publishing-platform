@@ -1140,7 +1140,113 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
         updateNavText();
     }, 500);
+
+    // 11. Record the visit (来訪の記録)
+    trackPageView();
 });
+
+// ========== Visit tracking (来訪の記録) ==========
+/*
+ * ページを開くたびに1回、裏で /api/analytics/track/pageview に知らせる。
+ * 投稿ごとの目印（?utm_source=x&utm_campaign=...）と参照元も一緒に送る。
+ * 最初の来訪（ファーストタッチ）は localStorage に取っておき、登録時に
+ * getAcquisition() で渡す → users.acquisition_* に残る。
+ * 管理画面・file://・デモモード・Global Privacy Control 有効時は送らない。
+ */
+var AL_SESSION_KEY = 'al_sid';
+var AL_FIRST_TOUCH_KEY = 'al_first_touch';
+var AL_UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content'];
+
+function _alSessionId() {
+    try {
+        var sid = sessionStorage.getItem(AL_SESSION_KEY);
+        if (!sid) {
+            sid = 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+            sessionStorage.setItem(AL_SESSION_KEY, sid);
+        }
+        return sid;
+    } catch (e) { return null; }
+}
+
+function _alReadUtm() {
+    var q = new URLSearchParams(location.search);
+    var out = null;
+    AL_UTM_KEYS.forEach(function(k) {
+        var v = q.get(k);
+        if (v) { out = out || {}; out[k] = v.slice(0, 100); }
+    });
+    return out;
+}
+
+function _alExternalReferrer() {
+    var r = document.referrer;
+    if (!r) return null;
+    try {
+        if (new URL(r).hostname === location.hostname) return null;
+        return r.slice(0, 500);
+    } catch (e) { return null; }
+}
+
+/** 最初の来訪を覚える。目印付きの記録は、目印無しの記録より優先する */
+function _alRememberFirstTouch(utm, referrer) {
+    try {
+        var raw = localStorage.getItem(AL_FIRST_TOUCH_KEY);
+        var prev = raw ? JSON.parse(raw) : null;
+        if (prev && (prev.source || !utm)) return;
+        localStorage.setItem(AL_FIRST_TOUCH_KEY, JSON.stringify({
+            source: utm ? utm.utm_source || null : null,
+            medium: utm ? utm.utm_medium || null : null,
+            campaign: utm ? utm.utm_campaign || null : null,
+            content: utm ? utm.utm_content || null : null,
+            referrer: referrer,
+            landing: (location.pathname + location.search).slice(0, 500),
+            at: new Date().toISOString()
+        }));
+    } catch (e) {}
+}
+
+/** 登録フォームが呼ぶ。最初の来訪の記録（無ければ null） */
+function getAcquisition() {
+    try {
+        var raw = localStorage.getItem(AL_FIRST_TOUCH_KEY);
+        return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
+}
+window.getAcquisition = getAcquisition;
+
+function _alPageType() {
+    var f = (location.pathname.split('/').pop() || 'index.html').replace(/\.html?$/, '');
+    return f || 'index';
+}
+
+function trackPageView() {
+    if (location.protocol === 'file:' || window.DEMO_MODE) return;
+    if (/\/admin\//.test(location.pathname)) return;
+    if (navigator.globalPrivacyControl) return;
+
+    var utm = _alReadUtm();
+    var referrer = _alExternalReferrer();
+    _alRememberFirstTouch(utm, referrer);
+
+    var payload = {
+        page_path: location.pathname,
+        page_type: _alPageType(),
+        referrer: referrer,
+        session_id: _alSessionId(),
+        lang: getCurrentLanguage()
+    };
+    if (utm) AL_UTM_KEYS.forEach(function(k) { payload[k] = utm[k] || null; });
+
+    var headers = { 'Content-Type': 'application/json' };
+    var token = localStorage.getItem('token');
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+    try {
+        fetch((window.API_ORIGIN || '') + '/api/analytics/track/pageview', {
+            method: 'POST', headers: headers, body: JSON.stringify(payload), keepalive: true
+        }).catch(function() {});
+    } catch (e) {}
+}
+window.trackPageView = trackPageView;
 
 // ========== Message Badge ==========
 

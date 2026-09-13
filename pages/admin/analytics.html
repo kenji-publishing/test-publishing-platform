@@ -2,11 +2,11 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../../favicon.svg?v=202609121601">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg?v=202609131949">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/svg+xml" href="../../favicon.svg?v=202609121601">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg?v=202609131949">
     <title>プラットフォーム分析 - 管理者 - AuctLect</title>
-    <script src="../../js/config.js?v=202609121601"></script>
+    <script src="../../js/config.js?v=202609131949"></script>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,9 +23,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <!-- Custom CSS -->
-    <link href="../../css/variables.css?v=202609121601" rel="stylesheet">
-    <link rel="stylesheet" href="../../css/style-new.css?v=202609121601">
-    <link href="../../css/components.css?v=202609121601" rel="stylesheet">
+    <link href="../../css/variables.css?v=202609131949" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/style-new.css?v=202609131949">
+    <link href="../../css/components.css?v=202609131949" rel="stylesheet">
     
     <style>
         /* Admin Analytics Styles */
@@ -297,7 +297,7 @@
             to { transform: rotate(360deg); }
         }
     </style>
-    <script src="../../js/admin-auth-notice.js?v=202609121601"></script>
+    <script src="../../js/admin-auth-notice.js?v=202609131949"></script>
 </head>
 <body>
     <!-- Admin Header -->
@@ -357,8 +357,8 @@
                             <div class="label">今日の訪問者</div>
                         </div>
                         <div class="realtime-stat">
-                            <div class="value" id="todayRevenue">--</div>
-                            <div class="label">今日の収益</div>
+                            <div class="value" id="todayPurchases">--</div>
+                            <div class="label">今日の購入</div>
                         </div>
                     </div>
                 </div>
@@ -404,9 +404,9 @@
                     <div class="col-6 col-md-4 col-lg-2">
                         <div class="stat-card">
                             <div class="stat-icon indigo"><i class="fas fa-book-open"></i></div>
-                            <div class="stat-value" id="workViews">--</div>
-                            <div class="stat-label">作品閲覧</div>
-                            <div class="stat-change neutral">--</div>
+                            <div class="stat-value" id="trackedSignups">--</div>
+                            <div class="stat-label">入口がわかる登録</div>
+                            <div class="stat-change neutral">目印・参照元あり</div>
                         </div>
                     </div>
                     <div class="col-6 col-md-4 col-lg-2">
@@ -414,15 +414,15 @@
                             <div class="stat-icon amber"><i class="fas fa-shopping-cart"></i></div>
                             <div class="stat-value" id="purchases">--</div>
                             <div class="stat-label">購入数</div>
-                            <div class="stat-change neutral">--</div>
+                            <div class="stat-change neutral" id="puChange">--</div>
                         </div>
                     </div>
                     <div class="col-6 col-md-4 col-lg-2">
                         <div class="stat-card">
                             <div class="stat-icon red"><i class="fas fa-yen-sign"></i></div>
-                            <div class="stat-value" id="totalRevenue">--</div>
-                            <div class="stat-label">総収益</div>
-                            <div class="stat-change positive" id="revChange">--</div>
+                            <div class="stat-value" id="totalRevenue" style="font-size: 1.1rem;">--</div>
+                            <div class="stat-label">売上（通貨別・税込）</div>
+                            <div class="stat-change neutral">正確な数字は財務ページ</div>
                         </div>
                     </div>
                 </div>
@@ -489,6 +489,66 @@
                     </div>
                 </div>
                 
+                <!-- どこから来たか -->
+                <div class="row g-4 mb-4">
+                    <div class="col-lg-5">
+                        <div class="chart-card">
+                            <h3><i class="fas fa-door-open"></i> 入口別の訪問者</h3>
+                            <p class="text-muted small mb-3">訪問者ごとに「最初に開いたページ」の来訪元で数えています。direct はリンク元が無い来訪（URL直打ち・アプリ内リンク・メール等）。</p>
+                            <div id="sourceBreakdown"></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-7">
+                        <div class="chart-card">
+                            <h3><i class="fas fa-tag"></i> 目印（UTM）別</h3>
+                            <p class="text-muted small mb-3">
+                                投稿ごとにリンクの末尾へ目印を付けると、ここに行が増えます。例:
+                                <code>https://auctlect.com/?utm_source=x&amp;utm_medium=social&amp;utm_campaign=royalty70</code>
+                                （source=どこに載せたか / medium=種類 / campaign=どの投稿か）
+                            </p>
+                            <div class="table-responsive">
+                                <table class="ranking-table">
+                                    <thead>
+                                        <tr>
+                                            <th>source</th>
+                                            <th>medium</th>
+                                            <th>campaign</th>
+                                            <th>content</th>
+                                            <th class="text-end">PV</th>
+                                            <th class="text-end">訪問者</th>
+                                            <th class="text-end">登録</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="campaignBody">
+                                        <tr><td colspan="7" class="text-center py-3 text-muted">まだ目印付きの来訪はありません</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-card mb-4">
+                    <h3><i class="fas fa-user-plus"></i> 登録者の獲得元</h3>
+                    <p class="text-muted small mb-3">登録した人が「最初に」どこから来たか。unknown はこの仕組みを入れる前の登録、または記録を持たないブラウザからの登録。</p>
+                    <div class="table-responsive">
+                        <table class="ranking-table">
+                            <thead>
+                                <tr>
+                                    <th>source</th>
+                                    <th>medium</th>
+                                    <th>campaign</th>
+                                    <th>content</th>
+                                    <th class="text-end">登録者数</th>
+                                </tr>
+                            </thead>
+                            <tbody id="signupSourceBody">
+                                <tr><td colspan="5" class="text-center py-3 text-muted">期間内の登録はありません</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <!-- Top Works -->
                 <div class="chart-card">
                     <h3><i class="fas fa-trophy"></i> 人気作品TOP10</h3>
@@ -499,8 +559,8 @@
                                     <th style="width: 40px;">#</th>
                                     <th>作品名</th>
                                     <th>作者</th>
-                                    <th class="text-end">閲覧数</th>
-                                    <th class="text-end">収益</th>
+                                    <th class="text-end">閲覧数（累計）</th>
+                                    <th class="text-end">購入（期間内）</th>
                                 </tr>
                             </thead>
                             <tbody id="topWorksBody">
@@ -574,11 +634,14 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    updateStats(data.overview);
+                    updateStats(data.overview, data.signupSources);
                     updateTrafficChart(data.trend);
                     updateUserGrowthChart(data.userGrowth);
                     updateDeviceBreakdown(data.deviceBreakdown);
                     updateCountryBreakdown(data.countryBreakdown);
+                    updateSources(data.sources);
+                    updateCampaigns(data.campaigns);
+                    updateSignupSources(data.signupSources);
                     updateTopWorks(data.topWorks);
                 }
             } catch (error) {
@@ -603,7 +666,7 @@
                     document.getElementById('activeUsers').textContent = data.realtime.activeUsers;
                     document.getElementById('pageViewsHour').textContent = formatNumber(data.realtime.pageViewsLastHour);
                     document.getElementById('todayVisitors').textContent = formatNumber(data.realtime.today.visitors);
-                    document.getElementById('todayRevenue').textContent = '¥' + formatNumber(data.realtime.today.revenue);
+                    document.getElementById('todayPurchases').textContent = formatNumber(data.realtime.today.purchases);
                 }
             } catch (error) {
                 console.error('Realtime error:', error);
@@ -639,27 +702,37 @@
         // =============================================
         // UI Updates
         // =============================================
-        function updateStats(overview) {
+        function updateStats(overview, signupSources) {
+            const setChange = (id, change) => {
+                const el = document.getElementById(id);
+                el.textContent = formatChange(change);
+                el.className = 'stat-change ' + getChangeClass(change);
+            };
             document.getElementById('totalPageViews').textContent = formatNumber(overview.pageViews.value);
-            document.getElementById('pvChange').textContent = formatChange(overview.pageViews.change);
-            document.getElementById('pvChange').className = 'stat-change ' + getChangeClass(overview.pageViews.change);
-            
+            setChange('pvChange', overview.pageViews.change);
+
             document.getElementById('uniqueVisitors').textContent = formatNumber(overview.uniqueVisitors.value);
-            document.getElementById('uvChange').textContent = formatChange(overview.uniqueVisitors.change);
-            document.getElementById('uvChange').className = 'stat-change ' + getChangeClass(overview.uniqueVisitors.change);
-            
+            setChange('uvChange', overview.uniqueVisitors.change);
+
             document.getElementById('newUsers').textContent = formatNumber(overview.newUsers.value);
-            document.getElementById('nuChange').textContent = formatChange(overview.newUsers.change);
-            document.getElementById('nuChange').className = 'stat-change ' + getChangeClass(overview.newUsers.change);
-            
-            document.getElementById('workViews').textContent = formatNumber(overview.workViews);
-            document.getElementById('purchases').textContent = formatNumber(overview.purchases);
-            
-            document.getElementById('totalRevenue').textContent = '¥' + formatNumber(overview.revenue.total);
-            document.getElementById('revChange').textContent = formatChange(overview.revenue.change);
-            document.getElementById('revChange').className = 'stat-change ' + getChangeClass(overview.revenue.change);
+            setChange('nuChange', overview.newUsers.change);
+
+            // 入口（目印か参照元）がわかっている登録者の数
+            const tracked = (signupSources || [])
+                .filter(r => r.source && r.source !== 'unknown')
+                .reduce((a, r) => a + (r.signups || 0), 0);
+            document.getElementById('trackedSignups').textContent = formatNumber(tracked);
+
+            document.getElementById('purchases').textContent = formatNumber(overview.purchases.value);
+            setChange('puChange', overview.purchases.change);
+
+            // 通貨をまたいで足し算はしない。通貨ごとに並べる
+            const rev = overview.revenue || [];
+            document.getElementById('totalRevenue').textContent = rev.length
+                ? rev.map(r => r.currency + ' ' + formatNumber(Math.round(r.total * 100) / 100)).join(' / ')
+                : '0';
         }
-        
+
         function updateTrafficChart(trend) {
             const ctx = document.getElementById('trafficChart').getContext('2d');
             
@@ -752,13 +825,11 @@
             const total = Object.values(breakdown).reduce((a, b) => a + b, 0);
             
             const countryNames = {
-                'JP': '日本',
-                'US': 'アメリカ',
-                'GB': 'イギリス',
-                'DE': 'ドイツ',
-                'CN': '中国',
-                'KR': '韓国',
-                'FR': 'フランス'
+                'JP': '日本', 'US': 'アメリカ', 'GB': 'イギリス', 'DE': 'ドイツ', 'CN': '中国',
+                'KR': '韓国', 'FR': 'フランス', 'ES': 'スペイン', 'IT': 'イタリア', 'PT': 'ポルトガル',
+                'BR': 'ブラジル', 'MX': 'メキシコ', 'CA': 'カナダ', 'AU': 'オーストラリア', 'IE': 'アイルランド',
+                'NL': 'オランダ', 'TW': '台湾', 'HK': '香港', 'SG': 'シンガポール', 'IN': 'インド',
+                'SA': 'サウジアラビア', 'AE': 'UAE', 'EG': 'エジプト', 'NZ': 'ニュージーランド'
             };
             
             const colors = ['jp', 'us', 'gb', 'de', 'other'];
@@ -782,6 +853,64 @@
             }).join('');
         }
         
+        function updateSources(sources) {
+            const container = document.getElementById('sourceBreakdown');
+            if (!sources || sources.length === 0) {
+                container.innerHTML = '<div class="text-muted small">まだ来訪の記録がありません</div>';
+                return;
+            }
+            const total = sources.reduce((a, r) => a + r.visitors, 0);
+            const colors = ['jp', 'us', 'gb', 'de', 'other'];
+            container.innerHTML = sources.slice(0, 8).map((r, i) => {
+                const pct = total > 0 ? (r.visitors / total * 100).toFixed(1) : 0;
+                return `
+                    <div class="breakdown-item">
+                        <span class="label" title="${escapeHtml(r.source)}">${escapeHtml(r.source)}</span>
+                        <div class="bar-container"><div class="bar ${colors[i] || 'other'}" style="width: ${pct}%"></div></div>
+                        <span class="value">${formatNumber(r.visitors)}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateCampaigns(campaigns) {
+            const tbody = document.getElementById('campaignBody');
+            if (!campaigns || campaigns.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-3 text-muted">まだ目印付きの来訪はありません</td></tr>';
+                return;
+            }
+            const dash = v => v ? escapeHtml(v) : '<span class="text-muted">—</span>';
+            tbody.innerHTML = campaigns.map(r => `
+                <tr>
+                    <td>${dash(r.source)}</td>
+                    <td>${dash(r.medium)}</td>
+                    <td>${dash(r.campaign)}</td>
+                    <td>${dash(r.content)}</td>
+                    <td class="text-end">${formatNumber(r.page_views)}</td>
+                    <td class="text-end">${formatNumber(r.visitors)}</td>
+                    <td class="text-end"><strong>${formatNumber(r.signups)}</strong></td>
+                </tr>
+            `).join('');
+        }
+
+        function updateSignupSources(rows) {
+            const tbody = document.getElementById('signupSourceBody');
+            if (!rows || rows.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-3 text-muted">期間内の登録はありません</td></tr>';
+                return;
+            }
+            const dash = v => v ? escapeHtml(v) : '<span class="text-muted">—</span>';
+            tbody.innerHTML = rows.map(r => `
+                <tr>
+                    <td>${dash(r.source)}</td>
+                    <td>${dash(r.medium)}</td>
+                    <td>${dash(r.campaign)}</td>
+                    <td>${dash(r.content)}</td>
+                    <td class="text-end"><strong>${formatNumber(r.signups)}</strong></td>
+                </tr>
+            `).join('');
+        }
+
         function updateTopWorks(topWorks) {
             const tbody = document.getElementById('topWorksBody');
             
@@ -796,7 +925,7 @@
                     <td>${escapeHtml(work.title)}</td>
                     <td class="text-muted">${escapeHtml(work.author_name)}</td>
                     <td class="text-end">${formatNumber(work.views)}</td>
-                    <td class="text-end">¥${formatNumber(work.revenue)}</td>
+                    <td class="text-end">${formatNumber(work.purchases)}</td>
                 </tr>
             `).join('');
         }

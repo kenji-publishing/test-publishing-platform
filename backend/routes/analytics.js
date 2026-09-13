@@ -5,6 +5,46 @@
 
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
+const { cleanToken, cleanUrl } = require('../services/acquisition');
+
+// 自サイト内の遷移は「参照元」に数えない
+const OWN_HOSTS = ['auctlect.com', 'www.auctlect.com', 'localhost', '127.0.0.1'];
+const BOT_RE = /bot|crawl|spider|slurp|facebookexternalhit|preview|headless|lighthouse|pingdom|uptime|monitor/i;
+
+/** ログイン中なら user_id、そうでなければ null（来訪の記録はログイン必須にしない） */
+function optionalUserId(req) {
+    const h = req.headers['authorization'];
+    const token = h && h.split(' ')[1];
+    if (!token) return null;
+    try {
+        return jwt.verify(token, process.env.JWT_SECRET).userId || null;
+    } catch (e) {
+        return null;
+    }
+}
+
+/** IPは末尾を落として保存する（IPv4は最後の1区切り、IPv6は下位を切る） */
+function maskIp(ip) {
+    if (!ip) return null;
+    ip = String(ip).replace(/^::ffff:/, '');
+    if (/^\d+\.\d+\.\d+\.\d+$/.test(ip)) return ip.replace(/\.\d+$/, '.0');
+    if (ip.includes(':')) {
+        if (ip === '::1') return ip;
+        const head = ip.split('::')[0].split(':').filter(Boolean).slice(0, 3);
+        return head.length === 3 ? head.join(':') + '::' : null;
+    }
+    return null;
+}
+
+/** SQL: referrer から www. 抜きのドメインを取り出す式 */
+const REF_HOST_SQL = "substring(referrer from '^https?://(?:www\\.)?([^/:?#]+)')";
+/** SQL: 来訪の入口。utm_source > 外部の参照元ドメイン > direct */
+const ENTRY_SOURCE_SQL = `COALESCE(utm_source,
+    CASE WHEN ${REF_HOST_SQL} = ANY($2::text[]) THEN NULL ELSE ${REF_HOST_SQL} END,
+    'direct')`;
+/** SQL: 訪問者の識別子。ログイン中はuser、そうでなければセッション */
+const VISITOR_SQL = "COALESCE(user_id::text, session_id)";
 
 // =============================================
 // Middleware
@@ -40,41 +80,46 @@ const requireAdmin = (req, res, next) => {
 
 /**
  * POST /api/analytics/track/pageview
- * Track page view
+ * ページを開いたことを1回知らせる（navbar.js から全ページで呼ばれる）
+ * 目印（utm_*）と Cloudflare の国も一緒に残す。失敗しても閲覧には影響させない。
  */
 router.post('/track/pageview', async (req, res) => {
     const pool = req.app.get('db');
-    const { page_path, page_type, referrer, session_id } = req.body;
-    
+    const b = req.body || {};
+    const userAgent = (req.headers['user-agent'] || '').slice(0, 500);
+    if (BOT_RE.test(userAgent)) return res.json({ success: true, skipped: 'bot' });
+
+    const pagePath = cleanUrl(b.page_path, 500);
+    if (!pagePath) return res.status(400).json({ error: 'page_path required' });
+
     try {
-        // Parse user agent
-        const userAgent = req.headers['user-agent'] || '';
-        const deviceType = detectDeviceType(userAgent);
-        const browser = detectBrowser(userAgent);
-        const os = detectOS(userAgent);
-        
-        // Get IP and geo (simplified)
-        const ip = req.ip || req.connection.remoteAddress;
-        
+        const country = (req.headers['cf-ipcountry'] || '').toUpperCase().slice(0, 2);
         await pool.query(`
-            INSERT INTO page_views (user_id, session_id, page_path, page_type, referrer, user_agent, ip_address, device_type, browser, os)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+            INSERT INTO page_views
+                (user_id, session_id, page_path, page_type, referrer, user_agent, ip_address,
+                 device_type, browser, os, country, utm_source, utm_medium, utm_campaign, utm_content, lang)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
         `, [
-            req.body.user_id || null,
-            session_id,
-            page_path,
-            page_type,
-            referrer,
+            optionalUserId(req),
+            cleanToken(b.session_id, 100),
+            pagePath,
+            cleanToken(b.page_type, 50),
+            cleanUrl(b.referrer, 500),
             userAgent,
-            ip,
-            deviceType,
-            browser,
-            os
+            maskIp(req.ip),
+            detectDeviceType(userAgent),
+            detectBrowser(userAgent),
+            detectOS(userAgent),
+            /^[A-Z]{2}$/.test(country) ? country : null,
+            cleanToken(b.utm_source),
+            cleanToken(b.utm_medium),
+            cleanToken(b.utm_campaign),
+            cleanToken(b.utm_content),
+            cleanToken(b.lang, 10)
         ]);
-        
         res.json({ success: true });
     } catch (error) {
-        console.error('Track pageview error:', error);
+        console.error('Track pageview error:', error.message);
         res.status(500).json({ error: 'Failed to track pageview' });
     }
 });
@@ -403,156 +448,167 @@ router.get('/author/work/:workId', authenticateToken, async (req, res) => {
 
 /**
  * GET /api/analytics/admin/overview
- * Get platform-wide analytics overview
+ * 全体の来訪・登録・購入。集計表（analytics_daily）は誰も埋めていなかったので、
+ * page_views / users / transactions から直接数える。
  */
 router.get('/admin/overview', authenticateToken, requireAdmin, async (req, res) => {
     const pool = req.app.get('db');
-    const { period = '30' } = req.query;
-    const days = parseInt(period) || 30;
-    
+    const days = parseInt(req.query.period) || 30;
+    const own = OWN_HOSTS;
+
     try {
-        // Get aggregated platform stats
-        const statsResult = await pool.query(`
-            SELECT 
-                COALESCE(SUM(total_page_views), 0) as total_page_views,
-                COALESCE(SUM(unique_visitors), 0) as unique_visitors,
-                COALESCE(SUM(new_users), 0) as new_users,
-                COALESCE(AVG(active_users), 0) as avg_active_users,
-                COALESCE(SUM(total_work_views), 0) as total_work_views,
-                COALESCE(SUM(total_reading_time_minutes), 0) as total_reading_time,
-                COALESCE(SUM(total_purchases), 0) as total_purchases,
-                COALESCE(SUM(total_revenue), 0) as total_revenue,
-                COALESCE(SUM(platform_revenue), 0) as platform_revenue
-            FROM analytics_daily
-            WHERE date >= CURRENT_DATE - $1::int
+        // $1 = 期間の日数、$2 = 何日前まで戻すか（0 = 今期、days = 前期）
+        const periodStats = (offsetDays) => pool.query(`
+            SELECT
+                (SELECT COUNT(*) FROM page_views
+                  WHERE created_at >= CURRENT_DATE - ($1::int + $2::int)
+                    AND created_at <  CURRENT_DATE - $2::int + 1) AS page_views,
+                (SELECT COUNT(DISTINCT ${VISITOR_SQL}) FROM page_views
+                  WHERE created_at >= CURRENT_DATE - ($1::int + $2::int)
+                    AND created_at <  CURRENT_DATE - $2::int + 1) AS unique_visitors,
+                (SELECT COUNT(*) FROM users
+                  WHERE created_at >= CURRENT_DATE - ($1::int + $2::int)
+                    AND created_at <  CURRENT_DATE - $2::int + 1) AS new_users,
+                (SELECT COUNT(*) FROM transactions
+                  WHERE status = 'completed' AND transaction_type IN ('purchase', 'ai_tool')
+                    AND created_at >= CURRENT_DATE - ($1::int + $2::int)
+                    AND created_at <  CURRENT_DATE - $2::int + 1) AS purchases
+        `, [days, offsetDays]);
+
+        const [curRes, prevRes] = await Promise.all([periodStats(0), periodStats(days)]);
+
+        const revenueRes = await pool.query(`
+            SELECT currency, SUM(amount) AS total, COUNT(*) AS count
+            FROM transactions
+            WHERE status = 'completed' AND transaction_type IN ('purchase', 'ai_tool')
+              AND created_at >= CURRENT_DATE - $1::int
+            GROUP BY currency ORDER BY count DESC
         `, [days]);
-        
-        // Get previous period
-        const prevResult = await pool.query(`
-            SELECT 
-                COALESCE(SUM(total_page_views), 0) as total_page_views,
-                COALESCE(SUM(unique_visitors), 0) as unique_visitors,
-                COALESCE(SUM(new_users), 0) as new_users,
-                COALESCE(SUM(total_revenue), 0) as total_revenue
-            FROM analytics_daily
-            WHERE date >= CURRENT_DATE - $1::int * 2
-            AND date < CURRENT_DATE - $1::int
+
+        const trendRes = await pool.query(`
+            SELECT d::date AS date,
+                   COALESCE(pv.page_views, 0)::int AS page_views,
+                   COALESCE(pv.unique_visitors, 0)::int AS unique_visitors,
+                   COALESCE(nu.new_users, 0)::int AS new_users
+            FROM generate_series(CURRENT_DATE - $1::int, CURRENT_DATE, interval '1 day') d
+            LEFT JOIN (
+                SELECT DATE(created_at) AS dt, COUNT(*) AS page_views,
+                       COUNT(DISTINCT ${VISITOR_SQL}) AS unique_visitors
+                FROM page_views WHERE created_at >= CURRENT_DATE - $1::int GROUP BY 1
+            ) pv ON pv.dt = d::date
+            LEFT JOIN (
+                SELECT DATE(created_at) AS dt, COUNT(*) AS new_users
+                FROM users WHERE created_at >= CURRENT_DATE - $1::int GROUP BY 1
+            ) nu ON nu.dt = d::date
+            ORDER BY 1
         `, [days]);
-        
-        // Get daily trend
-        const trendResult = await pool.query(`
-            SELECT 
-                date,
-                total_page_views as page_views,
-                unique_visitors,
-                new_users,
-                total_revenue as revenue
-            FROM analytics_daily
-            WHERE date >= CURRENT_DATE - $1::int
-            ORDER BY date ASC
-        `, [days]);
-        
-        // Get top works
-        const topWorksResult = await pool.query(`
-            SELECT 
-                w.work_id as id,
-                w.title,
-                COALESCE(u.pen_name, u.first_name || ' ' || u.last_name) as author_name,
-                COALESCE(SUM(wa.page_views), 0) as views,
-                COALESCE(SUM(wa.revenue), 0) as revenue
+
+        const topWorksRes = await pool.query(`
+            SELECT w.work_id AS id, w.title,
+                   COALESCE(u.pen_name, u.first_name || ' ' || u.last_name) AS author_name,
+                   COALESCE(w.view_count, 0)::int AS views,
+                   COALESCE(t.purchases, 0)::int AS purchases
             FROM works w
             JOIN users u ON w.author_id = u.user_id
-            LEFT JOIN work_analytics_daily wa ON w.work_id = wa.work_id AND wa.date >= CURRENT_DATE - $1::int
+            LEFT JOIN (
+                SELECT work_id, COUNT(*) AS purchases FROM transactions
+                WHERE status = 'completed' AND transaction_type = 'purchase'
+                  AND created_at >= CURRENT_DATE - $1::int
+                GROUP BY work_id
+            ) t ON t.work_id = w.work_id
             WHERE w.status = 'published'
-            GROUP BY w.work_id, w.title, u.pen_name, u.first_name, u.last_name
-            ORDER BY views DESC
+            ORDER BY purchases DESC, views DESC
             LIMIT 10
         `, [days]);
-        
-        // Get device breakdown
-        const deviceResult = await pool.query(`
-            SELECT 
-                COALESCE(SUM((device_breakdown->>'desktop')::int), 0) as desktop,
-                COALESCE(SUM((device_breakdown->>'mobile')::int), 0) as mobile,
-                COALESCE(SUM((device_breakdown->>'tablet')::int), 0) as tablet
-            FROM analytics_daily
-            WHERE date >= CURRENT_DATE - $1::int
+
+        const deviceRes = await pool.query(`
+            SELECT COALESCE(device_type, 'desktop') AS device, COUNT(*)::int AS n
+            FROM page_views WHERE created_at >= CURRENT_DATE - $1::int GROUP BY 1
         `, [days]);
-        
-        // Get country breakdown
-        const countryResult = await pool.query(`
-            SELECT 
-                COALESCE(
-                    jsonb_object_agg(
-                        key,
-                        COALESCE((value)::int, 0)
-                    ),
-                    '{}'::jsonb
-                ) as breakdown
-            FROM (
-                SELECT key, SUM((value)::int) as value
-                FROM analytics_daily, jsonb_each_text(country_breakdown)
-                WHERE date >= CURRENT_DATE - $1::int
-                GROUP BY key
-                ORDER BY value DESC
-                LIMIT 10
-            ) sub
+
+        const countryRes = await pool.query(`
+            SELECT country, COUNT(DISTINCT ${VISITOR_SQL})::int AS visitors
+            FROM page_views
+            WHERE created_at >= CURRENT_DATE - $1::int AND country IS NOT NULL
+            GROUP BY country ORDER BY visitors DESC LIMIT 10
         `, [days]);
-        
-        // Get user growth
-        const userGrowthResult = await pool.query(`
-            SELECT 
-                DATE(created_at) as date,
-                COUNT(*) as new_users
+
+        // 入口別の訪問者数。訪問者ごとに「最初に開いたページ」の参照元で数える
+        // （サイト内を回るたびに direct が増えないように）
+        const sourcesRes = await pool.query(`
+            WITH firsts AS (
+                SELECT DISTINCT ON (${VISITOR_SQL})
+                       ${ENTRY_SOURCE_SQL} AS source
+                FROM page_views
+                WHERE created_at >= CURRENT_DATE - $1::int
+                ORDER BY ${VISITOR_SQL}, created_at
+            )
+            SELECT source, COUNT(*)::int AS visitors
+            FROM firsts GROUP BY source ORDER BY visitors DESC LIMIT 15
+        `, [days, own]);
+
+        // 目印（UTM）別。閲覧数・訪問者数と、その目印から来て登録した人数
+        const campaignsRes = await pool.query(`
+            SELECT utm_source AS source, utm_medium AS medium, utm_campaign AS campaign, utm_content AS content,
+                   COUNT(*)::int AS page_views,
+                   COUNT(DISTINCT ${VISITOR_SQL})::int AS visitors
+            FROM page_views
+            WHERE created_at >= CURRENT_DATE - $1::int
+              AND (utm_source IS NOT NULL OR utm_campaign IS NOT NULL)
+            GROUP BY 1, 2, 3, 4 ORDER BY visitors DESC LIMIT 30
+        `, [days]);
+
+        const signupsRes = await pool.query(`
+            SELECT COALESCE(acquisition_source,
+                       CASE WHEN substring(acquisition_referrer from '^https?://(?:www\\.)?([^/:?#]+)') = ANY($2::text[]) THEN NULL
+                            ELSE substring(acquisition_referrer from '^https?://(?:www\\.)?([^/:?#]+)') END,
+                       CASE WHEN acquisition_at IS NULL THEN 'unknown' ELSE 'direct' END) AS source,
+                   acquisition_medium AS medium,
+                   acquisition_campaign AS campaign,
+                   acquisition_content AS content,
+                   COUNT(*)::int AS signups
             FROM users
             WHERE created_at >= CURRENT_DATE - $1::int
-            GROUP BY DATE(created_at)
-            ORDER BY date ASC
-        `, [days]);
-        
-        const stats = statsResult.rows[0];
-        const prev = prevResult.rows[0];
-        
-        const calcChange = (current, previous) => {
-            if (!previous || previous == 0) return 0;
-            return ((current - previous) / previous * 100).toFixed(1);
+            GROUP BY 1, 2, 3, 4 ORDER BY signups DESC LIMIT 30
+        `, [days, own]);
+
+        const cur = curRes.rows[0];
+        const prev = prevRes.rows[0];
+        const calcChange = (c, p) => {
+            c = parseInt(c) || 0; p = parseInt(p) || 0;
+            if (!p) return c ? 100 : 0;
+            return ((c - p) / p * 100).toFixed(1);
         };
-        
+
+        const device = { desktop: 0, mobile: 0, tablet: 0 };
+        deviceRes.rows.forEach(r => { device[r.device] = (device[r.device] || 0) + r.n; });
+        const country = {};
+        countryRes.rows.forEach(r => { country[r.country] = r.visitors; });
+
+        // 目印ごとに登録者数を突き合わせる
+        const key = r => [r.source || '', r.medium || '', r.campaign || '', r.content || ''].join('|');
+        const signupByKey = {};
+        signupsRes.rows.forEach(r => { signupByKey[key(r)] = r.signups; });
+        const campaigns = campaignsRes.rows.map(r => ({ ...r, signups: signupByKey[key(r)] || 0 }));
+
         res.json({
             success: true,
             period: days,
             overview: {
-                pageViews: {
-                    value: parseInt(stats.total_page_views),
-                    change: calcChange(stats.total_page_views, prev.total_page_views)
-                },
-                uniqueVisitors: {
-                    value: parseInt(stats.unique_visitors),
-                    change: calcChange(stats.unique_visitors, prev.unique_visitors)
-                },
-                newUsers: {
-                    value: parseInt(stats.new_users),
-                    change: calcChange(stats.new_users, prev.new_users)
-                },
-                avgActiveUsers: parseInt(stats.avg_active_users),
-                workViews: parseInt(stats.total_work_views),
-                readingTime: {
-                    minutes: parseInt(stats.total_reading_time),
-                    formatted: formatReadingTime(stats.total_reading_time)
-                },
-                purchases: parseInt(stats.total_purchases),
-                revenue: {
-                    total: parseFloat(stats.total_revenue).toFixed(2),
-                    platform: parseFloat(stats.platform_revenue).toFixed(2),
-                    change: calcChange(stats.total_revenue, prev.total_revenue),
-                    currency: 'JPY'
-                }
+                pageViews: { value: parseInt(cur.page_views), change: calcChange(cur.page_views, prev.page_views) },
+                uniqueVisitors: { value: parseInt(cur.unique_visitors), change: calcChange(cur.unique_visitors, prev.unique_visitors) },
+                newUsers: { value: parseInt(cur.new_users), change: calcChange(cur.new_users, prev.new_users) },
+                purchases: { value: parseInt(cur.purchases), change: calcChange(cur.purchases, prev.purchases) },
+                revenue: revenueRes.rows.map(r => ({ currency: r.currency, total: parseFloat(r.total), count: parseInt(r.count) }))
             },
-            trend: trendResult.rows,
-            topWorks: topWorksResult.rows,
-            deviceBreakdown: deviceResult.rows[0],
-            countryBreakdown: countryResult.rows[0]?.breakdown || {},
-            userGrowth: userGrowthResult.rows
+            trend: trendRes.rows,
+            topWorks: topWorksRes.rows,
+            deviceBreakdown: device,
+            countryBreakdown: country,
+            sources: sourcesRes.rows,
+            campaigns,
+            signupSources: signupsRes.rows,
+            userGrowth: trendRes.rows.map(r => ({ date: r.date, new_users: r.new_users }))
         });
     } catch (error) {
         console.error('Admin analytics error:', error);
@@ -584,13 +640,13 @@ router.get('/admin/realtime', authenticateToken, requireAdmin, async (req, res) 
         
         // Today's stats
         const todayResult = await pool.query(`
-            SELECT 
-                COALESCE(total_page_views, 0) as page_views,
-                COALESCE(unique_visitors, 0) as visitors,
-                COALESCE(new_users, 0) as new_users,
-                COALESCE(total_revenue, 0) as revenue
-            FROM analytics_daily
-            WHERE date = CURRENT_DATE
+            SELECT
+                (SELECT COUNT(*) FROM page_views WHERE created_at >= CURRENT_DATE)::int AS page_views,
+                (SELECT COUNT(DISTINCT ${VISITOR_SQL}) FROM page_views WHERE created_at >= CURRENT_DATE)::int AS visitors,
+                (SELECT COUNT(*) FROM users WHERE created_at >= CURRENT_DATE)::int AS new_users,
+                (SELECT COUNT(*) FROM transactions
+                  WHERE status = 'completed' AND transaction_type IN ('purchase', 'ai_tool')
+                    AND created_at >= CURRENT_DATE)::int AS purchases
         `);
         
         res.json({
@@ -602,7 +658,7 @@ router.get('/admin/realtime', authenticateToken, requireAdmin, async (req, res) 
                     page_views: 0,
                     visitors: 0,
                     new_users: 0,
-                    revenue: 0
+                    purchases: 0
                 }
             },
             timestamp: new Date().toISOString()
@@ -626,11 +682,17 @@ router.get('/admin/export', authenticateToken, requireAdmin, async (req, res) =>
         let data;
         
         if (type === 'platform') {
+            // 日別の来訪・訪問者に、入口（utm_source か参照元）と目印を添えて出す
             const result = await pool.query(`
-                SELECT * FROM analytics_daily
-                WHERE date >= CURRENT_DATE - $1::int
-                ORDER BY date ASC
-            `, [days]);
+                SELECT to_char(DATE(created_at), 'YYYY-MM-DD') AS date,
+                       ${ENTRY_SOURCE_SQL} AS source,
+                       utm_campaign AS campaign,
+                       COUNT(*)::int AS page_views,
+                       COUNT(DISTINCT ${VISITOR_SQL})::int AS visitors
+                FROM page_views
+                WHERE created_at >= CURRENT_DATE - $1::int
+                GROUP BY 1, 2, 3 ORDER BY 1, 4 DESC
+            `, [days, OWN_HOSTS]);
             data = result.rows;
         } else if (type === 'works') {
             const result = await pool.query(`

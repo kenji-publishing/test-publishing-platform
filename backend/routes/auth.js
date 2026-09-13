@@ -15,6 +15,7 @@ const { authenticate } = require('../middleware/auth');
 const { sendEmail } = require('../config/email');
 const { loginLimiter, registerLimiter, emailRequestLimiter } = require('../middleware/rateLimits');
 const { OAuth2Client } = require('google-auth-library');
+const { saveAcquisition } = require('../services/acquisition');
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:8000';
 const VERIFY_LINK_EXPIRY = 24 * 60 * 60 * 1000; // 確認リンクは24時間有効
@@ -79,8 +80,8 @@ router.post('/register',
         return res.status(400).json({ errors: errors.array() });
       }
       
-      const { email, password, firstName, lastName, role, penName, country } = req.body;
-      
+      const { email, password, firstName, lastName, role, penName, country, acquisition } = req.body;
+
       // Check if user already exists
       const existingUser = await db.query(
         'SELECT user_id FROM users WHERE email = $1',
@@ -106,7 +107,10 @@ router.post('/register',
       );
       
       const user = result.rows[0];
-      
+
+      // どの投稿・参照元から来て登録したか（navbar.js が覚えていたファーストタッチ）
+      await saveAcquisition(db, user.user_id, acquisition);
+
       // Also create user_roles entry for backward compatibility
       try {
         await db.query(
@@ -356,6 +360,7 @@ router.post('/google', loginLimiter, async (req, res) => {
         console.log('user_roles insert skipped:', e.message);
       }
       console.log(`New user created via Google Sign-In: ${user.user_id}`);
+      await saveAcquisition(db, user.user_id, req.body.acquisition);
     }
 
     if (user.account_status && user.account_status !== 'active') {
