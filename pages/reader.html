@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609221946">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609222006">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609221946">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609222006">
     <title>Reader - AuctLect</title>
     
     <!-- Google Fonts -->
@@ -15,9 +15,9 @@
     <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="../css/variables.css?v=202609221946" rel="stylesheet"><!-- navbar.cssが使う--color-*変数の定義（無いとドロップダウンが透明になる） -->
-    <link href="../css/navbar.css?v=202609221946" rel="stylesheet">
-    <link href="../css/mobile-fixes.css?v=202609221946" rel="stylesheet">
+    <link href="../css/variables.css?v=202609222006" rel="stylesheet"><!-- navbar.cssが使う--color-*変数の定義（無いとドロップダウンが透明になる） -->
+    <link href="../css/navbar.css?v=202609222006" rel="stylesheet">
+    <link href="../css/mobile-fixes.css?v=202609222006" rel="stylesheet">
 
     <style>
         :root {
@@ -731,6 +731,22 @@
         border-top: 1px solid var(--reader-border);
         display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;
     }
+    /* マンガの試し読み: 最後のページで下に出す帯 */
+    .manga-sample-bar {
+        background: var(--reader-bg); border-top: 1px solid var(--reader-border);
+        padding: 0.6rem 1rem; display: flex; align-items: center; justify-content: center;
+        gap: 0.75rem; flex-wrap: wrap; font-size: 0.9rem;
+    }
+    .manga-sample-bar .manga-sample-btn {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        background: var(--reader-accent); color: #fff; text-decoration: none;
+        border-radius: 8px; padding: 0.45rem 1.1rem; font-weight: 600;
+    }
+    .manga-sample-bar.flash { animation: mangaSampleFlash 0.6s ease-in-out 2; }
+    @keyframes mangaSampleFlash {
+        0%, 100% { background: var(--reader-bg); }
+        50% { background: rgba(139, 115, 85, 0.18); }
+    }
     .reading-mode-switch { display: flex; gap: 0.5rem; }
     .mode-btn {
         padding: 0.4rem 0.8rem; border: 1px solid var(--reader-border);
@@ -1011,6 +1027,7 @@
                 </a>
                 <span class="toolbar-divider">|</span>
                 <span class="work-title" id="mangaWorkTitle">Manga Title</span>
+                <span class="sample-badge" id="mangaSampleBadge" style="display:none;"></span>
                 <span class="work-author" id="mangaWorkAuthor"></span>
             </div>
             <div class="toolbar-right">
@@ -1045,6 +1062,15 @@
             <!-- Thumbnail Strip -->
             <div class="thumbnail-strip" id="mangaThumbnailStrip"></div>
 
+            <!-- 試し読みの終わり（最後の試し読みページで出る） -->
+            <div class="manga-sample-bar" id="mangaSampleBar" style="display:none;">
+                <span id="mangaSampleBarText"></span>
+                <a class="manga-sample-btn" id="mangaSampleBtn" href="#">
+                    <i class="fas fa-book-open"></i><span id="mangaSampleBtnText"></span>
+                </a>
+                <span class="price-approx" id="mangaSampleApprox" style="color:var(--reader-secondary);"></span>
+            </div>
+
             <!-- Controls -->
             <div class="viewer-controls">
                 <div class="reading-mode-switch">
@@ -1077,12 +1103,12 @@
     <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/config.js?v=202609221946"></script>
-    <script src="../js/i18n.js?v=202609221946"></script>
-    <script src="../js/lang/it.js?v=202609221946"></script>
-    <script src="../js/navbar.js?v=202609221946"></script>
-    <script src="../js/translations.js?v=202609221946"></script>
-    <script src="../js/lazy-loader.js?v=202609221946"></script>
+    <script src="../js/config.js?v=202609222006"></script>
+    <script src="../js/i18n.js?v=202609222006"></script>
+    <script src="../js/lang/it.js?v=202609222006"></script>
+    <script src="../js/navbar.js?v=202609222006"></script>
+    <script src="../js/translations.js?v=202609222006"></script>
+    <script src="../js/lazy-loader.js?v=202609222006"></script>
     <script>
         // ===== Mode Detection =====
         const isManga = new URLSearchParams(window.location.search).get('type') === 'manga';
@@ -1359,6 +1385,13 @@ function getL(obj, replacements = {}) {
                 }
 
                 var pv = data.preview;
+                // マンガ作品はマンガビューアで開き直す（?type=manga が付いていないリンクでも動くように）
+                if (pv.contentType === 'manga') {
+                    var mu = new URL(window.location.href);
+                    mu.searchParams.set('type', 'manga');
+                    window.location.replace(mu.toString());
+                    return;
+                }
                 previewInfo = pv;
                 // renderWorkPages / updateAiBadge は works テーブルの列名で見るので合わせる
                 loadedWork = {
@@ -3514,6 +3547,7 @@ function getL(obj, replacements = {}) {
             rightToLeft:     { en: 'Right to Left', ja: '右→左', zh: '从右到左', 'zh-TW': '從右到左', es: 'Derecha a izquierda', fr: 'Droite à gauche', de: 'Rechts nach links', ko: '오른쪽→왼쪽', ar: 'من اليمين إلى اليسار', pt: 'Direita para esquerda', it: 'Da destra a sinistra' },
             vertical:        { en: 'Vertical', ja: '縦読み', zh: '竖排', 'zh-TW': '豎排', es: 'Vertical', fr: 'Vertical', de: 'Vertikal', ko: '세로', ar: 'عمودي', pt: 'Vertical', it: 'Verticale' },
             verticalSoon:    { en: 'Vertical mode coming soon!', ja: '縦読みは近日公開予定！', zh: '竖排模式即将推出！', 'zh-TW': '豎排模式即將推出！', es: '¡Modo vertical próximamente!', fr: 'Mode vertical bientôt disponible !', de: 'Vertikaler Modus kommt bald!', ko: '세로 모드 곧 출시!', ar: 'وضع عمودي قريباً!', pt: 'Modo vertical em breve!', it: 'Modalità verticale disponibile a breve!' },
+            sampleEndBar:    { en: 'End of the sample — {n} of {t} pages', ja: '試し読みはここまで（全{t}ページ中{n}ページ）', zh: '试读结束（共 {t} 页中的 {n} 页）', 'zh-TW': '試閱結束（共 {t} 頁中的 {n} 頁）', es: 'Fin de la muestra: {n} de {t} páginas', fr: "Fin de l'extrait — {n} pages sur {t}", de: 'Ende der Leseprobe – {n} von {t} Seiten', ko: '미리보기 끝 — 전체 {t}페이지 중 {n}페이지', ar: 'نهاية المقتطف — {n} من {t} صفحة', pt: 'Fim da amostra — {n} de {t} páginas', it: "Fine dell'anteprima — {n} di {t} pagine" },
             noPages:         { en: 'This work has no pages yet.', ja: 'この作品にはまだページがありません。', zh: '该作品还没有页面。', 'zh-TW': '該作品還沒有頁面。', es: 'Esta obra aún no tiene páginas.', fr: 'Cette œuvre n\'a pas encore de pages.', de: 'Dieses Werk hat noch keine Seiten.', ko: '이 작품에는 아직 페이지가 없습니다.', ar: 'لا توجد صفحات لهذا العمل بعد.', pt: 'Esta obra ainda não tem páginas.', it: 'Quest\'opera non ha ancora pagine.' }
         };
         function mangaGetL(obj) { const lang = localStorage.getItem('preferredLanguage') || 'en'; return obj[lang] || obj.en || ''; }
@@ -3531,6 +3565,12 @@ function getL(obj, replacements = {}) {
         // ページ画像URLを取得（実作品は認証付きfetch→blob、デモはプレースホルダー）
         function mangaFetchPageUrl(pageNum) {
             if (!apiWorkId) return Promise.resolve(mangaPageUrls[pageNum - 1]);
+            // 試し読みの画像は公開URL（ログイン不要）。認証付きfetch→blobは要らない
+            if (isPreview) {
+                return Promise.resolve((window.API_ORIGIN || '') + '/api/works/'
+                    + encodeURIComponent(apiWorkId) + '/preview/pages/'
+                    + mangaServerPageNo(pageNum) + '/image');
+            }
             if (mangaBlobUrls.has(pageNum)) return mangaBlobUrls.get(pageNum);
             const token = localStorage.getItem('token');
             const pr = fetch((window.API_ORIGIN || '') + '/api/works/' + encodeURIComponent(apiWorkId) + '/pages/' + mangaServerPageNo(pageNum) + '/image', {
@@ -3558,6 +3598,98 @@ function getL(obj, replacements = {}) {
                 a.className = 'btn btn-light btn-sm';
                 loading.appendChild(a);
             }
+        }
+
+        // 試し読みで受け取った情報（ページ数・価格）
+        let mangaPreview = null;
+
+        /**
+         * マンガの試し読み。ログイン不要。
+         * 見えるのは先頭 previewPages ページぶんだけで、画像も専用の公開URLから取る
+         */
+        async function mangaLoadPreviewFromApi() {
+            const detailUrl = 'work-detail.html?id=' + encodeURIComponent(apiWorkId);
+            try {
+                const resp = await fetch((window.API_ORIGIN || '') + '/api/works/' + encodeURIComponent(apiWorkId) + '/preview');
+                const data = await resp.json().catch(() => ({}));
+                if (resp.status === 404) {
+                    mangaShowNotice(getL(uiText.workNotFound), 'browse.html', getL(uiText.viewWorkPage));
+                    return;
+                }
+                if (!resp.ok || !data.preview) {
+                    mangaShowNotice(getL(uiText.sampleUnavailable), detailUrl, getL(uiText.viewWorkPage));
+                    return;
+                }
+                const pv = data.preview;
+                // 文章作品なのにマンガビューアで開かれていたら、文章のリーダーで開き直す
+                if (pv.contentType !== 'manga') {
+                    const tu = new URL(window.location.href);
+                    tu.searchParams.delete('type');
+                    window.location.replace(tu.toString());
+                    return;
+                }
+                if (!pv.previewPages) {
+                    mangaShowNotice(getL(uiText.sampleUnavailable), detailUrl, getL(uiText.viewWorkPage));
+                    return;
+                }
+
+                mangaPreview = pv;
+                mangaTotalPages = pv.previewPages;      // 送り先の上限も試し読みの範囲まで
+                mangaPagesMeta = pv.pages || [];
+                mangaPagesMeta.forEach((p, i) => {
+                    if (p.chapterTitle) mangaChapters.push({ page: i + 1, title: p.chapterTitle });
+                });
+
+                document.getElementById('mangaWorkTitle').textContent = pv.title || '';
+                document.getElementById('mangaWorkAuthor').textContent = pv.authorName ? ('by ' + pv.authorName) : '';
+                document.title = (pv.title || 'Reader') + ' - AuctLect';
+
+                const badge = document.getElementById('mangaSampleBadge');
+                if (badge) {
+                    badge.textContent = getL(uiText.sampleBadge);
+                    badge.style.display = 'inline-block';
+                }
+                // 戻る/閉じるは作品ページへ（試し読みの人はライブラリに無い）
+                document.querySelectorAll('#mangaModeUI a[href="dashboard.html"]').forEach(a => { a.href = detailUrl; });
+
+                mangaSetupSampleBar(detailUrl);
+                mangaBuildChapterSelect();
+                mangaInit();
+            } catch (err) {
+                console.error('Failed to load manga preview:', err);
+                mangaShowNotice(getL(uiText.loadFailed), 'javascript:location.reload()', getL(uiText.retry));
+            }
+        }
+
+        /** 試し読みの帯（最後のページで出す）の中身を作る */
+        function mangaSetupSampleBar(detailUrl) {
+            const bar = document.getElementById('mangaSampleBar');
+            if (!bar || !mangaPreview) return;
+            document.getElementById('mangaSampleBarText').textContent =
+                mangaGetL(mangaUiText.sampleEndBar)
+                    .replace('{n}', String(mangaPreview.previewPages))
+                    .replace('{t}', String(mangaPreview.totalPages));
+            const price = Number(mangaPreview.price) || 0;
+            let label = getL(uiText.continueReading);
+            if (price > 0 && typeof formatWorkPrice === 'function') {
+                label += ' — ' + formatWorkPrice(price, mangaPreview.currency || 'USD');
+            }
+            document.getElementById('mangaSampleBtnText').textContent = label;
+            document.getElementById('mangaSampleBtn').href = detailUrl;
+            // 読者の通貨での目安（作品ページ・文章の試し読みと同じ表示）
+            const approx = document.getElementById('mangaSampleApprox');
+            if (approx && price > 0 && typeof fillApproxPrices === 'function') {
+                approx.setAttribute('data-price', price);
+                approx.setAttribute('data-currency', mangaPreview.currency || 'USD');
+                try { fillApproxPrices(bar); } catch (e) {}
+            }
+        }
+
+        /** 最後の試し読みページに来たら帯を出す */
+        function mangaUpdateSampleBar(pageNum) {
+            const bar = document.getElementById('mangaSampleBar');
+            if (!bar || !mangaPreview) return;
+            bar.style.display = (pageNum >= mangaTotalPages) ? 'flex' : 'none';
         }
 
         async function mangaLoadFromApi() {
@@ -3629,7 +3761,9 @@ function getL(obj, replacements = {}) {
 
         // ---- Init ----
         function mangaInit() {
-            document.getElementById('mangaBackText').textContent     = mangaGetL(mangaUiText.backToDashboard);
+            // 試し読みの人はライブラリにもダッシュボードにも行き場が無いので、作品ページへ
+            document.getElementById('mangaBackText').textContent     = isPreview
+                ? getL(uiText.viewWorkPage) : mangaGetL(mangaUiText.backToDashboard);
             document.getElementById('mangaPagesText').textContent    = mangaGetL(mangaUiText.pagesBtn);
             document.getElementById('mangaFullscreenText').textContent = mangaGetL(mangaUiText.fullscreen);
             document.getElementById('mangaCloseText').textContent    = mangaGetL(mangaUiText.close);
@@ -3652,6 +3786,7 @@ function getL(obj, replacements = {}) {
             document.getElementById('mangaCurrentPageNum').textContent = pageNum;
             mangaUpdateThumbnailActive(pageNum);
             mangaUpdateChapterSelect(pageNum);
+            mangaUpdateSampleBar(pageNum);
             mangaFetchPageUrl(pageNum)
                 .then(url => new Promise((resolve, reject) => {
                     const tmp = new Image();
@@ -3736,8 +3871,24 @@ function getL(obj, replacements = {}) {
         }
 
         function mangaNextPage() {
-            if (mangaReadingMode === 'rtl') { if (mangaCurrentPage > 1) mangaLoadPage(mangaCurrentPage - 1); }
-            else { if (mangaCurrentPage < mangaTotalPages) mangaLoadPage(mangaCurrentPage + 1); }
+            if (mangaReadingMode === 'rtl') {
+                if (mangaCurrentPage > 1) { mangaLoadPage(mangaCurrentPage - 1); return; }
+            } else {
+                if (mangaCurrentPage < mangaTotalPages) { mangaLoadPage(mangaCurrentPage + 1); return; }
+            }
+            // これ以上進めない。**最後の試し読みページにいるときだけ**帯を光らせる
+            // （右→左で読む設定では1ページ目でも「進めない」状態になるため）
+            if (mangaCurrentPage >= mangaTotalPages) mangaFlashSampleBar();
+        }
+
+        function mangaFlashSampleBar() {
+            const bar = document.getElementById('mangaSampleBar');
+            if (!bar || !mangaPreview) return;
+            bar.style.display = 'flex';
+            bar.classList.remove('flash');
+            void bar.offsetWidth;          // アニメーションをやり直させる
+            bar.classList.add('flash');
+            setTimeout(() => bar.classList.remove('flash'), 1400);
         }
 
         function mangaPrevPage() {
@@ -3787,7 +3938,8 @@ function getL(obj, replacements = {}) {
 
         // ---- Start ----
         document.addEventListener('DOMContentLoaded', () => {
-            if (apiWorkId) mangaLoadFromApi();
+            if (apiWorkId && isPreview) mangaLoadPreviewFromApi();
+            else if (apiWorkId) mangaLoadFromApi();
             else mangaInit(); // デモ表示（IDなし）
         });
     }

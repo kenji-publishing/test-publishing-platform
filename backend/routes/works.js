@@ -872,9 +872,26 @@ function cutPreview(content, percent) {
 }
 
 /**
+ * マンガの試し読みで見せるページ数。
+ * ・割合をページ数に当てる（10% × 180ページ = 18ページ）
+ * ・1〜2ページでは中身が分からないので**最低3ページ**まで増やす
+ * ・ただし**全ページは絶対に見せない**（最後の1ページは必ず残す）
+ *   → 総1ページの作品は試し読みなし（0を返す）
+ */
+function previewPageCount(total, percent) {
+    const n = Number(total) || 0;
+    if (n <= 0 || !(percent > 0)) return 0;
+    let shown = Math.ceil(n * (percent / 100));
+    shown = Math.max(shown, Math.min(3, n));
+    shown = Math.min(shown, n - 1);
+    return Math.max(0, shown);
+}
+
+/**
  * GET /api/works/:workId/preview
- * 試し読み（あらすじ＋本文の先頭 preview_percent ぶん）。ログイン不要で誰でも読める。
- * マンガはページ画像が別テーブルなので対象外（400を返し、UIはボタンを出さない）
+ * 試し読み。ログイン不要で誰でも読める。
+ *  ・文章作品: あらすじ＋本文の先頭 preview_percent ぶん
+ *  ・マンガ: 先頭◯ページぶんのページ一覧（画像は /preview/pages/:pageNo/image）
  */
 router.get('/:workId/preview', async (req, res) => {
     try {
@@ -897,14 +914,6 @@ router.get('/:workId/preview', async (req, res) => {
 
         const work = result.rows[0];
 
-        // マンガの試し読みは未対応（本文がページ画像で、この仕組みでは切り出せない）
-        if (work.content_type === 'manga') {
-            return res.status(400).json({
-                error: 'Preview is not available for manga works',
-                code: 'PREVIEW_UNSUPPORTED'
-            });
-        }
-
         // 成人向けの作品は、ログイン不要で本文の一部を配らない
         // （年齢確認の仕組みがまだ無いため。一覧からも除外されている）
         if (work.is_adult || work.age_rating === '18') {
@@ -921,6 +930,50 @@ router.get('/:workId/preview', async (req, res) => {
             return res.status(403).json({
                 error: 'The author has turned off previews for this work',
                 code: 'PREVIEW_DISABLED'
+            });
+        }
+
+        // マンガは本文ではなくページ画像。先頭◯ページぶんの一覧を返す
+        if (work.content_type === 'manga') {
+            const pageRows = (await db.query(
+                `SELECT page_no, chapter_title FROM work_pages WHERE work_id = $1 ORDER BY page_no`,
+                [req.params.workId]
+            )).rows;
+            const shown = previewPageCount(pageRows.length, previewPercent);
+            if (!shown) {
+                // ページが1枚も無い作品、または1枚しかなく全部見せることになる作品
+                return res.status(400).json({
+                    error: 'Preview is not available for this manga work',
+                    code: 'PREVIEW_UNSUPPORTED'
+                });
+            }
+            res.set('Cache-Control', 'no-store');
+            return res.json({
+                success: true,
+                preview: {
+                    workId: work.work_id,
+                    title: work.title,
+                    authorName: work.author_name || 'Unknown',
+                    description: work.description,
+                    synopsis: work.synopsis,
+                    previewContent: '',
+                    previewPercent: previewPercent,
+                    contentType: 'manga',
+                    totalPages: pageRows.length,
+                    previewPages: shown,
+                    pages: pageRows.slice(0, shown).map(r => ({
+                        pageNo: r.page_no,
+                        chapterTitle: r.chapter_title
+                    })),
+                    language: work.language,
+                    originalLanguage: work.original_language,
+                    coverImage: work.cover_image || work.cover_image_url || null,
+                    aiTextUsage: work.ai_text_usage,
+                    isFree: work.is_free,
+                    price: work.price,
+                    currency: work.currency,
+                    hasMore: pageRows.length > shown
+                }
             });
         }
 
@@ -1200,6 +1253,53 @@ router.get('/:workId/pages/:pageNo/image', authenticate, async (req, res) => {
         res.sendFile(p);
     } catch (error) {
         console.error('Serve work page error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/works/:workId/preview/pages/:pageNo/image
+ * 試し読みのページ画像。**ログイン不要**。
+ * 見せるのは先頭 previewPageCount ページぶんだけで、それ以降は 403。
+ * （認証つきの /pages/:pageNo/image に「試し読みなら通す」分岐を足すのではなく、
+ *   別の入口にしてある。購入者向けの経路に例外を作らないため）
+ */
+router.get('/:workId/preview/pages/:pageNo/image', async (req, res) => {
+    try {
+        const work = (await db.query(
+            `SELECT content_type, preview_percent, is_adult, age_rating
+               FROM works WHERE work_id = $1 AND status = 'published'`,
+            [req.params.workId]
+        )).rows[0];
+        if (!work || work.content_type !== 'manga') {
+            return res.status(404).json({ error: 'Work not found' });
+        }
+        if (work.is_adult || work.age_rating === '18') {
+            return res.status(403).json({ error: 'Not available', code: 'PREVIEW_AGE_RESTRICTED' });
+        }
+        const percent = work.preview_percent === null || work.preview_percent === undefined
+            ? 10 : Number(work.preview_percent);
+        const pages = (await db.query(
+            `SELECT page_no, file_name FROM work_pages WHERE work_id = $1 ORDER BY page_no`,
+            [req.params.workId]
+        )).rows;
+        const shown = previewPageCount(pages.length, percent);
+
+        const pageNo = parseInt(req.params.pageNo, 10);
+        // ページ番号は連番でない場合がある（差し替え等）ので、並び順の位置で判定する
+        const index = pages.findIndex(p => Number(p.page_no) === pageNo);
+        if (index < 0) return res.status(404).json({ error: 'Page not found' });
+        if (index >= shown) {
+            return res.status(403).json({ error: 'Purchase required', code: 'PREVIEW_LIMIT' });
+        }
+
+        const p = path.join(MANGA_PAGES_DIR, req.params.workId, pages[index].file_name);
+        if (!fs.existsSync(p)) return res.status(404).json({ error: 'Page file missing' });
+        // 誰でも同じ画像なので共有キャッシュに置いてよい（1時間）
+        res.setHeader('Cache-Control', 'public, max-age=3600');
+        res.sendFile(p);
+    } catch (error) {
+        console.error('Serve preview page error:', error);
         res.status(500).json({ error: error.message });
     }
 });

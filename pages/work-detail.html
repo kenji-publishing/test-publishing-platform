@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609221946">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609222006">
     <title>Work Detail - AuctLect</title>
-    <script src="../js/config.js?v=202609221946"></script>
+    <script src="../js/config.js?v=202609222006"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="../css/variables.css?v=202609221946" rel="stylesheet">
-    <link href="../css/style-new.css?v=202609221946" rel="stylesheet">
-    <link href="../css/components.css?v=202609221946" rel="stylesheet">
-    <link href="../css/mobile-fixes.css?v=202609221946" rel="stylesheet">
-    <link href="../css/navbar.css?v=202609221946" rel="stylesheet">
+    <link href="../css/variables.css?v=202609222006" rel="stylesheet">
+    <link href="../css/style-new.css?v=202609222006" rel="stylesheet">
+    <link href="../css/components.css?v=202609222006" rel="stylesheet">
+    <link href="../css/mobile-fixes.css?v=202609222006" rel="stylesheet">
+    <link href="../css/navbar.css?v=202609222006" rel="stylesheet">
 <!-- Work Detail Page Styles -->
     <style>
         .work-detail-container { padding: var(--spacing-xl) 0; }
@@ -668,19 +668,19 @@
     <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/lang/ja.js?v=202609221946"></script>
-    <script src="../js/lang/en.js?v=202609221946"></script>
-    <script src="../js/lang/zh.js?v=202609221946"></script>
-    <script src="../js/lang/zh-TW.js?v=202609221946"></script>
-    <script src="../js/lang/es.js?v=202609221946"></script>
-    <script src="../js/lang/fr.js?v=202609221946"></script>
-    <script src="../js/lang/de.js?v=202609221946"></script>
-    <script src="../js/lang/ko.js?v=202609221946"></script>
-    <script src="../js/lang/ar.js?v=202609221946"></script>
-    <script src="../js/lang/pt.js?v=202609221946"></script>
-    <script src="../js/lang/it.js?v=202609221946"></script>
-    <script src="../js/i18n.js?v=202609221946"></script>
-    <script src="../js/navbar.js?v=202609221946"></script>
+    <script src="../js/lang/ja.js?v=202609222006"></script>
+    <script src="../js/lang/en.js?v=202609222006"></script>
+    <script src="../js/lang/zh.js?v=202609222006"></script>
+    <script src="../js/lang/zh-TW.js?v=202609222006"></script>
+    <script src="../js/lang/es.js?v=202609222006"></script>
+    <script src="../js/lang/fr.js?v=202609222006"></script>
+    <script src="../js/lang/de.js?v=202609222006"></script>
+    <script src="../js/lang/ko.js?v=202609222006"></script>
+    <script src="../js/lang/ar.js?v=202609222006"></script>
+    <script src="../js/lang/pt.js?v=202609222006"></script>
+    <script src="../js/lang/it.js?v=202609222006"></script>
+    <script src="../js/i18n.js?v=202609222006"></script>
+    <script src="../js/navbar.js?v=202609222006"></script>
 
 <!-- Work Detail Page Script -->
     <script>
@@ -1045,17 +1045,15 @@ function escapeHtml(text) {
             var owned = isMine || (priceNum > 0
                 ? serverOwnedIds.has(String(id))
                 : isInLibrary(id));
-            // 試し読み: まだ持っていない有料の文章作品だけに出す。
-            // マンガはページ画像なのでこの仕組みでは切り出せない（将来対応）。
-            // 著者が0%にした作品にも出さない
+            // 試し読み: まだ持っていない有料作品に出す（文章＝先頭◯%、マンガ＝先頭◯ページ）。
+            // 著者が0%にした作品と成人向け（18+・年齢確認の仕組みが無い）には出さない
             var samplePct = work.previewPercent == null ? 10 : Number(work.previewPercent);
-            // 成人向け（18+）は年齢確認の仕組みが無いため試し読みを出さない（サーバーも断る）
-            var canSample = !owned && priceNum > 0 && work.contentType !== 'manga'
-                && samplePct > 0 && work.ageRating !== '18';
+            var canSample = !owned && priceNum > 0 && samplePct > 0 && work.ageRating !== '18';
             var sampleBtn = document.getElementById('btnSample');
             if (sampleBtn) {
                 sampleBtn.style.display = canSample ? 'inline-flex' : 'none';
-                sampleBtn.href = 'reader.html?id=' + encodeURIComponent(id) + '&preview=1';
+                sampleBtn.href = 'reader.html?id=' + encodeURIComponent(id) + '&preview=1'
+                    + (work.contentType === 'manga' ? '&type=manga' : '');
                 document.getElementById('btnSampleText').textContent = getL(uiText.readSample);
             }
 
