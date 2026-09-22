@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609131949">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609221841">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609131949">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609221841">
     <title>Reader - AuctLect</title>
     
     <!-- Google Fonts -->
@@ -15,9 +15,9 @@
     <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="../css/variables.css?v=202609131949" rel="stylesheet"><!-- navbar.cssが使う--color-*変数の定義（無いとドロップダウンが透明になる） -->
-    <link href="../css/navbar.css?v=202609131949" rel="stylesheet">
-    <link href="../css/mobile-fixes.css?v=202609131949" rel="stylesheet">
+    <link href="../css/variables.css?v=202609221841" rel="stylesheet"><!-- navbar.cssが使う--color-*変数の定義（無いとドロップダウンが透明になる） -->
+    <link href="../css/navbar.css?v=202609221841" rel="stylesheet">
+    <link href="../css/mobile-fixes.css?v=202609221841" rel="stylesheet">
 
     <style>
         :root {
@@ -103,6 +103,35 @@
             break-inside: avoid; -webkit-column-break-inside: avoid;
             break-after: column; -webkit-column-break-after: always;
         }
+        /* 試し読みの終わり: 1ページを丸ごと使い、そのまま購入へ進める */
+        .sample-end {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 0.9rem;
+            padding: 0 0.5rem;
+            break-before: column;
+            break-inside: avoid;
+            break-after: column;
+        }
+        .sample-end .sample-end-title { font-size: 1.15rem; font-weight: 700; margin: 0; }
+        .sample-end .sample-end-body { font-size: 0.95rem; opacity: 0.85; margin: 0; max-width: 22em; }
+        .sample-end .sample-end-btn {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.7rem 1.6rem; border-radius: 8px;
+            background: var(--reader-accent); color: #fff; text-decoration: none; font-weight: 600;
+        }
+        .sample-end .sample-end-approx { font-size: 0.85rem; opacity: 0.75; }
+        /* 試し読みの印（作品名の隣） */
+        .sample-badge {
+            display: inline-block; margin-inline-start: 0.5rem; padding: 0.1rem 0.5rem;
+            border: 1px solid currentColor; border-radius: 999px;
+            font-size: 0.7rem; font-weight: 600; opacity: 0.85; white-space: nowrap;
+        }
+
         .reader-cover img {
             max-width: 100%;
             /* 題名と余白のぶんを残して収める */
@@ -778,6 +807,7 @@
             </a>
             <span class="work-title" id="workTitle" dir="auto"></span>
             <span class="ai-badge-reader" id="readerAiBadge"></span>
+            <span class="sample-badge" id="readerSampleBadge" style="display:none;"></span>
         </div>
         
         <div class="toolbar-center">
@@ -1043,12 +1073,12 @@
     <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/config.js?v=202609131949"></script>
-    <script src="../js/i18n.js?v=202609131949"></script>
-    <script src="../js/lang/it.js?v=202609131949"></script>
-    <script src="../js/navbar.js?v=202609131949"></script>
-    <script src="../js/translations.js?v=202609131949"></script>
-    <script src="../js/lazy-loader.js?v=202609131949"></script>
+    <script src="../js/config.js?v=202609221841"></script>
+    <script src="../js/i18n.js?v=202609221841"></script>
+    <script src="../js/lang/it.js?v=202609221841"></script>
+    <script src="../js/navbar.js?v=202609221841"></script>
+    <script src="../js/translations.js?v=202609221841"></script>
+    <script src="../js/lazy-loader.js?v=202609221841"></script>
     <script>
         // ===== Mode Detection =====
         const isManga = new URLSearchParams(window.location.search).get('type') === 'manga';
@@ -1121,6 +1151,11 @@
             noResults: { en: 'No results found', ja: '結果が見つかりません', zh: '未找到结果', 'zh-TW': '未找到結果', es: 'No se encontraron resultados', fr: 'Aucun résultat trouvé', de: 'Keine Ergebnisse gefunden', ko: '결과 없음', ar: 'لم يتم العثور على نتائج', pt: 'Nenhum resultado encontrado', it: 'Nessun risultato trovato' },
             loadingContent: { en: 'Loading...', ja: '読み込み中...', zh: '加载中...', 'zh-TW': '載入中...', es: 'Cargando...', fr: 'Chargement...', de: 'Wird geladen...', ko: '로딩 중...', ar: 'جارٍ التحميل...', pt: 'Carregando...', it: 'Caricamento...' },
             purchaseRequired: { en: 'Purchase is required to read this work.', ja: 'この作品を読むには購入が必要です。', zh: '阅读此作品需要购买。', 'zh-TW': '閱讀此作品需要購買。', es: 'Se requiere la compra para leer esta obra.', fr: 'L\'achat est requis pour lire cette œuvre.', de: 'Zum Lesen dieses Werks ist ein Kauf erforderlich.', ko: '이 작품을 읽으려면 구매가 필요합니다.', ar: 'الشراء مطلوب لقراءة هذا العمل.', pt: 'A compra é necessária para ler esta obra.', it: 'È necessario l\'acquisto per leggere quest\'opera.' },
+            sampleBadge: { en: 'Sample', ja: '試し読み', zh: '试读', 'zh-TW': '試閱', es: 'Muestra', fr: 'Extrait', de: 'Leseprobe', ko: '미리보기', ar: 'مقتطف', pt: 'Amostra', it: 'Anteprima' },
+            sampleEndTitle: { en: 'End of the sample', ja: 'ここまでが試し読みです', zh: '试读结束', 'zh-TW': '試閱結束', es: 'Fin de la muestra', fr: 'Fin de l\'extrait', de: 'Ende der Leseprobe', ko: '미리보기가 끝났습니다', ar: 'نهاية المقتطف', pt: 'Fim da amostra', it: "Fine dell'anteprima" },
+            sampleEndBody: { en: 'You have read the first {n}% of this work. Buy it to keep reading to the end.', ja: 'この作品の最初の{n}%を読みました。続きは購入すると最後まで読めます。', zh: '您已阅读本作品的前 {n}%。购买后可继续读到结尾。', 'zh-TW': '您已閱讀本作品的前 {n}%。購買後可繼續讀到結尾。', es: 'Has leído el primer {n}% de esta obra. Cómprala para seguir leyendo hasta el final.', fr: "Vous avez lu les premiers {n}% de cette œuvre. Achetez-la pour continuer jusqu'à la fin.", de: 'Sie haben die ersten {n}% dieses Werks gelesen. Kaufen Sie es, um bis zum Ende weiterzulesen.', ko: '이 작품의 처음 {n}%를 읽었습니다. 구매하면 끝까지 읽을 수 있습니다.', ar: 'قرأت أول {n}% من هذا العمل. اشترِه لمتابعة القراءة إلى النهاية.', pt: 'Leu os primeiros {n}% desta obra. Compre-a para continuar a ler até ao fim.', it: "Hai letto il primo {n}% di quest'opera. Acquistala per continuare fino alla fine." },
+            continueReading: { en: 'Continue reading', ja: '続きを読む', zh: '继续阅读', 'zh-TW': '繼續閱讀', es: 'Seguir leyendo', fr: 'Continuer la lecture', de: 'Weiterlesen', ko: '계속 읽기', ar: 'متابعة القراءة', pt: 'Continuar a ler', it: 'Continua a leggere' },
+            sampleUnavailable: { en: 'A sample is not available for this work.', ja: 'この作品は試し読みできません。', zh: '此作品暂不提供试读。', 'zh-TW': '此作品暫不提供試閱。', es: 'No hay muestra disponible para esta obra.', fr: 'Aucun extrait n\'est disponible pour cette œuvre.', de: 'Für dieses Werk ist keine Leseprobe verfügbar.', ko: '이 작품은 미리보기를 제공하지 않습니다.', ar: 'لا يتوفر مقتطف لهذا العمل.', pt: 'Não há amostra disponível para esta obra.', it: "Per quest'opera non è disponibile un'anteprima." },
             viewWorkPage: { en: 'View work page', ja: '作品ページを見る', zh: '查看作品页面', 'zh-TW': '檢視作品頁面', es: 'Ver página de la obra', fr: 'Voir la page de l\'œuvre', de: 'Werkseite ansehen', ko: '작품 페이지 보기', ar: 'عرض صفحة العمل', pt: 'Ver página da obra', it: 'Vedi la pagina dell\'opera' },
             workNotFound: { en: 'Work not found.', ja: '作品が見つかりません。', zh: '未找到作品。', es: 'Obra no encontrada.', fr: 'Œuvre introuvable.', de: 'Werk nicht gefunden.', ko: '작품을 찾을 수 없습니다.', ar: 'العمل غير موجود.', pt: 'Obra não encontrada.', it: 'Opera non trovata.' },
             loadFailed: { en: 'Failed to load the work. Please try again.', ja: '作品を読み込めませんでした。もう一度お試しください。', zh: '加载作品失败。请重试。', 'zh-TW': '載入作品失敗。請重試。', es: 'No se pudo cargar la obra. Inténtalo de nuevo.', fr: 'Échec du chargement de l\'œuvre. Veuillez réessayer.', de: 'Werk konnte nicht geladen werden. Bitte erneut versuchen.', ko: '작품을 불러오지 못했습니다. 다시 시도해주세요.', ar: 'فشل تحميل العمل. حاول مرة أخرى.', pt: 'Falha ao carregar a obra. Tente novamente.', it: 'Impossibile caricare l\'opera. Riprova.' },
@@ -1188,6 +1223,8 @@ function getL(obj, replacements = {}) {
         // apiWorkId: 実作品ID（あればAPIから読み込む）。無ければデモ表示のまま
         const apiWorkId = urlParams.get('workId') || urlParams.get('work_id') || urlParams.get('id') || null;
         const workId = apiWorkId || 'sample-work-id';
+        // 試し読み（?preview=1）: ログイン不要。本文は先頭の数%だけ届く
+        const isPreview = /^(1|true|yes)$/i.test(urlParams.get('preview') || '');
         const workTitle = urlParams.get('title') || document.getElementById('workTitle').textContent;
 
         if (urlParams.get('title')) {
@@ -1195,12 +1232,16 @@ function getL(obj, replacements = {}) {
         }
 
         // 作品ごとにしおり・メモ・最終ページを分けて保存する
-        function storageKey(base) { return base + '_' + workId; }
+        function storageKey(base) {
+            // 試し読みは分量が違うので、しおり・メモ・読書位置を本編と混ぜない
+            return base + (isPreview ? '_sample_' : '_') + workId;
+        }
 
         // State
         let currentPage = 1;
         let totalPages = 3;
         let loadedWork = null; // APIから読み込んだ作品データ
+        let previewInfo = null; // 試し読みのとき: /preview が返した情報（割合・価格）
         // 前回の読書位置（初期表示のupdatePageInfoで上書きされる前に読んでおく）
         const savedLastPage = parseInt(localStorage.getItem(storageKey('reader_lastpage')) || '1', 10);
         let bookmarks = JSON.parse(localStorage.getItem(storageKey('reader_bookmarks')) || '[]');
@@ -1231,7 +1272,10 @@ function getL(obj, replacements = {}) {
             updateReaderHeight();
             showTouchHint();
             restoreReaderSettings();
-            if (!isManga && apiWorkId) loadWorkFromApi();
+            if (!isManga && apiWorkId) {
+                if (isPreview) loadPreviewFromApi();
+                else loadWorkFromApi();
+            }
         });
 
         // ===== 実作品の読み込み（API接続） =====
@@ -1286,6 +1330,73 @@ function getL(obj, replacements = {}) {
                 restoreReadingPosition();
             } catch (err) {
                 console.error('Failed to load work:', err);
+                showReaderNotice(getL(uiText.loadFailed), 'javascript:location.reload()', getL(uiText.retry));
+            }
+        }
+
+        /**
+         * 試し読みの読み込み。
+         * /preview はログイン不要で、本文の先頭 preview_percent ぶんだけを返す。
+         * マンガ（400）と、著者が0%にした作品（403）は読めないので作品ページへ案内する
+         */
+        async function loadPreviewFromApi() {
+            showReaderNotice(getL(uiText.loadingContent));
+            var detailUrl = 'work-detail.html?id=' + encodeURIComponent(apiWorkId);
+            try {
+                var resp = await fetch((window.API_ORIGIN || '') + '/api/works/' + encodeURIComponent(apiWorkId) + '/preview');
+                var data = await resp.json().catch(function () { return {}; });
+                if (resp.status === 404) {
+                    showReaderNotice(getL(uiText.workNotFound), 'browse.html', getL(uiText.viewWorkPage));
+                    return;
+                }
+                if (!resp.ok || !data.preview) {
+                    showReaderNotice(getL(uiText.sampleUnavailable), detailUrl, getL(uiText.viewWorkPage));
+                    return;
+                }
+
+                var pv = data.preview;
+                previewInfo = pv;
+                // renderWorkPages / updateAiBadge は works テーブルの列名で見るので合わせる
+                loadedWork = {
+                    work_id: pv.workId,
+                    title: pv.title,
+                    content: pv.previewContent || '',
+                    cover_image: pv.coverImage || null,
+                    language: pv.language,
+                    original_language: pv.originalLanguage,
+                    content_type: pv.contentType,
+                    ai_text_usage: pv.aiTextUsage,
+                    price: pv.price,
+                    currency: pv.currency
+                };
+
+                document.getElementById('workTitle').textContent = pv.title || '';
+                document.title = (pv.title || 'Reader') + ' - AuctLect';
+                var badge = document.getElementById('readerSampleBadge');
+                if (badge) {
+                    badge.textContent = getL(uiText.sampleBadge);
+                    badge.style.display = 'inline-block';
+                }
+                // 戻る先は作品ページ（試し読みの人はライブラリに無い）
+                var back = document.getElementById('backLink');
+                if (back) {
+                    back.href = detailUrl;
+                    var backText = document.getElementById('backLinkText');
+                    if (backText) backText.textContent = getL(uiText.viewWorkPage);
+                }
+
+                renderWorkPages(loadedWork.content, loadedWork);
+
+                if ((pv.language || pv.originalLanguage) === "ar"
+                    && !loadSetting(storageKey(WRITING_MODE_KEY), WRITING_MODES)) {
+                    setWritingMode("rtl", false);
+                }
+
+                updateAiBadge();
+                updatePageInfo();
+                restoreReadingPosition();
+            } catch (err) {
+                console.error('Failed to load preview:', err);
                 showReaderNotice(getL(uiText.loadFailed), 'javascript:location.reload()', getL(uiText.retry));
             }
         }
@@ -1553,13 +1664,22 @@ function getL(obj, replacements = {}) {
             var lines = [];
 
             // 表紙は「絵＋題名」でひとつの塊。中の題名を見出しとして扱うと、
-            // そこでページが切れて表紙が2枚3枚に割れる（実際に起きた）
-            var cover = flow.querySelector('.reader-cover');
-            if (cover) {
-                var cb = cover.getBoundingClientRect();
-                lines.push([vpRight - cb.right - scroll, vpRight - cb.left - scroll, false]);
+            // そこでページが切れて表紙が2枚3枚に割れる（実際に起きた）。
+            // 試し読みの終わりのページも同じ扱い（こちらは必ずページの頭から始める）
+            var blocks = fullPageBlocks(flow);
+            Array.prototype.forEach.call(blocks, function (blk) {
+                var cb = blk.getBoundingClientRect();
+                if (!cb.width && !cb.height) return;   // 隠している間は数えない
+                lines.push([vpRight - cb.right - scroll, vpRight - cb.left - scroll,
+                            !blk.classList.contains('reader-cover')]);
+            });
+            function insideCover(el) {
+                if (!el) return false;
+                for (var bi = 0; bi < blocks.length; bi++) {
+                    if (blocks[bi].contains(el)) return true;
+                }
+                return false;
             }
-            function insideCover(el) { return !!(cover && el && cover.contains(el)); }
 
             var walker = document.createTreeWalker(flow, NodeFilter.SHOW_TEXT);
             var n;
@@ -1615,6 +1735,38 @@ function getL(obj, replacements = {}) {
         }
 
         /**
+         * 縦書きで「試し読みの終わり」のページを、次のページの頭まで余白で押し出す。
+         *
+         * 横書きは段組みの break-before が同じことをしてくれるが、縦書きは段組みを
+         * 使わないので、本文が終わったその場所から始まってしまう。すると前のページの
+         * 途中から顔を出し、同じ行が2ページに出る
+         */
+        function alignSampleEndToPage(vp, flow) {
+            var blk = flow.querySelector('.sample-end');
+            if (!blk) return;
+            // この塊は中身を横書きにしてあるので、margin-block-start は「上」になってしまう。
+            // 縦書きの本文は右から左へ進むので、押し出すのは右の余白
+            blk.style.marginRight = '';            // 前回の押し出しを消してから測る
+            if (!isVerticalMode()) return;
+
+            var W = vp.clientWidth;
+            // 本文だけのページ割りを測る（この塊を外した状態）
+            blk.style.display = 'none';
+            var textOffsets = measureVerticalPages(vp, flow);
+            blk.style.display = '';
+            var lastStart = textOffsets.length ? textOffsets[textOffsets.length - 1] : 0;
+
+            var from = vp.getBoundingClientRect().right - blk.getBoundingClientRect().right - vp.scrollLeft;
+            var need = (lastStart + W) - from;
+            if (need > 1) blk.style.marginRight = need + 'px';
+        }
+
+        /** 1ページを丸ごと使う塊（表紙・試し読みの終わり）。中身は行として数えない */
+        function fullPageBlocks(flow) {
+            return flow.querySelectorAll('.reader-cover, .sample-end');
+        }
+
+        /**
          * 縦書きでは、章の始まりを次のページの頭へ送る。
          * 横書きは段組みの break-before が同じことをしてくれるが、
          * 縦書きは段組みを使わないので、余白を足して押し出す
@@ -1667,6 +1819,8 @@ function getL(obj, replacements = {}) {
                 flow.style.paddingInlineEnd = '';
                 flow.style.paddingBlockEnd = '';
                 vp.style.width = '';
+                var sampleEnd = flow.querySelector('.sample-end');
+                if (sampleEnd) sampleEnd.style.marginRight = '';
                 pageOffsets = null;
                 pageStep = width || 1;
                 totalPages = 1;
@@ -1724,22 +1878,24 @@ function getL(obj, replacements = {}) {
                 vp.style.width = '';
             }
 
-            // 表紙は1ページを丸ごと使う。
-            // 縦書きのままだと、絵と題名が横に並んで2ページぶんの幅になり、割れて見える
-            var cover = flow.querySelector('.reader-cover');
-            if (cover) {
+            // 表紙と「試し読みの終わり」は1ページを丸ごと使う。
+            // 縦書きのままだと、中身が横に並んで2ページぶんの幅になり、割れて見える
+            Array.prototype.forEach.call(fullPageBlocks(flow), function (blk) {
                 if (isVerticalMode()) {
-                    cover.style.writingMode = 'horizontal-tb';
-                    cover.style.width = pageStep + 'px';
-                    cover.style.height = vp.clientHeight + 'px';
+                    blk.style.writingMode = 'horizontal-tb';
+                    blk.style.width = pageStep + 'px';
+                    blk.style.height = vp.clientHeight + 'px';
                 } else {
-                    cover.style.writingMode = '';
-                    cover.style.width = '';
-                    cover.style.height = '';
+                    blk.style.writingMode = '';
+                    blk.style.width = '';
+                    blk.style.height = '';
                 }
-            }
+            });
             flow.style.paddingInlineEnd = '';
             flow.style.paddingBlockEnd = '';
+
+            // 試し読みの終わりのページは、前のページの途中からではなく頭から始める
+            alignSampleEndToPage(vp, flow);
 
             scrollSign = measureScrollSign(vp);
 
@@ -1852,11 +2008,58 @@ function getL(obj, replacements = {}) {
                 flow.appendChild(mark(el));
             });
 
+            // 試し読みは最後に「ここまで」＋購入ボタンのページを足す
+            if (isPreview && previewInfo) {
+                flow.appendChild(mark(buildSampleEndBlock()));
+            }
+
             container.appendChild(flow);
             currentPage = 1;
             // 画像の読み込みで高さが変わるため、揃ってからもう一度数え直す
             layoutPages();
             waitForImages(flow, function() { layoutPages(currentAnchorIndex()); });
+        }
+
+        /**
+         * 試し読みの最後のページ。1ページを丸ごと使い、そのまま購入へ進めるようにする。
+         * 価格の表示と読者の通貨での目安は、他のページと同じ navbar.js の関数を使う
+         */
+        function buildSampleEndBlock() {
+            var pv = previewInfo || {};
+            var div = document.createElement('div');
+            div.className = 'sample-end';
+
+            var h = document.createElement('p');
+            h.className = 'sample-end-title';
+            h.textContent = getL(uiText.sampleEndTitle);
+            div.appendChild(h);
+
+            var body = document.createElement('p');
+            body.className = 'sample-end-body';
+            body.textContent = getL(uiText.sampleEndBody).replace('{n}', String(pv.previewPercent || 10));
+            div.appendChild(body);
+
+            var price = Number(pv.price) || 0;
+            var a = document.createElement('a');
+            a.className = 'sample-end-btn';
+            a.href = 'work-detail.html?id=' + encodeURIComponent(pv.workId || apiWorkId);
+            var label = getL(uiText.continueReading);
+            if (price > 0 && typeof formatWorkPrice === 'function') {
+                label += ' — ' + formatWorkPrice(price, pv.currency || 'USD');
+            }
+            a.textContent = label;
+            div.appendChild(a);
+
+            // 別の通貨圏の読者に「自分だといくら払うのか」を添える（作品ページと同じ表示）
+            if (price > 0 && typeof fillApproxPrices === 'function') {
+                var approx = document.createElement('span');
+                approx.className = 'price-approx sample-end-approx';
+                approx.setAttribute('data-price', price);
+                approx.setAttribute('data-currency', pv.currency || 'USD');
+                div.appendChild(approx);
+                try { fillApproxPrices(div); } catch (e) {}
+            }
+            return div;
         }
 
         /** 画像が読み終わるのを待つ（読み込み前後で1ページの量が変わるため） */
@@ -2595,9 +2798,10 @@ function getL(obj, replacements = {}) {
             if (pos.blockIndex < 0) return;
             try { localStorage.setItem(storageKey(POSITION_KEY), JSON.stringify(pos)); } catch (e) {}
 
-            // サーバーへは間を置いて送る（1ページごとに送ると通信が増えるだけ）
+            // サーバーへは間を置いて送る（1ページごとに送ると通信が増えるだけ）。
+            // 試し読みの位置は本編の続きとは別物なので、この端末だけに残す
             var token = localStorage.getItem('token');
-            if (!token || !workId) return;
+            if (!token || !workId || isPreview) return;
             if (positionSaveTimer) clearTimeout(positionSaveTimer);
             positionSaveTimer = setTimeout(function () {
                 positionSaveTimer = null;
@@ -2617,7 +2821,7 @@ function getL(obj, replacements = {}) {
             positionSaveTimer = null;
             var token = localStorage.getItem('token');
             var pos = localPosition();
-            if (!token || !workId || !pos) return;
+            if (!token || !workId || !pos || isPreview) return;
             // 閉じる直前でも届く送り方
             if (navigator.sendBeacon) {
                 // sendBeaconは認証ヘッダーを付けられないので、fetchのkeepaliveを使う
@@ -2639,7 +2843,7 @@ function getL(obj, replacements = {}) {
             var local = localPosition();
             var remote = null;
             var token = localStorage.getItem('token');
-            if (token && workId) {
+            if (token && workId && !isPreview) {
                 try {
                     var resp = await fetch((window.API_ORIGIN || '') + '/api/works/' + encodeURIComponent(workId) + '/position', {
                         headers: { 'Authorization': 'Bearer ' + token }

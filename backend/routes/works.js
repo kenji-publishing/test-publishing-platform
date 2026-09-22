@@ -367,7 +367,7 @@ router.get('/', async (req, res) => {
         let query = `
             SELECT w.work_id, w.title, w.description, w.synopsis, w.cover_image_url,
                    w.cover_image, w.genre, w.tags, w.original_language, w.language,
-                   w.content_type, w.price, w.currency, w.is_free,
+                   w.content_type, w.price, w.currency, w.is_free, w.preview_percent,
                    w.view_count, w.like_count, w.comment_count,
                    w.rating_average, w.rating_count, w.published_at,
                    w.is_adult, w.age_rating, w.content_warnings,
@@ -810,15 +810,80 @@ router.get('/:workId', async (req, res) => {
 });
 
 /**
+ * 試し読みで切り出す長さを決める。
+ * ・文の終わりで切る（言語ごとの終止符を並べる。アラビア語の ؟ や 。 も含む）
+ * ・段落の切れ目があればそちらを優先（読み終わりが自然になる）
+ * ・原稿マーカー（[[img]] / [[table]]〜[[/table]]）の途中では切らない
+ */
+const SENTENCE_END_RE = /[。．.!！?？؟۔…‥](?:["'”』」）)\]]*)/g;
+
+/**
+ * 著者が指定した試し読みの割合を検算する。
+ * 0（試し読みなし）も有効な値なので `|| 10` で潰さないこと。
+ * 未指定(undefined/null/空)は null を返し、呼び出し側の既定に任せる
+ */
+function normalizePreviewPercent(value) {
+    if (value === undefined || value === null || value === '') return null;
+    const n = Math.round(Number(value));
+    if (!Number.isFinite(n)) return null;
+    return Math.min(50, Math.max(0, n));
+}
+
+function cutPreview(content, percent) {
+    const text = String(content || '');
+    if (!text || !(percent > 0)) return '';
+    // 極端に短い作品でも「試し読みが空っぽ」にはしない（最低100文字）
+    const target = Math.max(Math.min(text.length, 100), Math.floor(text.length * (percent / 100)));
+    if (target >= text.length) return text;
+
+    let cut = target;
+
+    // 段落の切れ目（空行）が後半にあれば、そこで切る
+    const para = text.lastIndexOf('\n\n', target);
+    if (para > target * 0.6) {
+        cut = para;
+    } else {
+        // 無ければ文の終わりを探す
+        let last = -1;
+        SENTENCE_END_RE.lastIndex = 0;
+        let m;
+        while ((m = SENTENCE_END_RE.exec(text)) !== null) {
+            const end = m.index + m[0].length;
+            if (end > target) break;
+            last = end;
+        }
+        if (last > target * 0.6) cut = last;
+    }
+
+    let out = text.slice(0, cut);
+
+    // 表の途中で切れた場合は、その表の手前まで戻す（閉じない[[table]]を残さない）
+    const openTable = out.lastIndexOf('[[table]]');
+    if (openTable > -1 && out.indexOf('[[/table]]', openTable) === -1) {
+        out = out.slice(0, openTable);
+    }
+    // 挿絵マーカーが途中で切れた場合も落とす
+    const openImg = out.lastIndexOf('[[img');
+    if (openImg > -1 && out.indexOf(']]', openImg) === -1) {
+        out = out.slice(0, openImg);
+    }
+
+    return out.replace(/\s+$/, '');
+}
+
+/**
  * GET /api/works/:workId/preview
- * Get work preview - synopsis + first 10% of content
+ * 試し読み（あらすじ＋本文の先頭 preview_percent ぶん）。ログイン不要で誰でも読める。
+ * マンガはページ画像が別テーブルなので対象外（400を返し、UIはボタンを出さない）
  */
 router.get('/:workId/preview', async (req, res) => {
     try {
         const result = await db.query(
-            `SELECT w.work_id, w.title, w.description, w.synopsis, 
-                    w.content, w.preview_percent, w.is_free, w.price,
-                    w.word_count, w.page_count,
+            `SELECT w.work_id, w.title, w.description, w.synopsis,
+                    w.content, w.preview_percent, w.is_free, w.price, w.currency,
+                    w.word_count, w.page_count, w.content_type, w.is_adult, w.age_rating,
+                    w.language, w.original_language, w.cover_image, w.cover_image_url,
+                    w.ai_text_usage,
                     COALESCE(NULLIF(w.author_name, ''), u.pen_name, NULLIF(TRIM(COALESCE(u.first_name,'') || ' ' || COALESCE(u.last_name,'')), '')) AS author_name
              FROM works w
              JOIN users u ON w.author_id = u.user_id
@@ -831,30 +896,39 @@ router.get('/:workId/preview', async (req, res) => {
         }
 
         const work = result.rows[0];
-        const content = work.content || '';
-        const previewPercent = work.preview_percent || 10;
 
-        // Calculate preview length
-        const previewLength = Math.floor(content.length * (previewPercent / 100));
-
-        // Find a good break point (end of sentence or paragraph)
-        let previewContent = content.substring(0, previewLength);
-
-        // Try to end at a sentence
-        const lastPeriod = Math.max(
-            previewContent.lastIndexOf('。'),
-            previewContent.lastIndexOf('.'),
-            previewContent.lastIndexOf('！'),
-            previewContent.lastIndexOf('!'),
-            previewContent.lastIndexOf('？'),
-            previewContent.lastIndexOf('?'),
-            previewContent.lastIndexOf('\n\n')
-        );
-
-        if (lastPeriod > previewLength * 0.7) {
-            previewContent = previewContent.substring(0, lastPeriod + 1);
+        // マンガの試し読みは未対応（本文がページ画像で、この仕組みでは切り出せない）
+        if (work.content_type === 'manga') {
+            return res.status(400).json({
+                error: 'Preview is not available for manga works',
+                code: 'PREVIEW_UNSUPPORTED'
+            });
         }
 
+        // 成人向けの作品は、ログイン不要で本文の一部を配らない
+        // （年齢確認の仕組みがまだ無いため。一覧からも除外されている）
+        if (work.is_adult || work.age_rating === '18') {
+            return res.status(403).json({
+                error: 'Previews are not available for age-restricted works',
+                code: 'PREVIEW_AGE_RESTRICTED'
+            });
+        }
+
+        // 著者が0%（試し読みなし）を選んでいる作品
+        const previewPercent = work.preview_percent === null || work.preview_percent === undefined
+            ? 10 : Number(work.preview_percent);
+        if (!(previewPercent > 0)) {
+            return res.status(403).json({
+                error: 'The author has turned off previews for this work',
+                code: 'PREVIEW_DISABLED'
+            });
+        }
+
+        const content = work.content || '';
+        const previewContent = cutPreview(content, previewPercent);
+
+        // 国ごとに変わる情報は無いが、本文の一部を含むので中間キャッシュに残さない
+        res.set('Cache-Control', 'no-store');
         res.json({
             success: true,
             preview: {
@@ -868,8 +942,14 @@ router.get('/:workId/preview', async (req, res) => {
                 totalLength: content.length,
                 wordCount: work.word_count,
                 pageCount: work.page_count,
+                contentType: work.content_type,
+                language: work.language,
+                originalLanguage: work.original_language,
+                coverImage: work.cover_image || work.cover_image_url || null,
+                aiTextUsage: work.ai_text_usage,
                 isFree: work.is_free,
                 price: work.price,
+                currency: work.currency,
                 hasMore: content.length > previewContent.length
             }
         });
@@ -1270,7 +1350,8 @@ router.post('/', authenticate, async (req, res) => {
                     rating === '18',   // is_adult は一覧除外に使われているので同期させる
                     isAiGenerated || (aiText !== 'none') || false,
                     aiToolsUsed || null,
-                    previewPercent || 10,
+                    // 0（試し読みなし）を選べるようにするため || は使わない
+                    normalizePreviewPercent(previewPercent) === null ? 10 : normalizePreviewPercent(previewPercent),
                     wordCount,
                     pageCount,
                     workCurrency,
@@ -1403,7 +1484,7 @@ router.put('/:workId', authenticate, async (req, res) => {
             [
                 title, description, synopsis, content, genre, tags,
                 price, status, isFree, coverImage, isAdult,
-                isAiGenerated, aiToolsUsed, previewPercent,
+                isAiGenerated, aiToolsUsed, normalizePreviewPercent(previewPercent),
                 wordCount, pageCount, req.params.workId, workCurrency,
                 aiText, aiCover, aiTranslation, rating, warnings, workAuthorName,
                 originalId !== undefined, originalId === undefined ? null : originalId,
