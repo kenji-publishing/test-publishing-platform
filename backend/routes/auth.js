@@ -701,14 +701,19 @@ router.post('/reset-password', loginLimiter, async (req, res) => {
  */
 router.put('/password', authenticate, async (req, res) => {
   try {
-    const { currentPassword, newPassword } = req.body;
+    // 画面（profile.html）は長らく current_password / new_password で送っていたのに、
+    // ここは currentPassword / newPassword しか読んでおらず、**一度も変更できない状態**だった
+    // （2026-09-30 kenjiさんが遭遇）。画面も直したが、古いキャッシュのページからでも
+    // 通るよう、どちらの名前でも受け付ける。
+    const currentPassword = req.body.currentPassword ?? req.body.current_password;
+    const newPassword = req.body.newPassword ?? req.body.new_password;
 
     if (!currentPassword || !newPassword) {
-      return res.status(400).json({ error: 'Current and new password are required' });
+      return res.status(400).json({ error: 'Current and new password are required', code: 'MISSING_FIELDS' });
     }
 
-    if (newPassword.length < 8) {
-      return res.status(400).json({ error: 'New password must be at least 8 characters' });
+    if (String(newPassword).length < 8) {
+      return res.status(400).json({ error: 'New password must be at least 8 characters', code: 'PASSWORD_TOO_SHORT' });
     }
 
     const userResult = await db.query(
@@ -733,7 +738,9 @@ router.put('/password', authenticate, async (req, res) => {
     const isMatch = await bcrypt.compare(currentPassword, userResult.rows[0].password_hash);
 
     if (!isMatch) {
-      return res.status(401).json({ error: 'Current password is incorrect' });
+      // 401 にしない。この人はログイン済みで、間違えたのは入力だけ。
+      // 401 は「ログインの期限切れ」と読まれ、共通処理にログアウトさせられかねない
+      return res.status(400).json({ error: 'Current password is incorrect', code: 'WRONG_CURRENT_PASSWORD' });
     }
 
     const salt = await bcrypt.genSalt(12);
