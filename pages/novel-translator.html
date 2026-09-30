@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609301958">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202609302119">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Novel Translator - AuctLect</title>
 
@@ -16,26 +16,26 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <!-- Platform CSS -->
-    <link href="../css/variables.css?v=202609301958" rel="stylesheet">
-    <link rel="stylesheet" href="../css/style-new.css?v=202609301958">
-    <link href="../css/components.css?v=202609301958" rel="stylesheet">
-    <link href="../css/navbar.css?v=202609301958" rel="stylesheet">
-    <link rel="stylesheet" href="../css/mobile-fixes.css?v=202609301958">
+    <link href="../css/variables.css?v=202609302119" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style-new.css?v=202609302119">
+    <link href="../css/components.css?v=202609302119" rel="stylesheet">
+    <link href="../css/navbar.css?v=202609302119" rel="stylesheet">
+    <link rel="stylesheet" href="../css/mobile-fixes.css?v=202609302119">
 
     <!-- 言語ファイル（9言語） -->
-    <script src="../js/config.js?v=202609301958"></script>
-    <script src="../js/lang/ja.js?v=202609301958"></script>
-    <script src="../js/lang/en.js?v=202609301958"></script>
-    <script src="../js/lang/zh.js?v=202609301958"></script>
-    <script src="../js/lang/zh-TW.js?v=202609301958"></script>
-    <script src="../js/lang/es.js?v=202609301958"></script>
-    <script src="../js/lang/fr.js?v=202609301958"></script>
-    <script src="../js/lang/de.js?v=202609301958"></script>
-    <script src="../js/lang/ko.js?v=202609301958"></script>
-    <script src="../js/lang/ar.js?v=202609301958"></script>
-    <script src="../js/lang/pt.js?v=202609301958"></script>
-    <script src="../js/lang/it.js?v=202609301958"></script>
-    <script src="../js/wizard-common.js?v=202609301958"></script>
+    <script src="../js/config.js?v=202609302119"></script>
+    <script src="../js/lang/ja.js?v=202609302119"></script>
+    <script src="../js/lang/en.js?v=202609302119"></script>
+    <script src="../js/lang/zh.js?v=202609302119"></script>
+    <script src="../js/lang/zh-TW.js?v=202609302119"></script>
+    <script src="../js/lang/es.js?v=202609302119"></script>
+    <script src="../js/lang/fr.js?v=202609302119"></script>
+    <script src="../js/lang/de.js?v=202609302119"></script>
+    <script src="../js/lang/ko.js?v=202609302119"></script>
+    <script src="../js/lang/ar.js?v=202609302119"></script>
+    <script src="../js/lang/pt.js?v=202609302119"></script>
+    <script src="../js/lang/it.js?v=202609302119"></script>
+    <script src="../js/wizard-common.js?v=202609302119"></script>
 
     <style>
         :root {
@@ -715,8 +715,7 @@
         .review-panel-header { padding: 0.6rem 1rem; background: var(--color-bg); font-weight: 600; font-size: 0.85rem; border-bottom: 1px solid var(--color-border); }
         .edit-hint { font-weight: 400; font-size: 0.75rem; color: var(--color-text-secondary); }
         .review-text { padding: 1rem; font-size: 0.88rem; line-height: 1.8; min-height: 300px; max-height: 500px; overflow-y: auto; white-space: pre-wrap; }
-        .review-text.editable { width: 100%; border: none; resize: none; font-family: 'Noto Sans JP', sans-serif; outline: none; }
-        .review-text.editable:focus { background: rgba(139,115,85,0.03); }
+        .review-text.readonly { width: 100%; border: none; resize: none; font-family: 'Noto Sans JP', sans-serif; outline: none; background: transparent; cursor: default; }
 
         /* Step 9 */
         .complete-icon { font-size: 4rem; color: var(--color-success); margin-bottom: 1rem; }
@@ -1150,11 +1149,11 @@
                 </div>
             </div>
 
-            <!-- ===== Step 8: Review & Edit ===== -->
+            <!-- ===== Step 8: Review (read only; corrections are made in the downloaded file) ===== -->
             <div class="wizard-step" id="step8" style="display:none;">
                 <div class="step-card wide-card">
                     <h2 id="s8Title">Review Translation</h2>
-                    <p class="step-desc" id="s8Desc">Review and edit the translation below. You can make corrections before finalizing.</p>
+                    <p class="step-desc" id="s8Desc">Compare the translation with the original. To make corrections, download the file on the next screen and edit it in Word or a text editor. The edited file can be registered directly on the Upload page.</p>
 
                     <!-- 章ごとの注文では1ファイルずつ表示する。10章を1つの枠に入れても読めない -->
                     <div id="reviewPartBar" style="display:none; margin-bottom:0.75rem; align-items:center; gap:0.5rem; flex-wrap:wrap;">
@@ -1168,8 +1167,8 @@
                             <div class="review-text" id="reviewOriginal" dir="auto"></div>
                         </div>
                         <div class="review-panel">
-                            <div class="review-panel-header" id="s8TransHeader">Translation <span class="edit-hint" id="s8EditHint">(click to edit)</span></div>
-                            <textarea class="review-text editable" id="reviewTranslation" dir="auto"></textarea>
+                            <div class="review-panel-header" id="s8TransHeader">Translation</div>
+                            <textarea class="review-text readonly" id="reviewTranslation" dir="auto" readonly tabindex="-1"></textarea>
                         </div>
                     </div>
 
@@ -1598,15 +1597,14 @@
     }
 
     function onReviewPartChange(sel) {
-        saveReviewPart();                       // 手で直した分をその章へ書き戻してから切り替える
+        saveReviewPart();
         loadReviewPart(parseInt(sel.value, 10) || 0);
     }
 
+    // 確認画面は読むだけ（修正はダウンロードしたファイルで行う）。
+    // 以前は画面の内容をその章へ書き戻していたが、表示とずれた時に章を上書きしてしまうのでやめた
     function saveReviewPart() {
         if (!resultParts) return;
-        const ta = document.getElementById('reviewTranslation');
-        if (!ta) return;
-        resultParts[reviewPart] = ta.value;
         translatedText = resultParts.join(PART_SEP);
     }
 
@@ -2448,7 +2446,7 @@
     /** まとめて1つにするときの本文。章ごとの注文では全章をつなげる */
     function reviewFullText() {
         if (resultParts) { saveReviewPart(); return resultParts.join(PART_SEP); }
-        return document.getElementById('reviewTranslation').value;
+        return translatedText || document.getElementById('reviewTranslation').value;
     }
 
     function downloadResult(format) {
@@ -2480,7 +2478,7 @@
     // 翻訳済み原稿をアップロードページへ引き渡す（AIエディタ・テキストエディターと同じ連携）
     function uploadTranslatedWork() {
         const L = getLang();
-        const text = (document.getElementById('reviewTranslation').value || translatedText || '').trim();
+        const text = (reviewFullText() || translatedText || '').trim();
         if (!text) {
             alert(L === 'ja' ? '翻訳結果が見つかりません。翻訳が完了してからお試しください。' : 'No translation found. Please wait until the translation completes.');
             return;
@@ -2785,10 +2783,9 @@
             s7Title: { en: 'Translating your text...', ja: '\u30c6\u30ad\u30b9\u30c8\u3092\u7ffb\u8a33\u4e2d...', zh: '\u6b63\u5728\u7ffb\u8b6f\u60a8\u7684\u6587\u672c...', es: 'Traduciendo su texto...', fr: 'Traduction en cours...', de: 'Ihr Text wird \u00fcbersetzt...', ko: '\ud14d\uc2a4\ud2b8 \ubc88\uc5ed \uc911...', ar: '\u062c\u0627\u0631\u064a \u062a\u0631\u062c\u0645\u0629 \u0627\u0644\u0646\u0635...', pt: 'Traduzindo seu texto...', it: 'Traduzione del tuo testo in corso...' },
             s7Note: { en: 'Please do not close this page.', ja: '\u3053\u306e\u30da\u30fc\u30b8\u3092\u9589\u3058\u306a\u3044\u3067\u304f\u3060\u3055\u3044\u3002', zh: '\u8acb\u52ff\u95dc\u9589\u6b64\u9801\u9762\u3002', es: 'No cierre esta p\u00e1gina.', fr: 'Ne fermez pas cette page.', de: 'Bitte schlie\u00dfen Sie diese Seite nicht.', ko: '\uc774 \ud398\uc774\uc9c0\ub97c \ub2eb\uc9c0 \ub9c8\uc138\uc694.', ar: '\u064a\u0631\u062c\u0649 \u0639\u062f\u0645 \u0625\u063a\u0644\u0627\u0642 \u0647\u0630\u0647 \u0627\u0644\u0635\u0641\u062d\u0629.', pt: 'N\u00e3o feche esta p\u00e1gina.', it: 'Si prega di non chiudere questa pagina.' },
             s8Title: { en: 'Review Translation', ja: '\u7ffb\u8a33\u3092\u78ba\u8a8d', zh: '\u5be9\u67e5\u7ffb\u8b6f', es: 'Revisar traducci\u00f3n', fr: 'V\u00e9rifier la traduction', de: '\u00dcbersetzung pr\u00fcfen', ko: '\ubc88\uc5ed \uac80\ud1a0', ar: '\u0645\u0631\u0627\u062c\u0639\u0629 \u0627\u0644\u062a\u0631\u062c\u0645\u0629', pt: 'Revisar tradu\u00e7\u00e3o', it: 'Rivedi la traduzione' },
-            s8Desc: { en: 'Review and edit the translation below. You can make corrections before finalizing.', ja: '\u4e0b\u8a18\u306e\u7ffb\u8a33\u3092\u78ba\u8a8d\u30fb\u4fee\u6b63\u3057\u3066\u304f\u3060\u3055\u3044\u3002', zh: '\u8acb\u5be9\u67e5\u4e26\u7de8\u8f2f\u4ee5\u4e0b\u7ffb\u8b6f\u3002\u60a8\u53ef\u4ee5\u5728\u5b8c\u6210\u524d\u9032\u884c\u4fee\u6b63\u3002', es: 'Revise y edite la traducci\u00f3n. Puede hacer correcciones antes de finalizar.', fr: 'V\u00e9rifiez et modifiez la traduction. Vous pouvez corriger avant de finaliser.', de: 'Pr\u00fcfen und bearbeiten Sie die \u00dcbersetzung. Sie k\u00f6nnen vor dem Abschluss Korrekturen vornehmen.', ko: '\ubc88\uc5ed\uc744 \uac80\ud1a0\ud558\uace0 \ud3b8\uc9d1\ud558\uc138\uc694. \uc644\ub8cc \uc804\uc5d0 \uc218\uc815\ud560 \uc218 \uc788\uc2b5\ub2c8\ub2e4.', ar: '\u0631\u0627\u062c\u0639 \u0648\u0639\u062f\u0644 \u0627\u0644\u062a\u0631\u062c\u0645\u0629. \u064a\u0645\u0643\u0646\u0643 \u0625\u062c\u0631\u0627\u0621 \u062a\u0635\u062d\u064a\u062d\u0627\u062a \u0642\u0628\u0644 \u0627\u0644\u0627\u0646\u062a\u0647\u0627\u0621.', pt: 'Revise e edite a tradu\u00e7\u00e3o. Voc\u00ea pode fazer corre\u00e7\u00f5es antes de finalizar.', it: 'Rivedi e modifica la traduzione qui sotto. Puoi apportare correzioni prima di finalizzare.' },
+            s8Desc: { en: 'Compare the translation with the original. To make corrections, download the file on the next screen and edit it in Word or a text editor. The edited file can be registered directly on the Upload page.', ja: '原文と見比べて、訳文を確認してください。修正は、次の画面でダウンロードしたファイルをWordなどで編集して行えます。編集したファイルは、そのままアップロード画面から登録できます。', zh: '請對照原文確認譯文。如需修改，請在下一畫面下載檔案，並用Word等軟體編輯。編輯好的檔案可直接在上傳頁面登錄。', es: 'Compare la traducción con el original. Para hacer correcciones, descargue el archivo en la siguiente pantalla y edítelo en Word u otro editor de texto. El archivo editado puede registrarse directamente en la página de subida.', fr: 'Comparez la traduction avec l’original. Pour corriger, téléchargez le fichier à l’écran suivant et modifiez-le dans Word ou un éditeur de texte. Le fichier modifié peut être enregistré directement sur la page de publication.', de: 'Vergleichen Sie die Übersetzung mit dem Original. Für Korrekturen laden Sie die Datei im nächsten Schritt herunter und bearbeiten Sie sie in Word oder einem Texteditor. Die bearbeitete Datei können Sie direkt auf der Upload-Seite einreichen.', ko: '원문과 비교하며 번역문을 확인하세요. 수정은 다음 화면에서 파일을 다운로드한 뒤 Word 등에서 편집하면 됩니다. 편집한 파일은 업로드 페이지에서 바로 등록할 수 있습니다.', ar: 'قارن الترجمة بالنص الأصلي. لإجراء تصحيحات، نزّل الملف في الشاشة التالية وعدّله في Word أو أي محرر نصوص. يمكن تسجيل الملف المعدّل مباشرة من صفحة الرفع.', pt: 'Compare a tradução com o original. Para fazer correções, baixe o arquivo na próxima tela e edite-o no Word ou em outro editor de texto. O arquivo editado pode ser registrado diretamente na página de envio.', it: 'Confronta la traduzione con l’originale. Per le correzioni, scarica il file nella schermata successiva e modificalo in Word o in un editor di testo. Il file modificato può essere registrato direttamente nella pagina di caricamento.' },
             s8OrigHeader: { en: 'Original', ja: '\u539f\u6587', zh: '\u539f\u6587', es: 'Original', fr: 'Original', de: 'Original', ko: '\uc6d0\ubb38', ar: '\u0627\u0644\u0623\u0635\u0644\u064a', pt: 'Original', it: 'Originale' },
             s8TransHeader: { en: 'Translation', ja: '\u7ffb\u8a33', zh: '\u8b6f\u6587', es: 'Traducci\u00f3n', fr: 'Traduction', de: '\u00dcbersetzung', ko: '\ubc88\uc5ed', ar: '\u0627\u0644\u062a\u0631\u062c\u0645\u0629', pt: 'Tradu\u00e7\u00e3o', it: 'Traduzione' },
-            s8EditHint: { en: '(click to edit)', ja: '\uff08\u30af\u30ea\u30c3\u30af\u3067\u7de8\u96c6\uff09', zh: '\uff08\u9ede\u64ca\u7de8\u8f2f\uff09', 'zh-TW': '\uff08\u9ede\u9078\u7de8\u8f2f\uff09', es: '(clic para editar)', fr: '(cliquez pour \u00e9diter)', de: '(klicken zum Bearbeiten)', ko: '(\ud074\ub9ad\ud558\uc5ec \ud3b8\uc9d1)', ar: '(\u0627\u0646\u0642\u0631 \u0644\u0644\u062a\u0639\u062f\u064a\u0644)', pt: '(clique para editar)', it: '(clicca per modificare)' },
             s8BtnRetranslate: { en: 'Re-translate with different model', ja: '\u5225\u306e\u30e2\u30c7\u30eb\u3067\u518d\u7ffb\u8a33', zh: '\u7528\u4e0d\u540c\u6a21\u578b\u91cd\u65b0\u7ffb\u8b6f', es: 'Retraducir con otro modelo', fr: 'Retraduire avec un autre mod\u00e8le', de: 'Mit anderem Modell neu \u00fcbersetzen', ko: '\ub2e4\ub978 \ubaa8\ub378\ub85c \uc7ac\ubc88\uc5ed', ar: '\u0625\u0639\u0627\u062f\u0629 \u0627\u0644\u062a\u0631\u062c\u0645\u0629 \u0628\u0646\u0645\u0648\u0630\u062c \u0622\u062e\u0631', pt: 'Retraduzir com outro modelo', it: 'Ritraduci con un modello diverso' },
             s8BtnText: { en: 'Finalize & Download', ja: '\u5b8c\u4e86\u3057\u3066\u30c0\u30a6\u30f3\u30ed\u30fc\u30c9', zh: '\u5b8c\u6210\u4e26\u4e0b\u8f09', es: 'Finalizar y descargar', fr: 'Finaliser et t\u00e9l\u00e9charger', de: 'Abschlie\u00dfen & Herunterladen', ko: '\uc644\ub8cc \ubc0f \ub2e4\uc6b4\ub85c\ub4dc', ar: '\u0625\u0646\u0647\u0627\u0621 \u0648\u062a\u0646\u0632\u064a\u0644', pt: 'Finalizar e baixar', it: 'Finalizza e scarica' },
             s9Title: { en: 'Translation Complete!', ja: '\u7ffb\u8a33\u5b8c\u4e86\uff01', zh: '\u7ffb\u8b6f\u5b8c\u6210\uff01', es: '\u00a1Traducci\u00f3n completada!', fr: 'Traduction termin\u00e9e !', de: '\u00dcbersetzung abgeschlossen!', ko: '\ubc88\uc5ed \uc644\ub8cc!', ar: '\u0627\u0643\u062a\u0645\u0644\u062a \u0627\u0644\u062a\u0631\u062c\u0645\u0629!', pt: 'Tradu\u00e7\u00e3o conclu\u00edda!', it: 'Traduzione completata!' },
@@ -2835,7 +2832,7 @@
         setText('s6CardLabel', T.s6CardLabel); setText('s6MethodsNote', T.s6MethodsNote);
         setText('s7Title', T.s7Title); setText('s7Note', T.s7Note);
         setText('s8Title', T.s8Title); setText('s8Desc', T.s8Desc); setText('s8OrigHeader', T.s8OrigHeader);
-        setText('s8EditHint', T.s8EditHint); setText('s8BtnRetranslate', T.s8BtnRetranslate); setText('s8BtnText', T.s8BtnText);
+        setText('s8TransHeader', T.s8TransHeader); setText('s8BtnRetranslate', T.s8BtnRetranslate); setText('s8BtnText', T.s8BtnText);
         setText('s9Title', T.s9Title); setText('s9Desc', T.s9Desc); setText('s9BtnReview', T.s9BtnReview); setText('s9BtnNew', T.s9BtnNew); setText('s9CheckText', T.s9CheckText); setText('s9CheckLinkLabel', T.s9CheckLinkLabel);
         document.querySelectorAll('.back-label').forEach(el => el.textContent = t(T.btnBack));
         document.querySelectorAll('.next-label').forEach(el => el.textContent = t(T.btnNext));
@@ -2914,7 +2911,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- JSZip: lets us crack open .docx (which is a ZIP) to read the text inside -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="../js/i18n.js?v=202609301958"></script>
-    <script src="../js/navbar.js?v=202609301958"></script>
+    <script src="../js/i18n.js?v=202609302119"></script>
+    <script src="../js/navbar.js?v=202609302119"></script>
 </body>
 </html>
