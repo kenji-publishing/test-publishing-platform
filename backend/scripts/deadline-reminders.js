@@ -18,7 +18,9 @@ const { DONE, ONE_OFF, YEARLY } = require('../config/deadlines');
 
 const TO = 'info@auctlect.com';
 const OSS_FIRST_QUARTER = '2026-Q3';          // 登録の発効は 2026-08-10
-const OSS_REMIND = [30, 14, 7, 3, 1, 0];
+// OSS は「四半期が終わった翌日（＝申告できるようになった日）」にも必ず知らせる（isDue の opensToday）。
+// 期限からの日数だけだと、月の長さで初回が四半期の途中（3/31 など）にずれるため
+const OSS_REMIND = [14, 7, 3, 1, 0];
 const DAY = 86400000;
 
 const arg = name => { const i = process.argv.indexOf(name); return i >= 0 ? (process.argv[i + 1] || '') : null; };
@@ -79,13 +81,17 @@ function yearlyItems(today) {
 function allItems(today) {
   return [...ossItems(today), ...ONE_OFF, ...yearlyItems(today)]
     .filter(it => !DONE.includes(it.id))
-    .map(it => ({ ...it, daysLeft: daysBetween(today, it.date) }))
+    .map(it => ({
+      ...it,
+      daysLeft: daysBetween(today, it.date),
+      opensToday: !!it.quarterEnd && ymd(it.quarterEnd) === ymd(today),
+    }))
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
 /** 今日知らせるべきか */
 function isDue(it) {
-  if (it.remind.includes(it.daysLeft)) return true;
+  if (it.remind.includes(it.daysLeft) || it.opensToday) return true;
   // 届け出・申告は、済むまで毎日（ただし1年より前のものは追わない）
   return !!it.overdue && it.daysLeft < 0 && it.daysLeft >= -365;
 }
@@ -103,11 +109,11 @@ async function ossDetail(it, today) {
     const oss = require('../services/ossReport');
     const rows = await oss.getReturnSummary(it.ossLabel);
     const unknown = await oss.getUnattributed(it.ossLabel).catch(() => []);
-    let s;
+    let s = it.opensToday ? '四半期が終わり、今日から申告できるようになりました。早めの提出がおすすめです（期限直前はROSが混んだり止まったりすることがあります）。\n' : '';
     if (!rows.length) {
-      s = '集計結果：この四半期のEU圏への販売は 0件です。→ ゼロ申告（Nil return）で提出できます。納付はありません。';
+      s += '集計結果：この四半期のEU圏への販売は 0件です。→ ゼロ申告（Nil return）で提出できます。納付はありません。';
     } else {
-      s = '集計結果：EU圏への販売があります。国ごとに申告し、同じ期限までにユーロで納付します。\n'
+      s += '集計結果：EU圏への販売があります。国ごとに申告し、同じ期限までにユーロで納付します。\n'
         + rows.map(r => `  ${r.member_state}  税率${r.vat_rate}%  ${r.currency}  課税標準 ${Number(r.taxable_amount).toFixed(2)}  VAT ${Number(r.vat_amount).toFixed(2)}  （販売${r.sales}件・返金${r.refunds}件）`).join('\n')
         + `\n  ※ ユーロ以外の通貨は ${ymd(new Date(it.quarterEnd - DAY))} 時点の欧州中央銀行（ECB）レートで換算。`
         + 'Claude に見せていただければ、申告する金額を計算します。';
