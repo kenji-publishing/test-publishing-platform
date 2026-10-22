@@ -76,6 +76,23 @@ UNKNOWN_N=$($PSQL "SELECT count(*) FROM transactions
 WORKS_N=$($PSQL "SELECT count(*) FROM works WHERE status='published';" 2>/dev/null || echo 0)
 unset PGPASSWORD
 
+# HTTPSの証明書の残り日数。certbot が残り30日で自動更新するので、14日を切ったら更新が止まっている。
+# hooks.auctlect.com は Cloudflare を通さないので、切れるとメール不達の通知（SES）が届かなくなる
+CERT_INFO=""
+CERT_WARN=""
+for H in auctlect.com hooks.auctlect.com; do
+  END=$(echo | timeout 10 openssl s_client -connect 127.0.0.1:443 -servername "$H" 2>/dev/null \
+        | openssl x509 -noout -enddate 2>/dev/null | cut -d= -f2)
+  if [ -n "$END" ]; then
+    LEFT=$(( ( $(date -d "$END" +%s) - $(date +%s) ) / 86400 ))
+    CERT_INFO="${CERT_INFO}${H} 残り${LEFT}日 "
+    [ "$LEFT" -lt 14 ] && CERT_WARN="${CERT_WARN}${H}（残り${LEFT}日） "
+  else
+    CERT_INFO="${CERT_INFO}${H} 確認できず "
+    CERT_WARN="${CERT_WARN}${H}（証明書を読めない） "
+  fi
+done
+
 LATEST=$(ls -t "$BACKUP_DIR"/*.dump 2>/dev/null | head -1)
 if [ -n "$LATEST" ]; then
   AGE_H=$(( ( $(date +%s) - $(stat -c %Y "$LATEST") ) / 3600 ))
@@ -93,6 +110,14 @@ add() { WARN="${WARN}${1}"$'\n'; }
 [ "${DB_MB:-0}" -ge 2048 ] && add "・データベースが ${DB_MB}MB になりました。管理型DBへの移行を検討してください。"
 [ "${TX30:-0}" -ge 300 ] && add "・直近30日の取引が ${TX30} 件（1日あたり10件超）。1日1回のバックアップでは、障害時に失う取引が無視できない量になります。管理型DB（5分刻みの巻き戻し）への移行時期です。"
 [ "$AGE_H" -ge 72 ] && add "・最新のバックアップが ${AGE_H} 時間前のままです。日次バックアップが止まっている可能性があります。"
+[ -n "$CERT_WARN" ] && add "・HTTPSの証明書の期限が近づいています: ${CERT_WARN}。自動更新（certbot）が止まっている可能性があります。切れるとサイトやメール不達の通知が止まります。"
+
+# 期日のお知らせ（deadline-reminders.js）が最後に動いた日。2日以上止まっていたら知らせる
+DL_STATE="$BACKUP_DIR/deadlines-last-run"
+if [ -f "$DL_STATE" ]; then
+  DL_AGE_H=$(( ( $(date +%s) - $(stat -c %Y "$DL_STATE") ) / 3600 ))
+  [ "$DL_AGE_H" -ge 48 ] && add "・期日のお知らせ（申告・更新の期限チェック）が ${DL_AGE_H} 時間動いていません。"
+fi
 
 # --- 作品が増えたときに、見せ方を変える時期の目安 ---
 # トップページは「新着12件」だけを出している。作品が少ないうちはそれで全体像が見えるが、
@@ -123,6 +148,7 @@ add() { WARN="${WARN}${1}"$'\n'; }
   echo "EU圏への販売: ${EU_N}件${EU_COUNTRIES:+ (${EU_COUNTRIES})}"
   echo "購入者の国が不明: ${UNKNOWN_N}件"
   echo "最新バックアップ: ${AGE_H}時間前"
+  echo "HTTPS証明書: ${CERT_INFO}"
   echo "判定: $([ -z "$WARN" ] && echo '問題なし' || echo '要対応')"
 } > "$STATE"
 

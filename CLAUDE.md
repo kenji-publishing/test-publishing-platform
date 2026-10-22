@@ -145,9 +145,11 @@ test-publishing-platform/
 │   ├── middleware/         # 認証ミドルウェア (authenticate/authorize)
 │   ├── migrations/         # SQL マイグレーション
 │   ├── scripts/
-│   │   └── oss-return.js   # EU OSS 四半期申告用データの書き出し
+│   │   ├── oss-return.js   # EU OSS 四半期申告用データの書き出し
+│   │   └── deadline-reminders.js # 期日が近づいたらメール（OSS申告・確認書・更新など）
 │   └── config/             # DB, メール, 収益, VAT税率
-│       └── vatRates.js     # VAT税率表（電子書籍＋標準税率）。成人向けの分岐あり
+│       ├── vatRates.js     # VAT税率表（電子書籍＋標準税率）。成人向けの分岐あり
+│       └── deadlines.js    # 期日の一覧。**期日を足す・済んだら DONE に id を足す**のはここ
 ├── deploy/                 # 本番サーバーに置くもの
 │   ├── nginx-auctlect.conf # 本体（certbotが443ブロックを追記済み。cpだけで上書きしない）
 │   ├── nginx-hooks.conf    # hooks.auctlect.com（Cloudflareを通さないwebhook専用）
@@ -161,7 +163,8 @@ test-publishing-platform/
 | 何 | いつ | 通知先 |
 |---|---|---|
 | DBバックアップ（`backup-db.sh`） | 毎日 02:30 UTC | 失敗時のみ info@auctlect.com |
-| 健康診断（`health-check.sh`） | 毎日 02:40 UTC | 基準超過時のみ |
+| 健康診断（`health-check.sh`） | 毎日 02:40 UTC | 基準超過時のみ（HTTPS証明書の残り日数も見る） |
+| **期日のお知らせ（`deadline-reminders.js`）** | 毎日 07:00 UTC | 期日の30/14/7/3/1/0日前・申告は期限後も毎日 → info@auctlect.com |
 | Lightsailスナップショット | 毎日 03:00 UTC | — |
 | 月次の控えをkenjiさんのPCへ | 毎月1日 | 定期タスク |
 | メール不達の検知 | 随時 | 管理者＋info@auctlect.com |
