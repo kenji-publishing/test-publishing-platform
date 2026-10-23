@@ -116,7 +116,11 @@ async function ossDetail(it, today) {
       s += '集計結果：EU圏への販売があります。国ごとに申告し、同じ期限までにユーロで納付します。\n'
         + rows.map(r => `  ${r.member_state}  税率${r.vat_rate}%  ${r.currency}  課税標準 ${Number(r.taxable_amount).toFixed(2)}  VAT ${Number(r.vat_amount).toFixed(2)}  （販売${r.sales}件・返金${r.refunds}件）`).join('\n')
         + `\n  ※ ユーロ以外の通貨は ${ymd(new Date(it.quarterEnd - DAY))} 時点の欧州中央銀行（ECB）レートで換算。`
-        + 'Claude に見せていただければ、申告する金額を計算します。';
+        + 'Claude に見せていただければ、申告する金額を計算します。'
+        // 受付通知（2026-10-22）に書かれていた送金先。摘要を間違えると、この申告に充当されない
+        + `\n  納付（EFT・ユーロ建て）：Danske Bank／IBAN IE33 DABA 9515 9910 0035 65／BIC DABAIE2D／`
+        + `摘要は必ず「EU372102380.${it.ossLabel.split('-Q')[1]}.${it.ossLabel.split('-Q')[0]}」。`
+        + '送金先と摘要は、提出後にROSに届く受付通知の記載とも照らし合わせてください。';
     }
     if (unknown.length) s += `\n  ⚠️ 購入者の国が分からない取引が ${unknown.length} 件あります。EU分が混じっていないか Claude と確認してください。`;
     return s;
