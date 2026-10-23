@@ -142,10 +142,12 @@ test-publishing-platform/
 │   ├── routes/             # API ルート
 │   │   └── ses-webhook.js  # SESの不達通知を受ける（署名検証あり）
 │   ├── services/           # 通知・収益分配・OSS申告・SNS署名検証
+│   │   └── fieldCrypto.js  # 受取口座の暗号化（鍵は.envのPAYOUT_ENC_KEYだけ。DB・バックアップには入らない）
 │   ├── middleware/         # 認証ミドルウェア (authenticate/authorize)
 │   ├── migrations/         # SQL マイグレーション
 │   ├── scripts/
 │   │   ├── oss-return.js   # EU OSS 四半期申告用データの書き出し
+│   │   ├── encrypt-payout-details.js # 暗号化前の口座データの一括暗号化（実行済み・何度でも安全）
 │   │   └── deadline-reminders.js # 期日が近づいたらメール（OSS申告・確認書・更新など）
 │   └── config/             # DB, メール, 収益, VAT税率
 │       ├── vatRates.js     # VAT税率表（電子書籍＋標準税率）。成人向けの分岐あり
@@ -180,6 +182,9 @@ test-publishing-platform/
 - **S3の控え**: バケット `auctlect-backups-223133989302`（ロンドン・COMPLIANCE 30日・31日目に自動削除）。
   サーバーの鍵（IAM `auctlect-backup-writer`、`aws --profile auctlect-backup`）は**置くだけ**で、読む・消すはできない。
   取り出すときはAWSコンソールのS3画面から。ロックは取り消せないので、大きなファイルを誤って置かないこと
+- **受取口座の口座番号・支店・追加情報・住所は暗号化して保存**（`user_payout_details` と支払い控え `payout_items.details_snapshot`）。
+  読み書きは必ず `services/fieldCrypto.js` を通すこと（直接SQLで入れると平文が混ざる）。
+  鍵 `PAYOUT_ENC_KEY` を失うと読めなくなり、受取人に登録し直してもらうことになる。**鍵を作り直さないこと**
 - 管理者アカウントは2つ（Google と Microsoft）。片方を失っても運営できるようにしてある
 
 ## Key Conventions

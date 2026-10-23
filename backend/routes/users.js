@@ -10,6 +10,7 @@ const crypto = require('crypto');
 const db = require('../config/database');
 const { sendEmail } = require('../config/email');
 const { createNotification } = require('../services/notificationService');
+const { encryptField, decryptPayoutDetails } = require('../services/fieldCrypto');
 
 // Simple auth middleware
 const authenticate = async (req, res, next) => {
@@ -113,7 +114,7 @@ router.get('/payout-details', authenticate, async (req, res) => {
        FROM user_payout_details WHERE user_id = $1`,
       [req.user.userId]
     );
-    res.json({ payout: result.rows[0] || null });
+    res.json({ payout: decryptPayoutDetails(result.rows[0]) || null });
   } catch (error) {
     console.error('Get payout details error:', error);
     res.status(500).json({ error: error.message });
@@ -178,6 +179,8 @@ router.put('/payout-details', authenticate, async (req, res) => {
       const s = String(v).trim();
       return s ? s.slice(0, n) : null;
     };
+    // 口座番号などは暗号化して保存（services/fieldCrypto.js）。長さの制限は暗号化の前に掛ける
+    const secret = (v, n) => encryptField(clip(v, n));
     await db.query(
       `INSERT INTO user_payout_details
          (user_id, method, account_holder, beneficiary_address, bank_country, account_currency, bank_name,
@@ -195,9 +198,9 @@ router.put('/payout-details', authenticate, async (req, res) => {
          extra_info = EXCLUDED.extra_info,
          allow_small_payout = EXCLUDED.allow_small_payout,
          updated_at = CURRENT_TIMESTAMP`,
-      [req.user.userId, clip(account_holder, 200), clip(beneficiary_address, 300), clip(bank_country, 60), currency,
-       clip(bank_name, 200), clip(branch_info, 200), clip(account_number, 120),
-       clip(account_type, 20), clip(extra_info, 300), !!allow_small_payout]
+      [req.user.userId, clip(account_holder, 200), secret(beneficiary_address, 300), clip(bank_country, 60), currency,
+       clip(bank_name, 200), secret(branch_info, 200), secret(account_number, 120),
+       clip(account_type, 20), secret(extra_info, 300), !!allow_small_payout]
     );
     res.json({ success: true });
   } catch (error) {

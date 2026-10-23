@@ -18,6 +18,7 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const db = require('../config/database');
 const { createNotification } = require('../services/notificationService');
+const { encryptPayoutDetails, decryptPayoutDetails } = require('../services/fieldCrypto');
 
 router.use(authenticate);
 router.use(authorize('admin'));
@@ -103,7 +104,8 @@ async function computePayouts(queryFn, cutoff) {
 
     const items = [];
     for (const [userId, g] of byUser) {
-        const u = userMap.get(userId) || {};
+        // 口座番号などは暗号化して保存されている（services/fieldCrypto.js）
+        const u = decryptPayoutDetails(userMap.get(userId) || {});
         const name = u.pen_name || ((u.first_name || '') + ' ' + (u.last_name || '')).trim() || 'Unknown';
         const item = {
             userId,
@@ -238,7 +240,7 @@ router.post('/runs', async (req, res) => {
                    (run_id, user_id, payout_currency, gross_amount, fee_amount, net_amount, split_count, details_snapshot)
                  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
                 [run.run_id, item.userId, item.payoutCurrency, item.gross, item.fee, item.net,
-                 item.splitCount, JSON.stringify({ ...item.details, email: item.email, name: item.name })]
+                 item.splitCount, JSON.stringify(encryptPayoutDetails({ ...item.details, email: item.email, name: item.name }))]
             );
             const stamped = await client.query(
                 `UPDATE revenue_splits SET payout_run_id = $1
@@ -293,7 +295,7 @@ router.get('/runs/:runId', async (req, res) => {
             `SELECT item_id, user_id, payout_currency, gross_amount, fee_amount, net_amount, split_count, details_snapshot
              FROM payout_items WHERE run_id = $1 ORDER BY net_amount DESC`,
             [req.params.runId]
-        )).rows;
+        )).rows.map(it => ({ ...it, details_snapshot: decryptPayoutDetails(it.details_snapshot) }));
         res.json({ success: true, run, items });
     } catch (error) {
         console.error('Get payout run error:', error);
@@ -355,7 +357,7 @@ router.get('/runs/:runId/wise.csv', async (req, res) => {
         const lines = [csvLine(header)];
 
         for (const it of items) {
-            const d = it.details_snapshot || {};
+            const d = decryptPayoutDetails(it.details_snapshot) || {};
             const cur = it.payout_currency;
             const isIbanCur = ['EUR', 'AED', 'SAR', 'EGP'].includes(cur) || /^[A-Z]{2}[0-9]{2}[A-Z0-9]+$/.test(String(d.account_number || '').replace(/\s/g, ''));
             const acct = String(d.account_number || '').replace(/\s/g, '');
@@ -407,7 +409,7 @@ router.get('/runs/:runId/summary.csv', async (req, res) => {
         const lines = [csvLine(['name', 'email', 'currency', 'gross', 'fee', 'net', 'splits',
             'account_holder', 'bank_country', 'bank_name', 'branch_info', 'account_number', 'account_type', 'beneficiary_address', 'extra_info'])];
         for (const it of items) {
-            const d = it.details_snapshot || {};
+            const d = decryptPayoutDetails(it.details_snapshot) || {};
             lines.push(csvLine([
                 d.name || '', d.email || '', it.payout_currency, it.gross_amount, it.fee_amount, it.net_amount,
                 it.split_count, d.account_holder || '', d.bank_country || '', d.bank_name || '',
