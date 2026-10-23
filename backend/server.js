@@ -79,12 +79,22 @@ app.use('/api/ses', sesWebhookRoutes);
 app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 
-// 本人確認の書類の受け付けは 2026-10 に廃止した。万一 uploads/verification/ に何か置かれても配信しない。
-// 下の static より先に置くこと（順番を入れ替えるとURLを知っている人なら見られてしまう）
-app.use('/uploads/verification', (req, res) => res.status(404).end());
-
-// Static files for uploads
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// /uploads でそのまま配信するのは、だれに見られてもよい表紙と挿絵だけ（許可リスト）。
+// それ以外は 404:
+//   manga-pages/   販売中のマンガのページ → /api/works/:id/pages/:n/image（購入者・著者・管理者）
+//                                         /api/works/:id/preview/pages/:n/image（試し読みの範囲だけ）
+//   manga-orders/  翻訳を依頼された未公開の原稿 → /api/ai-tools/orders/:id/page/:n（依頼者・管理者）
+//   manga-staging/ 依頼前の原稿の一時置き場
+//   verification/  本人確認の書類（2026-10に廃止）
+// 「隠す場所を並べる」形にすると、新しい置き場を作ったときに漏れるので、逆にしてある。
+// static の根っこはフォルダごとに分けること。uploads/ を根にすると
+// /uploads/covers/../manga-pages/... で隣のフォルダに抜けられる（実際に試して抜けた）。
+// nginx 側でも同じ場所を 404 にしている（deploy/nginx-auctlect.conf）
+const PUBLIC_UPLOAD_DIRS = ['covers', 'illustrations'];
+for (const dir of PUBLIC_UPLOAD_DIRS) {
+    app.use(`/uploads/${dir}`, express.static(path.join(__dirname, 'uploads', dir)));
+}
+app.use('/uploads', (req, res) => res.status(404).end());
 
 // API Routes
 app.use('/api/auth', authRoutes);

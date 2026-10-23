@@ -189,7 +189,11 @@ test-publishing-platform/
   読み書きは必ず `services/fieldCrypto.js` を通すこと（直接SQLで入れると平文が混ざる）。
   鍵 `PAYOUT_ENC_KEY` を失うと読めなくなり、受取人に登録し直してもらうことになる。**鍵を作り直さないこと**
 - **本人確認（書類の受け付け）は2026-10に廃止**（使われていなかった。migration 062で表も削除）。パスポート等は預からない方針。
-  `users.verified`（応募者一覧の✓・管理者が手動で付ける）は別物で残っている。`uploads/verification/` は念のため server.js と nginx で404のまま。`/uploads/` の他の場所はURLを知っていれば誰でも見られる
+  `users.verified`（応募者一覧の✓・管理者が手動で付ける）は別物で残っている。`uploads/verification/` は念のため server.js と nginx で404のまま
+- **`/uploads/` でそのまま配信するのは `covers/` と `illustrations/` だけ**（server.js の `PUBLIC_UPLOAD_DIRS`・許可リスト）。
+  マンガのページ（`manga-pages/`）と翻訳依頼の原稿（`manga-orders/`・`manga-staging/`）は404で、
+  権限を確かめるAPI（`/api/works/:id/pages/:n/image`・試し読みは `/preview/pages/:n/image`・`/api/ai-tools/orders/:id/page/:n`）からだけ返す。
+  新しい置き場を作るときは、公開してよいものだけ `PUBLIC_UPLOAD_DIRS` に足すこと
 - 管理者アカウントは2つ（Google と Microsoft）。片方を失っても運営できるようにしてある
 
 ## Key Conventions

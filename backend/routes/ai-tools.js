@@ -437,12 +437,16 @@ router.get('/orders/:orderId', authenticate, async (req, res) => {
 
 /**
  * GET /api/ai-tools/orders/:orderId/page/:pageNo
- * マンガ注文のページ画像を返す（本人のみ。決済後のレビュー画面用）
+ * マンガ注文のページ画像を返す（本人＋管理者。決済後のレビュー画面用）
+ * 原稿は未公開なので static では配信していない（server.js の PUBLIC_UPLOAD_DIRS）。ここが唯一の入口
  */
 router.get('/orders/:orderId/page/:pageNo', authenticate, async (req, res) => {
     try {
-        const order = await getOwnOrder(req, res);
-        if (!order) return;
+        const order = (await db.query(`SELECT * FROM ai_tool_orders WHERE order_id = $1`, [req.params.orderId])).rows[0];
+        // 他人の注文は「無い」と答える（getOwnOrder と同じ。有無も教えない）
+        if (!order || (order.user_id !== req.user.userId && req.user.role !== 'admin')) {
+            return res.status(404).json({ error: 'Order not found' });
+        }
         if (order.tool !== 'manga' || !Array.isArray(order.pages)) {
             return res.status(404).json({ error: 'Not a manga order' });
         }

@@ -1105,8 +1105,12 @@ const workPageUpload = multer({
     fileFilter: (req, file, cb) => cb(null, ['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype))
 });
 
-/** ページ閲覧の権限判定（/fullと同じ: 著者 / 無料 / 購入済み。下書きは著者のみ） */
-async function checkPageReadAccess(workId, userId) {
+/**
+ * ページ閲覧の権限判定（/fullと同じ: 著者 / 無料 / 購入済み。下書きは著者のみ）
+ * ＋管理者（通報の確認などで中身を見る必要がある）。
+ * ページ画像は static では配信していない（server.js の PUBLIC_UPLOAD_DIRS）ので、ここが唯一の入口
+ */
+async function checkPageReadAccess(workId, userId, role) {
     const result = await db.query(
         `SELECT w.work_id, w.author_id, w.status, w.is_free, w.price, w.title,
                 COALESCE(NULLIF(w.author_name, ''), u.pen_name, u.first_name || ' ' || u.last_name) AS author_name
@@ -1118,6 +1122,7 @@ async function checkPageReadAccess(workId, userId) {
     const work = result.rows[0];
     if (!work) return { error: 404 };
     if (work.author_id === userId) return { access: 'author', work };
+    if (role === 'admin') return { access: 'admin', work };
     // 無料で読めるのは公開中の間だけ
     if (work.status === 'published' && (work.is_free || work.price === 0 || work.price === null)) {
         return { access: 'free', work };
@@ -1209,7 +1214,7 @@ router.delete('/:workId/pages', authenticate, async (req, res) => {
  */
 router.get('/:workId/pages', authenticate, async (req, res) => {
     try {
-        const check = await checkPageReadAccess(req.params.workId, req.user.userId);
+        const check = await checkPageReadAccess(req.params.workId, req.user.userId, req.user.role);
         if (check.error === 404) return res.status(404).json({ error: 'Work not found' });
         if (check.error === 403) return res.status(403).json({ error: 'Purchase required', price: check.price });
 
@@ -1237,7 +1242,7 @@ router.get('/:workId/pages', authenticate, async (req, res) => {
  */
 router.get('/:workId/pages/:pageNo/image', authenticate, async (req, res) => {
     try {
-        const check = await checkPageReadAccess(req.params.workId, req.user.userId);
+        const check = await checkPageReadAccess(req.params.workId, req.user.userId, req.user.role);
         if (check.error === 404) return res.status(404).json({ error: 'Work not found' });
         if (check.error === 403) return res.status(403).json({ error: 'Purchase required', price: check.price });
 
