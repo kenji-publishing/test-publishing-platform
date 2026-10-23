@@ -11,13 +11,11 @@
  */
 
 const path = require('path');
-const fs = require('fs');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const db = require('../config/database');
 const R = require('../config/retention');
 
 const DRY_RUN = process.argv.includes('--dry-run');
-const BACKEND_DIR = path.join(__dirname, '..');
 const REMOVED = '[removed]';
 
 // 片付ける対象の行を選ぶ条件。$1 は日数
@@ -57,23 +55,6 @@ const RULES = [
         days: R.DELETED_ACCOUNT_DAYS,
         where: `user_id IN (SELECT user_id FROM users WHERE deleted_at < NOW() - make_interval(days => $1))`,
         apply: `DELETE FROM notifications WHERE {where}`
-    },
-    {
-        name: '本人確認の書類と氏名・生年月日',
-        table: 'verification_requests',
-        days: R.VERIFICATION_REVIEWED_DAYS,
-        where: `(document_url IS NOT NULL OR full_legal_name IS NOT NULL OR date_of_birth IS NOT NULL
-                 OR nationality IS NOT NULL OR additional_notes IS NOT NULL)
-                AND ((status IN ('approved', 'rejected') AND reviewed_at < NOW() - make_interval(days => $1))
-                     OR (status IN ('pending', 'more_info_needed')
-                         AND created_at < NOW() - make_interval(days => ${Number(R.VERIFICATION_STALE_DAYS)}))
-                     OR user_id IN (SELECT user_id FROM users
-                         WHERE deleted_at < NOW() - make_interval(days => ${Number(R.DELETED_ACCOUNT_DAYS)})))`,
-        // 書類の画像ファイルは、DBの更新が確定してから消す（files に集めて main で消す）
-        collectFiles: `SELECT document_url FROM verification_requests WHERE {where} AND document_url IS NOT NULL`,
-        apply: `UPDATE verification_requests SET document_url = NULL, document_filename = NULL,
-                    full_legal_name = NULL, date_of_birth = NULL, nationality = NULL, additional_notes = NULL
-                WHERE {where}`
     },
     {
         name: 'アクセス記録のIPアドレス・ブラウザ情報',
@@ -132,13 +113,6 @@ const RULES = [
     }
 ];
 
-// document_url は '/uploads/verification/<ファイル名>'。名前だけ取り出して、その場所以外は消さない
-function verificationFilePath(url) {
-    const name = path.basename(String(url));
-    if (!name || name === '.' || name === '..') return null;
-    return path.join(BACKEND_DIR, 'uploads', 'verification', name);
-}
-
 async function runRule(rule) {
     const exists = (await db.query('SELECT to_regclass($1) AS t', [rule.table])).rows[0].t;
     if (!exists) return { skipped: true };
@@ -149,18 +123,13 @@ async function runRule(rule) {
         const target = (await client.query(
             `SELECT COUNT(*)::int AS n FROM ${rule.table} WHERE ${rule.where}`, [rule.days]
         )).rows[0].n;
-        let files = [];
-        if (target > 0 && rule.collectFiles) {
-            files = (await client.query(rule.collectFiles.replace('{where}', rule.where), [rule.days]))
-                .rows.map(r => r.document_url);
-        }
         if (DRY_RUN || target === 0) {
             await client.query('ROLLBACK');
-            return { target, changed: 0, files: [] };
+            return { target, changed: 0 };
         }
         const result = await client.query(rule.apply.replace('{where}', rule.where), [rule.days]);
         await client.query('COMMIT');
-        return { target, changed: result.rowCount, files };
+        return { target, changed: result.rowCount };
     } catch (error) {
         await client.query('ROLLBACK');
         throw error;
@@ -179,14 +148,8 @@ async function main() {
                 console.log(`${stamp}  --  ${rule.name}: 表が無いので飛ばしました`);
                 continue;
             }
-            let removedFiles = 0;
-            for (const url of r.files) {
-                const p = verificationFilePath(url);
-                if (!p) continue;
-                try { fs.unlinkSync(p); removedFiles++; } catch (e) { if (e.code !== 'ENOENT') throw e; }
-            }
             const what = DRY_RUN ? `対象 ${r.target}件（--dry-run のため変更なし）`
-                : `${r.changed}件を片付けました` + (removedFiles ? `（書類ファイル ${removedFiles}件）` : '');
+                : `${r.changed}件を片付けました`;
             console.log(`${stamp}  OK  ${rule.name}（${rule.days}日）: ${what}`);
         } catch (error) {
             failed++;

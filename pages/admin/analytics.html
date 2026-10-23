@@ -2,12 +2,12 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../../favicon.svg?v=202610151942">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg?v=202610231937">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex">
-    <link rel="icon" type="image/svg+xml" href="../../favicon.svg?v=202610151942">
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg?v=202610231937">
     <title>プラットフォーム分析 - 管理者 - AuctLect</title>
-    <script src="../../js/config.js?v=202610151942"></script>
+    <script src="../../js/config.js?v=202610231937"></script>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,9 +24,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <!-- Custom CSS -->
-    <link href="../../css/variables.css?v=202610151942" rel="stylesheet">
-    <link rel="stylesheet" href="../../css/style-new.css?v=202610151942">
-    <link href="../../css/components.css?v=202610151942" rel="stylesheet">
+    <link href="../../css/variables.css?v=202610231937" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/style-new.css?v=202610231937">
+    <link href="../../css/components.css?v=202610231937" rel="stylesheet">
     
     <style>
         /* Admin Analytics Styles */
@@ -298,7 +298,7 @@
             to { transform: rotate(360deg); }
         }
     </style>
-    <script src="../../js/admin-auth-notice.js?v=202610151942"></script>
+    <script src="../../js/admin-auth-notice.js?v=202610231937"></script>
 </head>
 <body>
     <!-- Admin Header -->
@@ -310,7 +310,6 @@
                 <a class="nav-item" href="index.html"><i class="fas fa-th-large"></i><span>ダッシュボード</span></a>
                 <div class="nav-section">ユーザー管理</div>
                 <a class="nav-item" href="index.html#users"><i class="fas fa-users"></i><span>ユーザー一覧</span></a>
-                <a class="nav-item" href="index.html#verification"><i class="fas fa-user-check"></i><span>本人確認</span><span class="badge-pending" id="verification-badge" style="display:none;">0</span></a>
                 <div class="nav-section">コンテンツ</div>
                 <a class="nav-item" href="index.html#moderation"><i class="fas fa-shield-alt"></i><span>コンテンツ審査</span><span class="badge-pending" id="moderation-badge" style="display:none;">0</span></a>
                 <a class="nav-item" href="reports.html"><i class="fas fa-flag"></i><span>通報の確認</span><span class="badge-pending" id="report-badge" style="display:none;">0</span></a>
@@ -1002,8 +1001,7 @@
             const el = document.getElementById(id);
             if (el && n > 0) { el.textContent = n; el.style.display = ''; }
         };
-        const [ver, mod, dmca, trans, fb, inq, rep] = await Promise.all([
-            get('/api/verification/admin/stats'),
+        const [mod, dmca, trans, fb, inq, rep] = await Promise.all([
             get('/api/moderation/admin/stats'),
             get('/api/dmca/admin/stats'),
             get('/api/translation-queue/admin/stats'),
@@ -1012,7 +1010,6 @@
             get('/api/reports/admin/stats')
         ]);
         if (fb) show('feedback-badge', parseInt(fb.highPriority) || 0);
-        if (ver) show('verification-badge', parseInt(ver.pending) || 0);
         if (mod) show('moderation-badge', parseInt(mod.draft) || 0);
         if (dmca && dmca.stats) show('dmca-badge', parseInt(dmca.stats.new) || 0);
         if (trans && trans.stats) show('translation-badge', parseInt(trans.stats.pending) || 0);

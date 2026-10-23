@@ -42,7 +42,6 @@ const revenueRoutes = require('./routes/revenue');
 const messagesRoutes = require('./routes/messages');
 const interactionsRoutes = require('./routes/interactions');
 const adminRoutes = require('./routes/admin');
-const verificationRoutes = require('./routes/verification');
 const financeRoutes = require('./routes/finance');
 const payoutRoutes = require('./routes/payouts');
 const inquiryRoutes = require('./routes/inquiries');
@@ -80,7 +79,7 @@ app.use('/api/ses', sesWebhookRoutes);
 app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 
-// 本人確認の書類（パスポート等）は uploads/ の下に保存されるが、誰にも配信しない。
+// 本人確認の書類の受け付けは 2026-10 に廃止した。万一 uploads/verification/ に何か置かれても配信しない。
 // 下の static より先に置くこと（順番を入れ替えるとURLを知っている人なら見られてしまう）
 app.use('/uploads/verification', (req, res) => res.status(404).end());
 
@@ -104,7 +103,6 @@ app.use('/api/revenue', revenueRoutes);
 app.use('/api/messages', messagesRoutes);
 app.use('/api/interactions', interactionsRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/verification', verificationRoutes);
 app.use('/api/finance', financeRoutes);
 app.use('/api/payouts', payoutRoutes);
 app.use('/api/inquiries', inquiryRoutes);
@@ -157,7 +155,6 @@ app.get('/', (req, res) => {
       works: '/api/works',
       translations: '/api/translations',
       admin: '/api/admin',
-      verification: '/api/verification',
       moderation: '/api/moderation',
       finance: '/api/finance',
       dmca: '/api/dmca',
@@ -210,7 +207,6 @@ app.listen(PORT, () => {
   console.log(`   - GET  /api/works`);
   console.log(`   - GET  /api/admin/stats`);
   console.log(`   - GET  /api/admin/users`);
-  console.log(`   - GET  /api/verification/admin/requests`);
   console.log(`   - GET  /api/moderation/admin/works`);
   console.log(`   - GET  /api/finance/admin/stats`);
   console.log(`   - GET  /api/dmca/admin/stats`);

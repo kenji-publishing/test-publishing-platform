@@ -188,7 +188,8 @@ test-publishing-platform/
 - **受取口座の口座番号・支店・追加情報・住所は暗号化して保存**（`user_payout_details` と支払い控え `payout_items.details_snapshot`）。
   読み書きは必ず `services/fieldCrypto.js` を通すこと（直接SQLで入れると平文が混ざる）。
   鍵 `PAYOUT_ENC_KEY` を失うと読めなくなり、受取人に登録し直してもらうことになる。**鍵を作り直さないこと**
-- **本人確認の書類（`uploads/verification/`）は配信しない**（server.js と nginx の両方で404）。`/uploads/` の他の場所はURLを知っていれば誰でも見られる
+- **本人確認（書類の受け付け）は2026-10に廃止**（使われていなかった。migration 062で表も削除）。パスポート等は預からない方針。
+  `users.verified`（応募者一覧の✓・管理者が手動で付ける）は別物で残っている。`uploads/verification/` は念のため server.js と nginx で404のまま。`/uploads/` の他の場所はURLを知っていれば誰でも見られる
 - 管理者アカウントは2つ（Google と Microsoft）。片方を失っても運営できるようにしてある
 
 ## Key Conventions
