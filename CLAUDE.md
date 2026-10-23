@@ -153,7 +153,8 @@ test-publishing-platform/
 ├── deploy/                 # 本番サーバーに置くもの
 │   ├── nginx-auctlect.conf # 本体（certbotが443ブロックを追記済み。cpだけで上書きしない）
 │   ├── nginx-hooks.conf    # hooks.auctlect.com（Cloudflareを通さないwebhook専用）
-│   ├── backup-db.sh        # 日次バックアップ（毎日 02:30 UTC）
+│   ├── backup-db.sh        # 日次バックアップ（毎日 02:30 UTC）→ S3の消せない置き場にも送る
+│   ├── aws-setup-backup-bucket.sh # S3 Object Lock の置き場づくり（CloudShellで1回だけ・実行済み）
 │   └── health-check.sh     # 健康診断（毎日 02:40 UTC・基準超過時のみ通知）
 └── services/
     └── emailService.js     # フロントエンドメールサービス
@@ -163,6 +164,7 @@ test-publishing-platform/
 | 何 | いつ | 通知先 |
 |---|---|---|
 | DBバックアップ（`backup-db.sh`） | 毎日 02:30 UTC | 失敗時のみ info@auctlect.com |
+| ↳ 同じDB＋作品ファイルをS3へ（30日間**だれにも消せない**） | 毎日 02:30 UTC | 失敗時のみ info@auctlect.com |
 | 健康診断（`health-check.sh`） | 毎日 02:40 UTC | 基準超過時のみ（HTTPS証明書の残り日数も見る） |
 | **期日のお知らせ（`deadline-reminders.js`）** | 毎日 07:00 UTC | 期日の30/14/7/3/1/0日前・申告は期限後も毎日 → info@auctlect.com |
 | Lightsailスナップショット | 毎日 03:00 UTC | — |
@@ -175,6 +177,9 @@ test-publishing-platform/
   **四半期申告が必要（売上ゼロでも必須）。初回はQ3 2026、期限 2026-10-31**
 - **英国のVATは別で、まだ未登録**（課税売上高が閾値未満）。`UK_VAT_REGISTERED = false` の間、
   英国内の販売は税率0。**この2つを混同しないこと**
+- **S3の控え**: バケット `auctlect-backups-223133989302`（ロンドン・COMPLIANCE 30日・31日目に自動削除）。
+  サーバーの鍵（IAM `auctlect-backup-writer`、`aws --profile auctlect-backup`）は**置くだけ**で、読む・消すはできない。
+  取り出すときはAWSコンソールのS3画面から。ロックは取り消せないので、大きなファイルを誤って置かないこと
 - 管理者アカウントは2つ（Google と Microsoft）。片方を失っても運営できるようにしてある
 
 ## Key Conventions

@@ -5,8 +5,14 @@
 # 毎日のスナップショットの中に「その日の整合の取れたダンプ」が必ず含まれるようにしている。
 # スナップショットだけだと電源断相当の複製になるため、pg_dump と併用する。
 #
+# 続けて、同じダンプと作品ファイル（uploads/）を S3 の「消せない置き場」へ送る。
+# サーバーごと暗号化・削除されても、S3 側は30日間だれにも消せない。
+# 置き場の作り方: deploy/aws-setup-backup-bucket.sh
+#
 # 復元:  pg_restore -d auctlect_db --clean --if-exists <ファイル>
 # 中身確認: pg_restore --list <ファイル>
+# S3から取り出す: このサーバーの鍵では読めない（置くだけ）。AWSコンソールの S3 画面から
+#                 ダウンロードするか、管理者の権限で aws s3 cp を使う。
 
 set -uo pipefail
 
@@ -14,7 +20,10 @@ ENV_FILE="/home/ubuntu/auctlect/backend/.env"
 BACKUP_DIR="/home/ubuntu/backups"
 LOG="$BACKUP_DIR/backup.log"
 KEEP_DAYS=30
-NOTIFY="/home/ubuntu/backup-notify.js"
+NOTIFY="/home/ubuntu/auctlect/backend/backup-notify.js"
+UPLOADS_PARENT="/home/ubuntu/auctlect/backend"
+# cron の PATH には /snap/bin が無いので絶対パスで呼ぶ
+AWS="/snap/bin/aws --profile auctlect-backup --region eu-west-2"
 
 mkdir -p "$BACKUP_DIR"
 
@@ -73,3 +82,33 @@ TABLES=$(pg_restore --list "$OUT" 2>>"$LOG" | grep -c "TABLE DATA") || TABLES=0
 DELETED=$(find "$BACKUP_DIR" -name 'auctlect_db_*.dump' -mtime +$KEEP_DAYS -print -delete | wc -l)
 
 log "OK  $(basename "$OUT")  $(numfmt --to=iec "$SIZE")  テーブル${TABLES}件  削除${DELETED}件"
+
+# ---- S3 の消せない置き場へ ----
+# バケット名はアカウント番号から決まる（auctlect-backups-<番号>）
+ACCOUNT="$($AWS sts get-caller-identity --query Account --output text 2>>"$LOG")" \
+  || fail "S3: AWSの鍵が使えません（aws configure --profile auctlect-backup を確認）"
+BUCKET="auctlect-backups-${ACCOUNT}"
+
+# 送って、ロックが本当に掛かったかまで確かめる
+put_locked() {
+  local file="$1" key="$2" until
+  $AWS s3 cp "$file" "s3://$BUCKET/$key" --only-show-errors 2>>"$LOG" \
+    || fail "S3: 送信に失敗しました: $key"
+  until="$($AWS s3api get-object-retention --bucket "$BUCKET" --key "$key" \
+           --query Retention.RetainUntilDate --output text 2>>"$LOG")"
+  [ -n "$until" ] && [ "$until" != "None" ] \
+    || fail "S3: 送れたがロックが掛かっていません: $key"
+  echo "$until"
+}
+
+UNTIL="$(put_locked "$OUT" "db/$(basename "$OUT")")" || exit 1
+
+# 作品ファイル（表紙・マンガのページ）はDBではなく uploads/ にあるので一緒に送る
+UP_TAR="$BACKUP_DIR/uploads_${STAMP}.tar.gz"
+tar -C "$UPLOADS_PARENT" -czf "$UP_TAR" uploads 2>>"$LOG" \
+  || { rm -f "$UP_TAR"; fail "S3: uploads/ をまとめられませんでした"; }
+put_locked "$UP_TAR" "uploads/$(basename "$UP_TAR")" > /dev/null || { rm -f "$UP_TAR"; exit 1; }
+UP_SIZE=$(stat -c%s "$UP_TAR")
+rm -f "$UP_TAR"   # サーバー内の uploads/ そのものとスナップショットがあるので、まとめた物は残さない
+
+log "OK  S3へ送信  DB+作品ファイル$(numfmt --to=iec "$UP_SIZE")  ${UNTIL%%T*} まで消せない"
