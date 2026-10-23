@@ -4,5 +4,8 @@
 -- パスポート等の画像は持っていなければ漏れないので、受け付け口ごと取り除く。
 -- users.verified（応募者一覧の✓表示・管理者が手動で付ける）は別物なので残す。
 
+-- 005 が作った集計ビュー（どこからも使われていない）を先に消す。CASCADE は使わない
+-- （思わぬものまで一緒に消えないよう、消すものを名指しする）
+DROP VIEW IF EXISTS pending_verifications_count;
 DROP TABLE IF EXISTS verification_requests;
 DROP FUNCTION IF EXISTS update_verification_updated_at();
