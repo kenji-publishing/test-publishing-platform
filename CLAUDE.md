@@ -148,9 +148,11 @@ test-publishing-platform/
 │   ├── scripts/
 │   │   ├── oss-return.js   # EU OSS 四半期申告用データの書き出し
 │   │   ├── encrypt-payout-details.js # 暗号化前の口座データの一括暗号化（実行済み・何度でも安全）
-│   │   └── deadline-reminders.js # 期日が近づいたらメール（OSS申告・確認書・更新など）
+│   │   ├── deadline-reminders.js # 期日が近づいたらメール（OSS申告・確認書・更新など）
+│   │   └── retention.js    # 保存期限を過ぎた個人情報の片付け（毎日・--dry-runで件数だけ）
 │   └── config/             # DB, メール, 収益, VAT税率
 │       ├── vatRates.js     # VAT税率表（電子書籍＋標準税率）。成人向けの分岐あり
+│       ├── retention.js    # **個人情報の保存期限の一覧**。プライバシーポリシーの期間と揃えること
 │       └── deadlines.js    # 期日の一覧。**期日を足す・済んだら DONE に id を足す**のはここ
 ├── deploy/                 # 本番サーバーに置くもの
 │   ├── nginx-auctlect.conf # 本体（certbotが443ブロックを追記済み。cpだけで上書きしない）
@@ -170,6 +172,7 @@ test-publishing-platform/
 | 健康診断（`health-check.sh`） | 毎日 02:40 UTC | 基準超過時のみ（HTTPS証明書の残り日数も見る） |
 | **期日のお知らせ（`deadline-reminders.js`）** | 毎日 07:00 UTC | 期日の30/14/7/3/1/0日前・申告は期限後も毎日 → info@auctlect.com |
 | Lightsailスナップショット | 毎日 03:00 UTC | — |
+| 個人情報の片付け（`retention.js`） | 毎日 03:20 UTC | 2日止まったら健康診断が知らせる（ログ `~/backups/retention.log`） |
 | 月次の控えをkenjiさんのPCへ | 毎月1日 | 定期タスク |
 | メール不達の検知 | 随時 | 管理者＋info@auctlect.com |
 
@@ -185,6 +188,7 @@ test-publishing-platform/
 - **受取口座の口座番号・支店・追加情報・住所は暗号化して保存**（`user_payout_details` と支払い控え `payout_items.details_snapshot`）。
   読み書きは必ず `services/fieldCrypto.js` を通すこと（直接SQLで入れると平文が混ざる）。
   鍵 `PAYOUT_ENC_KEY` を失うと読めなくなり、受取人に登録し直してもらうことになる。**鍵を作り直さないこと**
+- **本人確認の書類（`uploads/verification/`）は配信しない**（server.js と nginx の両方で404）。`/uploads/` の他の場所はURLを知っていれば誰でも見られる
 - 管理者アカウントは2つ（Google と Microsoft）。片方を失っても運営できるようにしてある
 
 ## Key Conventions

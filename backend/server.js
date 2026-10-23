@@ -80,6 +80,10 @@ app.use('/api/ses', sesWebhookRoutes);
 app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 
+// 本人確認の書類（パスポート等）は uploads/ の下に保存されるが、誰にも配信しない。
+// 下の static より先に置くこと（順番を入れ替えるとURLを知っている人なら見られてしまう）
+app.use('/uploads/verification', (req, res) => res.status(404).end());
+
 // Static files for uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
