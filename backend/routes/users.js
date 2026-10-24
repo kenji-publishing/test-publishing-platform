@@ -88,9 +88,12 @@ router.put('/profile', authenticate, async (req, res) => {
            preferred_language = COALESCE($5, preferred_language),
            updated_at = CURRENT_TIMESTAMP
        WHERE user_id = $6
-       RETURNING *`,
+       RETURNING user_id, email, first_name, last_name, pen_name AS display_name,
+                 country_code, bio, profile_image_url AS avatar_url, verified,
+                 created_at, email_verified, preferred_language`,
       [first_name, last_name, penName, bio, preferred_language, req.user.userId, clearPen]
     );
+    // 返す列は GET /profile と同じ形にそろえる。RETURNING * だとパスワードのハッシュまで画面に返していた
     
     res.json({
       success: true,
