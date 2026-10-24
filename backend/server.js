@@ -90,9 +90,13 @@ app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 // static の根っこはフォルダごとに分けること。uploads/ を根にすると
 // /uploads/covers/../manga-pages/... で隣のフォルダに抜けられる（実際に試して抜けた）。
 // nginx 側でも同じ場所を 404 にしている（deploy/nginx-auctlect.conf）
-const PUBLIC_UPLOAD_DIRS = ['covers', 'illustrations'];
+// avatars/ はプロフィール写真（ナビバーのアイコン）。routes/users.js が中身を画像か確かめてから置く
+const PUBLIC_UPLOAD_DIRS = ['covers', 'illustrations', 'avatars'];
 for (const dir of PUBLIC_UPLOAD_DIRS) {
-    app.use(`/uploads/${dir}`, express.static(path.join(__dirname, 'uploads', dir)));
+    app.use(`/uploads/${dir}`, express.static(path.join(__dirname, 'uploads', dir), {
+        // 拡張子どおりの種類として扱わせる（中身を推測して HTML として開かせない）
+        setHeaders: res => res.setHeader('X-Content-Type-Options', 'nosniff')
+    }));
 }
 app.use('/uploads', (req, res) => res.status(404).end());
 

@@ -569,13 +569,13 @@ function renderNavbar(options) {
     // User dropdown (auth-only)
     html += '<div class="user-dropdown auth-only" id="userDropdown">';
     html += '<button type="button" class="user-dropdown-toggle" id="userDropdownBtn" onclick="toggleUserDropdown(event)">';
-    html += '<i class="fas fa-user-circle"></i>';
+    html += '<span class="nav-avatar" id="navAvatar"><i class="fas fa-user-circle"></i></span>';
     html += '<span class="user-name d-none d-xl-inline" id="userName">User</span>';
     html += '<i class="fas fa-chevron-down user-chevron d-none d-xl-inline"></i>';
     html += '</button>';
     html += '<div class="user-menu" id="userMenu">';
     html += '<div class="user-menu-header">';
-    html += '<div class="user-avatar"><i class="fas fa-user-circle"></i></div>';
+    html += '<div class="user-avatar" id="navAvatarLarge"><i class="fas fa-user-circle"></i></div>';
     html += '<div class="user-info">';
     html += '<div class="user-display-name" id="userDisplayName">User</div>';
     html += '<div class="user-email" id="userEmail">user@example.com</div>';
@@ -928,6 +928,17 @@ function loadUserInfo() {
             if (userNameEl) userNameEl.textContent = displayName;
             if (userDisplayNameEl) userDisplayNameEl.textContent = displayName;
             if (userEmailEl) userEmailEl.textContent = user.email || '';
+            // プロフィール写真。ログインの応答には入っていないので、無ければ一度だけ取りに行って覚える。
+            // /api/auth/ を使うのは、期限切れのトークンでも「ログインし直して」の案内を出さないため
+            // （/api/auth/ は fetch の期限切れ通知の対象外。ここで出すと、どのページを開いても出てしまう）
+            if (user.avatarUrl !== undefined) {
+                showNavAvatar(user.avatarUrl);
+            } else {
+                fetch((window.API_ORIGIN || '') + '/api/auth/profile', { headers: { 'Authorization': 'Bearer ' + token } })
+                    .then(function(r) { return r.ok ? r.json() : null; })
+                    .then(function(d) { if (d && d.user) setUserAvatar(d.user.profileImage || null); })
+                    .catch(function() {});
+            }
             document.body.classList.add('logged-in');
         } catch (e) {
             document.body.classList.remove('logged-in');
@@ -936,6 +947,131 @@ function loadUserInfo() {
         document.body.classList.remove('logged-in');
     }
 }
+
+// ========== プロフィール写真（ナビバーのアイコン） ==========
+// 写真のURLはログイン中の user オブジェクト（localStorage）に avatarUrl として持つ。
+// 保存はプロフィール画面とアカウント設定の両方から uploadProfilePhoto() で行う。
+var AVATAR_MESSAGES = {
+    saved: { en: 'Photo saved.', ja: '写真を保存しました。', zh: '照片已保存。', es: 'Foto guardada.', fr: 'Photo enregistrée.',
+             de: 'Foto gespeichert.', ko: '사진을 저장했습니다.', ar: 'تم حفظ الصورة.', pt: 'Foto salva.', it: 'Foto salvata.' },
+    removed: { en: 'Photo removed.', ja: '写真を外しました。', zh: '已移除照片。', es: 'Foto eliminada.', fr: 'Photo supprimée.',
+               de: 'Foto entfernt.', ko: '사진을 삭제했습니다.', ar: 'تمت إزالة الصورة.', pt: 'Foto removida.', it: 'Foto rimossa.' },
+    removeLabel: { en: 'Remove photo', ja: '写真を外す', zh: '移除照片', es: 'Quitar foto', fr: 'Retirer la photo',
+                   de: 'Foto entfernen', ko: '사진 삭제', ar: 'إزالة الصورة', pt: 'Remover foto', it: 'Rimuovi foto' },
+    BAD_TYPE: { en: 'This image could not be read. Please choose a JPG or PNG photo.',
+                ja: 'この画像は読み込めませんでした。JPG か PNG の写真を選んでください。',
+                zh: '无法读取此图片。请选择 JPG 或 PNG 格式的照片。',
+                es: 'No se pudo leer esta imagen. Elige una foto JPG o PNG.',
+                fr: 'Impossible de lire cette image. Choisissez une photo JPG ou PNG.',
+                de: 'Dieses Bild konnte nicht gelesen werden. Bitte wählen Sie ein JPG- oder PNG-Foto.',
+                ko: '이 이미지를 읽을 수 없습니다. JPG 또는 PNG 사진을 선택해 주세요.',
+                ar: 'تعذّرت قراءة هذه الصورة. يُرجى اختيار صورة بصيغة JPG أو PNG.',
+                pt: 'Não foi possível ler esta imagem. Escolha uma foto JPG ou PNG.',
+                it: 'Impossibile leggere questa immagine. Scegli una foto JPG o PNG.' },
+    TOO_LARGE: { en: 'This photo is too large.', ja: '写真が大きすぎます。', zh: '照片太大。', es: 'La foto es demasiado grande.',
+                 fr: 'Cette photo est trop volumineuse.', de: 'Das Foto ist zu groß.', ko: '사진이 너무 큽니다.',
+                 ar: 'الصورة كبيرة جدًا.', pt: 'A foto é grande demais.', it: 'La foto è troppo grande.' },
+    SAVE_FAILED: { en: 'The photo could not be saved. Please try again.', ja: '写真を保存できませんでした。もう一度お試しください。',
+                   zh: '无法保存照片，请重试。', es: 'No se pudo guardar la foto. Inténtalo de nuevo.',
+                   fr: 'La photo n’a pas pu être enregistrée. Veuillez réessayer.',
+                   de: 'Das Foto konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.',
+                   ko: '사진을 저장하지 못했습니다. 다시 시도해 주세요.', ar: 'تعذّر حفظ الصورة. يُرجى المحاولة مرة أخرى.',
+                   pt: 'Não foi possível salvar a foto. Tente novamente.', it: 'Impossibile salvare la foto. Riprova.' }
+};
+
+// 写真として表示してよいURLか（自分のサーバーの avatars/ だけ。それ以外は img にも入れない）
+function isAvatarUrl(url) {
+    return typeof url === 'string' && /^\/uploads\/avatars\/[A-Za-z0-9._-]+$/.test(url);
+}
+
+function showNavAvatar(url) {
+    [['navAvatar', 'nav-avatar-img'], ['navAvatarLarge', 'nav-avatar-img nav-avatar-img-lg']].forEach(function(pair) {
+        var el = document.getElementById(pair[0]);
+        if (!el) return;
+        el.textContent = '';
+        if (isAvatarUrl(url)) {
+            var img = document.createElement('img');
+            img.src = (window.API_ORIGIN || '') + url;
+            img.alt = '';
+            img.className = pair[1];
+            el.appendChild(img);
+        } else {
+            var icon = document.createElement('i');
+            icon.className = 'fas fa-user-circle';
+            el.appendChild(icon);
+        }
+    });
+}
+
+// 保存・削除のあとに呼ぶ。覚えている user を書き換え、ナビバーのアイコンもその場で替える
+function setUserAvatar(url) {
+    try {
+        var u = JSON.parse(localStorage.getItem('user') || 'null');
+        if (u) { u.avatarUrl = url || null; localStorage.setItem('user', JSON.stringify(u)); }
+    } catch (e) {}
+    showNavAvatar(url || null);
+}
+
+function avatarError(code) {
+    var e = new Error(getL(AVATAR_MESSAGES[code] || AVATAR_MESSAGES.SAVE_FAILED));
+    e.code = code;
+    return e;
+}
+
+// 写真を長い辺 512px の JPEG に縮めてから保存する。スマホの大きな写真もそのまま使え、
+// 撮影場所などの付帯情報も描き直しで落ちる。iPhone の HEIC など、ブラウザが開けない形式は BAD_TYPE
+function uploadProfilePhoto(file) {
+    return new Promise(function(resolve, reject) {
+        if (!file || !/^image\//.test(file.type)) return reject(avatarError('BAD_TYPE'));
+        var reader = new FileReader();
+        reader.onerror = function() { reject(avatarError('BAD_TYPE')); };
+        reader.onload = function() {
+            var img = new Image();
+            img.onerror = function() { reject(avatarError('BAD_TYPE')); };
+            img.onload = function() {
+                var scale = Math.min(1, 512 / Math.max(img.width, img.height));
+                var canvas = document.createElement('canvas');
+                canvas.width = Math.max(1, Math.round(img.width * scale));
+                canvas.height = Math.max(1, Math.round(img.height * scale));
+                var ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#ffffff';   // 透過PNGの透明部分が黒くならないように
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                canvas.toBlob(function(blob) {
+                    if (!blob) return reject(avatarError('BAD_TYPE'));
+                    var form = new FormData();
+                    form.append('avatar', blob, 'avatar.jpg');
+                    fetch((window.API_ORIGIN || '') + '/api/users/avatar', {
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+                        body: form
+                    }).then(function(r) {
+                        return r.json().catch(function() { return {}; }).then(function(d) {
+                            if (!r.ok || !isAvatarUrl(d.avatar_url)) throw avatarError(d.code || 'SAVE_FAILED');
+                            setUserAvatar(d.avatar_url);
+                            resolve(d.avatar_url);
+                        });
+                    }).catch(function(e) { reject(e && e.code ? e : avatarError('SAVE_FAILED')); });
+                }, 'image/jpeg', 0.85);
+            };
+            img.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function removeProfilePhoto() {
+    return fetch((window.API_ORIGIN || '') + '/api/users/avatar', {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+    }).then(function(r) {
+        if (!r.ok) throw avatarError('SAVE_FAILED');
+        setUserAvatar(null);
+    });
+}
+window.uploadProfilePhoto = uploadProfilePhoto;
+window.removeProfilePhoto = removeProfilePhoto;
+window.AVATAR_MESSAGES = AVATAR_MESSAGES;
 
 // ========== ログインの有効期限切れ ==========
 // トークンの有効期限は7日。切れたあとの画面は「作品の読み込みに失敗しました:

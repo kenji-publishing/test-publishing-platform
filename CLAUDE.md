@@ -194,6 +194,8 @@ test-publishing-platform/
   マンガのページ（`manga-pages/`）と翻訳依頼の原稿（`manga-orders/`・`manga-staging/`）は404で、
   権限を確かめるAPI（`/api/works/:id/pages/:n/image`・試し読みは `/preview/pages/:n/image`・`/api/ai-tools/orders/:id/page/:n`）からだけ返す。
   新しい置き場を作るときは、公開してよいものだけ `PUBLIC_UPLOAD_DIRS` に足すこと
+- **プロフィール写真**は `uploads/avatars/`（公開。ナビバー右上のアイコンに出る）。画面側で512pxのJPEGに縮めて `POST /api/users/avatar`、サーバーは先頭バイトで画像か確かめる。
+  送信・表示は navbar.js の `uploadProfilePhoto()` / `showNavAvatar()`。退会と同時に写真ファイルは消える
 - 管理者アカウントは2つ（Google と Microsoft）。片方を失っても運営できるようにしてある
 
 ## Key Conventions

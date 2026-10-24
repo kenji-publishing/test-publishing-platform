@@ -7,6 +7,9 @@
 const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
+const multer = require('multer');
 const db = require('../config/database');
 const { sendEmail } = require('../config/email');
 const { createNotification } = require('../services/notificationService');
@@ -102,6 +105,81 @@ router.put('/profile', authenticate, async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// ===== プロフィール写真 =====
+// ナビバーのアイコンに出す公開情報なので uploads/avatars/ に置き、/uploads/avatars/ で配信する
+// （server.js の PUBLIC_UPLOAD_DIRS）。画面側で 512px の JPEG に縮めてから送ってくる
+// （撮影場所などの写真の付帯情報もそこで落ちる）。
+// 種類はファイル先頭のバイトで確かめる。拡張子や Content-Type は送り手が自由に偽れるので、
+// それを信じると、画像のふりをした HTML を公開フォルダに置かれてしまう
+const AVATAR_DIR = path.join(__dirname, '..', 'uploads', 'avatars');
+fs.mkdirSync(AVATAR_DIR, { recursive: true });
+const avatarUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 2 * 1024 * 1024, files: 1 } });
+
+function avatarImageType(buf) {
+  if (buf.length > 3 && buf[0] === 0xFF && buf[1] === 0xD8 && buf[2] === 0xFF) return 'jpg';
+  if (buf.length > 8 && buf.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]))) return 'png';
+  if (buf.length > 12 && buf.toString('ascii', 0, 4) === 'RIFF' && buf.toString('ascii', 8, 12) === 'WEBP') return 'webp';
+  return null;
+}
+
+// 古い写真のファイルを消す。avatars/ の中のものだけ（名前だけ取り出すので他の場所には届かない）
+function removeAvatarFile(url) {
+  if (typeof url !== 'string' || !url.startsWith('/uploads/avatars/')) return;
+  fs.unlink(path.join(AVATAR_DIR, path.basename(url)), () => {});
+}
+
+/**
+ * POST /api/users/avatar  （multipart, 項目名 avatar）
+ * プロフィール写真を保存して、新しいURLを返す。ファイル名は毎回変えるので、
+ * ブラウザに古い写真が残ることはない
+ */
+router.post('/avatar', authenticate, (req, res, next) => {
+  avatarUpload.single('avatar')(req, res, err => {
+    if (!err) return next();
+    const tooLarge = err.code === 'LIMIT_FILE_SIZE';
+    res.status(400).json({ error: tooLarge ? 'File too large' : 'Upload failed', code: tooLarge ? 'TOO_LARGE' : 'UPLOAD_FAILED' });
+  });
+}, async (req, res) => {
+  let written = null;
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No file', code: 'NO_FILE' });
+    const ext = avatarImageType(req.file.buffer);
+    if (!ext) return res.status(400).json({ error: 'Unsupported image type', code: 'BAD_TYPE' });
+
+    const name = `${req.user.userId}-${crypto.randomBytes(6).toString('hex')}.${ext}`;
+    written = path.join(AVATAR_DIR, name);
+    fs.writeFileSync(written, req.file.buffer);
+    const url = `/uploads/avatars/${name}`;
+
+    const old = (await db.query('SELECT profile_image_url FROM users WHERE user_id = $1', [req.user.userId])).rows[0];
+    await db.query('UPDATE users SET profile_image_url = $1, updated_at = CURRENT_TIMESTAMP WHERE user_id = $2',
+      [url, req.user.userId]);
+    if (old) removeAvatarFile(old.profile_image_url);
+    res.json({ success: true, avatar_url: url });
+  } catch (error) {
+    if (written) fs.unlink(written, () => {});
+    console.error('Avatar upload error:', error);
+    res.status(500).json({ error: 'Failed to save photo', code: 'SAVE_FAILED' });
+  }
+});
+
+/**
+ * DELETE /api/users/avatar
+ * プロフィール写真を外す（アイコンは元の人の形に戻る）
+ */
+router.delete('/avatar', authenticate, async (req, res) => {
+  try {
+    const old = (await db.query('SELECT profile_image_url FROM users WHERE user_id = $1', [req.user.userId])).rows[0];
+    await db.query('UPDATE users SET profile_image_url = NULL, updated_at = CURRENT_TIMESTAMP WHERE user_id = $1',
+      [req.user.userId]);
+    if (old) removeAvatarFile(old.profile_image_url);
+    res.json({ success: true, avatar_url: null });
+  } catch (error) {
+    console.error('Avatar delete error:', error);
+    res.status(500).json({ error: 'Failed to remove photo', code: 'SAVE_FAILED' });
   }
 });
 
@@ -517,8 +595,11 @@ router.post('/confirm-delete', async (req, res) => {
     }
 
     await db.query('DELETE FROM account_deletion_requests WHERE user_id = $1', [userId]);
-    await db.query('UPDATE users SET account_status = $1, email = $2, deleted_at = NOW() WHERE user_id = $3',
+    // プロフィール写真は公開の場所にあるので、退会と同時に消す（90日待つと、その間URLで見られてしまう）
+    const avatar = (await db.query('SELECT profile_image_url FROM users WHERE user_id = $1', [userId])).rows[0];
+    await db.query('UPDATE users SET account_status = $1, email = $2, deleted_at = NOW(), profile_image_url = NULL WHERE user_id = $3',
       ['deleted', `deleted_${userId}@deleted.local`, userId]);
+    if (avatar) removeAvatarFile(avatar.profile_image_url);
     console.log(`Account deleted: user=${userId}, works archived=${archived.length}, works kept on sale=${kept.length}, collaborators notified=${notifiedCollaborators}`);
 
     // Send final confirmation

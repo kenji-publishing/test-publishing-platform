@@ -95,13 +95,13 @@
             <!-- User Dropdown (auth-only) -->
             <div class="user-dropdown auth-only" id="userDropdown">
                 <button type="button" class="user-dropdown-toggle" id="userDropdownBtn" onclick="toggleUserDropdown(event)">
-                    <i class="fas fa-user-circle"></i>
+                    <span class="nav-avatar" id="navAvatar"><i class="fas fa-user-circle"></i></span>
                     <span class="user-name d-none d-lg-inline" id="userName">User</span>
                     <i class="fas fa-chevron-down user-chevron d-none d-lg-inline"></i>
                 </button>
                 <div class="user-menu" id="userMenu">
                     <div class="user-menu-header">
-                        <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
+                        <div class="user-avatar" id="navAvatarLarge"><i class="fas fa-user-circle"></i></div>
                         <div class="user-info">
                             <div class="user-display-name" id="userDisplayName">User</div>
                             <div class="user-email" id="userEmail">user@example.com</div>
@@ -249,6 +249,9 @@
                                 <i class="fas fa-camera me-1"></i> <span id="btnChangePhoto" data-i18n="profile.btnChangePhoto">Change Photo</span>
                             </button>
                             <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="handleAvatarChange(event)">
+                            <button type="button" class="btn-change-photo" id="btnRemovePhoto" style="display:none" onclick="handleAvatarRemove()">
+                                <i class="fas fa-trash-alt me-1"></i> <span id="btnRemovePhotoLabel">Remove photo</span>
+                            </button>
                         </div>
                         <form id="profileForm" onsubmit="saveProfile(event)">
                             <div class="mb-3">
@@ -494,14 +497,12 @@
             var dn = profileData.display_name || (profileData.first_name + ' ' + profileData.last_name).trim() || 'User';
             var initial = dn.charAt(0).toUpperCase();
             var email = profileData.email || '';
-            // Avatar (view)
-            var avatarEl = document.getElementById('profileAvatar');
-            if (profileData.avatar_url) avatarEl.innerHTML = '<img src="' + profileData.avatar_url + '" alt="Avatar">';
-            else document.getElementById('profileInitial').textContent = initial;
-            // Avatar (edit)
-            var editAvatar = document.getElementById('editAvatar');
-            if (profileData.avatar_url) editAvatar.innerHTML = '<img src="' + profileData.avatar_url + '" alt="Avatar">';
-            else document.getElementById('editAvatarInitial').textContent = initial;
+            renderAvatar('profileAvatar', profileData.avatar_url, initial);
+            renderAvatar('editAvatar', profileData.avatar_url, initial);
+            var removeBtn = document.getElementById('btnRemovePhoto');
+            if (removeBtn) removeBtn.style.display = profileData.avatar_url ? '' : 'none';
+            var removeLabel = document.getElementById('btnRemovePhotoLabel');
+            if (removeLabel && window.AVATAR_MESSAGES) removeLabel.textContent = getL(AVATAR_MESSAGES.removeLabel);
             // Text fields
             document.getElementById('profileDisplayName').textContent = dn;
             document.getElementById('profileEmailDisplay').textContent = email;
@@ -540,15 +541,44 @@
             }
         }
 
-        // ========== Avatar Change ==========
+        // ========== Avatar ==========
+        // 写真は選んだ時点で保存する（「保存」ボタンを待たない）。縮小と送信は navbar.js の uploadProfilePhoto。
+        // 保存するとナビバー右上のアイコンもその場で替わる
+        function renderAvatar(id, url, initial) {
+            var el = document.getElementById(id);
+            if (!el) return;
+            el.textContent = '';
+            if (typeof url === 'string' && /^\/uploads\/avatars\/[A-Za-z0-9._-]+$/.test(url)) {
+                var img = document.createElement('img');
+                img.src = (window.API_ORIGIN || '') + url;
+                img.alt = '';
+                el.appendChild(img);
+            } else {
+                var span = document.createElement('span');
+                span.textContent = initial || 'U';
+                el.appendChild(span);
+            }
+        }
+
         function handleAvatarChange(event) {
-            var file = event.target.files[0];
+            var input = event.target;
+            var file = input.files[0];
+            input.value = '';   // 同じ写真を選び直しても change が起きるように
             if (!file) return;
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('editAvatar').innerHTML = '<img src="' + e.target.result + '" alt="Avatar">';
-            };
-            reader.readAsDataURL(file);
+            if (window.location.search.indexOf('demo') !== -1 || !localStorage.getItem('token')) return;
+            uploadProfilePhoto(file).then(function(url) {
+                profileData.avatar_url = url;
+                renderProfile();
+                showToast(getL(AVATAR_MESSAGES.saved), 'success');
+            }).catch(function(e) { showToast(e.message, 'error'); });
+        }
+
+        function handleAvatarRemove() {
+            removeProfilePhoto().then(function() {
+                profileData.avatar_url = null;
+                renderProfile();
+                showToast(getL(AVATAR_MESSAGES.removed), 'success');
+            }).catch(function(e) { showToast(e.message, 'error'); });
         }
 
         // ========== Save Profile ==========
