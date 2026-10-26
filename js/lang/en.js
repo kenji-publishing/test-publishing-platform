@@ -53,7 +53,7 @@ window.translations.en = {
         howItWorks: {
             title: 'How It Works',
             step1: {
-                title: 'Write &amp; Upload',
+                title: 'Write & Upload',
                 desc: 'Create your story.'
             },
             step2: {
@@ -161,7 +161,7 @@ window.translations.en = {
             reader: 'Reader',
             readerDesc: 'Discover stories',
             author: 'Author',
-            authorDesc: 'Write &amp; publish',
+            authorDesc: 'Write & publish',
             translator: 'Translator',
             translatorDesc: 'Translate works'
         },

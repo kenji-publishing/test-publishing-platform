@@ -53,7 +53,7 @@ window.translations.it = {
         howItWorks: {
             title: 'Come Funziona',
             step1: {
-                title: 'Scrivi &amp; Carica',
+                title: 'Scrivi & Carica',
                 desc: 'Crea la tua storia.'
             },
             step2: {
@@ -161,7 +161,7 @@ window.translations.it = {
             reader: 'Lettore',
             readerDesc: 'Scopri storie',
             author: 'Autore',
-            authorDesc: 'Scrivi &amp; pubblica',
+            authorDesc: 'Scrivi & pubblica',
             translator: 'Traduttore',
             translatorDesc: 'Traduci opere'
         },
@@ -385,7 +385,7 @@ window.translations.it = {
         labelTags: 'Tag (Opzionale)',
         placeholderTags: 'avventura, azione, romantico (separati da virgola)',
         sectionUpload: 'Carica File',
-        uploadDragText: 'Trascina &amp; Rilascia i File Qui',
+        uploadDragText: 'Trascina & Rilascia i File Qui',
         uploadOrText: 'oppure clicca per sfogliare',
         btnBrowseFiles: 'Sfoglia File',
         uploadFormats: 'Manoscritto: TXT o Word (.docx). Le pagine dei manga si caricano a parte in JPG, PNG, WEBP o PDF.',
@@ -873,7 +873,7 @@ window.translations.it = {
         s1Desc: 'La nostra traduzione manga AI utilizza Claude Vision di Anthropic. I costi sono per pagina in base al modello scelto. Seleziona la tua valuta qui sotto.',
         s1CurrLabel: 'Valuta',
         s1BtnAgree: 'Ho capito, continua',
-        s2Title: 'Carica &amp; Lingua',
+        s2Title: 'Carica & Lingua',
         s2LabelSource: 'Lingua di Origine',
         s2LabelTarget: 'Lingua di Destinazione',
         uploadText: 'Clicca o trascina le pagine manga qui (.jpg, .png)',
@@ -940,7 +940,7 @@ window.translations.it = {
         s8Desc: 'Rivedi le pagine manga tradotte. Puoi modificare il testo se necessario.',
         s8Placeholder: 'Le pagine tradotte appariranno qui',
         s8BtnRetranslate: 'Ritraduce con un modello diverso',
-        s8BtnText: 'Finalizza &amp; Scarica',
+        s8BtnText: 'Finalizza & Scarica',
         s9Title: 'Traduzione Completata!',
         s9Desc: 'La traduzione del tuo manga è pronta. Scarica i tuoi file qui sotto.',
         s9BtnReview: 'Rivedi di nuovo',
@@ -1745,7 +1745,7 @@ window.translations.it = {
         s8TransHeader: 'Traduzione',
         s8EditHint: '(clicca per modificare)',
         s8BtnRetranslate: 'Ritraduce con un modello diverso',
-        s8BtnText: 'Finalizza &amp; Scarica',
+        s8BtnText: 'Finalizza & Scarica',
         s9Title: 'Traduzione Completata!',
         s9Desc: 'La tua traduzione è pronta. Scarica il tuo file qui sotto.',
         s9BtnReview: 'Rivedi di nuovo',
