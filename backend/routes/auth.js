@@ -18,6 +18,15 @@ const { OAuth2Client } = require('google-auth-library');
 const { saveAcquisition } = require('../services/acquisition');
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:8000';
+
+// パスワードの決まり（登録・再設定・変更で共通）。画面側（register / reset-password / profile）も同じ4条件
+const PASSWORD_RULE_MESSAGE =
+  'パスワードは8文字以上で、大文字・小文字・数字をそれぞれ1つ以上入れてください。\n' +
+  'Password must be at least 8 characters and include an uppercase letter, a lowercase letter and a number.';
+function isStrongPassword(pw) {
+  const s = String(pw || '');
+  return s.length >= 8 && /[A-Z]/.test(s) && /[a-z]/.test(s) && /[0-9]/.test(s);
+}
 const VERIFY_LINK_EXPIRY = 24 * 60 * 60 * 1000; // 確認リンクは24時間有効
 const RESET_LINK_EXPIRY = 60 * 60 * 1000;       // パスワード再設定リンクは1時間有効
 
@@ -67,8 +76,7 @@ router.post('/register',
   registerLimiter,
   // Validation
   body('email').isEmail().normalizeEmail(),
-  // パスワードの再設定・変更（下の reset-password / change-password）と同じ8文字以上
-  body('password').isLength({ min: 8 }),
+  body('password').custom(isStrongPassword),
   body('firstName').trim().notEmpty(),
   body('lastName').trim().notEmpty(),
   body('role').isIn(['author', 'translator', 'editor', 'reader']),
@@ -78,10 +86,10 @@ router.post('/register',
       // Check validation errors
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        // 画面は data.error を表示するので、パスワードの長さだけは分かる文で返す
+        // 画面は data.error を表示するので、パスワードの決まりだけは分かる文で返す
         const pwError = errors.array().some(e => (e.path || e.param) === 'password');
         return res.status(400).json({
-          error: pwError ? 'パスワードは8文字以上にしてください。\nPassword must be at least 8 characters.' : undefined,
+          error: pwError ? PASSWORD_RULE_MESSAGE : undefined,
           errors: errors.array()
         });
       }
@@ -660,8 +668,8 @@ router.post('/reset-password', loginLimiter, async (req, res) => {
     if (!token || !email || !newPassword) {
       return res.status(400).json({ error: 'Token, email and new password are required' });
     }
-    if (String(newPassword).length < 8) {
-      return res.status(400).json({ error: 'Password must be at least 8 characters', code: 'PASSWORD_TOO_SHORT' });
+    if (!isStrongPassword(newPassword)) {
+      return res.status(400).json({ error: PASSWORD_RULE_MESSAGE, code: 'PASSWORD_TOO_WEAK' });
     }
 
     const user = (await db.query(
@@ -718,8 +726,8 @@ router.put('/password', authenticate, async (req, res) => {
       return res.status(400).json({ error: 'Current and new password are required', code: 'MISSING_FIELDS' });
     }
 
-    if (String(newPassword).length < 8) {
-      return res.status(400).json({ error: 'New password must be at least 8 characters', code: 'PASSWORD_TOO_SHORT' });
+    if (!isStrongPassword(newPassword)) {
+      return res.status(400).json({ error: PASSWORD_RULE_MESSAGE, code: 'PASSWORD_TOO_WEAK' });
     }
 
     const userResult = await db.query(
