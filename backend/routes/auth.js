@@ -67,7 +67,8 @@ router.post('/register',
   registerLimiter,
   // Validation
   body('email').isEmail().normalizeEmail(),
-  body('password').isLength({ min: 6 }),
+  // パスワードの再設定・変更（下の reset-password / change-password）と同じ8文字以上
+  body('password').isLength({ min: 8 }),
   body('firstName').trim().notEmpty(),
   body('lastName').trim().notEmpty(),
   body('role').isIn(['author', 'translator', 'editor', 'reader']),
@@ -77,9 +78,14 @@ router.post('/register',
       // Check validation errors
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        // 画面は data.error を表示するので、パスワードの長さだけは分かる文で返す
+        const pwError = errors.array().some(e => (e.path || e.param) === 'password');
+        return res.status(400).json({
+          error: pwError ? 'パスワードは8文字以上にしてください。\nPassword must be at least 8 characters.' : undefined,
+          errors: errors.array()
+        });
       }
-      
+
       const { email, password, firstName, lastName, role, penName, country, acquisition } = req.body;
 
       // Check if user already exists
