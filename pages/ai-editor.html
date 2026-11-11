@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202611092129">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202611112023">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Editor - AuctLect</title>
 
@@ -16,25 +16,25 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <!-- Platform CSS -->
-    <link href="../css/variables.css?v=202611092129" rel="stylesheet">
-    <link rel="stylesheet" href="../css/style-new.css?v=202611092129">
-    <link href="../css/components.css?v=202611092129" rel="stylesheet">
-    <link href="../css/navbar.css?v=202611092129" rel="stylesheet">
-    <link rel="stylesheet" href="../css/mobile-fixes.css?v=202611092129">
+    <link href="../css/variables.css?v=202611112023" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style-new.css?v=202611112023">
+    <link href="../css/components.css?v=202611112023" rel="stylesheet">
+    <link href="../css/navbar.css?v=202611112023" rel="stylesheet">
+    <link rel="stylesheet" href="../css/mobile-fixes.css?v=202611112023">
 
     <!-- 言語ファイル（9言語） -->
-    <script src="../js/lang/ja.js?v=202611092129"></script>
-    <script src="../js/lang/en.js?v=202611092129"></script>
-    <script src="../js/lang/zh.js?v=202611092129"></script>
-    <script src="../js/lang/zh-TW.js?v=202611092129"></script>
-    <script src="../js/lang/es.js?v=202611092129"></script>
-    <script src="../js/lang/fr.js?v=202611092129"></script>
-    <script src="../js/lang/de.js?v=202611092129"></script>
-    <script src="../js/lang/ko.js?v=202611092129"></script>
-    <script src="../js/lang/ar.js?v=202611092129"></script>
-    <script src="../js/lang/pt.js?v=202611092129"></script>
-    <script src="../js/lang/it.js?v=202611092129"></script>
-    <script src="../js/wizard-common.js?v=202611092129"></script>
+    <script src="../js/lang/ja.js?v=202611112023"></script>
+    <script src="../js/lang/en.js?v=202611112023"></script>
+    <script src="../js/lang/zh.js?v=202611112023"></script>
+    <script src="../js/lang/zh-TW.js?v=202611112023"></script>
+    <script src="../js/lang/es.js?v=202611112023"></script>
+    <script src="../js/lang/fr.js?v=202611112023"></script>
+    <script src="../js/lang/de.js?v=202611112023"></script>
+    <script src="../js/lang/ko.js?v=202611112023"></script>
+    <script src="../js/lang/ar.js?v=202611112023"></script>
+    <script src="../js/lang/pt.js?v=202611112023"></script>
+    <script src="../js/lang/it.js?v=202611112023"></script>
+    <script src="../js/wizard-common.js?v=202611112023"></script>
 
     <style>
         :root {
@@ -1231,6 +1231,7 @@
             const cp = document.querySelector('#compare' + model.charAt(0).toUpperCase() + model.slice(1) + ' .compare-price');
             if (cp) cp.textContent = priceStr;
         });
+        updateCompareTotals();
         // Minimum display
         const stripeMin = formatPrice(PAY_MINIMUMS.stripe[selectedCurrency]);
         const minLabels = {
@@ -1314,7 +1315,8 @@
         const count = text.length;
         document.getElementById('charCount').textContent = count.toLocaleString();
         const pages = Math.ceil(count / 2000);
-        document.getElementById('pageEstimate').textContent = count > 0 ? '\u2248 ' + pages + (getLang() === 'ja' ? ' \u30da\u30fc\u30b8' : ' pages') : '';
+        const pageLabel = { en: 'pages', ja: 'ページ', zh: '頁', es: 'páginas', fr: 'pages', de: 'Seiten', ko: '쪽', ar: 'صفحة', pt: 'páginas', it: 'pagine' };
+        document.getElementById('pageEstimate').textContent = count > 0 ? '\u2248 ' + pages + ' ' + (pageLabel[getLang()] || pageLabel.en) : '';
     }
 
     function swapLanguages() {
@@ -1788,7 +1790,12 @@
                 (header || card.firstElementChild).insertAdjacentElement('afterend', el);
             }
             const total = Math.max(toSelectedCurrency(Math.ceil(chars / 1000 * PRICING_JPY[m].per1k)), getMinimum());
-            el.textContent = (L === 'ja' ? '総額 ' : 'Total ') + formatPrice(total) + (L === 'ja' ? '（' + chars.toLocaleString() + '字）' : ' (' + chars.toLocaleString() + ' chars)');
+            const totalLabel = { en: 'Total', ja: '総額', zh: '總額', es: 'Total', fr: 'Total', de: 'Gesamt', ko: '총액', ar: 'الإجمالي', pt: 'Total', it: 'Totale' };
+            const charUnit = { en: 'chars', ja: '字', zh: '字', es: 'car.', fr: 'car.', de: 'Zeich.', ko: '자', ar: 'حرف', pt: 'car.', it: 'car.' };
+            const n = chars.toLocaleString();
+            // 日本語・中国語・韓国語は全角かっこで単位を数字に付ける。ほかは半角かっこで間を空ける
+            el.textContent = (totalLabel[L] || totalLabel.en) + ' ' + formatPrice(total)
+                + (['ja', 'zh', 'ko'].includes(L) ? '（' + n + charUnit[L] + '）' : ' (' + n + ' ' + (charUnit[L] || charUnit.en) + ')');
         });
     }
 
@@ -2445,6 +2452,7 @@
         const setLabel2 = (id, icon, obj) => { const el = document.getElementById(id); if (el) el.innerHTML = icon + ' ' + t(obj); };
         setLabel2('s1CurrLabel', '<i class="fas fa-coins me-1"></i>', T.s1CurrLabel);
         updateStep1Prices();
+        updateCharCount();
         setText('s1BtnAgree', T.s1BtnAgree);
         setText('s2Title', T.s2Title); setText('s2LabelSource', T.s2LabelSource); setText('s2LabelTarget', T.s2LabelTarget);
         setText('tabFullLabel', T.tabFullLabel); setText('tabFileLabel', T.tabFileLabel); setText('charLabel', T.charLabel);
@@ -2556,8 +2564,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- JSZip: lets us crack open .docx (which is a ZIP) to read the text inside -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="../js/config.js?v=202611092129"></script>
-    <script src="../js/i18n.js?v=202611092129"></script>
-    <script src="../js/navbar.js?v=202611092129"></script>
+    <script src="../js/config.js?v=202611112023"></script>
+    <script src="../js/i18n.js?v=202611112023"></script>
+    <script src="../js/navbar.js?v=202611112023"></script>
 </body>
 </html>
