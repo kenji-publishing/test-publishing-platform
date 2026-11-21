@@ -2,21 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202611112023">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202611212008">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex">
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202611112023">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg?v=202611212008">
     <title>Upload Work - AuctLect</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="../css/variables.css?v=202611112023" rel="stylesheet">
-    <link href="../css/style-new.css?v=202611112023" rel="stylesheet">
-    <link href="../css/components.css?v=202611112023" rel="stylesheet">
-    <link href="../css/navbar.css?v=202611112023" rel="stylesheet">
-    <link href="../css/mobile-fixes.css?v=202611112023" rel="stylesheet">
+    <link href="../css/variables.css?v=202611212008" rel="stylesheet">
+    <link href="../css/style-new.css?v=202611212008" rel="stylesheet">
+    <link href="../css/components.css?v=202611212008" rel="stylesheet">
+    <link href="../css/navbar.css?v=202611212008" rel="stylesheet">
+    <link href="../css/mobile-fixes.css?v=202611212008" rel="stylesheet">
     <style>
         /* ========== Upload Page Specific Styles ========== */
         .upload-container { padding: var(--spacing-xl) 0; }
@@ -96,6 +96,18 @@
                         <p id="pageSubtitle" data-i18n="upload.pageSubtitle">Share your creation with readers worldwide</p>
                     </div>
                     
+                    <!-- 未ログインの人への案内。入力は最後まで出来てしまうので、始める前に知らせる。
+                         ログインは別のタブで開く＝この画面の入力（選んだ原稿も）は消えない -->
+                    <div id="loginNotice" role="status" style="display:none; background:#fff3cd; border:1px solid #f0d58a; border-radius:8px; padding:0.85rem 1rem; margin-bottom:1rem; font-size:0.92rem; line-height:1.7;">
+                        <i class="fas fa-right-to-bracket me-1" id="loginNoticeIcon"></i>
+                        <span id="loginNoticeText"></span>
+                        <span id="loginNoticeLinks" style="white-space:nowrap;">
+                            <a href="login.html" target="_blank" rel="noopener" class="fw-semibold ms-1" id="loginNoticeLogin"></a>
+                            <span class="mx-1">/</span>
+                            <a href="register.html" target="_blank" rel="noopener" class="fw-semibold" id="loginNoticeRegister"></a>
+                        </span>
+                    </div>
+
                     <form id="uploadForm">
                         <!-- 投稿タイプの選択は廃止（翻訳版ルートは未実装のダミーだった）。
                              翻訳版は作品に翻訳者を共同制作者として招く流れに一本化 -->
@@ -611,21 +623,21 @@
     <div id="footer-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/config.js?v=202611112023"></script>
-    <script src="../js/i18n.js?v=202611112023"></script>
-    <script src="../js/wizard-common.js?v=202611112023"></script>
-    <script src="../js/navbar.js?v=202611112023"></script>
-    <script src="../js/lang/ja.js?v=202611112023"></script>
-    <script src="../js/lang/en.js?v=202611112023"></script>
-    <script src="../js/lang/zh.js?v=202611112023"></script>
-    <script src="../js/lang/zh-TW.js?v=202611112023"></script>
-    <script src="../js/lang/es.js?v=202611112023"></script>
-    <script src="../js/lang/fr.js?v=202611112023"></script>
-    <script src="../js/lang/de.js?v=202611112023"></script>
-    <script src="../js/lang/ko.js?v=202611112023"></script>
-    <script src="../js/lang/ar.js?v=202611112023"></script>
-    <script src="../js/lang/pt.js?v=202611112023"></script>
-    <script src="../js/lang/it.js?v=202611112023"></script>
+    <script src="../js/config.js?v=202611212008"></script>
+    <script src="../js/i18n.js?v=202611212008"></script>
+    <script src="../js/wizard-common.js?v=202611212008"></script>
+    <script src="../js/navbar.js?v=202611212008"></script>
+    <script src="../js/lang/ja.js?v=202611212008"></script>
+    <script src="../js/lang/en.js?v=202611212008"></script>
+    <script src="../js/lang/zh.js?v=202611212008"></script>
+    <script src="../js/lang/zh-TW.js?v=202611212008"></script>
+    <script src="../js/lang/es.js?v=202611212008"></script>
+    <script src="../js/lang/fr.js?v=202611212008"></script>
+    <script src="../js/lang/de.js?v=202611212008"></script>
+    <script src="../js/lang/ko.js?v=202611212008"></script>
+    <script src="../js/lang/ar.js?v=202611212008"></script>
+    <script src="../js/lang/pt.js?v=202611212008"></script>
+    <script src="../js/lang/it.js?v=202611212008"></script>
     
     <script>
         // ========== Pattern C: Navbar 多言語対応テキスト（9言語）==========
@@ -2320,14 +2332,109 @@
             if (!document.getElementById('hasEditor').checked) loadPartnerSuggest();
         });
 
+        // ========== 未ログインの案内 ==========
+        // 編集モード（?edit=）は読み込み時にログイン画面へ送るので、ここでは新規のときだけ出す
+        var loginText = {
+            notice: {
+                en: 'You need to log in to publish a work. Please log in before you start. Login opens in a new tab, so nothing you enter here is lost.',
+                ja: '作品を公開するには、ログインが必要です。入力を始める前にログインしてください。ログインは別のタブで開くので、この画面の入力は消えません。',
+                zh: '发布作品需要登录。请在开始填写前登录。登录会在新标签页中打开，此页面填写的内容不会丢失。',
+                'zh-TW': '發布作品需要登入。請在開始填寫前登入。登入會在新分頁中開啟，此頁面填寫的內容不會遺失。',
+                es: 'Para publicar una obra debes iniciar sesión. Hazlo antes de empezar. El inicio de sesión se abre en otra pestaña, así que no perderás lo que escribas aquí.',
+                fr: 'Vous devez vous connecter pour publier une œuvre. Faites-le avant de commencer. La connexion s’ouvre dans un nouvel onglet : rien de ce que vous saisissez ici ne sera perdu.',
+                de: 'Zum Veröffentlichen müssen Sie angemeldet sein. Bitte melden Sie sich an, bevor Sie beginnen. Die Anmeldung öffnet sich in einem neuen Tab, Ihre Eingaben hier bleiben erhalten.',
+                ko: '작품을 공개하려면 로그인이 필요합니다. 입력을 시작하기 전에 로그인해 주세요. 로그인은 새 탭에서 열리므로 이 화면의 입력 내용은 사라지지 않습니다.',
+                ar: 'يجب تسجيل الدخول لنشر عمل. يُرجى تسجيل الدخول قبل البدء. يُفتح تسجيل الدخول في تبويب جديد، فلن تفقد ما أدخلته هنا.',
+                pt: 'Para publicar uma obra é preciso entrar na conta. Faça isso antes de começar. O login abre em outra aba, então nada do que você preencher aqui se perde.',
+                it: 'Per pubblicare un’opera devi accedere. Fallo prima di iniziare. L’accesso si apre in una nuova scheda, quindi non perderai ciò che inserisci qui.'
+            },
+            login: { en: 'Log in', ja: 'ログイン', zh: '登录', 'zh-TW': '登入', es: 'Iniciar sesión', fr: 'Se connecter', de: 'Anmelden', ko: '로그인', ar: 'تسجيل الدخول', pt: 'Entrar', it: 'Accedi' },
+            register: { en: 'Create an account', ja: 'アカウントを作る', zh: '创建账号', 'zh-TW': '建立帳號', es: 'Crear una cuenta', fr: 'Créer un compte', de: 'Konto erstellen', ko: '계정 만들기', ar: 'إنشاء حساب', pt: 'Criar conta', it: 'Crea un account' },
+            done: {
+                en: 'You are logged in. You can carry on here.',
+                ja: 'ログインしました。このまま続けられます。',
+                zh: '已登录。可以在此继续。',
+                'zh-TW': '已登入。可以在此繼續。',
+                es: 'Has iniciado sesión. Puedes continuar aquí.',
+                fr: 'Vous êtes connecté. Vous pouvez continuer ici.',
+                de: 'Sie sind angemeldet. Sie können hier fortfahren.',
+                ko: '로그인되었습니다. 이대로 계속할 수 있습니다.',
+                ar: 'تم تسجيل الدخول. يمكنك المتابعة هنا.',
+                pt: 'Você entrou na conta. Pode continuar aqui.',
+                it: 'Hai effettuato l’accesso. Puoi continuare qui.'
+            },
+            needLogin: {
+                en: 'You need to log in to publish. Use the notice at the top of this page to log in in a new tab — what you entered stays here. Then come back and press {btn} again.',
+                ja: 'ログインが必要です。画面の上の案内から、別のタブでログインしてください。入力した内容はこのまま残ります。ログインのあと、この画面に戻って、もう一度{btn}を押してください。',
+                zh: '需要登录。请通过页面上方的提示在新标签页中登录，已填写的内容会保留。登录后回到此页面，再次点击{btn}。',
+                'zh-TW': '需要登入。請透過頁面上方的提示在新分頁中登入，已填寫的內容會保留。登入後回到此頁面，再次點選{btn}。',
+                es: 'Debes iniciar sesión. Usa el aviso de la parte superior para iniciar sesión en otra pestaña: lo que has escrito se conserva. Después vuelve aquí y pulsa de nuevo {btn}.',
+                fr: 'Vous devez vous connecter. Utilisez l’avis en haut de la page pour vous connecter dans un nouvel onglet : ce que vous avez saisi est conservé. Revenez ensuite ici et cliquez de nouveau sur {btn}.',
+                de: 'Sie müssen angemeldet sein. Melden Sie sich über den Hinweis oben in einem neuen Tab an – Ihre Eingaben bleiben erhalten. Kehren Sie danach hierher zurück und klicken Sie erneut auf {btn}.',
+                ko: '로그인이 필요합니다. 화면 위의 안내에서 새 탭으로 로그인해 주세요. 입력한 내용은 그대로 남습니다. 로그인한 뒤 이 화면으로 돌아와 다시 {btn}를 눌러 주세요.',
+                ar: 'يجب تسجيل الدخول. استخدم التنبيه أعلى الصفحة لتسجيل الدخول في تبويب جديد، وسيبقى ما أدخلته كما هو. ثم عُد إلى هنا واضغط {btn} مرة أخرى.',
+                pt: 'É preciso entrar na conta. Use o aviso no topo da página para entrar em outra aba — o que você preencheu continua aqui. Depois volte e clique de novo em {btn}.',
+                it: 'Devi accedere. Usa l’avviso in alto per accedere in una nuova scheda: ciò che hai inserito resta qui. Poi torna qui e premi di nuovo {btn}.'
+            }
+        };
+        var loginNoticeJustLoggedIn = false;
+        function renderLoginNotice() {
+            var box = document.getElementById('loginNotice');
+            if (!box) return;
+            var loggedIn = !!localStorage.getItem('token');
+            if (loggedIn && !loginNoticeJustLoggedIn) { box.style.display = 'none'; return; }
+            box.style.display = 'block';
+            box.style.background = loggedIn ? '#d1f0d9' : '#fff3cd';
+            box.style.borderColor = loggedIn ? '#9fd4ae' : '#f0d58a';
+            document.getElementById('loginNoticeIcon').className = 'fas ' + (loggedIn ? 'fa-circle-check' : 'fa-right-to-bracket') + ' me-1';
+            document.getElementById('loginNoticeText').textContent = getL(loggedIn ? loginText.done : loginText.notice);
+            document.getElementById('loginNoticeLinks').style.display = loggedIn ? 'none' : '';
+            document.getElementById('loginNoticeLogin').textContent = getL(loginText.login);
+            document.getElementById('loginNoticeRegister').textContent = getL(loginText.register);
+        }
+        document.addEventListener('DOMContentLoaded', function () { if (!editWorkId) renderLoginNotice(); });
+        document.addEventListener('languageChanged', function () { if (!editWorkId) renderLoginNotice(); });
+        // 別のタブでログインすると localStorage が変わる → 案内を「ログインしました」に切り替える
+        window.addEventListener('storage', function (e) {
+            if (e.key !== 'token' || editWorkId) return;
+            loginNoticeJustLoggedIn = !!e.newValue;
+            renderLoginNotice();
+        });
+
+        // プレビュー（公開前の確認画面）の文言。10言語＋繁体字
+        // （showPreview の中に同じ名前 pvText の変数があるので、別の名前にしてある）
+        var previewText = {
+            heading: { en: 'Preview — how readers will see it', ja: 'プレビュー — 読者からの見え方', zh: '预览 — 读者看到的样子', 'zh-TW': '預覽 — 讀者看到的樣子', es: 'Vista previa: así la verán los lectores', fr: 'Aperçu — ce que verront les lecteurs', de: 'Vorschau – so sehen es die Leser', ko: '미리보기 — 독자에게 보이는 모습', ar: 'معاينة — كما سيراها القراء', pt: 'Pré-visualização — como os leitores verão', it: 'Anteprima — come la vedranno i lettori' },
+            note: { en: 'Nothing has been published yet. Check the details below, then confirm.', ja: 'まだ公開されていません。以下の内容を確認してから公開してください。', zh: '尚未发布。请确认以下内容后再发布。', 'zh-TW': '尚未發布。請確認以下內容後再發布。', es: 'Todavía no se ha publicado nada. Revisa los datos y luego confirma.', fr: 'Rien n’a encore été publié. Vérifiez les informations ci-dessous, puis confirmez.', de: 'Es wurde noch nichts veröffentlicht. Prüfen Sie die Angaben und bestätigen Sie dann.', ko: '아직 공개되지 않았습니다. 아래 내용을 확인한 뒤 공개해 주세요.', ar: 'لم يُنشر شيء بعد. راجع التفاصيل أدناه ثم أكّد.', pt: 'Nada foi publicado ainda. Confira os dados abaixo e depois confirme.', it: 'Non è stato ancora pubblicato nulla. Controlla i dati qui sotto, poi conferma.' },
+            // 作品ページ（work-detail.html）の表記と同じ
+            by: { en: 'by', ja: '著者:', zh: '作者:', 'zh-TW': '作者:', es: 'por', fr: 'par', de: 'von', ko: '저자:', ar: 'بواسطة', pt: 'por', it: 'di' },
+            contentHeading: { en: 'Contents preview', ja: '本文プレビュー', zh: '正文预览', 'zh-TW': '內文預覽', es: 'Vista previa del texto', fr: 'Aperçu du texte', de: 'Textvorschau', ko: '본문 미리보기', ar: 'معاينة النص', pt: 'Pré-visualização do texto', it: 'Anteprima del testo' },
+            noText: { en: '(No text content)', ja: '（本文なし）', zh: '（无正文）', 'zh-TW': '（無內文）', es: '(Sin texto)', fr: '(Aucun texte)', de: '(Kein Text)', ko: '(본문 없음)', ar: '(لا يوجد نص)', pt: '(Sem texto)', it: '(Nessun testo)' },
+            confirm: { en: 'Publish now', ja: 'この内容で公開する', zh: '确认发布', 'zh-TW': '確認發布', es: 'Publicar ahora', fr: 'Publier maintenant', de: 'Jetzt veröffentlichen', ko: '이 내용으로 공개', ar: 'انشر الآن', pt: 'Publicar agora', it: 'Pubblica ora' },
+            back: { en: 'Back to editing', ja: '編集に戻る', zh: '返回编辑', 'zh-TW': '返回編輯', es: 'Volver a editar', fr: 'Retour à la modification', de: 'Zurück zur Bearbeitung', ko: '편집으로 돌아가기', ar: 'العودة إلى التحرير', pt: 'Voltar à edição', it: 'Torna alla modifica' }
+        };
+        // 選択欄で選ばれている項目の、画面に出ている名前（「ファンタジー」「日本語」）
+        function selectedLabel(id, fallback) {
+            var sel = document.getElementById(id);
+            var opt = sel && sel.options[sel.selectedIndex];
+            return (opt && opt.value && opt.textContent.trim()) || fallback;
+        }
+
         // Step 1: 「公開」ボタン → 入力内容を集めてプレビューを表示（まだ送信しない）
         document.getElementById('uploadForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
             var token = localStorage.getItem('token');
             if (!token) {
-                alert(getL({ en: 'Please log in to publish a work.', ja: '作品を公開するにはログインしてください。' }));
-                window.location.href = 'login.html';
+                // ログイン画面へ移動しない。移動すると、入力した内容と選んだ原稿がすべて消える。
+                // 案内を見せて、別のタブでログインしてもらう（戻ってもう一度押せば続けられる）
+                // 文中のボタン名は実際のボタンの表示から取る（訳し分けの食い違いを防ぐ）
+                var cjkQuote = ['ja', 'zh-TW'].indexOf(getCurrentLanguage()) !== -1;
+                alert(getL(loginText.needLogin).replace('{btn}',
+                    (cjkQuote ? '「' : '“') + getL(uiText.btnPublish) + (cjkQuote ? '」' : '”')));
+                renderLoginNotice();
+                var ln = document.getElementById('loginNotice');
+                if (ln) ln.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 return;
             }
 
@@ -2469,26 +2576,22 @@
                 if (el) el.setAttribute('dir', pvDir);
             });
 
-            document.getElementById('pvHeading').textContent = getL({
-                en: 'Preview — how readers will see it', ja: 'プレビュー — 読者からの見え方' });
-            document.getElementById('pvNote').textContent = getL({
-                en: 'Nothing has been published yet. Check the details below, then confirm.',
-                ja: 'まだ公開されていません。以下の内容を確認してから公開してください。' });
+            document.getElementById('pvHeading').textContent = getL(previewText.heading);
+            document.getElementById('pvNote').textContent = getL(previewText.note);
             document.getElementById('pvTitle').textContent = p.title;
 
             var authorName = p.authorName || accountAuthorName();
-            document.getElementById('pvAuthor').textContent = authorName ? (getL(uiText.by || { en: 'by' }) + ' ' + authorName) : '';
+            document.getElementById('pvAuthor').textContent = authorName ? (getL(previewText.by) + ' ' + authorName) : '';
 
-            document.getElementById('pvGenre').textContent = p.genre;
-            document.getElementById('pvLang').textContent = p.language.toUpperCase();
+            document.getElementById('pvGenre').textContent = selectedLabel('workGenre', p.genre);
+            document.getElementById('pvLang').textContent = selectedLabel('workLanguage', p.language.toUpperCase());
             document.getElementById('pvPrice').textContent = p.isFree
-                ? getL({ en: 'Free', ja: '無料' })
+                ? getL(uiText.priceFree)
                 : formatWorkPrice(p.price, p.currency);
             document.getElementById('pvDesc').textContent = p.description;
 
             // 本文プレビュー（Reader風の表示で全文をスクロール確認できる）
-            document.getElementById('pvContentHeading').textContent = getL({
-                en: 'Contents preview', ja: '本文プレビュー' });
+            document.getElementById('pvContentHeading').textContent = getL(previewText.contentHeading);
             if (p.contentType === 'manga') {
                 // マンガ: 本文の代わりにページ数と章マーク数を表示
                 var marks = mangaPages.filter(function(x) { return x.chapterTitle; }).length;
@@ -2497,7 +2600,7 @@
                     : getL(mangaText.previewKeep).replace('{n}', mangaExistingCount);
             } else {
                 var pvText = p.content || (editWork && editWork.content) ||
-                    getL({ en: '(No text content)', ja: '（本文なし）' });
+                    getL(previewText.noText);
                 // 挿絵・表マーカーは読みやすい表記に置き換えて表示（実際の表示はリーダーで確認）
                 pvText = pvText
                     .replace(/\[\[img:PENDING:(\d+)\]\]/g, function(mm, n) { return '〔' + getL(novelText.illusWord) + ' ' + (parseInt(n, 10) + 1) + '〕'; })
@@ -2542,8 +2645,8 @@
                 box.innerHTML = '<i class="fas fa-book" style="font-size:3rem; color:#c9b8a3;"></i>';
             }
 
-            document.getElementById('pvConfirmText').textContent = getL({ en: 'Publish now', ja: 'この内容で公開する' });
-            document.getElementById('pvBackText').textContent = getL({ en: 'Back to editing', ja: '編集に戻る' });
+            document.getElementById('pvConfirmText').textContent = getL(previewText.confirm);
+            document.getElementById('pvBackText').textContent = getL(previewText.back);
             document.getElementById('previewModal').style.display = 'block';
         }
 
