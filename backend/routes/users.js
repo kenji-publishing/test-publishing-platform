@@ -238,6 +238,57 @@ router.get('/payout-status', authenticate, async (req, res) => {
 });
 
 /**
+ * GET /api/users/earnings-summary
+ * ダッシュボードに出す「自分の取り分」の合計。本人の分だけを返す。
+ *
+ * 売上の正は revenue_splits（購入のたびに取り分を1行ずつ記録。返金はマイナス行で打ち消す）。
+ * 以前のダッシュボードは author_analytics_daily を読んでいたが、この表に書き込む処理は
+ * どこにも無く、売れても「総収益 ¥0」のままだった（2026-11-21）。
+ *
+ * 通貨は混ぜない（1作品1通貨。円の本とドルの本があれば2行になる）。
+ *   totals: 通貨ごとの合計と、まだ支払われていない額（payout_run_id が空のもの）
+ *   byWork: 作品ごと・通貨ごとの合計と、売れた回数（返金ぶんは差し引く）
+ */
+router.get('/earnings-summary', authenticate, async (req, res) => {
+  try {
+    const totals = (await db.query(
+      `SELECT COALESCE(currency, 'USD') AS currency,
+              COALESCE(SUM(amount), 0) AS total,
+              COALESCE(SUM(amount) FILTER (WHERE payout_run_id IS NULL), 0) AS unpaid
+         FROM revenue_splits
+        WHERE recipient_id = $1
+        GROUP BY COALESCE(currency, 'USD')
+        ORDER BY SUM(amount) DESC`,
+      [req.user.userId]
+    )).rows;
+
+    const byWork = (await db.query(
+      `SELECT rs.work_id, w.title, COALESCE(rs.currency, 'USD') AS currency,
+              COALESCE(SUM(rs.amount), 0) AS total,
+              COUNT(*) FILTER (WHERE rs.amount > 0) - COUNT(*) FILTER (WHERE rs.amount < 0) AS sales
+         FROM revenue_splits rs
+         LEFT JOIN works w ON w.work_id = rs.work_id
+        WHERE rs.recipient_id = $1
+        GROUP BY rs.work_id, w.title, COALESCE(rs.currency, 'USD')
+        ORDER BY SUM(rs.amount) DESC
+        LIMIT 100`,
+      [req.user.userId]
+    )).rows;
+
+    res.json({
+      totals: totals.map(r => ({ currency: r.currency, total: Number(r.total), unpaid: Number(r.unpaid) })),
+      byWork: byWork.map(r => ({
+        workId: r.work_id, title: r.title, currency: r.currency,
+        total: Number(r.total), sales: Math.max(0, Number(r.sales))
+      }))
+    });
+  } catch (error) {
+    console.error('Get earnings summary error:', error.message);
+    res.status(500).json({ error: 'Failed to load earnings', code: 'EARNINGS_LOAD_FAILED' });
+  }
+});
+
+/**
  * PUT /api/users/payout-details
  * 受取口座の登録・更新（upsert）。月次の手動送金（Wise一括）の宛先になる
  */
